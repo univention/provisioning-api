@@ -1,0 +1,47 @@
+services:
+  app:
+    profiles:
+      - dev
+    build:
+      context: "dispatcher"
+    container_name: "provisioning-dispatcher-dev"
+    restart: "on-failure"
+    environment:
+      LOG_LEVEL: "DEBUG"
+    depends_on:
+      - "redis"
+    ports:
+      - "7777:7777"
+
+  redis:
+    image: "redis/redis-stack"
+    environment:
+      FOO: "bar"
+    ports:
+      # Redis Server
+      - "6379:6379"
+      # RedisInsight GUI
+      - "8002:8001"
+    volumes:
+      - type: "volume"
+        source: "redis-data"
+        target: "/foo/bar"
+
+  # Environment of the pre-commit linter.
+  pre-commit:
+    profiles:
+      - test
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-pre-commit/upx-pre-commit:latest
+    volumes:
+      - type: bind
+        source: .
+        target: /code
+      - type: volume
+        # pre-commit installs dependencies, having them cached speeds things up
+        # a lot.
+        source: pre-commit-cache
+        target: /cache
+
+volumes:
+  pre-commit-cache:
+  redis-data:

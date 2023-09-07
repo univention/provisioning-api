@@ -1,0 +1,82 @@
+---
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  # "Check for added large files"
+  - id: check-added-large-files
+  # "Check for merge conflicts"
+  - id: check-merge-conflict
+  # "Check Yaml"
+  - id: check-yaml
+    args:
+      # Allow custom tags like Gitlab's "!reference" tag.
+      - --unsafe
+    exclude: ^helm/.+/templates/
+  # "Trim Trailing Whitespace"
+  - id: trailing-whitespace
+
+# "Commit messages"
+- repo: https://github.com/compilerla/conventional-pre-commit
+  rev: v2.4.0
+  hooks:
+    - id: conventional-pre-commit
+      stages: [commit-msg]
+
+# "Ruff Python linter"
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  rev: 'v0.0.287'
+  hooks:
+    - id: ruff
+    - id: ruff
+      alias: "ruff-fix"
+      stages: [ manual ]
+      args: ["--fix"]
+
+# "Black Python formatter"
+-   repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+    -   id: black
+
+# "docker-compose.yaml linter"
+- repo: https://gitlab.com/univention/pre-commit-hooks/docker-compose-check
+  rev: 7702a8801a158b8595569dd29e2dd655d8a08310
+  hooks:
+  - id: docker-compose-check
+
+# "Dockerfile linter"
+- repo: https://gitlab.com/univention/pre-commit-hooks/docker-pre-commit
+  rev: v2.0.0
+  hooks:
+  - id: hadolint-system
+
+# "Helm chart linter"
+- repo: https://github.com/gruntwork-io/pre-commit
+  rev: v0.1.22
+  hooks:
+  - id: helmlint
+
+# Disable temporarily because gitlab-api can not be accessed.
+# "urllib.error.HTTPError: HTTP Error 401: Unauthorized"
+# ".gitlab-ci.yml linter"
+# - repo: https://gitlab.com/univention/pre-commit-hooks/gitlab-ci-linter
+#   rev: v1.0.1
+#   hooks:
+#   - id: gitlab-ci-linter
+#     args:
+#     - '--server'
+#     - 'https://git.knut.univention.de'
+
+- repo: https://github.com/norwoodj/helm-docs
+  rev: v1.11.0
+  hooks:
+    - id: helm-docs
+      args:
+        - --chart-search-root=helm
+        - --template-files=README.md.gotmpl
+...
