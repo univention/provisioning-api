@@ -6,7 +6,7 @@ from dispatcher.persistence.messages import MessageRepository
 from dispatcher.persistence.subscriptions import SubscriptionRepository
 
 
-def _match_subscription(
+def match_subscription(
     sub_realm: str, sub_topic: str, msg_realm: str, msg_topic: str
 ) -> bool:
     """Decides whether a message is sent to a subscriber.
@@ -50,7 +50,7 @@ class SubscriptionService:
         return [
             s_name
             for s_realm, s_topic, s_name in await self._repo.get_subscribers_by_topics()
-            if _match_subscription(s_realm, s_topic, realm, topic)
+            if match_subscription(s_realm, s_topic, realm, topic)
         ]
 
     async def add_subscriber(self, sub: core.models.NewSubscriber):
@@ -70,12 +70,16 @@ class SubscriptionService:
             fill_queue_status=fill_queue_status,
         )
 
-    async def get_subscriber_queue_status(self, name: str) -> core.models.FillQueueStatus:
+    async def get_subscriber_queue_status(
+        self, name: str
+    ) -> core.models.FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
-        status = self._repo.set_subscriber_queue_status(name)
+        status = await self._repo.get_subscriber_queue_status(name)
         return core.models.FillQueueStatus[status]
 
-    async def set_subscriber_queue_status(self, name: str, status: core.models.FillQueueStatus):
+    async def set_subscriber_queue_status(
+        self, name: str, status: core.models.FillQueueStatus
+    ):
         """Set the pre-fill status of the given subscriber."""
         await self._repo.set_subscriber_queue_status(name, status.name)
 

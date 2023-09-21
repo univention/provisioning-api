@@ -50,10 +50,16 @@ poetry run dev
 The server is available on port 7777.
 Find the OpenAPI schema here: http://localhost:7777/docs .
 
+## Tests
+
 Run tests:
 ```sh
 poetry run pytest
 ```
+
+Currently all tests are integration tests which require a Redis instance running locally
+(see "Start dependencies").
+
 
 ### Pre-commit
 

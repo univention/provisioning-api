@@ -14,7 +14,7 @@ from dispatcher.service import (
     SubscriptionService,
 )
 from dispatcher.subscription.sink import WebSocketSink, SinkManager
-import dispatcher.service.prefill
+import dispatcher.prefill
 
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,9 @@ async def get_subscriptions(
     return await service.get_subscribers()
 
 
-@router.get("/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"])
+@router.get(
+    "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+)
 async def get_subscription(
     name: str,
     repo: DependsSubscriptionRepo,
@@ -70,7 +72,9 @@ async def get_subscription(
     return subscriber
 
 
-@router.post("/subscription/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"])
+@router.post(
+    "/subscription/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
+)
 async def create_subscription(
     subscriber: core.models.NewSubscriber,
     repo: DependsSubscriptionRepo,
@@ -85,14 +89,21 @@ async def create_subscription(
     try:
         await service.add_subscriber(subscriber)
     except ValueError as err:
-        print("sub exists", err)
-        raise fastapi.HTTPException(fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err))
+        raise fastapi.HTTPException(
+            fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
+        )
 
     if subscriber.fill_queue:
-        tasks.add_task(dispatcher.service.prefill.pre_fill_queue, subscriber.name)
+        tasks.add_task(
+            dispatcher.prefill.init_queue,
+            subscriber.name,
+            subscriber.realms_topics,
+        )
 
 
-@router.delete("/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"])
+@router.delete(
+    "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+)
 async def cancel_subscription(
     name: str,
     repo: DependsSubscriptionRepo,
@@ -157,7 +168,9 @@ async def subscription_websocket(
 
 
 @router.get(
-    "/subscription/{name}/message", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscription/{name}/message",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["sink"],
 )
 async def get_subscription_messages(
     name: str,

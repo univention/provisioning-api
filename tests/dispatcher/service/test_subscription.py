@@ -16,7 +16,7 @@ def test_subscription_match():
 
     for sub_realm, sub_topic, msg_realm, msg_topic, expectation in test_cases:
         assert (
-            dispatcher.service.subscription._match_subscription(
+            dispatcher.service.subscription.match_subscription(
                 sub_realm, sub_topic, msg_realm, msg_topic
             )
             == expectation
