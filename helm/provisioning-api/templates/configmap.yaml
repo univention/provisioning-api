@@ -1,0 +1,9 @@
+---
+{{ include "common.configMap" (dict "top" . "overrides" "provisioningApi.configMap") }}
+
+{{- define "provisioningApi.configMap" }}
+{{- with .top }}
+data: null
+{{- end }}
+{{- end }}
+...

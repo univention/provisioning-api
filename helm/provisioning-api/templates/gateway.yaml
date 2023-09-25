@@ -1,0 +1,38 @@
+{{- if and .Values.istio.enabled .Values.istio.gateway.enabled -}}
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "Gateway"
+metadata:
+  name: {{ printf "%s-%s" (include "common.names.fullname" .) "-gateway" }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+  {{- with .Values.istio.virtualService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    istio:  {{ .Values.istio.gateway.selectorIstio }}
+  servers:
+    - hosts:
+        - {{ .Values.istio.host }}
+      port:
+        name: "http"
+        number: 80
+        protocol: "HTTP"
+    {{- if .Values.istio.gateway.tls.enabled }}
+      tls:
+        httpsRedirect: {{ .Values.istio.gateway.tls.httpsRedirect }}
+    - hosts:
+        - {{ .Values.istio.host }}
+      port:
+        name: "https"
+        number: 443
+        protocol: "HTTPS"
+      tls:
+        credentialName: {{ .Values.istio.gateway.tls.secretName }}
+        minProtocolVersion: "TLSV1_2"
+        mode: "SIMPLE"
+    {{- end }}
+...
+{{- end }}

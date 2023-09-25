@@ -1,0 +1,46 @@
+# provisioning-api
+
+A Helm chart for the Univention Portal Provisioning API
+
+- **Version**: 0.1.0
+- **Type**: application
+- **AppVersion**: 1.16.0
+- **Homepage:** <https://www.univention.de/>
+
+## TL;DR
+
+```console
+helm repo add provisioning-api #TODO https://gitlab.souvap-univention.de/api/v4/projects/75/packages/helm/stable
+helm upgrade --install provisioning-api provisioning-api
+```
+
+## Introduction
+
+This chart does install the Provisioning API of the Univention Management Stack.
+
+## Installing
+
+To install the chart with the release name `provisioning-api`:
+
+```console
+helm repo add univention-portal #TODO https://gitlab.souvap-univention.de/api/v4/projects/75/packages/helm/stable
+helm upgrade --install provisioning-api provisioning-api
+```
+
+By default the chart will install PostgreSQL as well. See the section [Values](#values)
+regarding all available configuration options.
+
+## Uninstalling
+
+To uninstall the chart with the release name `provisioning-api`:
+
+```console
+helm uninstall provisioning-api
+```
+
+Note that persistent volume claims are not automatically deleted. This is
+relevant if you did use the bundled PostgreSQL as a database.
+
+```console
+kubectl delete pvc -l release=provisioning-api
+```

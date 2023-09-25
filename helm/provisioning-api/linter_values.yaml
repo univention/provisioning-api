@@ -1,0 +1,36 @@
+---
+
+# Dummy values for running the Helm linter on the provisioning-api.
+# Run it like this: helm lint -f values.yaml -f linter_values.yaml .
+
+
+## Application-specific
+provisioning-api: null
+
+
+## Kubernetes ingress
+ingress:
+  enabled: false
+  host: "portal.example.develop.souvap-univention.de"
+
+
+## Istio based
+istio:
+  enabled: true
+  host: "portal.example.develop.souvap-univention.de"
+
+
+## Docker image
+image:
+  tag: "branch-feature-example"
+
+
+## Container deployment probes
+probes:
+  liveness:
+    enabled: false
+
+  readiness:
+    enabled: false
+
+...

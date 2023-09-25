@@ -1,0 +1,11 @@
+---
+{{ include "common.deployment" (dict "top" . "overrides" "provisioning-api.deployment") }}
+...
+
+{{- define "provisioning-api.deployment" }}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print .top.Template.BasePath "/configmap.yaml") .top | sha256sum | quote }}
+{{- end }}
