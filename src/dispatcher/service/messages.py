@@ -42,7 +42,9 @@ class MessageService:
         for subscriber_name in subscriber_names:
             await self._repo.add_live_message(subscriber_name, message)
 
-    async def add_prefill_message(self, subscriber_name: str, message: core.models.Message):
+    async def add_prefill_message(
+        self, subscriber_name: str, message: core.models.Message
+    ):
         """Add the given message to the subscriber's queue."""
         await self._repo.add_prefill_message(subscriber_name, message)
 
@@ -53,7 +55,10 @@ class MessageService:
         service.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
-        self, subscriber_name: str, block: Optional[int] = None, force: Optional[bool] = False
+        self,
+        subscriber_name: str,
+        block: Optional[int] = None,
+        force: Optional[bool] = False,
     ) -> Optional[Tuple[str, core.models.Message]]:
         """Retrieve the first message from the subscriber's stream.
 
@@ -90,7 +95,7 @@ class MessageService:
         :param str last: Id of the last message to return.
         :param bool force: Whether to list messages, even if the pre-filling is not done.
         """
-        
+
         sub_service = SubscriptionService(SubscriptionRepository(self._repo._redis))
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 

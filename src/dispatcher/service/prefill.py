@@ -20,7 +20,9 @@ async def pre_fill_queue(subscriber_name: str, realms_topics: List[Tuple[str, st
         sub_repo = SubscriptionRepository(redis)
         sub_service = SubscriptionService(sub_repo)
 
-        await sub_service.set_subscriber_queue_status(subscriber_name, core.models.FillQueueStatus.running)
+        await sub_service.set_subscriber_queue_status(
+            subscriber_name, core.models.FillQueueStatus.running
+        )
 
         try:
             for realm, topic in realms_topics:
@@ -29,16 +31,20 @@ async def pre_fill_queue(subscriber_name: str, realms_topics: List[Tuple[str, st
                 else:
                     # FIXME: unhandled realm
                     pass
-        except:
-            await sub_service.set_subscriber_queue_status(subscriber_name, core.models.FillQueueStatus.failed)
+        except Exception:
+            await sub_service.set_subscriber_queue_status(
+                subscriber_name, core.models.FillQueueStatus.failed
+            )
         finally:
-            await sub_service.set_subscriber_queue_status(subscriber_name, core.models.FillQueueStatus.done)
+            await sub_service.set_subscriber_queue_status(
+                subscriber_name, core.models.FillQueueStatus.done
+            )
 
 
 async def pre_fill_udm(service: MessageService, subscriber_name: str, topic: str):
     auth = aiohttp.BasicAuth(settings.udm_username, settings.udm_password)
     async with aiohttp.ClientSession(auth=auth) as session:
-        async with session.get(f"{settings.udm_url}/") as request:
+        async with session.get(f"{settings.udm_url}/") as _:
             pass
             # TODO
             this_topic = "TODO"
@@ -55,17 +61,17 @@ async def pre_fill_udm_topic(service: MessageService, subscriber_name: str, topi
         # We should probably use pagination to fetch the objects but the parameters
         # `page` and `limit` are marked as "Broken/Experimental" in the UDM REST API.
         params = {
-            #"page": "1"
-            #"limit": "100"
+            # "page": "1"
+            # "limit": "100"
         }
 
-        async with session.get(f"{settings.udm_url}/{topic}", params=params) as request:
+        async with session.get(f"{settings.udm_url}/{topic}", params=params) as _:
             # TODO
             message = core.models.Message(
                 publisher_name="udm-pre-fill",
                 ts=datetime.now(),
                 realm="udm",
                 topic=topic,
-                body={}, # TODO
+                body={},  # TODO
             )
             await service.add_prefill_message(subscriber_name, message)

@@ -70,12 +70,16 @@ class SubscriptionService:
             fill_queue_status=fill_queue_status,
         )
 
-    async def get_subscriber_queue_status(self, name: str) -> core.models.FillQueueStatus:
+    async def get_subscriber_queue_status(
+        self, name: str
+    ) -> core.models.FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
         status = self._repo.set_subscriber_queue_status(name)
         return core.models.FillQueueStatus[status]
 
-    async def set_subscriber_queue_status(self, name: str, status: core.models.FillQueueStatus):
+    async def set_subscriber_queue_status(
+        self, name: str, status: core.models.FillQueueStatus
+    ):
         """Set the pre-fill status of the given subscriber."""
         await self._repo.set_subscriber_queue_status(name, status.name)
 
