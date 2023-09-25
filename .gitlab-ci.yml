@@ -1,0 +1,43 @@
+---
+
+variables:
+  SOUVAP_HELM_PROJECT_ID: 155
+  SOUVAP_REGISTRY_PATH: souvap/tooling/images/univention
+
+include:
+  - project: "univention/customers/dataport/upx/common-ci"
+    file:
+      # TODO: Sphinx docs inherits a stage definition from upstream,
+      # has to be included before our default stages to avoid trouble.
+      - "jobs/sphinx-docs.yaml"
+      - "defaults/souvap-workflow.yaml"
+      - "defaults/stages.yaml"
+      - "templates/kaniko.yaml"
+      - "templates/souvap.yaml"
+      - "jobs/lint-commit-messages.yaml"
+      - "jobs/lint-pre-commit.yaml"
+      - "jobs/package-and-publish-helm-charts.yaml"
+
+build-provisioning-dispatch-image:
+  stage: "build"
+  extends: ".kaniko"
+  needs: []
+  variables:
+    KANIKO_BUILD_CONTEXT: "./"
+    CI_REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}/provisioning-dispatch"
+
+# TODO: build-testrunner-image:
+
+# TODO: test-provisioning-dispatch:
+
+push-image-souvap:
+  needs:
+    - job: "build-provisioning-dispatch-image"
+  extends: ".push-image-souvap"
+  variables:
+    SOUVAP_IMAGE_NAME: "provisioning-dispatch"
+
+# publish-helm-charts-souvap:
+#   extends: ".publish-helm-charts-souvap"
+
+...
