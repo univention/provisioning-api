@@ -23,7 +23,7 @@ build-provisioning-dispatch-image:
   extends: ".kaniko"
   needs: []
   variables:
-    KANIKO_BUILD_CONTEXT: "provisioning-api"
+    DOCKERFILE_PATH: "docker/dispatch/Dockerfile"
     CI_REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}/provisioning-dispatch"
 
 # TODO: build-testrunner-image:

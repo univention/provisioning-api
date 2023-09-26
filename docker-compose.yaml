@@ -1,9 +1,9 @@
 services:
   app:
-    profiles:
-      - dev
+    # profiles:
+      # - dev
     build:
-      context: "dispatcher"
+      dockerfile: docker/dispatch/Dockerfile
     container_name: "provisioning-dispatcher-dev"
     restart: "on-failure"
     environment:
