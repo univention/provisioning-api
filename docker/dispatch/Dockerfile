@@ -1,7 +1,10 @@
+ARG WORKDIR="/app"
+
 ###############################################
 # Stage 1: build and install dependencies
 FROM library/python:3.11-slim as builder
 ARG WORKDIR
+WORKDIR ${WORKDIR}
 
 ENV \
     # Do not buffer `stdout`
@@ -16,26 +19,33 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-WORKDIR /app
-RUN echo $WORKDIR && ls && pwd
-COPY . .
+COPY ./src ${WORKDIR}/src
+COPY logging.yaml \
+     poetry.lock \
+     pyproject.toml \
+     README.md \
+     ${WORKDIR}/
 
-# install Poetry
-RUN pip install --no-cache-dir poetry==1.6.1 && \
+RUN \
+    # install Poetry
+    pip install --no-cache-dir poetry==1.6.1 && \
+    # install dependencies
     poetry install --only main
 
 
 ###############################################
 # Stage 2: final image
 FROM library/python:3.11-slim as final
+ARG WORKDIR
+WORKDIR ${WORKDIR}
 
-COPY --from=builder /app /
+COPY --from=builder ${WORKDIR} ${WORKDIR}
 
 EXPOSE 7777
 
 # run
 ENTRYPOINT [ \
-        "./.venv/bin/python", "-m", \
+        "./.venv/bin/python3", "-m", \
         "uvicorn", "dispatcher:start_dev", \
         "--log-config", "logging.yaml", \
         "--host", "0.0.0.0", \
