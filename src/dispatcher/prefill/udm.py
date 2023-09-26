@@ -20,8 +20,7 @@ class UDMClient:
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMClient("http://ucs/univention/udm", "Administrator", "univention") \
-        as client:
+    async with UDMClient("http://ucs/univention/udm", "Administrator", "univention") as client:
         await client.get_object_types()
     ```
     """
