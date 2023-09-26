@@ -1,7 +1,7 @@
 services:
   app:
-    # profiles:
-      # - dev
+    profiles:
+      - dev
     build:
       dockerfile: docker/dispatch/Dockerfile
     container_name: "provisioning-dispatcher-dev"
