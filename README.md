@@ -67,3 +67,10 @@ Run the pre-commit checks before committing:
 ```sh
 docker compose run --rm pre-commit run
 ```
+
+### Sphinx Documentation
+
+Build the sphinx documentation:
+```sh
+docker compose run docs
+```
