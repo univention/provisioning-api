@@ -51,14 +51,11 @@ class MessageRepository:
         key = Keys.queue(subscriber_name)
         flat_message = message.flatten()
         await self._redis.xadd(key, flat_message, "0-*")
-    
-    async def delete_prefill_messages(
-            self, subscriber_name: str
-    ):
+
+    async def delete_prefill_messages(self, subscriber_name: str):
         """Delete all pre-fill messages from the subscriber's queue."""
         key = Keys.queue(subscriber_name)
         await self._redis.xtrim(key, minid=1)
-
 
     async def get_next_message(
         self, subscriber_name: str, block: Optional[int] = None

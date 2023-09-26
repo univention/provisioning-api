@@ -102,7 +102,7 @@ class SubscriptionRepository:
                 pipe.sadd(Keys.subscriber_topics(name), f"{realm}:{topic}")
 
             await pipe.execute()
-    
+
     async def get_subscriber_queue_status(self, name: str) -> str:
         """
         Get the pre-fill status of the subscriber.
@@ -110,10 +110,9 @@ class SubscriptionRepository:
 
         if not await self._redis.sismember(Keys.subscribers, name):
             raise ValueError("Subscriber not found.")
-        
+
         key = Keys.subscriber(name)
         return await self._redis.hget(key, "fill_queue_status")
-
 
     async def set_subscriber_queue_status(self, name: str, status: str):
         """
@@ -125,7 +124,6 @@ class SubscriptionRepository:
 
         key = Keys.subscriber(name)
         await self._redis.hset(key, "fill_queue_status", status)
-
 
     async def delete_subscriber(self, name: str):
         """

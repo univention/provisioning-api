@@ -1,11 +1,11 @@
 import uuid
 
-from httpx import AsyncClient
+import httpx
 import pytest
 
 from core.models.subscriber import FillQueueStatus
-from dispatcher.main import app
 from dispatcher.api import v1_prefix as api_prefix
+from dispatcher.main import app
 
 
 @pytest.fixture(scope="session")
@@ -15,12 +15,12 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def client():
-    async with AsyncClient(app=app, base_url="http://testserver") as client:
+    async with httpx.AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
 
 
 @pytest.mark.anyio
-async def test_create_and_get_subscription(client: AsyncClient):
+async def test_create_and_get_subscription(client: httpx.AsyncClient):
     name = str(uuid.uuid4())
     realms_topics = [
         ["foo", "bar/baz"],
@@ -40,9 +40,7 @@ async def test_create_and_get_subscription(client: AsyncClient):
     response = await client.get(f"{api_prefix}/subscription/{name}")
     assert response.status_code == 200
     data = response.json()
-    import json
 
-    print(json.dumps(data, indent=2))
     assert data["name"] == name
     assert not data["fill_queue"]
     assert data["fill_queue_status"] == FillQueueStatus.done
@@ -53,7 +51,7 @@ async def test_create_and_get_subscription(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_get_subscriptions(client: AsyncClient):
+async def test_get_subscriptions(client: httpx.AsyncClient):
     subscriptions = [
         {
             "name": str(uuid.uuid4()),
@@ -106,7 +104,7 @@ async def test_get_subscriptions(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_delete_subscription(client: AsyncClient):
+async def test_delete_subscription(client: httpx.AsyncClient):
     name = str(uuid.uuid4())
     realms_topics = [
         ["foo", "bar/baz"],
@@ -135,7 +133,7 @@ async def test_delete_subscription(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_post_message(client: AsyncClient):
+async def test_post_message(client: httpx.AsyncClient):
     name = str(uuid.uuid4())
     realm = "foo"
     topic = "bar/baz"
@@ -178,7 +176,7 @@ async def test_post_message(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_manual_message_processing(client: AsyncClient):
+async def test_manual_message_processing(client: httpx.AsyncClient):
     name = str(uuid.uuid4())
     realm = "foo"
     topic = "bar/baz"

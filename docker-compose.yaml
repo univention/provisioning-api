@@ -42,6 +42,15 @@ services:
         source: pre-commit-cache
         target: /cache
 
+  # Environment to build the documentation
+  docs:
+    image: docker-registry.knut.univention.de/sphinx:latest
+    working_dir: /src/docs
+    volumes:
+      - ".:/src"
+    profiles:
+      - docs
+
 volumes:
   pre-commit-cache:
   redis-data:

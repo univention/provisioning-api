@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
-from typing import Any, ClassVar, Dict, Self
+from typing import Any, ClassVar, Dict
+from typing_extensions import Self
 
 from pydantic import BaseModel
 

@@ -18,11 +18,11 @@ class Settings(BaseSettings):
     redis_port: int = 6379
 
     # UDM REST API: base url
-    udm_url: str = ""
+    udm_url: str = "http://localhost:8000/univention/udm"
     # UDM REST API: username
-    udm_username: str = ""
+    udm_username: str = "Administrator"
     # UDM REST API: password
-    udm_password: str = ""
+    udm_password: str = "univention"
 
 
 settings = Settings()
