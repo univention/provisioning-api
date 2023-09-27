@@ -1,9 +1,18 @@
 ---
-{{ include "common.configMap" (dict "top" . "overrides" "provisioningApi.configMap") }}
+{{ include "common.configMap" (dict "top" . "overrides" "provisioning-api.configMap") }}
 
-{{- define "provisioningApi.configMap" }}
+{{- define "provisioning-api.configMap" }}
 {{- with .top }}
-data: null
+data:
+  LOG_LEVEL: "{{ .Values.provisioningApi.logLevel }}"
+  DEBUG: "{{ .Values.provisioningApi.debug }}"
+  ROOT_PATH: "{{ .Values.provisioningApi.rootPath }}"
+  CORS_ALL: "{{ .Values.provisioningApi.corsAll }}"
+  REDIS_HOST: "{{ .Values.provisioningApi.redisHost }}"
+  REDIS_PORT: "{{ .Values.provisioningApi.redisPort }}"
+  UDM_URL: "{{ .Values.provisioningApi.udmUrl }}"
+  UDM_USERNAME: "{{ .Values.provisioningApi.udmUsername }}"
+  UDM_PASSWORD: "{{ .Values.provisioningApi.udmPassword }}"
 {{- end }}
 {{- end }}
 ...

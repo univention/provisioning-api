@@ -18,7 +18,26 @@ tolerations: []
 
 
 # -- Application configuration of provisioning-api
-provisioningApi: {}
+provisioningApi:
+  # -- Python log level
+  logLevel: "INFO"
+  # -- FastAPI: debug mode
+  debug: True
+  # -- FastAPI: webserver root path
+  rootPath: ""
+  # -- FastAPI: disable CORS checks
+  corsAll: False
+  # -- Redis: host
+  redisHost: "localhost"
+  # -- Redis: port
+  redisPort: 6379
+  # -- UDM REST API: base url
+  udmUrl: ""
+  # -- UDM REST API: username
+  udmUsername: ""
+  # -- UDM REST API: password
+  udmPassword: ""
+
 
 ## Kubernetes ingress
 ingress:
