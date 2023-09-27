@@ -18,6 +18,10 @@ include:
       - "jobs/lint-pre-commit.yaml"
       - "jobs/package-and-publish-helm-charts.yaml"
 
+lint-pre-commit:
+  before_script:
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+
 build-provisioning-dispatch-image:
   stage: "build"
   extends: ".kaniko"
@@ -37,7 +41,7 @@ push-image-souvap:
   variables:
     SOUVAP_IMAGE_NAME: "provisioning-dispatch"
 
-# publish-helm-charts-souvap:
-#   extends: ".publish-helm-charts-souvap"
+publish-helm-charts-souvap:
+  extends: ".publish-helm-charts-souvap"
 
 ...
