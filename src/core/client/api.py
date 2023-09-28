@@ -18,8 +18,9 @@ class AsyncClient:
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
+            print(subscriber.model_dump())
             async with session.post(
-                f"{self.base_url}/v1/subscription", data=subscriber.model_dump()
+                f"{self.base_url}/v1/subscription", json=subscriber.model_dump()
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -30,7 +31,7 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscription(self, name: str) -> core.models.api.Subscriber:
+    async def get_subscription(self, name: str) -> core.models.subscriber.Subscriber:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}/v1/subscription/{name}"
@@ -40,7 +41,7 @@ class AsyncClient:
 
     async def get_subscription_messages(
         self, name: str, count=None, first=None, last=None
-    ) -> List[Tuple[str, core.models.api.Message]]:
+    ) -> List[Tuple[str, core.models.queue.Message]]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}/v1/subscription/{name}/message",
@@ -60,12 +61,12 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
                 f"{self.base_url}/v1/subscription/{name}/message/{message_id}",
-                data=report.model_dump(),
+                json=report.model_dump(),
             ):
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscriptions(self) -> List[core.models.api.Subscriber]:
+    async def get_subscriptions(self) -> List[core.models.subscriber.Subscriber]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(f"{self.base_url}/v1/subscription/") as response:
                 data = await response.json()
@@ -76,12 +77,12 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}/v1/message", data=message.model_dump()
+                f"{self.base_url}/v1/message", json=message.model_dump()
             ):
                 # either return nothing or let `.post` throw
                 pass
 
-    @contextlib.contextmanager
+    @contextlib.asynccontextmanager
     async def stream(self, name: str):
         async with aiohttp.ClientSession() as session:
             async with session.ws_connect(
@@ -94,9 +95,9 @@ class AsyncClientStream:
     def __init__(self, websocket: aiohttp.ClientWebSocketResponse):
         self.websocket = websocket
 
-    async def receive_message(self) -> core.models.api.Message:
-        data = self.websocket.receive_json()
-        return core.models.api.Message.model_validate(data)
+    async def receive_message(self) -> core.models.queue.Message:
+        data = await self.websocket.receive_json()
+        return core.models.queue.Message.model_validate(data)
 
     async def send_report(self, status: core.models.api.MessageProcessingStatus):
         report = core.models.api.MessageProcessingStatusReport(status=status)

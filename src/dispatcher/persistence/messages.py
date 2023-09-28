@@ -70,7 +70,8 @@ class MessageRepository:
         response = await self._redis.xread({key: "0-0"}, count=1, block=block)
 
         if key not in response:
-            raise KeyError("Subscriber not found!")
+            # empty stream
+            return None
 
         entries = response[key][0]
         if entries:
