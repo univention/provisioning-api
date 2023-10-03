@@ -57,9 +57,6 @@ Run tests:
 poetry run pytest
 ```
 
-Currently all tests are integration tests which require a Redis instance running locally
-(see "Start dependencies").
-
 
 ### Pre-commit
 

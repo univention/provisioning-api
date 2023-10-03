@@ -33,6 +33,7 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 httpx = "^0.24.0"
 pytest = "^7.4.2"
+fakeredis = "2.19.0"
 
 [tool.ruff]
 line-length = 120
