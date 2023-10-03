@@ -32,6 +32,11 @@ RUN \
     # install dependencies
     poetry install --only main
 
+###############################################
+# Stage 2: testing image
+from builder as testing
+
+RUN poetry install --with dev
 
 ###############################################
 # Stage 2: final image
