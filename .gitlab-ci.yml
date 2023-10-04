@@ -50,7 +50,7 @@ test-provisioning-dispatch:
   needs:
     - job: build-provisioning-dispatch-test-image
       optional: true
-  image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:branch-jlohmer-testing-pipeline-v1"
+  image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:latest"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
