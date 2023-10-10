@@ -1,5 +1,5 @@
 import contextlib
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import aiohttp
 
@@ -18,7 +18,6 @@ class AsyncClient:
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            print(subscriber.model_dump())
             async with session.post(
                 f"{self.base_url}/v1/subscription", json=subscriber.model_dump()
             ):
@@ -37,18 +36,20 @@ class AsyncClient:
                 f"{self.base_url}/v1/subscription/{name}"
             ) as response:
                 data = await response.json()
-                return core.models.api.Subscriber.model_validate(data)
+                return core.models.subscriber.Subscriber.model_validate(data)
 
     async def get_subscription_messages(
         self, name: str, count=None, first=None, last=None
-    ) -> List[Tuple[str, core.models.queue.Message]]:
+    ) -> List[core.models.queue.Message]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}/v1/subscription/{name}/message",
-                params=dict(count=count, first=first, last=last),
+                params=dict(count=count),
             ) as response:
                 msgs = await response.json()
-                return [core.models.api.Message.model_validate(msg) for msg in msgs]
+                return [
+                    core.models.queue.Message.model_validate(msg[1]) for msg in msgs
+                ]
 
     async def set_message_status(
         self,
@@ -70,7 +71,7 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(f"{self.base_url}/v1/subscription/") as response:
                 data = await response.json()
-                return core.models.api.Subscriber.model_validate(data)
+                return [core.models.subscriber.Subscriber.model_validate(data)]
 
     async def submit_message(self, realm: str, topic: str, body: Dict[str, Any]):
         message = core.models.api.NewMessage(realm=realm, topic=topic, body=body)

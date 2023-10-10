@@ -7,8 +7,10 @@ import uuid
 
 import core.client
 
+from typing import Optional
 
-def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
+
+def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):
     colors = ["k", "r", "g", "y", "b", "v", "c", "w"]
 
     def fg_color(color):

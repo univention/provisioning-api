@@ -27,9 +27,11 @@ class UDMClient:
 
     def __init__(self, base_url: str, username: str, password: str):
         self.base_url = base_url
-        if not self.base_url.endswith("/"):
-            self.base_url += "/"
+        if self.base_url.endswith("/"):
+            self.base_url = self.base_url[:-1]
 
+        if not username or not password:
+            logger.warning("udm username or password missing")
         self.auth = aiohttp.BasicAuth(username, password)
         self.headers = [("accept", "application/json")]
         self._session = None
