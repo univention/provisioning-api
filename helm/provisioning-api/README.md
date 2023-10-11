@@ -466,8 +466,6 @@ true
   "corsAll": false,
   "debug": true,
   "logLevel": "INFO",
-  "redisHost": "localhost",
-  "redisPort": 6379,
   "rootPath": "",
   "udmPassword": null,
   "udmUrl": null,
@@ -505,24 +503,6 @@ true
 			<td>Python log level</td>
 		</tr>
 		<tr>
-			<td>provisioningApi.redisHost</td>
-			<td>string</td>
-			<td><pre lang="json">
-"localhost"
-</pre>
-</td>
-			<td>Redis: host</td>
-		</tr>
-		<tr>
-			<td>provisioningApi.redisPort</td>
-			<td>int</td>
-			<td><pre lang="json">
-6379
-</pre>
-</td>
-			<td>Redis: port</td>
-		</tr>
-		<tr>
 			<td>provisioningApi.rootPath</td>
 			<td>string</td>
 			<td><pre lang="json">
@@ -557,6 +537,48 @@ null
 </pre>
 </td>
 			<td>UDM REST API: username</td>
+		</tr>
+		<tr>
+			<td>redis</td>
+			<td>object</td>
+			<td><pre lang="json">
+{
+  "auth": {
+    "enabled": false
+  },
+  "bundled": true,
+  "connection": {
+    "host": null,
+    "port": null
+  },
+  "replica": {
+    "replicaCount": 0
+  }
+}
+</pre>
+</td>
+			<td>Redis server settings.</td>
+		</tr>
+		<tr>
+			<td>redis.bundled</td>
+			<td>bool</td>
+			<td><pre lang="json">
+true
+</pre>
+</td>
+			<td>Set to `true` if you want Redis to be installed as well.</td>
+		</tr>
+		<tr>
+			<td>redis.connection</td>
+			<td>object</td>
+			<td><pre lang="json">
+{
+  "host": null,
+  "port": null
+}
+</pre>
+</td>
+			<td>Connection parameters. These are required if you use an external Redis.</td>
 		</tr>
 		<tr>
 			<td>replicaCount</td>

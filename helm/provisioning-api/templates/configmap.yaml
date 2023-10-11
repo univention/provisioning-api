@@ -8,8 +8,13 @@ data:
   DEBUG: "{{ .Values.provisioningApi.debug }}"
   ROOT_PATH: "{{ .Values.provisioningApi.rootPath }}"
   CORS_ALL: "{{ .Values.provisioningApi.corsAll }}"
-  REDIS_HOST: "{{ .Values.provisioningApi.redisHost }}"
-  REDIS_PORT: "{{ .Values.provisioningApi.redisPort }}"
+  {{- if .Values.redis.bundled }}
+  REDIS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "redis" "chartValues" .Values.redis "context" $.top) }}-master"
+  REDIS_PORT: "{{ .Values.redis.master.containerPorts.redis }}"
+  {{- else }}
+  REDIS_HOST: {{ required "The parameter \"redis.connection.host\" is required." .Values.redis.connection.host | quote }}
+  REDIS_PORT: {{ required "The parameter \"redis.connection.port\" is required." .Values.redis.connection.port | quote }}
+  {{- end }}
   UDM_URL: {{ required "The parameter \"provisioningApi.udmUrl\" is required." .Values.provisioningApi.udmUrl | quote }}
   UDM_USERNAME: {{ required "The parameter \"provisioningApi.udmUsername\" is required." .Values.provisioningApi.udmUsername | quote }}
   UDM_PASSWORD: {{ required "The parameter \"provisioningApi.udmPassword\" is required." .Values.provisioningApi.udmPassword | quote }}

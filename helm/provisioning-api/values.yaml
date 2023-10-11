@@ -27,10 +27,6 @@ provisioningApi:
   rootPath: ""
   # -- FastAPI: disable CORS checks
   corsAll: False
-  # -- Redis: host
-  redisHost: "localhost"
-  # -- Redis: port
-  redisPort: 6379
   # -- UDM REST API: base url
   udmUrl: null
   # -- UDM REST API: username
@@ -38,6 +34,18 @@ provisioningApi:
   # -- UDM REST API: password
   udmPassword: null
 
+# -- Redis server settings.
+redis:
+  # -- Set to `true` if you want Redis to be installed as well.
+  bundled: true
+  # -- Connection parameters. These are required if you use an external Redis.
+  connection:
+    host: null
+    port: null
+  auth:
+    enabled: false
+  replica:
+    replicaCount: 0
 
 ## Kubernetes ingress
 ingress:
