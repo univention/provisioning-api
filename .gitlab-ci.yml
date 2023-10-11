@@ -54,7 +54,7 @@ test-provisioning-dispatch:
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
-    - poetry run pytest --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
+    - poetry run pytest tests/ --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
