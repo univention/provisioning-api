@@ -10,9 +10,9 @@ data:
   CORS_ALL: "{{ .Values.provisioningApi.corsAll }}"
   REDIS_HOST: "{{ .Values.provisioningApi.redisHost }}"
   REDIS_PORT: "{{ .Values.provisioningApi.redisPort }}"
-  UDM_URL: "{{ .Values.provisioningApi.udmUrl }}"
-  UDM_USERNAME: "{{ .Values.provisioningApi.udmUsername }}"
-  UDM_PASSWORD: "{{ .Values.provisioningApi.udmPassword }}"
+  UDM_URL: {{ required "The parameter \"provisioningApi.udmUrl\" is required." .Values.provisioningApi.udmUrl | quote }}
+  UDM_USERNAME: {{ required "The parameter \"provisioningApi.udmUsername\" is required." .Values.provisioningApi.udmUsername | quote }}
+  UDM_PASSWORD: {{ required "The parameter \"provisioningApi.udmPassword\" is required." .Values.provisioningApi.udmPassword | quote }}
 {{- end }}
 {{- end }}
 ...

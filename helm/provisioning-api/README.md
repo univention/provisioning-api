@@ -469,9 +469,9 @@ true
   "redisHost": "localhost",
   "redisPort": 6379,
   "rootPath": "",
-  "udmPassword": "",
-  "udmUrl": "",
-  "udmUsername": ""
+  "udmPassword": null,
+  "udmUrl": null,
+  "udmUsername": null
 }
 </pre>
 </td>
@@ -535,7 +535,7 @@ true
 			<td>provisioningApi.udmPassword</td>
 			<td>string</td>
 			<td><pre lang="json">
-""
+null
 </pre>
 </td>
 			<td>UDM REST API: password</td>
@@ -544,7 +544,7 @@ true
 			<td>provisioningApi.udmUrl</td>
 			<td>string</td>
 			<td><pre lang="json">
-""
+null
 </pre>
 </td>
 			<td>UDM REST API: base url</td>
@@ -553,7 +553,7 @@ true
 			<td>provisioningApi.udmUsername</td>
 			<td>string</td>
 			<td><pre lang="json">
-""
+null
 </pre>
 </td>
 			<td>UDM REST API: username</td>

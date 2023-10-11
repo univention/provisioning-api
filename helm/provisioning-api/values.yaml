@@ -32,11 +32,11 @@ provisioningApi:
   # -- Redis: port
   redisPort: 6379
   # -- UDM REST API: base url
-  udmUrl: ""
+  udmUrl: null
   # -- UDM REST API: username
-  udmUsername: ""
+  udmUsername: null
   # -- UDM REST API: password
-  udmPassword: ""
+  udmPassword: null
 
 
 ## Kubernetes ingress
