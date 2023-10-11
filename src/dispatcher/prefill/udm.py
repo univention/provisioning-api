@@ -82,8 +82,11 @@ class UDMClient:
             response = await request.json()
             n_results = response["results"]
             logger.info(f"Found {n_results} results for {object_type}.")
-            uris = [obj["uri"] for obj in response["_embedded"]["udm:object"]]
-            return uris
+            if n_results > 0:
+                uris = [obj["uri"] for obj in response["_embedded"]["udm:object"]]
+                return uris
+            else:
+                return []
 
     async def get_object(self, url: str) -> Dict:
         """Fetch the given UDM object."""
