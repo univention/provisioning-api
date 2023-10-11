@@ -979,6 +979,27 @@ hiredis = ["hiredis (>=1.0.0)"]
 ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==20.0.1)", "requests (>=2.26.0)"]
 
 [[package]]
+name = "requests"
+version = "2.31.0"
+description = "Python HTTP for Humans."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
+    {file = "requests-2.31.0.tar.gz", hash = "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"},
+]
+
+[package.dependencies]
+certifi = ">=2017.4.17"
+charset-normalizer = ">=2,<4"
+idna = ">=2.5,<4"
+urllib3 = ">=1.21.1,<3"
+
+[package.extras]
+socks = ["PySocks (>=1.5.6,!=1.5.7)"]
+use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
+
+[[package]]
 name = "sniffio"
 version = "1.3.0"
 description = "Sniff out which async library your code is running under"
@@ -1039,6 +1060,73 @@ files = [
     {file = "typing_extensions-4.8.0-py3-none-any.whl", hash = "sha256:8f92fc8806f9a6b641eaa5318da32b44d401efaac0f6678c9bc448ba3605faa0"},
     {file = "typing_extensions-4.8.0.tar.gz", hash = "sha256:df8e4339e9cb77357558cbdbceca33c303714cf861d1eef15e1070055ae8b7ef"},
 ]
+
+[[package]]
+name = "ucs-test-utils"
+version = "0.0.0.dev0+jlohmer.udm.rest.test.client.da066998"
+description = "Utilities used for testing ucs-related systems"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "ucs_test_utils-0.0.0.dev0+jlohmer.udm.rest.test.client.da066998-py3-none-any.whl", hash = "sha256:5cba77560b2a9c9fe9a7a55ba35d44a50abb1806834978d30c53bda14ecf454c"},
+    {file = "ucs_test_utils-0.0.0.dev0+jlohmer.udm.rest.test.client.da066998.tar.gz", hash = "sha256:a848c7809cde1eca79eab88304187bf4fe1f1dbaafd248f1c27f841e6731fa5f"},
+]
+
+[package.source]
+type = "legacy"
+url = "https://git.knut.univention.de/api/v4/projects/3/packages/pypi/simple"
+reference = "ucs"
+
+[[package]]
+name = "univention-admin-rest-client"
+version = "0.1.0"
+description = "Python and Bash clients for the UDM-REST-API"
+optional = false
+python-versions = "*"
+files = [
+    {file = "univention_admin_rest_client-0.1.0-py2.py3-none-any.whl", hash = "sha256:192711c25490941cb0b74d1eba3a6071fbe4dd777434b8c95ca18bc73d2bc06e"},
+    {file = "univention_admin_rest_client-0.1.0.tar.gz", hash = "sha256:5cb953425b16a7f439c3cf6a6d9c4f8b1a0657953db9fbe3b06714b77e406036"},
+]
+
+[package.dependencies]
+requests = "*"
+uritemplate = "*"
+
+[package.extras]
+test = ["univention-admin-rest-client-test"]
+
+[package.source]
+type = "legacy"
+url = "https://git.knut.univention.de/api/v4/projects/3/packages/pypi/simple"
+reference = "ucs"
+
+[[package]]
+name = "uritemplate"
+version = "4.1.1"
+description = "Implementation of RFC 6570 URI Templates"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "uritemplate-4.1.1-py2.py3-none-any.whl", hash = "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"},
+    {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
+]
+
+[[package]]
+name = "urllib3"
+version = "2.0.6"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "urllib3-2.0.6-py3-none-any.whl", hash = "sha256:7a7c7003b000adf9e7ca2a377c9688bbc54ed41b985789ed576570342a375cd2"},
+    {file = "urllib3-2.0.6.tar.gz", hash = "sha256:b19e1a85d206b56d7df1d5e683df4a7725252a964e3993648dd0fb5a1c157564"},
+]
+
+[package.extras]
+brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
+secure = ["certifi", "cryptography (>=1.9)", "idna (>=2.0.0)", "pyopenssl (>=17.1.0)", "urllib3-secure-extra"]
+socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
+zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "uvicorn"
@@ -1228,4 +1316,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "49174309c2144409d19ce10064bf3912f37c32e8bc35f2e123a2fbe1b2401c26"
+content-hash = "66d0d367eba1a2d0f9e5f572fc58c91f2fefd6a366f8de6ac03932c6cf9982be"
