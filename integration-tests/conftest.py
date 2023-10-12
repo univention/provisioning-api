@@ -23,6 +23,14 @@ def udm_admin_password():
 
 
 @pytest.fixture
+def provisioning_uri():
+    return os.environ.get(
+        "TESTS_PROVISIONING_ADMIN_URL",
+        "http://localhost:8000/univention/provisioning-api",
+    )
+
+
+@pytest.fixture
 def udm(udm_uri, udm_admin_username, udm_admin_password):
     udm = UDM(udm_uri, udm_admin_username, udm_admin_password)
     # test the connection
