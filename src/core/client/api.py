@@ -1,5 +1,5 @@
 import contextlib
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import aiohttp
 
@@ -40,15 +40,21 @@ class AsyncClient:
 
     async def get_subscription_messages(
         self, name: str, count=None, first=None, last=None
-    ) -> List[core.models.queue.Message]:
+    ) -> List[Tuple[str, core.models.queue.Message]]:
+        params = {
+            key: value
+            for key, value in {"count": count, "first": first, "last": last}.items()
+            if value is not None
+        }
+
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}/v1/subscription/{name}/message",
-                params=dict(count=count),
+                f"{self.base_url}/v1/subscription/{name}/message", params=params
             ) as response:
                 msgs = await response.json()
                 return [
-                    core.models.queue.Message.model_validate(msg[1]) for msg in msgs
+                    (msg[0], core.models.queue.Message.model_validate(msg[1]))
+                    for msg in msgs
                 ]
 
     async def set_message_status(
