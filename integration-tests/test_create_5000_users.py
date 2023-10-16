@@ -17,7 +17,7 @@ async def create_udm_users(
 ):
     errors = []
 
-    auth = aiohttp.BasicAuth("Administrator", "univention")
+    auth = aiohttp.BasicAuth(username, password)
     headers = {"Accept": "application/json"}
 
     async with aiohttp.ClientSession(auth=auth, headers=headers) as session:
@@ -26,14 +26,18 @@ async def create_udm_users(
         )
         test_user = await response.json()
 
+        tasks = []
         for _ in range(user_number):
             user_args = udm_user_args(minimal=False)
             test_user["properties"].update(user_args)
-            response = await session.post(
-                "http://localhost:8000/univention/udm/users/user/", json=test_user
+            tasks.append(
+                session.post(
+                    "http://localhost:8000/univention/udm/users/user/", json=test_user
+                )
             )
-            if not response.status == 201:
-                errors.append(await response.json())
+
+        responses = await asyncio.gather(*tasks)
+        errors = [await res.json() for res in responses if res.status != 201]
     return errors
 
 

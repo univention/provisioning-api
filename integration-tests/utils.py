@@ -44,11 +44,11 @@ def random_date(
     return start_date + (end_date - start_date) * random.random()
 
 
-def udm_user_args(minimal=True, sufix=""):
-    _username = uts.random_username() + sufix
+def udm_user_args(minimal=True, suffix=""):
+    _username = uts.random_username() + suffix
     result = {
-        "firstname": f"{uts.random_string()}{sufix}",
-        "lastname": f"{uts.random_string()}{sufix}",
+        "firstname": f"{uts.random_string()}{suffix}",
+        "lastname": f"{uts.random_string()}{suffix}",
         "username": _username,
         "displayName": _username,
         "password": uts.random_string(),
