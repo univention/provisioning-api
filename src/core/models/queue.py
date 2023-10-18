@@ -25,6 +25,13 @@ class Message(BaseMessage):
     # The content of the message.
     body: Dict[str, Any]
 
+    def flatten_bytes(self) -> bytes:
+        """Serialise the message into dict, then in json string, and then in bytes"""
+        dictionary = self.flatten()
+        json_string = json.dumps(dictionary)
+        bytes_string = json_string.encode("utf-8")
+        return bytes_string
+
     def flatten(self) -> Dict[str, str]:
         """Convert the message into a simple dict.
 

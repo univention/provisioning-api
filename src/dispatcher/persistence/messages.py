@@ -2,7 +2,10 @@ from typing import Annotated, Dict, cast, List, Optional, Tuple
 
 import core.models
 import fastapi
+import aio_pika
 import redis.asyncio as redis
+from core.models import Message
+from kafka import KafkaProducer, KafkaConsumer
 
 from .redis import RedisDependency
 
@@ -123,6 +126,186 @@ class MessageRepository:
 
         key = Keys.queue(subscriber_name)
         await self._redis.xtrim(key, maxlen=0)
+
+
+class RabbitMQMessageRepository(MessageRepository):
+    """
+    Message repository using RabbitMQ as a backend.
+    Concerns:
+    - RabbitMQ alwaus appends message in the end. There's no api to prepend messages or control the insert position.
+    - RabbitMQ does not provide a direct mechanism to selectively delete messages by content or position in the queue.
+
+    As a prefill workaround, we will use two separate queues - one for pre-fill messages and one for live messages.
+    The consumer can first process all messages from the prefill queue before moving on to the live queue.
+
+    """
+
+    live_queue_prefix = "live_"
+    prefill_queue_prefix = "prefill_"
+
+    def __init__(self, connection: aio_pika.Connection):
+        self._connection = connection
+
+    async def _get_channel(self) -> aio_pika.Channel:
+        return await self._connection.channel()
+
+    async def add_live_message(self, subscriber_name: str, message: Message):
+        channel = await self._get_channel()
+        await channel.default_exchange.publish(
+            aio_pika.Message(body=message.flatten_bytes()),
+            f"{self.prefill_queue_prefix}{subscriber_name}",
+        )
+
+    async def add_prefill_message(self, subscriber_name: str, message: Message):
+        channel = await self._get_channel()
+        await channel.default_exchange.publish(
+            aio_pika.Message(body=message.flatten_bytes()),
+            f"{self.prefill_queue_prefix}{subscriber_name}",
+        )
+
+    async def delete_prefill_messages(self, subscriber_name: str):
+        channel = await self._get_channel()
+        await channel.queue_delete(f"{self.prefill_queue_prefix}{subscriber_name}")
+
+    async def get_next_message(
+        self, subscriber_name: str, block: Optional[int] = None
+    ) -> Optional[Tuple[str, Message]]:
+        channel = await self._get_channel()
+
+        # Check prefill queue first
+        prefill_queue = await channel.declare_queue(
+            f"{self.prefill_queue_prefix}{subscriber_name}", auto_delete=True
+        )
+        live_queue = await channel.declare_queue(
+            f"{self.live_queue_prefix}{subscriber_name}", auto_delete=True
+        )
+
+        if prefill_queue.message_count > 0:
+            message: aio_pika.IncomingMessage = await prefill_queue.get(timeout=block)
+        else:
+            message: aio_pika.IncomingMessage = await live_queue.get(timeout=block)
+
+        return message.message_id, Message.inflate(message.body.decode())
+
+    async def get_messages(
+        self,
+        subscriber_name: str,
+        count: Optional[int] = None,
+        first: int | str = "-",
+        last: int | str = "+",
+    ) -> List[Tuple[str, Message]]:
+        messages = []
+        channel = await self._get_channel()
+
+        prefill_queue = await channel.declare_queue(
+            f"{self.prefill_queue_prefix}{subscriber_name}", auto_delete=True
+        )
+        live_queue = await channel.declare_queue(
+            f"{self.live_queue_prefix}{subscriber_name}", auto_delete=True
+        )
+
+        total_count = count or (prefill_queue.message_count + live_queue.message_count)
+
+        for _ in range(total_count):
+            if prefill_queue.message_count > 0:
+                message: aio_pika.IncomingMessage = await prefill_queue.get()
+            else:
+                message: aio_pika.IncomingMessage = await live_queue.get()
+                if not message:
+                    break
+            messages.append(
+                (message.message_id, Message.inflate(message.body.decode()))
+            )
+
+        return messages
+
+    async def delete_message(self, subscriber_name: str, message_id: str):
+        # Deleting individual messages in RabbitMQ by their ID is not supported, we need to consume instead.
+        pass
+
+    async def delete_queue(self, subscriber_name: str):
+        channel = await self._get_channel()
+        prefill_queue = await channel.declare_queue(
+            f"{self.prefill_queue_prefix}{subscriber_name}", auto_delete=True
+        )
+        live_queue = await channel.declare_queue(
+            f"{self.live_queue_prefix}{subscriber_name}", auto_delete=True
+        )
+        await prefill_queue.delete(if_unused=False, if_empty=False)
+        await live_queue.delete(if_unused=False, if_empty=False)
+
+
+class KafkaMessageRepository(MessageRepository):
+    live_queue_prefix = "live_"
+    prefill_queue_prefix = "prefill_"
+
+    def __init__(self, bootstrap_servers: List[str]):
+        self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
+        self.consumer = KafkaConsumer(bootstrap_servers=bootstrap_servers)
+
+    def add_live_message(self, subscriber_name: str, message: Message):
+        self.producer.send(
+            f"{self.live_queue_prefix}{subscriber_name}", value=message.flatten()
+        )
+
+    def add_prefill_message(self, subscriber_name: str, message: Message):
+        self.producer.send(
+            f"{self.prefill_queue_prefix}{subscriber_name}", value=message.flatten()
+        )
+
+    def delete_prefill_messages(self, subscriber_name: str):
+        # Kafka doesn't allow for direct deletion of messages.
+        # In real-world scenarios, one might consider using Kafka's log compaction or topic deletion.
+        pass
+
+    def get_next_message(
+        self, subscriber_name: str, block: Optional[int] = None
+    ) -> Optional[Tuple[str, Message]]:
+        # block is ignored
+        # Check prefill topic first
+        self.consumer.subscribe(
+            [
+                f"{self.prefill_queue_prefix}{subscriber_name}",
+                f"{self.live_queue_prefix}{subscriber_name}",
+            ]
+        )
+
+        for record in self.consumer:
+            # Deserialize and return the next message
+            return record.offset, Message.inflate(record.value)
+
+        return None
+
+    def get_messages(
+        self, subscriber_name: str, count: Optional[int] = None
+    ) -> List[Tuple[str, Message]]:
+        # first and last args are not supported
+        self.consumer.subscribe(
+            [
+                f"{self.prefill_queue_prefix}{subscriber_name}",
+                f"{self.live_queue_prefix}{subscriber_name}",
+            ]
+        )
+
+        messages = []
+        for _, record in zip(range(count), self.consumer):
+            messages.append((record.offset, Message.inflate(record.value)))
+
+        return messages
+
+    def delete_message(self, subscriber_name: str, offset: int):
+        # Kafka also doesn't support direct message deletion.
+        pass
+
+    def delete_queue(self, subscriber_name: str):
+        # Kafka uses topics, not queues. Deleting a topic is possible but typically
+        # managed outside of client applications due to data integrity concerns.
+        # It's generally recommended to create new topics instead of deleting old ones.
+        # Resources:
+        # https://stackoverflow.com/questions/32703469/python-how-to-delete-all-messages-under-a-kafka-topic
+        # https://martinhynar.medium.com/strategies-for-deletion-of-records-in-kafka-topic-c13f2fbe0f82
+        # https://kafka.apache.org/documentation.html#compaction
+        pass
 
 
 def get_message_repository(redis: RedisDependency) -> MessageRepository:
