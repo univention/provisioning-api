@@ -1,23 +1,21 @@
 import enum
 from typing import Any, Dict, List, Tuple
+from pydantic import BaseModel, Field
 
-import pydantic
 
-
-class NewSubscriber(pydantic.BaseModel):
+class NewSubscriber(BaseModel):
     """Request to register a subscriber."""
 
-    # The identifier of the subscriber.
-    name: str
+    name: str = Field(description="The identifier of the subscriber.")
+    realms_topics: List[Tuple[str, str]] = Field(
+        description="A list of `(realm, topic)` tuples that this subscriber subscribes to."
+    )
+    fill_queue: bool = Field(
+        description="Whether pre-filling of the queue was requested."
+    )
 
-    # A list of `(realm, topic)` that this subscriber subscribes to.
-    realms_topics: List[Tuple[str, str]]
 
-    # Whether pre-filling of the queue was requested.
-    fill_queue: bool
-
-
-class NewMessage(pydantic.BaseModel):
+class NewMessage(BaseModel):
     """
     A message as it arrives on the API.
     """
@@ -35,7 +33,7 @@ class MessageProcessingStatus(str, enum.Enum):
     ok = "ok"
 
 
-class MessageProcessingStatusReport(pydantic.BaseModel):
+class MessageProcessingStatusReport(BaseModel):
     """A subscriber reporting whether a message was processed."""
 
     # Whether the message was processed by the subscriber.
