@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from core.config import settings
 from .api import router as api_router
-from .log import setup as setup_logging
+from core.log import setup as setup_logging
 
 
 setup_logging()

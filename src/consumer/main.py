@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .api import router as api_router
-from .config import settings
-from .log import setup as setup_logging
+from core.config import settings
+from core.log import setup as setup_logging
 
 
 setup_logging()

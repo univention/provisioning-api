@@ -3,7 +3,7 @@ import json
 from typing import Any, ClassVar, Dict
 from typing_extensions import Self
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class BaseMessage(BaseModel):
@@ -23,7 +23,9 @@ class Message(BaseMessage):
     """The base class for any kind of message sent via the queues."""
 
     # The content of the message.
-    body: Dict[str, Any]
+    body: Dict[str, Any] = Field(
+        description="The content of the message as a key/value dictionary."
+    )
 
     def flatten(self) -> Dict[str, str]:
         """Convert the message into a simple dict.
