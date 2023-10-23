@@ -25,7 +25,7 @@ aiohttp = "^3.8.5"
 websockets = "^11.0.3"
 
 [tool.poetry.scripts]
-dev = "dispatcher:start_dev"
+dev = "provisioning:start_dev"
 client = "example-client.main:run"
 
 [tool.poetry.group.dev]

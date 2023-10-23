@@ -7,12 +7,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from dispatcher.api import router as dispatcher_api_router
+from consumer.api import router as consumer_api_router
 from core.config import settings
-from .api import router as api_router
-from .log import setup as setup_logging
+
+# TODO split up logging
+# from .log import setup as setup_logging
 
 
-setup_logging()
+# setup_logging()
 
 openapi_tags = [
     {
@@ -47,7 +50,8 @@ if settings.cors_all:
         allow_headers=["*"],
     )
 
-app.include_router(api_router)
+app.include_router(dispatcher_api_router)
+app.include_router(consumer_api_router)
 
 
 @app.exception_handler(RequestValidationError)

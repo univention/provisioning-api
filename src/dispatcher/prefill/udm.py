@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Type
 
 import core.models
 
-from dispatcher.config import settings
+from core.config import settings
 from dispatcher.prefill.base import PreFillService
 from dispatcher.service.subscription import match_subscription
 
