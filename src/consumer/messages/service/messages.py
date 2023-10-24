@@ -4,8 +4,8 @@ from typing import List, Optional, Tuple
 import core.models
 
 from consumer.messages.persistence.messages import MessageRepository
-from consumer.messages.persistence.subscriptions import SubscriptionRepository
-from consumer.messages.service.subscription import SubscriptionService
+from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
+from consumer.subscriptions.service.subscription import SubscriptionService
 
 
 class MessageService:

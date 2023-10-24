@@ -1,4 +1,4 @@
-import consumer.messages.service.subscription
+import consumer.subscriptions.service.subscription
 
 
 def test_subscription_match():
@@ -16,7 +16,7 @@ def test_subscription_match():
 
     for sub_realm, sub_topic, msg_realm, msg_topic, expectation in test_cases:
         assert (
-            consumer.messages.service.subscription.match_subscription(
+            consumer.subscriptions.service.subscription.match_subscription(
                 sub_realm, sub_topic, msg_realm, msg_topic
             )
             == expectation

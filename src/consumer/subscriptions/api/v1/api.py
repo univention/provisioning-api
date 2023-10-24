@@ -5,15 +5,12 @@ from typing import List, Tuple
 import fastapi
 import core.models
 
-from consumer.messages.persistence import (
-    DependsMessageRepo,
-    DependsSubscriptionRepo,
-)
-from consumer.messages.service import (
-    MessageService,
-    SubscriptionService,
-)
-from consumer.messages.subscription.sink import WebSocketSink, SinkManager
+from consumer.messages.persistence import DependsMessageRepo
+from consumer.subscriptions.persistence import DependsSubscriptionRepo
+from consumer.messages.service import MessageService
+from consumer.subscriptions.service.subscription import SubscriptionService
+from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
+from prefill import init_queue as init_prefill_queue
 
 
 logger = logging.getLogger(__name__)
@@ -77,7 +74,7 @@ async def create_subscription(
 
     if subscriber.fill_queue:
         tasks.add_task(
-            dispatcher.prefill.init_queue,
+            init_prefill_queue,
             subscriber.name,
             subscriber.realms_topics,
         )

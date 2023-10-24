@@ -1,7 +1,6 @@
-import logging
-from typing import List
-
 import fastapi
+import logging
+
 import core.models
 
 from consumer.messages.persistence import (
@@ -10,7 +9,7 @@ from consumer.messages.persistence import (
 from consumer.messages.service import (
     MessageService,
 )
-from consumer.messages.subscription.sink import SinkManager
+from consumer.subscriptions.subscription.sink import SinkManager
 
 
 logger = logging.getLogger(__name__)

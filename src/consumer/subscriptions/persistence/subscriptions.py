@@ -3,7 +3,7 @@ from typing import Annotated, Any, Dict, List, Optional, Tuple
 import fastapi
 import redis.asyncio as redis
 
-from .redis import RedisDependency
+from consumer.core.persistence.redis import RedisDependency
 
 
 class Keys:

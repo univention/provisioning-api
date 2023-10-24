@@ -3,12 +3,12 @@ from typing import List, Tuple
 
 import core.models
 
-from dispatcher.persistence.messages import MessageRepository
-from dispatcher.persistence.redis import redis_context
-from dispatcher.persistence.subscriptions import SubscriptionRepository
-from dispatcher.service.messages import MessageService
-from dispatcher.service.subscription import SubscriptionService
-from dispatcher.prefill.udm import UDMPreFill
+from consumer.messages.persistence.messages import MessageRepository
+from consumer.core.persistence.redis import redis_context
+from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
+from consumer.messages.service.messages import MessageService
+from consumer.subscriptions.service.subscription import SubscriptionService
+from prefill.udm import UDMPreFill
 
 
 logger = logging.getLogger(__name__)

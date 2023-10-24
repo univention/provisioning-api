@@ -12,7 +12,7 @@ from redis._parsers.helpers import (
 from redis.utils import str_if_bytes
 
 from consumer.main import app
-from consumer.messages.persistence.redis import redis_dependency
+from consumer.core.persistence.redis import redis_dependency
 
 
 async def redis_fake_dependency():

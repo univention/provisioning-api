@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Type
 import core.models
 
 from core.config import settings
-from dispatcher.prefill.base import PreFillService
-from dispatcher.service.subscription import match_subscription
+from prefill.base import PreFillService
+from consumer.subscriptions.service.subscription import match_subscription
 
 
 logger = logging.getLogger(__name__)

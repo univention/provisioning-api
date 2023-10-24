@@ -6,7 +6,7 @@ Target directory structure:
         /messages
             /service (dispatcher)
             /api
-        /subscription
+        /subscriptions
             /api
     /producer
         /service
@@ -25,3 +25,4 @@ Open points:
 - What is the difference between Authn/z and Credentials store?
     - Which Authentication layer?
 - How much do we need to stick to the architectural design in the presentation?
+- Is the split between consumer.messages and consumer.subscriptions really necessary? (i.e. Consumer REST API/Consumer Registration API)

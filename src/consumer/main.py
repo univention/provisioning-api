@@ -50,8 +50,8 @@ if settings.cors_all:
         allow_headers=["*"],
     )
 
-app.include_router(dispatcher_api_router, prefix="/dispatcher", tags=["Messages"])
-app.include_router(consumer_api_router, prefix="/consumers", tags=["Consumers"])
+app.include_router(dispatcher_api_router)
+app.include_router(consumer_api_router)
 
 
 @app.exception_handler(RequestValidationError)

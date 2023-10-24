@@ -1,6 +1,6 @@
 import abc
 
-from dispatcher.service.messages import MessageService
+from consumer.messages.service.messages import MessageService
 
 
 class PreFillService(abc.ABC):
