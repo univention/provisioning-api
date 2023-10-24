@@ -4,8 +4,8 @@ from typing import Optional
 from fakeredis.aioredis import FakeRedis
 from fastapi.testclient import TestClient
 
-from dispatcher.api import v1_prefix as api_prefix
-from dispatcher.main import app
+from consumer.messages.api import v1_prefix as api_prefix
+from consumer.main import app
 
 
 class RedisXreadMock:

@@ -7,12 +7,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .api import router as api_router
+from .messages.api import router as dispatcher_api_router
+from .subscriptions.api import router as consumer_api_router
 from core.config import settings
-from core.log import setup as setup_logging
+
+# TODO split up logging
+# from .log import setup as setup_logging
 
 
-setup_logging()
+# setup_logging()
 
 openapi_tags = [
     {
@@ -34,7 +37,7 @@ app = FastAPI(
     description="Forward LDAP changes to subscribers",
     openapi_tags=openapi_tags,
     root_path=settings.root_path,
-    title="Consumer REST API",
+    title="Provisioning Dispatcher",
     version="v1",
 )
 
@@ -47,7 +50,8 @@ if settings.cors_all:
         allow_headers=["*"],
     )
 
-app.include_router(api_router)
+app.include_router(dispatcher_api_router, prefix="/dispatcher", tags=["Messages"])
+app.include_router(consumer_api_router, prefix="/consumers", tags=["Consumers"])
 
 
 @app.exception_handler(RequestValidationError)

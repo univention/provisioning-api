@@ -2,8 +2,8 @@ import re
 from typing import List
 
 import core.models
-from dispatcher.persistence.messages import MessageRepository
-from dispatcher.persistence.subscriptions import SubscriptionRepository
+from consumer.messages.persistence.messages import MessageRepository
+from consumer.messages.persistence.subscriptions import SubscriptionRepository
 
 
 def match_subscription(

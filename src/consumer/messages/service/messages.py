@@ -3,9 +3,9 @@ from typing import List, Optional, Tuple
 
 import core.models
 
-from dispatcher.persistence.messages import MessageRepository
-from dispatcher.persistence.subscriptions import SubscriptionRepository
-from dispatcher.service.subscription import SubscriptionService
+from consumer.messages.persistence.messages import MessageRepository
+from consumer.messages.persistence.subscriptions import SubscriptionRepository
+from consumer.messages.service.subscription import SubscriptionService
 
 
 class MessageService:

@@ -51,7 +51,7 @@ EXPOSE 7777
 # run
 ENTRYPOINT [ \
         "./.venv/bin/python3", "-m", \
-        "uvicorn", "dispatcher:start_dev", \
+        "uvicorn", "provisioning:start_dev", \
         "--log-config", "logging.yaml", \
         "--host", "0.0.0.0", \
         "--port", "7777" \

@@ -11,8 +11,8 @@ from redis._parsers.helpers import (
 )
 from redis.utils import str_if_bytes
 
-from dispatcher.main import app
-from dispatcher.persistence.redis import redis_dependency
+from consumer.main import app
+from consumer.messages.persistence.redis import redis_dependency
 
 
 async def redis_fake_dependency():

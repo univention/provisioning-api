@@ -5,16 +5,15 @@ from typing import List, Tuple
 import fastapi
 import core.models
 
-from dispatcher.persistence import (
+from consumer.messages.persistence import (
     DependsMessageRepo,
     DependsSubscriptionRepo,
 )
-from dispatcher.service import (
+from consumer.messages.service import (
     MessageService,
     SubscriptionService,
 )
-from dispatcher.subscription.sink import WebSocketSink, SinkManager
-import dispatcher.prefill
+from consumer.messages.subscription.sink import WebSocketSink, SinkManager
 
 
 logger = logging.getLogger(__name__)

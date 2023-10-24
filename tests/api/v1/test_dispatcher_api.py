@@ -3,8 +3,8 @@ import uuid
 import httpx
 import pytest
 
-from dispatcher.api import v1_prefix as api_prefix
-from dispatcher.main import app as dispatcher_app
+from consumer.messages.api import v1_prefix as api_prefix
+from consumer.main import app as dispatcher_app
 from consumer.main import app as consumer_app
 
 
