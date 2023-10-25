@@ -3,9 +3,10 @@ import uuid
 import httpx
 import pytest
 
-from consumer.messages.api import v1_prefix as api_prefix
-from consumer.main import app as dispatcher_app
-from consumer.main import app as consumer_app
+from consumer.messages.api import v1_prefix as messages_api_prefix
+from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
+from consumer.main import app as messages_app
+from consumer.main import app as subscriptions_app
 
 
 @pytest.fixture(scope="session")
@@ -14,24 +15,24 @@ def anyio_backend():
 
 
 @pytest.fixture(scope="session")
-async def consumer_client():
+async def subscriptions_client():
     async with httpx.AsyncClient(
-        app=consumer_app, base_url="http://testserver"
+        app=subscriptions_app, base_url="http://testserver"
     ) as client:
         yield client
 
 
 @pytest.fixture(scope="session")
-async def dispatcher_client():
+async def messages_client():
     async with httpx.AsyncClient(
-        app=dispatcher_app, base_url="http://testserver"
+        app=messages_app, base_url="http://testserver"
     ) as client:
         yield client
 
 
 @pytest.mark.anyio
 async def test_post_message(
-    dispatcher_client: httpx.AsyncClient, consumer_client: httpx.AsyncClient
+    messages_client: httpx.AsyncClient, subscriptions_client: httpx.AsyncClient
 ):
     name = str(uuid.uuid4())
     realm = "foo"
@@ -46,8 +47,8 @@ async def test_post_message(
     }
     body = {"hello": "world"}
 
-    response = await consumer_client.post(
-        f"{api_prefix}/subscription/",
+    response = await subscriptions_client.post(
+        f"{subscriptions_api_prefix}/subscription/",
         json={
             "name": name,
             "realms_topics": [[realm, topic]],
@@ -56,8 +57,8 @@ async def test_post_message(
     )
     assert response.status_code == 201
 
-    response = await dispatcher_client.post(
-        f"{api_prefix}/message/",
+    response = await messages_client.post(
+        f"{messages_api_prefix}/message/",
         json={
             "realm": realm,
             "topic": topic,
@@ -66,7 +67,9 @@ async def test_post_message(
     )
     assert response.status_code == 202
 
-    response = await consumer_client.get(f"{api_prefix}/subscription/{name}/message")
+    response = await messages_client.get(
+        f"{messages_api_prefix}/subscription/{name}/message"
+    )
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -77,7 +80,7 @@ async def test_post_message(
 
 @pytest.mark.anyio
 async def test_manual_message_processing(
-    dispatcher_client: httpx.AsyncClient, consumer_client: httpx.AsyncClient
+    messages_client: httpx.AsyncClient, subscriptions_client: httpx.AsyncClient
 ):
     name = str(uuid.uuid4())
     realm = "foo"
@@ -85,8 +88,8 @@ async def test_manual_message_processing(
     body1 = {"first": {"foo": "1"}}
     body2 = {"second": {"bar": "2"}}
 
-    response = await consumer_client.post(
-        f"{api_prefix}/subscription/",
+    response = await subscriptions_client.post(
+        f"{subscriptions_api_prefix}/subscription/",
         json={
             "name": name,
             "realms_topics": [[realm, topic]],
@@ -95,8 +98,8 @@ async def test_manual_message_processing(
     )
     assert response.status_code == 201
 
-    response = await dispatcher_client.post(
-        f"{api_prefix}/message/",
+    response = await messages_client.post(
+        f"{messages_api_prefix}/message/",
         json={
             "realm": realm,
             "topic": topic,
@@ -105,8 +108,8 @@ async def test_manual_message_processing(
     )
     assert response.status_code == 202
 
-    response = await dispatcher_client.post(
-        f"{api_prefix}/message/",
+    response = await messages_client.post(
+        f"{messages_api_prefix}/message/",
         json={
             "realm": realm,
             "topic": topic,
@@ -115,22 +118,26 @@ async def test_manual_message_processing(
     )
     assert response.status_code == 202
 
-    response = await consumer_client.get(f"{api_prefix}/subscription/{name}/message")
+    response = await messages_client.get(
+        f"{messages_api_prefix}/subscription/{name}/message"
+    )
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
     assert data[0][1]["body"] == body1
     message_id: str = data[0][0]
 
-    response = await dispatcher_client.post(
-        f"{api_prefix}/subscription/{name}/message/{message_id}",
+    response = await messages_client.post(
+        f"{messages_api_prefix}/subscription/{name}/message/{message_id}",
         json={
             "status": "ok",
         },
     )
     assert response.status_code == 200
 
-    response = await consumer_client.get(f"{api_prefix}/subscription/{name}/message")
+    response = await messages_client.get(
+        f"{messages_api_prefix}/subscription/{name}/message"
+    )
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1

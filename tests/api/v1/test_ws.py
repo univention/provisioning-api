@@ -4,7 +4,8 @@ from typing import Optional
 from fakeredis.aioredis import FakeRedis
 from fastapi.testclient import TestClient
 
-from consumer.messages.api import v1_prefix as api_prefix
+from consumer.messages.api import v1_prefix as messages_api_prefix
+from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.main import app
 
 
@@ -67,7 +68,7 @@ def test_websocket(monkeypatch):
     body2 = {"second": {"bar": "2"}}
 
     response = client.post(
-        f"{api_prefix}/subscription/",
+        f"{subscriptions_api_prefix}/subscription/",
         json={
             "name": name,
             "realms_topics": [[realm, topic]],
@@ -77,7 +78,7 @@ def test_websocket(monkeypatch):
     assert response.status_code == 201
 
     response = client.post(
-        f"{api_prefix}/message/",
+        f"{messages_api_prefix}/message/",
         json={
             "realm": realm,
             "topic": topic,
@@ -87,7 +88,7 @@ def test_websocket(monkeypatch):
     assert response.status_code == 202
 
     response = client.post(
-        f"{api_prefix}/message/",
+        f"{messages_api_prefix}/message/",
         json={
             "realm": realm,
             "topic": topic,
@@ -97,7 +98,9 @@ def test_websocket(monkeypatch):
     assert response.status_code == 202
 
     monkeypatch.setattr(FakeRedis, "xread", RedisXreadMock.xread_1)
-    with client.websocket_connect(f"{api_prefix}/subscription/{name}/ws") as ws_client:
+    with client.websocket_connect(
+        f"{messages_api_prefix}/subscription/{name}/ws"
+    ) as ws_client:
         data = ws_client.receive_json()
 
         assert data["realm"] == realm

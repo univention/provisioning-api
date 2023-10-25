@@ -1,15 +1,12 @@
-import json
 import logging
-from typing import List, Tuple
+from typing import List
 
 import fastapi
 import core.models
 
-from consumer.messages.persistence import DependsMessageRepo
 from consumer.subscriptions.persistence import DependsSubscriptionRepo
-from consumer.messages.service import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
-from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
+from consumer.subscriptions.subscription.sink import SinkManager
 from prefill import init_queue as init_prefill_queue
 
 
@@ -97,71 +94,3 @@ async def cancel_subscription(
         await service.remove_subscriber(name)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
-
-
-@router.websocket("/subscription/{name}/ws")
-async def subscription_websocket(
-    name: str,
-    websocket: fastapi.WebSocket,
-    repo: DependsMessageRepo,
-):
-    """Stream messages for an existing subscription."""
-
-    # TODO: check authorization
-
-    service = MessageService(repo)
-
-    sink = await manager.add(name, WebSocketSink(websocket))
-
-    try:
-        while True:
-            id_message = await service.get_next_message(name, block=250)
-            if not id_message:
-                continue
-
-            message_id, message = id_message
-            await sink.send_message(message)
-
-            reply = await websocket.receive_text()
-            try:
-                report = core.models.MessageProcessingStatusReport(**json.loads(reply))
-            except Exception:
-                logger.error(
-                    f"{name} > Unexpected input from WebSocket client: {reply}"
-                )
-                break
-
-            if report.status == core.models.MessageProcessingStatus.ok:
-                await service.remove_message(name, message_id)
-            else:
-                logger.error(
-                    f"{name} > WebSocket client reported status: {report.status}"
-                )
-                break
-    except fastapi.WebSocketDisconnect:
-        logger.info(f"{name} WebSocket client disconnected.")
-    except Exception as exc:
-        logger.warn(f"{name} WebSocket failed: {exc}")
-    finally:
-        await manager.close(name)
-
-
-@router.get(
-    "/subscription/{name}/message",
-    status_code=fastapi.status.HTTP_200_OK,
-    tags=["sink"],
-)
-async def get_subscription_messages(
-    name: str,
-    repo: DependsMessageRepo,
-    count: int | None = None,
-    first: int | str | None = None,
-    last: int | str | None = None,
-) -> List[Tuple[str, core.models.Message]]:
-    """Return the next pending message(s) for the given subscription."""
-
-    # TODO: check authorization
-
-    service = MessageService(repo)
-    messages = await service.get_messages(name, count or 1, first or "-", last or "+")
-    return messages
