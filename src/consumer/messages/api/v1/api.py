@@ -20,23 +20,6 @@ router = fastapi.APIRouter()
 manager = SinkManager()
 
 
-@router.post("/message/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
-async def create_new_message(
-    data: shared.models.NewMessage,
-    request: fastapi.Request,
-    repo: DependsMessageRepo,
-):
-    """Submit a new message."""
-
-    # TODO: check authorization
-
-    # TODO: set publisher_name from authentication data
-    publisher_name = request.client.host
-
-    service = MessageService(repo)
-    await service.publish_message(data, publisher_name)
-
-
 @router.post(
     "/subscription/{name}/message/",
     status_code=fastapi.status.HTTP_200_OK,
