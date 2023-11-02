@@ -7,6 +7,7 @@ import core.models
 from consumer.subscriptions.persistence import DependsSubscriptionRepo
 from consumer.subscriptions.service.subscription import SubscriptionService
 from consumer.subscriptions.subscription.sink import SinkManager
+from consumer.messages.persistence import DependsMessageRepo
 from prefill import init_queue as init_prefill_queue
 
 
@@ -19,12 +20,13 @@ manager = SinkManager()
 @router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
     repo: DependsSubscriptionRepo,
+    msg_repo: DependsMessageRepo,
 ) -> List[core.models.Subscriber]:
     """Return all subscriptions."""
 
     # TODO: check authorization
 
-    service = SubscriptionService(repo)
+    service = SubscriptionService(repo, msg_repo)
     return await service.get_subscribers()
 
 
@@ -34,12 +36,13 @@ async def get_subscriptions(
 async def get_subscription(
     name: str,
     repo: DependsSubscriptionRepo,
+    msg_repo: DependsMessageRepo,
 ) -> core.models.Subscriber:
     """Return information about a subscription."""
 
     # TODO: check authorization
 
-    service = SubscriptionService(repo)
+    service = SubscriptionService(repo, msg_repo)
     try:
         subscriber = await service.get_subscriber(name)
     except ValueError as err:
@@ -54,13 +57,14 @@ async def get_subscription(
 async def create_subscription(
     subscriber: core.models.NewSubscriber,
     repo: DependsSubscriptionRepo,
+    msg_repo: DependsMessageRepo,
     tasks: fastapi.BackgroundTasks,
 ):
     """Create a new subscription."""
 
     # TODO: check authorization for `new_sub.subscriber_name` / `new_sub.realms_topics`
 
-    service = SubscriptionService(repo)
+    service = SubscriptionService(repo, msg_repo)
 
     try:
         await service.add_subscriber(subscriber)
@@ -82,13 +86,14 @@ async def create_subscription(
 )
 async def cancel_subscription(
     name: str,
-    repo: DependsSubscriptionRepo,
+    subs_repo: DependsSubscriptionRepo,
+    msg_repo: DependsMessageRepo,
 ):
     """Delete a subscription."""
 
     # TODO: check authorization
 
-    service = SubscriptionService(repo)
+    service = SubscriptionService(subs_repo, msg_repo)
     try:
         await manager.close(name)
         await service.remove_subscriber(name)
