@@ -85,18 +85,46 @@ class TestSubscriptionRepository:
             [call("subscribers"), call("subscriber_topics:subscriber_1")]
         )
 
-    # async def test_get_subscribers_by_topics_without_realms_topics(self, redis: FakeRedis):
-    #     name = "subscriber_1"
-    #     realms_topics = []
-    #     redis.smembers = AsyncMock(side_effect=([name], realms_topics))
-    #     sub_repo = SubscriptionRepository(redis)
-    #
-    #     result = await sub_repo.get_subscribers_by_topics()
-    #
-    #     assert result == [("foo", "bar", name), ("abc", "def", name)]
-    #     redis.smembers.assert_has_calls(
-    #         [
-    #             call("subscribers"),
-    #             call('subscriber_topics:subscriber_1')
-    #         ]
-    #     )
+    async def test_get_subscribers_by_topics_without_realms_topics(self, redis: FakeRedis):
+        name = "subscriber_1"
+        realms_topics = []
+        redis.smembers = AsyncMock(side_effect=([name], realms_topics))
+        sub_repo = SubscriptionRepository(redis)
+
+        result = await sub_repo.get_subscribers_by_topics()
+
+        assert result == []
+        redis.smembers.assert_has_calls(
+            [
+                call("subscribers"),
+                call('subscriber_topics:subscriber_1')
+            ]
+        )
+    async def test_get_subscriber_with_no_subscriber(self, redis: FakeRedis):
+        name = "subscriber_1"
+        sub_repo = SubscriptionRepository(redis)
+
+        redis.sismember = AsyncMock(return_value=0)
+        redis.hget = AsyncMock()
+
+        with pytest.raises(ValueError) as e:
+            await sub_repo.get_subscriber_queue_status(name)
+
+        assert "Subscriber not found." == str(e.value)
+        redis.hget.assert_not_called()
+
+    async def test_get_subscriber_with_subscribers(self, redis: FakeRedis):
+        name = "subscriber_1"
+        sub_repo = SubscriptionRepository(redis)
+
+        redis.sismember = AsyncMock(return_value=1)
+        redis.hget = AsyncMock(return_value="value")
+
+        result = sub_repo.get_subscriber_queue_status(name)
+
+        # redis.hget.assert_called_once_with(f"subscriber:{name}", "fill_queue_status")
+        redis.hget.assert_called_once()
+        # assert result == "value"
+
+
+
