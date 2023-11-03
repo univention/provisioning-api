@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 from typing import Annotated, List, Optional, Tuple
+=======
+import json
+from typing import Annotated, Dict, cast, List, Optional, Tuple
+>>>>>>> ede9f0c (fix: change method to pusblish message to the nats)
 
 import core.models
 import fastapi
@@ -10,10 +15,16 @@ from core.models import Message
 
 
 class Keys:
-    """A list of keys used in Redis for queueing messages."""
+    """A list of keys used in Redis and Nats for queueing messages."""
 
     def queue(subscriber_name):
         return f"queue:{subscriber_name}"
+
+    def stream(subscriber_name):
+        return f"stream:{subscriber_name}"
+
+    def subject(subscriber_name):
+        return f"subject:{subscriber_name}"
 
 
 class MessageRepository:

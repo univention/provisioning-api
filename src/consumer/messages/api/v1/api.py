@@ -5,12 +5,14 @@ from typing import List, Tuple
 
 import core.models
 
-from consumer.messages.persistence import DependsMessageRepo
+# from consumer.core.persistence.nats import nats_context
+# from consumer.core.persistence.redis import redis_context
+
+from consumer.messages.persistence import DependsMessageRepo  # , MessageRepository
 from consumer.messages.service import MessageService
 
 from consumer.subscriptions.subscription.sink import WebSocketSink
 from consumer.subscriptions.subscription.sink import SinkManager
-
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ manager = SinkManager()
 async def create_new_message(
     data: core.models.NewMessage,
     request: fastapi.Request,
-    repo: DependsMessageRepo,
+    repo: DependsMessageRepo,  # need to comment for testing
 ):
     """Submit a new message."""
 
@@ -30,6 +32,12 @@ async def create_new_message(
 
     # TODO: set publisher_name from authentication data
     publisher_name = request.client.host
+
+    # uncomment for testing
+    # async with redis_context() as redis, nats_context() as nats:
+    #     msg_repo = MessageRepository(redis, nats)
+    #     service = MessageService(msg_repo)
+    #     await service.publish_message(data, publisher_name)
 
     service = MessageService(repo)
     await service.publish_message(data, publisher_name)
