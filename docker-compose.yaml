@@ -3,6 +3,7 @@ services:
     profiles:
       - dev
     build:
+      context: .
       dockerfile: docker/dispatch/Dockerfile
     container_name: "provisioning-dispatcher-dev"
     restart: "on-failure"
@@ -10,6 +11,7 @@ services:
       LOG_LEVEL: "DEBUG"
     depends_on:
       - "redis"
+      - "nats"
     ports:
       - "7777:7777"
 
@@ -26,6 +28,17 @@ services:
       - type: "volume"
         source: "redis-data"
         target: "/foo/bar"
+
+  nats:
+    image: "nats:latest"
+    environment:
+      jetstream: "enabled"
+    ports:
+      - "4222:4222" # Client connections
+      - "6222:6222" # Route connections
+      - "8222:8222" # HTTP monitoring port
+    command: --jetstream -m 8222
+
 
   # Environment of the pre-commit linter.
   pre-commit:

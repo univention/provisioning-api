@@ -3,7 +3,7 @@ from typing import Annotated, List, Optional, Tuple
 import core.models
 import fastapi
 from redis.asyncio import Redis
-
+import redis.asyncio as redis
 from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
 from core.models import Message
