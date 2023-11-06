@@ -18,13 +18,12 @@ def pipeline() -> AsyncMock:
     ).start()
 
 
-NAME = "subscriber_1"
-SUBSCRIBER_TOPICS = f"subscriber_topics:{NAME}"
-SUBSCRIBER = f"subscriber:{NAME}"
-
-
 @pytest.mark.anyio
 class TestSubscriptionRepository:
+    name = "subscriber_1"
+    subscriber_topics = f"subscriber_topics:{name}"
+    subscriber = f"subscriber:{name}"
+
     async def test_get_subscriber_names_return_data(self, redis: FakeRedis):
         sub_repo = SubscriptionRepository(redis)
 
@@ -51,24 +50,24 @@ class TestSubscriptionRepository:
         redis.sismember = AsyncMock(return_value=1)
         redis.hgetall = AsyncMock(
             return_value={
-                "name": NAME,
+                "name": self.name,
                 "fill_queue": True,
                 "fill_queue_status": "done",
             }
         )
         redis.smembers = AsyncMock(return_value=["foo:bar", "abc:def"])
         expected_result = {
-            "name": NAME,
+            "name": self.name,
             "realms_topics": [["foo", "bar"], ["abc", "def"]],
             "fill_queue": True,
             "fill_queue_status": "done",
         }
 
-        result = await sub_repo.get_subscriber(NAME)
+        result = await sub_repo.get_subscriber(self.name)
 
-        redis.sismember.assert_called_once_with("subscribers", NAME)
-        redis.hgetall.assert_called_once_with(SUBSCRIBER)
-        redis.smembers.assert_called_once_with(SUBSCRIBER_TOPICS)
+        redis.sismember.assert_called_once_with("subscribers", self.name)
+        redis.hgetall.assert_called_once_with(self.subscriber)
+        redis.smembers.assert_called_once_with(self.subscriber_topics)
         assert result == expected_result
 
     async def test_get_subscriber_non_existing(self, redis: FakeRedis):
@@ -79,9 +78,9 @@ class TestSubscriptionRepository:
         redis.smembers = AsyncMock()
 
         with pytest.raises(ValueError) as e:
-            await sub_repo.get_subscriber(NAME)
+            await sub_repo.get_subscriber(self.name)
 
-        redis.sismember.assert_called_once_with("subscribers", NAME)
+        redis.sismember.assert_called_once_with("subscribers", self.name)
         redis.hgetall.assert_not_called()
         redis.smembers.assert_not_called()
         assert "Subscriber not found." == str(e.value)
@@ -90,12 +89,14 @@ class TestSubscriptionRepository:
         sub_repo = SubscriptionRepository(redis)
 
         realms_topics = ["foo:bar", "abc:def"]
-        redis.smembers = AsyncMock(side_effect=([NAME], realms_topics))
+        redis.smembers = AsyncMock(side_effect=([self.name], realms_topics))
 
         result = await sub_repo.get_subscribers_by_topics()
 
-        redis.smembers.assert_has_calls([call("subscribers"), call(SUBSCRIBER_TOPICS)])
-        assert result == [("foo", "bar", NAME), ("abc", "def", NAME)]
+        redis.smembers.assert_has_calls(
+            [call("subscribers"), call(self.subscriber_topics)]
+        )
+        assert result == [("foo", "bar", self.name), ("abc", "def", self.name)]
 
     async def test_get_subscribers_by_topics_without_realms_topics(
         self, redis: FakeRedis
@@ -103,11 +104,13 @@ class TestSubscriptionRepository:
         sub_repo = SubscriptionRepository(redis)
 
         realms_topics = []
-        redis.smembers = AsyncMock(side_effect=([NAME], realms_topics))
+        redis.smembers = AsyncMock(side_effect=([self.name], realms_topics))
 
         result = await sub_repo.get_subscribers_by_topics()
 
-        redis.smembers.assert_has_calls([call("subscribers"), call(SUBSCRIBER_TOPICS)])
+        redis.smembers.assert_has_calls(
+            [call("subscribers"), call(self.subscriber_topics)]
+        )
         assert result == []
 
     async def test_add_subscriber_already_exists(self, redis: FakeRedis, pipeline):
@@ -118,10 +121,10 @@ class TestSubscriptionRepository:
 
         with pytest.raises(ValueError) as e:
             await sub_repo.add_subscriber(
-                NAME, realms_topics, True, FillQueueStatus.done
+                self.name, realms_topics, True, FillQueueStatus.done
             )
 
-        redis.sismember.assert_called_once_with("subscribers", NAME)
+        redis.sismember.assert_called_once_with("subscribers", self.name)
         pipeline.assert_not_called()
         assert "Subscriber already exists." == str(e.value)
 
@@ -133,21 +136,21 @@ class TestSubscriptionRepository:
         pipe = pipeline.return_value.__aenter__.return_value
 
         result = await sub_repo.add_subscriber(
-            NAME, realms_topics, True, FillQueueStatus.done
+            self.name, realms_topics, True, FillQueueStatus.done
         )
 
         pipeline.assert_called_once()
         pipe.sadd.assert_has_calls(
             [
-                call("subscribers", NAME),
-                call(SUBSCRIBER_TOPICS, "foo:bar"),
-                call(SUBSCRIBER_TOPICS, "abc:def"),
+                call("subscribers", self.name),
+                call(self.subscriber_topics, "foo:bar"),
+                call(self.subscriber_topics, "abc:def"),
             ]
         )
         pipe.hset.assert_called_once_with(
-            SUBSCRIBER,
+            self.subscriber,
             mapping={
-                "name": NAME,
+                "name": self.name,
                 "fill_queue": 1,
                 "fill_queue_status": FillQueueStatus.done,
             },
@@ -164,7 +167,7 @@ class TestSubscriptionRepository:
         redis.hget = AsyncMock()
 
         with pytest.raises(ValueError) as e:
-            await sub_repo.get_subscriber_queue_status(NAME)
+            await sub_repo.get_subscriber_queue_status(self.name)
 
         redis.hget.assert_not_called()
         assert "Subscriber not found." == str(e.value)
@@ -175,9 +178,9 @@ class TestSubscriptionRepository:
         redis.sismember = AsyncMock(return_value=1)
         redis.hget = AsyncMock(return_value="value")
 
-        result = await sub_repo.get_subscriber_queue_status(NAME)
+        result = await sub_repo.get_subscriber_queue_status(self.name)
 
-        redis.hget.assert_called_once_with(SUBSCRIBER, "fill_queue_status")
+        redis.hget.assert_called_once_with(self.subscriber, "fill_queue_status")
         assert result == "value"
 
     async def test_set_subscriber_queue_status_with_no_subscriber(
@@ -189,7 +192,7 @@ class TestSubscriptionRepository:
         redis.hset = AsyncMock()
 
         with pytest.raises(ValueError) as e:
-            await sub_repo.set_subscriber_queue_status(NAME, FillQueueStatus.done)
+            await sub_repo.set_subscriber_queue_status(self.name, FillQueueStatus.done)
 
         redis.hset.assert_not_called()
         assert "Subscriber not found." == str(e.value)
@@ -201,11 +204,11 @@ class TestSubscriptionRepository:
         redis.hset = AsyncMock()
 
         result = await sub_repo.set_subscriber_queue_status(
-            NAME, FillQueueStatus.pending
+            self.name, FillQueueStatus.pending
         )
 
         redis.hset.assert_called_once_with(
-            SUBSCRIBER, "fill_queue_status", FillQueueStatus.pending
+            self.subscriber, "fill_queue_status", FillQueueStatus.pending
         )
         assert result is None
 
@@ -217,7 +220,7 @@ class TestSubscriptionRepository:
         redis.sismember = AsyncMock(return_value=0)
 
         with pytest.raises(ValueError) as e:
-            await sub_repo.delete_subscriber(NAME)
+            await sub_repo.delete_subscriber(self.name)
 
         pipeline.assert_not_called()
         assert "Subscriber not found." == str(e.value)
@@ -228,9 +231,11 @@ class TestSubscriptionRepository:
         redis.sismember = AsyncMock(return_value=1)
         pipe = pipeline.return_value.__aenter__.return_value
 
-        result = await sub_repo.delete_subscriber(NAME)
+        result = await sub_repo.delete_subscriber(self.name)
 
-        pipe.delete.assert_has_calls([call(SUBSCRIBER_TOPICS), call(SUBSCRIBER)])
-        pipe.srem.assert_called_once_with("subscribers", NAME)
+        pipe.delete.assert_has_calls(
+            [call(self.subscriber_topics), call(self.subscriber)]
+        )
+        pipe.srem.assert_called_once_with("subscribers", self.name)
         pipe.execute.assert_called_once()
         assert result is None
