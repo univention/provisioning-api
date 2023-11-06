@@ -2,9 +2,11 @@ from typing import Annotated, Dict, cast, List, Optional, Tuple
 
 import core.models
 import fastapi
-import redis.asyncio as redis
+from redis.asyncio import Redis
 
 from consumer.core.persistence.redis import RedisDependency
+from consumer.port import Port
+from core.models import Message
 
 
 class Keys:
@@ -17,12 +19,11 @@ class Keys:
 class MessageRepository:
     """Store and retrieve messages from Redis."""
 
-    def __init__(self, redis: redis.Redis):
-        self._redis = redis
+    def __init__(self, redis: Redis):
+        self.redis = redis
+        self.port = Port(redis)
 
-    async def add_live_message(
-        self, subscriber_name: str, message: core.models.Message
-    ):
+    async def add_live_message(self, subscriber_name: str, message: Message):
         """Enqueue the given message for a particular subscriber.
 
         The message is received "live" and placed at the end of the queue
@@ -32,9 +33,7 @@ class MessageRepository:
         :param core.models.Message message: The message from the publisher.
         """
 
-        key = Keys.queue(subscriber_name)
-        flat_message = message.flatten()
-        await self._redis.xadd(key, flat_message, "*")
+        await self.port.add_live_message(subscriber_name, message)
 
     async def add_prefill_message(
         self, subscriber_name: str, message: core.models.Message
@@ -50,12 +49,12 @@ class MessageRepository:
 
         key = Keys.queue(subscriber_name)
         flat_message = message.flatten()
-        await self._redis.xadd(key, flat_message, "0-*")
+        await self.redis.xadd(key, flat_message, "0-*")
 
     async def delete_prefill_messages(self, subscriber_name: str):
         """Delete all pre-fill messages from the subscriber's queue."""
         key = Keys.queue(subscriber_name)
-        await self._redis.xtrim(key, minid=1)
+        await self.redis.xtrim(key, minid=1)
 
     async def get_next_message(
         self, subscriber_name: str, block: Optional[int] = None
@@ -67,7 +66,7 @@ class MessageRepository:
         """
         key = Keys.queue(subscriber_name)
 
-        response = await self._redis.xread({key: "0-0"}, count=1, block=block)
+        response = await self.redis.xread({key: "0-0"}, count=1, block=block)
 
         if key not in response:
             # empty stream
@@ -98,7 +97,7 @@ class MessageRepository:
         """
         key = Keys.queue(subscriber_name)
 
-        response = await self._redis.xrange(key, first, last, count)
+        response = await self.redis.xrange(key, first, last, count)
 
         return [
             (message_id, core.models.Message.inflate(flat_message))
@@ -113,7 +112,7 @@ class MessageRepository:
         """
 
         key = Keys.queue(subscriber_name)
-        await self._redis.xdel(key, message_id)
+        await self.redis.xdel(key, message_id)
 
     async def delete_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.
@@ -122,7 +121,7 @@ class MessageRepository:
         """
 
         key = Keys.queue(subscriber_name)
-        await self._redis.xtrim(key, maxlen=0)
+        await self.redis.xtrim(key, maxlen=0)
 
 
 def get_message_repository(redis: RedisDependency) -> MessageRepository:
