@@ -34,7 +34,7 @@ class MessageService:
             body=data.body,
         )
 
-        service = SubscriptionService(SubscriptionRepository(self._repo._redis))
+        service = SubscriptionService(SubscriptionRepository(self._repo.redis))
 
         subscriber_names = await service.get_subscribers_for_topic(
             message.realm, message.topic
@@ -67,7 +67,7 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(SubscriptionRepository(self._repo._redis))
+        sub_service = SubscriptionService(SubscriptionRepository(self._repo.redis))
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == core.models.FillQueueStatus.done):
@@ -96,7 +96,7 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(SubscriptionRepository(self._repo._redis))
+        sub_service = SubscriptionService(SubscriptionRepository(self._repo.redis))
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == core.models.FillQueueStatus.done):
