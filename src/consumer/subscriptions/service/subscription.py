@@ -88,7 +88,7 @@ class SubscriptionService:
         Delete a subscriber.
         """
 
-        msg_repo = MessageRepository(self._repo._redis)
+        msg_repo = MessageRepository(self._repo.redis)
 
         await self._repo.delete_subscriber(name)
         await msg_repo.delete_queue(name)

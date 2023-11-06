@@ -1,9 +1,10 @@
 from typing import Annotated, Any, Dict, List, Optional, Tuple
 
 import fastapi
-import redis.asyncio as redis
+from redis.asyncio import Redis
 
 from consumer.core.persistence.redis import RedisDependency
+from consumer.port import Port
 
 
 class Keys:
@@ -25,27 +26,27 @@ class SubscriptionRepository:
     Store and retrieve subscription information from Redis.
     """
 
-    def __init__(self, redis: redis.Redis):
-        self._redis = redis
+    def __init__(self, redis: Redis):
+        self.redis = redis
+        self.port = Port(redis)
 
     async def get_subscriber_names(self) -> List[str]:
         """
         Return a list of names of all known subscribers.
         """
 
-        subs = await self._redis.smembers(Keys.subscribers)
-        return subs
+        return await self.port.get_subscriber_names()
 
     async def get_subscriber(self, name: str) -> Optional[Dict[str, Any]]:
         """
         Get information about a registered subscriber.
         """
 
-        if not await self._redis.sismember(Keys.subscribers, name):
+        if not await self.port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        sub = await self._redis.hgetall(Keys.subscriber(name))
-        sub_topics = await self._redis.smembers(Keys.subscriber_topics(name))
+        sub = await self.port.get_subscriber_info(name)
+        sub_topics = await self.port.get_subscriber_topics(name)
         realms_topics = [realm_topic.split(":", 1) for realm_topic in sub_topics]
 
         return dict(
@@ -65,8 +66,7 @@ class SubscriptionRepository:
         result = []
 
         for name in names:
-            key = Keys.subscriber_topics(name)
-            realms_topics = await self._redis.smembers(key)
+            realms_topics = await self.port.get_subscriber_topics(name)
             for realm_topic in realms_topics:
                 realm, topic = realm_topic.split(":", 1)
                 result.append((realm, topic, name))
@@ -84,60 +84,42 @@ class SubscriptionRepository:
         Add a new subscriber.
         """
 
-        if await self._redis.sismember(Keys.subscribers, name):
+        if await self.port.get_subscriber_by_name(name):
             raise ValueError("Subscriber already exists.")
 
-        async with self._redis.pipeline(transaction=True) as pipe:
-            pipe.sadd(Keys.subscribers, name)
-            pipe.hset(
-                Keys.subscriber(name),
-                mapping={
-                    "name": name,
-                    "fill_queue": int(fill_queue),
-                    "fill_queue_status": fill_queue_status,
-                },
-            )
-
-            for realm, topic in realms_topics:
-                pipe.sadd(Keys.subscriber_topics(name), f"{realm}:{topic}")
-
-            await pipe.execute()
+        await self.port.add_subscriber(
+            name, realms_topics, fill_queue, fill_queue_status
+        )
 
     async def get_subscriber_queue_status(self, name: str) -> str:
         """
         Get the pre-fill status of the subscriber.
         """
 
-        if not await self._redis.sismember(Keys.subscribers, name):
+        if not await self.port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        key = Keys.subscriber(name)
-        return await self._redis.hget(key, "fill_queue_status")
+        return await self.port.get_subscriber_queue_status(name)
 
     async def set_subscriber_queue_status(self, name: str, status: str):
         """
         Set the pre-fill status of the subscriber.
         """
 
-        if not await self._redis.sismember(Keys.subscribers, name):
+        if not await self.port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        key = Keys.subscriber(name)
-        await self._redis.hset(key, "fill_queue_status", status)
+        await self.port.set_subscriber_queue_status(name, status)
 
     async def delete_subscriber(self, name: str):
         """
         Delete a subscriber and all of its data.
         """
 
-        if not await self._redis.sismember(Keys.subscribers, name):
+        if not await self.port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        async with self._redis.pipeline(transaction=True) as pipe:
-            pipe.delete(Keys.subscriber_topics(name))
-            pipe.delete(Keys.subscriber(name))
-            pipe.srem(Keys.subscribers, name)
-            await pipe.execute()
+        await self.port.delete_subscriber(name)
 
 
 def get_subscription_repository(redis: RedisDependency) -> SubscriptionRepository:
