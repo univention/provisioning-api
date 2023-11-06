@@ -34,7 +34,7 @@ class MessageService:
             body=data.body,
         )
 
-        service = SubscriptionService(SubscriptionRepository(self._repo._redis))
+        service = SubscriptionService(SubscriptionRepository(self._repo._redis), self._repo)
 
         subscriber_names = await service.get_subscribers_for_topic(
             message.realm, message.topic
