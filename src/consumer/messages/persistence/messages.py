@@ -66,6 +66,16 @@ class MessageRepository:
 
         return response[0]
 
+        response =  await self.port.read_stream(subscriber_name, block)
+        if key not in response:
+            # empty stream
+            return None
+
+        entries = response[key][0]
+        if entries:
+            message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
+            message = Message.inflate(flat_message)
+            return (message_id, message)
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:

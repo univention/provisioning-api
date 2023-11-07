@@ -6,6 +6,7 @@ from fakeredis.aioredis import FakeRedis
 from nats.aio.msg import Msg
 
 from consumer.messages.persistence import MessageRepository
+from consumer.port import Port
 from core.models import Message
 
 
