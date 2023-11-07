@@ -34,21 +34,22 @@ class NatsAdapter:
         await self.js.publish(subscriber_name, json.dumps(flat_message).encode())
         logger.info("Message was published")
 
-    async def get_messages(self, subscriber_name: str, count: int = 1):
+    async def get_messages(self, subscriber_name: str, timeout: float, count: int):
         """Retrieve multiple messages from a NATS subject."""
 
         sub = await self.js.pull_subscribe(
             subscriber_name, stream=NatsKeys.stream(subscriber_name)
         )
-        msgs = await sub.fetch(count)
+        msgs = await sub.fetch(count, timeout)
+
         return [Message.inflate(json.loads(ms.data.decode("utf-8"))) for ms in msgs]
 
         # TODO: add error handling
 
-    async def delete_message(self, subject: str, msg_seq: str):
+    async def delete_message(self, subscriber_name: str, msg_seq_num: str):
         """Delete a message from a NATS JetStream."""
-        # TODO: check whether it works
-        await self.nats.jetstream().delete_msg(subject, int(msg_seq))
+        # TODO: find a way to get msg_seq_num from message
+        await self.nats.jetstream().delete_msg(subscriber_name, int(msg_seq_num))
 
     async def delete_queue(self, subject: str):
         """Delete the entire stream for a given subject in NATS JetStream."""

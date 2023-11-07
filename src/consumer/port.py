@@ -23,17 +23,17 @@ class Port:
         await self.redis_adapter.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
-        self, subscriber_name: str, block: Optional[int] = None
+        self, subscriber_name: str, timeout: float
     ) -> Optional[Tuple[str, Message]]:
-        return await self.redis_adapter.get_next_message(subscriber_name, block)
+        return await self.nats_adapter.get_messages(subscriber_name, timeout, count=1)
 
     async def get_messages(
-        self, subscriber_name: str, count: int = 1
+        self, subscriber_name: str, timeout: float, count: int
     ) -> List[Tuple[str, Message]]:
-        return await self.nats_adapter.get_messages(subscriber_name, count)
+        return await self.nats_adapter.get_messages(subscriber_name, timeout, count)
 
-    async def delete_message(self, subscriber_name: str, message_id: str):
-        await self.redis_adapter.delete_message(subscriber_name, message_id)
+    async def delete_message(self, subscriber_name: str, msg_seq_num: str):
+        await self.nats_adapter.delete_message(subscriber_name, msg_seq_num)
 
     async def delete_queue(self, subscriber_name: str):
         await self.redis_adapter.delete_queue(subscriber_name)

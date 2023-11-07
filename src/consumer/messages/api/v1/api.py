@@ -35,13 +35,13 @@ async def create_new_message(
 
 
 @router.post(
-    "/subscription/{name}/message/{message_id}",
+    "/subscription/{name}/message/{msg_seq_num}",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
 async def post_message_status(
     name: str,
-    message_id: str,
+    msg_seq_num: str,
     repo: DependsMessageRepo,
     report: core.models.MessageProcessingStatusReport,
 ):
@@ -56,7 +56,7 @@ async def post_message_status(
         # so disconnect them first.
         await manager.close(name)
 
-        await service.remove_message(name, message_id)
+        await service.remove_message(name, msg_seq_num)
     else:
         # message was not processed, nothing to do...
         pass
@@ -68,14 +68,14 @@ async def post_message_status(
     tags=["sink"],
 )
 async def get_subscription_messages(
-    name: str, repo: DependsMessageRepo, count: int | None = None
+    name: str, repo: DependsMessageRepo, count: int = 1, timeout: float = 5
 ):
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
 
     service = MessageService(repo)
-    messages = await service.get_messages(name, count or 1)
+    messages = await service.get_messages(name, timeout, count)
     return messages
 
 
@@ -95,11 +95,11 @@ async def subscription_websocket(
 
     try:
         while True:
-            id_message = await service.get_next_message(name, block=250)
+            id_message = await service.get_next_message(name, timeout=250)
             if not id_message:
                 continue
 
-            message_id, message = id_message
+            msg_seq_num, message = id_message
             await sink.send_message(message)
 
             reply = await websocket.receive_text()
@@ -112,7 +112,7 @@ async def subscription_websocket(
                 break
 
             if report.status == core.models.MessageProcessingStatus.ok:
-                await service.remove_message(name, message_id)
+                await service.remove_message(name, msg_seq_num)
             else:
                 logger.error(
                     f"{name} > WebSocket client reported status: {report.status}"

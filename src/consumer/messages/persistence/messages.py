@@ -51,7 +51,7 @@ class MessageRepository:
         await self.port.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
-        self, subscriber_name: str, block: Optional[int] = None
+        self, subscriber_name: str, timeout: float
     ) -> Optional[Tuple[str, core.models.Message]]:
         """Retrieve the first message from the subscriber's stream.
 
@@ -60,7 +60,7 @@ class MessageRepository:
         """
         key = RedisKeys.queue(subscriber_name)
 
-        response = await self.port.get_next_message(subscriber_name, block)
+        response = await self.port.get_next_message(subscriber_name, timeout)
         if key not in response:
             # empty stream
             return None
@@ -74,7 +74,8 @@ class MessageRepository:
     async def get_messages(
         self,
         subscriber_name: str,
-        count: Optional[int] = None,
+        timeout: float,
+        count: int,
     ) -> List[Tuple[str, core.models.Message]]:
         """Return messages from a given queue.
 
@@ -86,15 +87,15 @@ class MessageRepository:
         :param str first: Id of the first message to return.
         :param str last: Id of the last message to return.
         """
-        return await self.port.get_messages(subscriber_name, count)
+        return await self.port.get_messages(subscriber_name, timeout, count)
 
-    async def delete_message(self, subscriber_name: str, message_id: str):
+    async def delete_message(self, subscriber_name: str, msg_seq_num: str):
         """Remove a message from the subscriber's queue.
 
         :param str subscriber_id: Id of the subscriber.
         :param str message_id: Id of the message to delete.
         """
-        await self.port.delete_message(subscriber_name, message_id)
+        await self.port.delete_message(subscriber_name, msg_seq_num)
 
     async def delete_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.
