@@ -29,7 +29,7 @@ class RedisAdapter:
         flat_message = message.flatten()
         await self.redis.xadd(key, flat_message, "*")
 
-    async def get_subscriber_names(self) -> List[str]:
+    async def get_subscriber_names(self):
         return await self.redis.smembers(RedisKeys.subscribers)
 
     async def get_subscriber_by_name(self, name: str):

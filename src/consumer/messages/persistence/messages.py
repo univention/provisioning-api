@@ -62,7 +62,7 @@ class MessageRepository:
         """
         key = Keys.queue(subscriber_name)
 
-        response =  await self.port.read_stream(subscriber_name, block)
+        response = await self.port.read_stream(subscriber_name, block)
         if key not in response:
             # empty stream
             return None
@@ -72,6 +72,7 @@ class MessageRepository:
             message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
             message = Message.inflate(flat_message)
             return (message_id, message)
+
     async def get_messages(
         self,
         subscriber_name: str,
@@ -89,7 +90,14 @@ class MessageRepository:
         :param str first: Id of the first message to return.
         :param str last: Id of the last message to return.
         """
-        return await self.port.get_messages(subscriber_name, count, first, last)
+        response = await self.port.read_stream_by_range(
+            subscriber_name, count, first, last
+        )
+
+        return [
+            (message_id, Message.inflate(flat_message))
+            for message_id, flat_message in response
+        ]
 
     async def delete_message(self, subscriber_name: str, message_id: str):
         """Remove a message from the subscriber's queue.
