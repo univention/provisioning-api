@@ -21,7 +21,7 @@ class Keys:
         return f"subscriber_topics:{subscriber_name}"
 
 
-class SubscriptionRepository:
+class SubscriptionRepositoryRedis:
     """
     Store and retrieve subscription information from Redis.
     """
@@ -120,6 +120,17 @@ class SubscriptionRepository:
             raise ValueError("Subscriber not found.")
 
         await self.port.delete_subscriber(name)
+
+
+class SubscriptionRepository(SubscriptionRepositoryRedis):
+    def __init__(self, redis: redis.Redis | None):
+        # TODO: implement SubscriptionRepositoryPostgres
+        # TODO: choose proper implementation based on the __init__ call signature
+        if not redis:
+            raise NotImplementedError(
+                "SubscriptionRepository currently requires a Redis dependency"
+            )
+        SubscriptionRepositoryRedis.__init__(self, redis=redis)
 
 
 def get_subscription_repository(redis: RedisDependency) -> SubscriptionRepository:
