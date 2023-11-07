@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -6,6 +7,8 @@ import core.models
 from consumer.messages.persistence.messages import MessageRepository
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.subscriptions.service.subscription import SubscriptionService
+
+logger = logging.getLogger(__name__)
 
 
 class MessageService:
@@ -34,7 +37,9 @@ class MessageService:
             body=data.body,
         )
 
-        service = SubscriptionService(SubscriptionRepository(self._repo.redis))
+        service = SubscriptionService(
+            SubscriptionRepository(self._repo.redis, self._repo.nats)
+        )
 
         subscriber_names = await service.get_subscribers_for_topic(
             message.realm, message.topic
@@ -67,7 +72,9 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(SubscriptionRepository(self._repo.redis))
+        sub_service = SubscriptionService(
+            SubscriptionRepository(self._repo.redis, self._repo.nats)
+        )
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == core.models.FillQueueStatus.done):
@@ -80,8 +87,6 @@ class MessageService:
         self,
         subscriber_name: str,
         count: Optional[int] = None,
-        first: Optional[int | str] = "-",
-        last: Optional[int | str] = "+",
         force: Optional[bool] = False,
     ) -> List[Tuple[str, core.models.Message]]:
         """Return messages from a given queue.
@@ -96,11 +101,13 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(SubscriptionRepository(self._repo.redis))
+        sub_service = SubscriptionService(
+            SubscriptionRepository(self._repo.redis, self._repo.nats)
+        )
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == core.models.FillQueueStatus.done):
-            return await self._repo.get_messages(subscriber_name, count, first, last)
+            return await self._repo.get_messages(subscriber_name, count)
         else:
             return []
 

@@ -4,24 +4,22 @@ import core.models
 import fastapi
 from redis.asyncio import Redis
 
+from consumer.adapters.redis_adapter import RedisKeys
 from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
 from core.models import Message
 
-
-class Keys:
-    """A list of keys used in Redis for queueing messages."""
-
-    def queue(subscriber_name):
-        return f"queue:{subscriber_name}"
+from consumer.core.persistence.nats import NatsDependency
+from nats.aio.client import Client as NATS
 
 
 class MessageRepository:
     """Store and retrieve messages from Redis."""
 
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: Redis, nats: NATS):
         self.redis = redis
-        self.port = Port(redis)
+        self.nats = nats
+        self.port = Port(redis, nats)
 
     async def add_live_message(self, subscriber_name: str, message: Message):
         """Enqueue the given message for a particular subscriber.
@@ -60,9 +58,9 @@ class MessageRepository:
         :param str subscriber_id: Id of the subscriber.
         :param int block: How long to block in milliseconds if no message is available.
         """
-        key = Keys.queue(subscriber_name)
+        key = RedisKeys.queue(subscriber_name)
 
-        response =  await self.port.read_stream(subscriber_name, block)
+        response = await self.port.read_stream(subscriber_name, block)
         if key not in response:
             # empty stream
             return None
@@ -72,12 +70,11 @@ class MessageRepository:
             message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
             message = Message.inflate(flat_message)
             return (message_id, message)
+
     async def get_messages(
         self,
         subscriber_name: str,
         count: Optional[int] = None,
-        first: int | str = "-",
-        last: int | str = "+",
     ) -> List[Tuple[str, core.models.Message]]:
         """Return messages from a given queue.
 
@@ -89,7 +86,7 @@ class MessageRepository:
         :param str first: Id of the first message to return.
         :param str last: Id of the last message to return.
         """
-        return await self.port.get_messages(subscriber_name, count, first, last)
+        return await self.port.get_messages(subscriber_name, count)
 
     async def delete_message(self, subscriber_name: str, message_id: str):
         """Remove a message from the subscriber's queue.
@@ -108,8 +105,10 @@ class MessageRepository:
         await self.port.delete_queue(subscriber_name)
 
 
-def get_message_repository(redis: RedisDependency) -> MessageRepository:
-    return MessageRepository(redis)
+def get_message_repository(
+    nats: NatsDependency, redis: RedisDependency
+) -> MessageRepository:
+    return MessageRepository(redis, nats)
 
 
 DependsMessageRepo = Annotated[

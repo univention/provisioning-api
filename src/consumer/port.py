@@ -2,16 +2,19 @@ from typing import Optional, Tuple, List
 
 from redis.asyncio import Redis
 
+from consumer.adapters.nats_adapter import NatsAdapter
 from consumer.adapters.redis_adapter import RedisAdapter
 from core.models import Message
+from nats.aio.client import Client as NATS
 
 
 class Port:
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: Redis, nats: NATS):
         self.redis_adapter = RedisAdapter(redis)
+        self.nats_adapter = NatsAdapter(nats)
 
     async def add_live_message(self, subscriber_name: str, message: Message):
-        await self.redis_adapter.add_live_message(subscriber_name, message)
+        await self.nats_adapter.add_message(subscriber_name, message)
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
         await self.redis_adapter.add_prefill_message(subscriber_name, message)
@@ -25,15 +28,9 @@ class Port:
         return await self.redis_adapter.read_stream(subscriber_name, block)
 
     async def get_messages(
-        self,
-        subscriber_name: str,
-        count: Optional[int] = None,
-        first: int | str = "-",
-        last: int | str = "+",
+        self, subscriber_name: str, count: int = 1
     ) -> List[Tuple[str, Message]]:
-        return await self.redis_adapter.get_messages(
-            subscriber_name, count, first, last
-        )
+        return await self.nats_adapter.get_messages(subscriber_name, count)
 
     async def delete_message(self, subscriber_name: str, message_id: str):
         await self.redis_adapter.delete_message(subscriber_name, message_id)

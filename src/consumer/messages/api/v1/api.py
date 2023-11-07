@@ -1,7 +1,6 @@
 import fastapi
 import json
 import logging
-from typing import List, Tuple
 
 import core.models
 
@@ -69,18 +68,14 @@ async def post_message_status(
     tags=["sink"],
 )
 async def get_subscription_messages(
-    name: str,
-    repo: DependsMessageRepo,
-    count: int | None = None,
-    first: int | str | None = None,
-    last: int | str | None = None,
-) -> List[Tuple[str, core.models.Message]]:
+    name: str, repo: DependsMessageRepo, count: int | None = None
+):
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
 
     service = MessageService(repo)
-    messages = await service.get_messages(name, count or 1, first or "-", last or "+")
+    messages = await service.get_messages(name, count or 1)
     return messages
 
 
