@@ -3,6 +3,7 @@ from typing import Annotated, List, Optional
 import fastapi
 from redis.asyncio import Redis
 
+from consumer.adapters.redis_adapter import RedisKeys
 from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
 from core.models import Message
@@ -66,7 +67,7 @@ class MessageRepository:
 
         return response[0]
 
-        response =  await self.port.read_stream(subscriber_name, block)
+        response = await self.port.read_stream(subscriber_name, block)
         if key not in response:
             # empty stream
             return None
@@ -76,6 +77,7 @@ class MessageRepository:
             message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
             message = Message.inflate(flat_message)
             return (message_id, message)
+
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:

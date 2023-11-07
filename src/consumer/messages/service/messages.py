@@ -11,6 +11,8 @@ from core.models.queue import NatsMessage
 
 logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
+
 
 class MessageService:
     def __init__(self, repo: MessageRepository):
