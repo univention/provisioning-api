@@ -35,14 +35,14 @@ class RedisAdapter:
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis.xtrim(RedisKeys.queue(subscriber_name), minid=1)
 
-    async def read_stream(
+    async def get_next_message(
         self, subscriber_name: str, block: Optional[int] = None
     ) -> Optional[List[Tuple[str, Message]]]:
         return await self.redis.xread(
             {RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block
         )
 
-    async def read_stream_by_range(
+    async def get_messages(
         self,
         subscriber_name: str,
         count: Optional[int] = None,
