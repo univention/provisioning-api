@@ -1,10 +1,9 @@
 from datetime import datetime
-from unittest.mock import AsyncMock, patch, Mock
+from unittest.mock import AsyncMock, patch
 import pytest
 from fakeredis.aioredis import FakeRedis
 
 from consumer.messages.persistence import MessageRepository
-from consumer.port import Port
 from core.models import Message
 
 
@@ -12,9 +11,12 @@ from core.models import Message
 def redis():
     return FakeRedis()
 
+
 @pytest.fixture
 def port() -> AsyncMock:
     return patch("src.consumer.messages.persistence.messages.Port").start().return_value
+
+
 @pytest.mark.anyio
 class TestMessageRepository:
     subscriber_name = "subscriber_1"
@@ -43,9 +45,9 @@ class TestMessageRepository:
         port.add_live_message = AsyncMock()
 
         await message_repo.add_live_message(self.subscriber_name, self.message)
-        port.add_live_message.assert_called_once_with(self.subscriber_name, self.message)
-
-
+        port.add_live_message.assert_called_once_with(
+            self.subscriber_name, self.message
+        )
 
     async def test_add_prefill_message(self, port, redis: FakeRedis):
         message_repo = MessageRepository(redis)
@@ -56,7 +58,9 @@ class TestMessageRepository:
             self.subscriber_name, self.message
         )
 
-        port.add_prefill_message.assert_called_once_with(self.subscriber_name, self.message)
+        port.add_prefill_message.assert_called_once_with(
+            self.subscriber_name, self.message
+        )
         assert result is None
 
     async def test_delete_prefill_messages(self, port, redis: FakeRedis):
@@ -79,10 +83,13 @@ class TestMessageRepository:
         port.read_stream.assert_called_once_with(self.subscriber_name, None)
         assert result is None
 
-    async def test_get_next_message_return_message(self, port, redis: FakeRedis):
+    async def test_get_next_message_return_message(self, redis: FakeRedis, port):
         message_repo = MessageRepository(redis)
         message_repo.port = port
-        port.read_stream = AsyncMock(return_value=("1111", self.message))
+
+        port.read_stream = AsyncMock(
+            return_value={self.queue_name: [[("1111", self.flat_message)]]}
+        )
         expected_result = ("1111", self.message)
 
         result = await message_repo.get_next_message(self.subscriber_name)
