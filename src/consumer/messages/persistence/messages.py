@@ -1,6 +1,5 @@
-from typing import Annotated, List, Optional, Tuple, cast, Dict
+from typing import Annotated, List, Optional
 
-import core.models
 import fastapi
 from redis.asyncio import Redis
 
@@ -8,20 +7,19 @@ from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
 from core.models import Message
 
+from consumer.core.persistence.nats import NatsDependency
+from nats.aio.client import Client as NATS
 
-class Keys:
-    """A list of keys used in Redis for queueing messages."""
-
-    def queue(subscriber_name):
-        return f"queue:{subscriber_name}"
+from core.models.queue import NatsMessage
 
 
 class MessageRepository:
     """Store and retrieve messages from Redis."""
 
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: Redis, nats: NATS):
         self.redis = redis
-        self.port = Port(redis)
+        self.nats = nats
+        self.port = Port(redis, nats)
 
     async def add_live_message(self, subscriber_name: str, message: Message):
         """Enqueue the given message for a particular subscriber.
@@ -30,92 +28,79 @@ class MessageRepository:
         (i.e. with the current timestamp).
 
         :param str subscriber_name: Name of the subscriber.
-        :param core.models.Message message: The message from the publisher.
+        :param Message message: The message from the publisher.
         """
 
         await self.port.add_live_message(subscriber_name, message)
 
-    async def add_prefill_message(
-        self, subscriber_name: str, message: core.models.Message
-    ):
+    async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Enqueue the given message for a particular subscriber.
 
         The message originates from the pre-fill process and is queued
         ahead of (== earlier than) live messages.
 
         :param str subscriber_name: Name of the subscriber.
-        :param core.models.Message message: The message from the pre-fill task.
+        :param Message message: The message from the pre-fill task.
         """
         await self.port.add_prefill_message(subscriber_name, message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
-        """Delete all pre-fill messages from the subscriber's queue."""
+        """Delete all pre-fill messages from the subscriber's queue.
+
+        :param str subscriber_name: name of the subscriber.
+        """
         await self.port.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
-        self, subscriber_name: str, block: Optional[int] = None
-    ) -> Optional[Tuple[str, core.models.Message]]:
+        self, subscriber_name: str, timeout: float, pop: bool
+    ) -> Optional[NatsMessage]:
         """Retrieve the first message from the subscriber's stream.
 
-        :param str subscriber_id: Id of the subscriber.
-        :param int block: How long to block in milliseconds if no message is available.
+        :param str subscriber_name: name of the subscriber.
+        :param float timeout: Max duration of the request before it expires.
         """
-        key = Keys.queue(subscriber_name)
-
-        response = await self.port.get_next_message(subscriber_name, block)
-        if key not in response:
+        response = await self.port.get_next_message(subscriber_name, timeout, pop)
+        if not response:
             # empty stream
             return None
 
-        entries = response[key][0]
-        if entries:
-            message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
-            message = Message.inflate(flat_message)
-            return (message_id, message)
+        return response[0]
 
     async def get_messages(
-        self,
-        subscriber_name: str,
-        count: Optional[int] = None,
-        first: int | str = "-",
-        last: int | str = "+",
-    ) -> List[Tuple[str, core.models.Message]]:
+        self, subscriber_name: str, timeout: float, count: int, pop: bool
+    ) -> List[NatsMessage]:
         """Return messages from a given queue.
 
         By default, *all* messages will be returned unless further restricted by
         parameters.
 
-        :param str subscriber_id: Id of the subscriber.
+        :param str subscriber_name: name of the subscriber.
+        :param float timeout: Max duration of the request before it expires.
         :param int count: How many messages to return at most.
-        :param str first: Id of the first message to return.
-        :param str last: Id of the last message to return.
+        :param bool pop: If messages should be deleted after request.
         """
-        response = await self.port.get_messages(subscriber_name, count, first, last)
+        return await self.port.get_messages(subscriber_name, timeout, count, pop)
 
-        return [
-            (message_id, Message.inflate(flat_message))
-            for message_id, flat_message in response
-        ]
-
-    async def delete_message(self, subscriber_name: str, message_id: str):
+    async def delete_message(self, msg: NatsMessage):
         """Remove a message from the subscriber's queue.
 
-        :param str subscriber_id: Id of the subscriber.
-        :param str message_id: Id of the message to delete.
+        :param List[Msg] msgs: set of fetched messages.
         """
-        await self.port.delete_message(subscriber_name, message_id)
+        await self.port.delete_message(msg)
 
     async def delete_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.
 
-        :param str subscriber_id: Id of the subscriber.
+        :param str subscriber_name: Name of the subscriber.
         """
 
         await self.port.delete_queue(subscriber_name)
 
 
-def get_message_repository(redis: RedisDependency) -> MessageRepository:
-    return MessageRepository(redis)
+def get_message_repository(
+    nats: NatsDependency, redis: RedisDependency
+) -> MessageRepository:
+    return MessageRepository(redis, nats)
 
 
 DependsMessageRepo = Annotated[

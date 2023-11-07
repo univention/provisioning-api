@@ -12,6 +12,11 @@ def redis():
 
 
 @pytest.fixture
+def nats() -> AsyncMock:
+    return patch("src.consumer.messages.persistence.messages.NATS").start().return_value
+
+
+@pytest.fixture
 def pipeline() -> AsyncMock:
     return patch(
         "src.consumer.subscriptions.persistence.subscriptions.redis.Redis.pipeline"
@@ -28,8 +33,8 @@ def port() -> AsyncMock:
 
 
 @pytest.fixture
-def sub_repo(redis, port) -> SubscriptionRepository:
-    sub_repo = SubscriptionRepository(redis)
+def sub_repo(redis, port, nats) -> SubscriptionRepository:
+    sub_repo = SubscriptionRepository(redis, nats)
     sub_repo.port = port
     return sub_repo
 

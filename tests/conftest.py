@@ -1,5 +1,9 @@
+import json
+from unittest.mock import AsyncMock, Mock
+
 import pytest
 from fakeredis import aioredis
+from nats.aio.msg import Msg
 from redis._parsers.helpers import (
     parse_xread_resp3,
     string_keys_to_dict,
@@ -11,8 +15,17 @@ from redis._parsers.helpers import (
 )
 from redis.utils import str_if_bytes
 
+from consumer.core.persistence.nats import nats_dependency
 from consumer.main import app
 from consumer.core.persistence.redis import redis_dependency
+
+FLAT_MESSAGE = {
+    "publisher_name": "127.0.0.1",
+    "ts": "2023-11-09T11:15:52.616061",
+    "realm": "foo",
+    "topic": "bar/baz",
+    "body": '{"hello": "world"}',
+}
 
 
 async def redis_fake_dependency():
@@ -65,10 +78,30 @@ async def redis_fake_dependency():
         await connection.aclose()
 
 
+async def nats_fake_dependency():
+    server = AsyncMock()
+    js = Mock()
+    server.jetstream = Mock(return_value=js)
+    js.stream_info = AsyncMock()
+    js.publish = AsyncMock()
+    js.delete_msg = AsyncMock()
+    js.add_consumer = AsyncMock()
+    js.delete_stream = AsyncMock()
+
+    sub = AsyncMock()
+    js.pull_subscribe = AsyncMock(return_value=sub)
+    sub.fetch = AsyncMock(
+        return_value=[Msg(_client=server, data=json.dumps(FLAT_MESSAGE).encode())]
+    )
+    return server
+
+
 @pytest.fixture(scope="session", autouse=True)
 def override_dependencies():
-    # Override original redis
-    app.dependency_overrides[redis_dependency] = redis_fake_dependency
+    # Override original redis and nats
+    app.dependency_overrides.update(
+        {redis_dependency: redis_fake_dependency, nats_dependency: nats_fake_dependency}
+    )
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests
     app.dependency_overrides.clear()

@@ -2,16 +2,21 @@ from typing import List, Tuple
 
 from redis.asyncio import Redis
 
+from consumer.adapters.nats_adapter import NatsAdapter
 from consumer.adapters.redis_adapter import RedisAdapter
 from core.models import Message
+from nats.aio.client import Client as NATS
+
+from core.models.queue import NatsMessage
 
 
 class Port:
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: Redis, nats: NATS):
         self.redis_adapter = RedisAdapter(redis)
+        self.nats_adapter = NatsAdapter(nats)
 
     async def add_live_message(self, subscriber_name: str, message: Message):
-        await self.redis_adapter.add_live_message(subscriber_name, message)
+        await self.nats_adapter.add_message(subscriber_name, message)
 
     async def get_subscriber_names(self) -> List[str]:
         return await self.redis_adapter.get_subscriber_names()

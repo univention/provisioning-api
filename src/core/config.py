@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     # Redis: port
     redis_port: int = 6379
 
+    # Nats: host
+    nats_host: str = "localhost"
+    # Nats: port
+    nats_port: int = 4222
+
     # UDM REST API: base url
     udm_url: str = "http://localhost:8000/univention/udm"
     # UDM REST API: username

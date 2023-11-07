@@ -3,8 +3,11 @@ from typing import Annotated, Any, Dict, List, Optional, Tuple
 import fastapi
 from redis.asyncio import Redis
 
+from consumer.core.persistence.nats import NatsDependency
 from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
+
+from nats.aio.client import Client as NATS
 
 
 class Keys:
@@ -26,9 +29,10 @@ class SubscriptionRepository:
     Store and retrieve subscription information from Redis.
     """
 
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: Redis, nats: NATS):
         self.redis = redis
-        self.port = Port(redis)
+        self.nats = nats
+        self.port = Port(redis, nats)
 
     async def get_subscriber_names(self) -> List[str]:
         """
@@ -122,8 +126,10 @@ class SubscriptionRepository:
         await self.port.delete_subscriber(name)
 
 
-def get_subscription_repository(redis: RedisDependency) -> SubscriptionRepository:
-    return SubscriptionRepository(redis)
+def get_subscription_repository(
+    redis: RedisDependency, nats: NatsDependency
+) -> SubscriptionRepository:
+    return SubscriptionRepository(redis, nats)
 
 
 DependsSubscriptionRepo = Annotated[
