@@ -10,7 +10,7 @@ class RedisKeys:
 
     subscribers = "subscribers"
 
-    def queue(subscriber_name):
+    def queue(subscriber_name: str) -> str:
         return f"queue:{subscriber_name}"
 
     def subscriber(subscriber_name: str) -> str:
