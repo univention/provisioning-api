@@ -35,22 +35,13 @@ class RedisAdapter:
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis.xtrim(RedisKeys.queue(subscriber_name), minid=1)
 
-    async def get_next_message(
+    async def read_stream(
         self, subscriber_name: str, block: Optional[int] = None
     ) -> Optional[Tuple[str, Message]]:
-        key = RedisKeys.queue(subscriber_name)
 
-        response = await self.redis.xread({key: "0-0"}, count=1, block=block)
+        return await self.redis.xread({RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block)
 
-        if key not in response:
-            # empty stream
-            return None
 
-        entries = response[key][0]
-        if entries:
-            message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
-            message = Message.inflate(flat_message)
-            return (message_id, message)
 
     async def get_messages(
         self,
@@ -113,9 +104,7 @@ class RedisAdapter:
         return await self.redis.hget(RedisKeys.subscriber(name), "fill_queue_status")
 
     async def set_subscriber_queue_status(self, name: str, status: str):
-        return await self.redis.hset(
-            RedisKeys.subscriber(name), "fill_queue_status", status
-        )
+        await self.redis.hset(RedisKeys.subscriber(name), "fill_queue_status", status)
 
     async def delete_subscriber(self, name: str):
         async with self.redis.pipeline(transaction=True) as pipe:

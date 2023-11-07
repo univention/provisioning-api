@@ -1,9 +1,10 @@
 from datetime import datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from fakeredis.aioredis import FakeRedis
 
 from consumer.messages.persistence import MessageRepository
+from consumer.port import Port
 from core.models import Message
 
 
@@ -11,7 +12,9 @@ from core.models import Message
 def redis():
     return FakeRedis()
 
-
+@pytest.fixture
+def port() -> AsyncMock:
+    return patch("src.consumer.messages.persistence.messages.Port").start().return_value
 @pytest.mark.anyio
 class TestMessageRepository:
     subscriber_name = "subscriber_1"
@@ -34,62 +37,57 @@ class TestMessageRepository:
         "body": '{"foo": "bar", "foo1": "bar1"}',
     }
 
-    async def test_add_live_message(self, redis: FakeRedis):
+    async def test_add_live_message(self, port, redis: FakeRedis):
         message_repo = MessageRepository(redis)
+        message_repo.port = port
+        port.add_live_message = AsyncMock()
 
-        redis.xadd = AsyncMock()
+        await message_repo.add_live_message(self.subscriber_name, self.message)
+        port.add_live_message.assert_called_once_with(self.subscriber_name, self.message)
 
-        result = await message_repo.add_live_message(self.subscriber_name, self.message)
-        redis.xadd.assert_called_once_with(self.queue_name, self.flat_message, "*")
-        assert result is None
 
-    async def test_add_prefill_message(self, redis: FakeRedis):
+
+    async def test_add_prefill_message(self, port, redis: FakeRedis):
         message_repo = MessageRepository(redis)
-
-        redis.xadd = AsyncMock()
+        message_repo.port = port
+        port.add_prefill_message = AsyncMock()
 
         result = await message_repo.add_prefill_message(
             self.subscriber_name, self.message
         )
 
-        redis.xadd.assert_called_once_with(self.queue_name, self.flat_message, "0-*")
+        port.add_prefill_message.assert_called_once_with(self.subscriber_name, self.message)
         assert result is None
 
-    async def test_delete_prefill_messages(self, redis: FakeRedis):
+    async def test_delete_prefill_messages(self, port, redis: FakeRedis):
         message_repo = MessageRepository(redis)
-
-        redis.xtrim = AsyncMock()
+        message_repo.port = port
+        port.delete_prefill_messages = AsyncMock()
 
         result = await message_repo.delete_prefill_messages(self.subscriber_name)
 
-        redis.xtrim.assert_called_once_with(self.queue_name, minid=1)
+        port.delete_prefill_messages.assert_called_once_with(self.subscriber_name)
         assert result is None
 
-    async def test_get_next_message_empty_stream(self, redis: FakeRedis):
+    async def test_get_next_message_empty_stream(self, port, redis: FakeRedis):
         message_repo = MessageRepository(redis)
-
-        redis.xread = AsyncMock(return_value={})
+        message_repo.port = port
+        port.read_stream = AsyncMock()
 
         result = await message_repo.get_next_message(self.subscriber_name)
 
-        redis.xread.assert_called_once_with(
-            {self.queue_name: "0-0"}, count=1, block=None
-        )
+        port.read_stream.assert_called_once_with(self.subscriber_name, None)
         assert result is None
 
-    async def test_get_next_message_return_message(self, redis: FakeRedis):
+    async def test_get_next_message_return_message(self, port, redis: FakeRedis):
         message_repo = MessageRepository(redis)
+        message_repo.port = port
+        port.read_stream = AsyncMock(return_value=("1111", self.message))
         expected_result = ("1111", self.message)
 
-        redis.xread = AsyncMock(
-            return_value={self.queue_name: [[("1111", self.flat_message)]]}
-        )
-
         result = await message_repo.get_next_message(self.subscriber_name)
 
-        redis.xread.assert_called_once_with(
-            {self.queue_name: "0-0"}, count=1, block=None
-        )
+        port.read_stream.assert_called_once_with(self.subscriber_name, None)
         assert result == expected_result
 
     async def test_get_messages_empty_stream(self, redis: FakeRedis):
