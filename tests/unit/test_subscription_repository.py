@@ -79,9 +79,13 @@ class TestSubscriptionRepository:
 
         result = await sub_repo.get_subscriber(self.subscriber_name)
 
-        await sub_repo.port.get_subscriber_by_name(self.subscriber_name)
-        await sub_repo.port.get_subscriber_info(self.subscriber_name)
-        await sub_repo.port.get_subscriber_topics(self.subscriber_name)
+        sub_repo.port.get_subscriber_by_name.assert_called_once_with(
+            self.subscriber_name
+        )
+        sub_repo.port.get_subscriber_info.assert_called_once_with(self.subscriber_name)
+        sub_repo.port.get_subscriber_topics.assert_called_once_with(
+            self.subscriber_name
+        )
         assert result == expected_result
 
     async def test_get_subscriber_non_existing(self, sub_repo: SubscriptionRepository):
