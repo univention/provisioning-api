@@ -12,6 +12,8 @@ from core.models import Message, FillQueueStatus
 @pytest.fixture
 def redis():
     return FakeRedis()
+
+
 @pytest.fixture
 def port() -> Mock:
     return patch("src.consumer.messages.persistence.messages.Port").start().return_value
@@ -20,8 +22,6 @@ def port() -> Mock:
 @pytest.fixture
 def pipeline() -> AsyncMock:
     return patch("src.consumer.adapters.redis_adapter.Redis.pipeline").start()
-
-
 
 
 @pytest.mark.anyio
@@ -54,7 +54,9 @@ class TestRedisAdapter:
 
         redis.xadd = AsyncMock()
 
-        result = await redis_adapter.add_live_message(self.subscriber_name, self.message)
+        result = await redis_adapter.add_live_message(
+            self.subscriber_name, self.message
+        )
         redis.xadd.assert_called_once_with(self.queue_name, self.flat_message, "*")
         assert result is None
 
@@ -90,11 +92,11 @@ class TestRedisAdapter:
         redis.xread.assert_called_once_with(
             {self.queue_name: "0-0"}, count=1, block=None
         )
-        assert result is None
+        assert result == {}
 
     async def test_get_next_message_return_message(self, redis: FakeRedis):
         redis_adapter = RedisAdapter(redis)
-        expected_result = ("1111", self.message)
+        expected_result = {self.queue_name: [[("1111", self.flat_message)]]}
 
         redis.xread = AsyncMock(
             return_value={self.queue_name: [[("1111", self.flat_message)]]}

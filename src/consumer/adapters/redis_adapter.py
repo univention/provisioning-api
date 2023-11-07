@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, cast, Dict
+from typing import List, Tuple, Optional
 
 from redis.asyncio import Redis
 
@@ -38,10 +38,9 @@ class RedisAdapter:
     async def read_stream(
         self, subscriber_name: str, block: Optional[int] = None
     ) -> Optional[Tuple[str, Message]]:
-
-        return await self.redis.xread({RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block)
-
-
+        return await self.redis.xread(
+            {RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block
+        )
 
     async def get_messages(
         self,
