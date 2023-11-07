@@ -62,7 +62,7 @@ async def redis_fake_dependency():
     try:
         yield connection
     finally:
-        await connection.close()
+        await connection.aclose()
 
 
 @pytest.fixture(scope="session", autouse=True)

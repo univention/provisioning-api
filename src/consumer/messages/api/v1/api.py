@@ -126,6 +126,6 @@ async def subscription_websocket(
     except fastapi.WebSocketDisconnect:
         logger.info(f"{name} WebSocket client disconnected.")
     except Exception as exc:
-        logger.warn(f"{name} WebSocket failed: {exc}")
+        logger.warning(f"{name} WebSocket failed: {exc}")
     finally:
         await manager.close(name)
