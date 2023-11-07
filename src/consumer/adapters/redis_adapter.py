@@ -68,9 +68,7 @@ class RedisAdapter:
         return await self.redis.hget(RedisKeys.subscriber(name), "fill_queue_status")
 
     async def set_subscriber_queue_status(self, name: str, status: str):
-        return await self.redis.hset(
-            RedisKeys.subscriber(name), "fill_queue_status", status
-        )
+        await self.redis.hset(RedisKeys.subscriber(name), "fill_queue_status", status)
 
     async def delete_subscriber(self, name: str):
         async with self.redis.pipeline(transaction=True) as pipe:
