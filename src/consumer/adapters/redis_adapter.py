@@ -42,7 +42,7 @@ class RedisAdapter:
             {RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block
         )
 
-    async def get_messages(
+    async def read_stream_by_range(
         self,
         subscriber_name: str,
         count: Optional[int] = None,

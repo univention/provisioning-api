@@ -115,7 +115,7 @@ class TestRedisAdapter:
     ):
         redis.xrange = AsyncMock(return_value=[])
 
-        result = await redis_adapter.get_messages(self.subscriber_name)
+        result = await redis_adapter.read_stream_by_range(self.subscriber_name)
 
         redis.xrange.assert_called_once_with(self.queue_name, "-", "+", None)
         assert result == []
@@ -126,10 +126,10 @@ class TestRedisAdapter:
         expected_result = [("0000", self.message), ("1111", self.message)]
 
         redis.xrange = AsyncMock(
-            return_value=[("0000", self.flat_message), ("1111", self.flat_message)]
+            return_value=[("0000", self.message), ("1111", self.message)]
         )
 
-        result = await redis_adapter.get_messages(self.subscriber_name)
+        result = await redis_adapter.read_stream_by_range(self.subscriber_name)
 
         redis.xrange.assert_called_once_with(self.queue_name, "-", "+", None)
         assert result == expected_result
