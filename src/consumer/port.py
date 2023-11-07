@@ -19,19 +19,19 @@ class Port:
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis_adapter.delete_prefill_messages(subscriber_name)
 
-    async def read_stream(
+    async def get_next_message(
         self, subscriber_name: str, block: Optional[int] = None
     ) -> Optional[Tuple[str, Message]]:
-        return await self.redis_adapter.read_stream(subscriber_name, block)
+        return await self.redis_adapter.get_next_message(subscriber_name, block)
 
-    async def read_stream_by_range(
+    async def get_messages(
         self,
         subscriber_name: str,
         count: Optional[int] = None,
         first: int | str = "-",
         last: int | str = "+",
     ):
-        return await self.redis_adapter.read_stream_by_range(
+        return await self.redis_adapter.get_messages(
             subscriber_name, count, first, last
         )
 

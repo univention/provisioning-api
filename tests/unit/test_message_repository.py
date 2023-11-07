@@ -77,47 +77,49 @@ class TestMessageRepository:
         assert result is None
 
     async def test_get_next_message_empty_stream(self, message_repo: MessageRepository):
-        message_repo.port.read_stream = AsyncMock()
+        message_repo.port.get_next_message = AsyncMock()
 
         result = await message_repo.get_next_message(self.subscriber_name)
 
-        message_repo.port.read_stream.assert_called_once_with(
+        message_repo.port.get_next_message.assert_called_once_with(
             self.subscriber_name, None
         )
         assert result is None
 
-    async def test_get_next_message_return_message(self, message_repo):
-        message_repo.port.read_stream = AsyncMock(
+    async def test_get_next_message_return_message(
+        self, message_repo: MessageRepository
+    ):
+        message_repo.port.get_next_message = AsyncMock(
             return_value={self.queue_name: [[("1111", self.flat_message)]]}
         )
         expected_result = ("1111", self.message)
 
         result = await message_repo.get_next_message(self.subscriber_name)
 
-        message_repo.port.read_stream.assert_called_once_with(
+        message_repo.port.get_next_message.assert_called_once_with(
             self.subscriber_name, None
         )
         assert result == expected_result
 
-    async def test_get_messages_empty_stream(self, message_repo):
-        message_repo.port.read_stream_by_range = AsyncMock(return_value=[])
+    async def test_get_messages_empty_stream(self, message_repo: MessageRepository):
+        message_repo.port.get_messages = AsyncMock(return_value=[])
 
         result = await message_repo.get_messages(self.subscriber_name)
 
-        message_repo.port.read_stream_by_range.assert_called_once_with(
+        message_repo.port.get_messages.assert_called_once_with(
             self.subscriber_name, None, "-", "+"
         )
         assert result == []
 
-    async def test_get_messages_return_messages(self, message_repo):
-        message_repo.port.read_stream_by_range = AsyncMock(
+    async def test_get_messages_return_messages(self, message_repo: MessageRepository):
+        message_repo.port.get_messages = AsyncMock(
             return_value=[("0000", self.flat_message), ("1111", self.flat_message)]
         )
         expected_result = [("0000", self.message), ("1111", self.message)]
 
         result = await message_repo.get_messages(self.subscriber_name)
 
-        message_repo.port.read_stream_by_range.assert_called_once_with(
+        message_repo.port.get_messages.assert_called_once_with(
             self.subscriber_name,
             None,
             "-",
@@ -125,7 +127,7 @@ class TestMessageRepository:
         )
         assert result == expected_result
 
-    async def test_delete_message(self, message_repo):
+    async def test_delete_message(self, message_repo: MessageRepository):
         message_repo.port.delete_message = AsyncMock()
 
         result = await message_repo.delete_message(self.subscriber_name, "1111")
@@ -135,7 +137,7 @@ class TestMessageRepository:
         )
         assert result is None
 
-    async def test_delete_queue(self, message_repo):
+    async def test_delete_queue(self, message_repo: MessageRepository):
         message_repo.port.delete_queue = AsyncMock()
 
         result = await message_repo.delete_queue(self.subscriber_name)
