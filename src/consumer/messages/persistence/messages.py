@@ -67,7 +67,7 @@ class MessageRepository:
 
         return response[0]
 
-        response = await self.port.get_next_message(subscriber_name, block)
+        response = await self.port.get_next_message(subscriber_name, timeout)
         if key not in response:
             # empty stream
             return None
