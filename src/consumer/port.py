@@ -24,14 +24,14 @@ class Port:
     ) -> Optional[Tuple[str, Message]]:
         return await self.redis_adapter.read_stream(subscriber_name, block)
 
-    async def get_messages(
+    async def read_stream_by_range(
         self,
         subscriber_name: str,
         count: Optional[int] = None,
         first: int | str = "-",
         last: int | str = "+",
-    ) -> List[Tuple[str, Message]]:
-        return await self.redis_adapter.get_messages(
+    ):
+        return await self.redis_adapter.read_stream_by_range(
             subscriber_name, count, first, last
         )
 

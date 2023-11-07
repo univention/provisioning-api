@@ -42,21 +42,16 @@ class RedisAdapter:
             {RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block
         )
 
-    async def get_messages(
+    async def read_stream_by_range(
         self,
         subscriber_name: str,
         count: Optional[int] = None,
         first: int | str = "-",
         last: int | str = "+",
-    ) -> List[Tuple[str, Message]]:
-        response = await self.redis.xrange(
+    ):
+        return await self.redis.xrange(
             RedisKeys.queue(subscriber_name), first, last, count
         )
-
-        return [
-            (message_id, Message.inflate(flat_message))
-            for message_id, flat_message in response
-        ]
 
     async def delete_message(self, subscriber_name: str, message_id: str):
         await self.redis.xdel(RedisKeys.queue(subscriber_name), message_id)
@@ -64,7 +59,7 @@ class RedisAdapter:
     async def delete_queue(self, subscriber_name: str):
         await self.redis.xtrim(RedisKeys.queue(subscriber_name), maxlen=0)
 
-    async def get_subscriber_names(self) -> List[str]:
+    async def get_subscriber_names(self):
         return await self.redis.smembers(RedisKeys.subscribers)
 
     async def get_subscriber_by_name(self, name: str):
