@@ -84,8 +84,8 @@ class RedisAdapter:
         fill_queue_status: str,
     ):
         async with self.redis.pipeline(transaction=True) as pipe:
-            pipe.sadd(RedisKeys.subscribers, name)
-            pipe.hset(
+            await pipe.sadd(RedisKeys.subscribers, name)
+            await pipe.hset(
                 RedisKeys.subscriber(name),
                 mapping={
                     "name": name,
@@ -95,7 +95,7 @@ class RedisAdapter:
             )
 
             for realm, topic in realms_topics:
-                pipe.sadd(RedisKeys.subscriber_topics(name), f"{realm}:{topic}")
+                await pipe.sadd(RedisKeys.subscriber_topics(name), f"{realm}:{topic}")
 
             await pipe.execute()
 
@@ -107,7 +107,7 @@ class RedisAdapter:
 
     async def delete_subscriber(self, name: str):
         async with self.redis.pipeline(transaction=True) as pipe:
-            pipe.delete(RedisKeys.subscriber_topics(name))
-            pipe.delete(RedisKeys.subscriber(name))
-            pipe.srem(RedisKeys.subscribers, name)
+            await pipe.delete(RedisKeys.subscriber_topics(name))
+            await pipe.delete(RedisKeys.subscriber(name))
+            await pipe.srem(RedisKeys.subscribers, name)
             await pipe.execute()

@@ -77,9 +77,9 @@ class TestSubscriptionRepository:
 
         result = await sub_repo.get_subscriber(self.subscriber_name)
 
-        port.get_subscriber_by_name(self.subscriber_name)
-        port.get_subscriber_info(self.subscriber_name)
-        port.get_subscriber_topics(self.subscriber_name)
+        await port.get_subscriber_by_name(self.subscriber_name)
+        await port.get_subscriber_info(self.subscriber_name)
+        await port.get_subscriber_topics(self.subscriber_name)
         assert result == expected_result
 
     async def test_get_subscriber_non_existing(self, redis: FakeRedis, port):
@@ -196,7 +196,9 @@ class TestSubscriptionRepository:
         result = await sub_repo.get_subscriber_queue_status(self.subscriber_name)
 
         port.get_subscriber_by_name.assert_called_once_with(self.subscriber_name)
-        port.get_subscriber_queue_status(self.subscriber_name, "fill_queue_status")
+        await port.get_subscriber_queue_status(
+            self.subscriber_name, "fill_queue_status"
+        )
         assert result == "value"
 
     async def test_set_subscriber_queue_status_with_no_subscriber(
