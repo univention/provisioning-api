@@ -10,7 +10,7 @@ class RedisKeys:
 
     subscribers = "subscribers"
 
-    def queue(subscriber_name):
+    def queue(subscriber_name: str) -> str:
         return f"queue:{subscriber_name}"
 
     def subscriber(subscriber_name: str) -> str:
@@ -35,12 +35,16 @@ class RedisAdapter:
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis.xtrim(RedisKeys.queue(subscriber_name), minid=1)
 
-    async def read_stream(
+    async def get_next_message(
         self, subscriber_name: str, block: Optional[int] = None
-    ) -> Optional[Tuple[str, Message]]:
-        return await self.redis.xread(
+    ) -> Optional[List[Tuple[str, Message]]]:
+        response = await self.redis.xread(
             {RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block
         )
+        return [
+            (message_id, Message.inflate(flat_message))
+            for message_id, flat_message in response
+        ]
 
     async def get_messages(
         self,
@@ -48,15 +52,10 @@ class RedisAdapter:
         count: Optional[int] = None,
         first: int | str = "-",
         last: int | str = "+",
-    ) -> List[Tuple[str, Message]]:
-        response = await self.redis.xrange(
+    ):
+        return await self.redis.xrange(
             RedisKeys.queue(subscriber_name), first, last, count
         )
-
-        return [
-            (message_id, Message.inflate(flat_message))
-            for message_id, flat_message in response
-        ]
 
     async def delete_message(self, subscriber_name: str, message_id: str):
         await self.redis.xdel(RedisKeys.queue(subscriber_name), message_id)
@@ -64,7 +63,7 @@ class RedisAdapter:
     async def delete_queue(self, subscriber_name: str):
         await self.redis.xtrim(RedisKeys.queue(subscriber_name), maxlen=0)
 
-    async def get_subscriber_names(self) -> List[str]:
+    async def get_subscriber_names(self):
         return await self.redis.smembers(RedisKeys.subscribers)
 
     async def get_subscriber_by_name(self, name: str):

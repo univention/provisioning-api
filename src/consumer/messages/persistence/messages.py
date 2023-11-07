@@ -60,7 +60,7 @@ class MessageRepository:
         """
         key = RedisKeys.queue(subscriber_name)
 
-        response = await self.port.read_stream(subscriber_name, block)
+        response = await self.port.get_next_message(subscriber_name, block)
         if key not in response:
             # empty stream
             return None
