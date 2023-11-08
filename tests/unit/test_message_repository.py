@@ -45,13 +45,6 @@ class TestMessageRepository:
             "foo1": "bar1",
         },
     )
-    flat_message = {
-        "publisher_name": "live_message",
-        "ts": "2023-11-03T12:34:56.789012",
-        "realm": "udm",
-        "topic": "topic_name",
-        "body": '{"foo": "bar", "foo1": "bar1"}',
-    }
 
     async def test_add_live_message(self, message_repo: MessageRepository):
         message_repo.port.add_live_message = AsyncMock()

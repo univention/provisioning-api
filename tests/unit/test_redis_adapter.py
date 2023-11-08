@@ -126,7 +126,7 @@ class TestRedisAdapter:
         expected_result = [("0000", self.message), ("1111", self.message)]
 
         redis.xrange = AsyncMock(
-            return_value=[("0000", self.message), ("1111", self.message)]
+            return_value=[("0000", self.flat_message), ("1111", self.flat_message)]
         )
 
         result = await redis_adapter.get_messages(self.subscriber_name)
