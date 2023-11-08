@@ -1,4 +1,4 @@
-from unittest.mock import call, patch, Mock
+from unittest.mock import call, patch
 
 from datetime import datetime
 from unittest.mock import AsyncMock
@@ -17,11 +17,6 @@ def redis():
 @pytest.fixture
 def redis_adapter(redis: FakeRedis) -> RedisAdapter:
     return RedisAdapter(redis)
-
-
-@pytest.fixture
-def port() -> Mock:
-    return patch("src.consumer.messages.persistence.messages.Port").start().return_value
 
 
 @pytest.fixture
@@ -131,7 +126,7 @@ class TestRedisAdapter:
         expected_result = [("0000", self.message), ("1111", self.message)]
 
         redis.xrange = AsyncMock(
-            return_value=[("0000", self.message), ("1111", self.message)]
+            return_value=[("0000", self.flat_message), ("1111", self.flat_message)]
         )
 
         result = await redis_adapter.get_messages(self.subscriber_name)

@@ -18,8 +18,13 @@ def port() -> AsyncMock:
 
 
 @pytest.fixture
-def message_repo(redis, port) -> MessageRepository:
-    message_repo = MessageRepository(redis)
+def nats() -> AsyncMock:
+    return patch("src.consumer.messages.persistence.messages.NATS").start().return_value
+
+
+@pytest.fixture
+def message_repo(redis, port, nats) -> MessageRepository:
+    message_repo = MessageRepository(redis, nats)
     message_repo.port = port
     return message_repo
 
@@ -38,13 +43,6 @@ class TestMessageRepository:
             "foo1": "bar1",
         },
     )
-    flat_message = {
-        "publisher_name": "live_message",
-        "ts": "2023-11-03T12:34:56.789012",
-        "realm": "udm",
-        "topic": "topic_name",
-        "body": '{"foo": "bar", "foo1": "bar1"}',
-    }
 
     async def test_add_live_message(self, message_repo: MessageRepository):
         message_repo.port.add_live_message = AsyncMock()
@@ -77,53 +75,48 @@ class TestMessageRepository:
         assert result is None
 
     async def test_get_next_message_empty_stream(self, message_repo: MessageRepository):
-        message_repo.port.get_next_message = AsyncMock()
+        message_repo.port.get_next_message = AsyncMock(return_value=[])
 
-        result = await message_repo.get_next_message(self.subscriber_name)
+        result = await message_repo.get_next_message(self.subscriber_name, 5)
 
         message_repo.port.get_next_message.assert_called_once_with(
-            self.subscriber_name, None
+            self.subscriber_name, 5
         )
         assert result is None
 
     async def test_get_next_message_return_message(
         self, message_repo: MessageRepository
     ):
-        message_repo.port.get_next_message = AsyncMock(
-            return_value={self.queue_name: [[("1111", self.flat_message)]]}
-        )
-        expected_result = ("1111", self.message)
+        message_repo.port.get_next_message = AsyncMock(return_value=[self.message])
+        expected_result = self.message
 
-        result = await message_repo.get_next_message(self.subscriber_name)
+        result = await message_repo.get_next_message(self.subscriber_name, 5)
 
         message_repo.port.get_next_message.assert_called_once_with(
-            self.subscriber_name, None
+            self.subscriber_name, 5
         )
         assert result == expected_result
 
     async def test_get_messages_empty_stream(self, message_repo: MessageRepository):
         message_repo.port.get_messages = AsyncMock(return_value=[])
 
-        result = await message_repo.get_messages(self.subscriber_name)
+        result = await message_repo.get_messages(self.subscriber_name, 5, 2)
 
         message_repo.port.get_messages.assert_called_once_with(
-            self.subscriber_name, None, "-", "+"
+            self.subscriber_name, 5, 2
         )
         assert result == []
 
     async def test_get_messages_return_messages(self, message_repo: MessageRepository):
         message_repo.port.get_messages = AsyncMock(
-            return_value=[("0000", self.flat_message), ("1111", self.flat_message)]
+            return_value=[self.message, self.message]
         )
-        expected_result = [("0000", self.message), ("1111", self.message)]
+        expected_result = [self.message, self.message]
 
-        result = await message_repo.get_messages(self.subscriber_name)
+        result = await message_repo.get_messages(self.subscriber_name, 5, 2)
 
         message_repo.port.get_messages.assert_called_once_with(
-            self.subscriber_name,
-            None,
-            "-",
-            "+",
+            self.subscriber_name, 5, 2
         )
         assert result == expected_result
 

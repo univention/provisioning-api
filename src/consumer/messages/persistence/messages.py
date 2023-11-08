@@ -1,10 +1,8 @@
-from typing import Annotated, List, Optional, Tuple, cast, Dict
+from typing import Annotated, List, Optional, Tuple
 
-import core.models
 import fastapi
 from redis.asyncio import Redis
 
-from consumer.adapters.redis_adapter import RedisKeys
 from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
 from core.models import Message
@@ -28,21 +26,19 @@ class MessageRepository:
         (i.e. with the current timestamp).
 
         :param str subscriber_name: Name of the subscriber.
-        :param core.models.Message message: The message from the publisher.
+        :param Message message: The message from the publisher.
         """
 
         await self.port.add_live_message(subscriber_name, message)
 
-    async def add_prefill_message(
-        self, subscriber_name: str, message: core.models.Message
-    ):
+    async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Enqueue the given message for a particular subscriber.
 
         The message originates from the pre-fill process and is queued
         ahead of (== earlier than) live messages.
 
         :param str subscriber_name: Name of the subscriber.
-        :param core.models.Message message: The message from the pre-fill task.
+        :param Message message: The message from the pre-fill task.
         """
         await self.port.add_prefill_message(subscriber_name, message)
 
@@ -52,31 +48,25 @@ class MessageRepository:
 
     async def get_next_message(
         self, subscriber_name: str, timeout: float
-    ) -> Optional[Tuple[str, core.models.Message]]:
+    ) -> Optional[Message]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_id: Id of the subscriber.
         :param int block: How long to block in milliseconds if no message is available.
         """
-        key = RedisKeys.queue(subscriber_name)
-
         response = await self.port.get_next_message(subscriber_name, timeout)
-        if key not in response:
+        if not response:
             # empty stream
             return None
 
-        entries = response[key][0]
-        if entries:
-            message_id, flat_message = cast(Tuple[str, Dict[str, str]], entries[0])
-            message = Message.inflate(flat_message)
-            return (message_id, message)
+        return response[0]
 
     async def get_messages(
         self,
         subscriber_name: str,
         timeout: float,
         count: int,
-    ) -> List[Tuple[str, core.models.Message]]:
+    ) -> List[Tuple[str, Message]]:
         """Return messages from a given queue.
 
         By default, *all* messages will be returned unless further restricted by

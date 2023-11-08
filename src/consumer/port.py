@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import Tuple, List
 
 from redis.asyncio import Redis
 
@@ -24,7 +24,7 @@ class Port:
 
     async def get_next_message(
         self, subscriber_name: str, timeout: float
-    ) -> Optional[Tuple[str, Message]]:
+    ) -> List[Message]:
         return await self.nats_adapter.get_messages(subscriber_name, timeout, count=1)
 
     async def get_messages(

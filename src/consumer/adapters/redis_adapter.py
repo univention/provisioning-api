@@ -38,13 +38,9 @@ class RedisAdapter:
     async def get_next_message(
         self, subscriber_name: str, block: Optional[int] = None
     ) -> Optional[List[Tuple[str, Message]]]:
-        response = await self.redis.xread(
+        return await self.redis.xread(
             {RedisKeys.queue(subscriber_name): "0-0"}, count=1, block=block
         )
-        return [
-            (message_id, Message.inflate(flat_message))
-            for message_id, flat_message in response
-        ]
 
     async def get_messages(
         self,
@@ -53,9 +49,13 @@ class RedisAdapter:
         first: int | str = "-",
         last: int | str = "+",
     ):
-        return await self.redis.xrange(
+        response = await self.redis.xrange(
             RedisKeys.queue(subscriber_name), first, last, count
         )
+        return [
+            (message_id, Message.inflate(flat_message))
+            for message_id, flat_message in response
+        ]
 
     async def delete_message(self, subscriber_name: str, message_id: str):
         await self.redis.xdel(RedisKeys.queue(subscriber_name), message_id)
