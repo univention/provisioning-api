@@ -30,7 +30,7 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
         msg_repo = MessageRepository(redis, nats)
         msg_service = MessageService(msg_repo)
         sub_repo = SubscriptionRepository(redis)
-        sub_service = SubscriptionService(sub_repo)
+        sub_service = SubscriptionService(sub_repo, msg_repo)
 
         await sub_service.set_subscriber_queue_status(
             subscriber_name, core.models.FillQueueStatus.running

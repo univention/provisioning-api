@@ -1,4 +1,3 @@
-import pytest
 from fakeredis import aioredis
 from redis._parsers.helpers import (
     parse_xread_resp3,
@@ -10,9 +9,6 @@ from redis._parsers.helpers import (
     parse_sentinel_slaves_and_sentinels_resp3,
 )
 from redis.utils import str_if_bytes
-
-from consumer.main import app
-from consumer.core.persistence.redis import redis_dependency
 
 
 async def redis_fake_dependency():
@@ -65,10 +61,10 @@ async def redis_fake_dependency():
         await connection.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
-def override_dependencies():
-    # Override original redis
-    app.dependency_overrides[redis_dependency] = redis_fake_dependency
-    yield  # This will ensure the setup is done before tests and cleanup after
-    # Clear the overrides after the tests
-    app.dependency_overrides.clear()
+# @pytest.fixture(scope="session", autouse=True)
+# def override_dependencies():
+# Override original redis
+# app.dependency_overrides[redis_dependency] = redis_fake_dependency
+# yield  # This will ensure the setup is done before tests and cleanup after
+# Clear the overrides after the tests
+# app.dependency_overrides.clear()

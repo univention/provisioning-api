@@ -22,8 +22,9 @@ def match_subscription(
 
 
 class SubscriptionService:
-    def __init__(self, repo: SubscriptionRepository):
+    def __init__(self, repo: SubscriptionRepository, msg_repo: MessageRepository):
         self._repo = repo
+        self._msg_repo = msg_repo
 
     async def get_subscribers(self) -> List[core.models.Subscriber]:
         """
@@ -87,8 +88,5 @@ class SubscriptionService:
         """
         Delete a subscriber.
         """
-
-        msg_repo = MessageRepository(self._repo.redis)
-
         await self._repo.delete_subscriber(name)
-        await msg_repo.delete_queue(name)
+        await self._msg_repo.delete_queue(name)
