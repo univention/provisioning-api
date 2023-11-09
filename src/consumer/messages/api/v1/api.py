@@ -68,14 +68,18 @@ async def post_message_status(
     tags=["sink"],
 )
 async def get_subscription_messages(
-    name: str, repo: DependsMessageRepo, count: int = 1, timeout: float = 5
+    name: str,
+    repo: DependsMessageRepo,
+    count: int = 1,
+    timeout: float = 5,
+    pop: bool = False,
 ):
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
 
     service = MessageService(repo)
-    messages = await service.get_messages(name, timeout, count)
+    messages = await service.get_messages(name, timeout, count, pop)
     return messages
 
 

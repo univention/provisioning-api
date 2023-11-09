@@ -2,6 +2,8 @@ import logging
 from datetime import datetime
 from typing import List, Optional, Tuple
 
+from nats.aio.msg import Msg
+
 import core.models
 
 from consumer.messages.persistence.messages import MessageRepository
@@ -88,6 +90,7 @@ class MessageService:
         subscriber_name: str,
         timeout: float,
         count: int,
+        pop: bool,
         force: Optional[bool] = False,
     ) -> List[Tuple[str, core.models.Message]]:
         """Return messages from a given queue.
@@ -108,18 +111,18 @@ class MessageService:
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == core.models.FillQueueStatus.done):
-            return await self._repo.get_messages(subscriber_name, timeout, count)
+            return await self._repo.get_messages(subscriber_name, timeout, count, pop)
         else:
             return []
 
-    async def remove_message(self, subscriber_name: str, msg_seq_num: str):
+    async def remove_message(self, msgs: List[Msg]):
         """Remove a message from the subscriber's queue.
 
         :param str subscriber_id: Id of the subscriber.
         :param str message_id: Id of the message to delete.
         """
 
-        await self._repo.delete_message(subscriber_name, msg_seq_num)
+        await self._repo.delete_message(msgs)
 
     async def remove_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.

@@ -1,5 +1,6 @@
 from typing import Tuple, List
 
+from nats.aio.msg import Msg
 from redis.asyncio import Redis
 
 from consumer.adapters.nats_adapter import NatsAdapter
@@ -28,12 +29,14 @@ class Port:
         return await self.nats_adapter.get_messages(subscriber_name, timeout, count=1)
 
     async def get_messages(
-        self, subscriber_name: str, timeout: float, count: int
+        self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[Tuple[str, Message]]:
-        return await self.nats_adapter.get_messages(subscriber_name, timeout, count)
+        return await self.nats_adapter.get_messages(
+            subscriber_name, timeout, count, pop
+        )
 
-    async def delete_message(self, subscriber_name: str, msg_seq_num: str):
-        await self.nats_adapter.delete_message(subscriber_name, msg_seq_num)
+    async def delete_message(self, msgs: List[Msg]):
+        await self.nats_adapter.delete_messages(msgs)
 
     async def delete_queue(self, subscriber_name: str):
         await self.redis_adapter.delete_queue(subscriber_name)

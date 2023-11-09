@@ -1,7 +1,12 @@
+import asyncio
 import logging
 
 import json
+from typing import List
+
 from nats.aio.client import Client as NATS
+from nats.aio.msg import Msg
+from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError
 
 from core.models import Message
@@ -14,6 +19,9 @@ class NatsKeys:
 
     def stream(subscriber_name):
         return f"stream:{subscriber_name}"
+
+    def durable_name(subscriber_name):
+        return f"durable_name:{subscriber_name}"
 
 
 class NatsAdapter:
@@ -31,27 +39,39 @@ class NatsAdapter:
             logger.warning(f"Creating new stream with name: {stream_name}")
             await self.js.add_stream(name=stream_name, subjects=[subscriber_name])
 
-        await self.js.publish(subscriber_name, json.dumps(flat_message).encode())
+        await self.js.add_consumer(
+            stream_name,
+            ConsumerConfig(durable_name=NatsKeys.durable_name(subscriber_name)),
+        )
+        await self.js.publish(
+            subscriber_name, json.dumps(flat_message).encode(), stream=stream_name
+        )
         logger.info("Message was published")
 
-    async def get_messages(self, subscriber_name: str, timeout: float, count: int):
+    async def get_messages(
+        self, subscriber_name: str, timeout: float, count: int, pop: bool
+    ):
         """Retrieve multiple messages from a NATS subject."""
-
         sub = await self.js.pull_subscribe(
-            subscriber_name, stream=NatsKeys.stream(subscriber_name)
+            subscriber_name,
+            durable=f"durable_name:{subscriber_name}",
+            stream=NatsKeys.stream(subscriber_name),
         )
-        msgs = await sub.fetch(count, timeout)
+        try:
+            msgs = await sub.fetch(count, timeout)
+        except asyncio.TimeoutError:
+            return []
+
+        if pop:
+            await self.delete_messages(msgs)
 
         return [Message.inflate(json.loads(ms.data.decode("utf-8"))) for ms in msgs]
 
-        # TODO: add error handling
-
-    async def delete_message(self, subscriber_name: str, msg_seq_num: str):
+    async def delete_messages(self, msgs: List[Msg]):
         """Delete a message from a NATS JetStream."""
-        # TODO: find a way to get msg_seq_num from message
-        await self.js.delete_msg(subscriber_name, int(msg_seq_num))
+        for msg in msgs:
+            await msg.ack()
 
-    async def delete_queue(self, subject: str):
+    async def delete_stream(self, subscriber_name: str):
         """Delete the entire stream for a given subject in NATS JetStream."""
-        # TODO: check whether it works
-        await self.js.delete_stream(subject)
+        await self.js.delete_stream(NatsKeys.stream(subscriber_name))

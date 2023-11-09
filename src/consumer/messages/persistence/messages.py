@@ -1,6 +1,7 @@
 from typing import Annotated, List, Optional, Tuple
 
 import fastapi
+from nats.aio.msg import Msg
 from redis.asyncio import Redis
 
 from consumer.core.persistence.redis import RedisDependency
@@ -62,10 +63,7 @@ class MessageRepository:
         return response[0]
 
     async def get_messages(
-        self,
-        subscriber_name: str,
-        timeout: float,
-        count: int,
+        self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[Tuple[str, Message]]:
         """Return messages from a given queue.
 
@@ -77,15 +75,15 @@ class MessageRepository:
         :param str first: Id of the first message to return.
         :param str last: Id of the last message to return.
         """
-        return await self.port.get_messages(subscriber_name, timeout, count)
+        return await self.port.get_messages(subscriber_name, timeout, count, pop)
 
-    async def delete_message(self, subscriber_name: str, msg_seq_num: str):
+    async def delete_message(self, msgs: List[Msg]):
         """Remove a message from the subscriber's queue.
 
         :param str subscriber_id: Id of the subscriber.
         :param str message_id: Id of the message to delete.
         """
-        await self.port.delete_message(subscriber_name, msg_seq_num)
+        await self.port.delete_message(msgs)
 
     async def delete_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.

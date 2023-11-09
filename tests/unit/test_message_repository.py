@@ -121,19 +121,19 @@ class TestMessageRepository:
         assert result == expected_result
 
     async def test_delete_message(self, message_repo: MessageRepository):
-        message_repo.port.delete_message = AsyncMock()
+        message_repo.port.delete_messages = AsyncMock()
 
         result = await message_repo.delete_message(self.subscriber_name, "1111")
 
-        message_repo.port.delete_message.assert_called_once_with(
+        message_repo.port.delete_messages.assert_called_once_with(
             self.subscriber_name, "1111"
         )
         assert result is None
 
     async def test_delete_queue(self, message_repo: MessageRepository):
-        message_repo.port.delete_queue = AsyncMock()
+        message_repo.port.delete_stream = AsyncMock()
 
         result = await message_repo.delete_queue(self.subscriber_name)
 
-        message_repo.port.delete_queue.assert_called_once_with(self.subscriber_name)
+        message_repo.port.delete_stream.assert_called_once_with(self.subscriber_name)
         assert result is None
