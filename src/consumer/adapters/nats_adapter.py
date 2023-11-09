@@ -49,7 +49,7 @@ class NatsAdapter:
     async def delete_message(self, subscriber_name: str, msg_seq_num: str):
         """Delete a message from a NATS JetStream."""
         # TODO: find a way to get msg_seq_num from message
-        await self.nats.jetstream().delete_msg(subscriber_name, int(msg_seq_num))
+        await self.js.delete_msg(subscriber_name, int(msg_seq_num))
 
     async def delete_queue(self, subject: str):
         """Delete the entire stream for a given subject in NATS JetStream."""

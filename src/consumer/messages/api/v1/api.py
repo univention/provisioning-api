@@ -99,7 +99,7 @@ async def subscription_websocket(
             if not id_message:
                 continue
 
-            msg_seq_num, message = id_message
+            msg_seq_num, message = id_message  # FIXME: id_message is not tuple
             await sink.send_message(message)
 
             reply = await websocket.receive_text()
