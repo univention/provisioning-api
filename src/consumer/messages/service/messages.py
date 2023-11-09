@@ -2,6 +2,8 @@ import logging
 from datetime import datetime
 from typing import List, Optional
 
+from nats.aio.msg import Msg
+
 import core.models
 
 from consumer.messages.persistence.messages import MessageRepository

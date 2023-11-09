@@ -1,5 +1,6 @@
 from typing import Tuple, List
 
+from nats.aio.msg import Msg
 from redis.asyncio import Redis
 
 from consumer.adapters.nats_adapter import NatsAdapter
