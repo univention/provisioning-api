@@ -44,7 +44,10 @@ class MessageRepository:
         await self.port.add_prefill_message(subscriber_name, message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
-        """Delete all pre-fill messages from the subscriber's queue."""
+        """Delete all pre-fill messages from the subscriber's queue.
+
+        :param str subscriber_name: name of the subscriber.
+        """
         await self.port.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
@@ -52,8 +55,8 @@ class MessageRepository:
     ) -> Optional[Message]:
         """Retrieve the first message from the subscriber's stream.
 
-        :param str subscriber_id: Id of the subscriber.
-        :param int block: How long to block in milliseconds if no message is available.
+        :param str subscriber_name: name of the subscriber.
+        :param float timeout: Max duration of the request before it expires.
         """
         response = await self.port.get_next_message(subscriber_name, timeout)
         if not response:
@@ -70,25 +73,24 @@ class MessageRepository:
         By default, *all* messages will be returned unless further restricted by
         parameters.
 
-        :param str subscriber_id: Id of the subscriber.
+        :param str subscriber_name: name of the subscriber.
+        :param float timeout: Max duration of the request before it expires.
         :param int count: How many messages to return at most.
-        :param str first: Id of the first message to return.
-        :param str last: Id of the last message to return.
+        :param bool pop: If messages should be deleted after request.
         """
         return await self.port.get_messages(subscriber_name, timeout, count, pop)
 
     async def delete_message(self, msgs: List[Msg]):
         """Remove a message from the subscriber's queue.
 
-        :param str subscriber_id: Id of the subscriber.
-        :param str message_id: Id of the message to delete.
+        :param List[Msg] msgs: set of fetched messages.
         """
         await self.port.delete_message(msgs)
 
     async def delete_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.
 
-        :param str subscriber_id: Id of the subscriber.
+        :param str subscriber_name: Name of the subscriber.
         """
 
         await self.port.delete_queue(subscriber_name)

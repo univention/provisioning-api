@@ -56,7 +56,7 @@ async def post_message_status(
         # so disconnect them first.
         await manager.close(name)
 
-        await service.remove_message(name, msg_seq_num)
+        await service.remove_message(name)
     else:
         # message was not processed, nothing to do...
         pass
@@ -116,7 +116,7 @@ async def subscription_websocket(
                 break
 
             if report.status == core.models.MessageProcessingStatus.ok:
-                await service.remove_message(name, msg_seq_num)
+                await service.remove_message(name)
             else:
                 logger.error(
                     f"{name} > WebSocket client reported status: {report.status}"
