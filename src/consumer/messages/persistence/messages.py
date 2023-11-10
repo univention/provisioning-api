@@ -1,7 +1,6 @@
 from typing import Annotated, List, Optional
 
 import fastapi
-from nats.aio.msg import Msg
 from redis.asyncio import Redis
 
 from consumer.core.persistence.redis import RedisDependency
