@@ -16,36 +16,6 @@ class MessageService:
     def __init__(self, repo: MessageRepository):
         self._repo = repo
 
-    async def publish_message(
-        self,
-        data: shared.models.NewMessage,
-        publisher_name: str,
-        ts: Optional[datetime] = None,
-    ):
-        """Publish the given message to all subscribers
-           to the given message type.
-
-        :param shared.models.NewMessage data: Key-value pairs to sent to the consumer.
-        :param str publisher_name: The name of the publisher.
-        :param datetime ts: Optional timestamp to be assigned to the message.
-        """
-
-        message = shared.models.Message(
-            publisher_name=publisher_name,
-            ts=ts or datetime.utcnow(),
-            realm=data.realm,
-            topic=data.topic,
-            body=data.body,
-        )
-
-        service = SubscriptionService(SubscriptionRepository(self._repo.port))
-
-        subscriber_names = await service.get_subscribers_for_topic(
-            message.realm, message.topic
-        )
-        for subscriber_name in subscriber_names:
-            await self._repo.add_live_message(subscriber_name, message)
-
     async def add_prefill_message(
         self, subscriber_name: str, message: shared.models.Message
     ):
