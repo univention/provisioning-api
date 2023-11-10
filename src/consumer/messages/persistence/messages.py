@@ -1,7 +1,6 @@
-from typing import Annotated, List, Optional, Tuple
+from typing import Annotated, List, Optional
 
 import fastapi
-from nats.aio.msg import Msg
 from redis.asyncio import Redis
 
 from consumer.core.persistence.redis import RedisDependency
@@ -10,6 +9,8 @@ from core.models import Message
 
 from consumer.core.persistence.nats import NatsDependency
 from nats.aio.client import Client as NATS
+
+from core.models.queue import NatsMessage
 
 
 class MessageRepository:
@@ -51,14 +52,14 @@ class MessageRepository:
         await self.port.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
-        self, subscriber_name: str, timeout: float
-    ) -> Optional[Message]:
+        self, subscriber_name: str, timeout: float, pop: bool
+    ) -> Optional[NatsMessage]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_name: name of the subscriber.
         :param float timeout: Max duration of the request before it expires.
         """
-        response = await self.port.get_next_message(subscriber_name, timeout)
+        response = await self.port.get_next_message(subscriber_name, timeout, pop)
         if not response:
             # empty stream
             return None
@@ -67,7 +68,7 @@ class MessageRepository:
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[Tuple[str, Message]]:
+    ) -> List[NatsMessage]:
         """Return messages from a given queue.
 
         By default, *all* messages will be returned unless further restricted by
@@ -80,12 +81,12 @@ class MessageRepository:
         """
         return await self.port.get_messages(subscriber_name, timeout, count, pop)
 
-    async def delete_message(self, msgs: List[Msg]):
+    async def delete_message(self, msg: NatsMessage):
         """Remove a message from the subscriber's queue.
 
         :param List[Msg] msgs: set of fetched messages.
         """
-        await self.port.delete_message(msgs)
+        await self.port.delete_message(msg)
 
     async def delete_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.

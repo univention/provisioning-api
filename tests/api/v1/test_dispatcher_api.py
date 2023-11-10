@@ -84,10 +84,10 @@ class TestDispatcher:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert data[0]["realm"] == REALM
-        assert data[0]["topic"] == TOPIC
-        assert data[0]["body"] == BODY
-        assert data[0]["publisher_name"] == "127.0.0.1"
+        assert data[0]["data"]["realm"] == REALM
+        assert data[0]["data"]["topic"] == TOPIC
+        assert data[0]["data"]["body"] == BODY
+        assert data[0]["data"]["publisher_name"] == "127.0.0.1"
 
     async def test_delete_message(
         self,
@@ -106,11 +106,20 @@ class TestDispatcher:
         )
         assert response.status_code == 201
 
-        message_id: str = "1"
-        response = await messages_client.post(
-            f"{messages_api_prefix}/subscription/{name}/message/{message_id}",
-            json={
-                "status": "ok",
+        nats_msg = {
+            "subject": "subscriber_2",
+            "reply": "$JS.ACK.stream:subscriber_2.durable_name:subscriber_2.4.8.19.1699615014739091916.0",
+            "data": {
+                "publisher_name": "127.0.0.1",
+                "ts": "2023-11-10T11:16:54.704547",
+                "realm": "test_realm",
+                "topic": "test_topic",
+                "body": {"key": "value_1"},
             },
+            "headers": {"Nats-Expected-Stream": "stream:subscriber_2"},
+        }
+        response = await messages_client.post(
+            f"{messages_api_prefix}/subscription/{name}/message/",
+            json={"msg": nats_msg, "report": {"status": "ok"}},
         )
         assert response.status_code == 200

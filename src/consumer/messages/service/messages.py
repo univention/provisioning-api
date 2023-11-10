@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
-from typing import List, Optional, Tuple
-
-from nats.aio.msg import Msg
+from typing import List, Optional
 
 import core.models
 
 from consumer.messages.persistence.messages import MessageRepository
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.subscriptions.service.subscription import SubscriptionService
+from core.models.queue import NatsMessage
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +63,10 @@ class MessageService:
     async def get_next_message(
         self,
         subscriber_name: str,
+        pop: bool,
         timeout: float = 5,
         force: Optional[bool] = False,
-    ) -> Optional[Tuple[str, core.models.Message]]:
+    ) -> Optional[NatsMessage]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_id: Id of the subscriber.
@@ -80,10 +80,10 @@ class MessageService:
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == core.models.FillQueueStatus.done):
-            return await self._repo.get_next_message(subscriber_name, timeout)
+            return await self._repo.get_next_message(subscriber_name, timeout, pop)
         else:
             # TODO: if `block` is set this call should block until the queue is ready
-            return []
+            return None
 
     async def get_messages(
         self,
@@ -92,7 +92,7 @@ class MessageService:
         count: int,
         pop: bool,
         force: Optional[bool] = False,
-    ) -> List[Tuple[str, core.models.Message]]:
+    ) -> List[NatsMessage]:
         """Return messages from a given queue.
 
         By default, *all* messages will be returned unless further restricted by
@@ -115,14 +115,14 @@ class MessageService:
         else:
             return []
 
-    async def remove_message(self, msgs: List[Msg]):
+    async def remove_message(self, msg: NatsMessage):
         """Remove a message from the subscriber's queue.
 
         :param str subscriber_id: Id of the subscriber.
         :param str message_id: Id of the message to delete.
         """
 
-        await self._repo.delete_message(msgs)
+        await self._repo.delete_message(msg)
 
     async def remove_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.

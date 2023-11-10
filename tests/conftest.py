@@ -85,6 +85,8 @@ async def nats_fake_dependency():
     js.stream_info = AsyncMock()
     js.publish = AsyncMock()
     js.delete_msg = AsyncMock()
+    js.add_consumer = AsyncMock()
+    js.delete_stream = AsyncMock()
 
     sub = AsyncMock()
     js.pull_subscribe = AsyncMock(return_value=sub)

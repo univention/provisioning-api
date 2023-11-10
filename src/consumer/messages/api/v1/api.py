@@ -1,3 +1,5 @@
+from typing import List
+
 import fastapi
 import json
 import logging
@@ -10,6 +12,7 @@ from consumer.messages.service import MessageService
 from consumer.subscriptions.subscription.sink import WebSocketSink
 from consumer.subscriptions.subscription.sink import SinkManager
 
+from core.models.queue import NatsMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +38,13 @@ async def create_new_message(
 
 
 @router.post(
-    "/subscription/{name}/message/{msg_seq_num}",
+    "/subscription/{name}/message/",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
 async def post_message_status(
     name: str,
-    msg_seq_num: str,
+    msg: NatsMessage,
     repo: DependsMessageRepo,
     report: core.models.MessageProcessingStatusReport,
 ):
@@ -56,7 +59,7 @@ async def post_message_status(
         # so disconnect them first.
         await manager.close(name)
 
-        await service.remove_message(name)
+        await service.remove_message(msg)
     else:
         # message was not processed, nothing to do...
         pass
@@ -73,14 +76,30 @@ async def get_subscription_messages(
     count: int = 1,
     timeout: float = 5,
     pop: bool = False,
-):
+) -> List[NatsMessage]:
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
 
     service = MessageService(repo)
-    messages = await service.get_messages(name, timeout, count, pop)
-    return messages
+    return await service.get_messages(name, timeout, count, pop)
+
+
+@router.delete(
+    "/message/",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["sink"],
+)
+async def remove_message(
+    msg: NatsMessage,
+    repo: DependsMessageRepo,
+):
+    """Remove message."""
+
+    # TODO: check authorization
+
+    service = MessageService(repo)
+    return await service.remove_message(msg)
 
 
 @router.websocket("/subscription/{name}/ws")
@@ -99,11 +118,17 @@ async def subscription_websocket(
 
     try:
         while True:
-            id_message = await service.get_next_message(name, timeout=250)
-            if not id_message:
+            nats_mess = await service.get_next_message(name, False, 250)
+            if not nats_mess:
                 continue
 
-            msg_seq_num, message = id_message  # FIXME: id_message is not tuple
+            message = Message(
+                publisher_name=nats_mess.data["publisher_name"],
+                ts=nats_mess.data["ts"],
+                realm=nats_mess.data["realm"],
+                topic=nats_mess.data["topic"],
+                body=nats_mess.data["body"],
+            )
             await sink.send_message(message)
 
             reply = await websocket.receive_text()
@@ -116,7 +141,7 @@ async def subscription_websocket(
                 break
 
             if report.status == core.models.MessageProcessingStatus.ok:
-                await service.remove_message(name)
+                await service.remove_message(message)
             else:
                 logger.error(
                     f"{name} > WebSocket client reported status: {report.status}"

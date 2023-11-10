@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from typing import Any, ClassVar, Dict
+from typing import Any, ClassVar, Dict, Optional
 from typing_extensions import Self
 
 from pydantic import BaseModel, Field
@@ -84,3 +84,10 @@ class UDMMessage(BaseMessage):
             new=msg.body.get("new", {}),
             old=msg.body.get("old", {}),
         )
+
+
+class NatsMessage(BaseModel):
+    subject: str = ""
+    reply: str = ""
+    data: dict = {}
+    headers: Optional[Dict[str, str]] = None
