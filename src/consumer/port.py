@@ -2,8 +2,8 @@ from typing import Tuple, List
 
 from redis.asyncio import Redis
 
-from consumer.adapters.nats_adapter import NatsAdapter
-from consumer.adapters.redis_adapter import RedisAdapter
+from shared.adapters.nats_adapter import NatsAdapter
+from shared.adapters.redis_adapter import RedisAdapter
 from core.models import Message
 from nats.aio.client import Client as NATS
 

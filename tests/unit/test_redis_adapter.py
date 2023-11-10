@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import pytest
 from fakeredis.aioredis import FakeRedis
 
-from consumer.adapters.redis_adapter import RedisAdapter
+from shared.adapters.redis_adapter import RedisAdapter
 from core.models import Message, FillQueueStatus
 
 
@@ -21,7 +21,7 @@ def redis_adapter(redis: FakeRedis) -> RedisAdapter:
 
 @pytest.fixture
 def pipeline() -> AsyncMock:
-    return patch("src.consumer.adapters.redis_adapter.Redis.pipeline").start()
+    return patch("src.shared.adapters.redis_adapter.Redis.pipeline").start()
 
 
 @pytest.mark.anyio
