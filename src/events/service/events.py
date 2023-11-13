@@ -3,16 +3,16 @@ from typing import Optional
 
 import core.models
 
-from ..port import MQlibPort
+from ..port import MQlibPort as mq
 
 
-class MessageService:
+class EventsService:
 
-    def __init__(self, mq: MQlibPort):
+    def __init__(self):
         self._mq = mq
 
 
-    async def publish_message(
+    async def publish_event(
         self,
         data: core.models.NewMessage,
         publisher_name: str,

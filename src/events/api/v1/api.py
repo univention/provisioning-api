@@ -3,15 +3,15 @@ import logging
 
 from consumer.messages.persistence import DependsMessageRepo
 from core.models import NewMessage
-from producer.service import MessageService
+from events.service import EventsService
 
 logger = logging.getLogger(__name__)
 
 router = fastapi.APIRouter()
 
 
-@router.post("/message/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
-async def create_new_message(
+@router.post("/event/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
+async def publish_event(
     data: NewMessage,
     request: fastapi.Request,
     repo: DependsMessageRepo,
@@ -23,5 +23,5 @@ async def create_new_message(
     # TODO: set publisher_name from authentication data
     publisher_name = request.client.host
 
-    service = MessageService(repo)
-    await service.publish_message(data, publisher_name)
+    service = EventsService(repo)
+    await service.publish_event(data, publisher_name)
