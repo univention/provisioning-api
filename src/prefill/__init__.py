@@ -1,7 +1,7 @@
 import logging
 from typing import List, Tuple
 
-import core.models
+import shared.models
 from consumer.core.persistence.nats import nats_context
 
 from consumer.messages.persistence.messages import MessageRepository
@@ -33,7 +33,7 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
         sub_service = SubscriptionService(sub_repo)
 
         await sub_service.set_subscriber_queue_status(
-            subscriber_name, core.models.FillQueueStatus.running
+            subscriber_name, shared.models.FillQueueStatus.running
         )
 
         try:
@@ -53,10 +53,10 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
             logging.error(f"Failed to launch pre-fill handler: {err.__class__} {err}")
 
             await sub_service.set_subscriber_queue_status(
-                subscriber_name, core.models.FillQueueStatus.failed
+                subscriber_name, shared.models.FillQueueStatus.failed
             )
 
         else:
             await sub_service.set_subscriber_queue_status(
-                subscriber_name, core.models.FillQueueStatus.done
+                subscriber_name, shared.models.FillQueueStatus.done
             )

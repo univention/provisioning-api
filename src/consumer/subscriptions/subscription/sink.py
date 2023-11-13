@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 
-from core.models.queue import Message
+from shared.models.queue import Message
 
 
 class Sink(ABC):

@@ -4,9 +4,9 @@ import logging
 from types import TracebackType
 from typing import Dict, List, Optional, Type
 
-import core.models
+import shared.models
 
-from core.config import settings
+from shared.config import settings
 from prefill.base import PreFillService
 from consumer.subscriptions.service.subscription import match_subscription
 
@@ -150,7 +150,7 @@ class UDMPreFill(PreFillService):
         """Retrieve the object for the given DN."""
         obj = await self._client.get_object(url)
 
-        message = core.models.Message(
+        message = shared.models.Message(
             publisher_name="udm-pre-fill",
             ts=datetime.now(),
             realm="udm",

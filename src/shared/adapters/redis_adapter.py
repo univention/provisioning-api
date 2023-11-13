@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional
 
 from redis.asyncio import Redis
 
-from core.models import Message
+from shared.models import Message
 
 
 class RedisKeys:

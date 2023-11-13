@@ -8,7 +8,7 @@ Tooling for provisioning LDAP objects to external services.
 
   The central service to receive LDAP changes and forward them to subscribed clients.
 
-- [Core and client library](./src/core/)
+- [Core and client library](src/shared/)
 
   Everything needed to implement a client.
 

@@ -4,7 +4,7 @@ import fastapi
 import json
 import logging
 
-import core.models
+import shared.models
 
 from consumer.messages.persistence import DependsMessageRepo
 from consumer.messages.service import MessageService
@@ -12,7 +12,7 @@ from consumer.messages.service import MessageService
 from consumer.subscriptions.subscription.sink import WebSocketSink
 from consumer.subscriptions.subscription.sink import SinkManager
 
-from core.models.queue import NatsMessage, Message
+from shared.models.queue import NatsMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ manager = SinkManager()
 
 @router.post("/message/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
 async def create_new_message(
-    data: core.models.NewMessage,
+    data: shared.models.NewMessage,
     request: fastapi.Request,
     repo: DependsMessageRepo,
 ):
@@ -46,7 +46,7 @@ async def post_message_status(
     name: str,
     msg: NatsMessage,
     repo: DependsMessageRepo,
-    report: core.models.MessageProcessingStatusReport,
+    report: shared.models.MessageProcessingStatusReport,
 ):
     """Report on the processing of the given message."""
 
@@ -54,7 +54,7 @@ async def post_message_status(
 
     service = MessageService(repo)
 
-    if report.status == core.models.MessageProcessingStatus.ok:
+    if report.status == shared.models.MessageProcessingStatus.ok:
         # Modifying the queue interferes with connected WebSocket clients,
         # so disconnect them first.
         await manager.close(name)
@@ -133,14 +133,16 @@ async def subscription_websocket(
 
             reply = await websocket.receive_text()
             try:
-                report = core.models.MessageProcessingStatusReport(**json.loads(reply))
+                report = shared.models.MessageProcessingStatusReport(
+                    **json.loads(reply)
+                )
             except Exception:
                 logger.error(
                     f"{name} > Unexpected input from WebSocket client: {reply}"
                 )
                 break
 
-            if report.status == core.models.MessageProcessingStatus.ok:
+            if report.status == shared.models.MessageProcessingStatus.ok:
                 await service.remove_message(message)
             else:
                 logger.error(

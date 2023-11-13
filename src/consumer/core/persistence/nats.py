@@ -4,7 +4,7 @@ from typing import Annotated, Coroutine, Iterator
 from fastapi import Depends
 from nats.aio.client import Client as NATS
 
-from core.config import settings
+from shared.config import settings
 
 
 async def nats_dependency() -> Coroutine[None, None, Iterator[NATS]]:

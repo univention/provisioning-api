@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-import core.models
+import shared.models
 from consumer.messages.persistence.messages import MessageRepository
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 
@@ -25,7 +25,7 @@ class SubscriptionService:
     def __init__(self, repo: SubscriptionRepository):
         self._repo = repo
 
-    async def get_subscribers(self) -> List[core.models.Subscriber]:
+    async def get_subscribers(self) -> List[shared.models.Subscriber]:
         """
         Return a list of names of all known subscribers.
         """
@@ -34,13 +34,13 @@ class SubscriptionService:
         subscribers = [await self.get_subscriber(name) for name in names]
         return subscribers
 
-    async def get_subscriber(self, name: str) -> core.models.Subscriber:
+    async def get_subscriber(self, name: str) -> shared.models.Subscriber:
         """
         Get information about a registered subscriber.
         """
 
         data = await self._repo.get_subscriber(name)
-        return core.models.Subscriber.model_validate(data)
+        return shared.models.Subscriber.model_validate(data)
 
     async def get_subscribers_for_topic(self, realm: str, topic: str) -> List[str]:
         """
@@ -53,15 +53,15 @@ class SubscriptionService:
             if match_subscription(s_realm, s_topic, realm, topic)
         ]
 
-    async def add_subscriber(self, sub: core.models.NewSubscriber):
+    async def add_subscriber(self, sub: shared.models.NewSubscriber):
         """
         Add a new subscriber.
         """
 
         if sub.fill_queue:
-            fill_queue_status = core.models.FillQueueStatus.pending
+            fill_queue_status = shared.models.FillQueueStatus.pending
         else:
-            fill_queue_status = core.models.FillQueueStatus.done
+            fill_queue_status = shared.models.FillQueueStatus.done
 
         await self._repo.add_subscriber(
             name=sub.name,
@@ -72,13 +72,13 @@ class SubscriptionService:
 
     async def get_subscriber_queue_status(
         self, name: str
-    ) -> core.models.FillQueueStatus:
+    ) -> shared.models.FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
         status = await self._repo.get_subscriber_queue_status(name)
-        return core.models.FillQueueStatus[status]
+        return shared.models.FillQueueStatus[status]
 
     async def set_subscriber_queue_status(
-        self, name: str, status: core.models.FillQueueStatus
+        self, name: str, status: shared.models.FillQueueStatus
     ):
         """Set the pre-fill status of the given subscriber."""
         await self._repo.set_subscriber_queue_status(name, status.name)

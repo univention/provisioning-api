@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from .messages.api import router as dispatcher_api_router
 from .subscriptions.api import router as consumer_api_router
-from core.config import settings
+from shared.config import settings
 
 # TODO split up logging
 # from .log import setup as setup_logging

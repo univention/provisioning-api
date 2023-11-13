@@ -3,7 +3,7 @@ import uuid
 import httpx
 import pytest
 
-from core.models.subscriber import FillQueueStatus
+from shared.models.subscriber import FillQueueStatus
 from consumer.subscriptions.api import v1_prefix as api_prefix
 from consumer.main import app
 

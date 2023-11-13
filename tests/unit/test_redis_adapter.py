@@ -6,7 +6,7 @@ import pytest
 from fakeredis.aioredis import FakeRedis
 
 from shared.adapters.redis_adapter import RedisAdapter
-from core.models import Message, FillQueueStatus
+from shared.models import Message, FillQueueStatus
 
 
 @pytest.fixture

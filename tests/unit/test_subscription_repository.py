@@ -3,7 +3,7 @@ import pytest
 from fakeredis.aioredis import FakeRedis
 
 from consumer.subscriptions.persistence import SubscriptionRepository
-from core.models import FillQueueStatus
+from shared.models import FillQueueStatus
 
 
 @pytest.fixture

@@ -5,7 +5,7 @@ import difflib
 import json
 import uuid
 
-import core.client
+import shared.client
 
 
 def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
@@ -26,7 +26,7 @@ def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
         print(text, **kwargs)
 
 
-def print_header(msg: core.client.Message, action=None):
+def print_header(msg: shared.client.Message, action=None):
     print()
 
     text = ""
@@ -67,7 +67,7 @@ def print_udm_diff(old: dict, new: dict):
             _cprint(line)
 
 
-def handle_udm_message(msg: core.client.Message):
+def handle_udm_message(msg: shared.client.Message):
     old_full = msg.body.get("old") or {}
     new_full = msg.body.get("new") or {}
 
@@ -92,7 +92,7 @@ def handle_udm_message(msg: core.client.Message):
         _cprint("No object data received!", fg="r")
 
 
-def handle_any_message(msg: core.client.Message):
+def handle_any_message(msg: shared.client.Message):
     print_header(msg)
     print(msg.model_dump_json(indent=2))
 
@@ -110,20 +110,20 @@ async def main():
     name = args.name
     realms_topics = [entry.split(":") for entry in args.realm_topic]
 
-    client = core.client.AsyncClient(args.base_url)
+    client = shared.client.AsyncClient(args.base_url)
     await client.create_subscription(name, realms_topics, args.fill)
 
     async with client.stream(name) as stream:
         while True:
             # handle incoming message
-            message: core.client.Message = await stream.receive_message()
+            message: shared.client.Message = await stream.receive_message()
             if message.realm == "udm":
                 handle_udm_message(message)
             else:
                 handle_any_message(message)
 
             # confirm message reception
-            status = core.client.MessageProcessingStatus.ok
+            status = shared.client.MessageProcessingStatus.ok
             await stream.send_report(status)
 
 

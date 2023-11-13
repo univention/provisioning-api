@@ -1,6 +1,6 @@
 import logging
 
-from core.config import settings
+from shared.config import settings
 
 
 def setup():

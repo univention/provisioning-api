@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 import fastapi
-import core.models
+import shared.models
 
 from consumer.subscriptions.persistence import DependsSubscriptionRepo
 from consumer.subscriptions.service.subscription import SubscriptionService
@@ -19,7 +19,7 @@ manager = SinkManager()
 @router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
     repo: DependsSubscriptionRepo,
-) -> List[core.models.Subscriber]:
+) -> List[shared.models.Subscriber]:
     """Return all subscriptions."""
 
     # TODO: check authorization
@@ -34,7 +34,7 @@ async def get_subscriptions(
 async def get_subscription(
     name: str,
     repo: DependsSubscriptionRepo,
-) -> core.models.Subscriber:
+) -> shared.models.Subscriber:
     """Return information about a subscription."""
 
     # TODO: check authorization
@@ -52,7 +52,7 @@ async def get_subscription(
     "/subscription/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
 )
 async def create_subscription(
-    subscriber: core.models.NewSubscriber,
+    subscriber: shared.models.NewSubscriber,
     repo: DependsSubscriptionRepo,
     tasks: fastapi.BackgroundTasks,
 ):
