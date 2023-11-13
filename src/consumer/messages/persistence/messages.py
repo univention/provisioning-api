@@ -5,12 +5,12 @@ from redis.asyncio import Redis
 
 from consumer.core.persistence.redis import RedisDependency
 from consumer.port import Port
-from core.models import Message
+from shared.models import Message
 
 from consumer.core.persistence.nats import NatsDependency
 from nats.aio.client import Client as NATS
 
-from core.models.queue import NatsMessage
+from shared.models.queue import NatsMessage
 
 
 class MessageRepository:

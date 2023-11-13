@@ -6,7 +6,7 @@ from fakeredis.aioredis import FakeRedis
 from nats.aio.msg import Msg
 
 from consumer.messages.persistence import MessageRepository
-from core.models import Message
+from shared.models import Message
 
 
 @pytest.fixture

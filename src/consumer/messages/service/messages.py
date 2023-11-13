@@ -2,12 +2,12 @@ import logging
 from datetime import datetime
 from typing import List, Optional
 
-import core.models
+import shared.models
 
 from consumer.messages.persistence.messages import MessageRepository
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.subscriptions.service.subscription import SubscriptionService
-from core.models.queue import NatsMessage
+from shared.models.queue import NatsMessage
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class MessageService:
 
     async def publish_message(
         self,
-        data: core.models.NewMessage,
+        data: shared.models.NewMessage,
         publisher_name: str,
         ts: Optional[datetime] = None,
     ):
@@ -30,7 +30,7 @@ class MessageService:
         :param datetime ts: Optional timestamp to be assigned to the message.
         """
 
-        message = core.models.Message(
+        message = shared.models.Message(
             publisher_name=publisher_name,
             ts=ts or datetime.utcnow(),
             realm=data.realm,
@@ -49,7 +49,7 @@ class MessageService:
             await self._repo.add_live_message(subscriber_name, message)
 
     async def add_prefill_message(
-        self, subscriber_name: str, message: core.models.Message
+        self, subscriber_name: str, message: shared.models.Message
     ):
         """Add the given message to the subscriber's queue."""
         await self._repo.add_prefill_message(subscriber_name, message)
@@ -79,7 +79,7 @@ class MessageService:
         )
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
-        if force or (queue_status == core.models.FillQueueStatus.done):
+        if force or (queue_status == shared.models.FillQueueStatus.done):
             return await self._repo.get_next_message(subscriber_name, timeout, pop)
         else:
             # TODO: if `block` is set this call should block until the queue is ready
@@ -110,7 +110,7 @@ class MessageService:
         )
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
-        if force or (queue_status == core.models.FillQueueStatus.done):
+        if force or (queue_status == shared.models.FillQueueStatus.done):
             return await self._repo.get_messages(subscriber_name, timeout, count, pop)
         else:
             return []

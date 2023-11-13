@@ -4,7 +4,7 @@ from typing import Annotated, Coroutine, Iterator
 from fastapi import Depends
 import redis.asyncio as redis
 
-from core.config import settings
+from shared.config import settings
 
 
 async def redis_dependency() -> Coroutine[None, None, Iterator[redis.Redis]]:

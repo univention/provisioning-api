@@ -4,10 +4,10 @@ from redis.asyncio import Redis
 
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.redis_adapter import RedisAdapter
-from core.models import Message
+from shared.models import Message
 from nats.aio.client import Client as NATS
 
-from core.models.queue import NatsMessage
+from shared.models.queue import NatsMessage
 
 
 class Port:

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple
 
 import aiohttp
 
-import core.models.api
+import shared.models.api
 
 
 class AsyncClient:
@@ -13,7 +13,7 @@ class AsyncClient:
     async def create_subscription(
         self, name: str, realms_topics: List[List[str]], fill_queue: bool = False
     ):
-        subscriber = core.models.api.NewSubscriber(
+        subscriber = shared.models.api.NewSubscriber(
             name=name, realms_topics=realms_topics, fill_queue=fill_queue
         )
 
@@ -31,32 +31,32 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscription(self, name: str) -> core.models.subscriber.Subscriber:
+    async def get_subscription(self, name: str) -> shared.models.subscriber.Subscriber:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}/v1/subscription/{name}"
             ) as response:
                 data = await response.json()
-                return core.models.api.Subscriber.model_validate(data)
+                return shared.models.api.Subscriber.model_validate(data)
 
     async def get_subscription_messages(
         self, name: str, count=None, first=None, last=None
-    ) -> List[Tuple[str, core.models.queue.Message]]:
+    ) -> List[Tuple[str, shared.models.queue.Message]]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}/v1/subscription/{name}/message",
                 params=dict(count=count, first=first, last=last),
             ) as response:
                 msgs = await response.json()
-                return [core.models.api.Message.model_validate(msg) for msg in msgs]
+                return [shared.models.api.Message.model_validate(msg) for msg in msgs]
 
     async def set_message_status(
         self,
         name: str,
         message_id: str,
-        status: core.models.api.MessageProcessingStatus,
+        status: shared.models.api.MessageProcessingStatus,
     ):
-        report = core.models.api.MessageProcessingStatusReport(status=status)
+        report = shared.models.api.MessageProcessingStatusReport(status=status)
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
@@ -66,14 +66,14 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscriptions(self) -> List[core.models.subscriber.Subscriber]:
+    async def get_subscriptions(self) -> List[shared.models.subscriber.Subscriber]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(f"{self.base_url}/v1/subscription/") as response:
                 data = await response.json()
-                return core.models.api.Subscriber.model_validate(data)
+                return shared.models.api.Subscriber.model_validate(data)
 
     async def submit_message(self, realm: str, topic: str, body: Dict[str, Any]):
-        message = core.models.api.NewMessage(realm=realm, topic=topic, body=body)
+        message = shared.models.api.NewMessage(realm=realm, topic=topic, body=body)
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
@@ -95,10 +95,10 @@ class AsyncClientStream:
     def __init__(self, websocket: aiohttp.ClientWebSocketResponse):
         self.websocket = websocket
 
-    async def receive_message(self) -> core.models.queue.Message:
+    async def receive_message(self) -> shared.models.queue.Message:
         data = await self.websocket.receive_json()
-        return core.models.queue.Message.model_validate(data)
+        return shared.models.queue.Message.model_validate(data)
 
-    async def send_report(self, status: core.models.api.MessageProcessingStatus):
-        report = core.models.api.MessageProcessingStatusReport(status=status)
+    async def send_report(self, status: shared.models.api.MessageProcessingStatus):
+        report = shared.models.api.MessageProcessingStatusReport(status=status)
         await self.websocket.send_json(report.model_dump())

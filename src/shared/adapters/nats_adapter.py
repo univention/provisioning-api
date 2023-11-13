@@ -9,8 +9,8 @@ from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError
 
-from core.models import Message
-from core.models.queue import NatsMessage
+from shared.models import Message
+from shared.models.queue import NatsMessage
 
 logger = logging.getLogger(__name__)
 
