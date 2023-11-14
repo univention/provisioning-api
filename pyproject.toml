@@ -9,7 +9,7 @@ license = "GNU Affero General Public License v3"
 readme = "README.md"
 packages = [
     { include = "example-client", from = "src" },
-    { include = "core", from = "src" },
+    { include = "shared", from = "src" },
     { include = "consumer", from = "src" },
     { include = "prefill", from = "src" },
 ]
