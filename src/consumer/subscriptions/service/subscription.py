@@ -3,6 +3,7 @@ from typing import List
 
 import shared.models
 from consumer.messages.persistence.messages import MessageRepository
+from consumer.port import Port
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 
 
@@ -88,7 +89,7 @@ class SubscriptionService:
         Delete a subscriber.
         """
 
-        msg_repo = MessageRepository(self._repo.redis, self._repo.nats)
+        msg_repo = MessageRepository(Port())
 
         await self._repo.delete_subscriber(name)
         await msg_repo.delete_queue(name)

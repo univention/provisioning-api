@@ -1,6 +1,7 @@
 from typing import Annotated, Any, Dict, List, Optional, Tuple
 
 import fastapi
+from fastapi import Depends
 from redis.asyncio import Redis
 
 from shared.persistence.nats import NatsDependency
@@ -29,10 +30,8 @@ class SubscriptionRepository:
     Store and retrieve subscription information from Redis.
     """
 
-    def __init__(self, redis: Redis, nats: NATS):
-        self.redis = redis
-        self.nats = nats
-        self.port = Port(redis, nats)
+    def __init__(self, port: Port):
+        self.port = port
 
     async def get_subscriber_names(self) -> List[str]:
         """
@@ -126,10 +125,13 @@ class SubscriptionRepository:
         await self.port.delete_subscriber(name)
 
 
+PortDependency = Annotated[Port, Depends(Port.port_dependency)]
+
+
 def get_subscription_repository(
-    redis: RedisDependency, nats: NatsDependency
+    port: PortDependency
 ) -> SubscriptionRepository:
-    return SubscriptionRepository(redis, nats)
+    return SubscriptionRepository(port)
 
 
 DependsSubscriptionRepo = Annotated[

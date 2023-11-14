@@ -5,6 +5,7 @@ from typing import List, Optional
 import shared.models
 
 from consumer.messages.persistence.messages import MessageRepository
+from consumer.port import Port
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models.queue import NatsMessage
@@ -39,7 +40,7 @@ class MessageService:
         )
 
         service = SubscriptionService(
-            SubscriptionRepository(self._repo.redis, self._repo.nats)
+            SubscriptionRepository()
         )
 
         subscriber_names = await service.get_subscribers_for_topic(
@@ -75,7 +76,7 @@ class MessageService:
         """
 
         sub_service = SubscriptionService(
-            SubscriptionRepository(self._repo.redis, self._repo.nats)
+            SubscriptionRepository(Port())
         )
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
@@ -106,7 +107,7 @@ class MessageService:
         """
 
         sub_service = SubscriptionService(
-            SubscriptionRepository(self._repo.redis, self._repo.nats)
+            SubscriptionRepository(Port())
         )
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
