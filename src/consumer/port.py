@@ -1,12 +1,12 @@
 import contextlib
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
-from redis.asyncio import Redis
+from fastapi import Depends
 
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.redis_adapter import RedisAdapter
+from shared.config import settings
 from shared.models import Message
-from nats.aio.client import Client as NATS
 
 from shared.models.queue import NatsMessage
 
@@ -16,10 +16,13 @@ class Port:
         self.redis_adapter = RedisAdapter()
         self.nats_adapter = NatsAdapter()
 
-    @contextlib.asynccontextmanager
     @staticmethod
-    async def initialize_port():
+    @contextlib.asynccontextmanager
+    async def port_context():
         port = Port()
+        await port.nats_adapter.nats.connect(
+            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
+        )
         try:
             yield port
         finally:
@@ -28,6 +31,9 @@ class Port:
     @staticmethod
     async def port_dependency():
         port = Port()
+        await port.nats_adapter.nats.connect(
+            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
+        )
         try:
             yield port
         finally:
@@ -95,3 +101,6 @@ class Port:
 
     async def delete_subscriber(self, name: str):
         await self.redis_adapter.delete_subscriber(name)
+
+
+PortDependency = Annotated[Port, Depends(Port.port_dependency)]

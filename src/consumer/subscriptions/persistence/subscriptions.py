@@ -1,14 +1,7 @@
 from typing import Annotated, Any, Dict, List, Optional, Tuple
 
 import fastapi
-from fastapi import Depends
-from redis.asyncio import Redis
-
-from shared.persistence.nats import NatsDependency
-from shared.persistence.redis import RedisDependency
-from consumer.port import Port
-
-from nats.aio.client import Client as NATS
+from consumer.port import Port, PortDependency
 
 
 class Keys:
@@ -125,12 +118,7 @@ class SubscriptionRepository:
         await self.port.delete_subscriber(name)
 
 
-PortDependency = Annotated[Port, Depends(Port.port_dependency)]
-
-
-def get_subscription_repository(
-    port: PortDependency
-) -> SubscriptionRepository:
+def get_subscription_repository(port: PortDependency) -> SubscriptionRepository:
     return SubscriptionRepository(port)
 
 

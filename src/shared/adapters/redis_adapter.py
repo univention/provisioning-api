@@ -1,28 +1,13 @@
+import logging
 from typing import List, Tuple, Optional
 
-import redis
 from redis.asyncio import Redis
 
-from consumer.core.persistence.redis import redis_context
 from shared.config import settings
 from shared.models import Message
 
-# class RedisConnectionManager:
-#     def __init__(self):
-#         self.connection = None
-#
-#     async def __aenter__(self) -> redis.Redis:
-#         self.connection = redis.Redis(
-#             host=settings.redis_host,
-#             port=settings.redis_port,
-#             decode_responses=True,
-#             protocol=3,
-#         )
-#         return self.connection
-#
-#     async def __aexit__(self, exc_type, exc_value, traceback):
-#         if self.connection:
-#             await self.connection.close()
+logger = logging.getLogger(__name__)
+
 
 class RedisKeys:
     """A list of keys used in Redis for queueing messages and storing subscriptions."""
@@ -41,14 +26,12 @@ class RedisKeys:
 
 class RedisAdapter:
     def __init__(self):
-        # self.redis = None
-
-        self.redis = redis.Redis(
-        host=settings.redis_host,
-        port=settings.redis_port,
-        decode_responses=True,
-        protocol=3,
-    )
+        self.redis = Redis(
+            host=settings.redis_host,
+            port=settings.redis_port,
+            decode_responses=True,
+            protocol=3,
+        )
 
     async def close(self):
         await self.redis.close()
@@ -96,6 +79,7 @@ class RedisAdapter:
         return await self.redis.smembers(RedisKeys.subscribers)
 
     async def get_subscriber_by_name(self, name: str):
+        logger.info(f"{self.redis=}")
         return await self.redis.sismember(RedisKeys.subscribers, name)
 
     async def get_subscriber_info(self, name: str):
