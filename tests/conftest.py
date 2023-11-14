@@ -15,9 +15,9 @@ from redis._parsers.helpers import (
 )
 from redis.utils import str_if_bytes
 
-from consumer.core.persistence.nats import nats_dependency
+from shared.persistence.nats import nats_dependency
 from consumer.main import app
-from consumer.core.persistence.redis import redis_dependency
+from shared.persistence.redis import redis_dependency
 
 FLAT_MESSAGE = {
     "publisher_name": "127.0.0.1",

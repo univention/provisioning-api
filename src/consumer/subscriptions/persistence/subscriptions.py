@@ -3,8 +3,8 @@ from typing import Annotated, Any, Dict, List, Optional, Tuple
 import fastapi
 from redis.asyncio import Redis
 
-from consumer.core.persistence.nats import NatsDependency
-from consumer.core.persistence.redis import RedisDependency
+from shared.persistence.nats import NatsDependency
+from shared.persistence.redis import RedisDependency
 from consumer.port import Port
 
 from nats.aio.client import Client as NATS

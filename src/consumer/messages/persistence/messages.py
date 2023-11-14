@@ -3,11 +3,11 @@ from typing import Annotated, List, Optional
 import fastapi
 from redis.asyncio import Redis
 
-from consumer.core.persistence.redis import RedisDependency
+from shared.persistence.redis import RedisDependency
 from consumer.port import Port
 from shared.models import Message
 
-from consumer.core.persistence.nats import NatsDependency
+from shared.persistence.nats import NatsDependency
 from nats.aio.client import Client as NATS
 
 from shared.models.queue import NatsMessage
