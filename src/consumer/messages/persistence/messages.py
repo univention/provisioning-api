@@ -1,6 +1,8 @@
 from typing import Annotated, List, Optional
 
 import fastapi
+import redis
+from fastapi import Depends
 from redis.asyncio import Redis
 
 from shared.persistence.redis import RedisDependency
@@ -16,10 +18,8 @@ from shared.models.queue import NatsMessage
 class MessageRepository:
     """Store and retrieve messages from Redis."""
 
-    def __init__(self, redis: Redis, nats: NATS):
-        self.redis = redis
-        self.nats = nats
-        self.port = Port(redis, nats)
+    def __init__(self, port: Port):
+        self.port = port
 
     async def add_live_message(self, subscriber_name: str, message: Message):
         """Enqueue the given message for a particular subscriber.
@@ -103,11 +103,13 @@ class MessageRepository:
 
         await self.port.delete_queue(subscriber_name)
 
+PortDependency = Annotated[Port, Depends(Port.port_dependency)]
+
 
 def get_message_repository(
-    nats: NatsDependency, redis: RedisDependency
+    port: PortDependency
 ) -> MessageRepository:
-    return MessageRepository(redis, nats)
+    return MessageRepository(port)
 
 
 DependsMessageRepo = Annotated[

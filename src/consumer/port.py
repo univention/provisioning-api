@@ -1,3 +1,4 @@
+import contextlib
 from typing import Tuple, List
 
 from redis.asyncio import Redis
@@ -11,9 +12,30 @@ from shared.models.queue import NatsMessage
 
 
 class Port:
-    def __init__(self, redis: Redis, nats: NATS):
-        self.redis_adapter = RedisAdapter(redis)
-        self.nats_adapter = NatsAdapter(nats)
+    def __init__(self):
+        self.redis_adapter = RedisAdapter()
+        self.nats_adapter = NatsAdapter()
+
+    @contextlib.asynccontextmanager
+    @staticmethod
+    async def initialize_port():
+        port = Port()
+        try:
+            yield port
+        finally:
+            await port.close()
+
+    @staticmethod
+    async def port_dependency():
+        port = Port()
+        try:
+            yield port
+        finally:
+            await port.close()
+
+    async def close(self):
+        await self.redis_adapter.close()
+        await self.nats_adapter.close()
 
     async def add_live_message(self, subscriber_name: str, message: Message):
         await self.nats_adapter.add_message(subscriber_name, message)

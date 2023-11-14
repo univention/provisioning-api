@@ -2,10 +2,9 @@ import logging
 from typing import List, Tuple
 
 import shared.models
-from shared.persistence.nats import nats_context
 
 from consumer.messages.persistence.messages import MessageRepository
-from shared.persistence.redis import redis_context
+from consumer.port import Port
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.messages.service.messages import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
@@ -26,10 +25,10 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
 
     logger.debug(f"Initializing queue for {subscriber_name}.")
 
-    async with redis_context() as redis, nats_context() as nats:
-        msg_repo = MessageRepository(redis, nats)
+    async with Port.initialize_port() as port:
+        msg_repo = MessageRepository(port)
         msg_service = MessageService(msg_repo)
-        sub_repo = SubscriptionRepository(redis, nats)
+        sub_repo = SubscriptionRepository(port)
         sub_service = SubscriptionService(sub_repo)
 
         await sub_service.set_subscriber_queue_status(

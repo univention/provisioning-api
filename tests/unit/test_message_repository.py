@@ -26,7 +26,7 @@ def nats() -> AsyncMock:
 
 @pytest.fixture
 def message_repo(redis, port, nats) -> MessageRepository:
-    message_repo = MessageRepository(redis, nats)
+    message_repo = MessageRepository(port)
     message_repo.port = port
     return message_repo
 

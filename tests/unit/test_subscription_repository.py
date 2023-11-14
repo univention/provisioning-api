@@ -34,7 +34,7 @@ def port() -> AsyncMock:
 
 @pytest.fixture
 def sub_repo(redis, port, nats) -> SubscriptionRepository:
-    sub_repo = SubscriptionRepository(redis, nats)
+    sub_repo = SubscriptionRepository(port)
     sub_repo.port = port
     return sub_repo
 
