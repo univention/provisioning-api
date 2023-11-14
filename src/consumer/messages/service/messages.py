@@ -7,7 +7,6 @@ from nats.aio.msg import Msg
 import core.models
 
 from consumer.messages.persistence.messages import MessageRepository
-from consumer.port import Port
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models.queue import NatsMessage
@@ -43,9 +42,7 @@ class MessageService:
             body=data.body,
         )
 
-        service = SubscriptionService(
-            SubscriptionRepository()
-        )
+        service = SubscriptionService(SubscriptionRepository(self._repo.port))
 
         subscriber_names = await service.get_subscribers_for_topic(
             message.realm, message.topic
@@ -79,9 +76,7 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(
-            SubscriptionRepository(Port())
-        )
+        sub_service = SubscriptionService(SubscriptionRepository(self._repo.port))
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == shared.models.FillQueueStatus.done):
@@ -110,9 +105,7 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(
-            SubscriptionRepository(Port())
-        )
+        sub_service = SubscriptionService(SubscriptionRepository(self._repo.port))
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == shared.models.FillQueueStatus.done):

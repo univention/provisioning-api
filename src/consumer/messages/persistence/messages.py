@@ -1,16 +1,8 @@
 from typing import Annotated, List, Optional
 
 import fastapi
-import redis
-from fastapi import Depends
-from redis.asyncio import Redis
-
-from shared.persistence.redis import RedisDependency
-from consumer.port import Port
+from consumer.port import Port, PortDependency
 from shared.models import Message
-
-from shared.persistence.nats import NatsDependency
-from nats.aio.client import Client as NATS
 
 from shared.models.queue import NatsMessage
 
@@ -103,12 +95,8 @@ class MessageRepository:
 
         await self.port.delete_queue(subscriber_name)
 
-PortDependency = Annotated[Port, Depends(Port.port_dependency)]
 
-
-def get_message_repository(
-    port: PortDependency
-) -> MessageRepository:
+def get_message_repository(port: PortDependency) -> MessageRepository:
     return MessageRepository(port)
 
 

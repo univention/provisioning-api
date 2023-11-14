@@ -25,7 +25,7 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
 
     logger.debug(f"Initializing queue for {subscriber_name}.")
 
-    async with Port.initialize_port() as port:
+    async with Port.port_context() as port:
         msg_repo = MessageRepository(port)
         msg_service = MessageService(msg_repo)
         sub_repo = SubscriptionRepository(port)

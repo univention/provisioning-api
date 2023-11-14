@@ -9,7 +9,6 @@ from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError
 
-from shared.config import settings
 from shared.models import Message
 from shared.models.queue import NatsMessage
 
@@ -29,13 +28,10 @@ class NatsKeys:
 class NatsAdapter:
     def __init__(self):
         self.nats = NATS()
-        self.nats.connect(servers=[f"nats://{settings.nats_host}:{settings.nats_port}"])
         self.js = self.nats.jetstream()
-
 
     async def close(self):
         await self.nats.close()
-
 
     async def add_message(self, subscriber_name: str, message: Message):
         """Publish a message to a NATS subject."""
