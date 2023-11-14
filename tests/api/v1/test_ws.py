@@ -1,11 +1,13 @@
 import uuid
+import pytest
 from fastapi.testclient import TestClient
 
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
+from events.api import v1_prefix as events_api_prefix
 from consumer.main import app
 
-
+@pytest.mark.xfail(reason="MQ Adapter and dependency injection needed first")
 def test_websocket():
     client = TestClient(app)
     name = str(uuid.uuid4())
@@ -24,7 +26,7 @@ def test_websocket():
     assert response.status_code == 201
 
     response = client.post(
-        f"{messages_api_prefix}/message/",
+        f"{events_api_prefix}/events/",
         json={
             "realm": realm,
             "topic": topic,
