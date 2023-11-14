@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 router = fastapi.APIRouter()
 
 
-@router.post("/event/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
+@router.post("/events/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
 async def publish_event(
     data: NewMessage,
     request: fastapi.Request,
@@ -23,5 +23,5 @@ async def publish_event(
     # TODO: set publisher_name from authentication data
     publisher_name = request.client.host
 
-    service = EventsService(repo)
+    service = EventsService()
     await service.publish_event(data, publisher_name)

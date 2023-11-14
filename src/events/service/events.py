@@ -3,13 +3,14 @@ from typing import Optional
 
 import core.models
 
-from ..port import MQlibPort as mq
+from ..port import MQlibPort
+from ..adapters.mq_abstract_adapter import MQAbstractAdapter
 
 
 class EventsService:
 
     def __init__(self):
-        self._mq = mq
+        self._mq = MQlibPort()
 
 
     async def publish_event(
