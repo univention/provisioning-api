@@ -29,7 +29,7 @@ class MessageService:
         """Publish the given message to all subscribers
            to the given message type.
 
-        :param dict content: Key-value pairs to sent to the consumer.
+        :param shared.models.NewMessage data: Key-value pairs to sent to the consumer.
         :param str publisher_name: The name of the publisher.
         :param datetime ts: Optional timestamp to be assigned to the message.
         """
@@ -71,8 +71,9 @@ class MessageService:
     ) -> Optional[NatsMessage]:
         """Retrieve the first message from the subscriber's stream.
 
-        :param str subscriber_id: Id of the subscriber.
-        :param int block: How long to block in milliseconds waiting for messages.
+        :param str subscriber_name: Name of the subscriber.
+        :param bool pop: If messages should be deleted after request.
+        :param float timeout: Max duration of the request before it expires.
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
@@ -98,10 +99,10 @@ class MessageService:
         By default, *all* messages will be returned unless further restricted by
         parameters.
 
-        :param str subscriber_id: Id of the subscriber.
+        :param str subscriber_name: Name of the subscriber.
+        :param float timeout: Max duration of the request before it expires.
         :param int count: How many messages to return at most.
-        :param str first: Id of the first message to return.
-        :param str last: Id of the last message to return.
+        :param bool pop: If messages should be deleted after request.
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
@@ -116,8 +117,7 @@ class MessageService:
     async def remove_message(self, msg: NatsMessage):
         """Remove a message from the subscriber's queue.
 
-        :param str subscriber_id: Id of the subscriber.
-        :param str message_id: Id of the message to delete.
+        :param msg: fetched message.
         """
 
         await self._repo.delete_message(msg)
@@ -125,7 +125,7 @@ class MessageService:
     async def remove_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.
 
-        :param str subscriber_id: Id of the subscriber.
+        :param str subscriber_name: Name of the subscriber.
         """
 
         await self._repo.delete_queue(subscriber_name)

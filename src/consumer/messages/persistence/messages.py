@@ -50,6 +50,7 @@ class MessageRepository:
 
         :param str subscriber_name: name of the subscriber.
         :param float timeout: Max duration of the request before it expires.
+        :param bool pop: If message should be deleted after request.
         """
         response = await self.port.get_next_message(subscriber_name, timeout, pop)
         if not response:
@@ -83,7 +84,7 @@ class MessageRepository:
     async def delete_message(self, msg: NatsMessage):
         """Remove a message from the subscriber's queue.
 
-        :param List[Msg] msgs: set of fetched messages.
+        :param msg: fetched message.
         """
         await self.port.delete_message(msg)
 
