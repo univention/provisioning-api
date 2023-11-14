@@ -24,6 +24,7 @@ uvicorn = "^0.23.2"
 redis = "^5.0.0"
 aiohttp = "^3.8.5"
 websockets = "^11.0.3"
+nats-py = "^2.6.0"
 
 [tool.poetry.scripts]
 dev = "consumer:start_dev"
