@@ -2,10 +2,10 @@ import logging
 from typing import List, Tuple
 
 import shared.models
-from consumer.core.persistence.nats import nats_context
+from shared.persistence.nats import nats_context
 
 from consumer.messages.persistence.messages import MessageRepository
-from consumer.core.persistence.redis import redis_context
+from shared.persistence.redis import redis_context
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
 from consumer.messages.service.messages import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
