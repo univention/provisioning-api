@@ -7,8 +7,6 @@ from consumer.adapters.redis_adapter import RedisAdapter
 from core.models import Message
 from nats.aio.client import Client as NATS
 
-from core.models.queue import NatsMessage
-
 
 class Port:
     def __init__(self, redis: Redis, nats: NATS):
