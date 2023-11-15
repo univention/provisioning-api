@@ -74,7 +74,7 @@ class NatsAdapter:
 
         if pop:
             for msg in msgs:
-                await self.delete_message(msg)
+                await self.remove_message(msg)
 
         msgs_to_return = []
         for msg in msgs:
@@ -88,7 +88,7 @@ class NatsAdapter:
 
         return msgs_to_return
 
-    async def delete_message(self, msg: Union[Msg, NatsMessage]):
+    async def remove_message(self, msg: Union[Msg, NatsMessage]):
         """Delete a message from a NATS JetStream."""
         if isinstance(msg, NatsMessage):
             msg.data["body"] = json.dumps(msg.data["body"])

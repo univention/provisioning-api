@@ -64,8 +64,8 @@ class ConsumerPort:
             subscriber_name, timeout, count, pop
         )
 
-    async def delete_message(self, msg: NatsMessage):
-        await self.nats_adapter.delete_message(msg)
+    async def remove_message(self, msg: NatsMessage):
+        await self.nats_adapter.remove_message(msg)
 
     async def delete_queue(self, subscriber_name: str):
         await self.nats_adapter.delete_stream(subscriber_name)
