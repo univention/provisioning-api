@@ -2,7 +2,7 @@ import fastapi
 import logging
 
 from consumer.messages.persistence import DependsMessageRepo
-from core.models import NewMessage
+from shared.models import NewMessage
 from events.service import EventsService
 
 logger = logging.getLogger(__name__)
