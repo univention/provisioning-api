@@ -1,21 +1,21 @@
 from datetime import datetime
 from typing import Optional
 
-import core.models
+from shared.adapters.mq_abstract_adapter import MQAbstractAdapter
+from shared.models import Message, NewMessage
 
-from ..port import MQlibPort
-from ..adapters.mq_abstract_adapter import MQAbstractAdapter
+from ..ports.port import MQlibPort
 
 
 class EventsService:
 
-    def __init__(self):
+    def __init__(self, mq_adapter: MQAbstractAdapter):
         self._mq = MQlibPort()
 
 
     async def publish_event(
         self,
-        data: core.models.NewMessage,
+        data: NewMessage,
         publisher_name: str,
         ts: Optional[datetime] = None,
     ):
@@ -27,7 +27,7 @@ class EventsService:
         :param datetime ts: Optional timestamp to be assigned to the message.
         """
 
-        message = core.models.Message(
+        message = Message(
             publisher_name=publisher_name,
             ts=ts or datetime.utcnow(),
             realm=data.realm,

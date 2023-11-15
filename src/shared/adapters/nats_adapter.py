@@ -9,6 +9,7 @@ from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError
 
+from shared.adapters.mq_abstract_adapter import MQAbstractAdapter
 from shared.models import Message
 from shared.models.queue import NatsMessage
 
@@ -25,7 +26,7 @@ class NatsKeys:
         return f"durable_name:{subscriber_name}"
 
 
-class NatsAdapter:
+class NatsAdapter(MQAbstractAdapter):
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
