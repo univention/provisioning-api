@@ -3,7 +3,6 @@ from shared.models import Message
 
 
 class MQlibPort:
-
     def __init__(self, mq_adapter: MQAbstractAdapter):
         self._mq_adapter = mq_adapter
 

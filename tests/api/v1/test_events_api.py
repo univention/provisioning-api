@@ -20,12 +20,8 @@ async def events_client():
 
 @pytest.mark.anyio
 class TestEvents:
-
     @pytest.mark.xfail(reason="MQ Adapter and dependency injection needed first")
-    async def test_post_message(
-        self,
-        events_client: httpx.AsyncClient
-    ):
+    async def test_post_message(self, events_client: httpx.AsyncClient):
         response = await events_client.post(
             f"{events_api_prefix}/events/",
             json={

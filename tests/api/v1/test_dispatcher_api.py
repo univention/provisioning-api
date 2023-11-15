@@ -36,7 +36,6 @@ async def messages_client():
 
 @pytest.mark.anyio
 class TestDispatcher:
-
     async def test_get_message(
         self,
         messages_client: httpx.AsyncClient,

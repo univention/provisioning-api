@@ -8,10 +8,8 @@ from ..ports.port import MQlibPort
 
 
 class EventsService:
-
     def __init__(self, mq_adapter: MQAbstractAdapter):
         self._mq = MQlibPort()
-
 
     async def publish_event(
         self,

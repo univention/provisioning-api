@@ -53,7 +53,7 @@ if settings.cors_all:
 
 app.include_router(dispatcher_api_router)
 app.include_router(consumer_api_router)
-app.include_router(events_api_router) # this will probably move to it's own app
+app.include_router(events_api_router)  # this will probably move to it's own app
 
 
 @app.exception_handler(RequestValidationError)

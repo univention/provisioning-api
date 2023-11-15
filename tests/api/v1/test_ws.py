@@ -7,6 +7,7 @@ from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from events.api import v1_prefix as events_api_prefix
 from consumer.main import app
 
+
 @pytest.mark.xfail(reason="MQ Adapter and dependency injection needed first")
 def test_websocket():
     client = TestClient(app)

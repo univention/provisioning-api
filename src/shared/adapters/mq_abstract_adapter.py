@@ -1,7 +1,7 @@
 from ..models import Message
 
-class MQAbstractAdapter:
 
+class MQAbstractAdapter:
     def __init__(self):
         pass
 
