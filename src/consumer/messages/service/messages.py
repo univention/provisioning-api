@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from nats.aio.msg import Msg
 
-import core.models
+import shared.models
 
 from consumer.messages.persistence.messages import MessageRepository
 from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
