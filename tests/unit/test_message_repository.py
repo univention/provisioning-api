@@ -21,7 +21,7 @@ def port() -> AsyncMock:
 
 @pytest.fixture
 def nats() -> AsyncMock:
-    return patch("src.consumer.messages.persistence.messages.NATS").start().return_value
+    return patch("src.shared.adapters.nats_adapter.NATS").start().return_value
 
 
 @pytest.fixture
