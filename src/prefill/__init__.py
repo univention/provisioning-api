@@ -3,9 +3,10 @@ from typing import List, Tuple
 
 import shared.models
 
-from consumer.messages.persistence.messages import MessageRepository
-from consumer.port import Port
-from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
+# from consumer.messages.port.messages import MessageRepositoryPort
+from consumer.port import ConsumerPort
+
+# from consumer.subscriptions.port.subscriptions import SubscriptionRepository
 from consumer.messages.service.messages import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
 from prefill.udm import UDMPreFill
@@ -25,11 +26,11 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
 
     logger.debug(f"Initializing queue for {subscriber_name}.")
 
-    async with Port.port_context() as port:
-        msg_repo = MessageRepository(port)
-        msg_service = MessageService(msg_repo)
-        sub_repo = SubscriptionRepository(port)
-        sub_service = SubscriptionService(sub_repo)
+    async with ConsumerPort.port_context() as port:
+        # msg_repo = MessageRepositoryPort(port)
+        msg_service = MessageService(port)
+        # sub_repo = SubscriptionRepository(port)
+        sub_service = SubscriptionService(port)
 
         await sub_service.set_subscriber_queue_status(
             subscriber_name, shared.models.FillQueueStatus.running

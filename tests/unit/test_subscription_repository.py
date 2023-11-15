@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fakeredis.aioredis import FakeRedis
 
-from consumer.subscriptions.persistence import SubscriptionRepository
+from consumer.subscriptions.port import SubscriptionRepository
 from shared.models import FillQueueStatus
 
 
@@ -19,16 +19,14 @@ def nats() -> AsyncMock:
 @pytest.fixture
 def pipeline() -> AsyncMock:
     return patch(
-        "src.consumer.subscriptions.persistence.subscriptions.redis.Redis.pipeline"
+        "src.consumer.subscriptions.port.subscriptions.redis.Redis.pipeline"
     ).start()
 
 
 @pytest.fixture
 def port() -> AsyncMock:
     return (
-        patch("src.consumer.subscriptions.persistence.subscriptions.Port")
-        .start()
-        .return_value
+        patch("src.consumer.subscriptions.port.subscriptions.Port").start().return_value
     )
 
 

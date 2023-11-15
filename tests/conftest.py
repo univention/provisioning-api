@@ -15,7 +15,7 @@ from redis._parsers.helpers import (
 )
 from redis.utils import str_if_bytes
 
-from consumer.port import Port
+from consumer.port import ConsumerPort
 from consumer.main import app
 
 FLAT_MESSAGE = {
@@ -102,7 +102,7 @@ async def port_fake_dependency():
 @pytest.fixture(scope="session", autouse=True)
 def override_dependencies():
     # Override original port
-    app.dependency_overrides[Port.port_dependency] = port_fake_dependency
+    app.dependency_overrides[ConsumerPort.port_dependency] = port_fake_dependency
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests
     app.dependency_overrides.clear()

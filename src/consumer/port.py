@@ -11,7 +11,7 @@ from shared.models import Message
 from shared.models.queue import NatsMessage
 
 
-class Port:
+class ConsumerPort:
     def __init__(self):
         self.redis_adapter = RedisAdapter()
         self.nats_adapter = NatsAdapter()
@@ -19,7 +19,7 @@ class Port:
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
-        port = Port()
+        port = ConsumerPort()
         await port.nats_adapter.nats.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
@@ -30,7 +30,7 @@ class Port:
 
     @staticmethod
     async def port_dependency():
-        port = Port()
+        port = ConsumerPort()
         await port.nats_adapter.nats.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
@@ -103,4 +103,4 @@ class Port:
         await self.redis_adapter.delete_subscriber(name)
 
 
-PortDependency = Annotated[Port, Depends(Port.port_dependency)]
+PortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

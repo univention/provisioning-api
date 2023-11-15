@@ -5,7 +5,7 @@ import pytest
 from fakeredis.aioredis import FakeRedis
 from nats.aio.msg import Msg
 
-from consumer.messages.persistence import MessageRepository
+from consumer.messages.port import MessageRepositoryPort
 from shared.models import Message
 
 
@@ -16,7 +16,7 @@ def redis():
 
 @pytest.fixture
 def port() -> AsyncMock:
-    return patch("src.consumer.messages.persistence.messages.Port").start().return_value
+    return patch("src.consumer.messages.port.messages.Port").start().return_value
 
 
 @pytest.fixture
@@ -25,8 +25,8 @@ def nats() -> AsyncMock:
 
 
 @pytest.fixture
-def message_repo(redis, port, nats) -> MessageRepository:
-    message_repo = MessageRepository(port)
+def message_repo(redis, port, nats) -> MessageRepositoryPort:
+    message_repo = MessageRepositoryPort(port)
     message_repo.port = port
     return message_repo
 
@@ -53,7 +53,7 @@ class TestMessageRepository:
         "body": '{"foo": "bar", "foo1": "bar1"}',
     }
 
-    async def test_add_live_message(self, message_repo: MessageRepository):
+    async def test_add_live_message(self, message_repo: MessageRepositoryPort):
         message_repo.port.add_live_message = AsyncMock()
 
         await message_repo.add_live_message(self.subscriber_name, self.message)
@@ -61,7 +61,7 @@ class TestMessageRepository:
             self.subscriber_name, self.message
         )
 
-    async def test_add_prefill_message(self, message_repo: MessageRepository):
+    async def test_add_prefill_message(self, message_repo: MessageRepositoryPort):
         message_repo.port.add_prefill_message = AsyncMock()
 
         result = await message_repo.add_prefill_message(
@@ -73,7 +73,7 @@ class TestMessageRepository:
         )
         assert result is None
 
-    async def test_delete_prefill_messages(self, message_repo: MessageRepository):
+    async def test_delete_prefill_messages(self, message_repo: MessageRepositoryPort):
         message_repo.port.delete_prefill_messages = AsyncMock()
 
         result = await message_repo.delete_prefill_messages(self.subscriber_name)
@@ -83,7 +83,9 @@ class TestMessageRepository:
         )
         assert result is None
 
-    async def test_get_next_message_empty_stream(self, message_repo: MessageRepository):
+    async def test_get_next_message_empty_stream(
+        self, message_repo: MessageRepositoryPort
+    ):
         message_repo.port.get_next_message = AsyncMock(return_value=[])
 
         result = await message_repo.get_next_message(self.subscriber_name, 5, False)
@@ -94,7 +96,7 @@ class TestMessageRepository:
         assert result is None
 
     async def test_get_next_message_return_message(
-        self, message_repo: MessageRepository
+        self, message_repo: MessageRepositoryPort
     ):
         message_repo.port.get_next_message = AsyncMock(return_value=[self.message])
         expected_result = self.message
@@ -106,7 +108,7 @@ class TestMessageRepository:
         )
         assert result == expected_result
 
-    async def test_get_messages_empty_stream(self, message_repo: MessageRepository):
+    async def test_get_messages_empty_stream(self, message_repo: MessageRepositoryPort):
         message_repo.port.get_messages = AsyncMock(return_value=[])
 
         result = await message_repo.get_messages(self.subscriber_name, 5, 2, False)
@@ -116,7 +118,9 @@ class TestMessageRepository:
         )
         assert result == []
 
-    async def test_get_messages_return_messages(self, message_repo: MessageRepository):
+    async def test_get_messages_return_messages(
+        self, message_repo: MessageRepositoryPort
+    ):
         message_repo.port.get_messages = AsyncMock(
             return_value=[self.message, self.message]
         )
@@ -129,7 +133,7 @@ class TestMessageRepository:
         )
         assert result == expected_result
 
-    async def test_delete_message(self, message_repo: MessageRepository):
+    async def test_delete_message(self, message_repo: MessageRepositoryPort):
         message_repo.port.delete_message = AsyncMock()
         msg = Msg(_client="nats", data=json.dumps(self.flat_message).encode())
 
@@ -138,7 +142,7 @@ class TestMessageRepository:
         message_repo.port.delete_message.assert_called_once_with(msg)
         assert result is None
 
-    async def test_delete_queue(self, message_repo: MessageRepository):
+    async def test_delete_queue(self, message_repo: MessageRepositoryPort):
         message_repo.port.delete_queue = AsyncMock()
 
         result = await message_repo.delete_queue(self.subscriber_name)

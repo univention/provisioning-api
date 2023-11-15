@@ -1,13 +1,14 @@
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Annotated
 
-import shared.models
+from fastapi import Depends
 
-from consumer.messages.persistence.messages import MessageRepository
-from consumer.subscriptions.persistence.subscriptions import SubscriptionRepository
+from consumer.port import ConsumerPort, PortDependency
+
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models.queue import NatsMessage
+from shared.models import NewMessage, FillQueueStatus
+from shared.models.queue import NatsMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 class MessageService:
-    def __init__(self, repo: MessageRepository):
-        self._repo = repo
+    def __init__(self, port: ConsumerPort):
+        self._port = port
 
     async def publish_message(
         self,
-        data: shared.models.NewMessage,
+        data: NewMessage,
         publisher_name: str,
         ts: Optional[datetime] = None,
     ):
@@ -32,7 +33,7 @@ class MessageService:
         :param datetime ts: Optional timestamp to be assigned to the message.
         """
 
-        message = shared.models.Message(
+        message = Message(
             publisher_name=publisher_name,
             ts=ts or datetime.utcnow(),
             realm=data.realm,
@@ -40,25 +41,22 @@ class MessageService:
             body=data.body,
         )
 
-        service = SubscriptionService(SubscriptionRepository(self._repo.port))
+        service = SubscriptionService(self._port)
 
         subscriber_names = await service.get_subscribers_for_topic(
             message.realm, message.topic
         )
         for subscriber_name in subscriber_names:
-            await self._repo.add_live_message(subscriber_name, message)
+            await self._port.add_live_message(subscriber_name, message)
 
-    async def add_prefill_message(
-        self, subscriber_name: str, message: shared.models.Message
-    ):
+    async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Add the given message to the subscriber's queue."""
-        await self._repo.add_prefill_message(subscriber_name, message)
+        await self._port.add_prefill_message(subscriber_name, message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
         """Delete the pre-fill message from the subscriber's queue."""
 
-        service = MessageService(self._repo)
-        service.delete_prefill_messages(subscriber_name)
+        await self._port.delete_prefill_messages(subscriber_name)
 
     async def get_next_message(
         self,
@@ -75,11 +73,12 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(SubscriptionRepository(self._repo.port))
+        sub_service = SubscriptionService(self._port)
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
-        if force or (queue_status == shared.models.FillQueueStatus.done):
-            return await self._repo.get_next_message(subscriber_name, timeout, pop)
+        if force or (queue_status == FillQueueStatus.done):
+            response = await self._port.get_next_message(subscriber_name, timeout, pop)
+            return response[0] if response else None
         else:
             # TODO: if `block` is set this call should block until the queue is ready
             return None
@@ -104,11 +103,11 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        sub_service = SubscriptionService(SubscriptionRepository(self._repo.port))
+        sub_service = SubscriptionService(self._port)
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
-        if force or (queue_status == shared.models.FillQueueStatus.done):
-            return await self._repo.get_messages(subscriber_name, timeout, count, pop)
+        if force or (queue_status == FillQueueStatus.done):
+            return await self._port.get_messages(subscriber_name, timeout, count, pop)
         else:
             return []
 
@@ -118,7 +117,7 @@ class MessageService:
         :param msg: fetched message.
         """
 
-        await self._repo.delete_message(msg)
+        await self._port.delete_message(msg)
 
     async def remove_queue(self, subscriber_name: str):
         """Delete the entire queue for the given consumer.
@@ -126,4 +125,11 @@ class MessageService:
         :param str subscriber_name: Name of the subscriber.
         """
 
-        await self._repo.delete_queue(subscriber_name)
+        await self._port.delete_queue(subscriber_name)
+
+
+def get_message_service(port: PortDependency) -> MessageService:
+    return MessageService(port)
+
+
+DependsMessageService = Annotated[MessageService, Depends(get_message_service)]

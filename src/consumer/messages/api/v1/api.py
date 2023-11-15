@@ -4,13 +4,14 @@ import fastapi
 import json
 import logging
 
-import shared.models
+from consumer.messages.service.messages import DependsMessageService
 
-from consumer.messages.persistence import DependsMessageRepo
-from consumer.messages.service import MessageService
-
-from consumer.subscriptions.subscription.sink import WebSocketSink
-from consumer.subscriptions.subscription.sink import SinkManager
+from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
+from shared.models import (
+    NewMessage,
+    MessageProcessingStatusReport,
+    MessageProcessingStatus,
+)
 
 from shared.models.queue import NatsMessage, Message
 
@@ -22,9 +23,9 @@ manager = SinkManager()
 
 @router.post("/message/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
 async def create_new_message(
-    data: shared.models.NewMessage,
+    data: NewMessage,
     request: fastapi.Request,
-    repo: DependsMessageRepo,
+    service: DependsMessageService,
 ):
     """Submit a new message."""
 
@@ -33,7 +34,7 @@ async def create_new_message(
     # TODO: set publisher_name from authentication data
     publisher_name = request.client.host
 
-    service = MessageService(repo)
+    # service = MessageService(repo)
     await service.publish_message(data, publisher_name)
 
 
@@ -45,16 +46,16 @@ async def create_new_message(
 async def post_message_status(
     name: str,
     msg: NatsMessage,
-    repo: DependsMessageRepo,
-    report: shared.models.MessageProcessingStatusReport,
+    service: DependsMessageService,
+    report: MessageProcessingStatusReport,
 ):
     """Report on the processing of the given message."""
 
     # TODO: check authorization
 
-    service = MessageService(repo)
+    # service = MessageService(repo)
 
-    if report.status == shared.models.MessageProcessingStatus.ok:
+    if report.status == MessageProcessingStatus.ok:
         # Modifying the queue interferes with connected WebSocket clients,
         # so disconnect them first.
         await manager.close(name)
@@ -72,7 +73,7 @@ async def post_message_status(
 )
 async def get_subscription_messages(
     name: str,
-    repo: DependsMessageRepo,
+    service: DependsMessageService,
     count: int = 1,
     timeout: float = 5,
     pop: bool = False,
@@ -81,7 +82,7 @@ async def get_subscription_messages(
 
     # TODO: check authorization
 
-    service = MessageService(repo)
+    # service = MessageService(repo)
     return await service.get_messages(name, timeout, count, pop)
 
 
@@ -92,13 +93,13 @@ async def get_subscription_messages(
 )
 async def remove_message(
     msg: NatsMessage,
-    repo: DependsMessageRepo,
+    service: DependsMessageService,
 ):
     """Remove message."""
 
     # TODO: check authorization
 
-    service = MessageService(repo)
+    # service = MessageService(repo)
     return await service.remove_message(msg)
 
 
@@ -106,13 +107,13 @@ async def remove_message(
 async def subscription_websocket(
     name: str,
     websocket: fastapi.WebSocket,
-    repo: DependsMessageRepo,
+    service: DependsMessageService,
 ):
     """Stream messages for an existing subscription."""
 
     # TODO: check authorization
 
-    service = MessageService(repo)
+    # service = MessageService(repo)
 
     sink = await manager.add(name, WebSocketSink(websocket))
 
@@ -133,16 +134,14 @@ async def subscription_websocket(
 
             reply = await websocket.receive_text()
             try:
-                report = shared.models.MessageProcessingStatusReport(
-                    **json.loads(reply)
-                )
+                report = MessageProcessingStatusReport(**json.loads(reply))
             except Exception:
                 logger.error(
                     f"{name} > Unexpected input from WebSocket client: {reply}"
                 )
                 break
 
-            if report.status == shared.models.MessageProcessingStatus.ok:
+            if report.status == MessageProcessingStatus.ok:
                 await service.remove_message(message)
             else:
                 logger.error(

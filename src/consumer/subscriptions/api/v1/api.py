@@ -4,8 +4,7 @@ from typing import List
 import fastapi
 import shared.models
 
-from consumer.subscriptions.persistence import DependsSubscriptionRepo
-from consumer.subscriptions.service.subscription import SubscriptionService
+from consumer.subscriptions.service.subscription import DependsSubscriptionService
 from consumer.subscriptions.subscription.sink import SinkManager
 from prefill import init_queue as init_prefill_queue
 
@@ -18,13 +17,12 @@ manager = SinkManager()
 
 @router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
-    repo: DependsSubscriptionRepo,
+    service: DependsSubscriptionService,
 ) -> List[shared.models.Subscriber]:
     """Return all subscriptions."""
 
     # TODO: check authorization
 
-    service = SubscriptionService(repo)
     return await service.get_subscribers()
 
 
@@ -33,13 +31,12 @@ async def get_subscriptions(
 )
 async def get_subscription(
     name: str,
-    repo: DependsSubscriptionRepo,
+    service: DependsSubscriptionService,
 ) -> shared.models.Subscriber:
     """Return information about a subscription."""
 
     # TODO: check authorization
 
-    service = SubscriptionService(repo)
     try:
         subscriber = await service.get_subscriber(name)
     except ValueError as err:
@@ -53,14 +50,12 @@ async def get_subscription(
 )
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,
-    repo: DependsSubscriptionRepo,
+    service: DependsSubscriptionService,
     tasks: fastapi.BackgroundTasks,
 ):
     """Create a new subscription."""
 
     # TODO: check authorization for `new_sub.subscriber_name` / `new_sub.realms_topics`
-
-    service = SubscriptionService(repo)
 
     try:
         await service.add_subscriber(subscriber)
@@ -82,15 +77,14 @@ async def create_subscription(
 )
 async def cancel_subscription(
     name: str,
-    repo: DependsSubscriptionRepo,
+    service: DependsSubscriptionService,
 ):
     """Delete a subscription."""
 
     # TODO: check authorization
 
-    service = SubscriptionService(repo)
     try:
         await manager.close(name)
-        await service.remove_subscriber(name)
+        await service.delete_subscriber(name)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
