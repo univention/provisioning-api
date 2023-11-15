@@ -6,6 +6,7 @@ variables:
 
 include:
   - project: "univention/customers/dataport/upx/common-ci"
+    ref: "v0.5.4"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
