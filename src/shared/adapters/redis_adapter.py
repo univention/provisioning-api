@@ -26,11 +26,15 @@ class RedisKeys:
 
 class RedisAdapter:
     def __init__(self, redis: Redis = None):
-        self.redis = redis if redis else Redis(
-            host=settings.redis_host,
-            port=settings.redis_port,
-            decode_responses=True,
-            protocol=3,
+        self.redis = (
+            redis
+            if redis
+            else Redis(
+                host=settings.redis_host,
+                port=settings.redis_port,
+                decode_responses=True,
+                protocol=3,
+            )
         )
 
     async def close(self):
