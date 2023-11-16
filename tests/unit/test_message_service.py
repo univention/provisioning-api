@@ -55,11 +55,11 @@ class TestMessageRepository:
         subscription_service.get_subscribers_for_topic = AsyncMock(
             return_value=[self.subscriber_name]
         )
-        message_service.port.add_live_message = AsyncMock()
+        message_service._port.add_live_message = AsyncMock()
 
         await message_service.publish_message(data, "live_message", self.message.ts)
 
-        message_service.port.add_live_message.assert_called_once_with(
+        message_service._port.add_live_message.assert_called_once_with(
             self.subscriber_name, self.message
         )
         subscription_service.get_subscribers_for_topic.assert_called_once_with(
@@ -67,23 +67,23 @@ class TestMessageRepository:
         )
 
     async def test_add_prefill_message(self, message_service: MessageService):
-        message_service.port.add_prefill_message = AsyncMock()
+        message_service._port.add_prefill_message = AsyncMock()
 
         result = await message_service.add_prefill_message(
             self.subscriber_name, self.message
         )
 
-        message_service.port.add_prefill_message.assert_called_once_with(
+        message_service._port.add_prefill_message.assert_called_once_with(
             self.subscriber_name, self.message
         )
         assert result is None
 
     async def test_delete_prefill_messages(self, message_service: MessageService):
-        message_service.port.delete_prefill_messages = AsyncMock()
+        message_service._port.delete_prefill_messages = AsyncMock()
 
         result = await message_service.delete_prefill_messages(self.subscriber_name)
 
-        message_service.port.delete_prefill_messages.assert_called_once_with(
+        message_service._port.delete_prefill_messages.assert_called_once_with(
             self.subscriber_name
         )
         assert result is None
@@ -94,13 +94,13 @@ class TestMessageRepository:
         subscription_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service.port.get_next_message = AsyncMock(return_value=[])
+        message_service._port.get_next_message = AsyncMock(return_value=[])
 
         result = await message_service.get_next_message(
             self.subscriber_name, False, 5, False
         )
 
-        message_service.port.get_next_message.assert_called_once_with(
+        message_service._port.get_next_message.assert_called_once_with(
             self.subscriber_name, 5, False
         )
         assert result is None
@@ -111,12 +111,12 @@ class TestMessageRepository:
         subscription_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service.port.get_next_message = AsyncMock(return_value=[self.message])
+        message_service._port.get_next_message = AsyncMock(return_value=[self.message])
         expected_result = self.message
 
         result = await message_service.get_next_message(self.subscriber_name, False, 5)
 
-        message_service.port.get_next_message.assert_called_once_with(
+        message_service._port.get_next_message.assert_called_once_with(
             self.subscriber_name, 5, False
         )
         assert result == expected_result
@@ -127,11 +127,11 @@ class TestMessageRepository:
         subscription_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service.port.get_messages = AsyncMock(return_value=[])
+        message_service._port.get_messages = AsyncMock(return_value=[])
 
         result = await message_service.get_messages(self.subscriber_name, 5, 2, False)
 
-        message_service.port.get_messages.assert_called_once_with(
+        message_service._port.get_messages.assert_called_once_with(
             self.subscriber_name, 5, 2, False
         )
         assert result == []
@@ -142,31 +142,31 @@ class TestMessageRepository:
         subscription_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service.port.get_messages = AsyncMock(
+        message_service._port.get_messages = AsyncMock(
             return_value=[self.message, self.message]
         )
         expected_result = [self.message, self.message]
 
         result = await message_service.get_messages(self.subscriber_name, 5, 2, False)
 
-        message_service.port.get_messages.assert_called_once_with(
+        message_service._port.get_messages.assert_called_once_with(
             self.subscriber_name, 5, 2, False
         )
         assert result == expected_result
 
     async def test_remove_message(self, message_service: MessageService):
-        message_service.port.remove_message = AsyncMock()
+        message_service._port.remove_message = AsyncMock()
         msg = NatsMessage(data=self.flat_message)
 
         result = await message_service.remove_message(msg)
 
-        message_service.port.remove_message.assert_called_once_with(msg)
+        message_service._port.remove_message.assert_called_once_with(msg)
         assert result is None
 
     async def test_delete_queue(self, message_service: MessageService):
-        message_service.port.delete_queue = AsyncMock()
+        message_service._port.delete_queue = AsyncMock()
 
         result = await message_service.delete_queue(self.subscriber_name)
 
-        message_service.port.delete_queue.assert_called_once_with(self.subscriber_name)
+        message_service._port.delete_queue.assert_called_once_with(self.subscriber_name)
         assert result is None

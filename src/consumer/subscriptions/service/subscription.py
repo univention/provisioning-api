@@ -24,14 +24,14 @@ def match_subscription(
 
 class SubscriptionService:
     def __init__(self, port: ConsumerPort):
-        self.port = port
+        self._port = port
 
     async def get_subscribers(self) -> List[Subscriber]:
         """
         Return a list of names of all known subscribers.
         """
 
-        names = await self.port.get_subscriber_names()
+        names = await self._port.get_subscriber_names()
         subscribers = [await self.get_subscriber(name) for name in names]
         return subscribers
 
@@ -39,11 +39,11 @@ class SubscriptionService:
         """
         Get information about a registered subscriber.
         """
-        if not await self.port.get_subscriber_by_name(name):
+        if not await self._port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        sub = await self.port.get_subscriber_info(name)
-        sub_topics = await self.port.get_subscriber_topics(name)
+        sub = await self._port.get_subscriber_info(name)
+        sub_topics = await self._port.get_subscriber_topics(name)
         realms_topics = [realm_topic.split(":", 1) for realm_topic in sub_topics]
 
         data = dict(
@@ -59,12 +59,12 @@ class SubscriptionService:
         """
         Return a list names of everyone subscribed to a given realm and topic.
         """
-        names = await self.port.get_subscriber_names()
+        names = await self._port.get_subscriber_names()
 
         result = []
 
         for name in names:
-            realms_topics = await self.port.get_subscriber_topics(name)
+            realms_topics = await self._port.get_subscriber_topics(name)
             for realm_topic in realms_topics:
                 realm, topic = realm_topic.split(":", 1)
                 result.append((realm, topic, name))
@@ -85,10 +85,10 @@ class SubscriptionService:
         else:
             fill_queue_status = FillQueueStatus.done
 
-        if await self.port.get_subscriber_by_name(sub.name):
+        if await self._port.get_subscriber_by_name(sub.name):
             raise ValueError("Subscriber already exists.")
 
-        await self.port.add_subscriber(
+        await self._port.add_subscriber(
             name=sub.name,
             realms_topics=sub.realms_topics,
             fill_queue=sub.fill_queue,
@@ -97,26 +97,26 @@ class SubscriptionService:
 
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
-        if not await self.port.get_subscriber_by_name(name):
+        if not await self._port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        status = await self.port.get_subscriber_queue_status(name)
+        status = await self._port.get_subscriber_queue_status(name)
         return FillQueueStatus[status]
 
     async def set_subscriber_queue_status(self, name: str, status: FillQueueStatus):
         """Set the pre-fill status of the given subscriber."""
-        if not await self.port.get_subscriber_by_name(name):
+        if not await self._port.get_subscriber_by_name(name):
             raise ValueError("Subscriber not found.")
 
-        await self.port.set_subscriber_queue_status(name, status.name)
+        await self._port.set_subscriber_queue_status(name, status.name)
 
     async def delete_subscriber(self, name: str):
         """
         Delete a subscriber.
         """
 
-        await self.port.delete_subscriber(name)
-        await self.port.delete_queue(name)
+        await self._port.delete_subscriber(name)
+        await self._port.delete_queue(name)
 
 
 def get_subscription_service(port: PortDependency) -> SubscriptionService:
