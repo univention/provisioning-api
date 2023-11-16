@@ -2,12 +2,13 @@ import asyncio
 import logging
 
 import json
-from typing import List, Union
+from typing import List, Union, Optional
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
-from nats.js.errors import NotFoundError
+from nats.js.errors import NotFoundError, KeyNotFoundError
+from nats.js.kv import KeyValue
 
 from shared.models import Message
 from shared.models.queue import NatsMessage
@@ -18,20 +19,32 @@ logger = logging.getLogger(__name__)
 class NatsKeys:
     """A list of keys used in Nats for queueing messages."""
 
+    subscribers = "subscribers"
+
     def stream(subscriber_name: str) -> str:
         return f"stream:{subscriber_name}"
 
     def durable_name(subscriber_name: str) -> str:
         return f"durable_name:{subscriber_name}"
 
+    def bucket_stream(bucket: str) -> str:
+        return f"KV_{bucket}"
+
+    def subscriber(subscriber_name: str) -> str:
+        return f"subscriber:{subscriber_name}"
+
 
 class NatsAdapter:
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
+        self.kv_store: Optional[KeyValue] = None
 
     async def close(self):
         await self.nats.close()
+
+    async def create_kv_store(self):
+        self.kv_store = await self.js.create_key_value(bucket="Pub_Sub_KV")
 
     async def add_message(self, subscriber_name: str, message: Message):
         """Publish a message to a NATS subject."""
@@ -48,7 +61,9 @@ class NatsAdapter:
             ConsumerConfig(durable_name=NatsKeys.durable_name(subscriber_name)),
         )
         await self.js.publish(
-            subscriber_name, json.dumps(flat_message).encode(), stream=stream_name
+            subscriber_name,
+            json.dumps(flat_message).encode("utf-8"),
+            stream=stream_name,
         )
         logger.info("Message was published")
 
@@ -97,7 +112,7 @@ class NatsAdapter:
                 _client=self.nats,
                 subject=msg.subject,
                 reply=msg.reply,
-                data=msg.data.encode(),
+                data=msg.data.encode("utf-8"),
                 headers=msg.headers,
             )
         await msg.ack()
@@ -105,3 +120,45 @@ class NatsAdapter:
     async def delete_stream(self, subscriber_name: str):
         """Delete the entire stream for a given subject in NATS JetStream."""
         await self.js.delete_stream(NatsKeys.stream(subscriber_name))
+
+    async def get_subscriber_names(self):
+        kv_store = await self.js.key_value("Pub_Sub_KV")
+        try:
+            names = await kv_store.get(NatsKeys.subscribers)
+        except KeyNotFoundError:
+            return []
+        return names.value.decode("utf-8").split(",")
+
+    async def add_subscriber(
+        self,
+        name: str,
+        realms_topics: List[list[str, str]],
+        fill_queue: bool,
+        fill_queue_status: str,
+    ):
+        sub_info = {
+            "name": name,
+            "realms_topics": realms_topics,
+            "fill_queue": int(fill_queue),
+            "fill_queue_status": fill_queue_status,
+        }
+        await self.kv_store.put(
+            NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
+        )
+
+        try:
+            subs = await self.kv_store.get(NatsKeys.subscribers)
+            updated_subs = subs.value.decode("utf-8") + f",{name}"
+            await self.kv_store.put(NatsKeys.subscribers, updated_subs.encode("utf-8"))
+        except KeyNotFoundError:
+            await self.kv_store.put(NatsKeys.subscribers, name.encode("utf-8"))
+
+        for realm, topic in realms_topics:
+            await self.kv_store.put(f"{realm}:{topic}", name.encode("utf-8"))
+
+    async def get_subscriber_info(self, name: str):
+        try:
+            sub = await self.kv_store.get(NatsKeys.subscriber(name))
+            return json.loads(sub.value.decode("utf-8"))
+        except KeyNotFoundError:
+            return None

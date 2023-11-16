@@ -37,16 +37,13 @@ class SubscriptionService:
         """
         Get information about a registered subscriber.
         """
-        if not await self._port.get_subscriber_by_name(name):
-            raise ValueError("Subscriber not found.")
-
         sub = await self._port.get_subscriber_info(name)
-        sub_topics = await self._port.get_subscriber_topics(name)
-        realms_topics = [realm_topic.split(":", 1) for realm_topic in sub_topics]
+        if not sub:
+            raise ValueError("Subscriber not found.")
 
         data = dict(
             name=sub["name"],
-            realms_topics=realms_topics,
+            realms_topics=sub["realms_topics"],
             fill_queue=bool(int(sub["fill_queue"])),
             fill_queue_status=sub["fill_queue_status"],
         )
@@ -83,7 +80,7 @@ class SubscriptionService:
         else:
             fill_queue_status = FillQueueStatus.done
 
-        if await self._port.get_subscriber_by_name(sub.name):
+        if await self._port.get_subscriber_info(sub.name):
             raise ValueError("Subscriber already exists.")
 
         await self._port.add_subscriber(

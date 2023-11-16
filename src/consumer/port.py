@@ -34,6 +34,7 @@ class ConsumerPort:
         await port.nats_adapter.nats.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
+        await port.nats_adapter.create_kv_store()
         try:
             yield port
         finally:
@@ -71,13 +72,13 @@ class ConsumerPort:
         await self.nats_adapter.delete_stream(subscriber_name)
 
     async def get_subscriber_names(self) -> List[str]:
-        return await self.redis_adapter.get_subscriber_names()
+        return await self.nats_adapter.get_subscriber_names()
 
     async def get_subscriber_by_name(self, name: str):
         return await self.redis_adapter.get_subscriber_by_name(name)
 
     async def get_subscriber_info(self, name: str):
-        return await self.redis_adapter.get_subscriber_info(name)
+        return await self.nats_adapter.get_subscriber_info(name)
 
     async def get_subscriber_topics(self, name: str):
         return await self.redis_adapter.get_subscriber_topics(name)
@@ -89,7 +90,7 @@ class ConsumerPort:
         fill_queue: bool,
         fill_queue_status: str,
     ):
-        await self.redis_adapter.add_subscriber(
+        await self.nats_adapter.add_subscriber(
             name, realms_topics, fill_queue, fill_queue_status
         )
 
