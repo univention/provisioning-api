@@ -27,7 +27,7 @@ FLAT_MESSAGE = {
 }
 
 
-async def redis_fake_dependency():
+async def fake_redis():
     connection = aioredis.FakeRedis(decode_responses=True, protocol=2)
     connection.response_callbacks.update(
         {
@@ -72,15 +72,13 @@ async def redis_fake_dependency():
     )
 
     try:
-        yield connection
+        return connection
     finally:
         await connection.aclose()
 
 
-async def nats_fake_dependency():
-    server = AsyncMock()
+def fake_js():
     js = Mock()
-    server.jetstream = Mock(return_value=js)
     js.stream_info = AsyncMock()
     js.publish = AsyncMock()
     js.delete_msg = AsyncMock()
@@ -90,13 +88,17 @@ async def nats_fake_dependency():
     sub = AsyncMock()
     js.pull_subscribe = AsyncMock(return_value=sub)
     sub.fetch = AsyncMock(
-        return_value=[Msg(_client=server, data=json.dumps(FLAT_MESSAGE).encode())]
+        return_value=[Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())]
     )
-    return server
+    return js
 
 
 async def port_fake_dependency():
-    pass
+    port = ConsumerPort()
+    port.nats_adapter.nats = AsyncMock()
+    port.nats_adapter.js = fake_js()
+    port.redis_adapter.redis = await fake_redis()
+    return port
 
 
 @pytest.fixture(scope="session", autouse=True)

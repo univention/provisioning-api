@@ -83,7 +83,6 @@ class RedisAdapter:
         return await self.redis.smembers(RedisKeys.subscribers)
 
     async def get_subscriber_by_name(self, name: str):
-        logger.info(f"{self.redis=}")
         return await self.redis.sismember(RedisKeys.subscribers, name)
 
     async def get_subscriber_info(self, name: str):

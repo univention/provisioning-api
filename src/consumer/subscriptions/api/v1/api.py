@@ -3,11 +3,11 @@ from typing import List
 
 import fastapi
 import shared.models
+from consumer.port import PortDependency
 
-from consumer.subscriptions.service.subscription import DependsSubscriptionService
+from consumer.subscriptions.service.subscription import SubscriptionService
 from consumer.subscriptions.subscription.sink import SinkManager
 from prefill import init_queue as init_prefill_queue
-
 
 logger = logging.getLogger(__name__)
 
@@ -17,25 +17,25 @@ manager = SinkManager()
 
 @router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
-    service: DependsSubscriptionService,
+    port: PortDependency,
 ) -> List[shared.models.Subscriber]:
     """Return all subscriptions."""
 
     # TODO: check authorization
 
+    service = SubscriptionService(port)
     return await service.get_subscribers()
 
 
 @router.get(
     "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def get_subscription(
-    name: str,
-    service: DependsSubscriptionService,
-) -> shared.models.Subscriber:
+async def get_subscription(name: str, port: PortDependency) -> shared.models.Subscriber:
     """Return information about a subscription."""
 
     # TODO: check authorization
+
+    service = SubscriptionService(port)
 
     try:
         subscriber = await service.get_subscriber(name)
@@ -50,12 +50,14 @@ async def get_subscription(
 )
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,
-    service: DependsSubscriptionService,
+    port: PortDependency,
     tasks: fastapi.BackgroundTasks,
 ):
     """Create a new subscription."""
 
     # TODO: check authorization for `new_sub.subscriber_name` / `new_sub.realms_topics`
+
+    service = SubscriptionService(port)
 
     try:
         await service.add_subscriber(subscriber)
@@ -75,13 +77,12 @@ async def create_subscription(
 @router.delete(
     "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def cancel_subscription(
-    name: str,
-    service: DependsSubscriptionService,
-):
+async def cancel_subscription(name: str, port: PortDependency):
     """Delete a subscription."""
 
     # TODO: check authorization
+
+    service = SubscriptionService(port)
 
     try:
         await manager.close(name)

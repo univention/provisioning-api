@@ -4,7 +4,8 @@ import fastapi
 import json
 import logging
 
-from consumer.messages.service.messages import DependsMessageService
+from consumer.messages.service.messages import MessageService
+from consumer.port import PortDependency
 
 from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
 from shared.models import (
@@ -25,7 +26,7 @@ manager = SinkManager()
 async def create_new_message(
     data: NewMessage,
     request: fastapi.Request,
-    service: DependsMessageService,
+    port: PortDependency,
 ):
     """Submit a new message."""
 
@@ -34,7 +35,7 @@ async def create_new_message(
     # TODO: set publisher_name from authentication data
     publisher_name = request.client.host
 
-    # service = MessageService(repo)
+    service = MessageService(port)
     await service.publish_message(data, publisher_name)
 
 
@@ -46,14 +47,14 @@ async def create_new_message(
 async def post_message_status(
     name: str,
     msg: NatsMessage,
-    service: DependsMessageService,
+    port: PortDependency,
     report: MessageProcessingStatusReport,
 ):
     """Report on the processing of the given message."""
 
     # TODO: check authorization
 
-    # service = MessageService(repo)
+    service = MessageService(port)
 
     if report.status == MessageProcessingStatus.ok:
         # Modifying the queue interferes with connected WebSocket clients,
@@ -73,7 +74,7 @@ async def post_message_status(
 )
 async def get_subscription_messages(
     name: str,
-    service: DependsMessageService,
+    port: PortDependency,
     count: int = 1,
     timeout: float = 5,
     pop: bool = False,
@@ -82,7 +83,7 @@ async def get_subscription_messages(
 
     # TODO: check authorization
 
-    # service = MessageService(repo)
+    service = MessageService(port)
     return await service.get_messages(name, timeout, count, pop)
 
 
@@ -93,13 +94,13 @@ async def get_subscription_messages(
 )
 async def remove_message(
     msg: NatsMessage,
-    service: DependsMessageService,
+    port: PortDependency,
 ):
     """Remove message."""
 
     # TODO: check authorization
 
-    # service = MessageService(repo)
+    service = MessageService(port)
     return await service.remove_message(msg)
 
 
@@ -107,13 +108,13 @@ async def remove_message(
 async def subscription_websocket(
     name: str,
     websocket: fastapi.WebSocket,
-    service: DependsMessageService,
+    port: PortDependency,
 ):
     """Stream messages for an existing subscription."""
 
     # TODO: check authorization
 
-    # service = MessageService(repo)
+    service = MessageService(port)
 
     sink = await manager.add(name, WebSocketSink(websocket))
 
@@ -142,7 +143,7 @@ async def subscription_websocket(
                 break
 
             if report.status == MessageProcessingStatus.ok:
-                await service.remove_message(message)
+                await service.remove_message(nats_mess)
             else:
                 logger.error(
                     f"{name} > WebSocket client reported status: {report.status}"

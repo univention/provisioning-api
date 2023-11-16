@@ -1,10 +1,8 @@
 import logging
 from datetime import datetime
-from typing import List, Optional, Annotated
+from typing import List, Optional
 
-from fastapi import Depends
-
-from consumer.port import ConsumerPort, PortDependency
+from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import NewMessage, FillQueueStatus
@@ -126,10 +124,3 @@ class MessageService:
         """
 
         await self._port.delete_queue(subscriber_name)
-
-
-def get_message_service(port: PortDependency) -> MessageService:
-    return MessageService(port)
-
-
-DependsMessageService = Annotated[MessageService, Depends(get_message_service)]

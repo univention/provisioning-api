@@ -13,20 +13,20 @@ def port() -> AsyncMock:
 
 
 @pytest.fixture
-def subscription_service() -> AsyncMock:
+def sub_service() -> AsyncMock:
     yield patch(
         "consumer.messages.service.messages.SubscriptionService"
     ).start().return_value
 
 
 @pytest.fixture
-def message_service(port, subscription_service) -> MessageService:
+def message_service(port, sub_service) -> MessageService:
     message_repo = MessageService(port)
     return message_repo
 
 
 @pytest.mark.anyio
-class TestMessageRepository:
+class TestMessageService:
     subscriber_name = "subscriber_1"
     message = Message(
         publisher_name="live_message",
@@ -46,13 +46,11 @@ class TestMessageRepository:
         "body": '{"foo": "bar", "foo1": "bar1"}',
     }
 
-    async def test_add_live_message(
-        self, message_service: MessageService, subscription_service
-    ):
+    async def test_add_live_message(self, message_service: MessageService, sub_service):
         data = NewMessage(
             realm="udm", topic="topic_name", body={"foo": "bar", "foo1": "bar1"}
         )
-        subscription_service.get_subscribers_for_topic = AsyncMock(
+        sub_service.get_subscribers_for_topic = AsyncMock(
             return_value=[self.subscriber_name]
         )
         message_service._port.add_live_message = AsyncMock()
@@ -62,7 +60,7 @@ class TestMessageRepository:
         message_service._port.add_live_message.assert_called_once_with(
             self.subscriber_name, self.message
         )
-        subscription_service.get_subscribers_for_topic.assert_called_once_with(
+        sub_service.get_subscribers_for_topic.assert_called_once_with(
             "udm", "topic_name"
         )
 
@@ -89,9 +87,9 @@ class TestMessageRepository:
         assert result is None
 
     async def test_get_next_message_empty_stream(
-        self, message_service: MessageService, subscription_service
+        self, message_service: MessageService, sub_service
     ):
-        subscription_service.get_subscriber_queue_status = AsyncMock(
+        sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
         message_service._port.get_next_message = AsyncMock(return_value=[])
@@ -106,9 +104,9 @@ class TestMessageRepository:
         assert result is None
 
     async def test_get_next_message_return_message(
-        self, message_service: MessageService, subscription_service
+        self, message_service: MessageService, sub_service
     ):
-        subscription_service.get_subscriber_queue_status = AsyncMock(
+        sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
         message_service._port.get_next_message = AsyncMock(return_value=[self.message])
@@ -122,9 +120,9 @@ class TestMessageRepository:
         assert result == expected_result
 
     async def test_get_messages_empty_stream(
-        self, message_service: MessageService, subscription_service
+        self, message_service: MessageService, sub_service
     ):
-        subscription_service.get_subscriber_queue_status = AsyncMock(
+        sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
         message_service._port.get_messages = AsyncMock(return_value=[])
@@ -137,9 +135,9 @@ class TestMessageRepository:
         assert result == []
 
     async def test_get_messages_return_messages(
-        self, message_service: MessageService, subscription_service
+        self, message_service: MessageService, sub_service
     ):
-        subscription_service.get_subscriber_queue_status = AsyncMock(
+        sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
         message_service._port.get_messages = AsyncMock(

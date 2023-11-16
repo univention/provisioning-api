@@ -1,9 +1,7 @@
 import re
-from typing import List, Annotated
+from typing import List
 
-from fastapi import Depends
-
-from consumer.port import ConsumerPort, PortDependency
+from consumer.port import ConsumerPort
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
 
 
@@ -89,10 +87,7 @@ class SubscriptionService:
             raise ValueError("Subscriber already exists.")
 
         await self._port.add_subscriber(
-            name=sub.name,
-            realms_topics=sub.realms_topics,
-            fill_queue=sub.fill_queue,
-            fill_queue_status=fill_queue_status,
+            sub.name, sub.realms_topics, sub.fill_queue, fill_queue_status
         )
 
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
@@ -112,17 +107,11 @@ class SubscriptionService:
 
     async def delete_subscriber(self, name: str):
         """
-        Delete a subscriber.
+        Delete a subscriber and all of its data.
         """
+
+        if not await self._port.get_subscriber_by_name(name):
+            raise ValueError("Subscriber not found.")
 
         await self._port.delete_subscriber(name)
         await self._port.delete_queue(name)
-
-
-def get_subscription_service(port: PortDependency) -> SubscriptionService:
-    return SubscriptionService(port)
-
-
-DependsSubscriptionService = Annotated[
-    SubscriptionService, Depends(get_subscription_service)
-]
