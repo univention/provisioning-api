@@ -103,4 +103,4 @@ class ConsumerPort:
         await self.redis_adapter.delete_subscriber(name)
 
 
-PortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]
+ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

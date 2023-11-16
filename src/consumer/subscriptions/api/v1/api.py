@@ -3,7 +3,7 @@ from typing import List
 
 import fastapi
 import shared.models
-from consumer.port import PortDependency
+from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from consumer.subscriptions.subscription.sink import SinkManager
@@ -17,7 +17,7 @@ manager = SinkManager()
 
 @router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
-    port: PortDependency,
+    port: ConsumerPortDependency,
 ) -> List[shared.models.Subscriber]:
     """Return all subscriptions."""
 
@@ -30,7 +30,9 @@ async def get_subscriptions(
 @router.get(
     "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def get_subscription(name: str, port: PortDependency) -> shared.models.Subscriber:
+async def get_subscription(
+    name: str, port: ConsumerPortDependency
+) -> shared.models.Subscriber:
     """Return information about a subscription."""
 
     # TODO: check authorization
@@ -50,7 +52,7 @@ async def get_subscription(name: str, port: PortDependency) -> shared.models.Sub
 )
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,
-    port: PortDependency,
+    port: ConsumerPortDependency,
     tasks: fastapi.BackgroundTasks,
 ):
     """Create a new subscription."""
@@ -77,7 +79,7 @@ async def create_subscription(
 @router.delete(
     "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def cancel_subscription(name: str, port: PortDependency):
+async def cancel_subscription(name: str, port: ConsumerPortDependency):
     """Delete a subscription."""
 
     # TODO: check authorization

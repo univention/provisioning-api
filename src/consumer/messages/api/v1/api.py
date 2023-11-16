@@ -5,7 +5,7 @@ import json
 import logging
 
 from consumer.messages.service.messages import MessageService
-from consumer.port import PortDependency
+from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
 from shared.models import (
@@ -26,7 +26,7 @@ manager = SinkManager()
 async def create_new_message(
     data: NewMessage,
     request: fastapi.Request,
-    port: PortDependency,
+    port: ConsumerPortDependency,
 ):
     """Submit a new message."""
 
@@ -47,7 +47,7 @@ async def create_new_message(
 async def post_message_status(
     name: str,
     msg: NatsMessage,
-    port: PortDependency,
+    port: ConsumerPortDependency,
     report: MessageProcessingStatusReport,
 ):
     """Report on the processing of the given message."""
@@ -74,7 +74,7 @@ async def post_message_status(
 )
 async def get_subscription_messages(
     name: str,
-    port: PortDependency,
+    port: ConsumerPortDependency,
     count: int = 1,
     timeout: float = 5,
     pop: bool = False,
@@ -94,7 +94,7 @@ async def get_subscription_messages(
 )
 async def remove_message(
     msg: NatsMessage,
-    port: PortDependency,
+    port: ConsumerPortDependency,
 ):
     """Remove message."""
 
@@ -108,7 +108,7 @@ async def remove_message(
 async def subscription_websocket(
     name: str,
     websocket: fastapi.WebSocket,
-    port: PortDependency,
+    port: ConsumerPortDependency,
 ):
     """Stream messages for an existing subscription."""
 
