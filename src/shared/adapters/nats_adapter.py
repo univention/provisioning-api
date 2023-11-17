@@ -11,7 +11,7 @@ from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
 from shared.models import Message
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class NatsAdapter:
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         try:
@@ -96,16 +96,16 @@ class NatsAdapter:
             data = json.loads(msg.data)
             data["body"] = json.loads(data["body"])
             msgs_to_return.append(
-                NatsMessage(
+                MQMessage(
                     subject=msg.subject, reply=msg.reply, data=data, headers=msg.headers
                 )
             )
 
         return msgs_to_return
 
-    async def remove_message(self, msg: Union[Msg, NatsMessage]):
+    async def remove_message(self, msg: Union[Msg, MQMessage]):
         """Delete a message from a NATS JetStream."""
-        if isinstance(msg, NatsMessage):
+        if isinstance(msg, MQMessage):
             msg.data["body"] = json.dumps(msg.data["body"])
             msg.data = json.dumps(msg.data)
             msg = Msg(
