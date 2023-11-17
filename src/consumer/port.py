@@ -89,12 +89,8 @@ class ConsumerPort:
             name, realms_topics, fill_queue, fill_queue_status
         )
 
-    async def set_subscriber_queue_status(
-        self, name: str, sub_info: dict, status: str
-    ) -> None:
-        return await self.nats_adapter.set_subscriber_queue_status(
-            name, sub_info, status
-        )
+    async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
+        return await self.nats_adapter.set_subscriber_queue_status(name, sub_info)
 
     async def delete_subscriber(self, name: str):
         await self.nats_adapter.delete_subscriber(name)

@@ -1,4 +1,5 @@
 import uuid
+
 import httpx
 import pytest
 
@@ -18,10 +19,11 @@ async def client():
         yield client
 
 
-# @pytest.mark.anyio
-@pytest.mark.skip(reason="Need to fix it later")
+@pytest.mark.anyio
 class TestConsumer:
-    async def test_create_and_get_subscription(self, client: httpx.AsyncClient):
+    async def test_create_subscription(
+        self, client: httpx.AsyncClient, override_dependencies_without_sub
+    ):
         name = str(uuid.uuid4())
         realms_topics = [
             ["foo", "bar/baz"],
@@ -37,93 +39,25 @@ class TestConsumer:
             },
         )
         assert response.status_code == 201
+
+    async def test_get_subscription(self, client: httpx.AsyncClient):
+        name = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+        realms_topics = [["foo", "bar"], ["abc", "def"]]
 
         response = await client.get(f"{api_prefix}/subscription/{name}")
         assert response.status_code == 200
         data = response.json()
 
         assert data["name"] == name
-        assert not data["fill_queue"]
+        assert data["fill_queue"]
         assert data["fill_queue_status"] == FillQueueStatus.done
         assert len(data["realms_topics"]) == len(realms_topics)
         assert all(
             ([realm, topic] in data["realms_topics"] for realm, topic in realms_topics)
         )
 
-    async def test_get_subscriptions(self, client: httpx.AsyncClient):
-        subscriptions = [
-            {
-                "name": str(uuid.uuid4()),
-                "realms_topics": [
-                    ["foo", "bar/baz"],
-                    ["abc", "def/ghi"],
-                ],
-            },
-            {
-                "name": str(uuid.uuid4()),
-                "realms_topics": [
-                    ["foo", "f33d/f00d"],
-                    ["bar", "c0ff/ee"],
-                ],
-            },
-        ]
-
-        for sub in subscriptions:
-            response = await client.post(
-                f"{api_prefix}/subscription/",
-                json={
-                    "name": sub["name"],
-                    "realms_topics": sub["realms_topics"],
-                    "fill_queue": False,
-                },
-            )
-            assert response.status_code == 201
-
-        response = await client.get(f"{api_prefix}/subscription/")
-        assert response.status_code == 200
-        data = response.json()
-
-        for request in subscriptions:
-            ok = False
-            for returned in data:
-                if returned["name"] != request["name"]:
-                    continue
-
-                assert len(returned["realms_topics"]) == len(request["realms_topics"])
-                assert all(
-                    (
-                        [realm, topic] in returned["realms_topics"]
-                        for realm, topic in request["realms_topics"]
-                    )
-                )
-
-                ok = True
-
-            assert ok
-
     async def test_delete_subscription(self, client: httpx.AsyncClient):
         name = str(uuid.uuid4())
-        realms_topics = [
-            ["foo", "bar/baz"],
-            ["abc", "def/ghi"],
-        ]
-
-        response = await client.post(
-            f"{api_prefix}/subscription/",
-            json={
-                "name": name,
-                "realms_topics": realms_topics,
-                "fill_queue": False,
-            },
-        )
-        assert response.status_code == 201
-
-        response = await client.get(f"{api_prefix}/subscription/{name}")
-        assert response.status_code == 200
-        assert response.json()["name"] == name
 
         response = await client.delete(f"{api_prefix}/subscription/{name}")
         assert response.status_code == 200
-
-        response = await client.get(f"{api_prefix}/subscription/{name}")
-        assert response.status_code == 404

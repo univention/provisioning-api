@@ -50,7 +50,7 @@ class TestMessageService:
         data = NewMessage(
             realm="udm", topic="topic_name", body={"foo": "bar", "foo1": "bar1"}
         )
-        sub_service.get_subscribers_for_topic = AsyncMock(
+        message_service._port.get_subscribers_for_topic = AsyncMock(
             return_value=[self.subscriber_name]
         )
         message_service._port.add_live_message = AsyncMock()
@@ -60,8 +60,8 @@ class TestMessageService:
         message_service._port.add_live_message.assert_called_once_with(
             self.subscriber_name, self.message
         )
-        sub_service.get_subscribers_for_topic.assert_called_once_with(
-            "udm", "topic_name"
+        message_service._port.get_subscribers_for_topic.assert_called_once_with(
+            "udm:topic_name"
         )
 
     async def test_add_prefill_message(self, message_service: MessageService):

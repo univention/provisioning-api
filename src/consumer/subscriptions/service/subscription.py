@@ -83,7 +83,8 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
-        await self._port.set_subscriber_queue_status(name, sub_info, status.name)
+        sub_info["fill_queue_status"] = status.name
+        await self._port.set_subscriber_queue_status(name, sub_info)
 
     async def delete_subscriber(self, name: str):
         """

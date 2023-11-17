@@ -4,7 +4,6 @@ import httpx
 import pytest
 
 from consumer.messages.api import v1_prefix as messages_api_prefix
-from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.main import app as messages_app
 from consumer.main import app as subscriptions_app
 
@@ -34,25 +33,13 @@ async def messages_client():
         yield client
 
 
-# @pytest.mark.anyio
-@pytest.mark.skip(reason="Need to fix it later")
+@pytest.mark.anyio
 class TestDispatcher:
     async def test_post_message(
         self,
         messages_client: httpx.AsyncClient,
         subscriptions_client: httpx.AsyncClient,
     ):
-        name = str(uuid.uuid4())
-        response = await subscriptions_client.post(
-            f"{subscriptions_api_prefix}/subscription/",
-            json={
-                "name": name,
-                "realms_topics": [[REALM, TOPIC]],
-                "fill_queue": False,
-            },
-        )
-        assert response.status_code == 201
-
         response = await messages_client.post(
             f"{messages_api_prefix}/message/",
             json={
@@ -69,16 +56,6 @@ class TestDispatcher:
         subscriptions_client: httpx.AsyncClient,
     ):
         name = str(uuid.uuid4())
-        response = await subscriptions_client.post(
-            f"{subscriptions_api_prefix}/subscription/",
-            json={
-                "name": name,
-                "realms_topics": [[REALM, TOPIC]],
-                "fill_queue": False,
-            },
-        )
-        assert response.status_code == 201
-
         response = await messages_client.get(
             f"{messages_api_prefix}/subscription/{name}/message"
         )
@@ -96,16 +73,6 @@ class TestDispatcher:
         subscriptions_client: httpx.AsyncClient,
     ):
         name = str(uuid.uuid4())
-
-        response = await subscriptions_client.post(
-            f"{subscriptions_api_prefix}/subscription/",
-            json={
-                "name": name,
-                "realms_topics": [[REALM, TOPIC]],
-                "fill_queue": False,
-            },
-        )
-        assert response.status_code == 201
 
         nats_msg = {
             "subject": "subscriber_2",

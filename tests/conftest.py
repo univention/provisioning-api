@@ -14,7 +14,7 @@ from redis._parsers.helpers import (
     parse_sentinel_slaves_and_sentinels_resp3,
 )
 from redis.utils import str_if_bytes
-
+from nats.js.kv import KeyValue
 from consumer.port import ConsumerPort
 from consumer.main import app
 
@@ -24,6 +24,12 @@ FLAT_MESSAGE = {
     "realm": "foo",
     "topic": "bar/baz",
     "body": '{"hello": "world"}',
+}
+SUBSCRIBER_INFO = {
+    "name": "0f084f8c-1093-4024-b215-55fe8631ddf6",
+    "realms_topics": [["foo", "bar"], ["abc", "def"]],
+    "fill_queue": True,
+    "fill_queue_status": "done",
 }
 
 
@@ -90,21 +96,59 @@ def fake_js():
     sub.fetch = AsyncMock(
         return_value=[Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())]
     )
+
     return js
 
 
-async def port_fake_dependency():
+def fake_kv_store():
+    kv_store = Mock()
+    kv_store.get = AsyncMock(
+        return_value=KeyValue.Entry(
+            "bucket", "key", json.dumps(SUBSCRIBER_INFO).encode("utf-8"), 1, 1, 1, ""
+        )
+    )
+    kv_store.put = AsyncMock()
+
+    return kv_store
+
+
+async def port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
     port.nats_adapter.nats = AsyncMock()
     port.nats_adapter.js = fake_js()
+
+    port.nats_adapter.add_subscriber = AsyncMock()
+    port.nats_adapter.get_subscribers_for_key = AsyncMock(
+        return_value=[SUBSCRIBER_INFO["name"]]
+    )
+    port.nats_adapter.delete_subscriber = AsyncMock()
+    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
+
     port.redis_adapter.redis = await fake_redis()
     return port
 
 
-@pytest.fixture(scope="session", autouse=True)
+async def port_fake_dependency_without_sub():
+    port = await port_fake_dependency()
+    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
+    return port
+
+
+@pytest.fixture(autouse=True)
 def override_dependencies():
     # Override original port
     app.dependency_overrides[ConsumerPort.port_dependency] = port_fake_dependency
+    yield  # This will ensure the setup is done before tests and cleanup after
+    # Clear the overrides after the tests
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def override_dependencies_without_sub():
+    # Override original port
+    app.dependency_overrides[
+        ConsumerPort.port_dependency
+    ] = port_fake_dependency_without_sub
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests
     app.dependency_overrides.clear()

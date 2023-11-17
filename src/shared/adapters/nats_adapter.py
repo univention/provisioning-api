@@ -153,10 +153,7 @@ class NatsAdapter:
         except KeyNotFoundError:
             return None
 
-    async def set_subscriber_queue_status(
-        self, name: str, sub_info: dict, status: str
-    ) -> None:
-        sub_info["fill_queue_status"] = status
+    async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
         await self.kv_store.put(
             NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
         )
