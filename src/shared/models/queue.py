@@ -86,7 +86,8 @@ class UDMMessage(BaseMessage):
         )
 
 
-class NatsMessage(BaseModel):
+class MQMessage(BaseModel):
+    """A message published/received via a message queue adapter."""
     subject: str = ""
     reply: str = ""
     data: dict = {}

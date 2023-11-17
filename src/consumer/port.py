@@ -8,7 +8,7 @@ from shared.adapters.redis_adapter import RedisAdapter
 from shared.config import settings
 from shared.models import Message
 
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 
 class ConsumerPort:
@@ -56,17 +56,17 @@ class ConsumerPort:
 
     async def get_next_message(
         self, subscriber_name: str, timeout: float, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         return await self.nats_adapter.get_messages(subscriber_name, timeout, 1, pop)
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         return await self.nats_adapter.get_messages(
             subscriber_name, timeout, count, pop
         )
 
-    async def remove_message(self, msg: NatsMessage):
+    async def remove_message(self, msg: MQMessage):
         await self.nats_adapter.remove_message(msg)
 
     async def delete_queue(self, subscriber_name: str):

@@ -13,7 +13,7 @@ from shared.models import (
     MessageProcessingStatus,
 )
 
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ manager = SinkManager()
 )
 async def post_message_status(
     name: str,
-    msg: NatsMessage,
+    msg: MQMessage,
     port: ConsumerPortDependency,
     report: MessageProcessingStatusReport,
 ):
@@ -60,7 +60,7 @@ async def get_subscription_messages(
     count: int = 1,
     timeout: float = 5,
     pop: bool = False,
-) -> List[NatsMessage]:
+) -> List[MQMessage]:
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
@@ -75,7 +75,7 @@ async def get_subscription_messages(
     tags=["sink"],
 )
 async def remove_message(
-    msg: NatsMessage,
+    msg: MQMessage,
     port: ConsumerPortDependency,
 ):
     """Remove message."""
