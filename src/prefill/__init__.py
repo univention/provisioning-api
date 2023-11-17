@@ -1,16 +1,13 @@
 import logging
-from typing import List, Tuple
+from typing import List
 
 import shared.models
 
-# from consumer.messages.port.messages import MessageRepositoryPort
 from consumer.port import ConsumerPort
 
-# from consumer.subscriptions.port.subscriptions import SubscriptionRepository
 from consumer.messages.service.messages import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
 from prefill.udm import UDMPreFill
-
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +16,7 @@ mapping = {
 }
 
 
-async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]]):
+async def init_queue(subscriber_name: str, realms_topics: List[List[str]]):
     """
     Initialize the queue for the given subscriber with its requested topics.
     """
@@ -27,9 +24,7 @@ async def init_queue(subscriber_name: str, realms_topics: List[Tuple[str, str]])
     logger.debug(f"Initializing queue for {subscriber_name}.")
 
     async with ConsumerPort.port_context() as port:
-        # msg_repo = MessageRepositoryPort(port)
         msg_service = MessageService(port)
-        # sub_repo = SubscriptionRepository(port)
         sub_service = SubscriptionService(port)
 
         await sub_service.set_subscriber_queue_status(

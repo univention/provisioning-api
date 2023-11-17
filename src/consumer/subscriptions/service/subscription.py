@@ -50,26 +50,6 @@ class SubscriptionService:
 
         return Subscriber.model_validate(data)
 
-    async def get_subscribers_for_topic(self, realm: str, topic: str) -> List[str]:
-        """
-        Return a list names of everyone subscribed to a given realm and topic.
-        """
-        names = await self._port.get_subscriber_names()
-
-        result = []
-
-        for name in names:
-            realms_topics = await self._port.get_subscriber_topics(name)
-            for realm_topic in realms_topics:
-                realm, topic = realm_topic.split(":", 1)
-                result.append((realm, topic, name))
-
-        return [
-            s_name
-            for s_realm, s_topic, s_name in result
-            if match_subscription(s_realm, s_topic, realm, topic)
-        ]
-
     async def add_subscriber(self, sub: NewSubscriber):
         """
         Add a new subscriber.
@@ -89,25 +69,28 @@ class SubscriptionService:
 
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
-        if not await self._port.get_subscriber_by_name(name):
+
+        sub_info = await self._port.get_subscriber_info(name)
+        if not sub_info:
             raise ValueError("Subscriber not found.")
 
-        status = await self._port.get_subscriber_queue_status(name)
+        status = sub_info["fill_queue_status"]
         return FillQueueStatus[status]
 
     async def set_subscriber_queue_status(self, name: str, status: FillQueueStatus):
         """Set the pre-fill status of the given subscriber."""
-        if not await self._port.get_subscriber_by_name(name):
+        sub_info = await self._port.get_subscriber_info(name)
+        if not sub_info:
             raise ValueError("Subscriber not found.")
 
-        await self._port.set_subscriber_queue_status(name, status.name)
+        await self._port.set_subscriber_queue_status(name, sub_info, status.name)
 
     async def delete_subscriber(self, name: str):
         """
         Delete a subscriber and all of its data.
         """
 
-        if not await self._port.get_subscriber_by_name(name):
+        if not await self._port.get_subscriber_info(name):
             raise ValueError("Subscriber not found.")
 
         await self._port.delete_subscriber(name)

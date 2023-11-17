@@ -119,20 +119,16 @@ class NatsAdapter:
 
     async def delete_stream(self, subscriber_name: str):
         """Delete the entire stream for a given subject in NATS JetStream."""
-        await self.js.delete_stream(NatsKeys.stream(subscriber_name))
-
-    async def get_subscriber_names(self):
-        kv_store = await self.js.key_value("Pub_Sub_KV")
         try:
-            names = await kv_store.get(NatsKeys.subscribers)
-        except KeyNotFoundError:
-            return []
-        return names.value.decode("utf-8").split(",")
+            await self.js.stream_info(NatsKeys.stream(subscriber_name))
+            await self.js.delete_stream(NatsKeys.stream(subscriber_name))
+        except NotFoundError:
+            return None
 
     async def add_subscriber(
         self,
         name: str,
-        realms_topics: List[list[str, str]],
+        realms_topics: List[List[str]],
         fill_queue: bool,
         fill_queue_status: str,
     ):
@@ -145,20 +141,56 @@ class NatsAdapter:
         await self.kv_store.put(
             NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
         )
-
-        try:
-            subs = await self.kv_store.get(NatsKeys.subscribers)
-            updated_subs = subs.value.decode("utf-8") + f",{name}"
-            await self.kv_store.put(NatsKeys.subscribers, updated_subs.encode("utf-8"))
-        except KeyNotFoundError:
-            await self.kv_store.put(NatsKeys.subscribers, name.encode("utf-8"))
+        await self.update_subscribers_for_key(NatsKeys.subscribers, name)
 
         for realm, topic in realms_topics:
-            await self.kv_store.put(f"{realm}:{topic}", name.encode("utf-8"))
+            await self.update_subscribers_for_key(f"{realm}:{topic}", name)
 
-    async def get_subscriber_info(self, name: str):
+    async def get_subscriber_info(self, name: str) -> Optional[dict]:
         try:
             sub = await self.kv_store.get(NatsKeys.subscriber(name))
             return json.loads(sub.value.decode("utf-8"))
         except KeyNotFoundError:
             return None
+
+    async def set_subscriber_queue_status(
+        self, name: str, sub_info: dict, status: str
+    ) -> None:
+        sub_info["fill_queue_status"] = status
+        await self.kv_store.put(
+            NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
+        )
+
+    async def delete_subscriber_from_key(self, key: str, name: str):
+        subs = await self.get_subscribers_for_key(key)
+        subs.remove(name)
+        if not subs:
+            await self.kv_store.delete(key)
+        else:
+            await self.kv_store.put(key, ",".join(subs).encode("utf-8"))
+
+    async def delete_subscriber(self, name: str):
+        await self.delete_subscriber_from_key(NatsKeys.subscribers, name)
+
+        sub_info = await self.get_subscriber_info(name)
+        realms_topics = sub_info["realms_topics"]
+
+        for realm, topic in realms_topics:
+            await self.delete_subscriber_from_key(f"{realm}:{topic}", name)
+
+        await self.kv_store.delete(NatsKeys.subscriber(name))
+
+    async def get_subscribers_for_key(self, key: str):
+        try:
+            names = await self.kv_store.get(key)
+            return names.value.decode("utf-8").split(",")
+        except KeyNotFoundError:
+            return []
+
+    async def update_subscribers_for_key(self, key: str, name: str) -> None:
+        try:
+            subs = await self.kv_store.get(key)
+            updated_subs = subs.value.decode("utf-8") + f",{name}"
+            await self.kv_store.put(key, updated_subs.encode("utf-8"))
+        except KeyNotFoundError:
+            await self.kv_store.put(key, name.encode("utf-8"))

@@ -39,10 +39,8 @@ class MessageService:
             body=data.body,
         )
 
-        service = SubscriptionService(self._port)
-
-        subscriber_names = await service.get_subscribers_for_topic(
-            message.realm, message.topic
+        subscriber_names = await self._port.get_subscribers_for_topic(
+            f"{message.realm}:{message.topic}"
         )
         for subscriber_name in subscriber_names:
             await self._port.add_live_message(subscriber_name, message)
