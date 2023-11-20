@@ -1,14 +1,11 @@
 import logging
-from datetime import datetime
 from typing import List, Optional
 
 from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import NewMessage, FillQueueStatus
+from shared.models import FillQueueStatus
 from shared.models.queue import NatsMessage, Message
-
-logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -16,34 +13,6 @@ logger = logging.getLogger(__name__)
 class MessageService:
     def __init__(self, port: ConsumerPort):
         self._port = port
-
-    async def publish_message(
-        self,
-        data: NewMessage,
-        publisher_name: str,
-        ts: Optional[datetime] = None,
-    ):
-        """Publish the given message to all subscribers
-           to the given message type.
-
-        :param NewMessage data: Key-value pairs to sent to the consumer.
-        :param str publisher_name: The name of the publisher.
-        :param datetime ts: Optional timestamp to be assigned to the message.
-        """
-
-        message = Message(
-            publisher_name=publisher_name,
-            ts=ts or datetime.utcnow(),
-            realm=data.realm,
-            topic=data.topic,
-            body=data.body,
-        )
-
-        subscriber_names = await self._port.get_subscribers_for_topic(
-            f"{message.realm}:{message.topic}"
-        )
-        for subscriber_name in subscriber_names:
-            await self._port.add_live_message(subscriber_name, message)
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Add the given message to the subscriber's queue."""

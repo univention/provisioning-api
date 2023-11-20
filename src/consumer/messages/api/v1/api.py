@@ -9,7 +9,6 @@ from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
 from shared.models import (
-    NewMessage,
     MessageProcessingStatusReport,
     MessageProcessingStatus,
 )
@@ -20,23 +19,6 @@ logger = logging.getLogger(__name__)
 
 router = fastapi.APIRouter()
 manager = SinkManager()
-
-
-@router.post("/message/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
-async def create_new_message(
-    data: NewMessage,
-    request: fastapi.Request,
-    port: ConsumerPortDependency,
-):
-    """Submit a new message."""
-
-    # TODO: check authorization
-
-    # TODO: set publisher_name from authentication data
-    publisher_name = request.client.host
-
-    service = MessageService(port)
-    await service.publish_message(data, publisher_name)
 
 
 @router.post(

@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from consumer.messages.api import v1_prefix as messages_api_prefix
+from events.api import v1_prefix as events_api_prefix
 from consumer.main import app
 
 
@@ -16,7 +17,7 @@ def test_websocket():
     body = {"hello": "world"}
 
     response = client.post(
-        f"{messages_api_prefix}/message/",
+        f"{events_api_prefix}/events/",
         json={
             "realm": realm,
             "topic": topic,

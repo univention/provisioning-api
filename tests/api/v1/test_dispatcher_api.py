@@ -35,21 +35,6 @@ async def messages_client():
 
 @pytest.mark.anyio
 class TestDispatcher:
-    async def test_post_message(
-        self,
-        messages_client: httpx.AsyncClient,
-        subscriptions_client: httpx.AsyncClient,
-    ):
-        response = await messages_client.post(
-            f"{messages_api_prefix}/message/",
-            json={
-                "realm": REALM,
-                "topic": TOPIC,
-                "body": BODY,
-            },
-        )
-        assert response.status_code == 202
-
     async def test_get_message(
         self,
         messages_client: httpx.AsyncClient,

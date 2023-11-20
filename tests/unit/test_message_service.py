@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from consumer.messages.service import MessageService
-from shared.models import Message, NewMessage, FillQueueStatus
+from shared.models import Message, FillQueueStatus
 from shared.models.queue import NatsMessage
 
 
@@ -45,24 +45,6 @@ class TestMessageService:
         "topic": "topic_name",
         "body": '{"foo": "bar", "foo1": "bar1"}',
     }
-
-    async def test_add_live_message(self, message_service: MessageService, sub_service):
-        data = NewMessage(
-            realm="udm", topic="topic_name", body={"foo": "bar", "foo1": "bar1"}
-        )
-        message_service._port.get_subscribers_for_topic = AsyncMock(
-            return_value=[self.subscriber_name]
-        )
-        message_service._port.add_live_message = AsyncMock()
-
-        await message_service.publish_message(data, "live_message", self.message.ts)
-
-        message_service._port.add_live_message.assert_called_once_with(
-            self.subscriber_name, self.message
-        )
-        message_service._port.get_subscribers_for_topic.assert_called_once_with(
-            "udm:topic_name"
-        )
 
     async def test_add_prefill_message(self, message_service: MessageService):
         message_service._port.add_prefill_message = AsyncMock()
