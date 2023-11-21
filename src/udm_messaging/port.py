@@ -12,20 +12,27 @@ from shared.models import Message
 class UDMMessagingPort:
     def __init__(self):
         self._cache_db_adapter = CacheDbAdapter()
-        self._notification_adapter = NotificationAdapter()
+        self._notification_adapter: Optional[NotificationAdapter] = None
         self._udm_adapter: Optional[UDMAdapter] = None
 
-    async def init_adapter(self):
+    async def init_udm_adapters(self):
         async with UDMAdapter(
             settings.udm_url, settings.udm_username, settings.udm_password
-        ) as udm_adapter:
-            self._udm_adapter = udm_adapter
+        ) as adapter:
+            self._udm_adapter = adapter
+
+    async def init_notification_adapter(self):
+        async with NotificationAdapter(
+            settings.notif_url, settings.notif_username, settings.notif_password
+        ) as adapter:
+            self._notification_adapter = adapter
 
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.init_adapter()
+        await port.init_udm_adapters()
+        await port.init_notification_adapter()
         yield port
 
     async def get_new_object(self, url: str):

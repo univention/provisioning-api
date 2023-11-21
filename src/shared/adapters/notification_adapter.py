@@ -13,7 +13,7 @@ class NotificationAdapter:
     It is intended to be used as an async context manager:
     ```
     async with NotificationAdapter("http://localhost:7777/events/v1", "Administrator", "univention") as adapter:
-        await adapter.!!!!!!!!!!!!!!!!!!!!!!!!!!!()
+        await adapter.send_notification(message)
     ```
     """
 
