@@ -12,6 +12,7 @@ from nats.js.kv import KeyValue
 
 from shared.models import Message
 from shared.models.queue import MQMessage
+from shared.models.adapters import BaseMessageQueue
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class NatsKeys:
         return f"subscriber:{subscriber_name}"
 
 
-class NatsAdapter:
+class NatsAdapter(BaseMessageQueue):
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()

@@ -6,6 +6,8 @@ from redis.asyncio import Redis
 from shared.config import settings
 from shared.models import Message
 
+from shared.models.adapters import BaseKVStore
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,7 +26,7 @@ class RedisKeys:
         return f"subscriber_topics:{subscriber_name}"
 
 
-class RedisAdapter:
+class RedisAdapter(BaseKVStore):
     def __init__(self, redis: Redis = None):
         self.redis = (
             redis
