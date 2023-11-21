@@ -36,3 +36,6 @@ class UDMMessagingService:
         )
         logger.info(f"Sending to queue from: {url}")
         await self._port.send_notification(message)
+
+    async def handle_changes(self):
+        pass
