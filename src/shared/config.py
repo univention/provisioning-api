@@ -29,5 +29,12 @@ class Settings(BaseSettings):
     # UDM REST API: password
     udm_password: str = "univention"
 
+    # Notification REST API: base url
+    notif_url: str = "http://localhost:7777/events/v1"
+    # Notification REST API: username
+    notif_username: str = ""
+    # Notification REST API: password
+    notif_password: str = ""
+
 
 settings = Settings()
