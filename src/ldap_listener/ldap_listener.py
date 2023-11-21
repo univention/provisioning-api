@@ -30,7 +30,7 @@ def _handle_modify(dn, new, old):
     Called when an object is modified.
     """
     logging.info(f'Edited user "{old}"')
-    service.handle_changes()
+    service.handle_changes(new)
 
 
 def _handle_create(dn, new):
@@ -38,7 +38,7 @@ def _handle_create(dn, new):
     Called when an object is newly created.
     """
     logging.info(f'Added user "{new}"')
-    service.handle_changes()
+    service.handle_changes(new)
 
 
 def _handle_remove(dn, old):
@@ -46,4 +46,4 @@ def _handle_remove(dn, old):
     Called when an previously existing object is removed.
     """
     logging.info(f'Removed user "{old}"')
-    service.handle_changes()
+    service.handle_changes(None)

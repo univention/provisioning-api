@@ -1,9 +1,8 @@
 import contextlib
 from typing import Optional
 
-from shared.adapters.cache_db_adapter import CacheDbAdapter
+from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.notification_adapter import NotificationAdapter
-from shared.adapters.udm_adapter import UDMAdapter
 
 from shared.config import settings
 from shared.models import Message
@@ -11,15 +10,8 @@ from shared.models import Message
 
 class UDMMessagingPort:
     def __init__(self):
-        self._cache_db_adapter = CacheDbAdapter()
+        self._nats_adapter = NatsAdapter()
         self._notification_adapter: Optional[NotificationAdapter] = None
-        self._udm_adapter: Optional[UDMAdapter] = None
-
-    async def init_udm_adapters(self):
-        async with UDMAdapter(
-            settings.udm_url, settings.udm_username, settings.udm_password
-        ) as adapter:
-            self._udm_adapter = adapter
 
     async def init_notification_adapter(self):
         async with NotificationAdapter(
@@ -31,18 +23,18 @@ class UDMMessagingPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.init_udm_adapters()
         await port.init_notification_adapter()
+        await port._nats_adapter.nats.connect(
+            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
+        )
+        await port._nats_adapter.create_kv_store()
         yield port
 
-    async def get_new_object(self, url: str):
-        return await self._udm_adapter.get_object(url)
+    async def retrieve(self, url: str):
+        return await self._nats_adapter.get_value_by_key(url)
 
-    async def retrieve_old_obj(self):
-        return await self._cache_db_adapter.retrieve_old_obj()
-
-    async def store_old_obj(self):
-        await self._cache_db_adapter.store_old_obj()
+    async def store(self, url: str, new_obj: str):
+        await self._nats_adapter.put_value_by_key(url, new_obj)
 
     async def send_notification(self, message: Message):
         await self._notification_adapter.send_notification(message)
