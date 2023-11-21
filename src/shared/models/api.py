@@ -15,7 +15,7 @@ class NewSubscriber(BaseModel):
     )
 
 
-class NewMessage(BaseModel):
+class Event(BaseModel):
     """
     A message as it arrives on the API.
     """

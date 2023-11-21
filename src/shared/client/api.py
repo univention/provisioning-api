@@ -73,7 +73,7 @@ class AsyncClient:
                 return shared.models.api.Subscriber.model_validate(data)
 
     async def submit_message(self, realm: str, topic: str, body: Dict[str, Any]):
-        message = shared.models.api.NewMessage(realm=realm, topic=topic, body=body)
+        message = shared.models.api.Event(realm=realm, topic=topic, body=body)
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(

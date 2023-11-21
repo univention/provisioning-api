@@ -1,1 +1,1 @@
-from .messages import MessageService  # noqa: F401
+from .events import EventsService  # noqa: F401

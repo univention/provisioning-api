@@ -4,36 +4,27 @@ from typing import Optional
 
 from events.port import EventsPort
 
-from shared.models.queue import Message
-from shared.models import NewMessage
+from shared.models import Event
 
 logger = logging.getLogger(__name__)
 
 
-class MessageService:
+class EventsService:
     def __init__(self, port: EventsPort):
         self._port = port
 
-    async def publish_message(
+    async def publish_event(
         self,
-        data: NewMessage,
+        event: Event,
         publisher_name: str,
         ts: Optional[datetime] = None,
     ):
         """Publish the given message to all subscribers
            to the given message type.
 
-        :param NewMessage data: Key-value pairs to sent to the consumer.
+        :param Event data: Key-value pairs to sent to the consumer.
         :param str publisher_name: The name of the publisher.
         :param datetime ts: Optional timestamp to be assigned to the message.
         """
 
-        message = Message(
-            publisher_name=publisher_name,
-            ts=ts or datetime.utcnow(),
-            realm=data.realm,
-            topic=data.topic,
-            body=data.body,
-        )
-
-        await self._port.add_live_message(message)
+        await self._port.add_live_event(event, publisher_name, ts)
