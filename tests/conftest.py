@@ -17,6 +17,7 @@ from redis.utils import str_if_bytes
 from nats.js.kv import KeyValue
 from consumer.port import ConsumerPort
 from consumer.main import app
+from events.port import EventsPort
 
 FLAT_MESSAGE = {
     "publisher_name": "127.0.0.1",
@@ -128,8 +129,29 @@ async def port_fake_dependency() -> ConsumerPort:
     return port
 
 
+async def events_port_fake_dependency() -> EventsPort:
+    port = EventsPort()
+    port.nats_adapter.nats = AsyncMock()
+    port.nats_adapter.js = fake_js()
+
+    port.nats_adapter.add_subscriber = AsyncMock()
+    port.nats_adapter.get_subscribers_for_key = AsyncMock(
+        return_value=[SUBSCRIBER_INFO["name"]]
+    )
+    port.nats_adapter.delete_subscriber = AsyncMock()
+    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
+
+    return port
+
+
 async def port_fake_dependency_without_sub():
     port = await port_fake_dependency()
+    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
+    return port
+
+
+async def port_fake_dependency_events():
+    port = await events_port_fake_dependency()
     port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
     return port
 
@@ -149,6 +171,15 @@ def override_dependencies_without_sub():
     app.dependency_overrides[
         ConsumerPort.port_dependency
     ] = port_fake_dependency_without_sub
+    yield  # This will ensure the setup is done before tests and cleanup after
+    # Clear the overrides after the tests
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def override_dependencies_events():
+    # Override original port
+    app.dependency_overrides[EventsPort.port_dependency] = port_fake_dependency_events
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests
     app.dependency_overrides.clear()

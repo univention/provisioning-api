@@ -23,7 +23,9 @@ async def client():
 
 @pytest.mark.anyio
 class TestEvents:
-    async def test_add_event(self, client: httpx.AsyncClient):
+    async def test_add_event(
+        self, client: httpx.AsyncClient, override_dependencies_events
+    ):
         response = await client.post(
             f"{api_prefix}/events/",
             json={

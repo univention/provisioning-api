@@ -9,7 +9,7 @@ from consumer.main import app
 
 
 @pytest.mark.anyio
-def test_websocket():
+def test_websocket(override_dependencies_events):
     client = TestClient(app)
     name = str(uuid.uuid4())
     realm = "foo"
