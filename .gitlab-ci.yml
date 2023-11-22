@@ -1,7 +1,7 @@
 ---
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.1.1"
+    ref: "v1.9.4"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
@@ -19,51 +19,34 @@ lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
 
+.build-matrix: &build-matrix
+  - IMAGE_NAME: "provisioning-dispatch"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-dispatch-test"
+    KANIKO_ARGS: "--target test"
+
+.publish-matrix: &publish-matrix
+  - IMAGE_NAME:
+    - "provisioning-dispatch"
+
 container-build:
   parallel:
-    matrix:
-      - IMAGE_NAME: "provisioning-dispatch"
-        TARGET: "final"
-      - IMAGE_NAME: "provisioning-dispatch-test"
-        TARGET: "test"
+    matrix: *build-matrix
   variables:
-    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
-    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
-    DOCKERFILE_PATH: "docker/dispatch/Dockerfile"
-    KANIKO_ARGS: "--target ${TARGET}"
+    KANIKO_BUILD_CONTEXT: "${CI_PROJECT_DIR}"
+    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
 
 container-generate-sbom:
   parallel:
-    matrix:
-      - IMAGE_NAME:
-          - "provisioning-dispatch"
-          - "provisioning-dispatch-test"
-  variables:
-    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
-    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
-    SBOM_PREFIX: "sbom-${IMAGE_NAME}"
+    matrix: *build-matrix
 
 container-sign:
   parallel:
-    matrix:
-      - IMAGE_NAME:
-          - "provisioning-dispatch"
-          - "provisioning-dispatch-test"
-  variables:
-    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
-    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
-    SBOM_PREFIX: "sbom-${IMAGE_NAME}"
+    matrix: *build-matrix
 
 container-security-scan:
   parallel:
-    matrix:
-      - IMAGE_NAME:
-          - "provisioning-dispatch"
-          - "provisioning-dispatch-test"
-  variables:
-    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
-    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
-    CODEQUALITY_REPORT_PREFIX: "gl-code-quality-report-${IMAGE_NAME}"
+    matrix: *build-matrix
 
 test-provisioning-dispatch:
   stage: "test"
@@ -81,9 +64,8 @@ test-provisioning-dispatch:
 
 publish-images:
   extends: ".push-image-souvap"
-  variables:
-    SOUVAP_IMAGE_NAME: "provisioning-dispatch"
-    BUILD_IMAGE_TAG: "$CI_REGISTRY_IMAGE/provisioning-dispatch:${RELEASE_VERSION}"
+  parallel:
+    matrix: *publish-matrix
 
 publish-helm-charts-souvap:
   extends: ".publish-helm-charts-souvap"
