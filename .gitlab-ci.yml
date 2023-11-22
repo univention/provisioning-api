@@ -1,57 +1,73 @@
 ---
-
-variables:
-  SOUVAP_HELM_PROJECT_ID: 155
-  SOUVAP_REGISTRY_PATH: souvap/tooling/images/univention
-
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v0.5.4"
+    ref: "v1.1.1"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
       - "jobs/sphinx-docs.yaml"
-      - "defaults/souvap-workflow.yaml"
       - "defaults/stages.yaml"
-      - "templates/kaniko.yaml"
+      - "defaults/souvap-workflow.yaml"
       - "templates/souvap.yaml"
-      - "jobs/lint-commit-messages.yaml"
       - "jobs/lint-pre-commit.yaml"
+      - "jobs/lint-commit-messages.yaml"
+      - "jobs/semantic-release-env.yaml"
+      - "jobs/container-build.yaml"
       - "jobs/package-and-publish-helm-charts.yaml"
 
 lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
 
-build-provisioning-dispatch-image:
-  stage: "build"
-  extends: ".kaniko"
-  needs: []
+container-build:
+  parallel:
+    matrix:
+      - IMAGE_NAME: "provisioning-dispatch"
+        TARGET: "final"
+      - IMAGE_NAME: "provisioning-dispatch-test"
+        TARGET: "test"
   variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
+    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
     DOCKERFILE_PATH: "docker/dispatch/Dockerfile"
-    CI_REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}/provisioning-dispatch"
-    KANIKO_ARGS: "--target final"
+    KANIKO_ARGS: "--target ${TARGET}"
 
-build-provisioning-dispatch-test-image:
-  stage: "build"
-  extends: ".kaniko"
-  needs: []
+container-generate-sbom:
+  parallel:
+    matrix:
+      - IMAGE_NAME:
+          - "provisioning-dispatch"
+          - "provisioning-dispatch-test"
   variables:
-    DOCKERFILE_PATH: "docker/dispatch/Dockerfile"
-    CI_REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test"
-    KANIKO_ARGS: "--target testing"
-  rules:
-    - changes:
-      - poetry.lock
-      - pyproject.toml
-      - docker/dispatch/*
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
+    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
+    SBOM_PREFIX: "sbom-${IMAGE_NAME}"
+
+container-sign:
+  parallel:
+    matrix:
+      - IMAGE_NAME:
+          - "provisioning-dispatch"
+          - "provisioning-dispatch-test"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
+    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
+    SBOM_PREFIX: "sbom-${IMAGE_NAME}"
+
+container-security-scan:
+  parallel:
+    matrix:
+      - IMAGE_NAME:
+          - "provisioning-dispatch"
+          - "provisioning-dispatch-test"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/${IMAGE_NAME}"
+    DIGEST_PREFIX: "digest-${IMAGE_NAME}"
+    CODEQUALITY_REPORT_PREFIX: "gl-code-quality-report-${IMAGE_NAME}"
 
 test-provisioning-dispatch:
   stage: "test"
-  needs:
-    - job: build-provisioning-dispatch-test-image
-      optional: true
-  image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:latest"
+  image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:${RELEASE_VERSION}"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
@@ -63,14 +79,12 @@ test-provisioning-dispatch:
         coverage_format: cobertura
         path: coverage.xml
 
-push-image-souvap:
-  needs:
-    - job: "build-provisioning-dispatch-image"
+publish-images:
   extends: ".push-image-souvap"
   variables:
     SOUVAP_IMAGE_NAME: "provisioning-dispatch"
+    BUILD_IMAGE_TAG: "$CI_REGISTRY_IMAGE/provisioning-dispatch:${RELEASE_VERSION}"
 
 publish-helm-charts-souvap:
   extends: ".publish-helm-charts-souvap"
-
 ...

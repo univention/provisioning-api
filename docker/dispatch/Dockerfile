@@ -33,8 +33,8 @@ RUN \
     poetry install --only main
 
 ###############################################
-# Stage 2: testing image
-from builder as testing
+# Stage 2: test image
+from builder as test
 
 RUN poetry install --with dev
 
