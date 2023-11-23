@@ -128,7 +128,7 @@ class NatsAdapter:
     async def add_subscriber(
         self,
         name: str,
-        realm_topic: List[str],
+        realm_topic: str,
         fill_queue: bool,
         fill_queue_status: str,
     ):
@@ -138,23 +138,15 @@ class NatsAdapter:
             "fill_queue": int(fill_queue),
             "fill_queue_status": fill_queue_status,
         }
-        await self.put_value_by_key(NatsKeys.subscriber(name), json.dumps(sub_info))
+        await self.put_value_by_key(NatsKeys.subscriber(name), sub_info)
         await self.update_subscribers_for_key(NatsKeys.subscribers, name)
 
-        await self.update_subscribers_for_key(
-            f"{realm_topic[0]}:{realm_topic[1]}", name
-        )
+        await self.update_subscribers_for_key(realm_topic, name)
 
-    async def create_subscription(
-        self, name: str, realm_topic: List[str], sub_info: dict
-    ):
+    async def create_subscription(self, name: str, realm_topic: str, sub_info: dict):
         sub_info["realms_topics"].append(realm_topic)
-        await self.kv_store.put(
-            NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
-        )
-        await self.update_subscribers_for_key(
-            f"{realm_topic[0]}:{realm_topic[1]}", name
-        )
+        await self.put_value_by_key(NatsKeys.subscriber(name), sub_info)
+        await self.update_subscribers_for_key(realm_topic, name)
 
     async def get_subscriber_info(self, name: str) -> Optional[dict]:
         try:
@@ -164,7 +156,7 @@ class NatsAdapter:
             return None
 
     async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
-        await self.put_value_by_key(NatsKeys.subscriber(name), json.dumps(sub_info))
+        await self.put_value_by_key(NatsKeys.subscriber(name), sub_info)
 
     async def delete_subscriber_from_key(self, key: str, name: str):
         subs = await self.get_subscribers_for_key(key)
@@ -176,13 +168,6 @@ class NatsAdapter:
 
     async def delete_subscriber(self, name: str):
         await self.delete_subscriber_from_key(NatsKeys.subscribers, name)
-
-        sub_info = await self.get_subscriber_info(name)
-        realms_topics = sub_info["realms_topics"]
-
-        for realm, topic in realms_topics:
-            await self.delete_subscriber_from_key(f"{realm}:{topic}", name)
-
         await self.kv_store.delete(NatsKeys.subscriber(name))
 
     async def get_value_by_key(self, key: str) -> Optional[KeyValue.Entry]:
@@ -191,7 +176,9 @@ class NatsAdapter:
         except KeyNotFoundError:
             return None
 
-    async def put_value_by_key(self, key: str, value: str):
+    async def put_value_by_key(self, key: str, value: Union[str, dict]):
+        if isinstance(value, dict):
+            value = json.dumps(value)
         await self.kv_store.put(key, value.encode("utf-8"))
 
     async def get_subscribers_for_key(self, key: str):

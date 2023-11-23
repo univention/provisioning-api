@@ -2,7 +2,10 @@ import re
 from typing import List
 
 from consumer.port import ConsumerPort
+from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
+
+manager = SinkManager()
 
 
 def match_subscription(
@@ -60,12 +63,13 @@ class SubscriptionService:
         else:
             fill_queue_status = FillQueueStatus.done
 
+        realm_topic_str = f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"
         sub_info = await self._port.get_subscriber_info(sub.name)
         if sub_info:
-            await self._port.create_subscription(sub.name, sub.realm_topic, sub_info)
+            await self._port.create_subscription(sub.name, realm_topic_str, sub_info)
         else:
             await self._port.add_subscriber(
-                sub.name, sub.realm_topic, sub.fill_queue, fill_queue_status
+                sub.name, realm_topic_str, sub.fill_queue, fill_queue_status
             )
 
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
@@ -87,13 +91,19 @@ class SubscriptionService:
         sub_info["fill_queue_status"] = status.name
         await self._port.set_subscriber_queue_status(name, sub_info)
 
+    async def cancel_subscription(self, name: str, realm_topic: List[str]):
+        sub_info = await self._port.get_subscriber_info(name)
+        realms_topics = sub_info["realms_topics"]
+        realms_topics.remove(f"{realm_topic[0]}:{realm_topic[1]}")
+        await self._port.update_sub_info(name, sub_info)
+
+        if not realms_topics:
+            await self.delete_subscriber(name)
+
     async def delete_subscriber(self, name: str):
         """
         Delete a subscriber and all of its data.
         """
-
-        if not await self._port.get_subscriber_info(name):
-            raise ValueError("Subscriber not found.")
 
         await self._port.delete_subscriber(name)
         await self._port.delete_queue(name)

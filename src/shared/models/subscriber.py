@@ -1,5 +1,5 @@
 import enum
-from typing import List, Tuple
+from typing import List
 
 import pydantic
 
@@ -22,7 +22,7 @@ class Subscriber(pydantic.BaseModel):
     name: str
 
     # A list of `(realm, topic)` that this subscriber subscribes to.
-    realms_topics: List[Tuple[str, str]]
+    realms_topics: List[str]
 
     # Whether pre-filling of the queue was requested.
     fill_queue: bool
