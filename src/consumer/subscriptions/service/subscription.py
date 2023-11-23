@@ -66,6 +66,7 @@ class SubscriptionService:
         realm_topic_str = f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"
         sub_info = await self._port.get_subscriber_info(sub.name)
         if sub_info:
+            # TODO: check whether realm_topic is not existed yet
             await self._port.create_subscription(sub.name, realm_topic_str, sub_info)
         else:
             await self._port.add_subscriber(
@@ -92,6 +93,7 @@ class SubscriptionService:
         await self._port.set_subscriber_queue_status(name, sub_info)
 
     async def cancel_subscription(self, name: str, realm_topic: List[str]):
+        # TODO: check whether realm_topic exists
         sub_info = await self._port.get_subscriber_info(name)
         realms_topics = sub_info["realms_topics"]
         realms_topics.remove(f"{realm_topic[0]}:{realm_topic[1]}")
@@ -104,6 +106,6 @@ class SubscriptionService:
         """
         Delete a subscriber and all of its data.
         """
-
+        await manager.close(name)
         await self._port.delete_subscriber(name)
         await self._port.delete_queue(name)

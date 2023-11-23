@@ -14,7 +14,6 @@ from redis._parsers.helpers import (
     parse_sentinel_slaves_and_sentinels_resp3,
 )
 from redis.utils import str_if_bytes
-from nats.js.kv import KeyValue
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
@@ -28,7 +27,7 @@ FLAT_MESSAGE = {
 }
 SUBSCRIBER_INFO = {
     "name": "0f084f8c-1093-4024-b215-55fe8631ddf6",
-    "realms_topics": [["foo", "bar"], ["abc", "def"]],
+    "realms_topics": ["foo:bar", "abc:def"],
     "fill_queue": True,
     "fill_queue_status": "done",
 }
@@ -101,18 +100,6 @@ def fake_js():
     return js
 
 
-def fake_kv_store():
-    kv_store = Mock()
-    kv_store.get = AsyncMock(
-        return_value=KeyValue.Entry(
-            "bucket", "key", json.dumps(SUBSCRIBER_INFO).encode("utf-8"), 1, 1, 1, ""
-        )
-    )
-    kv_store.put = AsyncMock()
-
-    return kv_store
-
-
 async def port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
     port.nats_adapter.nats = AsyncMock()
@@ -123,6 +110,8 @@ async def port_fake_dependency() -> ConsumerPort:
         return_value=[SUBSCRIBER_INFO["name"]]
     )
     port.nats_adapter.delete_subscriber = AsyncMock()
+    port.nats_adapter.put_value_by_key = AsyncMock()
+    port.nats_adapter.update_subscribers_for_key = AsyncMock()
     port.nats_adapter.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
 
     port.redis_adapter.redis = await fake_redis()
