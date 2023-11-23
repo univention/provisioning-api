@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import List
 
@@ -6,6 +7,7 @@ from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
 
 manager = SinkManager()
+logger = logging.getLogger(__name__)
 
 
 def match_subscription(
@@ -66,7 +68,10 @@ class SubscriptionService:
         realm_topic_str = f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"
         sub_info = await self._port.get_subscriber_info(sub.name)
         if sub_info:
-            # TODO: check whether realm_topic is not existed yet
+            if realm_topic_str in sub_info["realms_topics"]:
+                raise ValueError(
+                    "Subscription for the given realm_topic already exists"
+                )
             await self._port.create_subscription(sub.name, realm_topic_str, sub_info)
         else:
             await self._port.add_subscriber(
@@ -92,11 +97,12 @@ class SubscriptionService:
         sub_info["fill_queue_status"] = status.name
         await self._port.set_subscriber_queue_status(name, sub_info)
 
-    async def cancel_subscription(self, name: str, realm_topic: List[str]):
-        # TODO: check whether realm_topic exists
+    async def cancel_subscription(self, name: str, realm_topic: str):
         sub_info = await self._port.get_subscriber_info(name)
         realms_topics = sub_info["realms_topics"]
-        realms_topics.remove(f"{realm_topic[0]}:{realm_topic[1]}")
+        if realm_topic not in realms_topics:
+            raise ValueError("Subscription for the given realm_topic doesn't exist")
+        realms_topics.remove(realm_topic)
         await self._port.update_sub_info(name, sub_info)
 
         if not realms_topics:
