@@ -128,21 +128,33 @@ class NatsAdapter:
     async def add_subscriber(
         self,
         name: str,
-        realms_topics: List[List[str]],
+        realm_topic: List[str],
         fill_queue: bool,
         fill_queue_status: str,
     ):
         sub_info = {
             "name": name,
-            "realms_topics": realms_topics,
+            "realms_topics": [realm_topic],
             "fill_queue": int(fill_queue),
             "fill_queue_status": fill_queue_status,
         }
         await self.put_value_by_key(NatsKeys.subscriber(name), json.dumps(sub_info))
         await self.update_subscribers_for_key(NatsKeys.subscribers, name)
 
-        for realm, topic in realms_topics:
-            await self.update_subscribers_for_key(f"{realm}:{topic}", name)
+        await self.update_subscribers_for_key(
+            f"{realm_topic[0]}:{realm_topic[1]}", name
+        )
+
+    async def create_subscription(
+        self, name: str, realm_topic: List[str], sub_info: dict
+    ):
+        sub_info["realms_topics"].append(realm_topic)
+        await self.kv_store.put(
+            NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
+        )
+        await self.update_subscribers_for_key(
+            f"{realm_topic[0]}:{realm_topic[1]}", name
+        )
 
     async def get_subscriber_info(self, name: str) -> Optional[dict]:
         try:

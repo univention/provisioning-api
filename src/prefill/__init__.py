@@ -16,7 +16,7 @@ mapping = {
 }
 
 
-async def init_queue(subscriber_name: str, realms_topics: List[List[str]]):
+async def init_queue(subscriber_name: str, realm_topic: List[str]):
     """
     Initialize the queue for the given subscriber with its requested topics.
     """
@@ -32,14 +32,13 @@ async def init_queue(subscriber_name: str, realms_topics: List[List[str]]):
         )
 
         try:
-            for realm, topic in realms_topics:
-                logging.debug(f"Initializing {topic} from {realm}.")
-                if handler_class := mapping.get(realm):
-                    handler = handler_class(msg_service, subscriber_name, topic)
-                    await handler.fetch()
-                else:
-                    # FIXME: unhandled realm
-                    logging.error(f"Unhandled realm: {realm}")
+            logging.debug(f"Initializing {realm_topic[1]} from {realm_topic[0]}.")
+            if handler_class := mapping.get(realm_topic[0]):
+                handler = handler_class(msg_service, subscriber_name, realm_topic[1])
+                await handler.fetch()
+            else:
+                # FIXME: unhandled realm
+                logging.error(f"Unhandled realm: {realm_topic[0]}")
 
         except Exception as err:
             import traceback

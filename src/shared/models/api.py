@@ -7,8 +7,8 @@ class NewSubscriber(BaseModel):
     """Request to register a subscriber."""
 
     name: str = Field(description="The identifier of the subscriber.")
-    realms_topics: List[List[str]] = Field(
-        description="A list of `[realm, topic]` lists that this subscriber subscribes to."
+    realm_topic: List[str] = Field(
+        description="Realm and topic that this subscriber subscribes to."
     )
     fill_queue: bool = Field(
         description="Whether pre-filling of the queue was requested."

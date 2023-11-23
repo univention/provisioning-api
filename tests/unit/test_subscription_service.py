@@ -77,7 +77,7 @@ class TestSubscriptionService:
         sub_service._port.add_subscriber = AsyncMock()
 
         with pytest.raises(ValueError) as e:
-            await sub_service.add_subscriber(subscriber)
+            await sub_service.create_subscription(subscriber)
 
         sub_service._port.get_subscriber_info.assert_called_once_with(
             self.subscriber_name
@@ -95,7 +95,7 @@ class TestSubscriptionService:
         sub_service._port.get_subscriber_info = AsyncMock(return_value=None)
         sub_service._port.add_subscriber = AsyncMock()
 
-        result = await sub_service.add_subscriber(subscriber)
+        result = await sub_service.create_subscription(subscriber)
 
         sub_service._port.get_subscriber_info.assert_called_once_with(
             self.subscriber_name

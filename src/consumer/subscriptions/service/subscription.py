@@ -50,9 +50,9 @@ class SubscriptionService:
 
         return Subscriber.model_validate(data)
 
-    async def add_subscriber(self, sub: NewSubscriber):
+    async def create_subscription(self, sub: NewSubscriber):
         """
-        Add a new subscriber.
+        Add a new subscription.
         """
 
         if sub.fill_queue:
@@ -60,12 +60,13 @@ class SubscriptionService:
         else:
             fill_queue_status = FillQueueStatus.done
 
-        if await self._port.get_subscriber_info(sub.name):
-            raise ValueError("Subscriber already exists.")
-
-        await self._port.add_subscriber(
-            sub.name, sub.realms_topics, sub.fill_queue, fill_queue_status
-        )
+        sub_info = await self._port.get_subscriber_info(sub.name)
+        if sub_info:
+            await self._port.create_subscription(sub.name, sub.realm_topic, sub_info)
+        else:
+            await self._port.add_subscriber(
+                sub.name, sub.realm_topic, sub.fill_queue, fill_queue_status
+            )
 
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
