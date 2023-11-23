@@ -78,7 +78,7 @@ async def create_subscription(
     "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
 async def cancel_subscription(
-    name: str, realm_topic: List[str], port: ConsumerPortDependency
+    name: str, realm: str, topic: str, port: ConsumerPortDependency
 ):
     """Delete a subscription."""
 
@@ -87,6 +87,6 @@ async def cancel_subscription(
     service = SubscriptionService(port)
 
     try:
-        await service.cancel_subscription(name, realm_topic)
+        await service.cancel_subscription(name, [realm, topic])
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
