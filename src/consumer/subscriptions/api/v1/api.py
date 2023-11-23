@@ -6,13 +6,11 @@ import shared.models
 from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from consumer.subscriptions.subscription.sink import SinkManager
 from prefill import init_queue as init_prefill_queue
 
 logger = logging.getLogger(__name__)
 
 router = fastapi.APIRouter()
-manager = SinkManager()
 
 
 @router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
@@ -79,7 +77,9 @@ async def create_subscription(
 @router.delete(
     "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def cancel_subscription(name: str, port: ConsumerPortDependency):
+async def cancel_subscription(
+    name: str, realm_topic: List[str], port: ConsumerPortDependency
+):
     """Delete a subscription."""
 
     # TODO: check authorization
@@ -87,7 +87,6 @@ async def cancel_subscription(name: str, port: ConsumerPortDependency):
     service = SubscriptionService(port)
 
     try:
-        await manager.close(name)
-        await service.delete_subscriber(name)
+        await service.cancel_subscription(name, realm_topic)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
