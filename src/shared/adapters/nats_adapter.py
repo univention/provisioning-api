@@ -138,9 +138,7 @@ class NatsAdapter:
             "fill_queue": int(fill_queue),
             "fill_queue_status": fill_queue_status,
         }
-        await self.kv_store.put(
-            NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
-        )
+        await self.put_value_by_key(NatsKeys.subscriber(name), json.dumps(sub_info))
         await self.update_subscribers_for_key(NatsKeys.subscribers, name)
 
         await self.update_subscribers_for_key(
@@ -166,9 +164,7 @@ class NatsAdapter:
             return None
 
     async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
-        await self.kv_store.put(
-            NatsKeys.subscriber(name), json.dumps(sub_info).encode("utf-8")
-        )
+        await self.put_value_by_key(NatsKeys.subscriber(name), json.dumps(sub_info))
 
     async def delete_subscriber_from_key(self, key: str, name: str):
         subs = await self.get_subscribers_for_key(key)
@@ -176,7 +172,7 @@ class NatsAdapter:
         if not subs:
             await self.kv_store.delete(key)
         else:
-            await self.kv_store.put(key, ",".join(subs).encode("utf-8"))
+            await self.put_value_by_key(key, ",".join(subs))
 
     async def delete_subscriber(self, name: str):
         await self.delete_subscriber_from_key(NatsKeys.subscribers, name)
@@ -189,17 +185,23 @@ class NatsAdapter:
 
         await self.kv_store.delete(NatsKeys.subscriber(name))
 
-    async def get_subscribers_for_key(self, key: str):
+    async def get_value_by_key(self, key: str) -> Optional[KeyValue.Entry]:
         try:
-            names = await self.kv_store.get(key)
-            return names.value.decode("utf-8").split(",")
+            return await self.kv_store.get(key)
         except KeyNotFoundError:
-            return []
+            return None
+
+    async def put_value_by_key(self, key: str, value: str):
+        await self.kv_store.put(key, value.encode("utf-8"))
+
+    async def get_subscribers_for_key(self, key: str):
+        names = await self.get_value_by_key(key)
+        return names.value.decode("utf-8").split(",") if names else []
 
     async def update_subscribers_for_key(self, key: str, name: str) -> None:
         try:
             subs = await self.kv_store.get(key)
             updated_subs = subs.value.decode("utf-8") + f",{name}"
-            await self.kv_store.put(key, updated_subs.encode("utf-8"))
+            await self.put_value_by_key(key, updated_subs)
         except KeyNotFoundError:
-            await self.kv_store.put(key, name.encode("utf-8"))
+            await self.put_value_by_key(key, name)
