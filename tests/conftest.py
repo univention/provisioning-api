@@ -118,7 +118,7 @@ async def port_fake_dependency() -> ConsumerPort:
     port.nats_adapter.nats = AsyncMock()
     port.nats_adapter.js = fake_js()
 
-    port.nats_adapter.add_subscriber = AsyncMock()
+    port.nats_adapter.create_subscription = AsyncMock()
     port.nats_adapter.get_subscribers_for_key = AsyncMock(
         return_value=[SUBSCRIBER_INFO["name"]]
     )
@@ -134,7 +134,7 @@ async def events_port_fake_dependency() -> EventsPort:
     port.nats_adapter.nats = AsyncMock()
     port.nats_adapter.js = fake_js()
 
-    port.nats_adapter.add_subscriber = AsyncMock()
+    port.nats_adapter.create_subscription = AsyncMock()
     port.nats_adapter.get_subscribers_for_key = AsyncMock(
         return_value=[SUBSCRIBER_INFO["name"]]
     )

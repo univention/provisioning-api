@@ -81,13 +81,18 @@ class ConsumerPort:
     async def add_subscriber(
         self,
         name: str,
-        realms_topics: List[List[str]],
+        realm_topic: List[str],
         fill_queue: bool,
         fill_queue_status: str,
     ):
         await self.nats_adapter.add_subscriber(
-            name, realms_topics, fill_queue, fill_queue_status
+            name, realm_topic, fill_queue, fill_queue_status
         )
+
+    async def create_subscription(
+        self, name: str, realm_topic: List[str], sub_info: dict
+    ):
+        await self.nats_adapter.create_subscription(name, realm_topic, sub_info)
 
     async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
         return await self.nats_adapter.set_subscriber_queue_status(name, sub_info)

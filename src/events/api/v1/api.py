@@ -17,7 +17,7 @@ async def create_new_message(
     request: fastapi.Request,
     port: EventsPortDependency,
 ):
-    """Submit a new message."""
+    """Publish a new message to the incoming queue."""
 
     # TODO: check authorization
 

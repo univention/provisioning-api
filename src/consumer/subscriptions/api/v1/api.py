@@ -62,7 +62,7 @@ async def create_subscription(
     service = SubscriptionService(port)
 
     try:
-        await service.add_subscriber(subscriber)
+        await service.create_subscription(subscriber)
     except ValueError as err:
         raise fastapi.HTTPException(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
@@ -72,7 +72,7 @@ async def create_subscription(
         tasks.add_task(
             init_prefill_queue,
             subscriber.name,
-            subscriber.realms_topics,
+            subscriber.realm_topic,
         )
 
 
