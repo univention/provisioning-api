@@ -6,14 +6,14 @@ import aiohttp
 from shared.models import Message
 
 
-class NotificationAdapter:
+class EventAdapter:
     """
-    Client for the Events(Notification) REST API, providing the interfaces required by `UDMMessagingService`.
+    Client for the Events REST API, providing the interfaces required by `UDMMessagingService`.
 
     It is intended to be used as an async context manager:
     ```
-    async with NotificationAdapter("http://localhost:7777/events/v1", "Administrator", "univention") as adapter:
-        await adapter.send_notification(message)
+    async with EventAdapter("http://localhost:7777/events/v1", "Administrator", "univention") as adapter:
+        await adapter.send_event(message)
     ```
     """
 
@@ -26,7 +26,7 @@ class NotificationAdapter:
         self.headers = [("accept", "application/json")]
         self._session = None
 
-    async def __aenter__(self) -> "NotificationAdapter":
+    async def __aenter__(self) -> "EventAdapter":
         if not self._session:
             self._session = aiohttp.ClientSession(
                 auth=self.auth, headers=self.headers, raise_for_status=True
@@ -42,7 +42,7 @@ class NotificationAdapter:
         if self._session:
             await self._session.close()
 
-    async def send_notification(self, message: Message):
+    async def send_event(self, message: Message):
         async with self._session.post(
             f"{self.base_url}/events/", json=message.flatten()
         ) as request:

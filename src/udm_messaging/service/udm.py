@@ -19,7 +19,7 @@ class UDMMessagingService:
     async def store(self, new_obj: dict):
         await self._port.store(new_obj["url"], json.dumps(new_obj))
 
-    async def send_notification(self, new_obj: Optional[dict], old_obj: Optional[dict]):
+    async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
         object_type = ""  # FIXME: find type
 
         message = Message(
@@ -29,7 +29,7 @@ class UDMMessagingService:
             topic=object_type,
             body={"old": old_obj, "new": new_obj},
         )
-        await self._port.send_notification(message)
+        await self._port.send_event(message)
 
     def resolve_references(self, obj: dict):
         pass
@@ -39,4 +39,4 @@ class UDMMessagingService:
         if new_obj:
             new_obj = self.resolve_references(new_obj)
             await self.store(new_obj)
-        await self.send_notification(new_obj, old_obj)
+        await self.send_event(new_obj, old_obj)
