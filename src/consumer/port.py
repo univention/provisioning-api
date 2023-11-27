@@ -1,9 +1,10 @@
 import contextlib
-from typing import List, Annotated, Optional
+from typing import List, Annotated, Optional, Union
 
 from fastapi import Depends
+from nats.js.kv import KeyValue
 
-from shared.adapters.nats_adapter import NatsAdapter, NatsKeys
+from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.redis_adapter import RedisAdapter
 from shared.config import settings
 from shared.models import Message
@@ -72,37 +73,14 @@ class ConsumerPort:
     async def delete_queue(self, subscriber_name: str):
         await self.nats_adapter.delete_stream(subscriber_name)
 
-    async def get_subscriber_names(self) -> List[str]:
-        return await self.nats_adapter.get_subscribers_for_key(NatsKeys.subscribers)
+    async def get_value_by_key(self, key: str) -> Optional[KeyValue.Entry]:
+        return await self.nats_adapter.get_value_by_key(key)
 
-    async def get_subscriber_info(self, name: str) -> Optional[dict]:
-        return await self.nats_adapter.get_subscriber_info(name)
+    async def delete_key(self, key: str):
+        await self.nats_adapter.delete_key(key)
 
-    async def add_subscriber(
-        self,
-        name: str,
-        realm_topic: str,
-        fill_queue: bool,
-        fill_queue_status: str,
-    ):
-        await self.nats_adapter.add_subscriber(
-            name, realm_topic, fill_queue, fill_queue_status
-        )
-
-    async def create_subscription(self, name: str, realm_topic: str, sub_info: dict):
-        await self.nats_adapter.create_subscription(name, realm_topic, sub_info)
-
-    async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
-        return await self.nats_adapter.set_subscriber_queue_status(name, sub_info)
-
-    async def delete_subscriber(self, name: str):
-        await self.nats_adapter.delete_subscriber(name)
-
-    async def get_subscribers_for_topic(self, realm_topic: str) -> List[str]:
-        return await self.nats_adapter.get_subscribers_for_key(realm_topic)
-
-    async def update_sub_info(self, name, sub_info: dict):
-        await self.nats_adapter.put_value_by_key(NatsKeys.subscriber(name), sub_info)
+    async def put_value_by_key(self, key: str, value: Union[str, dict]):
+        await self.nats_adapter.put_value_by_key(key, value)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]
