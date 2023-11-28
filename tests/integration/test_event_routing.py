@@ -32,12 +32,9 @@ async def consumer():
 
 
 @pytest.mark.anyio
-@pytest.mark.xfail(reason="to make this work, a real MQ backend needs to be working")
 async def test_udm_create_user_event_is_routed_correctly(
     producer: httpx.AsyncClient,
     consumer: httpx.AsyncClient,
-    override_dependencies,
-    override_dependencies_events,
 ):
     # register a consumer
     name = str(uuid.uuid4())
@@ -69,7 +66,7 @@ async def test_udm_create_user_event_is_routed_correctly(
     message_consumer = TestClient(app)
     # evaluate that the message about a new user is received by the consumer
     with message_consumer.websocket_connect(
-        f"{messages_api_prefix}/subscription/{name}/ws"
+        f"{messages_api_prefix}/subscription/incoming/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 

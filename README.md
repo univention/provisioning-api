@@ -52,11 +52,18 @@ Find the OpenAPI schema here: http://localhost:7777/docs .
 
 ## Tests
 
-Run tests:
+
+If you want to run integration tests, make sure, you run
+
 ```sh
-poetry run pytest
+docker compose run nats
 ```
 
+first. Then:
+
+```sh
+poetry run pytest <dir/of/test-subset>
+```
 
 ### Pre-commit
 
