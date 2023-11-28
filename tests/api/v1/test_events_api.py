@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from events.api import v1_prefix as api_prefix
+from events.api import v1_prefix as events_api_prefix
 from consumer.main import app
 
 
@@ -27,7 +27,7 @@ class TestEvents:
         self, client: httpx.AsyncClient, override_dependencies_events
     ):
         response = await client.post(
-            f"{api_prefix}/events/",
+            f"{events_api_prefix}/events/",
             json={
                 "realm": REALM,
                 "topic": TOPIC,
