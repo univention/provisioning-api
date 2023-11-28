@@ -15,6 +15,6 @@ import pytest
 """
 
 
-@pytest.mark.xfail()
+@pytest.mark.xfail(reason="Missing UDM listener + dispatcher")
 def test_udm_event_is_routed_properly():
     raise NotImplementedError

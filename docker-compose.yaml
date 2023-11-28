@@ -39,6 +39,19 @@ services:
       - "8222:8222" # HTTP monitoring port
     command: --jetstream -m 8222 -p 4222
 
+  test:
+    profiles:
+      - test
+    platform: "linux/amd64"
+    environment:
+      nats_host: nats
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/provisioning-dispatch-test:${IMAGE_TAG:-latest}
+    build:
+      context: docker/provisioning-dispatch-test
+    volumes:
+      - type: bind
+        source: .
+        target: /app/
 
   # Environment of the pre-commit linter.
   pre-commit:

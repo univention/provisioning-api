@@ -32,6 +32,7 @@ async def consumer():
 
 
 @pytest.mark.anyio
+@pytest.mark.xfail(reason="Dispatcher not yet implemented")
 async def test_udm_create_user_event_is_routed_correctly(
     producer: httpx.AsyncClient,
     consumer: httpx.AsyncClient,

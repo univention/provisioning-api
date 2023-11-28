@@ -14,6 +14,11 @@ include:
       - "jobs/semantic-release-env.yaml"
       - "jobs/container-build.yaml"
       - "jobs/package-and-publish-helm-charts.yaml"
+  - project: "univention/dist/docker-services"
+    ref: "master"
+    file:
+      - "dind.yml"
+
 
 lint-pre-commit:
   before_script:
@@ -48,13 +53,37 @@ container-security-scan:
   parallel:
     matrix: *build-matrix
 
+test-integration:
+  stage: "test"
+  extends: .dind
+  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+  before_script:
+    # Allow that the Docker API version is negotiated between client and server
+    - unset DOCKER_API_VERSION
+    - export IMAGE_TAG=${RELEASE_VERSION}
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
+    - echo $IMAGE_TAG
+    - docker version
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
+    - docker compose config test
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 nats
+  script:
+    - docker compose run --quiet-pull --rm test poetry config virtualenvs.in-project true
+    - docker compose run --quiet-pull --rm test poetry install --with dev
+    - docker compose run --quiet-pull --rm test poetry run pytest tests/integration
+  after_script:
+    - docker compose down --volumes
+
+# TODO: docker compose run nats ... somehow
 test-provisioning-dispatch:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:${RELEASE_VERSION}"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
-    - poetry run pytest --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
+    - poetry run pytest --ignore=tests/integration/ --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
