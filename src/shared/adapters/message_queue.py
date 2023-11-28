@@ -1,12 +1,9 @@
-import asyncio
 import logging
 
-from enum import Enum
-from typing import List, Union, Dict
+from typing import List
 
 from shared.models import Message
 from shared.models.queue import MQMessage
-from shared.models.adapters import BaseMessageQueue
 
 
 logger = logging.getLogger(__name__)
@@ -15,8 +12,8 @@ logger = logging.getLogger(__name__)
 class MessageQueueAdapter:
     """The implementation class for an abstract message queue adapter."""
 
-    def __init__(self, message_queue: BaseMessageQueue):
-        self.message_queue = message_queue # NatsAdapter, RabbitMQAdapter etc. | BaseAdapter
+    def __init__(self, message_queue):
+        self.message_queue = message_queue
 
     async def connect(self, servers: List[str]):
         return await self.message_queue.connect(servers=servers)

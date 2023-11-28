@@ -88,6 +88,7 @@ class UDMMessage(BaseMessage):
 
 class MQMessage(BaseModel):
     """A message published/received via a message queue adapter."""
+
     subject: str = ""
     reply: str = ""
     data: dict = {}

@@ -1,6 +1,5 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional
 
-from shared.models import Message
 from shared.models.adapters import BaseKVStore
 
 
@@ -24,7 +23,7 @@ class KVStoreAdapter:
         fill_queue: bool,
         fill_queue_status: str,
     ):
-       await self.kv_store.add_subscriber(
+        await self.kv_store.add_subscriber(
             name=name,
             realms_topics=realms_topics,
             fill_queue=fill_queue,

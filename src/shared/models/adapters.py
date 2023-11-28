@@ -1,5 +1,4 @@
-from typing import List, Tuple, Dict, Optional
-from typing_extensions import Self
+from typing import List, Tuple, Optional
 from abc import ABC, abstractmethod
 
 from shared.models import Message

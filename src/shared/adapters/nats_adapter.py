@@ -2,17 +2,15 @@ import asyncio
 import logging
 
 import json
-from typing import List, Union, Optional
+from typing import List, Union
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
-from nats.js.errors import NotFoundError, KeyNotFoundError
-from nats.js.kv import KeyValue
+from nats.js.errors import NotFoundError
 
 from shared.models import Message
 from shared.models.queue import MQMessage
-from shared.models.adapters import BaseMessageQueue
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +33,7 @@ class NatsKeys:
         return f"subscriber:{subscriber_name}"
 
 
-class NatsAdapter(BaseMessageQueue):
+class NatsAdapter:
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()

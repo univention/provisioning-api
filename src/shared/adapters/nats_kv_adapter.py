@@ -5,7 +5,6 @@ from nats.aio.client import Client as NATS
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from shared.models.adapters import BaseKVStore
 from shared.adapters.nats_adapter import NatsKeys
 
 
