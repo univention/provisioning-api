@@ -64,7 +64,7 @@ class SubscriptionService:
         data = dict(
             name=sub["name"],
             realms_topics=sub["realms_topics"],
-            fill_queue=bool(int(sub["fill_queue"])),
+            fill_queue=sub["fill_queue"],
             fill_queue_status=sub["fill_queue_status"],
         )
 
@@ -74,7 +74,6 @@ class SubscriptionService:
         """
         Add a new subscription.
         """
-
         if sub.fill_queue:
             fill_queue_status = FillQueueStatus.pending
         else:
@@ -91,7 +90,6 @@ class SubscriptionService:
             logger.info(
                 f"Creating subscription for the realm_topic: '{realm_topic_str}'"
             )
-
             sub_info["realms_topics"].append(realm_topic_str)
             await self.set_sub_info(sub.name, sub_info)
             await self.update_realm_topic_subscribers(realm_topic_str, sub.name)
@@ -111,7 +109,7 @@ class SubscriptionService:
         sub_info = {
             "name": sub.name,
             "realms_topics": [f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"],
-            "fill_queue": int(sub.fill_queue),
+            "fill_queue": sub.fill_queue,
             "fill_queue_status": fill_queue_status,
         }
         await self.set_sub_info(sub.name, sub_info)
@@ -137,7 +135,7 @@ class SubscriptionService:
             raise ValueError("Subscriber not found.")
 
         sub_info["fill_queue_status"] = status.name
-        await self._port.put_value_by_key(SubscriptionKeys.subscriber(name), sub_info)
+        await self.set_sub_info(name, sub_info)
 
     async def cancel_subscription(self, name: str, realm_topic: str):
         sub_info = await self.get_subscriber_info(name)
@@ -150,9 +148,6 @@ class SubscriptionService:
 
         realms_topics.remove(realm_topic)
         await self.set_sub_info(name, sub_info)
-
-        if not realms_topics:
-            await self.delete_subscriber(name)
 
     async def set_sub_info(self, name, sub_info):
         await self._port.put_value_by_key(SubscriptionKeys.subscriber(name), sub_info)
