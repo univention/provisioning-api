@@ -1,8 +1,7 @@
-import uuid
-
 import httpx
 import pytest
 
+from tests.conftest import NAME
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from consumer.main import app as messages_app
 from consumer.main import app as subscriptions_app
@@ -40,9 +39,8 @@ class TestDispatcher:
         messages_client: httpx.AsyncClient,
         subscriptions_client: httpx.AsyncClient,
     ):
-        name = str(uuid.uuid4())
         response = await messages_client.get(
-            f"{messages_api_prefix}/subscription/{name}/message"
+            f"{messages_api_prefix}/subscription/{NAME}/message"
         )
         assert response.status_code == 200
         data = response.json()
@@ -57,8 +55,6 @@ class TestDispatcher:
         messages_client: httpx.AsyncClient,
         subscriptions_client: httpx.AsyncClient,
     ):
-        name = str(uuid.uuid4())
-
         nats_msg = {
             "subject": "subscriber_2",
             "reply": "$JS.ACK.stream:subscriber_2.durable_name:subscriber_2.4.8.19.1699615014739091916.0",
@@ -72,7 +68,7 @@ class TestDispatcher:
             "headers": {"Nats-Expected-Stream": "stream:subscriber_2"},
         }
         response = await messages_client.post(
-            f"{messages_api_prefix}/subscription/{name}/message/",
+            f"{messages_api_prefix}/subscription/{NAME}/message/",
             json={"msg": nats_msg, "report": {"status": "ok"}},
         )
         assert response.status_code == 200
