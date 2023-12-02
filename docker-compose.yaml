@@ -39,6 +39,15 @@ services:
       - "8222:8222" # HTTP monitoring port
     command: --jetstream -m 8222 -p 4222
 
+  udm-listener:
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/udm-listener:${IMAGE_TAG:-latest}
+    environment:
+      - name=value
+      - LDAP_HOST=""
+      - LDAP_BASE_DN=""
+      - LDAP_HOST_DN=""
+      - NOTIFIER_SERVER=""
+
   test:
     profiles:
       - test
