@@ -2,7 +2,7 @@ ARG LISTENER_BASE_IMAGE_TAG=v0.4.1
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base:${LISTENER_BASE_IMAGE_TAG}
 
 # hadolint ignore=DL3006
-FROM ${LISTENER_BASE_IMAGE}
+FROM ${LISTENER_BASE_IMAGE} as base
 
 # TODO: Duplicated from the portal-server
 RUN apt-get update \
@@ -18,5 +18,7 @@ RUN apt-get update \
 
 
 # COPY /app/listener/*.py /usr/lib/univention-directory-listener/system/
+
+FROM base as final
 
 CMD ["/command.sh"]

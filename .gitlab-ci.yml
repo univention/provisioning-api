@@ -27,19 +27,25 @@ lint-pre-commit:
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatch"
     KANIKO_ARGS: "--target final"
+    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
   - IMAGE_NAME: "provisioning-dispatch-test"
     KANIKO_ARGS: "--target test"
+    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
+  - IMAGE_NAME: "udm-listener"
+    KANIKO_ARGS: "--target final"
+    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
     - "provisioning-dispatch"
+  - IMAGE_NAME:
+    - "udm-listener"
 
 container-build:
   parallel:
     matrix: *build-matrix
   variables:
     KANIKO_BUILD_CONTEXT: "${CI_PROJECT_DIR}"
-    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
 
 container-generate-sbom:
   parallel:
