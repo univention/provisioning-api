@@ -34,26 +34,28 @@
 
 from univention.listener.handler import ListenerModuleHandler
 
-name = 'provisioning_handler'
+name = "provisioning_handler"
 
 
 class LdapListener(ListenerModuleHandler):
     def initialize(self):
-        self.logger.info('handler stub initialize')
+        self.logger.info("handler stub initialize")
 
     def create(self, dn, new):
-        self.logger.info('[ create ] dn: %r', dn)
+        self.logger.info("[ create ] dn: %r", dn)
 
     def modify(self, dn, old, new, old_dn):
-        self.logger.info('[ modify ] dn: %r', dn)
+        self.logger.info("[ modify ] dn: %r", dn)
         if old_dn:
-            self.logger.debug('it is (also) a move! old_dn: %r', old_dn)
-        self.logger.debug('changed attributes: %r', self.diff(old, new))
+            self.logger.debug("it is (also) a move! old_dn: %r", old_dn)
+        self.logger.debug("changed attributes: %r", self.diff(old, new))
 
     def remove(self, dn, old):
-        self.logger.info('[ remove ] dn: %r', dn)
+        self.logger.info("[ remove ] dn: %r", dn)
 
     class Configuration(ListenerModuleHandler.Configuration):
         name = name
-        description = 'this listener will be used to send LDAP changes to provisioning consumers'
-        ldap_filter = '(objectClass=*)'
+        description = (
+            "this listener will be used to send LDAP changes to provisioning consumers"
+        )
+        ldap_filter = "(objectClass=*)"
