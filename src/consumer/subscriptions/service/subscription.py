@@ -47,17 +47,16 @@ class SubscriptionService:
         return subscribers
 
     async def get_subscriber_names(self):
-        return await self.get_subscribers_for_key(SubscriptionKeys.subscribers)
+        return await self._port.get_subscribers_list_for_key(SubscriptionKeys.subscribers)
 
-    async def get_subscriber_info(self, name: str) -> Optional[dict]:
-        sub = await self._port.get_value_by_key(SubscriptionKeys.subscriber(name))
-        return json.loads(sub.value.decode("utf-8")) if sub else None
+    # async def get_subscriber_info(self, name: str) -> Optional[dict]:
+
 
     async def get_subscriber(self, name: str) -> Subscriber:
         """
         Get information about a registered subscriber.
         """
-        sub = await self.get_subscriber_info(name)
+        sub = await self._port.get_subscriber_info(SubscriptionKeys.subscriber(name))
         if not sub:
             raise ValueError("Subscriber not found.")
 
@@ -121,7 +120,7 @@ class SubscriptionService:
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
 
-        sub_info = await self.get_subscriber_info(name)
+        sub_info = await self._port.get_subscriber_info(name)
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
@@ -130,7 +129,7 @@ class SubscriptionService:
 
     async def set_subscriber_queue_status(self, name: str, status: FillQueueStatus):
         """Set the pre-fill status of the given subscriber."""
-        sub_info = await self.get_subscriber_info(name)
+        sub_info = await self._port.get_subscriber_info(name)
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
@@ -138,7 +137,7 @@ class SubscriptionService:
         await self.set_sub_info(name, sub_info)
 
     async def cancel_subscription(self, name: str, realm_topic: str):
-        sub_info = await self.get_subscriber_info(name)
+        sub_info = await self._port.get_subscriber_info(name)
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
@@ -167,12 +166,9 @@ class SubscriptionService:
     async def delete_sub_info(self, name: str):
         await self._port.delete_key(SubscriptionKeys.subscriber(name))
 
-    async def get_subscribers_for_key(self, key: str) -> List[str]:
-        names = await self._port.get_value_by_key(key)
-        return names.value.decode("utf-8").split(",") if names else []
 
     async def delete_subscriber_from_key(self, key: str, name: str):
-        subs = await self.get_subscribers_for_key(key)
+        subs = await self._port.get_subscribers_list_for_key(key)
         subs.remove(name)
         if not subs:
             await self._port.delete_key(key)
@@ -180,9 +176,9 @@ class SubscriptionService:
             await self._port.put_value_by_key(key, ",".join(subs))
 
     async def update_subscribers_for_key(self, key: str, value: str) -> None:
-        subs = await self._port.get_value_by_key(key)
+        subs = self._port.get_subscribers_str_for_key(key, value)
         if subs:
-            value = subs.value.decode("utf-8") + f",{value}"
+            value = subs
         await self._port.put_value_by_key(key, value)
 
     async def add_sub_to_subscribers(self, name: str):
