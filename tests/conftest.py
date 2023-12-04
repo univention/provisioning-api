@@ -1,11 +1,12 @@
 import json
 from copy import copy
 from typing import Union
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock
 
 import pytest
 from fakeredis import aioredis
 from nats.aio.msg import Msg
+from nats.js.api import ConsumerConfig
 from nats.js.kv import KeyValue
 from redis._parsers.helpers import (
     parse_xread_resp3,
@@ -21,7 +22,7 @@ from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
 
-NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 FLAT_MESSAGE = {
     "publisher_name": "127.0.0.1",
@@ -31,7 +32,7 @@ FLAT_MESSAGE = {
     "body": '{"hello": "world"}',
 }
 SUBSCRIBER_INFO = {
-    "name": NAME,
+    "name": SUBSCRIBER_NAME,
     "realms_topics": ["foo:bar", "abc:def"],
     "fill_queue": True,
     "fill_queue_status": "done",
@@ -48,7 +49,7 @@ BASE_KV_OBJ = KeyValue.Entry(
 )
 
 kv_sub_info = copy(BASE_KV_OBJ)
-kv_sub_info.key = f"subscriber:{NAME}"
+kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
 kv_sub_info.value = (
     b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["foo:bar"], "fill_queue": true, '
     b'"fill_queue_status": "done"}'
@@ -111,56 +112,66 @@ async def fake_redis():
         await connection.aclose()
 
 
-def fake_js():
-    js = Mock()
-    js.stream_info = AsyncMock()
-    js.publish = AsyncMock()
-    js.delete_msg = AsyncMock()
-    js.add_consumer = AsyncMock()
-    js.delete_stream = AsyncMock()
-
+class FakeJs:
     sub = AsyncMock()
-    js.pull_subscribe = AsyncMock(return_value=sub)
     sub.fetch = AsyncMock(
         return_value=[Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())]
     )
     Msg.ack = AsyncMock()
 
-    return js
+    async def pull_subscribe(self, subject: str, durable: str, stream: str):
+        return self.sub
+
+    @staticmethod
+    async def stream_info(name: str):
+        pass
+
+    @staticmethod
+    async def publish(subject: str, payload: bytes, stream: str):
+        pass
+
+    @staticmethod
+    async def delete_msg(name: str):
+        pass
+
+    @staticmethod
+    async def add_consumer(stream: str, config: ConsumerConfig):
+        pass
+
+    @staticmethod
+    async def delete_stream(name: str):
+        pass
 
 
-class FakeNats:
+class FakeKvStore:
     @classmethod
     async def delete(cls, key: str):
         pass
 
     @classmethod
-    async def get_value_by_key(cls, key: str):
-        values = {"abc:def": kv_subs, f"subscriber:{NAME}": kv_sub_info}
+    async def get(cls, key: str):
+        values = {"abc:def": kv_subs, f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info}
         return values[key]
 
     @classmethod
-    async def put_value_by_key(cls, key: str, value: Union[str, dict]):
+    async def put(cls, key: str, value: Union[str, dict]):
         pass
 
 
-def fake_nats_adapter(port: Union[ConsumerPort, EventsPort]):
-    port.nats_adapter.kv_store = AsyncMock()
-    port.nats_adapter.js = fake_js()
-    port.nats_adapter.kv_store.delete = AsyncMock(side_effect=FakeNats.delete)
-    port.nats_adapter.kv_store.get = AsyncMock(side_effect=FakeNats.get_value_by_key)
-    port.nats_adapter.kv_store.put = AsyncMock(side_effect=FakeNats.put_value_by_key)
+def add_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
+    port.nats_adapter.kv_store = FakeKvStore()
+    port.nats_adapter.js = FakeJs()
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    fake_nats_adapter(port)
+    add_fake_kv_store_and_js(port)
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    fake_nats_adapter(port)
+    add_fake_kv_store_and_js(port)
     return port
 
 

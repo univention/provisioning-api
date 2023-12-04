@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from tests.conftest import NAME
+from tests.conftest import SUBSCRIBER_NAME
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from consumer.main import app as messages_app
 from consumer.main import app as subscriptions_app
@@ -40,7 +40,7 @@ class TestDispatcher:
         subscriptions_client: httpx.AsyncClient,
     ):
         response = await messages_client.get(
-            f"{messages_api_prefix}/subscription/{NAME}/message"
+            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message"
         )
         assert response.status_code == 200
         data = response.json()
@@ -68,7 +68,7 @@ class TestDispatcher:
             "headers": {"Nats-Expected-Stream": "stream:subscriber_2"},
         }
         response = await messages_client.post(
-            f"{messages_api_prefix}/subscription/{NAME}/message/",
+            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message/",
             json={"msg": nats_msg, "report": {"status": "ok"}},
         )
         assert response.status_code == 200
