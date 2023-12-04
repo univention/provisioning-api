@@ -10,24 +10,9 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
     depends_on:
-      - "redis"
       - "nats"
     ports:
       - "7777:7777"
-
-  redis:
-    image: "redis/redis-stack"
-    environment:
-      FOO: "bar"
-    ports:
-      # Redis Server
-      - "6379:6379"
-      # RedisInsight GUI
-      - "8002:8001"
-    volumes:
-      - type: "volume"
-        source: "redis-data"
-        target: "/foo/bar"
 
   nats:
     image: "nats:latest"
@@ -99,4 +84,3 @@ services:
 
 volumes:
   pre-commit-cache:
-  redis-data:
