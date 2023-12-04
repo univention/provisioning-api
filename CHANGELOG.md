@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.0.1...v0.1.0) (2023-12-04)
+
+
+### Features
+
+* **docker-compose:** provide udm-listener service ([17c24a2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/17c24a2f62fdb9bb64a51541d5dfedc214c1a2d8))
+* **docker:** add udm-listener image build to CI ([9e6253c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/9e6253c6b70704a3e9559e0f77cb716ea19b4fa9))
+* **docker:** provide Dockerfile for udm-listener ([403dee9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/403dee985242b59749aa83935d96a5ae86b3894e))
+* **listener:** add listener implementation ([d799a9b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/d799a9b9d8e328335c0b6a7f35aaff04555ce174))
+* **listener:** add listener implementation ([e88971f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/e88971f16158f38d9c8a74541de50c3faee9c208))
+
 ## 0.0.1 (2023-11-29)
 
 
