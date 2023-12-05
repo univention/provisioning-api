@@ -1,10 +1,8 @@
 from typing import List, Optional
 
-from shared.models.adapters import BaseKVStore
-
 
 class KVStoreAdapter:
-    def __init__(self, kv_store: BaseKVStore):
+    def __init__(self, kv_store):
         self.kv_store = kv_store
 
     async def connect(self, servers: List[str]):
