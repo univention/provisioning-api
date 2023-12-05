@@ -70,20 +70,20 @@ class ConsumerPort:
     async def remove_message(self, msg: NatsMessage):
         await self.nats_adapter.remove_message(msg)
 
-    async def delete_queue(self, subscriber_name: str):
-        await self.nats_adapter.delete_stream(subscriber_name)
+    async def delete_queue(self, stream_name: str):
+        await self.nats_adapter.delete_stream(stream_name)
 
     async def get_dict_value(self, name: str) -> Optional[dict]:
-        sub = await self.nats_adapter.get_value(name)
-        return json.loads(sub.value.decode("utf-8")) if sub else None
+        result = await self.nats_adapter.get_value(name)
+        return json.loads(result.value.decode("utf-8")) if result else None
 
     async def get_list_value(self, key: str) -> List[str]:
-        names = await self.nats_adapter.get_value(key)
-        return names.value.decode("utf-8").split(",") if names else []
+        result = await self.nats_adapter.get_value(key)
+        return result.value.decode("utf-8").split(",") if result else []
 
     async def get_str_value(self, key: str) -> Optional[str]:
-        subs = await self.nats_adapter.get_value(key)
-        return subs.value.decode("utf-8") if subs else None
+        result = await self.nats_adapter.get_value(key)
+        return result.value.decode("utf-8") if result else None
 
     async def delete_kv_pair(self, key: str):
         await self.nats_adapter.delete_kv_pair(key)
