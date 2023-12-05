@@ -189,7 +189,7 @@ class SubscriptionService:
             raise ValueError("The subscriber with the given name does not exist")
 
         subs.remove(name)
-        await self._port.put_value(key, ",".join(subs))
+        await self._port.put_list_value(key, subs)
 
         logger.info("Subscriber was deleted")
 

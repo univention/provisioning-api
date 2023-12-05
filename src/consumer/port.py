@@ -91,5 +91,8 @@ class ConsumerPort:
     async def put_value(self, key: str, value: Union[str, dict]):
         await self.nats_adapter.put_value(key, value)
 
+    async def put_list_value(self, key: str, value: list[str]):
+        await self.nats_adapter.put_value(key, ",".join(value))
+
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

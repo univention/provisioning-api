@@ -237,6 +237,7 @@ class TestSubscriptionService:
         sub_service._port.get_list_value = AsyncMock(
             return_value=[self.subscriber_name]
         )
+        sub_service._port.put_list_value = AsyncMock()
         sub_service._port.put_value = AsyncMock()
 
         await sub_service.cancel_subscription(self.subscriber_name, "foo:bar")
@@ -245,9 +246,7 @@ class TestSubscriptionService:
             f"subscriber:{self.subscriber_name}"
         )
         sub_service._port.get_list_value.assert_called_once_with(self.realm_topic)
-        sub_service._port.put_value.assert_has_calls(
-            [
-                call(self.realm_topic, ""),
-                call(f"subscriber:{self.subscriber_name}", res_sub_info),
-            ]
+        sub_service._port.put_list_value.assert_called_once_with(self.realm_topic, [])
+        sub_service._port.put_value.assert_called_once_with(
+            f"subscriber:{self.subscriber_name}", res_sub_info
         )
