@@ -8,12 +8,12 @@ data:
   DEBUG: "{{ .Values.provisioningApi.debug }}"
   ROOT_PATH: "{{ .Values.provisioningApi.rootPath }}"
   CORS_ALL: "{{ .Values.provisioningApi.corsAll }}"
-  {{- if .Values.redis.bundled }}
-  REDIS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "redis" "chartValues" .Values.redis "context" $.top) }}-master"
-  REDIS_PORT: "{{ .Values.redis.master.containerPorts.redis }}"
+  {{- if .Values.nats.bundled }}
+  NATS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "nats" "chartValues" .Values.nats "context" $.top) }}"
+  NATS_PORT: "{{ .Values.provisioningApi.natsPort }}"
   {{- else }}
-  REDIS_HOST: {{ required "The parameter \"redis.connection.host\" is required." .Values.redis.connection.host | quote }}
-  REDIS_PORT: {{ required "The parameter \"redis.connection.port\" is required." .Values.redis.connection.port | quote }}
+  NATS_HOST: {{ required "The parameter \"nats.connection.host\" is required." .Values.nats.connection.host | quote }}
+  NATS_PORT: {{ required "The parameter \"nats.connection.port\" is required." .Values.nats.connection.port | quote }}
   {{- end }}
   UDM_URL: {{ required "The parameter \"provisioningApi.udmUrl\" is required." .Values.provisioningApi.udmUrl | quote }}
   UDM_USERNAME: {{ required "The parameter \"provisioningApi.udmUsername\" is required." .Values.provisioningApi.udmUsername | quote }}

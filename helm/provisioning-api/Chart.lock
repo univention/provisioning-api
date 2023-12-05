@@ -2,8 +2,8 @@ dependencies:
 - name: common
   repository: oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm
   version: 0.2.0
-- name: redis
+- name: nats
   repository: https://charts.bitnami.com/bitnami
-  version: 18.1.4
-digest: sha256:6b8144a8f1bc84fbbb82249b1f48c22409b8cb43c1d6c3dc495e9af1fd893bf3
-generated: "2023-10-11T15:10:19.020933+02:00"
+  version: 7.10.5
+digest: sha256:e75717027cdebb4b162dcf472b10184d66230654d1837247e455332b809393e5
+generated: "2023-12-05T14:19:27.661492167Z"

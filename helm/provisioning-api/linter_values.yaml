@@ -10,8 +10,8 @@ provisioningApi:
   debug: True
   rootPath: ""
   corsAll: False
-  redisHost: "localhost"
-  redisPort: 6379
+  natsHost: "localhost"
+  natsPort: 4222
   udmUrl: ""
   udmUsername: ""
   udmPassword: ""

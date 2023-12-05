@@ -18,9 +18,9 @@ dependencies:
     alias: "ums-common"
     repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
     version: "^0.2.0"
-  - name: "redis"
+  - name: "nats"
     repository: "https://charts.bitnami.com/bitnami"
-    version: "^18.0.0"
-    condition: "redis.bundled"
+    version: "^7.10.0"
+    condition: "nats.bundled"
 
 ...

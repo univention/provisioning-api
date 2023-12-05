@@ -27,6 +27,10 @@ provisioningApi:
   rootPath: ""
   # -- FastAPI: disable CORS checks
   corsAll: False
+  # -- NATS: host
+  natsHost: "localhost"
+  # -- NATS: port
+  natsPort: 4222
   # -- UDM REST API: base url
   udmUrl: null
   # -- UDM REST API: username
@@ -34,11 +38,11 @@ provisioningApi:
   # -- UDM REST API: password
   udmPassword: null
 
-# -- Redis server settings.
-redis:
-  # -- Set to `true` if you want Redis to be installed as well.
+# -- NATS server settings.
+nats:
+  # -- Set to `true` if you want NATS to be installed as well.
   bundled: true
-  # -- Connection parameters. These are required if you use an external Redis.
+  # -- Connection parameters. These are required if you use an external NATS.
   connection:
     host: null
     port: null
@@ -122,10 +126,8 @@ probes:
 resources:
   requests:
     memory: "512Mi"
-    cpu: "250m"
   limits:
     memory: "4Gi"
-    cpu: "4"
 
 ## Kubernetes Service
 service:

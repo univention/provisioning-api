@@ -49,7 +49,7 @@ kubectl delete pvc -l release=provisioning-api
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | redis | ^18.0.0 |
+| https://charts.bitnami.com/bitnami | nats | ^7.10.0 |
 | oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | ums-common(common) | ^0.2.0 |
 
 ## Values
@@ -324,6 +324,48 @@ true
 			<td></td>
 		</tr>
 		<tr>
+			<td>nats</td>
+			<td>object</td>
+			<td><pre lang="json">
+{
+  "auth": {
+    "enabled": false
+  },
+  "bundled": true,
+  "connection": {
+    "host": null,
+    "port": null
+  },
+  "replica": {
+    "replicaCount": 0
+  }
+}
+</pre>
+</td>
+			<td>NATS server settings.</td>
+		</tr>
+		<tr>
+			<td>nats.bundled</td>
+			<td>bool</td>
+			<td><pre lang="json">
+true
+</pre>
+</td>
+			<td>Set to `true` if you want NATS to be installed as well.</td>
+		</tr>
+		<tr>
+			<td>nats.connection</td>
+			<td>object</td>
+			<td><pre lang="json">
+{
+  "host": null,
+  "port": null
+}
+</pre>
+</td>
+			<td>Connection parameters. These are required if you use an external NATS.</td>
+		</tr>
+		<tr>
 			<td>nodeSelector</td>
 			<td>object</td>
 			<td><pre lang="json">
@@ -466,6 +508,8 @@ true
   "corsAll": false,
   "debug": true,
   "logLevel": "INFO",
+  "natsHost": "localhost",
+  "natsPort": 4222,
   "rootPath": "",
   "udmPassword": null,
   "udmUrl": null,
@@ -501,6 +545,24 @@ true
 </pre>
 </td>
 			<td>Python log level</td>
+		</tr>
+		<tr>
+			<td>provisioningApi.natsHost</td>
+			<td>string</td>
+			<td><pre lang="json">
+"localhost"
+</pre>
+</td>
+			<td>NATS: host</td>
+		</tr>
+		<tr>
+			<td>provisioningApi.natsPort</td>
+			<td>int</td>
+			<td><pre lang="json">
+4222
+</pre>
+</td>
+			<td>NATS: port</td>
 		</tr>
 		<tr>
 			<td>provisioningApi.rootPath</td>
@@ -539,48 +601,6 @@ null
 			<td>UDM REST API: username</td>
 		</tr>
 		<tr>
-			<td>redis</td>
-			<td>object</td>
-			<td><pre lang="json">
-{
-  "auth": {
-    "enabled": false
-  },
-  "bundled": true,
-  "connection": {
-    "host": null,
-    "port": null
-  },
-  "replica": {
-    "replicaCount": 0
-  }
-}
-</pre>
-</td>
-			<td>Redis server settings.</td>
-		</tr>
-		<tr>
-			<td>redis.bundled</td>
-			<td>bool</td>
-			<td><pre lang="json">
-true
-</pre>
-</td>
-			<td>Set to `true` if you want Redis to be installed as well.</td>
-		</tr>
-		<tr>
-			<td>redis.connection</td>
-			<td>object</td>
-			<td><pre lang="json">
-{
-  "host": null,
-  "port": null
-}
-</pre>
-</td>
-			<td>Connection parameters. These are required if you use an external Redis.</td>
-		</tr>
-		<tr>
 			<td>replicaCount</td>
 			<td>int</td>
 			<td><pre lang="json">
@@ -590,28 +610,10 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>resources.limits.cpu</td>
-			<td>string</td>
-			<td><pre lang="json">
-"4"
-</pre>
-</td>
-			<td></td>
-		</tr>
-		<tr>
 			<td>resources.limits.memory</td>
 			<td>string</td>
 			<td><pre lang="json">
 "4Gi"
-</pre>
-</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>resources.requests.cpu</td>
-			<td>string</td>
-			<td><pre lang="json">
-"250m"
 </pre>
 </td>
 			<td></td>

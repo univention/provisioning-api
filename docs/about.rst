@@ -23,7 +23,7 @@ The project comprises three components:
 Persistency
 -----------
 
-Data is persisted in a Redis server.
+Data is persisted in a NATS server.
 
 Filtering
 ---------
@@ -64,7 +64,7 @@ Queuing
 -------
 
 There is a queue for each registered subscriber.
-The queues are implemented using Redis Streams.
+The queues are implemented using `NATS JetStream <https://docs.nats.io/nats-concepts/jetstream>`_.
 
 Each item in the queue has a timestamp.
 Messages are sent to the subscribers one by one,
