@@ -34,24 +34,35 @@
 
 from univention.listener.handler import ListenerModuleHandler
 
+from udm_messaging.port import UDMMessagingPort
+from udm_messaging.service.udm import UDMMessagingService
+
+async with UDMMessagingPort.port_context() as port:
+    service = UDMMessagingService(port)
+
 name = "provisioning_handler"
 
 
 class LdapListener(ListenerModuleHandler):
+
     def initialize(self):
         self.logger.info("handler stub initialize")
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
+        service.handle_changes(new)
 
     def modify(self, dn, old, new, old_dn):
         self.logger.info("[ modify ] dn: %r", dn)
         if old_dn:
             self.logger.debug("it is (also) a move! old_dn: %r", old_dn)
         self.logger.debug("changed attributes: %r", self.diff(old, new))
+        service.handle_changes(new)
 
     def remove(self, dn, old):
         self.logger.info("[ remove ] dn: %r", dn)
+        service.handle_changes(None)
+
 
     class Configuration(ListenerModuleHandler.Configuration):
         name = name
