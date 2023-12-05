@@ -34,6 +34,7 @@ class NatsAdapter:
         self.nats = NATS()
         self.js = self.nats.jetstream()
         self.kv_store: Optional[KeyValue] = None
+        self._future = asyncio.Future()
 
     async def close(self):
         await self.nats.close()
@@ -137,3 +138,21 @@ class NatsAdapter:
         if isinstance(value, dict):
             value = json.dumps(value)
         await self.kv_store.put(key, value.encode("utf-8"))
+
+    async def get_subscribers_for_key(self, key: str):
+        names = await self.get_value(key)
+        return names.value.decode("utf-8").split(",") if names else []
+
+    async def update_subscribers_for_key(self, key: str, name: str) -> None:
+        try:
+            subs = await self.kv_store.get(key)
+            updated_subs = subs.value.decode("utf-8") + f",{name}"
+            await self.put_value(key, updated_subs)
+        except KeyNotFoundError:
+            await self.put_value(key, name)
+
+    async def subscribe_to_incoming_queue(self, subject):
+        async def cb(msg):
+            self._future.set_result(msg)
+
+        await self.nats.subscribe(subject, cb=cb)
