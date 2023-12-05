@@ -96,7 +96,7 @@ class ConsumerPort:
         fill_queue_status: str,
     ):
         await self.kv_store.add_subscriber(
-            name, realms_topics, fill_queue, fill_queue_status
+            name, realm_topic, fill_queue, fill_queue_status
         )
 
     async def create_subscription(self, name: str, realm_topic: str, sub_info: dict):

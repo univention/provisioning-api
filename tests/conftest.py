@@ -14,9 +14,9 @@ from redis._parsers.helpers import (
     parse_sentinel_slaves_and_sentinels_resp3,
 )
 from redis.utils import str_if_bytes
-from nats.js.kv import KeyValue
+from nats.js.kv import KeyValue  # noqa: F401
 
-from src.shared.adapters import NatsAdapter, NatsKVAdapter
+from src.shared.adapters import NatsAdapter, NatsKVAdapter  # noqa: F401
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
@@ -105,11 +105,11 @@ def fake_js():
 
 async def port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    #if type(port.message_queue.message_queue) is NatsAdapter:
+    # if type(port.message_queue.message_queue) is NatsAdapter:
     port.message_queue.message_queue.nats = AsyncMock()
     port.message_queue.message_queue.js = fake_js()
 
-    #if type(port.kv_store.kv_store) is NatsKVAdapter:
+    # if type(port.kv_store.kv_store) is NatsKVAdapter:
     port.kv_store.kv_store.nats = AsyncMock()
     port.kv_store.kv_store.js = fake_js()
 
@@ -125,11 +125,11 @@ async def port_fake_dependency() -> ConsumerPort:
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    #if type(port.message_queue.message_queue) is NatsAdapter:
+    # if type(port.message_queue.message_queue) is NatsAdapter:
     port.message_queue.message_queue.nats = AsyncMock()
     port.message_queue.message_queue.js = fake_js()
 
-    #if type(port.kv_store.kv_store) is NatsKVAdapter:
+    # if type(port.kv_store.kv_store) is NatsKVAdapter:
     port.kv_store.kv_store.nats = AsyncMock()
     port.kv_store.kv_store.js = fake_js()
 
