@@ -39,6 +39,7 @@ class NatsAdapter:
         self.nats = NATS()
         self.js = self.nats.jetstream()
         self.kv_store: Optional[KeyValue] = None
+        self._future = asyncio.Future()
 
     async def close(self):
         await self.nats.close()
@@ -46,22 +47,22 @@ class NatsAdapter:
     async def create_kv_store(self):
         self.kv_store = await self.js.create_key_value(bucket="Pub_Sub_KV")
 
-    async def add_message(self, subscriber_name: str, message: Message):
+    async def add_message(self, subject: str, message: Message):
         """Publish a message to a NATS subject."""
         flat_message = message.flatten()
-        stream_name = NatsKeys.stream(subscriber_name)
+        stream_name = NatsKeys.stream(subject)
         try:
             await self.js.stream_info(stream_name)
         except NotFoundError:
             logger.warning(f"Creating new stream with name: {stream_name}")
-            await self.js.add_stream(name=stream_name, subjects=[subscriber_name])
+            await self.js.add_stream(name=stream_name, subjects=[subject])
 
         await self.js.add_consumer(
             stream_name,
-            ConsumerConfig(durable_name=NatsKeys.durable_name(subscriber_name)),
+            ConsumerConfig(durable_name=NatsKeys.durable_name(subject)),
         )
         await self.js.publish(
-            subscriber_name,
+            subject,
             json.dumps(flat_message).encode("utf-8"),
             stream=stream_name,
         )
@@ -192,3 +193,15 @@ class NatsAdapter:
             await self.put_value_by_key(key, updated_subs)
         except KeyNotFoundError:
             await self.put_value_by_key(key, name)
+
+    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
+        try:
+            return await self.kv_store.get(key)
+        except KeyNotFoundError:
+            return None
+
+    async def subscribe_to_incoming_queue(self, subject):
+        async def cb(msg):
+            self._future.set_result(msg)
+
+        await self.nats.subscribe(subject, cb=cb)
