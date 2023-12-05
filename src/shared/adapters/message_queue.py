@@ -36,10 +36,10 @@ class MessageQueueAdapter:
             subscriber_name=subscriber_name, timeout=timeout, count=count, pop=pop
         )
 
-    async def delete_message(self, msg: MQMessage):
+    async def remove_message(self, msg: MQMessage):
         """Delete a message from a message queue stream."""
 
-        return await self.message_queue.delete_message(msg=msg)
+        return await self.message_queue.remove_message(msg=msg)
 
     async def delete_stream(self, subscriber_name: str):
         """Delete the stream for a given subject from the message queue."""
