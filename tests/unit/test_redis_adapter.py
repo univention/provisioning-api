@@ -303,7 +303,7 @@ class TestRedisAdapter:
 
         result = await redis_adapter.delete_subscriber(self.subscriber_name)
 
-        pipe.delete.assert_has_calls(
+        pipe.delete_kv_pair.assert_has_calls(
             [call(self.subscriber_topics), call(self.subscriber)]
         )
         pipe.srem.assert_called_once_with("subscribers", self.subscriber_name)

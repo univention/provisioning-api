@@ -158,20 +158,20 @@ class FakeKvStore:
         pass
 
 
-def add_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
+def set_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
     port.nats_adapter.kv_store = FakeKvStore()
     port.nats_adapter.js = FakeJs()
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    add_fake_kv_store_and_js(port)
+    set_fake_kv_store_and_js(port)
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    add_fake_kv_store_and_js(port)
+    set_fake_kv_store_and_js(port)
     return port
 
 

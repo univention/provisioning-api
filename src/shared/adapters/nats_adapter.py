@@ -120,16 +120,20 @@ class NatsAdapter:
         except NotFoundError:
             return None
 
-    async def delete_key(self, key: str):
+    async def delete_kv_pair(self, key: str):
         await self.kv_store.delete(key)
 
-    async def get_value_by_key(self, key: str) -> Optional[KeyValue.Entry]:
+    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
         try:
             return await self.kv_store.get(key)
         except KeyNotFoundError:
             return None
 
-    async def put_value_by_key(self, key: str, value: Union[str, dict]):
+    async def put_value(self, key: str, value: Union[str, dict]):
+        if not value:
+            await self.delete_kv_pair(key)
+            return
+
         if isinstance(value, dict):
             value = json.dumps(value)
         await self.kv_store.put(key, value.encode("utf-8"))

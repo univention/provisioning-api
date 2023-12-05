@@ -3,7 +3,6 @@ import json
 from typing import List, Annotated, Optional, Union
 
 from fastapi import Depends
-from nats.js.kv import KeyValue
 
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.redis_adapter import RedisAdapter
@@ -74,27 +73,23 @@ class ConsumerPort:
     async def delete_queue(self, subscriber_name: str):
         await self.nats_adapter.delete_stream(subscriber_name)
 
-    # async def get_value_by_key(self, key: str) -> Optional[KeyValue.Entry]:
-    #     return await self.nats_adapter.get_value_by_key(key)
-
-    async def get_subscriber_info(self, name: str) -> Optional[dict]:
-        sub = await self.nats_adapter.get_value_by_key(name)
+    async def get_dict_value(self, name: str) -> Optional[dict]:
+        sub = await self.nats_adapter.get_value(name)
         return json.loads(sub.value.decode("utf-8")) if sub else None
 
-    async def get_subscribers_list_for_key(self, key: str) -> List[str]:
-        names = await self.nats_adapter.get_value_by_key(key)
+    async def get_list_value(self, key: str) -> List[str]:
+        names = await self.nats_adapter.get_value(key)
         return names.value.decode("utf-8").split(",") if names else []
 
-    async def get_subscribers_str_for_key(self, key: str, value: str) -> Optional[str]:
-        subs = await self.nats_adapter.get_value_by_key(key)
-        return subs.value.decode("utf-8") + f",{value}"
+    async def get_str_value(self, key: str) -> Optional[str]:
+        subs = await self.nats_adapter.get_value(key)
+        return subs.value.decode("utf-8") if subs else None
 
+    async def delete_kv_pair(self, key: str):
+        await self.nats_adapter.delete_kv_pair(key)
 
-    async def delete_key(self, key: str):
-        await self.nats_adapter.delete_key(key)
-
-    async def put_value_by_key(self, key: str, value: Union[str, dict]):
-        await self.nats_adapter.put_value_by_key(key, value)
+    async def put_value(self, key: str, value: Union[str, dict]):
+        await self.nats_adapter.put_value(key, value)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

@@ -31,10 +31,10 @@ class UDMMessagingPort:
         yield port
 
     async def retrieve(self, url: str):
-        return await self._nats_adapter.get_value_by_key(url)
+        return await self._nats_adapter.get_value(url)
 
     async def store(self, url: str, new_obj: str):
-        await self._nats_adapter.put_value_by_key(url, new_obj)
+        await self._nats_adapter.put_value(url, new_obj)
 
     async def send_event(self, message: Message):
         await self._event_adapter.send_event(message)

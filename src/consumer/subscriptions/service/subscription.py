@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 from typing import List, Optional
@@ -47,16 +46,13 @@ class SubscriptionService:
         return subscribers
 
     async def get_subscriber_names(self):
-        return await self._port.get_subscribers_list_for_key(SubscriptionKeys.subscribers)
-
-    # async def get_subscriber_info(self, name: str) -> Optional[dict]:
-
+        return await self._port.get_list_value(SubscriptionKeys.subscribers)
 
     async def get_subscriber(self, name: str) -> Subscriber:
         """
         Get information about a registered subscriber.
         """
-        sub = await self._port.get_subscriber_info(SubscriptionKeys.subscriber(name))
+        sub = await self.get_subscriber_info(name)
         if not sub:
             raise ValueError("Subscriber not found.")
 
@@ -98,7 +94,10 @@ class SubscriptionService:
             await self.add_subscriber(sub, fill_queue_status, realm_topic_str)
 
     async def update_realm_topic_subscribers(self, realm_topic_str, name: str):
-        await self.update_subscribers_for_key(realm_topic_str, name)
+        await self.update_subscriber_names(realm_topic_str, name)
+
+    async def get_realm_topic_subscribers(self, realm_topic_str):
+        return await self._port.get_list_value(realm_topic_str)
 
     async def add_subscriber(
         self, sub: NewSubscriber, fill_queue_status: FillQueueStatus, realm_topic_str
@@ -117,10 +116,13 @@ class SubscriptionService:
 
         logger.info("New subscriber was created")
 
+    async def get_subscriber_info(self, name: str) -> Optional[dict]:
+        return await self._port.get_dict_value(SubscriptionKeys.subscriber(name))
+
     async def get_subscriber_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscriber."""
 
-        sub_info = await self._port.get_subscriber_info(name)
+        sub_info = await self.get_subscriber_info(name)
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
@@ -129,7 +131,7 @@ class SubscriptionService:
 
     async def set_subscriber_queue_status(self, name: str, status: FillQueueStatus):
         """Set the pre-fill status of the given subscriber."""
-        sub_info = await self._port.get_subscriber_info(name)
+        sub_info = await self.get_subscriber_info(name)
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
@@ -137,7 +139,7 @@ class SubscriptionService:
         await self.set_sub_info(name, sub_info)
 
     async def cancel_subscription(self, name: str, realm_topic: str):
-        sub_info = await self._port.get_subscriber_info(name)
+        sub_info = await self.get_subscriber_info(name)
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
@@ -146,40 +148,56 @@ class SubscriptionService:
             raise ValueError("Subscription for the given realm_topic doesn't exist")
 
         realms_topics.remove(realm_topic)
+        await self.delete_sub_from_realm_topic(realm_topic, name)
         await self.set_sub_info(name, sub_info)
 
     async def set_sub_info(self, name, sub_info):
-        await self._port.put_value_by_key(SubscriptionKeys.subscriber(name), sub_info)
+        await self._port.put_value(SubscriptionKeys.subscriber(name), sub_info)
 
     async def delete_subscriber(self, name: str):
         """
         Delete a subscriber and all of its data.
         """
         await manager.close(name)
+
+        sub_info = await self.get_subscriber_info(name)
+        if sub_info:
+            for realm_topic in sub_info["realms_topics"]:
+                await self.delete_sub_from_realm_topic(realm_topic, name)
+
         await self.delete_sub_from_subscribers(name)
         await self.delete_sub_info(SubscriptionKeys.subscriber(name))
         await self._port.delete_queue(name)
 
     async def delete_sub_from_subscribers(self, name: str):
-        await self.delete_subscriber_from_key(SubscriptionKeys.subscribers, name)
+        await self.delete_subscriber_from_values(SubscriptionKeys.subscribers, name)
+
+    async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
+        await self.delete_subscriber_from_values(realm_topic_str, name)
 
     async def delete_sub_info(self, name: str):
-        await self._port.delete_key(SubscriptionKeys.subscriber(name))
+        await self._port.delete_kv_pair(SubscriptionKeys.subscriber(name))
 
+    async def delete_subscriber_from_values(self, key: str, name: str):
+        logger.info(f"Deleting subscriber '{name}' from '{key}'")
 
-    async def delete_subscriber_from_key(self, key: str, name: str):
-        subs = await self._port.get_subscribers_list_for_key(key)
-        subs.remove(name)
+        subs = await self._port.get_list_value(key)
         if not subs:
-            await self._port.delete_key(key)
-        else:
-            await self._port.put_value_by_key(key, ",".join(subs))
+            raise ValueError("There are no subscribers")
 
-    async def update_subscribers_for_key(self, key: str, value: str) -> None:
-        subs = self._port.get_subscribers_str_for_key(key, value)
+        if name not in subs:
+            raise ValueError("The subscriber with the given name does not exist")
+
+        subs.remove(name)
+        await self._port.put_value(key, ",".join(subs))
+
+        logger.info("Subscriber was deleted")
+
+    async def update_subscriber_names(self, key: str, value: str) -> None:
+        subs = await self._port.get_str_value(key)
         if subs:
-            value = subs
-        await self._port.put_value_by_key(key, value)
+            value = subs + f",{value}"
+        await self._port.put_value(key, value)
 
     async def add_sub_to_subscribers(self, name: str):
-        await self.update_subscribers_for_key(SubscriptionKeys.subscribers, name)
+        await self.update_subscriber_names(SubscriptionKeys.subscribers, name)
