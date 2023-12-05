@@ -25,6 +25,10 @@ class ConsumerPort:
         await port.message_queue.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
+        await port.kv_store.connect(
+            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
+        )
+
         await port.kv_store.create_kv_store()
         try:
             yield port
@@ -34,18 +38,22 @@ class ConsumerPort:
     @staticmethod
     async def port_dependency():
         port = ConsumerPort()
-        await port.message_queue.nats.connect(
+        await port.message_queue.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
-        await port.message_queue.create_kv_store()
+        await port.kv_store.connect(
+            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
+        )
+
+        await port.kv_store.create_kv_store()
         try:
             yield port
         finally:
             await port.close()
 
     async def close(self):
-        await self.redis_adapter.close()
         await self.message_queue.close()
+        await self.kv_store.close()
 
     async def add_live_message(self, subscriber_name: str, message: Message):
         await self.message_queue.add_message(subscriber_name, message)
@@ -75,10 +83,10 @@ class ConsumerPort:
         await self.message_queue.delete_stream(subscriber_name)
 
     async def get_subscriber_names(self) -> List[str]:
-        return await self.message_queue.get_subscribers_for_key(NatsKeys.subscribers)
+        return await self.kv_store.get_subscribers_for_key(NatsKeys.subscribers)
 
     async def get_subscriber_info(self, name: str) -> Optional[dict]:
-        return await self.message_queue.get_subscriber_info(name)
+        return await self.kv_store.get_subscriber_info(name)
 
     async def add_subscriber(
         self,
@@ -87,7 +95,7 @@ class ConsumerPort:
         fill_queue: bool,
         fill_queue_status: str,
     ):
-        await self.message_queue.add_subscriber(
+        await self.kv_store.add_subscriber(
             name, realms_topics, fill_queue, fill_queue_status
         )
 
@@ -95,13 +103,13 @@ class ConsumerPort:
         await self.nats_adapter.create_subscription(name, realm_topic, sub_info)
 
     async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
-        return await self.message_queue.set_subscriber_queue_status(name, sub_info)
+        return await self.kv_store.set_subscriber_queue_status(name, sub_info)
 
     async def delete_subscriber(self, name: str):
-        await self.message_queue.delete_subscriber(name)
+        await self.kv_store.delete_subscriber(name)
 
     async def get_subscribers_for_topic(self, realm_topic: str) -> List[str]:
-        return await self.message_queue.get_subscribers_for_key(realm_topic)
+        return await self.kv_store.get_subscribers_for_key(realm_topic)
 
     async def update_sub_info(self, name, sub_info: dict):
         await self.nats_adapter.put_value_by_key(NatsKeys.subscriber(name), sub_info)
