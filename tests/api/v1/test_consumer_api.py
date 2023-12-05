@@ -17,6 +17,7 @@ def anyio_backend():
 async def client():
     async with httpx.AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
+        await client.aclose()
 
 
 @pytest.mark.anyio
