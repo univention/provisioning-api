@@ -14,6 +14,9 @@ from redis._parsers.helpers import (
     parse_sentinel_slaves_and_sentinels_resp3,
 )
 from redis.utils import str_if_bytes
+from nats.js.kv import KeyValue
+
+from src.shared.adapters import NatsAdapter, NatsKVAdapter
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
@@ -102,46 +105,53 @@ def fake_js():
 
 async def port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    port.nats_adapter.nats = AsyncMock()
-    port.nats_adapter.js = fake_js()
+    #if type(port.message_queue.message_queue) is NatsAdapter:
+    port.message_queue.message_queue.nats = AsyncMock()
+    port.message_queue.message_queue.js = fake_js()
 
-    port.nats_adapter.create_subscription = AsyncMock()
-    port.nats_adapter.get_subscribers_for_key = AsyncMock(
+    #if type(port.kv_store.kv_store) is NatsKVAdapter:
+    port.kv_store.kv_store.nats = AsyncMock()
+    port.kv_store.kv_store.js = fake_js()
+
+    port.kv_store.add_subscriber = AsyncMock()
+    port.kv_store.get_subscribers_for_key = AsyncMock(
         return_value=[SUBSCRIBER_INFO["name"]]
     )
-    port.nats_adapter.delete_subscriber = AsyncMock()
-    port.nats_adapter.put_value_by_key = AsyncMock()
-    port.nats_adapter.update_subscribers_for_key = AsyncMock()
-    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
+    port.kv_store.delete_subscriber = AsyncMock()
+    port.kv_store.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
 
-    port.redis_adapter.redis = await fake_redis()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    port.nats_adapter.nats = AsyncMock()
-    port.nats_adapter.js = fake_js()
+    #if type(port.message_queue.message_queue) is NatsAdapter:
+    port.message_queue.message_queue.nats = AsyncMock()
+    port.message_queue.message_queue.js = fake_js()
 
-    port.nats_adapter.create_subscription = AsyncMock()
-    port.nats_adapter.get_subscribers_for_key = AsyncMock(
+    #if type(port.kv_store.kv_store) is NatsKVAdapter:
+    port.kv_store.kv_store.nats = AsyncMock()
+    port.kv_store.kv_store.js = fake_js()
+
+    port.kv_store.add_subscriber = AsyncMock()
+    port.kv_store.get_subscribers_for_key = AsyncMock(
         return_value=[SUBSCRIBER_INFO["name"]]
     )
-    port.nats_adapter.delete_subscriber = AsyncMock()
-    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
+    port.kv_store.delete_subscriber = AsyncMock()
+    port.kv_store.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
 
     return port
 
 
 async def port_fake_dependency_without_sub():
     port = await port_fake_dependency()
-    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
+    port.kv_store.get_subscriber_info = AsyncMock(return_value=None)
     return port
 
 
 async def port_fake_dependency_events():
     port = await events_port_fake_dependency()
-    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
+    port.kv_store.get_subscriber_info = AsyncMock(return_value=None)
     return port
 
 
