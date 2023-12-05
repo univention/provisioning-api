@@ -89,4 +89,5 @@ async def cancel_subscription(
     try:
         await service.cancel_subscription(name, f"{realm}:{topic}")
     except ValueError as err:
+        print(err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))

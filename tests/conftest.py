@@ -31,12 +31,6 @@ FLAT_MESSAGE = {
     "topic": "bar/baz",
     "body": '{"hello": "world"}',
 }
-SUBSCRIBER_INFO = {
-    "name": SUBSCRIBER_NAME,
-    "realms_topics": ["foo:bar", "abc:def"],
-    "fill_queue": True,
-    "fill_queue_status": "done",
-}
 
 BASE_KV_OBJ = KeyValue.Entry(
     "KV_bucket",
@@ -58,7 +52,7 @@ kv_sub_info.value = (
 kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
 kv_subs.value = (
-    b"7e9e4ea6-6986-44cc-9fbc-7530c422fb21,000fjga6-6986-44cc-9000-7530c422f000"
+    b"7e9e4ea6-6986-44cc-9fbc-7530c422fb21,0f084f8c-1093-4024-b215-55fe8631ddf6"
 )
 
 
@@ -150,7 +144,11 @@ class FakeKvStore:
 
     @classmethod
     async def get(cls, key: str):
-        values = {"abc:def": kv_subs, f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info}
+        values = {
+            "abc:def": kv_subs,
+            "foo:bar": kv_subs,
+            f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info,
+        }
         return values[key]
 
     @classmethod
