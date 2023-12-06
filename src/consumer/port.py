@@ -100,7 +100,7 @@ class ConsumerPort:
         )
 
     async def create_subscription(self, name: str, realm_topic: str, sub_info: dict):
-        await self.nats_adapter.create_subscription(name, realm_topic, sub_info)
+        await self.kv_store.create_subscription(name, realm_topic, sub_info)
 
     async def set_subscriber_queue_status(self, name: str, sub_info: dict) -> None:
         return await self.kv_store.set_subscriber_queue_status(name, sub_info)
@@ -112,7 +112,7 @@ class ConsumerPort:
         return await self.kv_store.get_subscribers_for_key(realm_topic)
 
     async def update_sub_info(self, name, sub_info: dict):
-        await self.nats_adapter.put_value_by_key(NatsKeys.subscriber(name), sub_info)
+        await self.kv_store.put_value_by_key(NatsKeys.subscriber(name), sub_info)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]
