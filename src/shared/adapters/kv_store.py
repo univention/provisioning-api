@@ -21,10 +21,17 @@ class KVStoreAdapter:
         fill_queue: bool,
         fill_queue_status: str,
     ):
-        await self.kv_store.add_subscriber(name=name, realm_topic=realm_topic, fill_queue=fill_queue, fill_queue_status=fill_queue_status)
+        await self.kv_store.add_subscriber(
+            name=name,
+            realm_topic=realm_topic,
+            fill_queue=fill_queue,
+            fill_queue_status=fill_queue_status,
+        )
 
     async def create_subscription(self, name: str, realm_topic: str, sub_info: dict):
-        await self.kv_store.create_subscription(name=name, realm_topic=realm_topic, sub_info=sub_info)
+        await self.kv_store.create_subscription(
+            name=name, realm_topic=realm_topic, sub_info=sub_info
+        )
 
     async def get_subscriber_info(self, name: str) -> Optional[dict]:
         await self.kv_store.get_subscriber_info(name=name)

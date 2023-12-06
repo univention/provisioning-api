@@ -105,6 +105,7 @@ def fake_js():
 
 async def port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
+    # TODO: wrap setting up MQ and KV store in a procedure / remove if possible
     # if type(port.message_queue.message_queue) is NatsAdapter:
     port.message_queue.message_queue.nats = AsyncMock()
     port.message_queue.message_queue.js = fake_js()
@@ -112,6 +113,7 @@ async def port_fake_dependency() -> ConsumerPort:
     # if type(port.kv_store.kv_store) is NatsKVAdapter:
     port.kv_store.kv_store.nats = AsyncMock()
     port.kv_store.kv_store.js = fake_js()
+    port.kv_store.kv_store.kv_store = AsyncMock()
 
     port.kv_store.add_subscriber = AsyncMock()
     port.kv_store.get_subscribers_for_key = AsyncMock(
@@ -125,6 +127,7 @@ async def port_fake_dependency() -> ConsumerPort:
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
+    # TODO: wrap setting up MQ and KV store in a procedure / remove if possible
     # if type(port.message_queue.message_queue) is NatsAdapter:
     port.message_queue.message_queue.nats = AsyncMock()
     port.message_queue.message_queue.js = fake_js()
@@ -132,6 +135,7 @@ async def events_port_fake_dependency() -> EventsPort:
     # if type(port.kv_store.kv_store) is NatsKVAdapter:
     port.kv_store.kv_store.nats = AsyncMock()
     port.kv_store.kv_store.js = fake_js()
+    port.kv_store.kv_store.kv_store = AsyncMock()
 
     port.kv_store.add_subscriber = AsyncMock()
     port.kv_store.get_subscribers_for_key = AsyncMock(
