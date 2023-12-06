@@ -328,9 +328,6 @@ true
 			<td>object</td>
 			<td><pre lang="json">
 {
-  "auth": {
-    "enabled": false
-  },
   "bundled": true,
   "config": {
     "jetstream": {
@@ -544,7 +541,7 @@ true
 "localhost"
 </pre>
 </td>
-			<td>NATS: host</td>
+			<td>NATS: host (required if nats.bundled == false)</td>
 		</tr>
 		<tr>
 			<td>provisioningApi.natsPort</td>
@@ -553,7 +550,7 @@ true
 4222
 </pre>
 </td>
-			<td>NATS: port</td>
+			<td>NATS: port (required if nats.bundled == false)</td>
 		</tr>
 		<tr>
 			<td>provisioningApi.rootPath</td>

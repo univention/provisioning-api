@@ -27,9 +27,9 @@ provisioningApi:
   rootPath: ""
   # -- FastAPI: disable CORS checks
   corsAll: False
-  # -- NATS: host
+  # -- NATS: host (required if nats.bundled == false)
   natsHost: "localhost"
-  # -- NATS: port
+  # -- NATS: port (required if nats.bundled == false)
   natsPort: 4222
   # -- UDM REST API: base url
   udmUrl: null
@@ -40,8 +40,6 @@ provisioningApi:
 
 # -- NATS server settings.
 nats:
-  auth:
-    enabled: false
   # -- Set to `true` if you want NATS to be installed as well.
   bundled: true
   config:
