@@ -3,7 +3,7 @@ dependencies:
   repository: oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm
   version: 0.2.0
 - name: nats
-  repository: https://charts.bitnami.com/bitnami
-  version: 7.10.5
-digest: sha256:e75717027cdebb4b162dcf472b10184d66230654d1837247e455332b809393e5
-generated: "2023-12-05T14:19:27.661492167Z"
+  repository: https://nats-io.github.io/k8s/helm/charts/
+  version: 1.1.5
+digest: sha256:6ccd27376ec814b1b8db3557e88da8cfc5e2dd20075ff507503849145d9cca00
+generated: "2023-12-06T11:46:38.83112487Z"

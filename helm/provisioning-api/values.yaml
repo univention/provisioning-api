@@ -40,16 +40,17 @@ provisioningApi:
 
 # -- NATS server settings.
 nats:
-  # -- Set to `true` if you want NATS to be installed as well.
-  bundled: true
-  # -- Connection parameters. These are required if you use an external NATS.
-  connection:
-    host: null
-    port: null
   auth:
     enabled: false
-  replica:
-    replicaCount: 0
+  # -- Set to `true` if you want NATS to be installed as well.
+  bundled: true
+  config:
+    jetstream:
+      enabled: true
+
+      fileStorage:
+        pvc:
+          size: 1Gi
 
 ## Kubernetes ingress
 ingress:

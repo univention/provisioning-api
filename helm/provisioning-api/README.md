@@ -49,7 +49,7 @@ kubectl delete pvc -l release=provisioning-api
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | nats | ^7.10.0 |
+| https://nats-io.github.io/k8s/helm/charts/ | nats | ^1.1.5 |
 | oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | ums-common(common) | ^0.2.0 |
 
 ## Values
@@ -332,12 +332,15 @@ true
     "enabled": false
   },
   "bundled": true,
-  "connection": {
-    "host": null,
-    "port": null
-  },
-  "replica": {
-    "replicaCount": 0
+  "config": {
+    "jetstream": {
+      "enabled": true,
+      "fileStorage": {
+        "pvc": {
+          "size": "1Gi"
+        }
+      }
+    }
   }
 }
 </pre>
@@ -352,18 +355,6 @@ true
 </pre>
 </td>
 			<td>Set to `true` if you want NATS to be installed as well.</td>
-		</tr>
-		<tr>
-			<td>nats.connection</td>
-			<td>object</td>
-			<td><pre lang="json">
-{
-  "host": null,
-  "port": null
-}
-</pre>
-</td>
-			<td>Connection parameters. These are required if you use an external NATS.</td>
 		</tr>
 		<tr>
 			<td>nodeSelector</td>
