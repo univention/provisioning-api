@@ -16,7 +16,12 @@ from redis._parsers.helpers import (
 from redis.utils import str_if_bytes
 from nats.js.kv import KeyValue  # noqa: F401
 
-from src.shared.adapters import NatsAdapter, NatsKVAdapter  # noqa: F401
+from src.shared.adapters import (
+    NatsAdapter,
+    NatsKVAdapter,
+    MessageQueueAdapter,
+    KVStoreAdapter,
+)
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
@@ -103,14 +108,33 @@ def fake_js():
     return js
 
 
+def mock_nats_mq(abstract_mq: MessageQueueAdapter):
+    abstract_mq.message_queue.nats = AsyncMock()
+    abstract_mq.message_queue.js = fake_js()
+
+
+def mock_nats_kv(abstract_kv: KVStoreAdapter):
+    abstract_kv.kv_store.nats = AsyncMock()
+    abstract_kv.kv_store.js = fake_js()
+    abstract_kv.kv_store.kv_store = AsyncMock()
+
+
+def is_instance_by_class_name(obj, cls):
+    """Compare class names between obj instance and cls class (for conditional mocking)
+    Using this as a quick isinstance() replacement, because id(instance class) != id(implementation class).
+    """
+
+    return obj.__class__.__name__ == cls.__name__
+
+
 async def port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    # TODO: wrap setting up MQ and KV store in a procedure / remove if possible
-    # if type(port.message_queue.message_queue) is NatsAdapter:
-    port.message_queue.message_queue.nats = AsyncMock()
-    port.message_queue.message_queue.js = fake_js()
 
-    # if type(port.kv_store.kv_store) is NatsKVAdapter:
+    if is_instance_by_class_name(port.message_queue.message_queue, NatsAdapter):
+        mock_nats_mq(port.message_queue)
+    if is_instance_by_class_name(port.kv_store.kv_store, NatsKVAdapter):
+        mock_nats_kv(port.kv_store)
+
     port.kv_store.kv_store.nats = AsyncMock()
     port.kv_store.kv_store.js = fake_js()
     port.kv_store.kv_store.kv_store = AsyncMock()
@@ -127,15 +151,11 @@ async def port_fake_dependency() -> ConsumerPort:
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    # TODO: wrap setting up MQ and KV store in a procedure / remove if possible
-    # if type(port.message_queue.message_queue) is NatsAdapter:
-    port.message_queue.message_queue.nats = AsyncMock()
-    port.message_queue.message_queue.js = fake_js()
 
-    # if type(port.kv_store.kv_store) is NatsKVAdapter:
-    port.kv_store.kv_store.nats = AsyncMock()
-    port.kv_store.kv_store.js = fake_js()
-    port.kv_store.kv_store.kv_store = AsyncMock()
+    if is_instance_by_class_name(port.message_queue.message_queue, NatsAdapter):
+        mock_nats_mq(port.message_queue)
+    if is_instance_by_class_name(port.kv_store.kv_store, NatsKVAdapter):
+        mock_nats_kv(port.kv_store)
 
     port.kv_store.add_subscriber = AsyncMock()
     port.kv_store.get_subscribers_for_key = AsyncMock(
