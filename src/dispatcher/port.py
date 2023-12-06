@@ -1,9 +1,14 @@
 import contextlib
+import logging
 from typing import List
+
+from nats.aio.msg import Msg
 
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.config import settings
 from shared.models.queue import NatsMessage
+
+logger = logging.getLogger(__name__)
 
 
 class DispatcherPort:
@@ -34,3 +39,6 @@ class DispatcherPort:
 
     async def subscribe_to_incoming_queue(self, subject: str):
         await self._nats_adapter.subscribe_to_incoming_queue(subject)
+
+    async def wait_for_event(self) -> Msg:
+        return await self._nats_adapter.wait_for_event()

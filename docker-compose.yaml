@@ -24,7 +24,19 @@ services:
       - "8222:8222" # HTTP monitoring port
     command: --jetstream -m 8222 -p 4222
 
-  # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
+  dispatcher:
+    build:
+      context: .
+      dockerfile: docker/dispatcher-service/Dockerfile
+    container_name: "dispatcher-service"
+    restart: "on-failure"
+    environment:
+      LOG_LEVEL: "INFO"
+      NATS_HOST: "nats"
+    depends_on:
+      - "nats"
+
+    # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
   # but then maybe for integration testing ...
   udm-listener:
     # LDAP server and notifier need to be there
