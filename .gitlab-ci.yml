@@ -1,7 +1,7 @@
 ---
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.9.9"
+    ref: "v1.11.0"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
@@ -23,6 +23,7 @@ include:
 lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatch"
@@ -104,4 +105,5 @@ publish-images:
 
 publish-helm-charts-souvap:
   extends: ".publish-helm-charts-souvap"
+
 ...
