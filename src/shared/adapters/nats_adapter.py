@@ -156,3 +156,8 @@ class NatsAdapter:
             self._future.set_result(msg)
 
         await self.nats.subscribe(subject, cb=cb)
+
+    async def wait_for_event(self) -> Msg:
+        msg = await self._future
+        self._future = asyncio.Future()
+        return msg
