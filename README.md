@@ -20,14 +20,12 @@ Tooling for provisioning LDAP objects to external services.
 
 ### Start dependencies
 
-You can start a local Redis instance for testing:
+You can start a local NATS instance for testing:
 ```sh
-docker compose up --detach --remove-orphans
+docker compose up --detach --remove-orphans nats
 ```
 
-This will run Redis on its standard port 6379.
-
-The RedisInsights GUI will be served at http://localhost:8002.
+This will run NATS on its standard port 4222.
 
 ### Locally
 
@@ -51,7 +49,6 @@ The server is available on port 7777.
 Find the OpenAPI schema here: http://localhost:7777/docs .
 
 ## Tests
-
 
 If you want to run integration tests, make sure, you run
 
