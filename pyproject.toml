@@ -26,6 +26,7 @@ aiohttp = "^3.8.5"
 websockets = "^11.0.3"
 nats-py = "^2.6.0"
 trio = "^0.23.1"
+daemoniker = "^0.2.3"
 
 [tool.poetry.scripts]
 dev = "consumer:start_dev"

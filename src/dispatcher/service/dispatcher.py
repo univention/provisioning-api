@@ -24,22 +24,18 @@ class DispatcherService:
     async def store_event_in_consumer_queues(self):
         logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue("incoming")
-        try:
-            while True:
-                logger.info("Waiting for the event...")
-                msg = await self._port.wait_for_event()
+        while True:
+            logger.info("Waiting for the event...")
+            msg = await self._port.wait_for_event()
 
-                data = json.loads(msg.data)
-                realm = data["realm"]
-                topic = data["topic"]
-                logger.info(f"Received message with content '{data}'")
+            data = json.loads(msg.data)
+            realm = data["realm"]
+            topic = data["topic"]
+            logger.info(f"Received message with content '{data}'")
 
-                subscribers = await self.get_realm_topic_subscribers(f"{realm}:{topic}")
+            subscribers = await self.get_realm_topic_subscribers(f"{realm}:{topic}")
 
-                for sub in subscribers:
-                    logger.info(f"Sending message to '{sub}'")
-                    new_ms = Message.inflate(data)
-                    await self._port.store_event_in_queue(sub, new_ms)
-
-        except Exception as err:
-            logger.error(err)
+            for sub in subscribers:
+                logger.info(f"Sending message to '{sub}'")
+                new_ms = Message.inflate(data)
+                await self._port.store_event_in_queue(sub, new_ms)

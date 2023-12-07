@@ -36,25 +36,25 @@ services:
     depends_on:
       - "nats"
 
-    # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
-  # but then maybe for integration testing ...
-  udm-listener:
-    # LDAP server and notifier need to be there
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/udm-listener:${IMAGE_TAG:-latest}
-    environment:
-      # this config relies on running ldap server and notifier that have ports forwarded
-      LDAP_HOST: "localhost"
-      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
-      NOTIFIER_SERVER: "localhost"
-      LDAP_PORT: "3089"
-      DEBUG_LEVEL: "4"
-      # Whether to start encryption and validate certificates.
-      # Chose from "off", "unvalidated" and "secure".
-      TLS_MODE: "off"
-      LDAP_PASSWORD: "univention"
-      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
-    network_mode: "host"
+#    # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
+#  # but then maybe for integration testing ...
+#  udm-listener:
+#    # LDAP server and notifier need to be there
+#    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/udm-listener:${IMAGE_TAG:-latest}
+#    environment:
+#      # this config relies on running ldap server and notifier that have ports forwarded
+#      LDAP_HOST: "localhost"
+#      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
+#      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
+#      NOTIFIER_SERVER: "localhost"
+#      LDAP_PORT: "3089"
+#      DEBUG_LEVEL: "4"
+#      # Whether to start encryption and validate certificates.
+#      # Chose from "off", "unvalidated" and "secure".
+#      TLS_MODE: "off"
+#      LDAP_PASSWORD: "univention"
+#      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
+#    network_mode: "host"
 
   test:
     profiles:

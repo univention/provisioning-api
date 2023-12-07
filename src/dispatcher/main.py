@@ -2,13 +2,19 @@ import asyncio
 
 from src.dispatcher.port import DispatcherPort
 from src.dispatcher.service.dispatcher import DispatcherService
+from daemoniker import Daemonizer
 
 
-async def main():
+async def run_dispatcher():
     async with DispatcherPort.port_context() as port:
         service = DispatcherService(port)
         await service.store_event_in_consumer_queues()
 
 
+def main():
+    with Daemonizer():
+        asyncio.run(run_dispatcher())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
