@@ -1,7 +1,8 @@
 ---
+
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.11.0"
+    ref: "v1.11.1"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
@@ -12,13 +13,12 @@ include:
       - "jobs/lint-pre-commit.yaml"
       - "jobs/lint-commit-messages.yaml"
       - "jobs/semantic-release-env.yaml"
-      - "jobs/container-build.yaml"
+      - "jobs/container-build-souvap.yaml"
       - "jobs/package-and-publish-helm-charts.yaml"
   - project: "univention/dist/docker-services"
     ref: "master"
     file:
       - "dind.yml"
-
 
 lint-pre-commit:
   before_script:
@@ -98,8 +98,11 @@ test-provisioning-dispatch:
         coverage_format: cobertura
         path: coverage.xml
 
-publish-images:
-  extends: ".push-image-souvap"
+push-image-souvap:
+  parallel:
+    matrix: *publish-matrix
+
+container-sign-souvap:
   parallel:
     matrix: *publish-matrix
 
