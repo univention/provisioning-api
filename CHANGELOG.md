@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.0...v0.1.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* **ci:** add nats helm repo ([d1eb805](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/d1eb80574a5bb8f020bb00c474f7de96fee8bdf3))
+* **helm:** replace redis with nats ([fc2bc4e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/fc2bc4e426dbb0b4674f7cd76ef86247058e9825))
+* **helm:** switch to helm chart from nats instead of bitnami ([c55579e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/c55579e1ee5efb134980a28b652a285fbae9d3c2))
+
 ## [0.1.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.0.1...v0.1.0) (2023-12-04)
 
 
