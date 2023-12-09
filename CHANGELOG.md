@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.1...v0.1.2) (2023-12-09)
+
+
+### Bug Fixes
+
+* **ci:** reference common-ci v1.11.x to push sbom and signature to souvap ([86e1bbc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/86e1bbc35af459e46548cee84be33cb55631bd20))
+
 ## [0.1.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.0...v0.1.1) (2023-12-08)
 
 
