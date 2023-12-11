@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.2...v0.1.3) (2023-12-11)
+
+
+### Bug Fixes
+
+* fix deleting subscriber, getting subscribers and adding value to nats ([ce55584](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/ce555840770861b1376909a9da3f94eea3bb1f7a))
+* remove unused print ([e0e27d7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/e0e27d7307a1fc0e1d5ac7497413161598b24ee5))
+
 ## [0.1.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.1...v0.1.2) (2023-12-09)
 
 
