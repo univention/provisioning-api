@@ -338,6 +338,38 @@ true
         }
       }
     }
+  },
+  "container": {
+    "image": {
+      "registry": "docker.io",
+      "repository": "nats",
+      "tag": "2.10.5-alpine"
+    }
+  },
+  "natsBox": {
+    "container": {
+      "image": {
+        "registry": "docker.io",
+        "repository": "natsio/nats-box",
+        "tag": "0.14.1"
+      }
+    }
+  },
+  "reloader": {
+    "image": {
+      "registry": "docker.io",
+      "repository": "natsio/nats-server-config-reloader",
+      "tag": "0.14.0"
+    }
+  },
+  "statefulSet": {
+    "spec": {
+      "template": {
+        "spec": {
+          "serviceAccountName": "nats"
+        }
+      }
+    }
   }
 }
 </pre>
@@ -646,7 +678,7 @@ true
 			<td>service.ports.http.port</td>
 			<td>int</td>
 			<td><pre lang="json">
-7777
+80
 </pre>
 </td>
 			<td></td>

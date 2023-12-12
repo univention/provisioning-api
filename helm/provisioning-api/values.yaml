@@ -49,6 +49,27 @@ nats:
       fileStorage:
         pvc:
           size: 1Gi
+  statefulSet:
+    spec:
+      template:
+        spec:
+          serviceAccountName: "nats"
+  container:
+    image:
+      repository: "nats"
+      tag: "2.10.5-alpine"
+      registry: "docker.io"
+  reloader:
+    image:
+      repository: "natsio/nats-server-config-reloader"
+      tag: "0.14.0"
+      registry: "docker.io"
+  natsBox:
+    container:
+      image:
+        repository: "natsio/nats-box"
+        tag: "0.14.1"
+        registry: "docker.io"
 
 ## Kubernetes ingress
 ingress:
@@ -135,7 +156,7 @@ service:
   ports:
     http:
       containerPort: 7777
-      port: 7777
+      port: 80
       protocol: "TCP"
 
   sessionAffinity:
