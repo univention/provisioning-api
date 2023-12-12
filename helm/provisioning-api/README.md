@@ -530,10 +530,7 @@ true
   "logLevel": "INFO",
   "natsHost": "localhost",
   "natsPort": 4222,
-  "rootPath": "",
-  "udmPassword": null,
-  "udmUrl": null,
-  "udmUsername": null
+  "rootPath": ""
 }
 </pre>
 </td>
@@ -592,33 +589,6 @@ true
 </pre>
 </td>
 			<td>FastAPI: webserver root path</td>
-		</tr>
-		<tr>
-			<td>provisioningApi.udmPassword</td>
-			<td>string</td>
-			<td><pre lang="json">
-null
-</pre>
-</td>
-			<td>UDM REST API: password</td>
-		</tr>
-		<tr>
-			<td>provisioningApi.udmUrl</td>
-			<td>string</td>
-			<td><pre lang="json">
-null
-</pre>
-</td>
-			<td>UDM REST API: base url</td>
-		</tr>
-		<tr>
-			<td>provisioningApi.udmUsername</td>
-			<td>string</td>
-			<td><pre lang="json">
-null
-</pre>
-</td>
-			<td>UDM REST API: username</td>
 		</tr>
 		<tr>
 			<td>replicaCount</td>

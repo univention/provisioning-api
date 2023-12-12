@@ -16,7 +16,6 @@ replicaCount: 1
 securityContext: {}
 tolerations: []
 
-
 # -- Application configuration of provisioning-api
 provisioningApi:
   # -- Python log level
@@ -31,12 +30,6 @@ provisioningApi:
   natsHost: "localhost"
   # -- NATS: port (required if nats.bundled == false)
   natsPort: 4222
-  # -- UDM REST API: base url
-  udmUrl: null
-  # -- UDM REST API: username
-  udmUsername: null
-  # -- UDM REST API: password
-  udmPassword: null
 
 # -- NATS server settings.
 nats:

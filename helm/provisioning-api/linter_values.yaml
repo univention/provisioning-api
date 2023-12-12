@@ -7,14 +7,11 @@
 ## Application-specific
 provisioningApi:
   logLevel: "INFO"
-  debug: True
+  debug: true
   rootPath: ""
-  corsAll: False
+  corsAll: false
   natsHost: "localhost"
   natsPort: 4222
-  udmUrl: ""
-  udmUsername: ""
-  udmPassword: ""
 
 
 ## Kubernetes ingress

@@ -15,9 +15,6 @@ data:
   NATS_HOST: {{ required "The parameter \"nats.connection.host\" is required." .Values.nats.connection.host | quote }}
   NATS_PORT: {{ required "The parameter \"nats.connection.port\" is required." .Values.nats.connection.port | quote }}
   {{- end }}
-  UDM_URL: {{ required "The parameter \"provisioningApi.udmUrl\" is required." .Values.provisioningApi.udmUrl | quote }}
-  UDM_USERNAME: {{ required "The parameter \"provisioningApi.udmUsername\" is required." .Values.provisioningApi.udmUsername | quote }}
-  UDM_PASSWORD: {{ required "The parameter \"provisioningApi.udmPassword\" is required." .Values.provisioningApi.udmPassword | quote }}
 {{- end }}
 {{- end }}
 ...
