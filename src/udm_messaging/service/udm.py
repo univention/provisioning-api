@@ -68,7 +68,7 @@ class UDMMessagingService:
         await self._port.store(new_obj["entryUUID"][0].decode(), json.dumps(new_obj))
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
-        object_type = ""  # FIXME: find type
+        object_type = "users/user"  # FIXME: this value is mocked. Need to find correct reference
 
         message = Message(
             publisher_name="udm-listener",
