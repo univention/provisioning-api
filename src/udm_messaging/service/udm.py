@@ -5,7 +5,8 @@ from typing import Optional
 
 from shared.models import Message
 from udm_messaging.port import UDMMessagingPort
-from univention.admin.mapping import mapping, ListToString, mapDict
+
+# from univention.admin.mapping import mapping, ListToString, mapDict
 
 logger = logging.getLogger(__name__)
 
@@ -20,41 +21,41 @@ def unmapTranslationValue(vals, encoding=()):
     return [val.decode(*encoding).split(" ", 1) for val in vals]
 
 
-def register_mapping(map: mapping):
-    map.register("name", "cn", None, ListToString)
-    map.register(
-        "needsConfirmation",
-        "univentionNewPortalAnnouncementNeedsConfirmation",
-        None,
-        ListToString,
-    )
-    map.register(
-        "isSticky", "univentionNewPortalAnnouncementIsSticky", None, ListToString
-    )
-    map.register(
-        "severity", "univentionNewPortalAnnouncementSeverity", None, ListToString
-    )
-    map.register(
-        "title",
-        "univentionNewPortalAnnouncementTitle",
-        mapTranslationValue,
-        unmapTranslationValue,
-    )
-    # objectClass??
-    # univentionObjectType??
-    # structuralObjectClass??
-    # entryUUID??
-    # creatorsName??
-    # createTimestamp??
-    # modifiersName??
-    # modifyTimestamp??
-    # entryDN??
-    # subschemaSubentry??
-    # hasSubordinates??
+# def register_mapping(map: mapping):
+#     map.register("name", "cn", None, ListToString)
+#     map.register(
+#         "needsConfirmation",
+#         "univentionNewPortalAnnouncementNeedsConfirmation",
+#         None,
+#         ListToString,
+#     )
+#     map.register(
+#         "isSticky", "univentionNewPortalAnnouncementIsSticky", None, ListToString
+#     )
+#     map.register(
+#         "severity", "univentionNewPortalAnnouncementSeverity", None, ListToString
+#     )
+#     map.register(
+#         "title",
+#         "univentionNewPortalAnnouncementTitle",
+#         mapTranslationValue,
+#         unmapTranslationValue,
+#     )
+#     # objectClass??
+#     # univentionObjectType??
+#     # structuralObjectClass??
+#     # entryUUID??
+#     # creatorsName??
+#     # createTimestamp??
+#     # modifiersName??
+#     # modifyTimestamp??
+#     # entryDN??
+#     # subschemaSubentry??
+#     # hasSubordinates??
 
-
-MAP = mapping()
-register_mapping(MAP)
+#
+# MAP = mapping()
+# register_mapping(MAP)
 
 
 class UDMMessagingService:
@@ -68,7 +69,9 @@ class UDMMessagingService:
         await self._port.store(new_obj["entryUUID"][0].decode(), json.dumps(new_obj))
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
-        object_type = "users/user"  # FIXME: this value is mocked. Need to find correct reference
+        object_type = (
+            "users/user"  # FIXME: this value is mocked. Need to find correct reference
+        )
 
         message = Message(
             publisher_name="udm-listener",
@@ -92,7 +95,7 @@ class UDMMessagingService:
             old_obj = await self.retrieve(old_obj["entryUUID"][0].decode())
         else:
             old_obj = await self.retrieve(new_obj["entryUUID"][0].decode())
-            new_obj = mapDict(MAP, new_obj)  # convert ldap obj to udm obj
+            # new_obj = mapDict(MAP, new_obj)  # convert ldap obj to udm obj
             new_obj = await self.resolve_references(new_obj)
             await self.store(new_obj)
         await self.send_event(new_obj, old_obj)
