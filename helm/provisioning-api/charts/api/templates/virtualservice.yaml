@@ -4,7 +4,6 @@
 apiVersion: "networking.istio.io/v1beta1"
 kind: "VirtualService"
 metadata:
-  name: {{ include "common.names.fullname" . | quote }}
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
   {{- with .Values.istio.virtualService.annotations }}
@@ -19,7 +18,7 @@ spec:
   http:
     - match:
         - uri:
-            prefix: {{ .Values.provisioningApi.apiPrefix | quote }}
+            prefix: {{ .Values.provisioningApi.environment.apiPrefix | quote }}
       rewrite:
         uri: "/"
       route:

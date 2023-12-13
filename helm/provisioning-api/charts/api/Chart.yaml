@@ -2,7 +2,7 @@
 
 apiVersion: "v2"
 type: "application"
-name: "provisioning-service"
+name: "api"
 description: "A Helm chart for the Univention Portal Provisioning API"
 home: "https://www.univention.de/"
 
@@ -18,18 +18,5 @@ dependencies:
     alias: "ums-common"
     repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
     version: "^0.2.0"
-  - name: "nats"
-    repository: "https://nats-io.github.io/k8s/helm/charts/"
-    version: "^1.1.5"
-    condition: "nats.bundled"
-  - name: "api"
-    version: "0.1.0"
-    repository: "file://charts/api"
-  - name: "dispatcher"
-    version: "0.1.0"
-    repository: "file://charts/dispatcher"
-  - name: "udm-listener"
-    version: "0.1.0"
-    repository: "file://charts/udm-listener"
 
 ...

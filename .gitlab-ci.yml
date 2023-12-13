@@ -23,6 +23,9 @@ lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+    - helm dep build helm/provisioning-api/charts/api
+    - helm dep build helm/provisioning-api/charts/dispatcher
+    - helm dep build helm/provisioning-api/charts/udm-listener
 
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatch"

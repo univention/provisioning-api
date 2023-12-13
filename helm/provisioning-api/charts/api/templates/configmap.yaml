@@ -1,13 +1,12 @@
 ---
 {{ include "common.configMap" (dict "top" . "overrides" "provisioning-api.configMap") }}
-
 {{- define "provisioning-api.configMap" }}
 {{- with .top }}
 data:
-  LOG_LEVEL: "{{ .Values.provisioningApi.logLevel }}"
-  DEBUG: "{{ .Values.provisioningApi.debug }}"
-  ROOT_PATH: "{{ .Values.provisioningApi.rootPath }}"
-  CORS_ALL: "{{ .Values.provisioningApi.corsAll }}"
+  LOG_LEVEL: "{{ .Values.config.logLevel }}"
+  DEBUG: "{{ .Values.config.debug }}"
+  ROOT_PATH: "{{ .Values.config.rootPath }}"
+  CORS_ALL: "{{ .Values.config.corsAll }}"
   {{- if .Values.nats.bundled }}
   NATS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "nats" "chartValues" .Values.nats "context" $.top) }}"
   NATS_PORT: "4222"
