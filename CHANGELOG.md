@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.3...v0.1.4) (2023-12-13)
+
+
+### Bug Fixes
+
+* **helm:** use full image registry spec ([a8fafb1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/a8fafb1859fc3e1b033322f17726123a7e6572e8))
+
 ## [0.1.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.2...v0.1.3) (2023-12-11)
 
 
