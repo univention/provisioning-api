@@ -94,7 +94,11 @@ class TestDispatcher:
             side_effect=Exception("Stop waiting for the new event")
         )
         service = DispatcherService(port_with_mock_nats)
-        await service.store_event_in_consumer_queues()
+
+        try:
+            await service.store_event_in_consumer_queues()
+        except Exception:
+            pass
 
         # check subscribing to the incoming queue
         port_with_mock_nats._nats_adapter.nats.subscribe.assert_called_once_with(
