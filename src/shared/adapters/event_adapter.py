@@ -44,7 +44,7 @@ class EventAdapter:
 
     async def send_event(self, message: Message):
         async with self._session.post(
-            f"{self.base_url}/events/", json=message.flatten()
+            f"{self.base_url}events/", json=message.flatten()
         ) as request:
             response = await request.json()
             return response
