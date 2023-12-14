@@ -32,7 +32,7 @@ class DispatcherService:
                 data = json.loads(msg.data)
                 realm = data["realm"]
                 topic = data["topic"]
-                logger.info(f"Received message with content '{data}'")
+                logger.info(f"Received message with content: {data}")
 
                 subscribers = await self.get_realm_topic_subscribers(f"{realm}:{topic}")
 

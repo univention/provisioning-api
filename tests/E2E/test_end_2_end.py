@@ -1,5 +1,6 @@
 import asyncio
 
+import pytest
 import requests
 import uuid
 
@@ -10,11 +11,17 @@ from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
 
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 REALM = "udm"
 TOPIC = "users/user"
 BODY = {"old": {"New": "Object"}, "new": {"Old": "Object"}}
 
 
+@pytest.mark.anyio  # FIXME: do we need this decorator?
 async def test_workflow():
     name = str(uuid.uuid4())
 

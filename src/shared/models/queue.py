@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 import json
 from typing import Any, ClassVar, Dict, Optional
 from typing_extensions import Self
 
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 
 class BaseMessage(BaseModel):
@@ -40,7 +43,8 @@ class Message(BaseMessage):
             ts=self.ts.isoformat(),
             realm=self.realm,
             topic=self.topic,
-            body=json.dumps(self.body),
+            # body=json.dumps(self.body),
+            body=self.body,
         )
 
     @classmethod
@@ -50,7 +54,6 @@ class Message(BaseMessage):
         This is the opposite of `.flatten()`.
         It expands the serialized `body` back into `dict`s.
         """
-
         return Message(
             publisher_name=data["publisher_name"],
             ts=datetime.fromisoformat(data["ts"]),
