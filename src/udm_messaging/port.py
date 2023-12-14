@@ -15,23 +15,10 @@ class UDMMessagingPort:
         self._event_adapter: Optional[EventAdapter] = None
         self._udm_adapter: Optional[UDMAdapter] = None
 
-    async def init_event_adapter(self):
-        async with EventAdapter(
-            settings.event_url, settings.event_username, settings.event_password
-        ) as adapter:
-            self._event_adapter = adapter
-
-    async def init_udm_adapter(self):
-        async with UDMAdapter(
-            settings.udm_url, settings.udm_username, settings.udm_password
-        ) as adapter:
-            self._udm_adapter = adapter
-
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.init_event_adapter()
         await port._nats_adapter.nats.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
@@ -45,7 +32,11 @@ class UDMMessagingPort:
         await self._nats_adapter.put_value(url, new_obj)
 
     async def send_event(self, message: Message):
-        await self._event_adapter.send_event(message)
+        async with EventAdapter(
+            settings.event_url, settings.event_username, settings.event_password
+        ) as adapter:
+            self._event_adapter = adapter
+            await self._event_adapter.send_event(message)
 
     async def get_object(self, url: str) -> dict:
         return await self._udm_adapter.get_object(url)

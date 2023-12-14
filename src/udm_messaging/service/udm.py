@@ -78,7 +78,7 @@ class UDMMessagingService:
             ts=datetime.now(),
             realm="udm",
             topic=object_type,
-            body={"old": old_obj, "new": new_obj},
+            body={"new": new_obj, "old": old_obj},
         )
         await self._port.send_event(message)
 
