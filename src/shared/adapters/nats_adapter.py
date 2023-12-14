@@ -95,7 +95,6 @@ class NatsAdapter:
         msgs_to_return = []
         for msg in msgs:
             data = json.loads(msg.data)
-            data["body"] = json.loads(data["body"])
             msgs_to_return.append(
                 NatsMessage(
                     subject=msg.subject, reply=msg.reply, data=data, headers=msg.headers
