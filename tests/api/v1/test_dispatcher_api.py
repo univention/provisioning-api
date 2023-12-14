@@ -6,9 +6,9 @@ from consumer.messages.api import v1_prefix as messages_api_prefix
 from consumer.main import app as messages_app
 from consumer.main import app as subscriptions_app
 
-REALM = "foo"
-TOPIC = "bar/baz"
-BODY = {"hello": "world"}
+REALM = "udm"
+TOPIC = "users/user"
+BODY = {"user": "new_user_object"}
 
 
 @pytest.fixture(scope="session")

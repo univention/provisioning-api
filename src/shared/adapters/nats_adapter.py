@@ -34,7 +34,7 @@ class NatsAdapter:
         self.nats = NATS()
         self.js = self.nats.jetstream()
         self.kv_store: Optional[KeyValue] = None
-        self._future = asyncio.Future()
+        self.message_queue = asyncio.Queue()
 
     async def close(self):
         await self.nats.close()
@@ -49,7 +49,7 @@ class NatsAdapter:
         try:
             await self.js.stream_info(stream_name)
         except NotFoundError:
-            logger.warning(f"Creating new stream with name: {stream_name}")
+            logger.info(f"Creating new stream with name: {stream_name}")
             await self.js.add_stream(name=stream_name, subjects=[subject])
 
         await self.js.add_consumer(
@@ -151,13 +151,11 @@ class NatsAdapter:
         except KeyNotFoundError:
             await self.put_value(key, name)
 
-    async def subscribe_to_incoming_queue(self, subject):
-        async def cb(msg):
-            self._future.set_result(msg)
+    async def cb(self, msg):
+        await self.message_queue.put(msg)
 
-        await self.nats.subscribe(subject, cb=cb)
+    async def subscribe_to_queue(self, subject):
+        await self.nats.subscribe(subject, cb=self.cb)
 
     async def wait_for_event(self) -> Msg:
-        msg = await self._future
-        self._future = asyncio.Future()
-        return msg
+        return await self.message_queue.get()

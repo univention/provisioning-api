@@ -37,8 +37,8 @@ class DispatcherPort:
         result = await self._nats_adapter.get_value(key)
         return result.value.decode("utf-8").split(",") if result else []
 
-    async def subscribe_to_incoming_queue(self, subject: str):
-        await self._nats_adapter.subscribe_to_incoming_queue(subject)
+    async def subscribe_to_queue(self, subject: str):
+        await self._nats_adapter.subscribe_to_queue(subject)
 
     async def wait_for_event(self) -> Msg:
         return await self._nats_adapter.wait_for_event()
