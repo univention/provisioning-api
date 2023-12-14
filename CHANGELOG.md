@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.4...v0.2.0) (2023-12-14)
+
+
+### Features
+
+* create Dockerfile for dispatcher ([92ba35f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/92ba35fc3ce17bed55ec864721b17bf4c0117540))
+* implement dispatcher ([3c6b22c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/3c6b22ceb92bce0d424a3aa7efb14b62d1afaf36))
+
+
+### Bug Fixes
+
+* call dispatcher service as daemon ([3dd4125](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/3dd41250fc32d7486a803c4bd14252e33da2fae1))
+* use asyncio.Queue instead of Future and add integration test for dispatcher ([976e81b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/976e81b86c216407de54111cd12470c1b7969f90))
+
 ## [0.1.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.3...v0.1.4) (2023-12-13)
 
 
