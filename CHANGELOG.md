@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.2.0...v0.2.1) (2023-12-18)
+
+
+### Bug Fixes
+
+* **ci:** add Helm chart signing and publishing to souvap via OCI, common-ci 1.12.x ([e7fcd74](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/e7fcd7499327367d7057647525066235fa05fb92))
+
 ## [0.2.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.1.4...v0.2.0) (2023-12-14)
 
 
