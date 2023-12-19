@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.2.1...v0.3.0) (2023-12-19)
+
+
+### Features
+
+* **docker:** update dispatcher to UCS base and build it in CI ([147cf9c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/147cf9c666c688000efd950d88bc6df8b707760d))
+
 ## [0.2.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.2.0...v0.2.1) (2023-12-18)
 
 
