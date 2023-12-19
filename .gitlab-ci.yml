@@ -34,12 +34,17 @@ lint-pre-commit:
   - IMAGE_NAME: "udm-listener"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
+  - IMAGE_NAME: "dispatcher"
+    KANIKO_ARGS: "--target final"
+    DOCKERFILE_PATH: "docker/dispatcher-service/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
     - "provisioning-dispatch"
   - IMAGE_NAME:
     - "udm-listener"
+  - IMAGE_NAME:
+    - "dispatcher"
 
 container-build:
   parallel:
