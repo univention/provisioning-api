@@ -1,18 +1,9 @@
 import httpx
 import pytest
+from tests.conftest import FLAT_MESSAGE
 
 from events.api import v1_prefix as events_api_prefix
 from consumer.main import app
-
-
-REALM = "foo"
-TOPIC = "bar/baz"
-BODY = {"hello": "world"}
-
-
-@pytest.fixture(scope="session")
-def anyio_backend():
-    return "asyncio"
 
 
 @pytest.fixture(scope="session")
@@ -26,12 +17,5 @@ class TestEvents:
     async def test_add_event(
         self, client: httpx.AsyncClient, override_dependencies_events
     ):
-        response = await client.post(
-            f"{events_api_prefix}/events/",
-            json={
-                "realm": REALM,
-                "topic": TOPIC,
-                "body": BODY,
-            },
-        )
+        response = await client.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
         assert response.status_code == 202

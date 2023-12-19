@@ -1,7 +1,8 @@
 import json
 from copy import copy
+from datetime import datetime
 from typing import Union
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from fakeredis import aioredis
@@ -21,23 +22,37 @@ from redis.utils import str_if_bytes
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
+from shared.models import Message
+
+REALM = "udm"
+TOPIC = "users/user"
+BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
+PUBLISHER_NAME = "udm-listener"
+REALM_TOPIC = [REALM, TOPIC]
+REALMS_TOPICS = [f"{REALM}:{TOPIC}"]
+SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 SUBSCRIBER_INFO = {
-    "name": "0f084f8c-1093-4024-b215-55fe8631ddf6",
-    "realms_topics": ["foo:bar", "abc:def"],
+    "name": SUBSCRIBER_NAME,
+    "realms_topics": REALMS_TOPICS,
     "fill_queue": True,
     "fill_queue_status": "done",
 }
-
+MESSAGE = Message(
+    publisher_name=PUBLISHER_NAME,
+    ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
+    realm=REALM,
+    topic=TOPIC,
+    body=BODY,
+)
 FLAT_MESSAGE = {
-    "publisher_name": "127.0.0.1",
+    "publisher_name": PUBLISHER_NAME,
     "ts": "2023-11-09T11:15:52.616061",
-    "realm": "udm",
-    "topic": "users/user",
-    "body": '{"user": "new_user_object"}',
+    "realm": REALM,
+    "topic": TOPIC,
+    "body": BODY,
 }
 
-SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
 FLAT_MESSAGE = {
     "publisher_name": "127.0.0.1",
@@ -60,7 +75,7 @@ BASE_KV_OBJ = KeyValue.Entry(
 kv_sub_info = copy(BASE_KV_OBJ)
 kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["foo:bar"], "fill_queue": true, '
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:users/user"], "fill_queue": true, '
     b'"fill_queue_status": "done"}'
 )
 
@@ -119,13 +134,14 @@ async def fake_redis():
         await connection.aclose()
 
 
-# def fake_js():
-#     js = Mock()
-#     js.stream_info = AsyncMock()
-#     js.publish = AsyncMock()
-#     js.delete_msg = AsyncMock()
-#     js.add_consumer = AsyncMock()
-#     js.delete_stream = AsyncMock()
+def fake_js():
+    js = Mock()
+    js.stream_info = AsyncMock()
+    js.publish = AsyncMock()
+    js.delete_msg = AsyncMock()
+    js.add_consumer = AsyncMock()
+    js.delete_stream = AsyncMock()
+
 
 # sub = AsyncMock()
 # js.pull_subscribe = AsyncMock(return_value=sub)
@@ -153,6 +169,26 @@ async def fake_redis():
 def set_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
     port.nats_adapter.kv_store = FakeKvStore()
     port.nats_adapter.js = FakeJs()
+
+
+# async def consumer_port_fake_dependency() -> ConsumerPort:
+#     port = ConsumerPort()
+#     port.nats_adapter.nats = AsyncMock()
+#     port.nats_adapter.js = fake_js()
+#
+#     port.nats_adapter.create_subscription = AsyncMock()
+#     port.nats_adapter.get_subscribers_for_key = AsyncMock(
+#         return_value=[SUBSCRIBER_INFO["name"]]
+#     )
+#     port.nats_adapter.delete_subscriber = AsyncMock()
+#     port.nats_adapter.put_value_by_key = AsyncMock()
+#     port.nats_adapter.update_subscribers_for_key = AsyncMock()
+#     port.nats_adapter.get_subscriber_info = AsyncMock(
+#         return_value=deepcopy(SUBSCRIBER_INFO)
+#     )
+#
+#     port.redis_adapter.redis = await fake_redis()
+#     return port
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
@@ -225,6 +261,23 @@ class FakeKvStore:
 #     port.nats_adapter.get_subscriber_info = AsyncMock(return_value=SUBSCRIBER_INFO)
 #
 #     return port
+# async def events_port_fake_dependency() -> EventsPort:
+#     port = EventsPort()
+#     port.nats_adapter.nats = AsyncMock()
+#     port.nats_adapter.js = fake_js()
+#
+#     port.nats_adapter.create_subscription = AsyncMock()
+#     port.nats_adapter.get_subscribers_for_key = AsyncMock(
+#         return_value=[SUBSCRIBER_INFO["name"]]
+#     )
+#     port.nats_adapter.delete_subscriber = AsyncMock()
+#     port.nats_adapter.get_subscriber_info = AsyncMock(
+#         return_value=deepcopy(SUBSCRIBER_INFO)
+#     )
+#
+#     return port
+
+
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
     set_fake_kv_store_and_js(port)
@@ -242,6 +295,11 @@ async def port_fake_dependency_without_sub():
 #     port = await events_port_fake_dependency()
 #     port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
 #     return port
+
+
+@pytest.fixture(scope="session", autouse=True)
+def anyio_backend():
+    return "asyncio"
 
 
 @pytest.fixture(autouse=True)

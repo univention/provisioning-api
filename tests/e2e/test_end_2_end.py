@@ -3,29 +3,24 @@ import asyncio
 import requests
 import uuid
 
+from tests.conftest import REALM_TOPIC, TOPIC, BODY, PUBLISHER_NAME, REALM
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 
 from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
-REALM = "udm"
-TOPIC = "users/user"
-BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
-
 
 async def test_workflow():
     name = str(uuid.uuid4())
-
-    realm_topic = [REALM, TOPIC]
-
+    base_url = "http://localhost:7777"
     # call of Consumer: create subscription
 
     response = requests.post(
-        f"http://localhost:7777{subscriptions_api_prefix}/subscription",
+        f"{base_url}{subscriptions_api_prefix}/subscription",
         json={
             "name": name,
-            "realm_topic": realm_topic,
+            "realm_topic": REALM_TOPIC,
             "fill_queue": False,
         },
     )
@@ -39,10 +34,14 @@ async def test_workflow():
         service = UDMMessagingService(port)
         await service.send_event({"New": "Object"}, {"Old": "Object"})
 
-    # call of Dispatcher: get event
+    await asyncio.sleep(
+        5
+    )  # need time for Dispatcher to send message to the consumer queue
+
+    # call of Consumer: get messages from consumer queue
 
     response = requests.get(
-        f"http://localhost:7777{messages_api_prefix}/subscription/{name}/message"
+        f"{base_url}{messages_api_prefix}/subscription/{name}/message"
     )
     assert response.status_code == 200
     data = response.json()
@@ -50,7 +49,7 @@ async def test_workflow():
     assert data[0]["data"]["realm"] == REALM
     assert data[0]["data"]["topic"] == TOPIC
     assert data[0]["data"]["body"] == BODY
-    assert data[0]["data"]["publisher_name"] == "udm-listener"
+    assert data[0]["data"]["publisher_name"] == PUBLISHER_NAME
 
 
 if __name__ == "__main__":
