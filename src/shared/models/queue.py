@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-import json
 from typing import Any, ClassVar, Dict, Optional
 from typing_extensions import Self
 
@@ -43,7 +42,6 @@ class Message(BaseMessage):
             ts=self.ts.isoformat(),
             realm=self.realm,
             topic=self.topic,
-            # body=json.dumps(self.body),
             body=self.body,
         )
 
@@ -59,7 +57,7 @@ class Message(BaseMessage):
             ts=datetime.fromisoformat(data["ts"]),
             realm=data["realm"],
             topic=data["topic"],
-            body=json.loads(data["body"]),
+            body=data["body"],
         )
 
 
