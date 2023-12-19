@@ -1,6 +1,5 @@
 import asyncio
 
-import pytest
 import requests
 import uuid
 
@@ -10,18 +9,11 @@ from consumer.messages.api import v1_prefix as messages_api_prefix
 from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
-
-@pytest.fixture(scope="session")
-def anyio_backend():
-    return "asyncio"
-
-
 REALM = "udm"
 TOPIC = "users/user"
-BODY = {"old": {"New": "Object"}, "new": {"Old": "Object"}}
+BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 
 
-@pytest.mark.anyio  # FIXME: do we need this decorator?
 async def test_workflow():
     name = str(uuid.uuid4())
 
@@ -34,7 +26,7 @@ async def test_workflow():
         json={
             "name": name,
             "realm_topic": realm_topic,
-            "fill_queue": True,
+            "fill_queue": False,
         },
     )
     assert response.status_code == 201
@@ -58,7 +50,7 @@ async def test_workflow():
     assert data[0]["data"]["realm"] == REALM
     assert data[0]["data"]["topic"] == TOPIC
     assert data[0]["data"]["body"] == BODY
-    assert data[0]["data"]["publisher_name"] == "127.0.0.1"
+    assert data[0]["data"]["publisher_name"] == "udm-listener"
 
 
 if __name__ == "__main__":
