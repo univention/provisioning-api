@@ -49,18 +49,18 @@ class LdapListener(ListenerModuleHandler):
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
-        service.handle_changes(new, None)
+        service.add()  # FIXME: find a way to pass the params after testing
 
     def modify(self, dn, old, new, old_dn):
         self.logger.info("[ modify ] dn: %r", dn)
         if old_dn:
             self.logger.debug("it is (also) a move! old_dn: %r", old_dn)
         self.logger.debug("changed attributes: %r", self.diff(old, new))
-        service.handle_changes(new, old)
+        service.modify()  # FIXME: find a way to pass the params after testing
 
     def remove(self, dn, old):
         self.logger.info("[ remove ] dn: %r", dn)
-        service.handle_changes(None, old)
+        service.delete()  # FIXME: find a way to pass the params after testing
 
     class Configuration(ListenerModuleHandler.Configuration):
         name = name
