@@ -1,4 +1,3 @@
-import uuid
 from unittest.mock import AsyncMock
 
 import httpx
@@ -67,12 +66,10 @@ class TestDispatcher:
         override_dependencies_events,
     ):
         # register a consumer
-        name = str(uuid.uuid4())
-
         response = await consumer.post(
             f"{subscriptions_api_prefix}/subscription/",
             json={
-                "name": name,
+                "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
                 "fill_queue": False,
             },

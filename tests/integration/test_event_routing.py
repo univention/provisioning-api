@@ -1,9 +1,8 @@
 from fastapi.testclient import TestClient
 import httpx
 import pytest
-import uuid
 
-from tests.conftest import REALM, TOPIC, BODY, FLAT_MESSAGE
+from tests.conftest import REALM, TOPIC, BODY, FLAT_MESSAGE, SUBSCRIBER_NAME
 from events.api import v1_prefix as events_api_prefix
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
@@ -28,12 +27,10 @@ async def test_udm_create_user_event_is_routed_correctly(
     consumer: httpx.AsyncClient,
 ):
     # register a consumer
-    name = str(uuid.uuid4())
-
     response = await consumer.post(
         f"{subscriptions_api_prefix}/subscription/",
         json={
-            "name": name,
+            "name": SUBSCRIBER_NAME,
             "realm_topic": ["foo", "bar"],
             "fill_queue": False,
         },
@@ -47,7 +44,7 @@ async def test_udm_create_user_event_is_routed_correctly(
     message_consumer = TestClient(app)
     # evaluate that the message about a new user is received by the consumer
     with message_consumer.websocket_connect(
-        f"{messages_api_prefix}/subscription/incoming/ws"
+        f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 
