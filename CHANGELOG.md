@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.3.0...v0.3.1) (2023-12-20)
+
+
+### Bug Fixes
+
+* **docker:** update ucs-base 5.2-0 from v0.7.2 ro v0.10.0 ([79ca4b9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/79ca4b922f63aa09a388df37ac50d2fe4b19345e))
+
 ## [0.3.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.2.1...v0.3.0) (2023-12-19)
 
 
