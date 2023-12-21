@@ -36,25 +36,41 @@ services:
     depends_on:
       - "nats"
 
-#    # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
-#  # but then maybe for integration testing ...
-#  udm-listener:
-#    # LDAP server and notifier need to be there
-#    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/udm-listener:${IMAGE_TAG:-latest}
-#    environment:
-#      # this config relies on running ldap server and notifier that have ports forwarded
-#      LDAP_HOST: "localhost"
-#      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-#      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
-#      NOTIFIER_SERVER: "localhost"
-#      LDAP_PORT: "3089"
-#      DEBUG_LEVEL: "4"
-#      # Whether to start encryption and validate certificates.
-#      # Chose from "off", "unvalidated" and "secure".
-#      TLS_MODE: "off"
-#      LDAP_PASSWORD: "univention"
-#      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
-#    network_mode: "host"
+  #    # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
+  #  # but then maybe for integration testing ...
+  #  udm-listener:
+  #    # LDAP server and notifier need to be there
+  #    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/udm-listener:${IMAGE_TAG:-latest}
+  #    environment:
+  #      # this config relies on running ldap server and notifier that have ports forwarded
+  #      LDAP_HOST: "localhost"
+  #      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
+  #      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
+  #      NOTIFIER_SERVER: "localhost"
+  #      LDAP_PORT: "3089"
+  #      DEBUG_LEVEL: "4"
+  #      # Whether to start encryption and validate certificates.
+  #      # Chose from "off", "unvalidated" and "secure".
+  #      TLS_MODE: "off"
+  #      LDAP_PASSWORD: "univention"
+  #      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
+  #    network_mode: "host"
+
+  udm-listener:
+    build:
+      context: .
+      dockerfile: docker/udm-listener/Dockerfile
+    container_name: "udm-listener"
+    environment:
+      LDAP_HOST: "localhost"
+      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
+      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
+      NOTIFIER_SERVER: "localhost"
+      DEBUG_LEVEL: "4"
+      TLS_MODE: "off"
+      LDAP_PASSWORD: "univention"
+      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
+    network_mode: "host"
 
   test:
     profiles:
@@ -94,46 +110,38 @@ services:
     profiles:
       - docs
 
-  openldap:
-    image: osixia/openldap:latest
-    container_name: openldap
-    hostname: openldap
+  ldap-server:
+    platform: linux/amd64
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
+    environment:
+      DOMAIN_NAME: univention-organization.intranet
+      LDAP_BASE_DN: dc=univention-organization,dc=intranet
+      LDAP_CN_ADMIN_PW: "univention"
+      TLS_MODE: "off"
     ports:
-      - "389:389"
-      - "636:636"
-    environment:
-      - LDAP_ORGANISATION=univention-organization
-      - LDAP_DOMAIN=univention-organization.intranet
-      - LDAP_ADMIN_USERNAME=admin
-      - LDAP_ADMIN_PASSWORD=admin_pass
-      - LDAP_CONFIG_PASSWORD=config_pass
-      - "LDAP_BASE_DN=dc=univention-organization,dc=intranet"
-      - LDAP_TLS_CRT_FILENAME=server.crt
-      - LDAP_TLS_KEY_FILENAME=server.key
-      - LDAP_TLS_CA_CRT_FILENAME=univention-organization.ca.crt
-      - LDAP_READONLY_USER=true
-      - LDAP_READONLY_USER_USERNAME=user-ro
-      - LDAP_READONLY_USER_PASSWORD=ro-pass
-    networks:
-      - openldap
+      - 389:389
+    volumes:
+      - ldap-shared-data:/var/lib/univention-ldap/:rw
+      - type: bind
+        source: ./tests/base.conf
+        target: /etc/univention/base.conf
+        read_only: true
 
-  phpldapadmin:
-    image: osixia/phpldapadmin:latest
-    container_name: phpldapadmin
-    hostname: phpldapadmin
+  ldap-admin:
+    image: osixia/phpldapadmin:0.9.0
     environment:
-      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_LDAP_HOSTS: "#PYTHON2BASH:[{'ldap-server':{'login':{'bind_id':'cn=admin,dc=univention-organization,dc=intranet'}}}]"
       PHPLDAPADMIN_HTTPS: "false"
+    links:
+      - ldap-server
     ports:
-      - "80:80"
-    depends_on:
-      - openldap
-    networks:
-      - openldap
-
+      - 8001:80
 
 volumes:
   pre-commit-cache:
+  ldap-shared-data:
+  ldap-shared-run:
+
 
 networks:
   openldap:
