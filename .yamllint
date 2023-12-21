@@ -1,0 +1,82 @@
+---
+
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2023 Univention GmbH
+
+# reference: https://yamllint.readthedocs.io/
+
+extends: "default"
+
+rules:
+  brackets:
+    level: "error"
+
+  colons:
+    # TODO: set level to error
+    level: "warning"
+
+  comments:
+    level: "error"
+
+  comments-indentation:
+    level: "error"
+
+  document-end:
+    # TODO: set level to error
+    level: "warning"
+    present: true
+
+  document-start:
+    # TODO: set level to error
+    level: "warning"
+
+  empty-lines:
+    # TODO: set level to error
+    level: "warning"
+
+  empty-values:
+    level: "error"
+    forbid-in-block-mappings: true
+    forbid-in-flow-mappings: true
+
+  float-values:
+    level: "error"
+    forbid-inf: true
+    forbid-nan: true
+    forbid-scientific-notation: true
+    require-numeral-before-decimal: true
+
+  indentation:
+    # TODO: set level to error
+    level: "warning"
+    spaces: 2
+
+  key-duplicates:
+    # TODO: set level to error
+    level: "warning"
+
+  line-length:
+    # TODO: set level to error
+    level: "warning"
+    max: 120
+
+  # already handled by pre-commit "end-of-file-fixer"
+  new-line-at-end-of-file:
+    level: "error"
+
+  octal-values:
+    level: "error"
+    forbid-explicit-octal: true
+    forbid-implicit-octal: true
+
+  quoted-strings:
+    # TODO: set level to error
+    level: "warning"
+    quote-type: "double"
+    required: true
+    allow-quoted-quotes: true
+
+  truthy:
+    level: "error"
+
+...
