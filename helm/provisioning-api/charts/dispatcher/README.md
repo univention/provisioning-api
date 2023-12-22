@@ -17,10 +17,6 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| autoscaling.enabled | bool | `false` |  |
-| autoscaling.maxReplicas | int | `100` |  |
-| autoscaling.minReplicas | int | `1` |  |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | config | object | `{"natsHost":"localhost","natsPort":4222}` | Configuration of the dispatcher component |
 | config.natsHost | string | `"localhost"` | NATS: host (required if nats.bundled == false) |
 | config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
