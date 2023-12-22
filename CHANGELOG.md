@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.3.1...v0.4.0) (2023-12-22)
+
+
+### Features
+
+* **helm:** Add dispatcher and udm-listener ([56de228](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/56de228149326512dee3eb5f457d41b343381952))
+
+
+### Bug Fixes
+
+* **helm:** remove autoscaling ([e7c4f2c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/e7c4f2c2f777c579ea4932b204c43912908c7b0b))
+
 ## [0.3.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.3.0...v0.3.1) (2023-12-20)
 
 
