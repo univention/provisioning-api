@@ -7,7 +7,6 @@ from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
 
 manager = SinkManager()
-logger = logging.getLogger(__name__)
 
 
 def match_subscription(
@@ -35,6 +34,7 @@ class SubscriptionKeys:
 class SubscriptionService:
     def __init__(self, port: ConsumerPort):
         self._port = port
+        self.logger = logging.getLogger(__name__)
 
     async def get_subscribers(self) -> List[Subscriber]:
         """
@@ -82,14 +82,14 @@ class SubscriptionService:
                     "Subscription for the given realm_topic already exists"
                 )
 
-            logger.info(
+            self.logger.debug(
                 f"Creating subscription for the realm_topic: '{realm_topic_str}'"
             )
             sub_info["realms_topics"].append(realm_topic_str)
             await self.set_sub_info(sub.name, sub_info)
             await self.update_realm_topic_subscribers(realm_topic_str, sub.name)
 
-            logger.info("Subscription was created")
+            self.logger.info("Subscription was created")
         else:
             await self.add_subscriber(sub, fill_queue_status, realm_topic_str)
 
@@ -102,7 +102,7 @@ class SubscriptionService:
     async def add_subscriber(
         self, sub: NewSubscriber, fill_queue_status: FillQueueStatus, realm_topic_str
     ):
-        logger.info(f"Creating new subscriber with the name: '{sub.name}'")
+        self.logger.debug(f"Creating new subscriber with the name: '{sub.name}'")
 
         sub_info = {
             "name": sub.name,
@@ -114,7 +114,7 @@ class SubscriptionService:
         await self.add_sub_to_subscribers(sub.name)
         await self.update_realm_topic_subscribers(realm_topic_str, sub.name)
 
-        logger.info("New subscriber was created")
+        self.logger.info("New subscriber was created")
 
     async def get_subscriber_info(self, name: str) -> Optional[dict]:
         return await self._port.get_dict_value(SubscriptionKeys.subscriber(name))
@@ -179,7 +179,7 @@ class SubscriptionService:
         await self._port.delete_kv_pair(SubscriptionKeys.subscriber(name))
 
     async def delete_subscriber_from_values(self, key: str, name: str):
-        logger.info(f"Deleting subscriber '{name}' from '{key}'")
+        self.logger.debug(f"Deleting subscriber '{name}' from '{key}'")
 
         subs = await self._port.get_list_value(key)
         if not subs:
@@ -191,7 +191,7 @@ class SubscriptionService:
         subs.remove(name)
         await self._port.put_list_value(key, subs)
 
-        logger.info("Subscriber was deleted")
+        self.logger.info("Subscriber was deleted")
 
     async def update_subscriber_names(self, key: str, value: str) -> None:
         subs = await self._port.get_str_value(key)

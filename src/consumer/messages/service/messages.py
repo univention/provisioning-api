@@ -7,12 +7,11 @@ from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import FillQueueStatus
 from shared.models.queue import NatsMessage, Message
 
-logger = logging.getLogger(__name__)
-
 
 class MessageService:
     def __init__(self, port: ConsumerPort):
         self._port = port
+        self.logger = logging.getLogger(__name__)
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Add the given message to the subscriber's queue."""
@@ -72,7 +71,7 @@ class MessageService:
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == FillQueueStatus.done):
-            logger.info(f"Getting the messages for the '{subscriber_name}'")
+            self.logger.info(f"Getting the messages for the '{subscriber_name}'")
             return await self._port.get_messages(subscriber_name, timeout, count, pop)
         else:
             return []

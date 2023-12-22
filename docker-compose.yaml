@@ -31,7 +31,7 @@ services:
     container_name: "dispatcher-service"
     restart: "on-failure"
     environment:
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
     depends_on:
       - "nats"

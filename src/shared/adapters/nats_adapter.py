@@ -13,8 +13,6 @@ from nats.js.kv import KeyValue
 from shared.models import Message
 from shared.models.queue import NatsMessage
 
-logger = logging.getLogger(__name__)
-
 
 class NatsKeys:
     """A list of keys used in Nats for queueing messages."""
@@ -35,6 +33,7 @@ class NatsAdapter:
         self.js = self.nats.jetstream()
         self.kv_store: Optional[KeyValue] = None
         self.message_queue = asyncio.Queue()
+        self.logger = logging.getLogger(__name__)
 
     async def close(self):
         await self.nats.close()
@@ -49,7 +48,7 @@ class NatsAdapter:
         try:
             await self.js.stream_info(stream_name)
         except NotFoundError:
-            logger.info(f"Creating new stream with name: {stream_name}")
+            self.logger.debug(f"Creating new stream with name: {stream_name}")
             await self.js.add_stream(name=stream_name, subjects=[subject])
 
         await self.js.add_consumer(
@@ -61,7 +60,7 @@ class NatsAdapter:
             json.dumps(flat_message).encode("utf-8"),
             stream=stream_name,
         )
-        logger.info("Message was published")
+        self.logger.info("Message was published")
 
     async def get_messages(
         self, subject: str, timeout: float, count: int, pop: bool
