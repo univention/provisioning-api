@@ -26,6 +26,7 @@ async def consumer():
 async def test_udm_create_user_event_is_routed_correctly(
     producer: httpx.AsyncClient,
     consumer: httpx.AsyncClient,
+    override_dependencies_events,
 ):
     # register a consumer
     name = str(uuid.uuid4())
