@@ -72,6 +72,20 @@ services:
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
     network_mode: "host"
 
+  ldap-notifier:
+      platform: linux/amd64
+      image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-notifier:latest
+      build:
+        context: ./docker/ldap-notifier
+      depends_on:
+        ldap-server:
+          condition: service_started
+      ports:
+        - 6669:6669
+      volumes:
+        - ldap-shared-data:/var/lib/univention-ldap/:rw
+        - ldap-shared-run:/var/run/slapd/:ro
+
   test:
     profiles:
       - test
@@ -113,6 +127,7 @@ services:
   ldap-server:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
+    container_name: "ldap-server"
     environment:
       DOMAIN_NAME: univention-organization.intranet
       LDAP_BASE_DN: dc=univention-organization,dc=intranet
@@ -120,8 +135,11 @@ services:
       TLS_MODE: "off"
     ports:
       - 389:389
+      - 636:636
     volumes:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
+      - ldap-shared-run:/var/run/slapd/:rw
+#      - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
       - type: bind
         source: ./tests/base.conf
         target: /etc/univention/base.conf

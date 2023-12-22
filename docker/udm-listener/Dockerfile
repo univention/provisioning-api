@@ -6,6 +6,6 @@ FROM ${LISTENER_BASE_IMAGE} as final
 WORKDIR /app
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
-COPY ./src ./src
-ENV PYTHONPATH=$PYTHONPATH:/app/src
+COPY ./src ./
+ENV PYTHONPATH=$PYTHONPATH:/app
 #COPY ./docker/udm-listener/udm-listener-entrypoint.sh /entrypoint.d/75-udm-listener-entrypoint.sh
