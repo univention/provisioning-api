@@ -4,7 +4,7 @@ services:
       - dev
     build:
       context: .
-      dockerfile: docker/dispatch/Dockerfile
+      dockerfile: docker/provisioning-dispatcher/Dockerfile
     container_name: "provisioning-dispatcher-dev"
     restart: "on-failure"
     environment:
