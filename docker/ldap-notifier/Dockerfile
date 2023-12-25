@@ -104,7 +104,6 @@ COPY --from=build \
 #COPY --from=build \
 #  /version \
 #  /version
-#RUN cp /usr/sbin/univention-directory-notifier /usr/sbin/univention-directory-notifier
 
 # TODO: remove log-dir, when log-to-stdout has been released
 #   https://forge.univention.org/bugzilla/show_bug.cgi?id=52716

@@ -60,6 +60,8 @@ services:
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
+      args:
+       - LISTENER_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
     environment:
       LDAP_HOST: "localhost"

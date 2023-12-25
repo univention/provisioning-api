@@ -31,16 +31,23 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 #
+import asyncio
 
 from univention.listener.handler import ListenerModuleHandler
 
 from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
-async with UDMMessagingPort.port_context() as port:
-    service = UDMMessagingService(port)
 
 name = "provisioning_handler"
+
+
+async def init_udm_messaging():
+    async with UDMMessagingPort.port_context() as port:
+        return UDMMessagingService(port)
+
+
+service = asyncio.run(init_udm_messaging())
 
 
 class LdapListener(ListenerModuleHandler):
