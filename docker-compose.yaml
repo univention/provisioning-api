@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: docker/provisioning-dispatch/Dockerfile
+      args:
+        - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-dispatcher-dev"
     restart: "on-failure"
     environment:
@@ -28,6 +30,8 @@ services:
     build:
       context: .
       dockerfile: docker/dispatcher-service/Dockerfile
+      args:
+        - UCS_BASE_IMAGE_TAG=latest
     container_name: "dispatcher-service"
     restart: "on-failure"
     environment:
@@ -77,8 +81,6 @@ services:
   ldap-notifier:
       platform: linux/amd64
       image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-notifier:latest
-      build:
-        context: ./docker/ldap-notifier
       depends_on:
         ldap-server:
           condition: service_started

@@ -5,8 +5,22 @@ ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/data
 FROM library/python:3.11-slim as builder
 ARG WORKDIR="/app"
 
-ARG WORKDIR
 WORKDIR ${WORKDIR}
+
+ENV \
+    PATH="/home/${USER}/.local/bin:${PATH}" \
+    PYTHONPATH="." \
+    WEB_CONCURRENCY=1 \
+    # Do not buffer `stdout`
+    PYTHONUNBUFFERED=1 \
+    # Do not create `.pyc` files
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Do not ask questions
+    POETRY_NO_INTERACTION=1 \
+    # Put .venv inside source folder
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    # Cache of poetry
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
 COPY ./src ${WORKDIR}/src
@@ -19,18 +33,20 @@ COPY logging.yaml \
 RUN \
     # install Poetry
     pip install --no-cache-dir poetry==1.6.1 && \
-    # install dependencies
-    poetry install --only main
+    # install dependencies \
+    poetry config installer.max-workers 10 && \
+    poetry install --only main --no-ansi -vvv
 
-###############################################
-# Stage 2: test image
+############################################### \
+
 from builder as test
 
 RUN poetry install --with dev
 
 FROM ${LISTENER_BASE_IMAGE} as final
-WORKDIR /app
+ARG WORKDIR="/app"
+WORKDIR ${WORKDIR}
+COPY --from=builder ${WORKDIR} ${WORKDIR}
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
-COPY ./src ./
-ENV PYTHONPATH=$PYTHONPATH:/app
+ENV PYTHONPATH=$PYTHONPATH:/app/src:/app/.venv/lib/python3.11/site-packages
