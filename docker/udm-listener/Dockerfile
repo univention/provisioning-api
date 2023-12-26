@@ -2,7 +2,7 @@ ARG LISTENER_BASE_IMAGE_TAG=v0.4.1
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base:${LISTENER_BASE_IMAGE_TAG}
 
 # hadolint ignore=DL3006
-FROM library/python:3.11-slim as builder
+FROM library/python:3.7-slim as builder
 ARG WORKDIR="/app"
 
 WORKDIR ${WORKDIR}
@@ -32,7 +32,7 @@ COPY logging.yaml \
 
 RUN \
     # install Poetry
-    pip install --no-cache-dir poetry==1.6.1 && \
+    pip install --no-cache-dir poetry && \
     # install dependencies \
     poetry config installer.max-workers 10 && \
     poetry install --only main --no-ansi -vvv
@@ -49,4 +49,6 @@ WORKDIR ${WORKDIR}
 COPY --from=builder ${WORKDIR} ${WORKDIR}
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
-ENV PYTHONPATH=$PYTHONPATH:/app/src:/app/.venv/lib/python3.11/site-packages
+COPY ./docker/udm-listener/rest /usr/lib/python3/dist-packages/univention/admin/rest
+COPY ./docker/udm-listener/management /usr/lib/python3/dist-packages/univention/management
+ENV PYTHONPATH=$PYTHONPATH:/app/src:/app/.venv/lib/python3.7/site-packages

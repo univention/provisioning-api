@@ -9,7 +9,7 @@ import json
 
 from ldap.controls.readentry import PostReadControl, PreReadControl
 
-from univention.admin.rest.object import get_representation
+from univention.admin.rest.module import Object
 import univention.admin.uldap
 from univention.management.console.log import MODULE
 from univention.management.console.modules.udm.udm_ldap import UDM_Module
@@ -80,7 +80,7 @@ class UDMMessagingService(univention.admin.uldap.access):
                     attributes=raw.entry,
                 )
                 obj.open()
-                return get_representation(module, obj, ["*"], self, False)
+                return Object.get_representation(module, obj, ["*"], self, False)
             except ModuleNotFound:
                 MODULE.error(
                     "ReadControl response has object type %r, but the module was not found!"
