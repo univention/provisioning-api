@@ -10,14 +10,15 @@ from consumer.messages.api import v1_prefix as messages_api_prefix
 from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
+BASE_URL = "http://localhost:7777"
+
 
 async def test_workflow():
     name = str(uuid.uuid4())
-    base_url = "http://localhost:7777"
     # call of Consumer: create subscription
 
     response = requests.post(
-        f"{base_url}{subscriptions_api_prefix}/subscription",
+        f"{BASE_URL}{subscriptions_api_prefix}/subscription",
         json={
             "name": name,
             "realm_topic": REALM_TOPIC,
@@ -41,7 +42,7 @@ async def test_workflow():
     # call of Consumer: get messages from consumer queue
 
     response = requests.get(
-        f"{base_url}{messages_api_prefix}/subscription/{name}/message"
+        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message"
     )
     assert response.status_code == 200
     data = response.json()

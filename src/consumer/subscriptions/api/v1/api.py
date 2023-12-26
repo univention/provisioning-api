@@ -64,13 +64,6 @@ async def create_subscription(
         raise fastapi.HTTPException(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
         )
-    # FIXME: skip pre-fill logic in MVP
-    # if subscriber.fill_queue:
-    #     tasks.add_task(
-    #         init_prefill_queue,
-    #         subscriber.name,
-    #         subscriber.realm_topic,
-    #     )
 
 
 @router.delete(
