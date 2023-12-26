@@ -32,7 +32,7 @@ COPY logging.yaml \
 
 RUN \
     # install Poetry
-    pip install --no-cache-dir poetry && \
+    pip install --no-cache-dir poetry==1.5.1 && \
     # install dependencies \
     poetry config installer.max-workers 10 && \
     poetry install --only main --no-ansi -vvv
