@@ -1,10 +1,11 @@
 ARG LISTENER_BASE_IMAGE_TAG=v0.4.1
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base:${LISTENER_BASE_IMAGE_TAG}
-
-# hadolint ignore=DL3006
-FROM library/python:3.7-slim as builder
+ARG PYTHON_VERSION=3.7
 ARG WORKDIR="/app"
 
+# hadolint ignore=DL3006
+FROM library/python:${PYTHON_VERSION}-slim as builder
+ARG WORKDIR
 WORKDIR ${WORKDIR}
 
 ENV \
@@ -44,11 +45,14 @@ from builder as test
 RUN poetry install --with dev
 
 FROM ${LISTENER_BASE_IMAGE} as final
-ARG WORKDIR="/app"
+ARG WORKDIR
+ARG PYTHON_VERSION
+
 WORKDIR ${WORKDIR}
 COPY --from=builder ${WORKDIR} ${WORKDIR}
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
 COPY ./docker/udm-listener/rest /usr/lib/python3/dist-packages/univention/admin/rest
 COPY ./docker/udm-listener/management /usr/lib/python3/dist-packages/univention/management
-ENV PYTHONPATH=$PYTHONPATH:/app/src:/app/.venv/lib/python3.7/site-packages
+
+ENV PYTHONPATH=$PYTHONPATH:${WORKDIR}/src:${WORKDIR}/.venv/lib/python${PYTHON_VERSION}/site-packages

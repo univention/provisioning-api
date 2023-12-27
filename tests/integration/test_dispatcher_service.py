@@ -1,3 +1,4 @@
+from typing import Generator, Any
 from unittest.mock import AsyncMock
 
 import httpx
@@ -63,7 +64,7 @@ class TestDispatcher:
         consumer: httpx.AsyncClient,
         messages_client: httpx.AsyncClient,
         port_with_mock_nats: DispatcherPort,
-        override_dependencies_events,
+        override_dependencies_events: Generator[Any, Any, None],
     ):
         # register a consumer
         response = await consumer.post(

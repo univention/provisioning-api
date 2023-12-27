@@ -1,3 +1,5 @@
+from typing import Generator, Any
+
 from fastapi.testclient import TestClient
 import httpx
 import pytest
@@ -25,7 +27,7 @@ async def consumer():
 async def test_udm_create_user_event_is_routed_correctly(
     producer: httpx.AsyncClient,
     consumer: httpx.AsyncClient,
-    override_dependencies_events,
+    override_dependencies_events: Generator[Any, Any, None],
 ):
     # register a consumer
     response = await consumer.post(
