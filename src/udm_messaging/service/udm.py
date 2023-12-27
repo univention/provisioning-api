@@ -6,9 +6,6 @@ from shared.models import Message
 from udm_messaging.port import UDMMessagingPort
 
 import json
-
-from ldap.controls.readentry import PostReadControl, PreReadControl
-
 from univention.admin.rest.module import Object
 import univention.admin.uldap
 from univention.management.console.log import MODULE
@@ -19,13 +16,20 @@ logger = logging.getLogger(__name__)
 
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
-        self._port = port
+        super().__init__(
+            port=389,
+            start_tls=0,
+            base="dc=univention-organization,dc=intranet",
+            binddn="cn=admin,dc=univention-organization,dc=intranet",
+            bindpw="univention",
+        )
+        self._messaging_port = port
 
     async def retrieve(self, dn: str):
-        return await self._port.retrieve(dn)
+        return await self._messaging_port.retrieve(dn)
 
     async def store(self, new_obj: dict):
-        await self._port.store(new_obj["dn"][0].decode(), json.dumps(new_obj))
+        await self._messaging_port.store(new_obj["dn"][0].decode(), json.dumps(new_obj))
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
         object_type = new_obj["objectType"] if new_obj else old_obj["objectType"]
@@ -37,13 +41,15 @@ class UDMMessagingService(univention.admin.uldap.access):
             topic=object_type,
             body={"new": new_obj, "old": old_obj},
         )
-        await self._port.send_event(message)
+        await self._messaging_port.send_event(message)
 
     async def resolve_references(self, obj: dict):
         fields_to_resolve = ("creatorsName", "modifiersName")
         for field in fields_to_resolve:
             value = obj[field]
-            resolved_value = await self._port.get_object(f"users/user/{value}")
+            resolved_value = await self._messaging_port.get_object(
+                f"users/user/{value}"
+            )
             obj[field] = resolved_value
         return obj
 
@@ -53,17 +59,12 @@ class UDMMessagingService(univention.admin.uldap.access):
             raise ModuleNotFound
         return module
 
-    async def _handle_control_responses(self, responses):
-        def _get_control(response, ctrl_type):
-            for control in response.get("ctrls", []):
-                if control.controlType == ctrl_type:
-                    return control
-
-        def _ldap_to_udm(raw):
-            if raw is None:
+    async def _handle_control_responses(self, obj):
+        def _ldap_to_udm(entry):
+            if entry is None:
                 return None
 
-            object_types = raw.entry.get("univentionObjectType", [])
+            object_types = entry.get("univentionObjectType", [])
             if not isinstance(object_types, list) or len(object_types) < 1:
                 MODULE.warn("ReadControl response is missing `univentionObjectType`!")
                 return None
@@ -71,16 +72,18 @@ class UDMMessagingService(univention.admin.uldap.access):
             try:
                 object_type = object_types[0].decode("utf-8")
                 module = self._get_module(object_type)
-                obj = module.module.object(
+                module_obj = module.module.object(
                     co=None,
                     lo=self,
                     position=None,
-                    dn=raw.dn,
+                    dn=entry["entryDN"][0],
                     superordinate=None,
-                    attributes=raw.entry,
+                    attributes=entry,
                 )
-                obj.open()
-                return Object.get_representation(module, obj, ["*"], self, False)
+                module_obj.open()
+                return Object.get_representation(
+                    Object, module, module_obj, ["*"], self, False
+                )
             except ModuleNotFound:
                 MODULE.error(
                     "ReadControl response has object type %r, but the module was not found!"
@@ -88,67 +91,30 @@ class UDMMessagingService(univention.admin.uldap.access):
                 )
                 return None
 
-        if isinstance(responses, dict):
-            responses = [responses]
+        new = _ldap_to_udm(obj)
 
-        publish = []
-        new = None
-        old = None
-        for response in responses:
-            # extract control response and rebuild UDM representation
-            topic = "n/a"
-            new = _ldap_to_udm(_get_control(response, PostReadControl.controlType))
-            new = await self.resolve_references(new)
-            old = self.retrieve(
-                new.get("uuid")
-            )  # FIXME: find the way to retrieve old object without new (by UUID)
-            await self.store(new)
+        # new = await self.resolve_references(new)
+        old = await self.retrieve(
+            new.get("entryDN")
+        )  # FIXME: find the way to retrieve old object without new (by UUID)
+        await self.store(new)
 
-            if old:
-                topic = old["objectType"]
-                MODULE.debug("UDM before change")
-                for key, value in sorted(old.items(), key=lambda i: i[0]):
-                    MODULE.debug(f"  {key}: {value}")
-            if new:
-                topic = new["objectType"]
-                MODULE.debug("UDM after change")
-                for key, value in sorted(new.items(), key=lambda i: i[0]):
-                    MODULE.debug(f"  {key}: {value}")
+        if old:
+            MODULE.debug("UDM before change")
+            for key, value in sorted(old.items(), key=lambda i: i[0]):
+                MODULE.debug(f"  {key}: {value}")
+        if new:
+            MODULE.debug("UDM after change")
+            for key, value in sorted(new.items(), key=lambda i: i[0]):
+                MODULE.debug(f"  {key}: {value}")
 
-            if old or new:
-                publish.append((topic, old, new))
-            else:
-                MODULE.debug("No control responses for UDM objects were returned.")
-
-        if publish:
-            await self.send_event(new, old)
+        await self.send_event(new, old)
 
     def _extract_responses(self, func, response_name, *args, **kwargs):
-        # Note: the original call must not pass `serverctrls` and/or `response` via `args`!
+        pass
 
-        # either re-use the given response dict, or provide our own
-        if response_name not in kwargs:
-            kwargs[response_name] = [] if response_name == "responses" else {}
-        ctrl_response = kwargs.get(response_name)
-
-        kwargs["serverctrls"] = [
-            # strip the caller's Pre-/PostReadControls from the `serverctrls`
-            control
-            for control in (kwargs.get("serverctrls") or [])
-            if control.controlType
-            not in [PreReadControl.controlType, PostReadControl.controlType]
-        ] + [
-            # always add our all-inclusive Pre-/PostReadControls
-            PreReadControl(False, ["*", "+"]),
-            PostReadControl(False, ["*", "+"]),
-        ]
-
-        response = func(*args, **kwargs)
-        self._handle_control_responses(ctrl_response)
-        return response
-
-    def add(self, *args, **kwargs):
-        return self._extract_responses(super().add, "response", *args, **kwargs)
+    async def add(self, dn, obj):
+        await self._handle_control_responses(obj)
 
     def modify(self, *args, **kwargs):
         # If the DN and properties of the object are changed, this calls

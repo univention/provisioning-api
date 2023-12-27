@@ -56,7 +56,7 @@ class LdapListener(ListenerModuleHandler):
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
-        service.add()  # FIXME: find a way to pass the params after testing
+        asyncio.run(service.add(dn, new))
 
     def modify(self, dn, old, new, old_dn):
         self.logger.info("[ modify ] dn: %r", dn)

@@ -143,7 +143,6 @@ services:
     volumes:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
       - ldap-shared-run:/var/run/slapd/:rw
-#      - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
       - type: bind
         source: ./tests/base.conf
         target: /etc/univention/base.conf
@@ -159,12 +158,28 @@ services:
     ports:
       - 8001:80
 
+  udm-rest-api:
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:latest
+    platform: "linux/amd64"
+    ports:
+      - 9979:9979
+    volumes:
+      - type: bind
+        source: ./tests/base.conf
+        target: /etc/univention/base.conf
+        read_only: true
+    environment:
+      DOMAINNAME: univention-organization.intranet
+      HOSTNAME: localhost:9979
+      LDAP_HOST: localhost
+      LDAP_PORT: 389
+      LDAP_BASE_DN: dc=univention-organization,dc=intranet
+      LDAP_HOST_DN: cn=admin,dc=univention-organization,dc=intranet
+      TLS_MODE: off
+      MACHINE_SECRET: univention
+      LDAP_CN_ADMIN_PW: univention
+
 volumes:
   pre-commit-cache:
   ldap-shared-data:
   ldap-shared-run:
-
-
-networks:
-  openldap:
-    driver: bridge
