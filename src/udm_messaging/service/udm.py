@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
+from shared.config import settings
 from shared.models import Message
 from udm_messaging.port import UDMMessagingPort
 
@@ -17,11 +18,11 @@ logger = logging.getLogger(__name__)
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
         super().__init__(
-            port=389,
-            start_tls=0,
-            base="dc=univention-organization,dc=intranet",
-            binddn="cn=admin,dc=univention-organization,dc=intranet",
-            bindpw="univention",
+            port=settings.ldap_port,
+            start_tls=settings.ldap_start_tls,
+            base=settings.ldap_base_dn,
+            binddn=settings.ldap_host_dn,
+            bindpw=settings.ldap_password,
         )
         self._messaging_port = port
 

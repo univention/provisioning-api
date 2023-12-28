@@ -36,5 +36,16 @@ class Settings(BaseSettings):
     # Event REST API: password
     event_password: str = ""
 
+    # LDAP : port
+    ldap_port: int = 389
+    # LDAP : start_tls
+    ldap_start_tls: int = 0
+    # LDAP : base_dn
+    ldap_base_dn: str = "dc=univention-organization,dc=intranet"
+    # LDAP : host_dn
+    ldap_host_dn: str = "cn=admin,dc=univention-organization,dc=intranet"
+    # LDAP : password
+    ldap_password: str = "univention"
+
 
 settings = Settings()
