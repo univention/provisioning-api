@@ -1,7 +1,5 @@
 services:
   app:
-    profiles:
-      - dev
     build:
       context: .
       dockerfile: docker/provisioning-dispatch/Dockerfile
@@ -11,6 +9,7 @@ services:
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
+      NATS_HOST: "nats"
     depends_on:
       - "nats"
     ports:

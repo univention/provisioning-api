@@ -9,6 +9,7 @@ from shared.models.queue import NatsMessage, Message
 class DispatcherService:
     def __init__(self, port: DispatcherPort):
         self._port = port
+        logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
     async def retrieve_event_from_incoming_queue(
@@ -29,11 +30,11 @@ class DispatcherService:
             data = json.loads(msg.data)
             realm = data["realm"]
             topic = data["topic"]
-            self.logger.debug(f"Received message with content: {data}")
+            self.logger.info(f"Received message with content: {data}")
 
             subscribers = await self.get_realm_topic_subscribers(f"{realm}:{topic}")
 
             for sub in subscribers:
-                self.logger.debug(f"Sending message to '{sub}'")
+                self.logger.info(f"Sending message to '{sub}'")
                 new_ms = Message.inflate(data)
                 await self._port.store_event_in_queue(sub, new_ms)

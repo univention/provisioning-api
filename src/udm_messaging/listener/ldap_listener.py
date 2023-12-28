@@ -38,16 +38,13 @@ from univention.listener.handler import ListenerModuleHandler
 from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
-
 name = "provisioning_handler"
 
 
-async def init_udm_messaging():
+async def init_udm_messaging(dn, new):
     async with UDMMessagingPort.port_context() as port:
-        return UDMMessagingService(port)
-
-
-service = asyncio.run(init_udm_messaging())
+        service = UDMMessagingService(port)
+        await service.add(dn, new)
 
 
 class LdapListener(ListenerModuleHandler):
@@ -56,18 +53,18 @@ class LdapListener(ListenerModuleHandler):
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
-        asyncio.run(service.add(dn, new))
+        asyncio.run(init_udm_messaging(dn, new))
 
     def modify(self, dn, old, new, old_dn):
         self.logger.info("[ modify ] dn: %r", dn)
         if old_dn:
             self.logger.debug("it is (also) a move! old_dn: %r", old_dn)
         self.logger.debug("changed attributes: %r", self.diff(old, new))
-        service.modify()  # FIXME: find a way to pass the params after testing
+        # service.modify()  # FIXME: find a way to pass the params after testing
 
     def remove(self, dn, old):
         self.logger.info("[ remove ] dn: %r", dn)
-        service.delete()  # FIXME: find a way to pass the params after testing
+        # service.delete()  # FIXME: find a way to pass the params after testing
 
     class Configuration(ListenerModuleHandler.Configuration):
         name = name

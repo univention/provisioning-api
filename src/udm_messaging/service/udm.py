@@ -29,7 +29,7 @@ class UDMMessagingService(univention.admin.uldap.access):
         return await self._messaging_port.retrieve(dn)
 
     async def store(self, new_obj: dict):
-        await self._messaging_port.store(new_obj["dn"][0].decode(), json.dumps(new_obj))
+        await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj))
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
         object_type = new_obj["objectType"] if new_obj else old_obj["objectType"]
@@ -93,7 +93,7 @@ class UDMMessagingService(univention.admin.uldap.access):
 
         # new = await self.resolve_references(new)
         old = await self.retrieve(
-            new.get("entryDN")
+            new.get("entryUUID")
         )  # FIXME: find the way to retrieve old object without new (by UUID)
         await self.store(new)
 
