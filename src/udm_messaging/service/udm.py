@@ -81,9 +81,7 @@ class UDMMessagingService(univention.admin.uldap.access):
                     attributes=entry,
                 )
                 module_obj.open()
-                return Object.get_representation(
-                    Object, module, module_obj, ["*"], self, False
-                )
+                return Object.get_representation(module, module_obj, ["*"], self, False)
             except ModuleNotFound:
                 MODULE.error(
                     "ReadControl response has object type %r, but the module was not found!"

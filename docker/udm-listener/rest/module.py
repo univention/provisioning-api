@@ -1,9 +1,11 @@
 from univention.admin.rest.utils import decode_properties, superordinate_names
 import re
 from ldap.dn import explode_rdn
+from univention.management.console.modules.udm.udm_ldap import get_module
 
 
 class Object:
+    @classmethod
     def get_representation(
         cls, module, obj, properties, ldap_connection, copy=False, add=False
     ):
