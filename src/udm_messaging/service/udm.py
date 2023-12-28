@@ -26,12 +26,17 @@ class UDMMessagingService(univention.admin.uldap.access):
         self._messaging_port = port
 
     async def retrieve(self, dn: str):
+        MODULE.warn("Retrieving object from cache")
         return await self._messaging_port.retrieve(dn)
 
     async def store(self, new_obj: dict):
+        MODULE.warn("Storing object to cache %s" % (new_obj,))
         await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj))
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
+        if not (new_obj or old_obj):
+            return
+
         object_type = new_obj["objectType"] if new_obj else old_obj["objectType"]
 
         message = Message(
@@ -41,17 +46,8 @@ class UDMMessagingService(univention.admin.uldap.access):
             topic=object_type,
             body={"new": new_obj, "old": old_obj},
         )
+        MODULE.warn("Sending event with body: %s" % (message.body,))
         await self._messaging_port.send_event(message)
-
-    async def resolve_references(self, obj: dict):
-        fields_to_resolve = ("creatorsName", "modifiersName")
-        for field in fields_to_resolve:
-            value = obj[field]
-            resolved_value = await self._messaging_port.get_object(
-                f"users/user/{value}"
-            )
-            obj[field] = resolved_value
-        return obj
 
     def _get_module(self, object_type):
         module = UDM_Module(object_type, ldap_connection=self, ldap_position=None)
@@ -59,71 +55,44 @@ class UDMMessagingService(univention.admin.uldap.access):
             raise ModuleNotFound
         return module
 
-    async def _handle_control_responses(self, obj):
-        def _ldap_to_udm(entry):
-            if entry is None:
-                return None
+    def ldap_to_udm(self, entry: dict) -> Optional[dict]:
+        object_types = entry.get("univentionObjectType", [])
+        if not isinstance(object_types, list) or len(object_types) < 1:
+            MODULE.warn("ReadControl response is missing `univentionObjectType`!")
+            return None
 
-            object_types = entry.get("univentionObjectType", [])
-            if not isinstance(object_types, list) or len(object_types) < 1:
-                MODULE.warn("ReadControl response is missing `univentionObjectType`!")
-                return None
+        try:
+            object_type = object_types[0].decode("utf-8")
+            module = self._get_module(object_type)
+            module_obj = module.module.object(
+                co=None,
+                lo=self,
+                position=None,
+                dn=entry["entryDN"][0],
+                superordinate=None,
+                attributes=entry,
+            )
+            module_obj.open()
+            return Object.get_representation(module, module_obj, ["*"], self, False)
+        except ModuleNotFound:
+            MODULE.error(
+                "ReadControl response has object type %r, but the module was not found!"
+                % object_type
+            )
+            return None
 
-            try:
-                object_type = object_types[0].decode("utf-8")
-                module = self._get_module(object_type)
-                module_obj = module.module.object(
-                    co=None,
-                    lo=self,
-                    position=None,
-                    dn=entry["entryDN"][0],
-                    superordinate=None,
-                    attributes=entry,
-                )
-                module_obj.open()
-                return Object.get_representation(module, module_obj, ["*"], self, False)
-            except ModuleNotFound:
-                MODULE.error(
-                    "ReadControl response has object type %r, but the module was not found!"
-                    % object_type
-                )
-                return None
-
-        new = _ldap_to_udm(obj)
-
-        # new = await self.resolve_references(new)
-        old = await self.retrieve(
-            new.get("entryUUID")
-        )  # FIXME: find the way to retrieve old object without new (by UUID)
-        await self.store(new)
-
-        if old:
-            MODULE.debug("UDM before change")
-            for key, value in sorted(old.items(), key=lambda i: i[0]):
-                MODULE.debug(f"  {key}: {value}")
-        if new:
-            MODULE.debug("UDM after change")
-            for key, value in sorted(new.items(), key=lambda i: i[0]):
-                MODULE.debug(f"  {key}: {value}")
-
-        await self.send_event(new, old)
-
-    def _extract_responses(self, func, response_name, *args, **kwargs):
-        pass
-
-    async def add(self, dn, obj):
-        await self._handle_control_responses(obj)
-
-    def modify(self, *args, **kwargs):
-        # If the DN and properties of the object are changed, this calls
-        # ldap.rename_ext_s and ldap.modify_ext_s, yielding two responses.
-        return self._extract_responses(super().modify, "responses", *args, **kwargs)
-
-    def rename(self, *args, **kwargs):
-        return self._extract_responses(super().rename, "response", *args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        return self._extract_responses(super().delete, "response", *args, **kwargs)
+    async def handle_changes(self, new_obj, old_obj):
+        old = (
+            await self.retrieve(old_obj["entryUUID"][0].decode())
+            if old_obj
+            else old_obj
+        )
+        new = None
+        if new_obj:
+            new = self.ldap_to_udm(new_obj)
+            if new:
+                await self.store(new)
+        await self.send_event(new, old or old_obj)
 
 
 class ModuleNotFound(Exception):

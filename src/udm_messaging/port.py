@@ -1,4 +1,5 @@
 import contextlib
+import json
 from typing import Optional
 
 from shared.adapters.nats_adapter import NatsAdapter
@@ -25,7 +26,8 @@ class UDMMessagingPort:
         yield port
 
     async def retrieve(self, url: str):
-        return await self._nats_adapter.get_value(url)
+        result = await self._nats_adapter.get_value(url)
+        return json.loads(result.value.decode("utf-8")) if result else None
 
     async def store(self, url: str, new_obj: str):
         await self._nats_adapter.put_value(url, new_obj)
