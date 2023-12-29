@@ -1,8 +1,9 @@
 ARG LISTENER_BASE_IMAGE_TAG=v0.4.1
-ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base:${LISTENER_BASE_IMAGE_TAG}
+ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base
 ARG PYTHON_IMAGE_VERSION=3.7
 
 FROM library/python:${PYTHON_IMAGE_VERSION}-slim as builder
+WORKDIR /app
 
 ENV \
     PATH="/home/${USER}/.local/bin:${PATH}" \
@@ -40,11 +41,11 @@ from builder as test
 
 RUN poetry install --with dev
 
-FROM ${LISTENER_BASE_IMAGE} as final
+FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
 ARG PYTHON_IMAGE_VERSION
 
 WORKDIR /app
-COPY --from=builder . .
+COPY --from=builder /app .
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
 COPY ./docker/udm-listener/rest /usr/lib/python3/dist-packages/univention/admin/rest

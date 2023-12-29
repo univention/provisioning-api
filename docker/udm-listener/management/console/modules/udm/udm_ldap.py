@@ -359,7 +359,8 @@ class NoIpLeft(UMCError):
             'All IP addresses in the specified network "%s" are already in use.'
         ) % (self.network_name,)
         yield _(
-            "Please specify a different network or make sure that free IP addresses are available for the chosen network."
+            "Please specify a different network or make sure that free IP "
+            "addresses are available for the chosen network."
         )
 
 
@@ -367,7 +368,8 @@ class SearchTimeoutError(UMC_Error):
     def __init__(self):
         super(SearchTimeoutError, self).__init__(
             _(
-                "The query you have entered timed out. Please narrow down your search by specifying more query parameters"
+                "The query you have entered timed out. Please narrow down your search by "
+                "specifying more query parameters"
             )
         )
 
@@ -376,7 +378,9 @@ class SearchLimitReached(UMC_Error):
     def __init__(self):
         super(SearchLimitReached, self).__init__(
             _(
-                "The query you have entered yields too many matching entries. Please narrow down your search by specifying more query parameters. The current size limit of %s can be configured with the UCR variable directory/manager/web/sizelimit."
+                "The query you have entered yields too many matching entries. Please narrow down your search "
+                "by specifying more query parameters. The current size limit of %s can be configured with the "
+                "UCR variable directory/manager/web/sizelimit."
             )
             % ucr.get("directory/manager/web/sizelimit", "2000")
         )
@@ -750,7 +754,8 @@ class UDM_Module(object):
                     # handle AppAttributes
                     if option_name in app_data:
                         option_def = app_data[option_name]
-                        # use 'not enabled' since a truthy value as integer is 1 but 'boolean_values' stores the truthy value at index 0
+                        # use 'not enabled' since a truthy value as integer is 1 but 'boolean_values'
+                        # stores the truthy value at index 0
                         ldap_object[option_def["attribute_name"]] = option_def[
                             "boolean_values"
                         ][int(not enabled)]
@@ -1214,8 +1219,10 @@ class UDM_Module(object):
                     item["default"] = str(prop.base_default)
             elif key == "primaryGroup":  # set default for primaryGroup
                 if position_dn:
-                    # settings/usertemplate requires a superordinate to be given. The superordinate is automatically searched for if omitted. We need to set the position here.
-                    # better would be to use the default position, but settings/usertemplate doesn't set one: Bug #43427
+                    # settings/usertemplate requires a superordinate to be given. The superordinate
+                    # is automatically searched for if omitted. We need to set the position here.
+                    # better would be to use the default position, but settings/usertemplate doesn't set one:
+                    # Bug #43427
                     ldap_position.setDn(position_dn)
                 obj = self.module.object(None, ldap_connection, ldap_position, None)
                 obj.open()

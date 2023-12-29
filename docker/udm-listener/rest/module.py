@@ -82,7 +82,8 @@ class Object:
         if obj.entry_uuid:
             props["uuid"] = obj.entry_uuid
         # TODO: objectFlag is available for every module. remove the extended attribute and always map it.
-        # alternative: add some other meta information to this object, e.g. is_hidden_object: True, is_synced_from_active_directory: True, ...
+        # alternative: add some other meta information to this object, e.g. is_hidden_object: True,
+        # is_synced_from_active_directory: True, ...
         if "*" in properties or "objectFlag" in properties:
             props["properties"].setdefault(
                 "objectFlag",

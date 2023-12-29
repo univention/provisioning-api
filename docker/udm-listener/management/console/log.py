@@ -87,7 +87,8 @@ def log_init(filename, log_level=2, log_pid=None):
     """
     Initializes Univention debug.
 
-    :param str filename: The filename just needs to be a relative name. The directory /var/log/univention/ is prepended and the suffix '.log' is appended.
+    :param str filename: The filename just needs to be a relative name. The directory /var/log/univention/
+    is prepended and the suffix '.log' is appended.
     :param int log_level: log level to use (1-4)
     :param bool log_pid: Prefix log message with process ID
     """

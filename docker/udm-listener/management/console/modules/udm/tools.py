@@ -99,7 +99,8 @@ class LicenseImport(ldif.LDIFParser):
         ]:
             raise LicenseError(
                 _(
-                    "The license can not be applied. The LDAP base does not match (expected %(expected)s, found: %(found)s)."
+                    "The license can not be applied. The LDAP base does not match (expected %(expected)s, "
+                    "found: %(found)s)."
                 )
                 % {"expected": base, "found": self.base}
             )
@@ -148,13 +149,17 @@ def check_license(ldap_connection, ignore_core_edition=False):
     except udm_errors.licenseAccounts:  # UCS license v1
         raise LicenseError(
             _(
-                "You have too many user accounts for your license. Add and modify are disabled. Disable or delete <a href=\"javascript:void(0)\" onclick=\"require('umc/app').openModule('udm', 'users/user', {})\"> user accounts</a> to re-enable editing."
+                "You have too many user accounts for your license. Add and modify are disabled. Disable or "
+                "delete <a href=\"javascript:void(0)\" onclick=\"require('umc/app').openModule('udm', 'users/user', "
+                '{})"> user accounts</a> to re-enable editing.'
             )
         )
     except udm_errors.licenseUsers:  # UCS license v2
         raise LicenseError(
             _(
-                "You have too many user accounts for your license. Add and modify are disabled. Disable or delete <a href=\"javascript:void(0)\" onclick=\"require('umc/app').openModule('udm', 'users/user', {})\"> user accounts</a> to re-enable editing."
+                "You have too many user accounts for your license. Add and modify are disabled. Disable or delete "
+                "<a href=\"javascript:void(0)\" onclick=\"require('umc/app').openModule('udm', 'users/user', {})\"> "
+                "user accounts</a> to re-enable editing."
             )
         )
     except udm_errors.licenseClients:  # UCS license v1
@@ -172,13 +177,15 @@ def check_license(ldap_connection, ignore_core_edition=False):
     except udm_errors.licenseManagedClients:  # UCS license v2
         raise LicenseError(
             _(
-                "You have too many managed client accounts for your license. During this session add and modify are disabled."
+                "You have too many managed client accounts for your license. During this session add and modify "
+                "are disabled."
             )
         )
     except udm_errors.licenseCorporateClients:  # UCS license v2
         raise LicenseError(
             _(
-                "You have too many corporate client accounts for your license. During this session add and modify are disabled."
+                "You have too many corporate client accounts for your license. During this session add and modify "
+                "are disabled."
             )
         )
     except udm_errors.licenseDesktops:  # UCS license v1
@@ -190,19 +197,22 @@ def check_license(ldap_connection, ignore_core_edition=False):
     except udm_errors.licenseGroupware:  # UCS license v1
         raise LicenseError(
             _(
-                "You have too many groupware accounts for your license. During this session add and modify are disabled."
+                "You have too many groupware accounts for your license. During this session add and modify "
+                "are disabled."
             )
         )
     except udm_errors.licenseDVSUsers:  # UCS license v2
         raise LicenseError(
             _(
-                "You have too many DVS user accounts for your license. During this session add and modify are disabled."
+                "You have too many DVS user accounts for your license. During this session add and modify "
+                "are disabled."
             )
         )
     except udm_errors.licenseDVSClients:  # UCS license v2
         raise LicenseError(
             _(
-                "You have too many DVS client accounts for your license. During this session add and modify are disabled."
+                "You have too many DVS client accounts for your license. During this session add and modify "
+                "are disabled."
             )
         )
     except udm_errors.licenseExpired:
