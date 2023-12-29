@@ -1,12 +1,9 @@
-import logging
 from typing import List, Tuple, Optional
 
 from redis.asyncio import Redis
 
 from shared.config import settings
 from shared.models import Message
-
-logger = logging.getLogger(__name__)
 
 
 class RedisKeys:

@@ -48,7 +48,7 @@ class NatsAdapter:
         try:
             await self.js.stream_info(stream_name)
         except NotFoundError:
-            self.logger.debug(f"Creating new stream with name: {stream_name}")
+            self.logger.debug("Creating new stream with name: %s", stream_name)
             await self.js.add_stream(name=stream_name, subjects=[subject])
 
         await self.js.add_consumer(

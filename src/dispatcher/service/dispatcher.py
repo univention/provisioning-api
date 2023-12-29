@@ -30,11 +30,11 @@ class DispatcherService:
             data = json.loads(msg.data)
             realm = data["realm"]
             topic = data["topic"]
-            self.logger.info(f"Received message with content: {data}")
+            self.logger.info("Received message with content: %s", data)
 
             subscribers = await self.get_realm_topic_subscribers(f"{realm}:{topic}")
 
             for sub in subscribers:
-                self.logger.info(f"Sending message to '{sub}'")
+                self.logger.info("Sending message to %s", sub)
                 new_ms = Message.inflate(data)
                 await self._port.store_event_in_queue(sub, new_ms)

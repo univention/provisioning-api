@@ -71,7 +71,7 @@ class MessageService:
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
         if force or (queue_status == FillQueueStatus.done):
-            self.logger.info(f"Getting the messages for the '{subscriber_name}'")
+            self.logger.info("Getting the messages for the %s", subscriber_name)
             return await self._port.get_messages(subscriber_name, timeout, count, pop)
         else:
             return []

@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 import fastapi
@@ -6,8 +5,6 @@ import shared.models
 from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-
-logger = logging.getLogger(__name__)
 
 router = fastapi.APIRouter()
 
