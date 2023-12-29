@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.5.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.4.0...v0.5.0) (2023-12-29)
+
+
+### Features
+
+* add E2E test ([cc2d0a7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/cc2d0a7706d2c407d9dd272de9b691e5bf0a7745))
+* add ldap notifier image ([22d7403](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/22d740360c630e77943ada927720a3018a81642a))
+* add openldap container ([d7de0a2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/d7de0a2159348592874a8b911fbfa800417e1e86))
+* add udm-listener, ldap-server and ldap-admin to the docker-compose ([12c7bc4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/12c7bc46dfa03e5fe80d5dd46cf85e9c03105c83))
+* add udm-rest-api container and fix converting ldap to udm ([dd542b2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/dd542b2b07ede30c21989fb43507a1efef2be6e7))
+* convert LDAP obj to UDM obj and resolve references ([438bb5f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/438bb5fe3a1b8df02efb99912041dfe0ab8d1f08))
+* make ldap methods initial realization ([d4f667d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/d4f667de6d77d38e178fefb08a105bc609b6fc9a))
+
+
+### Bug Fixes
+
+* add annotation and make Python version an argument ([047a1e1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/047a1e1aca5462e9989512d8ad6ee89647cf7999))
+* add logger into classes, clear commented lines ([16befc6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/16befc6a82256a7473d36aaa7e884b4bb20ad4ae))
+* add missed rest and management modules to the listener container ([6eea289](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/6eea2895380d68cd29ac7ce20fb27ff048806d8a))
+* connection to EventAdapter, validation model for send_event ([a55ee2e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/a55ee2e27343334bbd135d8d6862dbb962d20d41))
+* do not pass class as the first argument ([a5c1bea](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/a5c1bea29fad182dcec598cfc5f0b02805d163a8))
+* fix connecting to the nats and displaying the logs int the dispatcher ([03e963d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/03e963d0864ba0d7cbf2a1904e34a6a07578783a))
+* fix inflate method and e2e test ([30c99b8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/30c99b84f7c7e9422ae0e021508b7402d07b6f73))
+* fix modify and delete methods, retrieving data from cache and refactor handling changes ([c1edcd1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/c1edcd1ff2c8ad9be862832a0526ca5d589c1485))
+* move ldap connection settings to the config file ([3395470](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/3395470414b46d39ef21f9e2fcbe784c5e1f4c0c))
+* provisioning-dispatcher-dev container ([8a9250d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/8a9250db778302a792a74841ad4a78ea546c2839))
+* remove commented code and WORKDIR argument, rename python image version argument ([422d0b0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/422d0b0fa2ba925b3fd7674a097b2051850f0b69))
+* remove the _event_adapter variable from the UDMMessagingPort class ([bb6cb15](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/bb6cb15f6d2a07c29c3852345d5ade4c0c7c6856))
+* rollback fixing dockerfile path ([114a70f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/114a70fdce778776dfeb47b9c0df70526cc370b9))
+* set WORKDIR, tag the version of an image explicitly, fix line too log error ([36bbd87](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/36bbd879e4f9e23aee5ce6ef567df5f01b3f074c))
+* specify poetry version to install ([f410876](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/f410876e6089234e65e33d22fd26863cec1c8135))
+* use existing image for notifier and fix installing libs for listener ([2a316f9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/2a316f95a412a4d36b1a82f56bbe8db264f3aa19))
+
 ## [0.4.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.3.1...v0.4.0) (2023-12-22)
 
 
