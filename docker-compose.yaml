@@ -39,32 +39,14 @@ services:
     depends_on:
       - "nats"
 
-  #    # TODO: this is probably only useful temporarily, since the udm-listener also should be part of the Tilt stack,
-  #  # but then maybe for integration testing ...
-  #  udm-listener:
-  #    # LDAP server and notifier need to be there
-  #    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/udm-listener:${IMAGE_TAG:-latest}
-  #    environment:
-  #      # this config relies on running ldap server and notifier that have ports forwarded
-  #      LDAP_HOST: "localhost"
-  #      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-  #      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
-  #      NOTIFIER_SERVER: "localhost"
-  #      LDAP_PORT: "3089"
-  #      DEBUG_LEVEL: "4"
-  #      # Whether to start encryption and validate certificates.
-  #      # Chose from "off", "unvalidated" and "secure".
-  #      TLS_MODE: "off"
-  #      LDAP_PASSWORD: "univention"
-  #      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
-  #    network_mode: "host"
 
   udm-listener:
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
       args:
-       - LISTENER_BASE_IMAGE_TAG=latest
+        - LISTENER_BASE_IMAGE_TAG=latest
+        - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
     environment:
       LDAP_HOST: "localhost"
@@ -78,16 +60,16 @@ services:
     network_mode: "host"
 
   ldap-notifier:
-      platform: linux/amd64
-      image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-notifier:latest
-      depends_on:
-        ldap-server:
-          condition: service_started
-      ports:
-        - 6669:6669
-      volumes:
-        - ldap-shared-data:/var/lib/univention-ldap/:rw
-        - ldap-shared-run:/var/run/slapd/:ro
+    platform: linux/amd64
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-notifier:latest
+    depends_on:
+      ldap-server:
+        condition: service_started
+    ports:
+      - 6669:6669
+    volumes:
+      - ldap-shared-data:/var/lib/univention-ldap/:rw
+      - ldap-shared-run:/var/run/slapd/:ro
 
   test:
     profiles:

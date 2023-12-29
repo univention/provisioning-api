@@ -1,12 +1,8 @@
 ARG LISTENER_BASE_IMAGE_TAG=v0.4.1
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base:${LISTENER_BASE_IMAGE_TAG}
-ARG PYTHON_VERSION=3.7
-ARG WORKDIR="/app"
+ARG PYTHON_IMAGE_VERSION=3.7
 
-# hadolint ignore=DL3006
-FROM library/python:${PYTHON_VERSION}-slim as builder
-ARG WORKDIR
-WORKDIR ${WORKDIR}
+FROM library/python:${PYTHON_IMAGE_VERSION}-slim as builder
 
 ENV \
     PATH="/home/${USER}/.local/bin:${PATH}" \
@@ -24,12 +20,12 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src ${WORKDIR}/src
+COPY ./src ./src
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
      README.md \
-     ${WORKDIR}/
+     ./
 
 RUN \
     # install Poetry
@@ -45,14 +41,13 @@ from builder as test
 RUN poetry install --with dev
 
 FROM ${LISTENER_BASE_IMAGE} as final
-ARG WORKDIR
-ARG PYTHON_VERSION
+ARG PYTHON_IMAGE_VERSION
 
-WORKDIR ${WORKDIR}
-COPY --from=builder ${WORKDIR} ${WORKDIR}
+WORKDIR /app
+COPY --from=builder . .
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
 COPY ./docker/udm-listener/rest /usr/lib/python3/dist-packages/univention/admin/rest
 COPY ./docker/udm-listener/management /usr/lib/python3/dist-packages/univention/management
 
-ENV PYTHONPATH=$PYTHONPATH:${WORKDIR}/src:${WORKDIR}/.venv/lib/python${PYTHON_VERSION}/site-packages
+ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python${PYTHON_IMAGE_VERSION}/site-packages
