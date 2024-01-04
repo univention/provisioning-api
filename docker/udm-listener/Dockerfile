@@ -3,12 +3,25 @@
 
 ARG LISTENER_BASE_IMAGE_TAG=v0.4.1
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base
-ARG PYTHON_IMAGE_VERSION=3.7
 ARG UDM_REST_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api
 ARG UDM_REST_IMAGE_TAG=latest
 
-FROM library/python:${PYTHON_IMAGE_VERSION}-slim as builder1
-WORKDIR /app
+ARG WORKDIR="/app"
+
+FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as builder1
+
+ARG WORKDIR
+WORKDIR ${WORKDIR}
+
+ARG USER=udm_listener
+RUN useradd -m "$USER"
+RUN chown "$USER":"$USER" "$WORKDIR" \
+    && apt-get -qq update \
+    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
+      python3-pip curl\
+    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
+USER "$USER"
+
 
 ENV \
     PATH="/home/${USER}/.local/bin:${PATH}" \
@@ -33,17 +46,7 @@ COPY logging.yaml \
      README.md \
      ./
 
-RUN \
-    # install Poetry
-    pip install --no-cache-dir poetry==1.5.1 && \
-    # install dependencies \
-    poetry config installer.max-workers 10 && \
-    poetry install --only main --no-ansi -vvv
-
-############################################### \
-
-from builder1 as test
-
+RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
 RUN poetry install --with dev
 
 
@@ -51,12 +54,13 @@ FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as builder2
 
 
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
-ARG PYTHON_IMAGE_VERSION
 
-WORKDIR /app
+ARG WORKDIR
+WORKDIR ${WORKDIR}
+
 COPY --from=builder1 /app .
 COPY --from=builder2 usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
 
-ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python${PYTHON_IMAGE_VERSION}/site-packages
+ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages

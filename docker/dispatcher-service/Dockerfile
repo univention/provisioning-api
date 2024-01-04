@@ -38,7 +38,7 @@ FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as build
 ARG WORKDIR
 WORKDIR ${WORKDIR}
 
-ARG USER=fastapi
+ARG USER=dispatcher
 RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
