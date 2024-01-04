@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.5.0...v0.5.1) (2024-01-04)
+
+
+### Bug Fixes
+
+* **deps:** add renovate.json ([ac93093](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/ac93093cb3af578942d63cfc50ad3f9173c9ec7a))
+* disable publish-helm-charts-souvap ([fbc2701](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/fbc27011b48b6a6249daae3b8b3a8e424f0dfb3c))
+
 ## [0.5.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.4.0...v0.5.0) (2023-12-29)
 
 
