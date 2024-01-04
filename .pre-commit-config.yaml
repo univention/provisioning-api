@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 ---
 
 # See https://pre-commit.com for more information
@@ -79,5 +82,11 @@ repos:
         args:
           - "--chart-search-root=helm"
           - "--template-files=README.md.gotmpl"
+
+  - repo: "https://git.knut.univention.de/univention/dist/pre-commit-hooks/addlicense"
+    rev: "v1.0.1"
+    hooks:
+      - id: "addlicense"
+        name: "Check or add license headers to files"
 
 ...

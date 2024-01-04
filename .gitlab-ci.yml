@@ -1,8 +1,11 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 ---
 
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.12.0"
+    ref: "v1.14.0"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
