@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 set -euxo pipefail
 
 ln --symbolic --force "${MACHINE_SECRET_FILE:-/run/secrets/machine_secret}" "/etc/machine.secret"

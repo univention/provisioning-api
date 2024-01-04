@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 from univention.admin.rest.utils import decode_properties, superordinate_names
 import re
 from ldap.dn import explode_rdn
