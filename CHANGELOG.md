@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.5.1...v0.5.2) (2024-01-04)
+
+
+### Bug Fixes
+
+* **ci:** add license header checking with common-ci v1.14.x and pre-commit-hook ([f7602e7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/f7602e7e0f16d38a821da1cf08b57bcec288c7bc))
+* **licensing:** add spdx license headers to all files ([5fc8106](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/commit/5fc810654f20e48386ca68dadf9c4be8526bb1c2))
+
 ## [0.5.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.5.0...v0.5.1) (2024-01-04)
 
 
