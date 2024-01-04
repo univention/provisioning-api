@@ -113,4 +113,8 @@ container-sign-souvap:
   parallel:
     matrix: *publish-matrix
 
+publish-helm-charts-souvap:
+  rules:
+    - when: never
+
 ...
