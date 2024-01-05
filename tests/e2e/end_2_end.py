@@ -5,12 +5,13 @@ import requests
 import uuid
 
 from shared.config import settings
-from tests.conftest import REALM_TOPIC, TOPIC, PUBLISHER_NAME, REALM
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
 
-
+REALM = "udm"
+TOPIC = "groups/group"
+PUBLISHER_NAME = "udm-listener"
 BASE_URL = "http://localhost:7777"
 
 
@@ -39,7 +40,7 @@ async def test_workflow():
         f"{BASE_URL}{subscriptions_api_prefix}/subscription",
         json={
             "name": name,
-            "realm_topic": REALM_TOPIC,
+            "realm_topic": [REALM, TOPIC],
             "fill_queue": False,
         },
     )
@@ -55,7 +56,7 @@ async def test_workflow():
     # call of Consumer: get messages from consumer queue
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=10"
+        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message"
     )
     assert response.status_code == 200
     data = response.json()
