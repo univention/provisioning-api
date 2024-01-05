@@ -25,7 +25,7 @@ from events.port import EventsPort
 from shared.models import Message
 
 REALM = "udm"
-TOPIC = "users/user"
+TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
 REALM_TOPIC = [REALM, TOPIC]
@@ -68,7 +68,7 @@ BASE_KV_OBJ = KeyValue.Entry(
 kv_sub_info = copy(BASE_KV_OBJ)
 kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:users/user"], "fill_queue": true, '
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:groups/group"], "fill_queue": true, '
     b'"fill_queue_status": "done"}'
 )
 
@@ -172,7 +172,7 @@ class FakeKvStore:
             "abc:def": kv_subs,
             "foo:bar": kv_subs,
             f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info,
-            "udm:users/user": kv_subs,
+            "udm:groups/group": kv_subs,
         }
         return values[key]
 

@@ -38,6 +38,8 @@ class Settings(BaseSettings):
 
     # LDAP : port
     ldap_port: int = 389
+    # LDAP : server_uri
+    ldap_server_uri: str = f"ldap://localhost:{ldap_port}"
     # LDAP : start_tls
     ldap_start_tls: int = 0
     # LDAP : base_dn

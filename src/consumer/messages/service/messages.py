@@ -53,7 +53,7 @@ class MessageService:
         timeout: float,
         count: int,
         pop: bool,
-        force: Optional[bool] = False,
+        force: bool,
     ) -> List[NatsMessage]:
         """Return messages from a given queue.
 

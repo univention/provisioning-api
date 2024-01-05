@@ -117,12 +117,12 @@ class TestSubscriptionService:
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
         sub_service._port.get_str_value.assert_has_calls(
-            [call("subscribers"), call("udm:users/user")]
+            [call("subscribers"), call("udm:groups/group")]
         )
         sub_service._port.put_value.assert_has_calls(
             [
                 call("subscribers", SUBSCRIBER_NAME),
-                call("udm:users/user", SUBSCRIBER_NAME),
+                call("udm:groups/group", SUBSCRIBER_NAME),
             ]
         )
 
@@ -213,7 +213,7 @@ class TestSubscriptionService:
         sub_service._port.put_list_value = AsyncMock()
         sub_service._port.put_value = AsyncMock()
 
-        await sub_service.cancel_subscription(SUBSCRIBER_NAME, "udm:users/user")
+        await sub_service.cancel_subscription(SUBSCRIBER_NAME, "udm:groups/group")
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
         sub_service._port.get_list_value.assert_called_once_with(self.realm_topic)

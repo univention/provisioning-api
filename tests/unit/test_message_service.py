@@ -88,7 +88,7 @@ class TestMessageService:
         )
         message_service._port.get_messages = AsyncMock(return_value=[])
 
-        result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False)
+        result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False, False)
 
         message_service._port.get_messages.assert_called_once_with(
             SUBSCRIBER_NAME, 5, 2, False
@@ -104,7 +104,7 @@ class TestMessageService:
         message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
         expected_result = [MESSAGE, MESSAGE]
 
-        result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False)
+        result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False, False)
 
         message_service._port.get_messages.assert_called_once_with(
             SUBSCRIBER_NAME, 5, 2, False
