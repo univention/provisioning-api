@@ -35,23 +35,22 @@ def connect_ldap_server():
 
 
 def modify_obj(dn: str, changes: dict):
-    ldap_server = connect_ldap_server()
-    ldap_server.modify(dn, changes)
+    ldap_conn = connect_ldap_server()
+    ldap_conn.modify(dn, changes)
 
 
 def delete_obj(dn: str):
-    ldap_server = connect_ldap_server()
-    ldap_server.delete(dn)
+    ldap_conn = connect_ldap_server()
+    ldap_conn.delete(dn)
 
 
 def add_obj(user_dn: str):
     ldap_conn = connect_ldap_server()
-    response = ldap_conn.add(
+    ldap_conn.add(
         dn=user_dn,
         object_class=("posixGroup", "univentionObject", "univentionGroup"),
         attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
     )
-    return response
 
 
 async def test_workflow():
