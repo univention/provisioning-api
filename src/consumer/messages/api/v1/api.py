@@ -136,7 +136,7 @@ async def subscription_websocket(
                 )
                 break
     except fastapi.WebSocketDisconnect:
-        logging.info("%s WebSocket client disconnected.", name)
+        logger.info("%s WebSocket client disconnected.", name)
     except Exception as exc:
         logger.warning("%s WebSocket failed: %s", name, exc)
     finally:
