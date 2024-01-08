@@ -1,10 +1,9 @@
 import asyncio
+from time import sleep
 
 import pytest
 import requests
 import uuid
-
-from ldap3.core.exceptions import LDAPBindError
 
 from shared.config import settings
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
@@ -22,40 +21,24 @@ def anyio_backend():
     return "asyncio"
 
 
-def connect_ldap_server():
-    try:
-        server = ldap3.Server(settings.ldap_server_uri)
-        connection = ldap3.Connection(
-            server, settings.ldap_host_dn, settings.ldap_password
+def trigger_ldap(dn: str, changes: dict):
+    server = ldap3.Server(settings.ldap_server_uri)
+    with ldap3.Connection(
+        server, settings.ldap_host_dn, settings.ldap_password
+    ) as conn:
+        conn.add(
+            dn=dn,
+            object_class=("posixGroup", "univentionObject", "univentionGroup"),
+            attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
         )
-        connection.bind()
-    except LDAPBindError as e:
-        connection = e
-    return connection
-
-
-def modify_obj(dn: str, changes: dict):
-    ldap_conn = connect_ldap_server()
-    ldap_conn.modify(dn, changes)
-
-
-def delete_obj(dn: str):
-    ldap_conn = connect_ldap_server()
-    ldap_conn.delete(dn)
-
-
-def add_obj(user_dn: str):
-    ldap_conn = connect_ldap_server()
-    ldap_conn.add(
-        dn=user_dn,
-        object_class=("posixGroup", "univentionObject", "univentionGroup"),
-        attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
-    )
+        conn.modify(dn, changes)
+        sleep(1)  # needs time to apply changes
+        conn.delete(dn)
 
 
 async def test_workflow():
     name = str(uuid.uuid4())
-    user_dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
+    dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
 
@@ -73,13 +56,11 @@ async def test_workflow():
 
     # Trigger LDAP
 
-    add_obj(user_dn)
-    modify_obj(user_dn, changes)
-    delete_obj(user_dn)
+    trigger_ldap(dn, changes)
 
     await asyncio.sleep(
         10
-    )  # need time for Dispatcher to send message to the consumer queue
+    )  # needs time for Dispatcher to send message to the consumer queue
 
     response = requests.get(
         f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=3"
@@ -95,17 +76,17 @@ async def test_workflow():
 
     # Check creating object
     assert data[0]["data"]["body"]["old"] is None
-    assert data[0]["data"]["body"]["new"]["dn"] == user_dn
+    assert data[0]["data"]["body"]["new"]["dn"] == dn
 
     # Check modifying object
-    assert data[1]["data"]["body"]["old"]["dn"] == user_dn
+    assert data[1]["data"]["body"]["old"]["dn"] == dn
     assert (
         data[1]["data"]["body"]["new"]["properties"]["description"] == new_description
     )
 
     # Check deleting object
     assert data[2]["data"]["body"]["new"] is None
-    assert data[2]["data"]["body"]["old"]["dn"] == user_dn
+    assert data[2]["data"]["body"]["old"]["dn"] == dn
 
 
 if __name__ == "__main__":
