@@ -6,10 +6,11 @@ ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/data
 ARG UDM_REST_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api
 ARG UDM_REST_IMAGE_TAG=latest
 
+ARG WORKDIR="/app"
 
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as builder
 
-ARG WORKDIR="/app"
+ARG WORKDIR
 WORKDIR ${WORKDIR}
 
 ARG USER=udm_listener
@@ -54,9 +55,10 @@ FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as udm_rest_image
 
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
 
-WORKDIR /app
+ARG WORKDIR
+WORKDIR ${WORKDIR}
 
-COPY --from=builder /app .
+COPY --from=builder ${WORKDIR} .
 COPY --from=udm_rest_image /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
