@@ -6,11 +6,10 @@ ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/data
 ARG UDM_REST_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api
 ARG UDM_REST_IMAGE_TAG=latest
 
+
+FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as builder
+
 ARG WORKDIR="/app"
-
-FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as builder1
-
-ARG WORKDIR
 WORKDIR ${WORKDIR}
 
 ARG USER=udm_listener
@@ -50,16 +49,15 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
 RUN poetry install --with dev
 
 
-FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as builder2
+FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as udm_rest_image
 
 
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
 
-ARG WORKDIR
-WORKDIR ${WORKDIR}
+WORKDIR /app
 
-COPY --from=builder1 /app .
-COPY --from=builder2 usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
+COPY --from=builder /app .
+COPY --from=udm_rest_image /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
 COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
 
