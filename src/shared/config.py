@@ -15,11 +15,6 @@ class Settings(BaseSettings):
     # FastAPI: disable CORS checks
     cors_all: bool = False
 
-    # Redis: host
-    redis_host: str = "localhost"
-    # Redis: port
-    redis_port: int = 6379
-
     # Nats: host
     nats_host: str = "localhost"
     # Nats: port

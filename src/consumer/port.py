@@ -8,7 +8,6 @@ from typing import List, Annotated, Optional, Union
 from fastapi import Depends
 
 from shared.adapters.nats_adapter import NatsAdapter
-from shared.adapters.redis_adapter import RedisAdapter
 from shared.config import settings
 from shared.models import Message
 
@@ -17,7 +16,6 @@ from shared.models.queue import NatsMessage
 
 class ConsumerPort:
     def __init__(self):
-        self.redis_adapter = RedisAdapter()
         self.nats_adapter = NatsAdapter()
 
     @staticmethod
@@ -46,17 +44,16 @@ class ConsumerPort:
             await port.close()
 
     async def close(self):
-        await self.redis_adapter.close()
         await self.nats_adapter.close()
 
     async def add_live_message(self, subject: str, message: Message):
         await self.nats_adapter.add_message(subject, message)
 
-    async def add_prefill_message(self, subject: str, message: Message):
-        await self.nats_adapter.add_message(subject, message)
+    async def add_prefill_message(self, subscriber_name: str, message: Message):
+        pass
 
     async def delete_prefill_messages(self, subscriber_name: str):
-        await self.redis_adapter.delete_prefill_messages(subscriber_name)
+        pass
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
