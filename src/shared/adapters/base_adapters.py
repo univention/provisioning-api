@@ -8,7 +8,7 @@ from shared.models import Message
 from shared.models.queue import MQMessage
 
 
-class BaseKVStore(ABC):
+class BaseKVStoreAdapter(ABC):
     """The base class for key-value store adapters."""
 
     @abstractmethod
@@ -36,7 +36,7 @@ class BaseKVStore(ABC):
         pass
 
 
-class BaseMessageQueue(ABC):
+class BaseMQAdapter(ABC):
     """The base class for message queue adapters."""
 
     @abstractmethod

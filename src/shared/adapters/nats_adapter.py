@@ -13,7 +13,7 @@ from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from shared.adapters.base_adapters import BaseKVStore, BaseMessageQueue
+from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
 from shared.models import Message
 from shared.models.queue import MQMessage
@@ -32,7 +32,7 @@ class NatsKeys:
         return f"KV_{bucket}"
 
 
-class NatsKVAdapter(BaseKVStore):
+class NatsKVAdapter(BaseKVStoreAdapter):
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
@@ -68,7 +68,7 @@ class NatsKVAdapter(BaseKVStore):
         await self.kv_store.put(key, value.encode("utf-8"))
 
 
-class NatsMQAdapter(BaseMessageQueue):
+class NatsMQAdapter(BaseMQAdapter):
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
