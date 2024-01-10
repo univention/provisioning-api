@@ -22,7 +22,7 @@ class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
         super().__init__(
             port=settings.ldap_port,
-            start_tls=settings.ldap_start_tls,
+            start_tls=2 if settings.tls_mode == "on" else 0,
             base=settings.ldap_base_dn,
             binddn=settings.ldap_host_dn,
             bindpw=settings.ldap_password,
