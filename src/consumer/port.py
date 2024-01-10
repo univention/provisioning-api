@@ -52,8 +52,8 @@ class ConsumerPort:
     async def add_live_message(self, subject: str, message: Message):
         await self.nats_adapter.add_message(subject, message)
 
-    async def add_prefill_message(self, subscriber_name: str, message: Message):
-        await self.redis_adapter.add_prefill_message(subscriber_name, message)
+    async def add_prefill_message(self, subject: str, message: Message):
+        await self.nats_adapter.add_message(subject, message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis_adapter.delete_prefill_messages(subscriber_name)

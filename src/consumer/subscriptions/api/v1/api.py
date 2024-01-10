@@ -3,6 +3,7 @@
 
 import logging
 from typing import List
+from prefill import init_queue as init_prefill_queue
 
 import fastapi
 import shared.models
@@ -66,6 +67,13 @@ async def create_subscription(
     except ValueError as err:
         raise fastapi.HTTPException(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
+        )
+
+    if subscriber.fill_queue:
+        tasks.add_task(
+            init_prefill_queue,
+            subscriber.name,
+            subscriber.realm_topic,
         )
 
 

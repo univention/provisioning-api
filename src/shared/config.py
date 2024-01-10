@@ -25,19 +25,31 @@ class Settings(BaseSettings):
     # Nats: port
     nats_port: int = 4222
 
-    # UDM REST API: base url
-    udm_url: str = "http://localhost:8000/univention/udm"
+    # UDM REST API: host
+    udm_host: str = "localhost"
+    # UDM REST API: port
+    udm_port: int = 9979
     # UDM REST API: username
-    udm_username: str = "Administrator"
+    udm_username: str = "cn=admin"
     # UDM REST API: password
     udm_password: str = "univention"
 
-    # Event REST API: base url
-    event_url: str = "http://localhost:7777/events/v1"
+    @property
+    def udm_url(self) -> str:
+        return f"http://{self.udm_host}:{self.udm_port}/udm"
+
+    # Event REST API: host
+    event_host: str = "localhost"
+    # Event REST API: port
+    event_port: int = 7777
     # Event REST API: username
     event_username: str = ""
     # Event REST API: password
     event_password: str = ""
+
+    @property
+    def event_url(self) -> str:
+        return f"http://{self.event_host}:{self.event_port}/events/v1"
 
     # LDAP : port
     ldap_port: int = 389

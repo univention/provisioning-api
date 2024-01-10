@@ -15,7 +15,7 @@ class EventAdapter:
 
     It is intended to be used as an async context manager:
     ```
-    async with EventAdapter("http://localhost:7777/events/v1", "Administrator", "univention") as adapter:
+    async with EventAdapter("http://localhost:7777/events/v1", "username", "password") as adapter:
         await adapter.send_event(message)
     ```
     """

@@ -16,7 +16,7 @@ class UDMAdapter:
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMAdapter("http://ucs/univention/udm", "Administrator", "univention") as adapter:
+    async with UDMAdapter("http://localhost:9979/udm", "username", "password") as adapter:
         await adapter.get_object_types()
     ```
     """
@@ -51,7 +51,7 @@ class UDMAdapter:
 
         Each entry has the keys `name`, `title` and `href`.
         """
-        async with self._session.get(f"{self.base_url}/") as request:
+        async with self._session.get(f"{self.base_url}") as request:
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
@@ -72,7 +72,7 @@ class UDMAdapter:
             params["position"] = position
 
         async with self._session.get(
-            f"{self.base_url}/{object_type}/", params=params
+            f"{self.base_url}{object_type}/", params=params
         ) as request:
             response = await request.json()
             n_results = response["results"]

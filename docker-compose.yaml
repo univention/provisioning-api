@@ -13,6 +13,7 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      UDM_HOST: "udm-rest-api"
     depends_on:
       - "nats"
     ports:
@@ -144,6 +145,7 @@ services:
 
   udm-rest-api:
     image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:latest
+    container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
       - 9979:9979
