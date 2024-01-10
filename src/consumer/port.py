@@ -58,11 +58,6 @@ class ConsumerPort:
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis_adapter.delete_prefill_messages(subscriber_name)
 
-    async def get_next_message(
-        self, subscriber_name: str, timeout: float, pop: bool
-    ) -> List[NatsMessage]:
-        return await self.nats_adapter.get_messages(subscriber_name, timeout, 1, pop)
-
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:

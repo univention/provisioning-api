@@ -56,14 +56,14 @@ class TestMessageService:
         sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_next_message = AsyncMock(return_value=[])
+        message_service._port.get_messages = AsyncMock(return_value=[])
 
         result = await message_service.get_next_message(
             SUBSCRIBER_NAME, False, 5, False
         )
 
-        message_service._port.get_next_message.assert_called_once_with(
-            SUBSCRIBER_NAME, 5, False
+        message_service._port.get_messages.assert_called_once_with(
+            SUBSCRIBER_NAME, 5, 1, False
         )
         assert result is None
 
@@ -73,13 +73,13 @@ class TestMessageService:
         sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_next_message = AsyncMock(return_value=[MESSAGE])
+        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE])
         expected_result = MESSAGE
 
         result = await message_service.get_next_message(SUBSCRIBER_NAME, False, 5)
 
-        message_service._port.get_next_message.assert_called_once_with(
-            SUBSCRIBER_NAME, 5, False
+        message_service._port.get_messages.assert_called_once_with(
+            SUBSCRIBER_NAME, 5, 1, False
         )
         assert result == expected_result
 
