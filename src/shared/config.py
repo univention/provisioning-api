@@ -40,8 +40,6 @@ class Settings(BaseSettings):
     ldap_port: int = 389
     # LDAP : host
     ldap_host: str = "localhost"
-    # LDAP : server_uri
-    ldap_server_uri: str = f"ldap://{ldap_host}:{ldap_port}"
     # LDAP : start_tls
     ldap_start_tls: int = 0
     # LDAP : base_dn
@@ -50,6 +48,10 @@ class Settings(BaseSettings):
     ldap_host_dn: str = "cn=admin,dc=univention-organization,dc=intranet"
     # LDAP : password
     ldap_password: str = "univention"
+
+    @property
+    def ldap_server_uri(self) -> str:
+        return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
 
 settings = Settings()

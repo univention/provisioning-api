@@ -58,9 +58,8 @@ async def test_workflow():
 
     trigger_ldap(dn, changes)
 
-    await asyncio.sleep(
-        10
-    )  # needs time for Dispatcher to send message to the consumer queue
+    # needs time for Dispatcher to send message to the consumer queue
+    await asyncio.sleep(10)
 
     response = requests.get(
         f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=3"
