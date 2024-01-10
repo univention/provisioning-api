@@ -4,13 +4,12 @@
 import logging
 from typing import List
 
-import shared.models
-
 from consumer.port import ConsumerPort
 
 from consumer.messages.service.messages import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
 from prefill.udm import UDMPreFill
+from shared.models import FillQueueStatus
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ async def init_queue(subscriber_name: str, realm_topic: List[str]):
         sub_service = SubscriptionService(port)
 
         await sub_service.set_subscriber_queue_status(
-            subscriber_name, shared.models.FillQueueStatus.running
+            subscriber_name, FillQueueStatus.running
         )
 
         try:
@@ -50,10 +49,10 @@ async def init_queue(subscriber_name: str, realm_topic: List[str]):
             logging.error(f"Failed to launch pre-fill handler: {err.__class__} {err}")
 
             await sub_service.set_subscriber_queue_status(
-                subscriber_name, shared.models.FillQueueStatus.failed
+                subscriber_name, FillQueueStatus.failed
             )
 
         else:
             await sub_service.set_subscriber_queue_status(
-                subscriber_name, shared.models.FillQueueStatus.done
+                subscriber_name, FillQueueStatus.done
             )
