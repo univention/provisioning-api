@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     # LDAP : port
     ldap_port: int = 389
     # LDAP : start_tls
-    ldap_start_tls: int = 0
+    tls_mode: str = "off"
     # LDAP : base_dn
     ldap_base_dn: str = "dc=univention-organization,dc=intranet"
     # LDAP : host_dn
