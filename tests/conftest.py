@@ -54,7 +54,7 @@ FLAT_MESSAGE = {
     "realm": REALM,
     "topic": TOPIC,
     "body": BODY,
-    "receivers": "All",
+    "destination": "*",
 }
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
@@ -199,7 +199,7 @@ async def events_port_fake_dependency() -> EventsPort:
 
 async def consumer_port_fake_dependency_without_sub():
     port = await consumer_port_fake_dependency()
-    port.nats_adapter.get_subscriber_info = AsyncMock(return_value=None)
+    port.nats_adapter.get_subscriber = AsyncMock(return_value=None)
     return port
 
 

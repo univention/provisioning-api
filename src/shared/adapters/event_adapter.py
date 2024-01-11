@@ -18,7 +18,9 @@ class EventAdapter:
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(settings.event_username, settings.event_password)
+        self.auth = aiohttp.BasicAuth(
+            settings.fastapi_username, settings.fastapi_password
+        )
         self.headers = [("accept", "application/json")]
         self._session = None
 
@@ -36,5 +38,4 @@ class EventAdapter:
         async with self._session.post(
             f"{self.base_url}events/", json=message.model_dump()
         ) as request:
-            response = await request.json()
-            return response
+            return await request.json()

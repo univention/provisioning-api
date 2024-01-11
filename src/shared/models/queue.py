@@ -32,11 +32,11 @@ class Message(BaseMessage):
         description="The content of the message as a key/value dictionary."
     )
 
-    receivers: str = Field(
-        default="All",
+    destination: str = Field(
+        default="*",
         description=(
             "Specifies the target subscriber when their queue is temporarily blocked. "
-            "The default is 'All' to broadcast the message to all subscribers."
+            "The default is '*' to broadcast the message to all subscribers."
         ),
     )
 
