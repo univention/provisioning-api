@@ -4,7 +4,7 @@
 import enum
 from typing import List
 
-import pydantic
+from pydantic import Field, BaseModel
 
 
 class FillQueueStatus(str, enum.Enum):
@@ -18,17 +18,19 @@ class FillQueueStatus(str, enum.Enum):
     done = "done"
 
 
-class Subscriber(pydantic.BaseModel):
+class Subscriber(BaseModel):
     """A registered subscriber."""
 
-    # The identifier of the subscriber.
-    name: str
+    name: str = Field(description="The identifier of the subscriber.")
 
-    # A list of `(realm, topic)` that this subscriber subscribes to.
-    realms_topics: List[str]
+    realms_topics: List[str] = Field(
+        description="A list of `(realm, topic)` that this subscriber subscribes to."
+    )
 
-    # Whether pre-filling of the queue was requested.
-    fill_queue: bool
+    fill_queue: bool = Field(
+        description="Whether pre-filling of the queue was requested."
+    )
 
-    # Pre-filling the queue: status
-    fill_queue_status: FillQueueStatus
+    fill_queue_status: FillQueueStatus = Field(
+        description="Pre-filling the queue: status."
+    )

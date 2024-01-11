@@ -54,6 +54,7 @@ FLAT_MESSAGE = {
     "realm": REALM,
     "topic": TOPIC,
     "body": BODY,
+    "receivers": "All",
 }
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())

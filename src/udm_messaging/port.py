@@ -3,11 +3,9 @@
 
 import contextlib
 import json
-from typing import Optional
 
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.event_adapter import EventAdapter
-from shared.adapters.udm_adapter import UDMAdapter
 
 from shared.config import settings
 from shared.models import Message
@@ -16,7 +14,6 @@ from shared.models import Message
 class UDMMessagingPort:
     def __init__(self):
         self._nats_adapter = NatsAdapter()
-        self._udm_adapter: Optional[UDMAdapter] = None
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -41,6 +38,3 @@ class UDMMessagingPort:
             settings.event_url, settings.event_username, settings.event_password
         ) as adapter:
             await adapter.send_event(message)
-
-    async def get_object(self, url: str) -> dict:
-        return await self._udm_adapter.get_object(url)

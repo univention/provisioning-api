@@ -10,14 +10,15 @@ from pydantic import BaseModel, Field, field_serializer
 class BaseMessage(BaseModel):
     """The common header properties of each message."""
 
-    # The name of the publisher of the message.
-    publisher_name: str
-    # The timestamp when the message was received by the dispatcher.
-    ts: datetime
-    # The realm of the message, e.g. `udm`.
-    realm: str
-    # The topic of the message, e.g. `users/user`.
-    topic: str
+    publisher_name: str = Field(description="The name of the publisher of the message.")
+
+    ts: datetime = Field(
+        description="The timestamp when the message was received by the dispatcher."
+    )
+
+    realm: str = Field(description="The realm of the message, e.g. `udm`.")
+
+    topic: str = Field(description="The topic of the message, e.g. `users/user`.")
 
     @field_serializer("ts")
     def serialize_dt(self, dt: datetime, _info):
@@ -27,9 +28,16 @@ class BaseMessage(BaseModel):
 class Message(BaseMessage):
     """The base class for any kind of message sent via the queues."""
 
-    # The content of the message.
     body: Dict[str, Any] = Field(
         description="The content of the message as a key/value dictionary."
+    )
+
+    receivers: str = Field(
+        default="All",
+        description=(
+            "Specifies the target subscriber when their queue is temporarily blocked. "
+            "The default is 'All' to broadcast the message to all subscribers."
+        ),
     )
 
 
@@ -38,10 +46,9 @@ class UDMMessage(BaseMessage):
 
     _realm: ClassVar[str] = "udm"
 
-    # The UDM object before the change.
-    old: Dict[str, Any]
-    # The UDM object after the change.
-    new: Dict[str, Any]
+    old: Dict[str, Any] = Field(description="The UDM object before the change.")
+
+    new: Dict[str, Any] = Field(description="The UDM object after the change.")
 
     @classmethod
     def from_message(cls, msg: Message):
