@@ -44,11 +44,11 @@ class RedisAdapter:
         await self.redis.close()
 
     async def add_live_message(self, subscriber_name: str, message: Message):
-        flat_message = message.flatten()
+        flat_message = message.model_dump()
         await self.redis.xadd(RedisKeys.queue(subscriber_name), flat_message, "*")
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
-        flat_message = message.flatten()
+        flat_message = message.model_dump()
         await self.redis.xadd(RedisKeys.queue(subscriber_name), flat_message, "0-*")
 
     async def delete_prefill_messages(self, subscriber_name: str):
@@ -72,7 +72,7 @@ class RedisAdapter:
             RedisKeys.queue(subscriber_name), first, last, count
         )
         return [
-            (message_id, Message.inflate(flat_message))
+            (message_id, Message.model_validate(flat_message))
             for message_id, flat_message in response
         ]
 

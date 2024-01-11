@@ -3,9 +3,8 @@
 
 from datetime import datetime
 from typing import Any, ClassVar, Dict, Optional
-from typing_extensions import Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 
 class BaseMessage(BaseModel):
@@ -20,6 +19,10 @@ class BaseMessage(BaseModel):
     # The topic of the message, e.g. `users/user`.
     topic: str
 
+    @field_serializer("ts")
+    def serialize_dt(self, dt: datetime, _info):
+        return dt.isoformat()
+
 
 class Message(BaseMessage):
     """The base class for any kind of message sent via the queues."""
@@ -28,37 +31,6 @@ class Message(BaseMessage):
     body: Dict[str, Any] = Field(
         description="The content of the message as a key/value dictionary."
     )
-
-    def flatten(self) -> Dict[str, str]:
-        """Convert the message into a simple dict.
-
-        Substructures inside the `body` dict are serialized using JSON.
-
-        This is necessary to store the message in a Redis stream.
-        """
-
-        return dict(
-            publisher_name=self.publisher_name,
-            ts=self.ts.isoformat(),
-            realm=self.realm,
-            topic=self.topic,
-            body=self.body,
-        )
-
-    @classmethod
-    def inflate(cls, data: Dict[str, str]) -> Self:
-        """Convert the dictionary into its original form.
-
-        This is the opposite of `.flatten()`.
-        It expands the serialized `body` back into `dict`s.
-        """
-        return Message(
-            publisher_name=data["publisher_name"],
-            ts=datetime.fromisoformat(data["ts"]),
-            realm=data["realm"],
-            topic=data["topic"],
-            body=data["body"],
-        )
 
 
 class UDMMessage(BaseMessage):

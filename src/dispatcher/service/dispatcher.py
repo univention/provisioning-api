@@ -39,5 +39,5 @@ class DispatcherService:
 
             for sub in subscribers:
                 self.logger.info(f"Sending message to '{sub}'")
-                new_ms = Message.inflate(data)
+                new_ms = Message.model_validate(data)
                 await self._port.store_event_in_queue(sub, new_ms)

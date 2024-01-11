@@ -46,7 +46,7 @@ class NatsAdapter:
 
     async def add_message(self, subject: str, message: Message):
         """Publish a message to a NATS subject."""
-        flat_message = message.flatten()
+        flat_message = message.model_dump()
         stream_name = NatsKeys.stream(subject)
         try:
             await self.js.stream_info(stream_name)
