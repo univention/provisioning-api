@@ -14,6 +14,7 @@ from shared.models import Message
 class UDMMessagingPort:
     def __init__(self):
         self._nats_adapter = NatsAdapter()
+        self._event_adapter = EventAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -23,7 +24,16 @@ class UDMMessagingPort:
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
         await port._nats_adapter.create_kv_store()
-        yield port
+        await port._event_adapter.connect()
+
+        try:
+            yield port
+        finally:
+            await port.close()
+
+    async def close(self):
+        await self._nats_adapter.close()
+        await self._event_adapter.close()
 
     async def retrieve(self, url: str):
         result = await self._nats_adapter.get_value(url)
@@ -32,9 +42,5 @@ class UDMMessagingPort:
     async def store(self, url: str, new_obj: str):
         await self._nats_adapter.put_value(url, new_obj)
 
-    @staticmethod
-    async def send_event(message: Message):
-        async with EventAdapter(
-            settings.event_url, settings.event_username, settings.event_password
-        ) as adapter:
-            await adapter.send_event(message)
+    async def send_event(self, message: Message):
+        await self._event_adapter.send_event(message)
