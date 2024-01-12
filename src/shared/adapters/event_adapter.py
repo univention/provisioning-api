@@ -18,9 +18,7 @@ class EventAdapter:
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(
-            settings.fastapi_username, settings.fastapi_password
-        )
+        self.auth = aiohttp.BasicAuth(settings.username, settings.password)
         self.headers = [("accept", "application/json")]
         self._session = None
 

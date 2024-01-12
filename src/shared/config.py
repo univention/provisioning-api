@@ -38,22 +38,22 @@ class Settings(BaseSettings):
     def udm_url(self) -> str:
         return f"http://{self.udm_host}:{self.udm_port}/udm"
 
-    # FastAPI: host
-    fastapi_host: str = "localhost"
-    # FastAPI: port
-    fastapi_port: int = 7777
-    # FastAPI: username
-    fastapi_username: str = ""
-    # FastAPI: password
-    fastapi_password: str = ""
+    # Consumer and Event REST API: host
+    host: str = "localhost"
+    # Consumer and Event REST API: port
+    port: int = 7777
+    # Consumer and Event REST API: username
+    username: str = ""
+    # Consumer and Event REST API: password
+    password: str = ""
 
     @property
     def event_url(self) -> str:
-        return f"http://{self.fastapi_host}:{self.fastapi_port}/events/v1"
+        return f"http://{self.host}:{self.port}/events/v1"
 
     @property
     def consumer_reg_url(self) -> str:
-        return f"http://{self.fastapi_host}:{self.fastapi_port}/subscriptions/v1"
+        return f"http://{self.host}:{self.port}/subscriptions/v1"
 
     # LDAP : port
     ldap_port: int = 389
