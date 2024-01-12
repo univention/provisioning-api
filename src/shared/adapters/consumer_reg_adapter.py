@@ -17,7 +17,9 @@ class ConsumerRegAdapter:
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(settings.username, settings.password)
+        self.auth = aiohttp.BasicAuth(
+            settings.consumer_event_username, settings.consumer_event_password
+        )
         self.headers = [("accept", "application/json")]
         self._session = None
         self.logger = logging.getLogger(__name__)
@@ -43,3 +45,9 @@ class ConsumerRegAdapter:
                 self.logger.error("Subscriber not found.")
                 return None
             raise
+
+    async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
+        async with self._session.get(
+            f"{self.base_url}subscriptions/?realm_topic={realm_topic}"
+        ) as request:
+            return await request.json()

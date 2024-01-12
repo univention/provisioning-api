@@ -73,12 +73,12 @@ class TestDispatcher:
         port_with_mock_nats: DispatcherPort,
     ):
         mock_get.return_value.__aenter__.return_value.json = AsyncMock(
-            return_value=SUBSCRIBER_INFO
+            return_value=[SUBSCRIBER_INFO]
         )
 
         # register a consumer
         response = await consumer.post(
-            f"{subscriptions_api_prefix}/subscriptions/",
+            f"{subscriptions_api_prefix}/subscriptions",
             json={
                 "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
@@ -89,7 +89,7 @@ class TestDispatcher:
 
         # call event api with new user event
         response = await producer.post(
-            f"{events_api_prefix}/events/",
+            f"{events_api_prefix}/events",
             json=FLAT_MESSAGE,
         )
         assert response.status_code == 202

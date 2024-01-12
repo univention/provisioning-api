@@ -31,7 +31,7 @@ async def test_udm_create_user_event_is_routed_correctly(
 ):
     # register a consumer
     response = await consumer.post(
-        f"{subscriptions_api_prefix}/subscriptions/",
+        f"{subscriptions_api_prefix}/subscriptions",
         json={
             "name": SUBSCRIBER_NAME,
             "realm_topic": ["foo", "bar"],
@@ -41,7 +41,7 @@ async def test_udm_create_user_event_is_routed_correctly(
     assert response.status_code == 201
 
     # call event api with new user event
-    response = await producer.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
+    response = await producer.post(f"{events_api_prefix}/events", json=FLAT_MESSAGE)
     assert response.status_code == 202
 
     message_consumer = TestClient(app)

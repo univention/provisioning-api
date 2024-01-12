@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-from typing import List
+from typing import List, Optional
 from prefill import init_queue as init_prefill_queue
 
 import fastapi
@@ -16,16 +16,16 @@ logger = logging.getLogger(__name__)
 router = fastapi.APIRouter()
 
 
-@router.get("/subscriptions/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
+@router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
-    port: ConsumerPortDependency,
+    port: ConsumerPortDependency, realm_topic: Optional[str] = None
 ) -> List[shared.models.Subscriber]:
-    """Return all subscriptions."""
+    """Return a list of all known subscribers or with the given realm_topic."""
 
     # TODO: check authorization
 
     service = SubscriptionService(port)
-    return await service.get_subscribers()
+    return await service.get_subscribers(realm_topic)
 
 
 @router.get(
@@ -49,7 +49,7 @@ async def get_subscription(
 
 
 @router.post(
-    "/subscriptions/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
+    "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
 )
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,

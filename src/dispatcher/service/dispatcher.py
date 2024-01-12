@@ -21,25 +21,19 @@ class DispatcherService:
     ) -> List[NatsMessage]:
         return await self._port.retrieve_event_from_queue("incoming", timeout, pop)
 
-    async def get_realm_topic_subscribers(self, realm_topic_str) -> List[str]:
-        return await self._port.get_list_value(realm_topic_str)
-
-    async def send_event(self, sub_name: str, new_msg: Message):
-        sub_info = await self._port.get_subscriber(sub_name)
-        if not sub_info:
-            return
-        if sub_info["fill_queue_status"] in (
+    async def send_event(self, subscriber: dict, new_msg: Message):
+        if subscriber["fill_queue_status"] in (
             FillQueueStatus.done,
             FillQueueStatus.failed,
         ):
-            self.logger.info("Sending message to %s", sub_name)
-            await self._port.send_event_to_consumer_queue(sub_name, new_msg)
+            self.logger.info("Sending message to %s", subscriber["name"])
+            await self._port.send_event_to_consumer_queue(subscriber["name"], new_msg)
         else:
             self.logger.info(
                 "Sending message to incoming queue for subscriber '%s' due to a temporary lock on its queue.",
-                sub_name,
+                subscriber["name"],
             )
-            new_msg.destination = sub_name
+            new_msg.destination = subscriber["name"]
             await self._port.send_event_to_incoming_queue(new_msg)
 
     async def store_event_in_consumer_queues(self):
@@ -56,11 +50,12 @@ class DispatcherService:
 
             subscribers = []
             if new_msg.destination == "*":
-                subscribers = await self.get_realm_topic_subscribers(
+                subscribers = await self._port.get_realm_topic_subscribers(
                     f"{realm}:{topic}"
-                )  # TODO: add this method to Consumer REST API
+                )
             else:
-                subscribers.append(new_msg.destination)
+                subscriber = await self._port.get_subscriber(new_msg.destination)
+                subscribers.append(subscriber)
 
-            for sub_name in subscribers:
-                await self.send_event(sub_name, new_msg)
+            for subscriber in subscribers:
+                await self.send_event(subscriber, new_msg)

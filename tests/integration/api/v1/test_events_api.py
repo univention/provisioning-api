@@ -18,5 +18,5 @@ async def client():
 @pytest.mark.anyio
 class TestEvents:
     async def test_add_event(self, client: httpx.AsyncClient):
-        response = await client.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
+        response = await client.post(f"{events_api_prefix}/events", json=FLAT_MESSAGE)
         assert response.status_code == 202

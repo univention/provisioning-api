@@ -15,7 +15,7 @@ from consumer.main import app
 def test_websocket():
     client = TestClient(app)
 
-    response = client.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
+    response = client.post(f"{events_api_prefix}/events", json=FLAT_MESSAGE)
     assert response.status_code == 202
 
     with client.websocket_connect(

@@ -52,7 +52,7 @@ class TestSubscriptionService:
             fill_queue_status="done",
         )
 
-        result = await sub_service.get_subscribers()
+        result = await sub_service.get_subscribers(None)
 
         sub_service._port.get_list_value.assert_called_once_with("subscribers")
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
@@ -61,7 +61,7 @@ class TestSubscriptionService:
     async def test_get_subscribers_empty_result(self, sub_service):
         sub_service._port.get_list_value = AsyncMock(return_value=[])
 
-        result = await sub_service.get_subscribers()
+        result = await sub_service.get_subscribers(None)
 
         sub_service._port.get_list_value.assert_called_once_with("subscribers")
         assert result == []

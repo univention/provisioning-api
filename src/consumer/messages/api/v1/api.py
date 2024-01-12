@@ -25,7 +25,7 @@ manager = SinkManager()
 
 
 @router.post(
-    "/subscriptions/{name}/messages/",
+    "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -74,7 +74,7 @@ async def get_subscription_messages(
 
 
 @router.delete(
-    "/messages/",
+    "/messages",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )

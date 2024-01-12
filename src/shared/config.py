@@ -39,21 +39,21 @@ class Settings(BaseSettings):
         return f"http://{self.udm_host}:{self.udm_port}/udm"
 
     # Consumer and Event REST API: host
-    host: str = "localhost"
+    consumer_event_host: str = "localhost"
     # Consumer and Event REST API: port
-    port: int = 7777
+    consumer_event_port: int = 7777
     # Consumer and Event REST API: username
-    username: str = ""
+    consumer_event_username: str = ""
     # Consumer and Event REST API: password
-    password: str = ""
+    consumer_event_password: str = ""
 
     @property
     def event_url(self) -> str:
-        return f"http://{self.host}:{self.port}/events/v1"
+        return f"http://{self.host}:{self.consumer_event_port}/events/v1"
 
     @property
     def consumer_reg_url(self) -> str:
-        return f"http://{self.host}:{self.port}/subscriptions/v1"
+        return f"http://{self.host}:{self.consumer_event_port}/subscriptions/v1"
 
     # LDAP : port
     ldap_port: int = 389

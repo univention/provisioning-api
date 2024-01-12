@@ -39,17 +39,20 @@ class SubscriptionService:
         self._port = port
         self.logger = logging.getLogger(__name__)
 
-    async def get_subscribers(self) -> List[Subscriber]:
+    async def get_subscribers(self, realm_topic: Optional[None]) -> List[Subscriber]:
         """
-        Return a list of names of all known subscribers.
+        Return a list of all known subscribers or with the given realm_topic.
         """
 
-        names = await self.get_subscriber_names()
+        names = await self.get_subscriber_names(
+            realm_topic or SubscriptionKeys.subscribers
+        )
         subscribers = [await self.get_subscriber(name) for name in names]
+
         return subscribers
 
-    async def get_subscriber_names(self):
-        return await self._port.get_list_value(SubscriptionKeys.subscribers)
+    async def get_subscriber_names(self, key: str):
+        return await self._port.get_list_value(key)
 
     async def get_subscriber(self, name: str) -> Subscriber:
         """
@@ -91,9 +94,6 @@ class SubscriptionService:
 
     async def update_realm_topic_subscribers(self, realm_topic_str: str, name: str):
         await self.update_subscriber_names(realm_topic_str, name)
-
-    async def get_realm_topic_subscribers(self, realm_topic_str: str):
-        return await self._port.get_list_value(realm_topic_str)
 
     async def add_subscriber(
         self,

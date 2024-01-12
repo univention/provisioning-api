@@ -51,10 +51,6 @@ class DispatcherPort:
     async def send_event_to_consumer_queue(self, subject: str, message: Message):
         await self._nats_adapter.add_message(subject, message)
 
-    async def get_list_value(self, key: str) -> List[str]:
-        result = await self._nats_adapter.get_value(key)
-        return result.value.decode("utf-8").split(",") if result else []
-
     async def subscribe_to_queue(self, subject: str):
         await self._nats_adapter.subscribe_to_queue(subject)
 
@@ -63,6 +59,9 @@ class DispatcherPort:
 
     async def get_subscriber(self, name: str) -> Optional[dict]:
         return await self._consumer_reg_adapter.get_subscriber(name)
+
+    async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
+        return await self._consumer_reg_adapter.get_realm_topic_subscribers(realm_topic)
 
     async def send_event_to_incoming_queue(self, message: Message):
         await self._event_adapter.send_event(message)

@@ -45,7 +45,7 @@ async def messages_client():
 class TestConsumer:
     async def test_create_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.post(
-            f"{api_prefix}/subscriptions/",
+            f"{api_prefix}/subscriptions",
             json={
                 "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
@@ -100,7 +100,7 @@ class TestConsumer:
             "headers": {"Nats-Expected-Stream": f"stream:{SUBSCRIBER_NAME}"},
         }
         response = await messages_client.post(
-            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages/",
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages",
             json={"msg": nats_msg, "report": {"status": "ok"}},
         )
         assert response.status_code == 200

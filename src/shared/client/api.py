@@ -71,7 +71,7 @@ class AsyncClient:
 
     async def get_subscriptions(self) -> List[shared.models.subscriber.Subscriber]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.get(f"{self.base_url}/v1/subscriptions/") as response:
+            async with session.get(f"{self.base_url}/v1/subscriptions") as response:
                 data = await response.json()
                 return shared.models.api.Subscriber.model_validate(data)
 

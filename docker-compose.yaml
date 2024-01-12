@@ -40,7 +40,7 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
-      FASTAPI_HOST: "app"
+      CONSUMER_EVENT_HOST: "app"
     depends_on:
       - "nats"
       - "app"
