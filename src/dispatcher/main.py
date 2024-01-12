@@ -11,7 +11,7 @@ from daemoniker import Daemonizer
 async def run_dispatcher():
     async with DispatcherPort.port_context() as port:
         service = DispatcherService(port)
-        await service.store_event_in_consumer_queues()
+        await service.dispatch_event()
 
 
 def main():

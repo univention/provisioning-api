@@ -3,11 +3,10 @@
 
 import json
 import logging
-from typing import List
 
 from shared.models import FillQueueStatus
 from src.dispatcher.port import DispatcherPort
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import Message
 
 
 class DispatcherService:
@@ -15,11 +14,6 @@ class DispatcherService:
         self._port = port
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-
-    async def retrieve_event_from_incoming_queue(
-        self, timeout: float = 5, pop: bool = True
-    ) -> List[NatsMessage]:
-        return await self._port.retrieve_event_from_queue("incoming", timeout, pop)
 
     async def send_event(self, subscriber: dict, new_msg: Message):
         if subscriber["fill_queue_status"] in (
@@ -36,7 +30,7 @@ class DispatcherService:
             new_msg.destination = subscriber["name"]
             await self._port.send_event_to_incoming_queue(new_msg)
 
-    async def store_event_in_consumer_queues(self):
+    async def dispatch_event(self):
         self.logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue("incoming")
         while True:

@@ -9,7 +9,7 @@ import pytest
 
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from tests.conftest import (
-    REALMS_TOPICS,
+    REALMS_TOPICS_STR,
     REALM,
     TOPIC,
     PUBLISHER_NAME,
@@ -63,9 +63,12 @@ class TestConsumer:
         assert data["name"] == SUBSCRIBER_NAME
         assert data["fill_queue"]
         assert data["fill_queue_status"] == FillQueueStatus.done
-        assert len(data["realms_topics"]) == len(REALMS_TOPICS)
+        assert len(data["realms_topics"]) == len([REALMS_TOPICS_STR])
         assert all(
-            (realm_topic in data["realms_topics"] for realm_topic in REALMS_TOPICS)
+            (
+                realm_topic in data["realms_topics"]
+                for realm_topic in [REALMS_TOPICS_STR]
+            )
         )
 
     async def test_delete_subscription(self, subscriptions_client: httpx.AsyncClient):

@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from copy import copy
+from copy import copy, deepcopy
 from datetime import datetime
 from typing import Union
 from unittest.mock import AsyncMock
@@ -32,12 +32,12 @@ TOPIC = "users/user"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
 REALM_TOPIC = [REALM, TOPIC]
-REALMS_TOPICS = [f"{REALM}:{TOPIC}"]
+REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
 SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 SUBSCRIBER_INFO = {
     "name": SUBSCRIBER_NAME,
-    "realms_topics": REALMS_TOPICS,
+    "realms_topics": [REALMS_TOPICS_STR],
     "fill_queue": True,
     "fill_queue_status": "done",
 }
@@ -48,6 +48,9 @@ MESSAGE = Message(
     topic=TOPIC,
     body=BODY,
 )
+MESSAGE_FOR_ONE_SUB = deepcopy(MESSAGE)
+MESSAGE_FOR_ONE_SUB.destination = SUBSCRIBER_NAME
+
 FLAT_MESSAGE = {
     "publisher_name": PUBLISHER_NAME,
     "ts": "2023-11-09T11:15:52.616061",
@@ -56,8 +59,13 @@ FLAT_MESSAGE = {
     "body": BODY,
     "destination": "*",
 }
+FLAT_MESSAGE_FOR_ONE_SUB = deepcopy(FLAT_MESSAGE)
+FLAT_MESSAGE_FOR_ONE_SUB["destination"] = SUBSCRIBER_NAME
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
+MSG_FOR_ONE_SUB = Msg(
+    _client="nats", data=json.dumps(FLAT_MESSAGE_FOR_ONE_SUB).encode()
+)
 
 BASE_KV_OBJ = KeyValue.Entry(
     "KV_bucket",

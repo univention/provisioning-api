@@ -3,7 +3,7 @@
 
 import contextlib
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from nats.aio.msg import Msg
 
@@ -11,7 +11,7 @@ from shared.adapters.consumer_reg_adapter import ConsumerRegAdapter
 from shared.adapters.event_adapter import EventAdapter
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.config import settings
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import Message
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +42,6 @@ class DispatcherPort:
         await self._nats_adapter.close()
         await self._consumer_reg_adapter.close()
         await self._event_adapter.close()
-
-    async def retrieve_event_from_queue(
-        self, subject, timeout, pop
-    ) -> List[NatsMessage]:
-        return await self._nats_adapter.get_messages(subject, timeout, 1, pop)
 
     async def send_event_to_consumer_queue(self, subject: str, message: Message):
         await self._nats_adapter.add_message(subject, message)

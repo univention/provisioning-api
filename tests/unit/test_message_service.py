@@ -11,11 +11,6 @@ from shared.models.queue import NatsMessage
 
 
 @pytest.fixture
-def port() -> AsyncMock:
-    return patch("consumer.messages.service.messages.ConsumerPort").start().return_value
-
-
-@pytest.fixture
 def sub_service() -> AsyncMock:
     yield patch(
         "consumer.messages.service.messages.SubscriptionService"
@@ -23,16 +18,13 @@ def sub_service() -> AsyncMock:
 
 
 @pytest.fixture
-def message_service(port, sub_service) -> MessageService:
-    message_repo = MessageService(port)
-    return message_repo
+def message_service() -> MessageService:
+    return MessageService(AsyncMock())
 
 
 @pytest.mark.anyio
 class TestMessageService:
     async def test_add_prefill_message(self, message_service: MessageService):
-        message_service._port.add_prefill_message = AsyncMock()
-
         result = await message_service.add_prefill_message(SUBSCRIBER_NAME, MESSAGE)
 
         message_service._port.add_prefill_message.assert_called_once_with(
@@ -41,8 +33,6 @@ class TestMessageService:
         assert result is None
 
     async def test_delete_prefill_messages(self, message_service: MessageService):
-        message_service._port.delete_prefill_messages = AsyncMock()
-
         result = await message_service.delete_prefill_messages(SUBSCRIBER_NAME)
 
         message_service._port.delete_prefill_messages.assert_called_once_with(
@@ -115,7 +105,6 @@ class TestMessageService:
         assert result == expected_result
 
     async def test_remove_message(self, message_service: MessageService):
-        message_service._port.remove_message = AsyncMock()
         msg = NatsMessage(data=FLAT_MESSAGE)
 
         result = await message_service.remove_message(msg)
@@ -124,8 +113,6 @@ class TestMessageService:
         assert result is None
 
     async def test_delete_queue(self, message_service: MessageService):
-        message_service._port.delete_queue = AsyncMock()
-
         result = await message_service.delete_queue(SUBSCRIBER_NAME)
 
         message_service._port.delete_queue.assert_called_once_with(SUBSCRIBER_NAME)

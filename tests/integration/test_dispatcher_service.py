@@ -101,7 +101,7 @@ class TestDispatcher:
         service = DispatcherService(port_with_mock_nats)
 
         try:
-            await service.store_event_in_consumer_queues()
+            await service.dispatch_event()
         except Exception:
             pass
 
