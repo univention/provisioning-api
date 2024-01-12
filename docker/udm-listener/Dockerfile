@@ -18,7 +18,7 @@ RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip curl\
+      python3-pip=18.1-5 curl=7.64.0-4+deb10u8 \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 
@@ -45,7 +45,7 @@ COPY logging.yaml \
      pyproject.toml \
      README.md \
      ./
-
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
 RUN poetry install --with dev
 
