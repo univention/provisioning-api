@@ -49,11 +49,11 @@ class Settings(BaseSettings):
 
     @property
     def event_url(self) -> str:
-        return f"http://{self.host}:{self.consumer_event_port}/events/v1"
+        return f"http://{self.consumer_event_host}:{self.consumer_event_port}/events/v1"
 
     @property
     def consumer_reg_url(self) -> str:
-        return f"http://{self.host}:{self.consumer_event_port}/subscriptions/v1"
+        return f"http://{self.consumer_event_host}:{self.consumer_event_port}/subscriptions/v1"
 
     # LDAP : port
     ldap_port: int = 389
