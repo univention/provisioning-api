@@ -48,7 +48,8 @@ async def port_with_mock_nats():
     port._nats_adapter.nats = AsyncMock()
     port._nats_adapter._future = AsyncMock()
     port._nats_adapter.wait_for_event = AsyncMock(return_value=MSG)
-    port._consumer_reg_adapter._session = aiohttp.ClientSession()
+    async with aiohttp.ClientSession() as session:
+        port._consumer_reg_adapter._session = session
     return port
 
 
@@ -77,7 +78,7 @@ class TestDispatcher:
 
         # register a consumer
         response = await consumer.post(
-            f"{subscriptions_api_prefix}/subscription/",
+            f"{subscriptions_api_prefix}/subscriptions/",
             json={
                 "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
@@ -115,7 +116,7 @@ class TestDispatcher:
 
         # check whether the event was stored in the consumer queue
         response = await messages_client.get(
-            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message"
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages"
         )
         assert response.status_code == 200
         data = response.json()

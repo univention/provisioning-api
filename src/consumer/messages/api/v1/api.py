@@ -25,7 +25,7 @@ manager = SinkManager()
 
 
 @router.post(
-    "/subscription/{name}/message/",
+    "/subscriptions/{name}/messages/",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -53,7 +53,7 @@ async def post_message_status(
 
 
 @router.get(
-    "/subscription/{name}/message",
+    "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -74,7 +74,7 @@ async def get_subscription_messages(
 
 
 @router.delete(
-    "/message/",
+    "/messages/",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -90,7 +90,7 @@ async def remove_message(
     return await service.remove_message(msg)
 
 
-@router.websocket("/subscription/{name}/ws")
+@router.websocket("/subscriptions/{name}/ws")
 async def subscription_websocket(
     name: str,
     websocket: fastapi.WebSocket,

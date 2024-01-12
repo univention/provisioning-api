@@ -37,7 +37,7 @@ class ConsumerRegAdapter:
     async def get_subscriber(self, name: str) -> Optional[dict]:
         try:
             async with self._session.get(
-                f"{self.base_url}subscription/{name}"
+                f"{self.base_url}subscriptions/{name}"
             ) as request:
                 return await request.json()
         except aiohttp.ClientResponseError as e:

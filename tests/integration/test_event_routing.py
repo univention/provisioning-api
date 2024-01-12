@@ -31,7 +31,7 @@ async def test_udm_create_user_event_is_routed_correctly(
 ):
     # register a consumer
     response = await consumer.post(
-        f"{subscriptions_api_prefix}/subscription/",
+        f"{subscriptions_api_prefix}/subscriptions/",
         json={
             "name": SUBSCRIBER_NAME,
             "realm_topic": ["foo", "bar"],
@@ -47,7 +47,7 @@ async def test_udm_create_user_event_is_routed_correctly(
     message_consumer = TestClient(app)
     # evaluate that the message about a new user is received by the consumer
     with message_consumer.websocket_connect(
-        f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/ws"
+        f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 

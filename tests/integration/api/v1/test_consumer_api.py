@@ -45,7 +45,7 @@ async def messages_client():
 class TestConsumer:
     async def test_create_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.post(
-            f"{api_prefix}/subscription/",
+            f"{api_prefix}/subscriptions/",
             json={
                 "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
@@ -56,7 +56,7 @@ class TestConsumer:
 
     async def test_get_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.get(
-            f"{api_prefix}/subscription/{SUBSCRIBER_NAME}"
+            f"{api_prefix}/subscriptions/{SUBSCRIBER_NAME}"
         )
         assert response.status_code == 200
         data = response.json()
@@ -70,7 +70,7 @@ class TestConsumer:
 
     async def test_delete_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.delete(
-            f"{api_prefix}/subscription/{SUBSCRIBER_NAME}?realm={REALM}&topic={TOPIC}",
+            f"{api_prefix}/subscriptions/{SUBSCRIBER_NAME}?realm={REALM}&topic={TOPIC}",
         )
         assert response.status_code == 200
 
@@ -79,7 +79,7 @@ class TestConsumer:
         messages_client: httpx.AsyncClient,
     ):
         response = await messages_client.get(
-            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message"
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages"
         )
         assert response.status_code == 200
         data = response.json()
@@ -100,7 +100,7 @@ class TestConsumer:
             "headers": {"Nats-Expected-Stream": f"stream:{SUBSCRIBER_NAME}"},
         }
         response = await messages_client.post(
-            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message/",
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages/",
             json={"msg": nats_msg, "report": {"status": "ok"}},
         )
         assert response.status_code == 200

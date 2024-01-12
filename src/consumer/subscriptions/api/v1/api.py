@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = fastapi.APIRouter()
 
 
-@router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
+@router.get("/subscriptions/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
     port: ConsumerPortDependency,
 ) -> List[shared.models.Subscriber]:
@@ -29,7 +29,7 @@ async def get_subscriptions(
 
 
 @router.get(
-    "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
 async def get_subscription(
     name: str, port: ConsumerPortDependency
@@ -49,7 +49,7 @@ async def get_subscription(
 
 
 @router.post(
-    "/subscription/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
+    "/subscriptions/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
 )
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,
@@ -78,7 +78,7 @@ async def create_subscription(
 
 
 @router.delete(
-    "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
 async def cancel_subscription(
     name: str, realm: str, topic: str, port: ConsumerPortDependency

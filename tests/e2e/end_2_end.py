@@ -21,7 +21,7 @@ async def test_workflow():
     # call of Consumer: create subscription
 
     response = requests.post(
-        f"{BASE_URL}{subscriptions_api_prefix}/subscription",
+        f"{BASE_URL}{subscriptions_api_prefix}/subscriptions",
         json={
             "name": name,
             "realm_topic": REALM_TOPIC,
@@ -45,7 +45,7 @@ async def test_workflow():
     # call of Consumer: get messages from consumer queue
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages"
     )
     assert response.status_code == 200
     data = response.json()

@@ -19,7 +19,7 @@ def test_websocket():
     assert response.status_code == 202
 
     with client.websocket_connect(
-        f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/ws"
+        f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 
