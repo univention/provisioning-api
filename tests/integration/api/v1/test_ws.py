@@ -12,7 +12,7 @@ from consumer.main import app
 
 
 @pytest.mark.anyio
-def test_websocket(override_dependencies_events):
+def test_websocket():
     client = TestClient(app)
 
     response = client.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)

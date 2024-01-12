@@ -209,19 +209,11 @@ def anyio_backend():
 
 
 @pytest.fixture(autouse=True)
-def override_dependencies_consumer():
+def override_dependencies():
     # Override original port
     app.dependency_overrides[
         ConsumerPort.port_dependency
     ] = consumer_port_fake_dependency
-    yield  # This will ensure the setup is done before tests and cleanup after
-    # Clear the overrides after the tests
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def override_dependencies_events():
-    # Override original port
     app.dependency_overrides[EventsPort.port_dependency] = events_port_fake_dependency
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests

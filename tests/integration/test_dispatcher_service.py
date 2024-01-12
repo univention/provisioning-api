@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import Generator, Any
 from unittest.mock import AsyncMock, patch
 
+import aiohttp
 import httpx
 import pytest
 from tests.conftest import SUBSCRIBER_NAME, SUBSCRIBER_INFO
@@ -42,13 +42,14 @@ async def consumer():
 # FIXME: need to move this fixture to conftest.py
 @pytest.fixture
 async def port_with_mock_nats():
-    async with DispatcherPort.port_context() as port:
-        port._nats_adapter.kv_store = FakeKvStore()
-        port._nats_adapter.js = FakeJs()
-        port._nats_adapter.nats = AsyncMock()
-        port._nats_adapter._future = AsyncMock()
-        port._nats_adapter.wait_for_event = AsyncMock(return_value=MSG)
-        return port
+    port = DispatcherPort()
+    port._nats_adapter.kv_store = FakeKvStore()
+    port._nats_adapter.js = FakeJs()
+    port._nats_adapter.nats = AsyncMock()
+    port._nats_adapter._future = AsyncMock()
+    port._nats_adapter.wait_for_event = AsyncMock(return_value=MSG)
+    port._consumer_reg_adapter._session = aiohttp.ClientSession()
+    return port
 
 
 @pytest.fixture(scope="session")
@@ -69,7 +70,6 @@ class TestDispatcher:
         consumer: httpx.AsyncClient,
         messages_client: httpx.AsyncClient,
         port_with_mock_nats: DispatcherPort,
-        override_dependencies_events: Generator[Any, Any, None],
     ):
         mock_get.return_value.__aenter__.return_value.json = AsyncMock(
             return_value=SUBSCRIBER_INFO
