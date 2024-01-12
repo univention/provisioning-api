@@ -24,7 +24,7 @@ A Helm chart for the Univention Portal Provisioning API
 | fullnameOverride | string | `"dispatcher"` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatcher"` |  |
+| image.repository | string | `"univention/customers/dataport/upx/provisioning-api/dispatcher"` |  |
 | image.tag | string | `"latest"` |  |
 | nameOverride | string | `""` |  |
 | nats.bundled | bool | `true` |  |

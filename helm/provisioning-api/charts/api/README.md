@@ -28,7 +28,7 @@ A Helm chart for the Univention Portal Provisioning API
 | fullnameOverride | string | `"provisioning-api"` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatch"` |  |
+| image.repository | string | `"univention/customers/dataport/upx/provisioning-api/api"` |  |
 | image.tag | string | `"latest"` |  |
 | ingress.annotations."nginx.ingress.kubernetes.io/configuration-snippet" | string | `"rewrite ^/univention/provisioning-api(/.*)$ $1 break;\n"` |  |
 | ingress.annotations."nginx.org/location-snippets" | string | `"rewrite ^/univention/provisioning-api(/.*)$ $1 break;\n"` |  |

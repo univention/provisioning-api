@@ -31,22 +31,22 @@ lint-pre-commit:
     - helm dep build helm/provisioning-api/charts/udm-listener
 
 .build-matrix: &build-matrix
-  - IMAGE_NAME: "provisioning-dispatch"
+  - IMAGE_NAME: "api"
     KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
-  - IMAGE_NAME: "provisioning-dispatch-test"
+    DOCKERFILE_PATH: "docker/api/Dockerfile"
+  - IMAGE_NAME: "api-test"
     KANIKO_ARGS: "--target test"
-    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
+    DOCKERFILE_PATH: "docker/api/Dockerfile"
   - IMAGE_NAME: "udm-listener"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
   - IMAGE_NAME: "dispatcher"
     KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/dispatcher-service/Dockerfile"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "provisioning-dispatch"
+    - "provisioning-api"
   - IMAGE_NAME:
     - "udm-listener"
   - IMAGE_NAME:
@@ -94,9 +94,9 @@ test-integration:
     - docker compose down --volumes
 
 # TODO: docker compose run nats ... somehow
-test-provisioning-dispatch:
+test-api:
   stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:${RELEASE_VERSION}"
+  image: "${CI_REGISTRY_IMAGE}/api-test:${RELEASE_VERSION}"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev

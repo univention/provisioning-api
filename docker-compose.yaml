@@ -5,10 +5,10 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/provisioning-dispatch/Dockerfile
+      dockerfile: docker/api/Dockerfile
       args:
         - UCS_BASE_IMAGE_TAG=latest
-    container_name: "provisioning-dispatcher-dev"
+    container_name: "provisioning-api-dev"
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -32,10 +32,10 @@ services:
   dispatcher:
     build:
       context: .
-      dockerfile: docker/dispatcher-service/Dockerfile
+      dockerfile: docker/dispatcher/Dockerfile
       args:
         - UCS_BASE_IMAGE_TAG=latest
-    container_name: "dispatcher-service"
+    container_name: "provisioning-dispatcher"
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
