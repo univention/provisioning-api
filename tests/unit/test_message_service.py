@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, call
 import pytest
 
 from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIBER_NAME
@@ -99,6 +99,26 @@ class TestMessageService:
 
         result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False)
 
+        sub_service.get_subscriber_queue_status.assert_called_once_with(SUBSCRIBER_NAME)
+        message_service._port.get_messages.assert_called_once_with(
+            SUBSCRIBER_NAME, 5, 2, False
+        )
+        assert result == expected_result
+
+    async def test_get_messages_wait_prefill_process(
+        self, message_service: MessageService, sub_service
+    ):
+        sub_service.get_subscriber_queue_status = AsyncMock(
+            side_effect=[FillQueueStatus.running, FillQueueStatus.done]
+        )
+        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
+        expected_result = [MESSAGE, MESSAGE]
+
+        result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False)
+
+        sub_service.get_subscriber_queue_status.assert_has_calls(
+            [call(SUBSCRIBER_NAME), call(SUBSCRIBER_NAME)]
+        )
         message_service._port.get_messages.assert_called_once_with(
             SUBSCRIBER_NAME, 5, 2, False
         )
