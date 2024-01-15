@@ -1,30 +1,33 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from unittest.mock import AsyncMock, patch
+from copy import deepcopy
+from unittest.mock import AsyncMock, patch, call
 
 import aiohttp
 import httpx
 import pytest
-from tests.conftest import SUBSCRIBER_NAME, SUBSCRIBER_INFO
-from consumer.main import app as messages_app
-from consumer.messages.api import v1_prefix as messages_api_prefix
 
+from shared.models import FillQueueStatus
 from tests.conftest import (
-    FakeKvStore,
-    FakeJs,
-    MSG,
-    REALM,
-    TOPIC,
-    BODY,
-    PUBLISHER_NAME,
-    FLAT_MESSAGE,
+    SUBSCRIBER_INFO,
+    MSG_FOR_ONE_SUB,
+    MESSAGE,
+    MESSAGE_FOR_ONE_SUB,
+    FLAT_MESSAGE_FOR_ONE_SUB,
+    SUBSCRIBER_NAME,
 )
+from consumer.main import app as messages_app
+
+from tests.conftest import FakeKvStore, FakeJs, MSG
 from dispatcher.port import DispatcherPort
 from dispatcher.service.dispatcher import DispatcherService
-from events.api import v1_prefix as events_api_prefix
-from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def anyio_backend():
+    return "asyncio"
 
 
 @pytest.fixture(scope="session")
@@ -39,7 +42,6 @@ async def consumer():
         yield client
 
 
-# FIXME: need to move this fixture to conftest.py
 @pytest.fixture
 async def port_with_mock_nats():
     port = DispatcherPort()
@@ -47,9 +49,13 @@ async def port_with_mock_nats():
     port._nats_adapter.js = FakeJs()
     port._nats_adapter.nats = AsyncMock()
     port._nats_adapter._future = AsyncMock()
-    port._nats_adapter.wait_for_event = AsyncMock(return_value=MSG)
+    port._nats_adapter.wait_for_event = AsyncMock(
+        side_effect=[MSG, Exception("Stop waiting for the new event")]
+    )
+    port._nats_adapter.add_message = AsyncMock()
     async with aiohttp.ClientSession() as session:
         port._consumer_reg_adapter._session = session
+        port._event_adapter._session = session
     return port
 
 
@@ -64,7 +70,7 @@ async def messages_client():
 @pytest.mark.anyio
 class TestDispatcher:
     @patch("src.shared.adapters.consumer_reg_adapter.aiohttp.ClientSession.get")
-    async def test_store_event_in_the_consumer_queue(
+    async def test_dispatch_events_to_all_subscribers(
         self,
         mock_get,
         producer: httpx.AsyncClient,
@@ -76,32 +82,10 @@ class TestDispatcher:
             return_value=[SUBSCRIBER_INFO]
         )
 
-        # register a consumer
-        response = await consumer.post(
-            f"{subscriptions_api_prefix}/subscriptions",
-            json={
-                "name": SUBSCRIBER_NAME,
-                "realm_topic": ["foo", "bar"],
-                "fill_queue": False,
-            },
-        )
-        assert response.status_code == 201
-
-        # call event api with new user event
-        response = await producer.post(
-            f"{events_api_prefix}/events",
-            json=FLAT_MESSAGE,
-        )
-        assert response.status_code == 202
         # trigger dispatcher to retrieve event from incoming queue
-        # TODO: create fake Nats for more realistic testing
-        port_with_mock_nats._nats_adapter.add_message = AsyncMock(
-            side_effect=Exception("Stop waiting for the new event")
-        )
         service = DispatcherService(port_with_mock_nats)
-
         try:
-            await service.dispatch_event()
+            await service.dispatch_events()
         except Exception:
             pass
 
@@ -109,19 +93,103 @@ class TestDispatcher:
         port_with_mock_nats._nats_adapter.nats.subscribe.assert_called_once_with(
             "incoming", cb=port_with_mock_nats._nats_adapter.cb
         )
-        # check waiting for event
-        port_with_mock_nats._nats_adapter.wait_for_event.assert_called_once_with()
-        # check storing event in the consumer queue
-        port_with_mock_nats._nats_adapter.add_message.assert_called_once()
-
-        # check whether the event was stored in the consumer queue
-        response = await messages_client.get(
-            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages"
+        # check waiting for the event
+        port_with_mock_nats._nats_adapter.wait_for_event.assert_has_calls(
+            [call(), call()]
         )
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data) == 1
-        assert data[0]["data"]["realm"] == REALM
-        assert data[0]["data"]["topic"] == TOPIC
-        assert data[0]["data"]["body"] == BODY
-        assert data[0]["data"]["publisher_name"] == PUBLISHER_NAME
+        # check getting subscribers for the realm_topic
+        mock_get.assert_called_once_with(
+            "http://localhost:7777/subscriptions/v1/subscriptions/?realm_topic=udm:users/user"
+        )
+        # check storing event in the consumer queue
+        port_with_mock_nats._nats_adapter.add_message.assert_called_once_with(
+            SUBSCRIBER_INFO["name"], MESSAGE
+        )
+
+    @patch("src.shared.adapters.consumer_reg_adapter.aiohttp.ClientSession.get")
+    async def test_dispatch_events_to_one_subscriber(
+        self,
+        mock_get,
+        producer: httpx.AsyncClient,
+        consumer: httpx.AsyncClient,
+        messages_client: httpx.AsyncClient,
+        port_with_mock_nats: DispatcherPort,
+    ):
+        mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+            return_value=SUBSCRIBER_INFO
+        )
+
+        # trigger dispatcher to retrieve event from incoming queue
+        port_with_mock_nats._nats_adapter.wait_for_event = AsyncMock(
+            side_effect=[MSG_FOR_ONE_SUB, Exception("Stop waiting for the new event")]
+        )
+
+        service = DispatcherService(port_with_mock_nats)
+        try:
+            await service.dispatch_events()
+        except Exception:
+            pass
+
+        # check subscribing to the incoming queue
+        port_with_mock_nats._nats_adapter.nats.subscribe.assert_called_once_with(
+            "incoming", cb=port_with_mock_nats._nats_adapter.cb
+        )
+        # check waiting for the event
+        port_with_mock_nats._nats_adapter.wait_for_event.assert_has_calls(
+            [call(), call()]
+        )
+        # check getting info for 1 subscriber
+        mock_get.assert_called_once_with(
+            f"http://localhost:7777/subscriptions/v1/subscriptions/{SUBSCRIBER_NAME}"
+        )
+        # check storing event in the consumer queue
+        port_with_mock_nats._nats_adapter.add_message.assert_called_once_with(
+            SUBSCRIBER_NAME, MESSAGE_FOR_ONE_SUB
+        )
+
+    @patch("src.shared.adapters.event_adapter.aiohttp.ClientSession.post")
+    @patch("src.shared.adapters.consumer_reg_adapter.aiohttp.ClientSession.get")
+    async def test_dispatch_events_to_incoming_queue(
+        self,
+        mock_get,
+        mock_post,
+        producer: httpx.AsyncClient,
+        consumer: httpx.AsyncClient,
+        messages_client: httpx.AsyncClient,
+        port_with_mock_nats: DispatcherPort,
+    ):
+        sub_info = deepcopy(SUBSCRIBER_INFO)
+        sub_info["fill_queue_status"] = FillQueueStatus.pending
+        msg = deepcopy(MSG)
+        mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+            return_value=[sub_info]
+        )
+
+        # trigger dispatcher to retrieve event from incoming queue
+        port_with_mock_nats._nats_adapter.wait_for_event = AsyncMock(
+            side_effect=[msg, Exception("Stop waiting for the new event")]
+        )
+
+        service = DispatcherService(port_with_mock_nats)
+        try:
+            await service.dispatch_events()
+        except Exception:
+            pass
+
+        # check subscribing to the incoming queue
+        port_with_mock_nats._nats_adapter.nats.subscribe.assert_called_once_with(
+            "incoming", cb=port_with_mock_nats._nats_adapter.cb
+        )
+        # check waiting for the event
+        port_with_mock_nats._nats_adapter.wait_for_event.assert_has_calls(
+            [call(), call()]
+        )
+        # check getting subscribers for the realm_topic
+        mock_get.assert_called_once_with(
+            "http://localhost:7777/subscriptions/v1/subscriptions/?realm_topic=udm:users/user"
+        )
+
+        # check sending event to the incoming queue for the subscriber
+        mock_post.assert_called_once_with(
+            "http://localhost:7777/events/v1/events", json=FLAT_MESSAGE_FOR_ONE_SUB
+        )

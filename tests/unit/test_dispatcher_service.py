@@ -22,7 +22,7 @@ def dispatcher_service() -> DispatcherService:
 
 @pytest.mark.anyio
 class TestDispatcherService:
-    async def test_dispatch_event_to_all_subscribers(
+    async def test_dispatch_events_to_all_subscribers(
         self, dispatcher_service: DispatcherService
     ):
         dispatcher_service._port.get_realm_topic_subscribers = AsyncMock(
@@ -33,7 +33,7 @@ class TestDispatcherService:
         )
 
         try:
-            await dispatcher_service.dispatch_event()
+            await dispatcher_service.dispatch_events()
         except Exception:
             pass
 
@@ -48,7 +48,7 @@ class TestDispatcherService:
         )
         dispatcher_service._port.send_event_to_incoming_queue.assert_not_called()
 
-    async def test_dispatch_event_to_one_subscriber(
+    async def test_dispatch_events_to_one_subscriber(
         self, dispatcher_service: DispatcherService
     ):
         dispatcher_service._port.get_subscriber = AsyncMock(
@@ -59,7 +59,7 @@ class TestDispatcherService:
         )
 
         try:
-            await dispatcher_service.dispatch_event()
+            await dispatcher_service.dispatch_events()
         except Exception:
             pass
 
@@ -74,7 +74,7 @@ class TestDispatcherService:
         )
         dispatcher_service._port.send_event_to_incoming_queue.assert_not_called()
 
-    async def test_dispatch_event_to_incoming_queue(
+    async def test_dispatch_events_to_incoming_queue(
         self, dispatcher_service: DispatcherService
     ):
         sub_info = deepcopy(SUBSCRIBER_INFO)
@@ -89,7 +89,7 @@ class TestDispatcherService:
         )
 
         try:
-            await dispatcher_service.dispatch_event()
+            await dispatcher_service.dispatch_events()
         except Exception:
             pass
 

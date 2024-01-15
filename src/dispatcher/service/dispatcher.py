@@ -30,7 +30,7 @@ class DispatcherService:
             new_msg.destination = subscriber["name"]
             await self._port.send_event_to_incoming_queue(new_msg)
 
-    async def dispatch_event(self):
+    async def dispatch_events(self):
         self.logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue("incoming")
         while True:

@@ -37,5 +37,5 @@ class EventAdapter:
     async def send_event(self, message: Message):
         async with self._session.post(
             f"{self.base_url}events", json=message.model_dump()
-        ) as request:
-            return await request.json()
+        ):
+            pass
