@@ -1,10 +1,6 @@
-# Disclaimer - Work in progress
+# Disclaimer - MVP, work in progress
 
-The repository you are looking into is work in progress.
-
-It contains proof of concept and preview builds in development created in context of the openDesk project.
-
-The repository's content provides you with first insights into the containerized cloud IAM from Univention, derived from the UCS appliance.
+It contains MVP created in context of the openDesk project.
 
 # Provisioning
 
