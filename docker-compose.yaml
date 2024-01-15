@@ -5,10 +5,10 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/api/Dockerfile
+      dockerfile: docker/events-and-consumer-api/Dockerfile
       args:
         - UCS_BASE_IMAGE_TAG=latest
-    container_name: "provisioning-api-dev"
+    container_name: "events-and-consumer-api-dev"
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -44,7 +44,6 @@ services:
     depends_on:
       - "nats"
       - "app"
-
 
   udm-listener:
     build:
@@ -83,9 +82,9 @@ services:
     platform: "linux/amd64"
     environment:
       nats_host: nats
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatch-test:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/events-and-consumer-api-test:${IMAGE_TAG:-latest}
     build:
-      context: docker/provisioning-dispatch-test
+      context: docker/events-and-consumer-api-test
     volumes:
       - type: bind
         source: .

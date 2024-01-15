@@ -3,12 +3,12 @@
 
 ---
 
-# Dummy values for running the Helm linter on the provisioning-api.
+# Dummy values for running the Helm linter on the provisioning-service.
 # Run it like this: helm lint -f values.yaml -f linter_values.yaml .
 
 
-## Application-specific - provisioning-api chart
-api:
+## Application-specific - events-and-consumer-api chart
+events-and-consumer-api:
   ingress:
     host: "localhost"
     tls:
@@ -22,7 +22,7 @@ api:
     natsPort: 4222
 
 
-## Application-specific - provisioning-dispatcher chart
+## Application-specific - dispatcher chart
 dispatcher:
   image:
     tag: "latest"

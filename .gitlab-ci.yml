@@ -26,17 +26,17 @@ lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
-    - helm dep build helm/provisioning-api/charts/api
-    - helm dep build helm/provisioning-api/charts/dispatcher
-    - helm dep build helm/provisioning-api/charts/udm-listener
+    - helm dep build helm/provisioning/charts/events-and-consumer-api
+    - helm dep build helm/provisioning/charts/dispatcher
+    - helm dep build helm/provisioning/charts/udm-listener
 
 .build-matrix: &build-matrix
-  - IMAGE_NAME: "api"
+  - IMAGE_NAME: "events-and-consumer-api"
     KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/api/Dockerfile"
-  - IMAGE_NAME: "api-test"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+  - IMAGE_NAME: "events-and-consumer-api-test"
     KANIKO_ARGS: "--target test"
-    DOCKERFILE_PATH: "docker/api/Dockerfile"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
   - IMAGE_NAME: "udm-listener"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
@@ -46,7 +46,7 @@ lint-pre-commit:
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "provisioning-api"
+    - "events-and-consumer-api"
   - IMAGE_NAME:
     - "udm-listener"
   - IMAGE_NAME:
@@ -94,9 +94,9 @@ test-integration:
     - docker compose down --volumes
 
 # TODO: docker compose run nats ... somehow
-test-api:
+test-events-and-consumer-api:
   stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/api-test:${RELEASE_VERSION}"
+  image: "${CI_REGISTRY_IMAGE}/events-and-consumer-api-test:${RELEASE_VERSION}"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev

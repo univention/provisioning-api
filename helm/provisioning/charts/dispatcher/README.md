@@ -1,4 +1,4 @@
-# api
+# dispatcher
 
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
@@ -17,40 +17,15 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"corsAll":false,"debug":true,"logLevel":"INFO","natsHost":"localhost","natsPort":4222,"rootPath":"/univention/provisioning-api"}` | Application specific |
-| config.corsAll | bool | `false` | FastAPI: disable CORS checks |
-| config.debug | bool | `true` | FastAPI: debug mode |
-| config.logLevel | string | `"INFO"` | Python log level |
+| config | object | `{"natsHost":"localhost","natsPort":4222}` | Configuration of the dispatcher component |
 | config.natsHost | string | `"localhost"` | NATS: host (required if nats.bundled == false) |
 | config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
-| config.rootPath | string | `"/univention/provisioning-api"` | FastAPI: webserver root path |
 | environment | object | `{}` |  |
-| fullnameOverride | string | `"provisioning-api"` |  |
+| fullnameOverride | string | `"dispatcher"` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning-api/api"` |  |
+| image.repository | string | `"univention/customers/dataport/upx/provisioning/dispatcher"` |  |
 | image.tag | string | `"latest"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/configuration-snippet" | string | `"rewrite ^/univention/provisioning-api(/.*)$ $1 break;\n"` |  |
-| ingress.annotations."nginx.org/location-snippets" | string | `"rewrite ^/univention/provisioning-api(/.*)$ $1 break;\n"` |  |
-| ingress.annotations."nginx.org/mergeable-ingress-type" | string | `"minion"` |  |
-| ingress.enabled | bool | `true` | Set this to `true` in order to enable the installation on Ingress related objects. |
-| ingress.host | string | `nil` | The hostname. This parameter has to be supplied. Example `portal.example`. |
-| ingress.ingressClassName | string | `"nginx"` |  |
-| ingress.paths[0].path | string | `"/univention/provisioning-api/"` |  |
-| ingress.paths[0].pathType | string | `"Prefix"` |  |
-| ingress.tls.enabled | bool | `true` |  |
-| ingress.tls.secretName | string | `""` |  |
-| istio.enabled | bool | `false` | Set this to `true` in order to enable the installation on Istio related objects. |
-| istio.gateway.annotations | string | `nil` |  |
-| istio.gateway.enabled | bool | `false` |  |
-| istio.gateway.externalGatewayName | string | `"swp-istio-gateway"` |  |
-| istio.gateway.selectorIstio | string | `"ingressgateway"` |  |
-| istio.gateway.tls.enabled | bool | `true` |  |
-| istio.gateway.tls.httpsRedirect | bool | `true` |  |
-| istio.gateway.tls.secretName | string | `""` |  |
-| istio.host | string | `nil` | The hostname. This parameter has to be supplied. Example `portal.example`. |
-| istio.virtualService.annotations | string | `nil` |  |
-| istio.virtualService.enabled | bool | `true` |  |
 | nameOverride | string | `""` |  |
 | nats.bundled | bool | `true` |  |
 | nodeSelector | object | `{}` |  |
@@ -73,12 +48,15 @@ A Helm chart for the Univention Portal Provisioning API
 | resources.requests.memory | string | `"512Mi"` |  |
 | securityContext | object | `{}` |  |
 | service.enabled | bool | `true` |  |
-| service.ports.http.containerPort | int | `7777` |  |
+| service.ports.http.containerPort | int | `8080` |  |
 | service.ports.http.port | int | `80` |  |
 | service.ports.http.protocol | string | `"TCP"` |  |
 | service.sessionAffinity.enabled | bool | `false` |  |
 | service.sessionAffinity.timeoutSeconds | int | `10800` |  |
 | service.type | string | `"ClusterIP"` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `""` |  |
 | tolerations | list | `[]` |  |
 
 ----------------------------------------------
