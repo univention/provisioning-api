@@ -5,10 +5,9 @@ from datetime import datetime
 import logging
 
 import shared.models
-from shared.adapters.udm_adapter import UDMAdapter
 
-from shared.config import settings
 from prefill.base import PreFillService
+from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
 
 
@@ -16,23 +15,23 @@ logger = logging.getLogger(__name__)
 
 
 class UDMPreFill(PreFillService):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, port: PrefillPort, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._logger = logging.getLogger(f"{logger.name} <{self._subscriber_name}>")
+        self._port = port
 
     async def fetch(self):
         """Start fetching all data for the given topic."""
 
-        async with UDMAdapter(
-            settings.udm_url, settings.udm_username, settings.udm_password
-        ) as client:
-            self._client = client
-            await self._expand_topics()
+        self._port = PrefillPort()._udm_adapter
+        await self._port.connect()
+
+        await self._expand_topics()
 
     async def _expand_topics(self):
         """Find all UDM object types which match the given topic."""
 
-        udm_modules = await self._client.get_object_types()
+        udm_modules = await self._port.get_object_types()
         udm_match = [
             module
             for module in udm_modules
@@ -60,14 +59,14 @@ class UDMPreFill(PreFillService):
         # For now, first request all users without their properties,
         # then do one request per user to fetch the whole object.
 
-        urls = await self._client.list_objects(object_type)
+        urls = await self._port.list_objects(object_type)
         for url in urls:
             self._logger.info(f"Grabbing object from: {url}")
             await self._fill_object(url, object_type)
 
     async def _fill_object(self, url: str, object_type: str):
         """Retrieve the object for the given DN."""
-        obj = await self._client.get_object(url)
+        obj = await self._port.get_object(url)
 
         message = shared.models.Message(
             publisher_name="udm-pre-fill",

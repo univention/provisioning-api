@@ -9,6 +9,7 @@ from consumer.port import ConsumerPort
 from consumer.messages.service.messages import MessageService
 from consumer.subscriptions.service.subscription import SubscriptionService
 from prefill.udm import UDMPreFill
+from prefill.port import PrefillPort
 from shared.models import FillQueueStatus
 
 logger = logging.getLogger(__name__)
@@ -35,12 +36,18 @@ async def init_queue(subscriber_name: str, realm_topic: List[str]):
 
         try:
             logging.debug(f"Initializing {realm_topic[1]} from {realm_topic[0]}.")
-            if handler_class := mapping.get(realm_topic[0]):
-                handler = handler_class(msg_service, subscriber_name, realm_topic[1])
-                await handler.fetch()
-            else:
+            handler_class = mapping.get(realm_topic[0])
+
+            if not handler_class:
                 # FIXME: unhandled realm
                 logging.error(f"Unhandled realm: {realm_topic[0]}")
+                return
+
+            async with PrefillPort.port_context() as port:
+                handler = handler_class(
+                    port, msg_service, subscriber_name, realm_topic[1]
+                )
+                await handler.fetch()
 
         except Exception as err:
             import traceback
