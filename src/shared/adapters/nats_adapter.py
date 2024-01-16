@@ -60,7 +60,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
 
     async def put_value(self, key: str, value: Union[str, dict]):
         if not value:
-            await self.delete_kv_pair(key)
+            await self.delete_kv_pair(key)  # Avoid creating a pair with an empty value
             return
 
         if isinstance(value, dict):
@@ -113,9 +113,7 @@ class NatsMQAdapter(BaseMQAdapter):
             return []
 
         sub = await self.js.pull_subscribe(
-            subject,
-            durable=f"durable_name:{subject}",
-            stream=NatsKeys.stream(subject),
+            subject, durable=f"durable_name:{subject}", stream=NatsKeys.stream(subject)
         )
         try:
             msgs = await sub.fetch(count, timeout)

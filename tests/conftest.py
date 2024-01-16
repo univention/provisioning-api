@@ -9,11 +9,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 from nats.aio.msg import Msg
-from nats.js.api import ConsumerConfig
+from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
+from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import Message
 
 REALM = "udm"
@@ -48,15 +49,15 @@ FLAT_MESSAGE = {
     "body": BODY,
     "destination": "*",
 }
-FLAT_MESSAGE_BYTES = (
-    b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": '
-    b'"users/user", "body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, "destination": "*"}'
+FLAT_MESSAGE_ENCODED = (
+    b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "users/user", '
+    b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, "destination": "*"}'
 )
 
 FLAT_MESSAGE_FOR_ONE_SUB = deepcopy(FLAT_MESSAGE)
 FLAT_MESSAGE_FOR_ONE_SUB["destination"] = SUBSCRIBER_NAME
 
-FLAT_MES_FOR_ONE_SUB_BYTES = (
+FLAT_MES_FOR_ONE_SUB_ENCODED = (
     b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "users/user", '
     b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, '
     b'"destination": "0f084f8c-1093-4024-b215-55fe8631ddf6"}'
@@ -94,35 +95,12 @@ class FakeJs:
     sub.fetch = AsyncMock(return_value=[MSG])
     Msg.ack = AsyncMock()
 
-    async def pull_subscribe(self, subject: str, durable: str, stream: str):
-        return self.sub
-
-    @staticmethod
-    async def stream_info(name: str):
-        pass
-
-    @staticmethod
-    async def publish(subject: str, payload: bytes, stream: str):
-        pass
-
-    @staticmethod
-    async def delete_msg(name: str):
-        pass
-
-    @staticmethod
-    async def add_consumer(stream: str, config: ConsumerConfig):
-        pass
-
-    @staticmethod
-    async def delete_stream(name: str):
-        pass
+    @classmethod
+    async def pull_subscribe(cls, subject: str, durable: str, stream: str):
+        return cls.sub
 
 
 class FakeKvStore:
-    @classmethod
-    async def delete(cls, key: str):
-        pass
-
     @classmethod
     async def get(cls, key: str):
         values = {
@@ -131,24 +109,32 @@ class FakeKvStore:
             f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info,
             "udm:users/user": kv_subs,
         }
-        return values[key]
+        if values.get(key):
+            return values.get(key)
+        raise KeyNotFoundError
 
-    @classmethod
-    async def put(cls, key: str, value: Union[str, dict]):
-        pass
+
+def set_up_fake_js(adapter: Union[NatsKVAdapter, NatsMQAdapter]):
+    adapter.js = AsyncMock()
+    adapter.js.pull_subscribe = AsyncMock(side_effect=FakeJs.pull_subscribe)
+
+
+def set_up_fake_kv_store(adapter: Union[NatsKVAdapter, NatsMQAdapter]):
+    adapter.kv_store = AsyncMock()
+    adapter.kv_store.get = AsyncMock(side_effect=FakeKvStore.get)
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    port.mq_adapter.js = FakeJs()
-    port.kv_adapter.js = FakeJs()
-    port.kv_adapter.kv_store = FakeKvStore()
+    set_up_fake_js(port.mq_adapter)
+    set_up_fake_js(port.kv_adapter)
+    set_up_fake_kv_store(port.kv_adapter)
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    port.mq_adapter.js = FakeJs()
+    set_up_fake_js(port.mq_adapter)
     return port
 
 

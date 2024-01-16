@@ -5,9 +5,9 @@ from copy import deepcopy
 from unittest.mock import AsyncMock, patch, call
 
 import aiohttp
-import httpx
 import pytest
-from tests.conftest import FLAT_MESSAGE_BYTES, FLAT_MES_FOR_ONE_SUB_BYTES
+from tests.conftest import FLAT_MESSAGE_ENCODED, FLAT_MES_FOR_ONE_SUB_ENCODED
+from tests.conftest import set_up_fake_js, set_up_fake_kv_store
 
 from shared.models import FillQueueStatus
 from tests.conftest import (
@@ -17,29 +17,17 @@ from tests.conftest import (
     SUBSCRIBER_NAME,
 )
 
-from tests.conftest import FakeKvStore, MSG
+from tests.conftest import MSG
 from dispatcher.port import DispatcherPort
 from dispatcher.service.dispatcher import DispatcherService
-from consumer.main import app
-
-
-@pytest.fixture(scope="session", autouse=True)
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest.fixture(scope="session")
-async def producer():
-    async with httpx.AsyncClient(app=app, base_url="http://testserver") as client:
-        yield client
 
 
 @pytest.fixture
 async def dispatcher_mock() -> DispatcherPort:
     port = DispatcherPort()
-    port.mq_adapter.js = AsyncMock()
-    port.kv_adapter.js = AsyncMock()
-    port.kv_adapter.kv_store = FakeKvStore()
+    set_up_fake_js(port.mq_adapter)
+    set_up_fake_js(port.kv_adapter)
+    set_up_fake_kv_store(port.kv_adapter)
     port.mq_adapter.message_queue.get = AsyncMock(
         side_effect=[MSG, Exception("Stop waiting for the new event")]
     )
@@ -82,7 +70,7 @@ class TestDispatcher:
         dispatcher_mock.mq_adapter.js.add_consumer.assert_called_once()
         dispatcher_mock.mq_adapter.js.publish.assert_called_once_with(
             SUBSCRIBER_INFO["name"],
-            FLAT_MESSAGE_BYTES,
+            FLAT_MESSAGE_ENCODED,
             stream=f"stream:{SUBSCRIBER_NAME}",
         )
 
@@ -90,7 +78,6 @@ class TestDispatcher:
     async def test_dispatch_events_to_one_subscriber(
         self,
         mock_get,
-        producer: httpx.AsyncClient,
         dispatcher_mock: DispatcherPort,
     ):
         mock_get.return_value.__aenter__.return_value.json = AsyncMock(
@@ -122,7 +109,7 @@ class TestDispatcher:
         dispatcher_mock.mq_adapter.js.add_consumer.assert_called_once()
         dispatcher_mock.mq_adapter.js.publish.assert_called_once_with(
             SUBSCRIBER_INFO["name"],
-            FLAT_MES_FOR_ONE_SUB_BYTES,
+            FLAT_MES_FOR_ONE_SUB_ENCODED,
             stream=f"stream:{SUBSCRIBER_NAME}",
         )
 
@@ -132,7 +119,6 @@ class TestDispatcher:
         self,
         mock_get,
         mock_post,
-        producer: httpx.AsyncClient,
         dispatcher_mock: DispatcherPort,
     ):
         sub_info = deepcopy(SUBSCRIBER_INFO)
