@@ -82,7 +82,7 @@ class SubscriptionService:
                 )
 
             self.logger.debug(
-                f"Creating subscription for the realm_topic: '{realm_topic_str}'"
+                "Creating subscription for the realm_topic: %s", realm_topic_str
             )
             sub_info.realms_topics.append(realm_topic_str)
             await self.set_sub_info(sub.name, sub_info)
@@ -101,7 +101,7 @@ class SubscriptionService:
         fill_queue_status: FillQueueStatus,
         realm_topic_str: str,
     ):
-        self.logger.debug(f"Creating new subscriber with the name: '{sub.name}'")
+        self.logger.debug("Creating new subscriber with the name: %s", sub.name)
         sub_info = Subscriber(
             name=sub.name,
             realms_topics=[f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"],
@@ -179,7 +179,7 @@ class SubscriptionService:
         await self._port.delete_kv_pair(SubscriptionKeys.subscriber(name))
 
     async def delete_subscriber_from_values(self, key: str, name: str):
-        self.logger.debug(f"Deleting subscriber '{name}' from '{key}'")
+        self.logger.debug("Deleting subscriber %s from %s", name, key)
 
         subs = await self._port.get_list_value(key)
         if not subs:

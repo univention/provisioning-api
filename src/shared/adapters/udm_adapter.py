@@ -72,7 +72,7 @@ class UDMAdapter:
         ) as request:
             response = await request.json()
             n_results = response["results"]
-            logger.info(f"Found {n_results} results for {object_type}.")
+            logger.info("Found %s results for %s.", n_results, object_type)
             if n_results > 0:
                 uris = [obj["uri"] for obj in response["_embedded"]["udm:object"]]
                 return uris

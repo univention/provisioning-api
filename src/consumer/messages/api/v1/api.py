@@ -124,7 +124,7 @@ async def subscription_websocket(
                 report = MessageProcessingStatusReport(**json.loads(reply))
             except Exception:
                 logger.error(
-                    f"{name} > Unexpected input from WebSocket client: {reply}"
+                    "%s > Unexpected input from WebSocket client: %s", name, reply
                 )
                 break
 
@@ -132,12 +132,12 @@ async def subscription_websocket(
                 await service.remove_message(nats_mess)
             else:
                 logger.error(
-                    f"{name} > WebSocket client reported status: {report.status}"
+                    "%s > WebSocket client reported status: %s", name, report.status
                 )
                 break
     except fastapi.WebSocketDisconnect:
-        logger.info(f"{name} WebSocket client disconnected.")
+        logging.info("%s WebSocket client disconnected.", name)
     except Exception as exc:
-        logger.warning(f"{name} WebSocket failed: {exc}")
+        logger.warning("%s WebSocket failed: %s", name, exc)
     finally:
         await manager.close(name)

@@ -88,7 +88,7 @@ class NatsMQAdapter(BaseMQAdapter):
         try:
             await self._js.stream_info(stream_name)
         except NotFoundError:
-            self.logger.debug(f"Creating new stream with name: {stream_name}")
+            self.logger.debug("Creating new stream with name: %s", stream_name)
             await self._js.add_stream(name=stream_name, subjects=[subject])
 
         await self._js.add_consumer(

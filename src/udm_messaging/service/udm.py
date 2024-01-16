@@ -28,13 +28,15 @@ class UDMMessagingService(univention.admin.uldap.access):
             bindpw=settings.ldap_password,
         )
         self._messaging_port = port
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
 
     async def retrieve(self, dn: str):
-        MODULE.warn("Retrieving object from cache")
+        self.logger.info("Retrieving object from cache")
         return await self._messaging_port.retrieve(dn)
 
     async def store(self, new_obj: dict):
-        MODULE.warn("Storing object to cache %s" % (new_obj,))
+        self.logger.info("Storing object to cache %s", new_obj)
         await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj))
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
@@ -50,7 +52,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             topic=object_type,
             body={"new": new_obj, "old": old_obj},
         )
-        MODULE.warn("Sending event with body: %s" % (message.body,))
+        self.logger.info("Sending event with body: %s", message.body)
         await self._messaging_port.send_event(message)
 
     def _get_module(self, object_type):
