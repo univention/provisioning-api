@@ -16,15 +16,15 @@ from shared.models.queue import MQMessage
 
 class ConsumerPort:
     def __init__(self):
-        self.message_queue = NatsMQAdapter()
-        self.kv_store = NatsKVAdapter()
+        self.mq_adapter = NatsMQAdapter()
+        self.kv_adapter = NatsKVAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = ConsumerPort()
-        await port.message_queue.connect()
-        await port.kv_store.connect()
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         try:
             yield port
         finally:
@@ -33,19 +33,19 @@ class ConsumerPort:
     @staticmethod
     async def port_dependency():
         port = ConsumerPort()
-        await port.message_queue.connect()
-        await port.kv_store.connect()
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         try:
             yield port
         finally:
             await port.close()
 
     async def close(self):
-        await self.message_queue.close()
-        await self.kv_store.close()
+        await self.mq_adapter.close()
+        await self.kv_adapter.close()
 
     async def add_live_message(self, subject: str, message: Message):
-        await self.message_queue.add_message(subject, message)
+        await self.mq_adapter.add_message(subject, message)
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
         pass
@@ -56,41 +56,39 @@ class ConsumerPort:
     async def get_next_message(
         self, subscriber_name: str, timeout: float, pop: bool
     ) -> List[MQMessage]:
-        return await self.message_queue.get_messages(subscriber_name, timeout, 1, pop)
+        return await self.mq_adapter.get_messages(subscriber_name, timeout, 1, pop)
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[MQMessage]:
-        return await self.message_queue.get_messages(
-            subscriber_name, timeout, count, pop
-        )
+        return await self.mq_adapter.get_messages(subscriber_name, timeout, count, pop)
 
     async def remove_message(self, msg: MQMessage):
-        await self.message_queue.remove_message(msg)
+        await self.mq_adapter.remove_message(msg)
 
     async def delete_queue(self, stream_name: str):
-        await self.message_queue.delete_stream(stream_name)
+        await self.mq_adapter.delete_stream(stream_name)
 
     async def get_dict_value(self, name: str) -> Optional[dict]:
-        result = await self.kv_store.get_value(name)
+        result = await self.kv_adapter.get_value(name)
         return json.loads(result.value.decode("utf-8")) if result else None
 
     async def get_list_value(self, key: str) -> List[str]:
-        result = await self.kv_store.get_value(key)
+        result = await self.kv_adapter.get_value(key)
         return result.value.decode("utf-8").split(",") if result else []
 
     async def get_str_value(self, key: str) -> Optional[str]:
-        result = await self.kv_store.get_value(key)
+        result = await self.kv_adapter.get_value(key)
         return result.value.decode("utf-8") if result else None
 
     async def delete_kv_pair(self, key: str):
-        await self.kv_store.delete_kv_pair(key)
+        await self.kv_adapter.delete_kv_pair(key)
 
     async def put_value(self, key: str, value: Union[str, dict]):
-        await self.kv_store.put_value(key, value)
+        await self.kv_adapter.put_value(key, value)
 
     async def put_list_value(self, key: str, value: list[str]):
-        await self.kv_store.put_value(key, ",".join(value))
+        await self.kv_adapter.put_value(key, ",".join(value))
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

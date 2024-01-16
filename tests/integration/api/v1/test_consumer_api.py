@@ -6,7 +6,6 @@ import logging
 import httpx
 import pytest
 
-
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from tests.conftest import (
     REALMS_TOPICS_STR,

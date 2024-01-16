@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 class DispatcherPort:
     def __init__(self):
-        self.message_queue = NatsMQAdapter()
-        self.kv_store = NatsKVAdapter()
+        self.mq_adapter = NatsMQAdapter()
+        self.kv_adapter = NatsKVAdapter()
         self._consumer_reg_adapter = ConsumerRegAdapter()
         self._event_adapter = EventAdapter()
 
@@ -28,8 +28,8 @@ class DispatcherPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = DispatcherPort()
-        await port.message_queue.connect()
-        await port.kv_store.connect()
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         await port._consumer_reg_adapter.connect()
         await port._event_adapter.connect()
         try:
@@ -38,26 +38,26 @@ class DispatcherPort:
             await port.close()
 
     async def close(self):
-        await self.message_queue.close()
-        await self.kv_store.close()
+        await self.mq_adapter.close()
+        await self.kv_adapter.close()
         await self._consumer_reg_adapter.close()
         await self._event_adapter.close()
 
     async def retrieve_event_from_queue(self, subject, timeout, pop) -> List[MQMessage]:
-        return await self.message_queue.get_messages(subject, timeout, 1, pop)
+        return await self.mq_adapter.get_messages(subject, timeout, 1, pop)
 
     async def send_event_to_consumer_queue(self, subject: str, message):
-        await self.message_queue.add_message(subject, message)
+        await self.mq_adapter.add_message(subject, message)
 
     async def get_list_value(self, key: str) -> List[str]:
-        result = await self.kv_store.get_value(key)
+        result = await self.kv_adapter.get_value(key)
         return result.value.decode("utf-8").split(",") if result else []
 
     async def subscribe_to_queue(self, subject: str):
-        await self.message_queue.subscribe_to_queue(subject)
+        await self.mq_adapter.subscribe_to_queue(subject)
 
     async def wait_for_event(self) -> Msg:
-        return await self.message_queue.wait_for_event()
+        return await self.mq_adapter.wait_for_event()
 
     async def get_subscriber(self, name: str) -> Optional[dict]:
         return await self._consumer_reg_adapter.get_subscriber(name)

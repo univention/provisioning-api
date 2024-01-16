@@ -14,7 +14,7 @@ from shared.models import Message
 
 class UDMMessagingPort:
     def __init__(self):
-        self.kv_store = NatsKVAdapter()
+        self.kv_adapter = NatsKVAdapter()
         self._udm_adapter: Optional[UDMAdapter] = None
         self._event_adapter = EventAdapter()
 
@@ -22,7 +22,7 @@ class UDMMessagingPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.kv_store.connect()
+        await port.kv_adapter.connect()
         await port._event_adapter.connect()
         try:
             yield port
@@ -30,15 +30,15 @@ class UDMMessagingPort:
             await port.close()
 
     async def close(self):
-        await self.kv_store.close()
+        await self.kv_adapter.close()
         await self._event_adapter.close()
 
     async def retrieve(self, url: str):
-        result = await self.kv_store.get_value(url)
+        result = await self.kv_adapter.get_value(url)
         return json.loads(result.value.decode("utf-8")) if result else None
 
     async def store(self, url: str, new_obj: str):
-        await self.kv_store.put_value(url, new_obj)
+        await self.kv_adapter.put_value(url, new_obj)
 
     async def send_event(self, message: Message):
         await self._event_adapter.send_event(message)

@@ -48,8 +48,19 @@ FLAT_MESSAGE = {
     "body": BODY,
     "destination": "*",
 }
+FLAT_MESSAGE_BYTES = (
+    b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": '
+    b'"users/user", "body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, "destination": "*"}'
+)
+
 FLAT_MESSAGE_FOR_ONE_SUB = deepcopy(FLAT_MESSAGE)
 FLAT_MESSAGE_FOR_ONE_SUB["destination"] = SUBSCRIBER_NAME
+
+FLAT_MES_FOR_ONE_SUB_BYTES = (
+    b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "users/user", '
+    b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, '
+    b'"destination": "0f084f8c-1093-4024-b215-55fe8631ddf6"}'
+)
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
 MSG_FOR_ONE_SUB = Msg(
@@ -76,11 +87,6 @@ kv_sub_info.value = (
 kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
 kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
-
-
-def set_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
-    port.kv_store.kv_store = FakeKvStore()
-    port.kv_store.js = FakeJs()
 
 
 class FakeJs:
@@ -134,13 +140,15 @@ class FakeKvStore:
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    set_fake_kv_store_and_js(port)
+    port.mq_adapter.js = FakeJs()
+    port.kv_adapter.js = FakeJs()
+    port.kv_adapter.kv_store = FakeKvStore()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    set_fake_kv_store_and_js(port)
+    port.mq_adapter.js = FakeJs()
     return port
 
 

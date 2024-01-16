@@ -11,24 +11,24 @@ from shared.models import Message
 
 class EventsPort:
     def __init__(self):
-        self.message_queue = NatsMQAdapter()
+        self.mq_adapter = NatsMQAdapter()
 
     @staticmethod
     async def port_dependency():
         port = EventsPort()
-        await port.message_queue.connect()
+        await port.mq_adapter.connect()
         try:
             yield port
         finally:
             await port.close()
 
     async def close(self):
-        await self.message_queue.close()
+        await self.mq_adapter.close()
 
     async def add_live_event(self, event: Message):
         # TODO: define the name "incoming" globally or handle it differently alltogether
 
-        await self.message_queue.add_message("incoming", event)
+        await self.mq_adapter.add_message("incoming", event)
 
 
 EventsPortDependency = Annotated[EventsPort, Depends(EventsPort.port_dependency)]
