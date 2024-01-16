@@ -40,7 +40,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self.nats.connect([f"nats://{settings.nats_host}:{settings.nats_port}"])
+        await self.nats.connect([settings.nats_server])
         await self.create_kv_store()
 
     async def close(self):
@@ -76,7 +76,7 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self.nats.connect([f"nats://{settings.nats_host}:{settings.nats_port}"])
+        await self.nats.connect([settings.nats_server])
 
     async def close(self):
         await self.nats.close()

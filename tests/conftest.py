@@ -16,6 +16,7 @@ from consumer.main import app
 from events.port import EventsPort
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import Message
+from shared.models.queue import MQMessage
 
 REALM = "udm"
 TOPIC = "users/user"
@@ -66,6 +67,20 @@ FLAT_MES_FOR_ONE_SUB_ENCODED = (
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
 MSG_FOR_ONE_SUB = Msg(
     _client="nats", data=json.dumps(FLAT_MESSAGE_FOR_ONE_SUB).encode()
+)
+
+MQMESSAGE = MQMessage(
+    subject="",
+    reply="",
+    data={
+        "publisher_name": "udm-listener",
+        "ts": "2023-11-09T11:15:52.616061",
+        "realm": "udm",
+        "topic": "users/user",
+        "body": {"new": {"New": "Object"}, "old": {"Old": "Object"}},
+        "destination": "*",
+    },
+    headers=None,
 )
 
 BASE_KV_OBJ = KeyValue.Entry(

@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     # Nats: port
     nats_port: int = 4222
 
+    @property
+    def nats_server(self) -> str:
+        return f"nats://{self.nats_host}:{self.nats_port}"
+
     # UDM REST API: host
     udm_host: str = "localhost"
     # UDM REST API: port

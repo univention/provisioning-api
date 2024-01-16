@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
@@ -14,6 +15,7 @@ from tests.conftest import (
     MSG,
     MESSAGE,
     FLAT_MESSAGE_ENCODED,
+    MQMESSAGE,
 )
 
 
@@ -34,6 +36,14 @@ def nats_mq_adapter() -> NatsMQAdapter:
     nats_mq_adapter.message_queue.get = AsyncMock(return_value=MSG)
     nats_mq_adapter.message_queue.put = AsyncMock()
     return nats_mq_adapter
+
+
+@pytest.fixture
+def mock_fetch(nats_mq_adapter):
+    sub = AsyncMock()
+    sub.fetch = AsyncMock(return_value=[MSG])
+    nats_mq_adapter.js.pull_subscribe = AsyncMock(return_value=sub)
+    return sub.fetch
 
 
 @pytest.mark.anyio
@@ -129,34 +139,88 @@ class TestNatsMQAdapter:
         )
         assert result is None
 
-    # async def test_get_messages(self, nats_mq_adapter):
-    #     result = nats_mq_adapter.get_messages(SUBSCRIBER_NAME, timeout=5, count=1, pop=False)
-    #
-    #     nats_mq_adapter.js.stream_info.assert_called_once_with(NatsKeys.stream(SUBSCRIBER_NAME))
-    #     nats_mq_adapter.js.pull_subscribe.assert_called_once_with(
-    #         SUBSCRIBER_NAME,
-    #         durable=f"durable_name:{SUBSCRIBER_NAME}",
-    #         stream=NatsKeys.stream(SUBSCRIBER_NAME)
-    #     )
-    #     nats_mq_adapter.js.stream_info.assert_called_once_with(NatsKeys.stream(SUBSCRIBER_NAME))
-    #
-    #
-    #     assert result == MSG
+    async def test_get_messages(self, nats_mq_adapter, mock_fetch):
+        nats_mq_adapter.remove_message = AsyncMock()
 
-    async def test_get_messages_with_removing(self, nats_mq_adapter):
-        pass
+        result = await nats_mq_adapter.get_messages(
+            SUBSCRIBER_NAME, timeout=5, count=1, pop=False
+        )
 
-    async def test_get_messages_without_stream(self, nats_mq_adapter):
-        pass
+        nats_mq_adapter.js.stream_info.assert_called_once_with(
+            NatsKeys.stream(SUBSCRIBER_NAME)
+        )
+        nats_mq_adapter.js.pull_subscribe.assert_called_once_with(
+            SUBSCRIBER_NAME,
+            durable=f"durable_name:{SUBSCRIBER_NAME}",
+            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+        )
+        mock_fetch.assert_called_once_with(1, 5)
+        nats_mq_adapter.remove_message.assert_not_called()
+        assert result == [MQMESSAGE]
+
+    async def test_get_messages_with_removing(self, nats_mq_adapter, mock_fetch):
+        nats_mq_adapter.remove_message = AsyncMock()
+
+        result = await nats_mq_adapter.get_messages(
+            SUBSCRIBER_NAME, timeout=5, count=1, pop=True
+        )
+
+        nats_mq_adapter.js.stream_info.assert_called_once_with(
+            NatsKeys.stream(SUBSCRIBER_NAME)
+        )
+        nats_mq_adapter.js.pull_subscribe.assert_called_once_with(
+            SUBSCRIBER_NAME,
+            durable=f"durable_name:{SUBSCRIBER_NAME}",
+            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+        )
+        mock_fetch.assert_called_once_with(1, 5)
+        nats_mq_adapter.remove_message.assert_called_once_with(MSG)
+        assert result == [MQMESSAGE]
+
+    async def test_get_messages_without_stream(self, nats_mq_adapter, mock_fetch):
+        nats_mq_adapter.js.stream_info = AsyncMock(side_effect=NotFoundError)
+        nats_mq_adapter.remove_message = AsyncMock()
+
+        result = await nats_mq_adapter.get_messages(
+            SUBSCRIBER_NAME, timeout=5, count=1, pop=False
+        )
+
+        nats_mq_adapter.js.stream_info.assert_called_once_with(
+            NatsKeys.stream(SUBSCRIBER_NAME)
+        )
+        nats_mq_adapter.js.pull_subscribe.assert_not_called()
+        mock_fetch.assert_not_called()
+        nats_mq_adapter.remove_message.assert_not_called()
+        assert result == []
 
     async def test_get_messages_timeout_error(self, nats_mq_adapter):
-        pass
+        sub = AsyncMock()
+        sub.fetch = AsyncMock(side_effect=asyncio.TimeoutError)
+        nats_mq_adapter.js.pull_subscribe = AsyncMock(return_value=sub)
+        nats_mq_adapter.remove_message = AsyncMock()
 
-    async def test_remove_message_with_custom_message(self, nats_mq_adapter):
-        pass
+        result = await nats_mq_adapter.get_messages(
+            SUBSCRIBER_NAME, timeout=5, count=1, pop=False
+        )
 
-    async def test_remove_message_with_nats_message(self, nats_mq_adapter):
-        pass
+        nats_mq_adapter.js.stream_info.assert_called_once_with(
+            NatsKeys.stream(SUBSCRIBER_NAME)
+        )
+        nats_mq_adapter.js.pull_subscribe.assert_called_once_with(
+            SUBSCRIBER_NAME,
+            durable=f"durable_name:{SUBSCRIBER_NAME}",
+            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+        )
+        sub.fetch.assert_called_once_with(1, 5)
+        nats_mq_adapter.remove_message.assert_not_called()
+        assert result == []
+
+    @pytest.mark.parametrize("message", [MQMESSAGE, MSG])
+    async def test_remove_message_with_custom_message(self, nats_mq_adapter, message):
+        result = await nats_mq_adapter.remove_message(message)
+
+        MSG.ack.assert_called_with()
+        assert result is None
 
     async def test_delete_stream(self, nats_mq_adapter):
         result = await nats_mq_adapter.delete_stream(SUBSCRIBER_NAME)
