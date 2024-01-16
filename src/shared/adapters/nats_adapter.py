@@ -13,6 +13,7 @@ from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
+from shared.config import settings
 from shared.models import Message
 from shared.models.queue import NatsMessage
 
@@ -30,19 +31,54 @@ class NatsKeys:
         return f"KV_{bucket}"
 
 
-class NatsAdapter:
+class NatsKVAdapter:
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
         self.kv_store: Optional[KeyValue] = None
-        self.message_queue = asyncio.Queue()
         self.logger = logging.getLogger(__name__)
+
+    async def connect(self):
+        await self.nats.connect([f"nats://{settings.nats_host}:{settings.nats_port}"])
+        await self.create_kv_store()
 
     async def close(self):
         await self.nats.close()
 
-    async def create_kv_store(self):
-        self.kv_store = await self.js.create_key_value(bucket="Pub_Sub_KV")
+    async def create_kv_store(self, name: str = "Pub_Sub_KV"):
+        self.kv_store = await self.js.create_key_value(bucket=name)
+
+    async def delete_kv_pair(self, key: str):
+        await self.kv_store.delete(key)
+
+    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
+        try:
+            return await self.kv_store.get(key)
+        except KeyNotFoundError:
+            return None
+
+    async def put_value(self, key: str, value: Union[str, dict]):
+        if not value:
+            await self.delete_kv_pair(key)
+            return
+
+        if isinstance(value, dict):
+            value = json.dumps(value)
+        await self.kv_store.put(key, value.encode("utf-8"))
+
+
+class NatsMQAdapter:
+    def __init__(self):
+        self.nats = NATS()
+        self.js = self.nats.jetstream()
+        self.message_queue = asyncio.Queue()
+        self.logger = logging.getLogger(__name__)
+
+    async def connect(self):
+        await self.nats.connect([f"nats://{settings.nats_host}:{settings.nats_port}"])
+
+    async def close(self):
+        await self.nats.close()
 
     async def add_message(self, subject: str, message: Message):
         """Publish a message to a NATS subject."""
@@ -121,36 +157,6 @@ class NatsAdapter:
             await self.js.delete_stream(NatsKeys.stream(stream_name))
         except NotFoundError:
             return None
-
-    async def delete_kv_pair(self, key: str):
-        await self.kv_store.delete(key)
-
-    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
-        try:
-            return await self.kv_store.get(key)
-        except KeyNotFoundError:
-            return None
-
-    async def put_value(self, key: str, value: Union[str, dict]):
-        if not value:
-            await self.delete_kv_pair(key)
-            return
-
-        if isinstance(value, dict):
-            value = json.dumps(value)
-        await self.kv_store.put(key, value.encode("utf-8"))
-
-    async def get_subscribers_for_key(self, key: str):
-        names = await self.get_value(key)
-        return names.value.decode("utf-8").split(",") if names else []
-
-    async def update_subscribers_for_key(self, key: str, name: str) -> None:
-        try:
-            subs = await self.kv_store.get(key)
-            updated_subs = subs.value.decode("utf-8") + f",{name}"
-            await self.put_value(key, updated_subs)
-        except KeyNotFoundError:
-            await self.put_value(key, name)
 
     async def cb(self, msg):
         await self.message_queue.put(msg)
