@@ -12,7 +12,6 @@ from shared.adapters.consumer_reg_adapter import ConsumerRegAdapter
 from shared.adapters.event_adapter import EventAdapter
 from shared.models.queue import Message
 from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from shared.models.queue import MQMessage
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +41,6 @@ class DispatcherPort:
         await self.kv_adapter.close()
         await self._consumer_reg_adapter.close()
         await self._event_adapter.close()
-
-    async def retrieve_event_from_queue(self, subject, timeout, pop) -> List[MQMessage]:
-        return await self.mq_adapter.get_messages(subject, timeout, 1, pop)
 
     async def send_event_to_consumer_queue(self, subject: str, message):
         await self.mq_adapter.add_message(subject, message)
