@@ -21,10 +21,10 @@ A Helm chart for the Univention Portal Provisioning API
 | config.natsHost | string | `"localhost"` | NATS: host (required if nats.bundled == false) |
 | config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
 | environment | object | `{}` |  |
-| fullnameOverride | string | `"provisioning-dispatcher"` |  |
+| fullnameOverride | string | `"dispatcher"` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning-api/provisioning-dispatcher"` |  |
+| image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatcher"` |  |
 | image.tag | string | `"latest"` |  |
 | nameOverride | string | `""` |  |
 | nats.bundled | bool | `true` |  |

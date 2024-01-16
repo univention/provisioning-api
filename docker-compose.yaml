@@ -83,7 +83,7 @@ services:
     platform: "linux/amd64"
     environment:
       nats_host: nats
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/provisioning-dispatch-test:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatch-test:${IMAGE_TAG:-latest}
     build:
       context: docker/provisioning-dispatch-test
     volumes:

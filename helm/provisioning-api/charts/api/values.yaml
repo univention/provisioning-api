@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ---
-# Default values for the provisioning-api.
+# Default values for the UMS provisioning api.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -10,7 +10,7 @@
 ## Global values
 affinity: {}
 environment: {}
-fullnameOverride: "provisioning-api-service"
+fullnameOverride: "provisioning-api"
 nameOverride: ""
 nodeSelector: {}
 podAnnotations: {}
@@ -22,7 +22,7 @@ tolerations: []
 
 image:
   registry: "gitregistry.knut.univention.de"
-  repository: "univention/customers/dataport/upx/provisioning-api/provisioning-dispatch"
+  repository: "univention/customers/dataport/upx/provisioning/provisioning-dispatch"
   imagePullPolicy: "Always"
   tag: "latest"
 

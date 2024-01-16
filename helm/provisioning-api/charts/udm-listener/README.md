@@ -29,7 +29,7 @@ A Helm chart for the Univention Portal Provisioning API
 | fullnameOverride | string | `"udm-listener"` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning-api/udm-listener"` |  |
+| image.repository | string | `"univention/customers/dataport/upx/provisioning/udm-listener"` |  |
 | image.tag | string | `"latest"` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |

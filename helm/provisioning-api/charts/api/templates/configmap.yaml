@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ---
-{{ include "common.configMap" (dict "top" . "overrides" "provisioning-api.configMap") }}
-{{- define "provisioning-api.configMap" }}
+{{ include "common.configMap" (dict "top" . "overrides" "provisioning.configMap") }}
+{{- define "provisioning.configMap" }}
 {{- with .top }}
 data:
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
