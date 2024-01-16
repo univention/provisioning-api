@@ -14,14 +14,14 @@ from tests.conftest import (
     MESSAGE,
     FLAT_MESSAGE_ENCODED,
     MQMESSAGE,
-    MockMqAdapter,
+    MockNatsMQAdapter,
     MockNatsKVAdapter,
 )
 
 
 @pytest.fixture
-def mock_nats_mq_adapter() -> MockMqAdapter:
-    return MockMqAdapter()
+def mock_nats_mq_adapter() -> MockNatsMQAdapter:
+    return MockNatsMQAdapter()
 
 
 @pytest.fixture

@@ -136,18 +136,18 @@ class FakeKvStore(AsyncMock):
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    port.mq_adapter = MockMqAdapter()
+    port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    port.mq_adapter = MockMqAdapter()
+    port.mq_adapter = MockNatsMQAdapter()
     return port
 
 
-class MockMqAdapter(NatsMQAdapter):
+class MockNatsMQAdapter(NatsMQAdapter):
     def __init__(self):
         super().__init__()
         self._nats = AsyncMock()

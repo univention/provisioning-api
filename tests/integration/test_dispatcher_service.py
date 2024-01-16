@@ -1,19 +1,22 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
 from copy import deepcopy
 from unittest.mock import AsyncMock, patch, call
 
 import aiohttp
 import pytest
-from tests.conftest import FLAT_MESSAGE_ENCODED, FLAT_MES_FOR_ONE_SUB_ENCODED
-from tests.conftest import MockMqAdapter, MockNatsKVAdapter
 
 from shared.models import FillQueueStatus
 from tests.conftest import (
-    SUBSCRIBER_INFO,
+    FLAT_MESSAGE_ENCODED,
     MSG_FOR_ONE_SUB,
+    FLAT_MES_FOR_ONE_SUB_ENCODED,
     FLAT_MESSAGE_FOR_ONE_SUB,
+)
+from tests.conftest import MockNatsMQAdapter, MockNatsKVAdapter
+
+from tests.conftest import (
+    SUBSCRIBER_INFO,
     SUBSCRIBER_NAME,
 )
 
@@ -25,7 +28,7 @@ from dispatcher.service.dispatcher import DispatcherService
 @pytest.fixture
 async def dispatcher_mock() -> DispatcherPort:
     port = DispatcherPort()
-    port.mq_adapter = MockMqAdapter()
+    port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     port.mq_adapter._message_queue.get = AsyncMock(
         side_effect=[MSG, Exception("Stop waiting for the new event")]
@@ -42,6 +45,12 @@ class TestDispatcher:
     async def test_store_event_in_the_consumer_queue(
         self, mock_get, dispatcher_mock: DispatcherPort
     ):
+        """
+
+        This abstract test focuses on checking the interaction between the Dispatcher Service and the Nats,
+        specifically verifying the usage of the NATS and jetstream. If the technology changes, the test will fail
+
+        """
         mock_get.return_value.__aenter__.return_value.json = AsyncMock(
             return_value=[SUBSCRIBER_INFO]
         )
