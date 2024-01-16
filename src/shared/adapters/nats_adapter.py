@@ -13,9 +13,10 @@ from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
+from shared.adapters.base_adapters import BaseKVStore, BaseMessageQueue
 from shared.config import settings
 from shared.models import Message
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 
 class NatsKeys:
@@ -31,7 +32,7 @@ class NatsKeys:
         return f"KV_{bucket}"
 
 
-class NatsKVAdapter:
+class NatsKVAdapter(BaseKVStore):
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
@@ -67,7 +68,7 @@ class NatsKVAdapter:
         await self.kv_store.put(key, value.encode("utf-8"))
 
 
-class NatsMQAdapter:
+class NatsMQAdapter(BaseMessageQueue):
     def __init__(self):
         self.nats = NATS()
         self.js = self.nats.jetstream()
@@ -103,7 +104,7 @@ class NatsMQAdapter:
 
     async def get_messages(
         self, subject: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         try:
@@ -129,16 +130,16 @@ class NatsMQAdapter:
         for msg in msgs:
             data = json.loads(msg.data)
             msgs_to_return.append(
-                NatsMessage(
+                MQMessage(
                     subject=msg.subject, reply=msg.reply, data=data, headers=msg.headers
                 )
             )
 
         return msgs_to_return
 
-    async def remove_message(self, msg: Union[Msg, NatsMessage]):
+    async def remove_message(self, msg: Union[Msg, MQMessage]):
         """Delete a message from a NATS JetStream."""
-        if isinstance(msg, NatsMessage):
+        if isinstance(msg, MQMessage):
             msg.data["body"] = json.dumps(msg.data["body"])
             msg.data = json.dumps(msg.data)
             msg = Msg(

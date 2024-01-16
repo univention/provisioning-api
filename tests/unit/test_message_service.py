@@ -7,7 +7,7 @@ import pytest
 from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIBER_NAME
 from consumer.messages.service import MessageService
 from shared.models import FillQueueStatus
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 
 @pytest.fixture
@@ -125,7 +125,8 @@ class TestMessageService:
         assert result == expected_result
 
     async def test_remove_message(self, message_service: MessageService):
-        msg = NatsMessage(data=FLAT_MESSAGE)
+        message_service._port.remove_message = AsyncMock()
+        msg = MQMessage(data=FLAT_MESSAGE)
 
         result = await message_service.remove_message(msg)
 

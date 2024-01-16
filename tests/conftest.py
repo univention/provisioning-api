@@ -79,8 +79,8 @@ kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 
 def set_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
-    port.nats_adapter.kv_store = FakeKvStore()
-    port.nats_adapter.js = FakeJs()
+    port.kv_store.kv_store = FakeKvStore()
+    port.kv_store.js = FakeJs()
 
 
 class FakeJs:
@@ -141,12 +141,6 @@ async def consumer_port_fake_dependency() -> ConsumerPort:
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
     set_fake_kv_store_and_js(port)
-    return port
-
-
-async def consumer_port_fake_dependency_without_sub():
-    port = await consumer_port_fake_dependency()
-    port.nats_adapter.get_subscriber = AsyncMock(return_value=None)
     return port
 
 

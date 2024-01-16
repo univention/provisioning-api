@@ -9,7 +9,7 @@ from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import FillQueueStatus
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import MQMessage, Message
 
 
 class MessageService:
@@ -32,7 +32,7 @@ class MessageService:
         pop: bool,
         timeout: float = 5,
         force: Optional[bool] = False,
-    ) -> Optional[NatsMessage]:
+    ) -> Optional[MQMessage]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_name: Name of the subscriber.
@@ -51,7 +51,7 @@ class MessageService:
         count: int,
         pop: bool,
         force: Optional[bool] = False,
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         """Return messages from a given queue.
 
         :param str subscriber_name: Name of the subscriber.
@@ -79,7 +79,7 @@ class MessageService:
         response = await self._port.get_messages(subscriber_name, timeout, count, pop)
         return response
 
-    async def remove_message(self, msg: NatsMessage):
+    async def remove_message(self, msg: MQMessage):
         """Remove a message from the subscriber's queue.
 
         :param msg: fetched message.
