@@ -34,27 +34,27 @@ class NatsKeys:
 
 class NatsKVAdapter(BaseKVStoreAdapter):
     def __init__(self):
-        self.nats = NATS()
-        self.js = self.nats.jetstream()
-        self.kv_store: Optional[KeyValue] = None
+        self._nats = NATS()
+        self._js = self._nats.jetstream()
+        self._kv_store: Optional[KeyValue] = None
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self.nats.connect([settings.nats_server])
+        await self._nats.connect([settings.nats_server])
         await self.create_kv_store()
 
     async def close(self):
-        await self.nats.close()
+        await self._nats.close()
 
     async def create_kv_store(self, name: str = "Pub_Sub_KV"):
-        self.kv_store = await self.js.create_key_value(bucket=name)
+        self._kv_store = await self._js.create_key_value(bucket=name)
 
     async def delete_kv_pair(self, key: str):
-        await self.kv_store.delete(key)
+        await self._kv_store.delete(key)
 
     async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
         try:
-            return await self.kv_store.get(key)
+            return await self._kv_store.get(key)
         except KeyNotFoundError:
             return None
 
@@ -65,37 +65,37 @@ class NatsKVAdapter(BaseKVStoreAdapter):
 
         if isinstance(value, dict):
             value = json.dumps(value)
-        await self.kv_store.put(key, value.encode("utf-8"))
+        await self._kv_store.put(key, value.encode("utf-8"))
 
 
 class NatsMQAdapter(BaseMQAdapter):
     def __init__(self):
-        self.nats = NATS()
-        self.js = self.nats.jetstream()
-        self.message_queue = asyncio.Queue()
+        self._nats = NATS()
+        self._js = self._nats.jetstream()
+        self._message_queue = asyncio.Queue()
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self.nats.connect([settings.nats_server])
+        await self._nats.connect([settings.nats_server])
 
     async def close(self):
-        await self.nats.close()
+        await self._nats.close()
 
     async def add_message(self, subject: str, message: Message):
         """Publish a message to a NATS subject."""
         flat_message = message.model_dump()
         stream_name = NatsKeys.stream(subject)
         try:
-            await self.js.stream_info(stream_name)
+            await self._js.stream_info(stream_name)
         except NotFoundError:
             self.logger.debug(f"Creating new stream with name: {stream_name}")
-            await self.js.add_stream(name=stream_name, subjects=[subject])
+            await self._js.add_stream(name=stream_name, subjects=[subject])
 
-        await self.js.add_consumer(
+        await self._js.add_consumer(
             stream_name,
             ConsumerConfig(durable_name=NatsKeys.durable_name(subject)),
         )
-        await self.js.publish(
+        await self._js.publish(
             subject,
             json.dumps(flat_message).encode("utf-8"),
             stream=stream_name,
@@ -108,11 +108,11 @@ class NatsMQAdapter(BaseMQAdapter):
         """Retrieve multiple messages from a NATS subject."""
 
         try:
-            await self.js.stream_info(NatsKeys.stream(subject))
+            await self._js.stream_info(NatsKeys.stream(subject))
         except NotFoundError:
             return []
 
-        sub = await self.js.pull_subscribe(
+        sub = await self._js.pull_subscribe(
             subject, durable=f"durable_name:{subject}", stream=NatsKeys.stream(subject)
         )
         try:
@@ -141,7 +141,7 @@ class NatsMQAdapter(BaseMQAdapter):
             msg.data["body"] = json.dumps(msg.data["body"])
             msg.data = json.dumps(msg.data)
             msg = Msg(
-                _client=self.nats,
+                _client=self._nats,
                 subject=msg.subject,
                 reply=msg.reply,
                 data=msg.data.encode("utf-8"),
@@ -152,16 +152,16 @@ class NatsMQAdapter(BaseMQAdapter):
     async def delete_stream(self, stream_name: str):
         """Delete the entire stream for a given name in NATS JetStream."""
         try:
-            await self.js.stream_info(NatsKeys.stream(stream_name))
-            await self.js.delete_stream(NatsKeys.stream(stream_name))
+            await self._js.stream_info(NatsKeys.stream(stream_name))
+            await self._js.delete_stream(NatsKeys.stream(stream_name))
         except NotFoundError:
             return None
 
     async def cb(self, msg):
-        await self.message_queue.put(msg)
+        await self._message_queue.put(msg)
 
     async def subscribe_to_queue(self, subject):
-        await self.nats.subscribe(subject, cb=self.cb)
+        await self._nats.subscribe(subject, cb=self.cb)
 
     async def wait_for_event(self) -> Msg:
-        return await self.message_queue.get()
+        return await self._message_queue.get()

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch, call
 import aiohttp
 import pytest
 from tests.conftest import FLAT_MESSAGE_ENCODED, FLAT_MES_FOR_ONE_SUB_ENCODED
-from tests.conftest import set_up_fake_js, set_up_fake_kv_store
+from tests.conftest import MockMqAdapter, MockNatsKVAdapter
 
 from shared.models import FillQueueStatus
 from tests.conftest import (
@@ -25,13 +25,11 @@ from dispatcher.service.dispatcher import DispatcherService
 @pytest.fixture
 async def dispatcher_mock() -> DispatcherPort:
     port = DispatcherPort()
-    set_up_fake_js(port.mq_adapter)
-    set_up_fake_js(port.kv_adapter)
-    set_up_fake_kv_store(port.kv_adapter)
-    port.mq_adapter.message_queue.get = AsyncMock(
+    port.mq_adapter = MockMqAdapter()
+    port.kv_adapter = MockNatsKVAdapter()
+    port.mq_adapter._message_queue.get = AsyncMock(
         side_effect=[MSG, Exception("Stop waiting for the new event")]
     )
-    port.mq_adapter.nats = AsyncMock()
     async with aiohttp.ClientSession() as session:
         port._consumer_reg_adapter._session = session
         port._event_adapter._session = session
@@ -57,18 +55,18 @@ class TestDispatcher:
             pass
 
         # check subscribing to the incoming queue
-        dispatcher_mock.mq_adapter.nats.subscribe.assert_called_once_with(
+        dispatcher_mock.mq_adapter._nats.subscribe.assert_called_once_with(
             "incoming", cb=dispatcher_mock.mq_adapter.cb
         )
         # check waiting for the event
-        dispatcher_mock.mq_adapter.message_queue.get.assert_has_calls([call(), call()])
+        dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
         # check getting subscribers for the realm_topic
         mock_get.assert_called_once_with(
             "http://localhost:7777/subscriptions/v1/subscriptions/?realm_topic=udm:users/user"
         )
         # check storing event in the consumer queue
-        dispatcher_mock.mq_adapter.js.add_consumer.assert_called_once()
-        dispatcher_mock.mq_adapter.js.publish.assert_called_once_with(
+        dispatcher_mock.mq_adapter._js.add_consumer.assert_called_once()
+        dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
             SUBSCRIBER_INFO["name"],
             FLAT_MESSAGE_ENCODED,
             stream=f"stream:{SUBSCRIBER_NAME}",
@@ -85,7 +83,7 @@ class TestDispatcher:
         )
 
         # trigger dispatcher to retrieve event from incoming queue
-        dispatcher_mock.mq_adapter.message_queue.get = AsyncMock(
+        dispatcher_mock.mq_adapter._message_queue.get = AsyncMock(
             side_effect=[MSG_FOR_ONE_SUB, Exception("Stop waiting for the new event")]
         )
 
@@ -96,18 +94,18 @@ class TestDispatcher:
             pass
 
         # check subscribing to the incoming queue
-        dispatcher_mock.mq_adapter.nats.subscribe.assert_called_once_with(
+        dispatcher_mock.mq_adapter._nats.subscribe.assert_called_once_with(
             "incoming", cb=dispatcher_mock.mq_adapter.cb
         )
         # check waiting for the event
-        dispatcher_mock.mq_adapter.message_queue.get.assert_has_calls([call(), call()])
+        dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
         # check getting info for 1 subscriber
         mock_get.assert_called_once_with(
             f"http://localhost:7777/subscriptions/v1/subscriptions/{SUBSCRIBER_NAME}"
         )
         # check storing event in the consumer queue
-        dispatcher_mock.mq_adapter.js.add_consumer.assert_called_once()
-        dispatcher_mock.mq_adapter.js.publish.assert_called_once_with(
+        dispatcher_mock.mq_adapter._js.add_consumer.assert_called_once()
+        dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
             SUBSCRIBER_INFO["name"],
             FLAT_MES_FOR_ONE_SUB_ENCODED,
             stream=f"stream:{SUBSCRIBER_NAME}",
@@ -129,7 +127,7 @@ class TestDispatcher:
         )
 
         # trigger dispatcher to retrieve event from incoming queue
-        dispatcher_mock.mq_adapter.message_queue.get = AsyncMock(
+        dispatcher_mock.mq_adapter._message_queue.get = AsyncMock(
             side_effect=[msg, Exception("Stop waiting for the new event")]
         )
 
@@ -140,11 +138,11 @@ class TestDispatcher:
             pass
 
         # check subscribing to the incoming queue
-        dispatcher_mock.mq_adapter.nats.subscribe.assert_called_once_with(
+        dispatcher_mock.mq_adapter._nats.subscribe.assert_called_once_with(
             "incoming", cb=dispatcher_mock.mq_adapter.cb
         )
         # check waiting for the event
-        dispatcher_mock.mq_adapter.message_queue.get.assert_has_calls([call(), call()])
+        dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
         # check getting subscribers for the realm_topic
         mock_get.assert_called_once_with(
             "http://localhost:7777/subscriptions/v1/subscriptions/?realm_topic=udm:users/user"

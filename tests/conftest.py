@@ -4,7 +4,6 @@
 import json
 from copy import copy, deepcopy
 from datetime import datetime
-from typing import Union
 from unittest.mock import AsyncMock
 
 import pytest
@@ -105,7 +104,13 @@ kv_subs.key = "abc:def"
 kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 
-class FakeJs:
+class FakeMessageQueue(AsyncMock):
+    @classmethod
+    async def get(cls):
+        return MSG
+
+
+class FakeJs(AsyncMock):
     sub = AsyncMock()
     sub.fetch = AsyncMock(return_value=[MSG])
     Msg.ack = AsyncMock()
@@ -115,7 +120,7 @@ class FakeJs:
         return cls.sub
 
 
-class FakeKvStore:
+class FakeKvStore(AsyncMock):
     @classmethod
     async def get(cls, key: str):
         values = {
@@ -129,28 +134,33 @@ class FakeKvStore:
         raise KeyNotFoundError
 
 
-def set_up_fake_js(adapter: Union[NatsKVAdapter, NatsMQAdapter]):
-    adapter.js = AsyncMock()
-    adapter.js.pull_subscribe = AsyncMock(side_effect=FakeJs.pull_subscribe)
-
-
-def set_up_fake_kv_store(adapter: Union[NatsKVAdapter, NatsMQAdapter]):
-    adapter.kv_store = AsyncMock()
-    adapter.kv_store.get = AsyncMock(side_effect=FakeKvStore.get)
-
-
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    set_up_fake_js(port.mq_adapter)
-    set_up_fake_js(port.kv_adapter)
-    set_up_fake_kv_store(port.kv_adapter)
+    port.mq_adapter = MockMqAdapter()
+    port.kv_adapter = MockNatsKVAdapter()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    set_up_fake_js(port.mq_adapter)
+    port.mq_adapter = MockMqAdapter()
     return port
+
+
+class MockMqAdapter(NatsMQAdapter):
+    def __init__(self):
+        super().__init__()
+        self._nats = AsyncMock()
+        self._js = FakeJs()
+        self._message_queue = FakeMessageQueue()
+
+
+class MockNatsKVAdapter(NatsKVAdapter):
+    def __init__(self):
+        super().__init__()
+        self._nats = AsyncMock()
+        self._js = FakeJs()
+        self._kv_store = FakeKvStore()
 
 
 @pytest.fixture(scope="session", autouse=True)
