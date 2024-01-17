@@ -1,6 +1,4 @@
 import asyncio
-from time import sleep
-
 import pytest
 import requests
 import uuid
@@ -21,19 +19,11 @@ def anyio_backend():
     return "asyncio"
 
 
-def trigger_ldap(dn: str, changes: dict):
+def connect_ldap_server():
     server = ldap3.Server(settings.ldap_server_uri)
-    with ldap3.Connection(
-        server, settings.ldap_host_dn, settings.ldap_password
-    ) as conn:
-        conn.add(
-            dn=dn,
-            object_class=("posixGroup", "univentionObject", "univentionGroup"),
-            attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
-        )
-        conn.modify(dn, changes)
-        sleep(1)  # needs time to apply changes
-        conn.delete(dn)
+    connection = ldap3.Connection(server, settings.ldap_host_dn, settings.ldap_password)
+    connection.bind()
+    return connection
 
 
 async def test_workflow():
@@ -41,8 +31,7 @@ async def test_workflow():
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
-
-    # call of Consumer: create subscription
+    connection = connect_ldap_server()
 
     response = requests.post(
         f"{BASE_URL}{subscriptions_api_prefix}/subscription",
@@ -54,38 +43,63 @@ async def test_workflow():
     )
     assert response.status_code == 201
 
-    # Trigger LDAP
-
-    trigger_ldap(dn, changes)
-
-    # needs time for Dispatcher to send message to the consumer queue
-    await asyncio.sleep(10)
+    # Test creating object
+    connection.add(
+        dn=dn,
+        object_class=("posixGroup", "univentionObject", "univentionGroup"),
+        attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
+    )
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=3"
+        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=5&pop=true"
     )
     assert response.status_code == 200
+
     data = response.json()
-    assert len(data) == 3
+    message = data[0]["data"]
 
-    for i in range(3):
-        assert data[i]["data"]["realm"] == REALM
-        assert data[i]["data"]["topic"] == TOPIC
-        assert data[i]["data"]["publisher_name"] == PUBLISHER_NAME
+    assert len(data) == 1
+    assert message["realm"] == REALM
+    assert message["topic"] == TOPIC
+    assert message["publisher_name"] == PUBLISHER_NAME
+    assert message["body"]["old"] is None
+    assert message["body"]["new"]["dn"] == dn
 
-    # Check creating object
-    assert data[0]["data"]["body"]["old"] is None
-    assert data[0]["data"]["body"]["new"]["dn"] == dn
+    # Test modifying object
+    connection.modify(dn, changes)
 
-    # Check modifying object
-    assert data[1]["data"]["body"]["old"]["dn"] == dn
-    assert (
-        data[1]["data"]["body"]["new"]["properties"]["description"] == new_description
+    response = requests.get(
+        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=5&pop=true"
     )
+    assert response.status_code == 200
 
-    # Check deleting object
-    assert data[2]["data"]["body"]["new"] is None
-    assert data[2]["data"]["body"]["old"]["dn"] == dn
+    data = response.json()
+    message = data[0]["data"]
+
+    assert len(data) == 1
+    assert message["realm"] == REALM
+    assert message["topic"] == TOPIC
+    assert message["publisher_name"] == PUBLISHER_NAME
+    assert message["body"]["old"]["dn"] == dn
+    assert message["body"]["new"]["properties"]["description"] == new_description
+
+    # Test deleting object
+    connection.delete(dn)
+
+    response = requests.get(
+        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=5&pop=true"
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    message = data[0]["data"]
+
+    assert len(data) == 1
+    assert message["realm"] == REALM
+    assert message["topic"] == TOPIC
+    assert message["publisher_name"] == PUBLISHER_NAME
+    assert message["body"]["new"] is None
+    assert message["body"]["old"]["dn"] == dn
 
 
 if __name__ == "__main__":

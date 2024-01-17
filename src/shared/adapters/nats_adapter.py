@@ -45,16 +45,10 @@ class NatsAdapter:
         """Publish a message to a NATS subject."""
         flat_message = message.flatten()
         stream_name = NatsKeys.stream(subject)
-        try:
-            await self.js.stream_info(stream_name)
-        except NotFoundError:
-            self.logger.debug(f"Creating new stream with name: {stream_name}")
-            await self.js.add_stream(name=stream_name, subjects=[subject])
 
-        await self.js.add_consumer(
-            stream_name,
-            ConsumerConfig(durable_name=NatsKeys.durable_name(subject)),
-        )
+        await self.create_stream(subject)
+        await self.create_consumer(subject)
+
         await self.js.publish(
             subject,
             json.dumps(flat_message).encode("utf-8"),
@@ -70,6 +64,7 @@ class NatsAdapter:
         try:
             await self.js.stream_info(NatsKeys.stream(subject))
         except NotFoundError:
+            self.logger.error("The stream was not found")
             return []
 
         sub = await self.js.pull_subscribe(
@@ -157,3 +152,25 @@ class NatsAdapter:
 
     async def wait_for_event(self) -> Msg:
         return await self.message_queue.get()
+
+    async def create_stream(self, subject: str):
+        stream_name = NatsKeys.stream(subject)
+
+        try:
+            await self.js.stream_info(stream_name)
+        except NotFoundError:
+            self.logger.info(f"Creating new stream for {subject}")
+            await self.js.add_stream(name=stream_name, subjects=[subject])
+
+    async def create_consumer(self, subject: str):
+        stream_name = NatsKeys.stream(subject)
+        durable_name = NatsKeys.durable_name(subject)
+
+        try:
+            await self.js.consumer_info(stream_name, durable_name)
+        except NotFoundError:
+            self.logger.info(f"Creating new consumer for {subject}")
+            await self.js.add_consumer(
+                stream_name,
+                ConsumerConfig(durable_name=durable_name),
+            )

@@ -94,5 +94,11 @@ class ConsumerPort:
     async def put_list_value(self, key: str, value: list[str]):
         await self.nats_adapter.put_value(key, ",".join(value))
 
+    async def create_stream(self, subject):
+        await self.nats_adapter.create_stream(subject)
+
+    async def create_consumer(self, subject):
+        await self.nats_adapter.create_consumer(subject)
+
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

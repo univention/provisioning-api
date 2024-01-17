@@ -113,6 +113,8 @@ class SubscriptionService:
         await self.set_sub_info(sub.name, sub_info)
         await self.add_sub_to_subscribers(sub.name)
         await self.update_realm_topic_subscribers(realm_topic_str, sub.name)
+        await self._port.create_stream(sub.name)
+        await self._port.create_consumer(sub.name)
 
         self.logger.info("New subscriber was created")
 
