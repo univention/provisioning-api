@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+
+apiVersion: "v2"
+type: "application"
+name: "events-and-consumer-api"
+description: "A Helm chart for the Univention Management Stack Provisioning Events and Consumer API"
+home: "https://www.univention.de/"
+
+# Chart version
+# Apply Semantic Versioning (https://semver.org/)
+version: "0.1.0"
+
+# Portal Version
+appVersion: "1.16.0"
+
+dependencies:
+  - name: "common"
+    alias: "ums-common"
+    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
+    version: "^0.2.0"
+
+...

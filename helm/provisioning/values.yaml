@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ---
-# Default values for the provisioning-api.
+# Default values for the provisioning-service.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -20,10 +20,10 @@ securityContext: {}
 tolerations: []
 
 
-## Application-specific - provisioning-api chart
-api: {}
+## Application-specific - events-and-consumer-api chart
+events-and-consumer-api: {}
 
-## Application-specific - provisioning-dispatcher chart
+## Application-specific - dispatcher chart
 dispatcher: {}
 
 ## Application-specific - udm-listener chart

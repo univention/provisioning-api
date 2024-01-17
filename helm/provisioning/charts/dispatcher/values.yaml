@@ -22,7 +22,7 @@ tolerations: []
 
 image:
   registry: "gitregistry.knut.univention.de"
-  repository: "univention/customers/dataport/upx/provisioning/provisioning-dispatcher"
+  repository: "univention/customers/dataport/upx/provisioning/dispatcher"
   imagePullPolicy: "Always"
   tag: "latest"
 

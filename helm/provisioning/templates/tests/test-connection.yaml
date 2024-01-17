@@ -15,6 +15,6 @@ spec:
     - name: "wget"
       image: "busybox"
       command: ['wget']
-      args: ['{{ include "common.names.fullname" . }}:{{ .Values.api.service.ports.http.port }}']
+      args: ['{{ include "common.names.fullname" . }}:{{ ".Values.events-and-consumer-api.service.ports.http.port" }}']
   restartPolicy: "Never"
 ...

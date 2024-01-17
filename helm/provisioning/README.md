@@ -49,8 +49,8 @@ kubectl delete pvc -l release=provisioning-api
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://charts/api | api | 0.1.0 |
 | file://charts/dispatcher | dispatcher | 0.1.0 |
+| file://charts/events-and-consumer-api | events-and-consumer-api | 0.1.0 |
 | file://charts/udm-listener | udm-listener | 0.1.0 |
 | https://nats-io.github.io/k8s/helm/charts/ | nats | ^1.1.5 |
 | oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | ums-common(common) | ^0.2.0 |
@@ -75,15 +75,6 @@ kubectl delete pvc -l release=provisioning-api
 			<td></td>
 		</tr>
 		<tr>
-			<td>api</td>
-			<td>object</td>
-			<td><pre lang="json">
-{}
-</pre>
-</td>
-			<td></td>
-		</tr>
-		<tr>
 			<td>dispatcher</td>
 			<td>object</td>
 			<td><pre lang="json">
@@ -94,6 +85,15 @@ kubectl delete pvc -l release=provisioning-api
 		</tr>
 		<tr>
 			<td>environment</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>events-and-consumer-api</td>
 			<td>object</td>
 			<td><pre lang="json">
 {}
