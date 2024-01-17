@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.6.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.5.2...v0.6.0) (2024-01-17)
+
+
+### Features
+
+* add adapter for Consumer Registration API, send event to incoming queue due to blocked consumer queue ([a84f17f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a84f17f13a87d4a3156bc2703b72144798b57e99))
+* add field 'receivers' to the Message, use Field for description ([82a78cb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/82a78cb46309c3a3a160ab1aac1db825c0c65963))
+* wait for pre-fill to finish during getting messages ([18a094a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/18a094a655b1fdc04639d6105f9c28d80a6bd12c))
+
+
+### Bug Fixes
+
+* add licenses ([8df66a3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8df66a391e48f0624456b133d0f60b5c98d7fcff))
+* fix typo in the settings variables ([0e4a993](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0e4a99366312c7afd10e374511cf4dfcbec26ace))
+* get realm_topic subs using Consumer REST API, remove trailing forward-slash from endpoints ([6362ee7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6362ee70fbcf9f62f5f2d0f522bbbfe8f01a6451))
+* pin versions in apt get install, set the SHELL option -o pipefail ([29a139c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/29a139cc6d2ddae355a44b50f23e8d772079bc15))
+* remove context manager from EventAdapter ([c850699](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c8506998993a489f6a6aa0352762be5697350b08))
+* rename connection settings after their purpose ([c9857ce](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c9857ce131a1bf2ca6db89442bb158c15660f138))
+* rename docker stages, remove unused workdir argument ([d1758aa](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d1758aa375b1b6d116828802fedbcec9c51cafb4))
+* replace flatten and inflate methods ([bd4b990](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd4b990b76a40f829cd1473d9fba0ac9f79c3d20))
+* return back WORKDIR argument ([6984407](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/69844070d1960e17e5d4e21547aad12effc1be9a))
+* return calling prefill, fix connection to the UDM REST, refactor settings ([539bd81](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/539bd81d50f098c552a46c18fe6b700116f4a46f))
+* update project name ([f3b8848](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f3b8848ad508ea66372155ef6843806fb76aacf6))
+* use listener-base image to install dependencies ([0c9fad3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0c9fad3b95b54ee9a3a8d7019bae854fc7abfb73))
+* use pluralization for endpoints ([e92f9c5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e92f9c51e803b94980cf983d3b515699d51c6d22))
+* use univention module from udm-rest-image ([b143271](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b1432713b11fd58f7a1706111c605e43227f3d94))
+
 ## [0.5.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.5.1...v0.5.2) (2024-01-04)
 
 
