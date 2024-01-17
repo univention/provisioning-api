@@ -3,7 +3,7 @@
 
 ---
 
-# Dummy values for running the Helm linter on the provisioning-service.
+# Dummy values for running the Helm linter on provisioning.
 # Run it like this: helm lint -f values.yaml -f linter_values.yaml .
 
 

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "provisioning-service"
+name = "provisioning"
 version = "0.1.0"
 description = "Univention Management Stack - Provisioning Service"
 authors = [

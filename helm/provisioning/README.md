@@ -1,6 +1,6 @@
-# provisioning-service
+# provisioning
 
-A Helm chart for the Univention Portal Provisioning API
+A Helm chart for the Univention Management Stack Provisioning Service
 
 - **Version**: 0.1.0
 - **Type**: application

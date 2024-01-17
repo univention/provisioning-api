@@ -5,8 +5,8 @@
 
 apiVersion: "v2"
 type: "application"
-name: "provisioning-service"
-description: "A Helm chart for the Univention Portal Provisioning API"
+name: "provisioning"
+description: "A Helm chart for the Univention Management Stack Provisioning Service"
 home: "https://www.univention.de/"
 
 # Chart version
