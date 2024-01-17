@@ -5,7 +5,7 @@
 
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.14.0"
+    ref: "v1.16.1"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
@@ -17,6 +17,8 @@ include:
       - "jobs/semantic-release-env.yaml"
       - "jobs/container-build-souvap.yaml"
       - "jobs/package-and-publish-helm-charts-souvap.yaml"
+      - "jobs/check-debian-updates.yaml"
+
   - project: "univention/dist/docker-services"
     ref: "master"
     file:
@@ -74,6 +76,10 @@ test-integration:
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: "never"
+    - when: "on_success"
   before_script:
     # Allow that the Docker API version is negotiated between client and server
     - unset DOCKER_API_VERSION
@@ -97,6 +103,10 @@ test-integration:
 test-events-and-consumer-api:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/events-and-consumer-api-test:${RELEASE_VERSION}"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: "never"
+    - when: "on_success"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
@@ -116,8 +126,9 @@ container-sign-souvap:
   parallel:
     matrix: *publish-matrix
 
-publish-helm-charts-souvap:
-  rules:
-    - when: never
-
+check-debian-updates:
+  parallel:
+    matrix: *publish-matrix
+  variables:
+    TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 ...
