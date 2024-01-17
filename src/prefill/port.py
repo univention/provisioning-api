@@ -7,7 +7,7 @@ from shared.adapters.udm_adapter import UDMAdapter
 
 
 class PrefillPort:
-    async def __init__(self) -> None:
+    def __init__(self):
         self._udm_adapter = UDMAdapter()
 
     @staticmethod
@@ -22,10 +22,10 @@ class PrefillPort:
             await port._udm_adapter.close()
 
     async def get_object_types(self):
-        return self._udm_adapter.get_object_types()
+        return await self._udm_adapter.get_object_types()
 
     async def list_objects(self, object_type):
-        return self._udm_adapter.list_objects(object_type)
+        return await self._udm_adapter.list_objects(object_type)
 
     async def get_object(self, url):
-        return self._udm_adapter.get_object(url)
+        return await self._udm_adapter.get_object(url)

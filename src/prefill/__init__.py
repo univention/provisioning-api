@@ -26,9 +26,9 @@ async def init_queue(subscriber_name: str, realm_topic: List[str]):
 
     logger.debug(f"Initializing queue for {subscriber_name}.")
 
-    async with ConsumerPort.port_context() as port:
-        msg_service = MessageService(port)
-        sub_service = SubscriptionService(port)
+    async with ConsumerPort.port_context() as consumer_port:
+        msg_service = MessageService(consumer_port)
+        sub_service = SubscriptionService(consumer_port)
 
         await sub_service.set_subscriber_queue_status(
             subscriber_name, FillQueueStatus.running
@@ -43,9 +43,9 @@ async def init_queue(subscriber_name: str, realm_topic: List[str]):
                 logging.error(f"Unhandled realm: {realm_topic[0]}")
                 return
 
-            async with PrefillPort.port_context() as port:
+            async with PrefillPort.port_context() as prefill_port:
                 handler = handler_class(
-                    port, msg_service, subscriber_name, realm_topic[1]
+                    prefill_port, msg_service, subscriber_name, realm_topic[1]
                 )
                 await handler.fetch()
 

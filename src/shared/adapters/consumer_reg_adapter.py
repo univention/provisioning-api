@@ -51,6 +51,6 @@ class ConsumerRegAdapter:
 
     async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
         async with self._session.get(
-            f"{self.base_url}subscriptions/?realm_topic={realm_topic}"
+            f"{self.base_url}subscriptions?realm_topic={realm_topic}"
         ) as request:
             return await request.json()

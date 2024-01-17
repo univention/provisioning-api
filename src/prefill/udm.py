@@ -21,15 +21,10 @@ class UDMPreFill(PreFillService):
         self._port = port
 
     async def fetch(self):
-        """Start fetching all data for the given topic."""
-
-        self._port = PrefillPort()._udm_adapter
-        await self._port.connect()
-
-        await self._expand_topics()
-
-    async def _expand_topics(self):
-        """Find all UDM object types which match the given topic."""
+        """
+        Start fetching all data for the given topic.
+        Find all UDM object types which match the given topic.
+        """
 
         udm_modules = await self._port.get_object_types()
         udm_match = [

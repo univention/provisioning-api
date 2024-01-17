@@ -99,7 +99,7 @@ class TestDispatcher:
         )
         # check getting subscribers for the realm_topic
         mock_get.assert_called_once_with(
-            "http://localhost:7777/subscriptions/v1/subscriptions/?realm_topic=udm:users/user"
+            "http://localhost:7777/subscriptions/v1/subscriptions?realm_topic=udm:users/user"
         )
         # check storing event in the consumer queue
         port_with_mock_nats._nats_adapter.add_message.assert_called_once_with(
@@ -186,7 +186,7 @@ class TestDispatcher:
         )
         # check getting subscribers for the realm_topic
         mock_get.assert_called_once_with(
-            "http://localhost:7777/subscriptions/v1/subscriptions/?realm_topic=udm:users/user"
+            "http://localhost:7777/subscriptions/v1/subscriptions?realm_topic=udm:users/user"
         )
 
         # check sending event to the incoming queue for the subscriber
