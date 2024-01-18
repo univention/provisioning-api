@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.6.0...v0.7.0) (2024-01-18)
+
+
+### Features
+
+* **ci:** add debian update check jobs for scheduled pipeline ([1fd8495](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1fd84955d00f8817090dafadb1c6f875c4148d0a))
+* **ci:** add debian update check jobs for scheduled pipeline ([1d87650](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1d87650e9fbde98c3927a43493a6f0296dc8e731))
+
 ## [0.6.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.5.2...v0.6.0) (2024-01-17)
 
 
