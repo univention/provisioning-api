@@ -10,8 +10,8 @@
 ## Global values
 affinity: {}
 environment: {}
-fullnameOverride: "dispatcher"
-nameOverride: ""
+fullnameOverride: ""
+nameOverride: provisioning-dispatcher
 nodeSelector: {}
 podAnnotations: {}
 podSecurityContext: {}

@@ -10,8 +10,8 @@
 ## Global values
 affinity: {}
 environment: {}
-fullnameOverride: "udm-listener"
-nameOverride: ""
+fullnameOverride: ""
+nameOverride: provisioning-udm-listener
 nodeSelector: {}
 podAnnotations: {}
 podSecurityContext: {}
