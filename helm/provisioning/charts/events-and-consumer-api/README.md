@@ -25,7 +25,7 @@ A Helm chart for the Univention Management Stack Provisioning Events and Consume
 | config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
 | config.rootPath | string | `"/univention/provisioning-api"` | FastAPI: webserver root path |
 | environment | object | `{}` |  |
-| fullnameOverride | string | `"events-and-consumer-api"` |  |
+| fullnameOverride | string | `""` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | image.repository | string | `"univention/customers/dataport/upx/provisioning/events-and-consumer-api"` |  |

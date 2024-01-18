@@ -26,7 +26,7 @@ A Helm chart for the Univention Portal Provisioning API
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | environment | object | `{}` |  |
-| fullnameOverride | string | `"udm-listener"` |  |
+| fullnameOverride | string | `""` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | image.repository | string | `"univention/customers/dataport/upx/provisioning/udm-listener"` |  |

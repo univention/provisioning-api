@@ -10,7 +10,7 @@
 ## Global values
 affinity: {}
 environment: {}
-fullnameOverride: "dispatcher"
+fullnameOverride: ""
 nameOverride: ""
 nodeSelector: {}
 podAnnotations: {}
