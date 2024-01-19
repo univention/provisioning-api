@@ -13,7 +13,7 @@ class NewSubscriber(BaseModel):
     realm_topic: List[str] = Field(
         description="Realm and topic that this subscriber subscribes to."
     )
-    fill_queue: bool = Field(
+    request_prefill: bool = Field(
         description="Whether pre-filling of the queue was requested."
     )
 

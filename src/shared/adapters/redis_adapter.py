@@ -98,8 +98,8 @@ class RedisAdapter:
         self,
         name: str,
         realms_topics: List[Tuple[str, str]],
-        fill_queue: bool,
-        fill_queue_status: str,
+        request_prefill: bool,
+        prefill_queue_status: str,
     ):
         async with self.redis.pipeline(transaction=True) as pipe:
             await pipe.sadd(RedisKeys.subscribers, name)
@@ -107,8 +107,8 @@ class RedisAdapter:
                 RedisKeys.subscriber(name),
                 mapping={
                     "name": name,
-                    "fill_queue": int(fill_queue),
-                    "fill_queue_status": fill_queue_status,
+                    "request_prefill": int(request_prefill),
+                    "prefill_queue_status": prefill_queue_status,
                 },
             )
 
@@ -118,10 +118,12 @@ class RedisAdapter:
             await pipe.execute()
 
     async def get_subscriber_queue_status(self, name: str):
-        return await self.redis.hget(RedisKeys.subscriber(name), "fill_queue_status")
+        return await self.redis.hget(RedisKeys.subscriber(name), "prefill_queue_status")
 
     async def set_subscriber_queue_status(self, name: str, status: str):
-        await self.redis.hset(RedisKeys.subscriber(name), "fill_queue_status", status)
+        await self.redis.hset(
+            RedisKeys.subscriber(name), "prefill_queue_status", status
+        )
 
     async def delete_subscriber(self, name: str):
         async with self.redis.pipeline(transaction=True) as pipe:

@@ -27,10 +27,10 @@ class Subscriber(BaseModel):
         description="A list of `(realm, topic)` that this subscriber subscribes to."
     )
 
-    fill_queue: bool = Field(
+    request_prefill: bool = Field(
         description="Whether pre-filling of the queue was requested."
     )
 
-    fill_queue_status: FillQueueStatus = Field(
+    prefill_queue_status: FillQueueStatus = Field(
         description="Pre-filling the queue: status."
     )

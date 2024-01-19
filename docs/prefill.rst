@@ -5,7 +5,7 @@ When a new subscriber registers with the provisioning service,
 it can request to be informed about the current state of objects
 in the LDAP.
 
-This is accomplished by setting `"fill_queue": true` in the
+This is accomplished by setting `"request_prefill": true` in the
 subscription request.
 
 Requirements

@@ -38,8 +38,8 @@ SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 SUBSCRIBER_INFO = {
     "name": SUBSCRIBER_NAME,
     "realms_topics": [REALMS_TOPICS_STR],
-    "fill_queue": True,
-    "fill_queue_status": "done",
+    "request_prefill": True,
+    "prefill_queue_status": "done",
 }
 MESSAGE = Message(
     publisher_name=PUBLISHER_NAME,
@@ -72,8 +72,8 @@ BASE_KV_OBJ = KeyValue.Entry(
 kv_sub_info = copy(BASE_KV_OBJ)
 kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:users/user"], "fill_queue": true, '
-    b'"fill_queue_status": "done"}'
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:users/user"], "request_prefill": true, '
+    b'"prefill_queue_status": "done"}'
 )
 
 kv_subs = copy(BASE_KV_OBJ)

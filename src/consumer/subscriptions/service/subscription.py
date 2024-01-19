@@ -68,10 +68,10 @@ class SubscriptionService:
         """
         Add a new subscription.
         """
-        if sub.fill_queue:
-            fill_queue_status = FillQueueStatus.pending
+        if sub.request_prefill:
+            prefill_queue_status = FillQueueStatus.pending
         else:
-            fill_queue_status = FillQueueStatus.done
+            prefill_queue_status = FillQueueStatus.done
 
         realm_topic_str = f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"
         sub_info = await self.get_subscriber_info(sub.name)
@@ -90,7 +90,7 @@ class SubscriptionService:
 
             self.logger.info("Subscription was created")
         else:
-            await self.add_subscriber(sub, fill_queue_status, realm_topic_str)
+            await self.add_subscriber(sub, prefill_queue_status, realm_topic_str)
 
     async def update_realm_topic_subscribers(self, realm_topic_str: str, name: str):
         await self.update_subscriber_names(realm_topic_str, name)
@@ -98,15 +98,15 @@ class SubscriptionService:
     async def add_subscriber(
         self,
         sub: NewSubscriber,
-        fill_queue_status: FillQueueStatus,
+        prefill_queue_status: FillQueueStatus,
         realm_topic_str: str,
     ):
         self.logger.debug(f"Creating new subscriber with the name: '{sub.name}'")
         sub_info = Subscriber(
             name=sub.name,
             realms_topics=[f"{sub.realm_topic[0]}:{sub.realm_topic[1]}"],
-            fill_queue=sub.fill_queue,
-            fill_queue_status=fill_queue_status,
+            request_prefill=sub.request_prefill,
+            prefill_queue_status=prefill_queue_status,
         )
         await self.set_sub_info(sub.name, sub_info)
         await self.add_sub_to_subscribers(sub.name)
@@ -125,7 +125,7 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
-        return sub_info.fill_queue_status
+        return sub_info.prefill_queue_status
 
     async def set_subscriber_queue_status(self, name: str, status: FillQueueStatus):
         """Set the pre-fill status of the given subscriber."""
@@ -133,7 +133,7 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscriber not found.")
 
-        sub_info.fill_queue_status = status.name
+        sub_info.prefill_queue_status = status.name
         await self.set_sub_info(name, sub_info)
 
     async def cancel_subscription(self, name: str, realm_topic: str):

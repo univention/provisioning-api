@@ -25,7 +25,7 @@ async def test_workflow():
         json={
             "name": name,
             "realm_topic": REALM_TOPIC,
-            "fill_queue": False,
+            "request_prefill": False,
         },
     )
     assert response.status_code == 201

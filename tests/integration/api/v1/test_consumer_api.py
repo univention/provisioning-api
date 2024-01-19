@@ -49,7 +49,7 @@ class TestConsumer:
             json={
                 "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
-                "fill_queue": False,
+                "request_prefill": False,
             },
         )
         assert response.status_code == 201
@@ -61,8 +61,8 @@ class TestConsumer:
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == SUBSCRIBER_NAME
-        assert data["fill_queue"]
-        assert data["fill_queue_status"] == FillQueueStatus.done
+        assert data["request_prefill"]
+        assert data["prefill_queue_status"] == FillQueueStatus.done
         assert len(data["realms_topics"]) == len([REALMS_TOPICS_STR])
         assert all(
             (

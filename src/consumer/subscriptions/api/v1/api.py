@@ -69,7 +69,7 @@ async def create_subscription(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
         )
 
-    if subscriber.fill_queue:
+    if subscriber.request_prefill:
         tasks.add_task(
             init_prefill_queue,
             subscriber.name,

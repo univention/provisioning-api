@@ -35,7 +35,7 @@ async def test_udm_create_user_event_is_routed_correctly(
         json={
             "name": SUBSCRIBER_NAME,
             "realm_topic": ["foo", "bar"],
-            "fill_queue": False,
+            "request_prefill": False,
         },
     )
     assert response.status_code == 201

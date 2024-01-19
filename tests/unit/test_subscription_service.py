@@ -25,7 +25,7 @@ class TestSubscriptionService:
     new_subscriber = NewSubscriber(
         name=SUBSCRIBER_NAME,
         realm_topic=REALM_TOPIC,
-        fill_queue=True,
+        request_prefill=True,
     )
     subscriber = f"subscriber:{SUBSCRIBER_NAME}"
 
@@ -35,8 +35,8 @@ class TestSubscriptionService:
         subscriber = Subscriber(
             name=SUBSCRIBER_NAME,
             realms_topics=[REALMS_TOPICS_STR],
-            fill_queue=True,
-            fill_queue_status="done",
+            request_prefill=True,
+            prefill_queue_status="done",
         )
 
         result = await sub_service.get_subscribers(None)
@@ -157,7 +157,7 @@ class TestSubscriptionService:
         result = await sub_service.set_subscriber_queue_status(
             SUBSCRIBER_NAME, FillQueueStatus.pending
         )
-        sub_info["fill_queue_status"] = "pending"
+        sub_info["prefill_queue_status"] = "pending"
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
         sub_service._port.put_value.assert_called_once_with(self.subscriber, sub_info)

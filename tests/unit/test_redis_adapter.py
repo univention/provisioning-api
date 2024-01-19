@@ -183,8 +183,8 @@ class TestRedisAdapter:
         fake_redis.hgetall = AsyncMock(
             return_value={
                 "name": SUBSCRIBER_NAME,
-                "fill_queue": True,
-                "fill_queue_status": "done",
+                "request_prefill": True,
+                "prefill_queue_status": "done",
             }
         )
         result = await redis_adapter.get_subscriber_info(SUBSCRIBER_NAME)
@@ -192,8 +192,8 @@ class TestRedisAdapter:
         fake_redis.hgetall.assert_called_once_with(self.subscriber)
         assert result == {
             "name": SUBSCRIBER_NAME,
-            "fill_queue": True,
-            "fill_queue_status": "done",
+            "request_prefill": True,
+            "prefill_queue_status": "done",
         }
 
     async def test_get_subscriber_topics(
@@ -239,8 +239,8 @@ class TestRedisAdapter:
             self.subscriber,
             mapping={
                 "name": SUBSCRIBER_NAME,
-                "fill_queue": 1,
-                "fill_queue_status": FillQueueStatus.done,
+                "request_prefill": 1,
+                "prefill_queue_status": FillQueueStatus.done,
             },
         )
         pipe.execute.assert_called_once_with()
@@ -253,7 +253,7 @@ class TestRedisAdapter:
 
         result = await redis_adapter.get_subscriber_queue_status(SUBSCRIBER_NAME)
 
-        fake_redis.hget.assert_called_once_with(self.subscriber, "fill_queue_status")
+        fake_redis.hget.assert_called_once_with(self.subscriber, "prefill_queue_status")
         assert result == "value"
 
     async def test_set_subscriber_queue_status(
@@ -266,7 +266,7 @@ class TestRedisAdapter:
         )
 
         fake_redis.hset.assert_called_once_with(
-            self.subscriber, "fill_queue_status", FillQueueStatus.pending
+            self.subscriber, "prefill_queue_status", FillQueueStatus.pending
         )
         assert result is None
 
