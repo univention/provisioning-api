@@ -9,6 +9,7 @@ import shared.models
 from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
+from shared.models import FillQueueStatus
 
 logger = logging.getLogger(__name__)
 
@@ -86,5 +87,23 @@ async def cancel_subscription(
 
     try:
         await service.cancel_subscription(name, f"{realm}:{topic}")
+    except ValueError as err:
+        raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
+
+
+@router.patch(
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+)
+async def update_subscriber_queue_status(
+    name: str, prefill_queue_status: FillQueueStatus, port: ConsumerPortDependency
+):
+    """Update subscriber's prefill queue status"""
+
+    # TODO: check authorization
+
+    service = SubscriptionService(port)
+
+    try:
+        await service.set_subscriber_queue_status(name, prefill_queue_status)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))

@@ -28,7 +28,7 @@ class TestMessageService:
         result = await message_service.add_prefill_message(SUBSCRIBER_NAME, MESSAGE)
 
         message_service._port.add_prefill_message.assert_called_once_with(
-            SUBSCRIBER_NAME, MESSAGE
+            f"prefill_{SUBSCRIBER_NAME}", MESSAGE
         )
         assert result is None
 

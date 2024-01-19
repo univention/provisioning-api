@@ -17,8 +17,8 @@ class MessageService:
         self.logger = logging.getLogger(__name__)
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
-        """Add the given message to the subscriber's queue."""
-        await self._port.add_prefill_message(subscriber_name, message)
+        """Add the given message to the subscriber's prefill queue."""
+        await self._port.add_prefill_message(f"prefill_{subscriber_name}", message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
         """Delete the pre-fill message from the subscriber's queue."""

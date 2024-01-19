@@ -1,7 +1,7 @@
 import asyncio
 
 from prefill.port import PrefillPort
-from prefill.udm import UDMPreFill
+from prefill.service.udm_prefill import UDMPreFill
 from daemoniker import Daemonizer
 
 

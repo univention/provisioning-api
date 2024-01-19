@@ -5,15 +5,20 @@ import contextlib
 
 from nats.aio.msg import Msg
 
+from shared.adapters.consumer_mes_adapter import ConsumerMesAdapter
+from shared.adapters.consumer_reg_adapter import ConsumerRegAdapter
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.udm_adapter import UDMAdapter
 from shared.config import settings
+from shared.models import FillQueueStatus, Message
 
 
 class PrefillPort:
     def __init__(self):
         self._udm_adapter = UDMAdapter()
         self._nats_adapter = NatsAdapter()
+        self._consumer_reg_adapter = ConsumerRegAdapter()
+        self._consumer_mes_adapter = ConsumerMesAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -24,6 +29,8 @@ class PrefillPort:
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
         await port._nats_adapter.create_kv_store()
+        await port._consumer_reg_adapter.connect()
+        await port._consumer_mes_adapter.connect()
 
         try:
             yield port
@@ -33,6 +40,8 @@ class PrefillPort:
     async def close(self):
         await self._udm_adapter.close()
         await self._nats_adapter.close()
+        await self._consumer_reg_adapter.close()
+        await self._consumer_mes_adapter.close()
 
     async def subscribe_to_queue(self, subject: str):
         await self._nats_adapter.subscribe_to_queue(subject)
@@ -48,3 +57,13 @@ class PrefillPort:
 
     async def get_object(self, url):
         return self._udm_adapter.get_object(url)
+
+    async def update_subscriber_queue_status(
+        self, name: str, queue_status: FillQueueStatus
+    ) -> None:
+        await self._consumer_reg_adapter.update_subscriber_queue_status(
+            name, queue_status
+        )
+
+    async def send_prefill_message(self, name: str, message: Message):
+        await self._consumer_mes_adapter.send_prefill_message(name, message)

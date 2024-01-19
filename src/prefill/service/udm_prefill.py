@@ -2,14 +2,15 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import json
 
-# from datetime import datetime
+from datetime import datetime
 import logging
 
-# import shared.models
+import shared.models
 
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
+from shared.models import FillQueueStatus
 from shared.models.queue import PrefillMessage
 
 logger = logging.getLogger(__name__)
@@ -29,10 +30,6 @@ class UDMPreFill(PreFillService):
             msg = await self._port.wait_for_event()
             await msg.in_progress()
 
-            # TODO: set through the Consumer API
-            #         # await sub_service.set_subscriber_queue_status(
-            #         #     subscriber_name, FillQueueStatus.running
-            #         # )
             try:
                 data = json.loads(msg.data)
                 validated_msg = PrefillMessage.model_validate(data)
@@ -40,6 +37,10 @@ class UDMPreFill(PreFillService):
                 self._subscriber_name = validated_msg.subscriber_name
                 self._topic = validated_msg.topic
                 self._realm = validated_msg.realm
+
+                await self._port.update_subscriber_queue_status(
+                    self._subscriber_name, FillQueueStatus.running
+                )
 
                 if self._realm == "udm":
                     await self.fetch()
@@ -52,18 +53,15 @@ class UDMPreFill(PreFillService):
 
                 await msg.nak()  # TODO: handle failed requests
 
-                # TODO: set through the Consumer API
-                # await sub_service.set_subscriber_queue_status(
-                #     subscriber_name, FillQueueStatus.failed
-                # )
+                await self._port.update_subscriber_queue_status(
+                    self._subscriber_name, FillQueueStatus.failed
+                )
+
             else:
                 await msg.ack()
-
-                # TODO: set through the Consumer API
-                # await sub_service.set_subscriber_queue_status(
-                #     subscriber_name, FillQueueStatus.done
-                # )
-                ...
+                await self._port.update_subscriber_queue_status(
+                    self._subscriber_name, FillQueueStatus.done
+                )
 
     async def fetch(self):
         """
@@ -106,19 +104,18 @@ class UDMPreFill(PreFillService):
 
     async def _fill_object(self, url: str, object_type: str):
         """Retrieve the object for the given DN."""
-        # obj = await self._port.get_object(url)
-        #
-        # message = shared.models.Message(
-        #     publisher_name="udm-pre-fill",
-        #     ts=datetime.now(),
-        #     realm="udm",
-        #     topic=object_type,
-        #     body={
-        #         "old": None,
-        #         "new": obj,
-        #     },
-        # )
-        # self._logger.info("Sending to the consumer prefill queue from: %s", url)
+        obj = await self._port.get_object(url)
 
-        # TODO: add message through the Consumer API
-        # await self._service.add_prefill_message(self._subscriber_name, message)
+        message = shared.models.Message(
+            publisher_name="udm-pre-fill",
+            ts=datetime.now(),
+            realm="udm",
+            topic=object_type,
+            body={
+                "old": None,
+                "new": obj,
+            },
+        )
+        self._logger.info("Sending to the consumer prefill queue from: %s", url)
+
+        await self._port.send_prefill_message(self._subscriber_name, message)

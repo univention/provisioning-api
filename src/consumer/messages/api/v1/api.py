@@ -90,6 +90,24 @@ async def remove_message(
     return await service.remove_message(msg)
 
 
+@router.post(
+    "/subscriptions/{name}/prefill-messages",
+    status_code=fastapi.status.HTTP_201_CREATED,
+    tags=["sink"],
+)
+async def send_prefill_message(
+    name: str,
+    data: Message,
+    port: ConsumerPortDependency,
+):
+    """Send the prefill message to the subscriber."""
+
+    # TODO: check authorization
+
+    service = MessageService(port)
+    await service.add_prefill_message(name, data)
+
+
 @router.websocket("/subscriptions/{name}/ws")
 async def subscription_websocket(
     name: str,
