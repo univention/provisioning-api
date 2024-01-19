@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.7.0...v0.7.1) (2024-01-19)
+
+
+### Bug Fixes
+
+* remove fullnameOverrides to get provisioning- prefix ([5d665df](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5d665dfd567485e87fdf12f8321c61144773dbe6))
+
 ## [0.7.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.6.0...v0.7.0) (2024-01-18)
 
 
