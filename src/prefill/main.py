@@ -1,0 +1,20 @@
+import asyncio
+
+from prefill.port import PrefillPort
+from prefill.udm import UDMPreFill
+from daemoniker import Daemonizer
+
+
+async def run_prefill():
+    async with PrefillPort.port_context() as port:
+        service = UDMPreFill(port)
+        await service.handle_requests_to_prefill()
+
+
+def main():
+    with Daemonizer():
+        asyncio.run(run_prefill())
+
+
+if __name__ == "__main__":
+    main()

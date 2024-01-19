@@ -23,11 +23,11 @@ class TestDispatcherService:
         dispatcher_service._port.wait_for_event = AsyncMock(
             side_effect=[MSG, Exception("Stop waiting for the new event")]
         )
+        MSG.in_progress = AsyncMock()
+        MSG.ack = AsyncMock()
 
-        try:
+        with pytest.raises(Exception) as e:
             await dispatcher_service.dispatch_events()
-        except Exception:
-            pass
 
         dispatcher_service._port.subscribe_to_queue.assert_called_once_with("incoming")
         dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
@@ -37,3 +37,4 @@ class TestDispatcherService:
         dispatcher_service._port.send_event_to_consumer_queue.assert_called_once_with(
             SUBSCRIBER_INFO["name"], MESSAGE
         )
+        assert "Stop waiting for the new event" == str(e.value)

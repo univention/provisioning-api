@@ -33,6 +33,14 @@ class Message(BaseMessage):
     )
 
 
+class PrefillMessage(BaseMessage):
+    """This class represents the message used to send a request to the Prefill Service."""
+
+    subscriber_name: str = Field(
+        description="The name of the subscriber who requested the prefilling queue"
+    )
+
+
 class UDMMessage(BaseMessage):
     """A message emitted from the UDM REST API."""
 

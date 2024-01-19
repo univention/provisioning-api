@@ -156,7 +156,7 @@ class NatsAdapter:
         await self.message_queue.put(msg)
 
     async def subscribe_to_queue(self, subject):
-        await self.nats.subscribe(subject, cb=self.cb)
+        await self.js.subscribe(subject, cb=self.cb, manual_ack=True)
 
     async def wait_for_event(self) -> Msg:
         return await self.message_queue.get()

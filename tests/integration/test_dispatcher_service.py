@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch, call
 
 import aiohttp
 import pytest
+from nats.aio.msg import Msg
 
 from tests.conftest import SUBSCRIBER_INFO, MESSAGE
 
@@ -18,12 +19,14 @@ async def port_with_mock_nats():
     port = DispatcherPort()
     port._nats_adapter.kv_store = FakeKvStore()
     port._nats_adapter.js = FakeJs()
-    port._nats_adapter.nats = AsyncMock()
+    port._nats_adapter.js.subscribe = AsyncMock()
     port._nats_adapter._future = AsyncMock()
     port._nats_adapter.wait_for_event = AsyncMock(
         side_effect=[MSG, Exception("Stop waiting for the new event")]
     )
     port._nats_adapter.add_message = AsyncMock()
+    Msg.in_progress = AsyncMock()
+    Msg.ack = AsyncMock()
     async with aiohttp.ClientSession() as session:
         port._consumer_reg_adapter._session = session
     return port
@@ -49,8 +52,8 @@ class TestDispatcher:
             pass
 
         # check subscribing to the incoming queue
-        port_with_mock_nats._nats_adapter.nats.subscribe.assert_called_once_with(
-            "incoming", cb=port_with_mock_nats._nats_adapter.cb
+        port_with_mock_nats._nats_adapter.js.subscribe.assert_called_once_with(
+            "incoming", cb=port_with_mock_nats._nats_adapter.cb, manual_ack=True
         )
         # check waiting for the event
         port_with_mock_nats._nats_adapter.wait_for_event.assert_has_calls(

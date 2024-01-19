@@ -3,7 +3,6 @@
 
 import logging
 from typing import List, Optional
-from prefill import init_queue as init_prefill_queue
 
 import fastapi
 import shared.models
@@ -54,7 +53,6 @@ async def get_subscription(
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,
     port: ConsumerPortDependency,
-    tasks: fastapi.BackgroundTasks,
 ):
     """Create a new subscription."""
 
@@ -70,11 +68,8 @@ async def create_subscription(
         )
 
     if subscriber.request_prefill:
-        tasks.add_task(
-            init_prefill_queue,
-            subscriber.name,
-            subscriber.realm_topic,
-        )
+        # TODO: send the request to the prefill queue
+        pass
 
 
 @router.delete(

@@ -2,15 +2,14 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import abc
-
-from consumer.messages.service.messages import MessageService
+from typing import Optional
 
 
 class PreFillService(abc.ABC):
-    def __init__(self, service: MessageService, subscriber_name: str, topic: str):
-        self._service = service
-        self._subscriber_name = subscriber_name
-        self._topic = topic
+    def __init__(self):
+        self._subscriber_name: Optional[str] = None
+        self._topic: Optional[str] = None
+        self._realm: Optional[str] = None
 
     @abc.abstractmethod
     async def fetch(self):
