@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-from typing import Optional
 
 import aiohttp
 
@@ -37,20 +36,8 @@ class ConsumerRegAdapter:
         if self._session:
             await self._session.close()
 
-    async def get_subscriber(self, name: str) -> Optional[dict]:
-        try:
-            async with self._session.get(
-                f"{self.base_url}subscriptions/{name}"
-            ) as request:
-                return await request.json()
-        except aiohttp.ClientResponseError as e:
-            if e.status == 404:
-                self.logger.error("Subscriber not found.")
-                return None
-            raise
-
     async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
         async with self._session.get(
-            f"{self.base_url}subscriptions/?realm_topic={realm_topic}"
+            f"{self.base_url}subscriptions?realm_topic={realm_topic}"
         ) as request:
             return await request.json()

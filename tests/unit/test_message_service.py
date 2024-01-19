@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from unittest.mock import AsyncMock, patch, call
+from unittest.mock import AsyncMock, patch
 import pytest
 
 from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIBER_NAME
@@ -46,14 +46,14 @@ class TestMessageService:
         sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_messages = AsyncMock(return_value=[])
+        message_service._port.get_next_message = AsyncMock(return_value=[])
 
         result = await message_service.get_next_message(
             SUBSCRIBER_NAME, False, 5, False
         )
 
-        message_service._port.get_messages.assert_called_once_with(
-            SUBSCRIBER_NAME, 5, 1, False
+        message_service._port.get_next_message.assert_called_once_with(
+            SUBSCRIBER_NAME, 5, False
         )
         assert result is None
 
@@ -63,13 +63,13 @@ class TestMessageService:
         sub_service.get_subscriber_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE])
+        message_service._port.get_next_message = AsyncMock(return_value=[MESSAGE])
         expected_result = MESSAGE
 
         result = await message_service.get_next_message(SUBSCRIBER_NAME, False, 5)
 
-        message_service._port.get_messages.assert_called_once_with(
-            SUBSCRIBER_NAME, 5, 1, False
+        message_service._port.get_next_message.assert_called_once_with(
+            SUBSCRIBER_NAME, 5, False
         )
         assert result == expected_result
 
@@ -100,25 +100,6 @@ class TestMessageService:
         result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False)
 
         sub_service.get_subscriber_queue_status.assert_called_once_with(SUBSCRIBER_NAME)
-        message_service._port.get_messages.assert_called_once_with(
-            SUBSCRIBER_NAME, 5, 2, False
-        )
-        assert result == expected_result
-
-    async def test_get_messages_wait_prefill_process(
-        self, message_service: MessageService, sub_service
-    ):
-        sub_service.get_subscriber_queue_status = AsyncMock(
-            side_effect=[FillQueueStatus.running, FillQueueStatus.done]
-        )
-        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
-        expected_result = [MESSAGE, MESSAGE]
-
-        result = await message_service.get_messages(SUBSCRIBER_NAME, 5, 2, False)
-
-        sub_service.get_subscriber_queue_status.assert_has_calls(
-            [call(SUBSCRIBER_NAME), call(SUBSCRIBER_NAME)]
-        )
         message_service._port.get_messages.assert_called_once_with(
             SUBSCRIBER_NAME, 5, 2, False
         )

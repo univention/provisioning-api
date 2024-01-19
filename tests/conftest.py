@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from copy import copy, deepcopy
+from copy import copy
 from datetime import datetime
 from typing import Union
 from unittest.mock import AsyncMock
@@ -48,8 +48,6 @@ MESSAGE = Message(
     topic=TOPIC,
     body=BODY,
 )
-MESSAGE_FOR_ONE_SUB = deepcopy(MESSAGE)
-MESSAGE_FOR_ONE_SUB.destination = SUBSCRIBER_NAME
 
 FLAT_MESSAGE = {
     "publisher_name": PUBLISHER_NAME,
@@ -57,15 +55,9 @@ FLAT_MESSAGE = {
     "realm": REALM,
     "topic": TOPIC,
     "body": BODY,
-    "destination": "*",
 }
-FLAT_MESSAGE_FOR_ONE_SUB = deepcopy(FLAT_MESSAGE)
-FLAT_MESSAGE_FOR_ONE_SUB["destination"] = SUBSCRIBER_NAME
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
-MSG_FOR_ONE_SUB = Msg(
-    _client="nats", data=json.dumps(FLAT_MESSAGE_FOR_ONE_SUB).encode()
-)
 
 BASE_KV_OBJ = KeyValue.Entry(
     "KV_bucket",

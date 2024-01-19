@@ -32,14 +32,6 @@ class Message(BaseMessage):
         description="The content of the message as a key/value dictionary."
     )
 
-    destination: str = Field(
-        default="*",
-        description=(
-            "Specifies the target subscriber when their queue is temporarily blocked. "
-            "The default is '*' to broadcast the message to all subscribers."
-        ),
-    )
-
 
 class UDMMessage(BaseMessage):
     """A message emitted from the UDM REST API."""

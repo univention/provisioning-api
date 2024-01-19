@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import asyncio
 import logging
 from typing import List, Optional
 
@@ -41,8 +40,14 @@ class MessageService:
         :param bool force: List messages, even if the pre-filling is not done?
         """
 
-        response = await self.get_messages(subscriber_name, timeout, 1, pop, force)
-        return response[0] if response else None
+        sub_service = SubscriptionService(self._port)
+        queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
+
+        if force or (queue_status == FillQueueStatus.done):
+            response = await self._port.get_next_message(subscriber_name, timeout, pop)
+            return response[0] if response else None
+        else:
+            return None
 
     async def get_messages(
         self,
@@ -64,20 +69,11 @@ class MessageService:
         sub_service = SubscriptionService(self._port)
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
-        if not force:
-            while queue_status not in (FillQueueStatus.done, FillQueueStatus.failed):
-                await asyncio.sleep(0.1)
-                logging.info(
-                    "Waiting for pre-filling to finish for subscriber %s. Current status: %s",
-                    subscriber_name,
-                    queue_status,
-                )
-                queue_status = await sub_service.get_subscriber_queue_status(
-                    subscriber_name
-                )
-
-        response = await self._port.get_messages(subscriber_name, timeout, count, pop)
-        return response
+        if force or (queue_status == FillQueueStatus.done):
+            self.logger.info(f"Getting the messages for the '{subscriber_name}'")
+            return await self._port.get_messages(subscriber_name, timeout, count, pop)
+        else:
+            return []
 
     async def remove_message(self, msg: NatsMessage):
         """Remove a message from the subscriber's queue.
