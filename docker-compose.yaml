@@ -45,6 +45,23 @@ services:
       - "nats"
       - "app"
 
+  prefill:
+    build:
+      context: .
+      dockerfile: docker/prefill/Dockerfile
+      args:
+        - UCS_BASE_IMAGE_TAG=latest
+    container_name: "provisioning-prefill"
+    restart: "on-failure"
+    environment:
+      LOG_LEVEL: "DEBUG"
+      NATS_HOST: "nats"
+      CONSUMER_EVENT_HOST: "app"
+      UDM_HOST: "udm-rest-api"
+    depends_on:
+      - "nats"
+      - "app"
+
   udm-listener:
     build:
       context: .

@@ -3,11 +3,13 @@
 
 import logging
 import re
+from datetime import datetime
 from typing import List, Optional
 
 from consumer.port import ConsumerPort
 from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
+from shared.models.queue import PrefillMessage
 
 manager = SinkManager()
 
@@ -167,7 +169,7 @@ class SubscriptionService:
 
         await self.delete_sub_from_subscribers(name)
         await self.delete_sub_info(SubscriptionKeys.subscriber(name))
-        await self._port.delete_queue(name)
+        await self._port.delete_stream(name)
 
     async def delete_sub_from_subscribers(self, name: str):
         await self.delete_subscriber_from_values(SubscriptionKeys.subscribers, name)
@@ -201,3 +203,14 @@ class SubscriptionService:
 
     async def add_sub_to_subscribers(self, name: str):
         await self.update_subscriber_names(SubscriptionKeys.subscribers, name)
+
+    async def send_request_to_prefill(self, subscriber: NewSubscriber):
+        self.logger.info("Sending the request to prefill")
+        message = PrefillMessage(
+            publisher_name="consumer-registration",
+            ts=datetime.now(),
+            realm=subscriber.realm_topic[0],
+            topic=subscriber.realm_topic[1],
+            subscriber_name=subscriber.name,
+        )
+        await self._port.add_message("prefill", message)

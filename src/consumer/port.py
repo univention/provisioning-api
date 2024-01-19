@@ -12,7 +12,7 @@ from shared.adapters.redis_adapter import RedisAdapter
 from shared.config import settings
 from shared.models import Message
 
-from shared.models.queue import NatsMessage
+from shared.models.queue import NatsMessage, PrefillMessage
 
 
 class ConsumerPort:
@@ -49,19 +49,11 @@ class ConsumerPort:
         await self.redis_adapter.close()
         await self.nats_adapter.close()
 
-    async def add_live_message(self, subject: str, message: Message):
-        await self.nats_adapter.add_message(subject, message)
-
-    async def add_prefill_message(self, subject: str, message: Message):
+    async def add_message(self, subject: str, message: Union[Message, PrefillMessage]):
         await self.nats_adapter.add_message(subject, message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
         await self.redis_adapter.delete_prefill_messages(subscriber_name)
-
-    async def get_next_message(
-        self, subscriber_name: str, timeout: float, pop: bool
-    ) -> List[NatsMessage]:
-        return await self.nats_adapter.get_messages(subscriber_name, timeout, 1, pop)
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
@@ -73,7 +65,7 @@ class ConsumerPort:
     async def remove_message(self, msg: NatsMessage):
         await self.nats_adapter.remove_message(msg)
 
-    async def delete_queue(self, stream_name: str):
+    async def delete_stream(self, stream_name: str):
         await self.nats_adapter.delete_stream(stream_name)
 
     async def get_dict_value(self, name: str) -> Optional[dict]:

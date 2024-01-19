@@ -69,8 +69,7 @@ async def create_subscription(
         )
 
     if subscriber.request_prefill:
-        # TODO: send the request to the prefill queue
-        pass
+        await service.send_request_to_prefill(subscriber)
 
 
 @router.delete(

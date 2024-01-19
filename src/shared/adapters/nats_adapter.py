@@ -14,7 +14,7 @@ from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
 from shared.models import Message
-from shared.models.queue import NatsMessage
+from shared.models.queue import NatsMessage, PrefillMessage
 
 
 class NatsKeys:
@@ -44,7 +44,7 @@ class NatsAdapter:
     async def create_kv_store(self):
         self.kv_store = await self.js.create_key_value(bucket="Pub_Sub_KV")
 
-    async def add_message(self, subject: str, message: Message):
+    async def add_message(self, subject: str, message: Union[Message, PrefillMessage]):
         """Publish a message to a NATS subject."""
         flat_message = message.model_dump()
         stream_name = NatsKeys.stream(subject)

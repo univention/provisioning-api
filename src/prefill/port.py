@@ -50,13 +50,13 @@ class PrefillPort:
         return await self._nats_adapter.wait_for_event()
 
     async def get_object_types(self):
-        return self._udm_adapter.get_object_types()
+        return await self._udm_adapter.get_object_types()
 
     async def list_objects(self, object_type):
-        return self._udm_adapter.list_objects(object_type)
+        return await self._udm_adapter.list_objects(object_type)
 
     async def get_object(self, url):
-        return self._udm_adapter.get_object(url)
+        return await self._udm_adapter.get_object(url)
 
     async def update_subscriber_queue_status(
         self, name: str, queue_status: FillQueueStatus

@@ -27,7 +27,7 @@ class TestMessageService:
     async def test_add_prefill_message(self, message_service: MessageService):
         result = await message_service.add_prefill_message(SUBSCRIBER_NAME, MESSAGE)
 
-        message_service._port.add_prefill_message.assert_called_once_with(
+        message_service._port.add_message.assert_called_once_with(
             f"prefill_{SUBSCRIBER_NAME}", MESSAGE
         )
         assert result is None
@@ -114,7 +114,7 @@ class TestMessageService:
         assert result is None
 
     async def test_delete_queue(self, message_service: MessageService):
-        result = await message_service.delete_queue(SUBSCRIBER_NAME)
+        result = await message_service.delete_stream(SUBSCRIBER_NAME)
 
-        message_service._port.delete_queue.assert_called_once_with(SUBSCRIBER_NAME)
+        message_service._port.delete_stream.assert_called_once_with(SUBSCRIBER_NAME)
         assert result is None

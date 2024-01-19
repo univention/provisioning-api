@@ -47,6 +47,6 @@ class ConsumerRegAdapter:
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
         async with self._session.patch(
-            f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status}"
+            f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
         ):
             pass

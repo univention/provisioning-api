@@ -20,6 +20,7 @@ class UDMPreFill(PreFillService):
     def __init__(self, port: PrefillPort):
         super().__init__()
         self._port = port
+        logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(__name__)
 
     async def handle_requests_to_prefill(self):
