@@ -48,9 +48,6 @@ class NatsAdapter:
         flat_message = message.model_dump()
         stream_name = NatsKeys.stream(subject)
 
-        await self.create_stream(subject)
-        await self.create_consumer(subject, NatsKeys.durable_name(subject))
-
         await self.js.publish(
             subject,
             json.dumps(flat_message).encode("utf-8"),
@@ -148,12 +145,12 @@ class NatsAdapter:
     async def cb(self, msg):
         await self.message_queue.put(msg)
 
-    async def subscribe_to_queue(self, subject: str, consumer_name: str):
+    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
         await self.create_stream(subject)
-        await self.create_consumer(subject, consumer_name)
+        await self.create_consumer(subject, deliver_subject)
 
         await self.js.subscribe(
-            subject, cb=self.cb, durable=consumer_name, manual_ack=True
+            subject, cb=self.cb, durable=deliver_subject, manual_ack=True
         )
 
     async def wait_for_event(self) -> Msg:
@@ -175,15 +172,19 @@ class NatsAdapter:
             self.logger.info("Creating new stream with the name %s", stream_name)
             await self.js.add_stream(name=stream_name, subjects=[subject])
 
-    async def create_consumer(self, subject: str, consumer_name: str):
+    async def create_consumer(
+        self, subject: str, deliver_subject: Optional[str] = None
+    ):
         stream_name = NatsKeys.stream(subject)
+        durable_name = NatsKeys.durable_name(subject)
+
         try:
-            await self.js.consumer_info(stream_name, consumer_name)
+            await self.js.consumer_info(stream_name, durable_name)
         except NotFoundError:
-            self.logger.info(f"Creating new consumer for {subject}")
+            self.logger.info("Creating new consumer with the name %s", durable_name)
             await self.js.add_consumer(
                 stream_name,
                 ConsumerConfig(
-                    durable_name=consumer_name, deliver_subject=consumer_name
+                    durable_name=durable_name, deliver_subject=deliver_subject
                 ),
             )

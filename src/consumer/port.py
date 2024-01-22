@@ -92,8 +92,11 @@ class ConsumerPort:
     async def stream_exists(self, prefill_queue_name: str) -> bool:
         return await self.nats_adapter.stream_exists(prefill_queue_name)
 
-    async def create_stream(self, subject: str):
+    async def create_stream(self, subject):
         await self.nats_adapter.create_stream(subject)
+
+    async def create_consumer(self, subject):
+        await self.nats_adapter.create_consumer(subject)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]
