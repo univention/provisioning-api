@@ -46,7 +46,7 @@ class MessageService:
         """
 
         response = await self.get_messages(
-            subscriber_name, timeout, 1, pop, skip_prefill
+            subscriber_name, timeout, count=1, pop=pop, skip_prefill=skip_prefill
         )
         return response[0] if response else None
 

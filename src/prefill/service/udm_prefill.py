@@ -5,13 +5,11 @@ import json
 from datetime import datetime
 import logging
 
-import shared.models
-
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
 from shared.models import FillQueueStatus
-from shared.models.queue import PrefillMessage
+from shared.models.queue import PrefillMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +105,7 @@ class UDMPreFill(PreFillService):
         """Retrieve the object for the given DN."""
         obj = await self._port.get_object(url)
 
-        message = shared.models.Message(
+        message = Message(
             publisher_name="udm-pre-fill",
             ts=datetime.now(),
             realm="udm",
@@ -119,4 +117,4 @@ class UDMPreFill(PreFillService):
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
-        await self._port.send_prefill_message(self._subscriber_name, message)
+        await self._port.create_prefill_message(self._subscriber_name, message)

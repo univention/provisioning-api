@@ -95,12 +95,12 @@ async def remove_message(
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )
-async def send_prefill_message(
+async def create_prefill_message(
     name: str,
     data: Message,
     port: ConsumerPortDependency,
 ):
-    """Send the prefill message to the subscriber."""
+    """Create the prefill message for the subscriber."""
 
     # TODO: check authorization
 

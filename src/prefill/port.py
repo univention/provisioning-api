@@ -65,5 +65,5 @@ class PrefillPort:
             name, queue_status
         )
 
-    async def send_prefill_message(self, name: str, message: Message):
-        await self._consumer_mes_adapter.send_prefill_message(name, message)
+    async def create_prefill_message(self, name: str, message: Message):
+        await self._consumer_mes_adapter.create_prefill_message(name, message)

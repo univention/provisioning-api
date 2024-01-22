@@ -37,7 +37,7 @@ class ConsumerMesAdapter:
         if self._session:
             await self._session.close()
 
-    async def send_prefill_message(self, name: str, message: Message):
+    async def create_prefill_message(self, name: str, message: Message):
         async with self._session.post(
             f"{self.base_url}subscriptions/{name}/prefill-messages",
             json=message.model_dump(),
