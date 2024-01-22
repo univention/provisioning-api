@@ -8,9 +8,6 @@ type: "application"
 name: "provisioning"
 description: "A Helm chart for the Univention Management Stack Provisioning Service"
 home: "https://www.univention.de/"
-
-# Chart version
-# Apply Semantic Versioning (https://semver.org/)
 version: "0.1.0"
 
 dependencies:
