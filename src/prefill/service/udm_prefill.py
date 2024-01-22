@@ -37,11 +37,13 @@ class UDMPreFill(PreFillService):
                 self._topic = validated_msg.topic
                 self._realm = validated_msg.realm
 
-                await self._port.update_subscriber_queue_status(
-                    self._subscriber_name, FillQueueStatus.running
-                )
-
                 if self._realm == "udm":
+                    self._logger.info(
+                        "Started the prefill for '%s'", self._subscriber_name
+                    )
+                    await self._port.update_subscriber_queue_status(
+                        self._subscriber_name, FillQueueStatus.running
+                    )
                     await self.fetch()
                 else:
                     # FIXME: unhandled realm

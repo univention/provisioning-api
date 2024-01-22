@@ -67,34 +67,53 @@ class MessageService:
         :param bool skip_prefill: List messages, even if the pre-filling is not done?
         """
 
-        messages = []
-
         sub_service = SubscriptionService(self._port)
         queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
 
-        # FIXME: fix logic to not get messages from prefill queue when empty
+        messages = []
+        prefill_stream = await self._port.stream_exists(
+            PrefillKeys.queue_name(subscriber_name)
+        )
 
-        if queue_status == FillQueueStatus.done:
-            self.logger.info(
-                "Getting the messages for the '%s' from the prefill queue",
-                subscriber_name,
+        if queue_status == FillQueueStatus.done and prefill_stream:
+            messages = await self.get_messages_from_prefill_queue(
+                subscriber_name, timeout, count, pop
             )
-            messages = await self._port.get_messages(
-                PrefillKeys.queue_name(subscriber_name), timeout, count, pop
-            )
-            if not messages:
-                await self._port.delete_stream(PrefillKeys.queue_name(subscriber_name))
-
-        elif skip_prefill or len(messages) < count:
-            self.logger.info(
-                "Getting the messages for the '%s' from the main queue", subscriber_name
-            )
+        elif skip_prefill or not prefill_stream:
             messages.extend(
-                await self._port.get_messages(
-                    subscriber_name, timeout, count - len(messages), pop
+                await self.get_messages_from_main_queue(
+                    subscriber_name, timeout, count, pop
                 )
             )
 
+        return messages
+
+    async def get_messages_from_main_queue(
+        self, subscriber_name: str, timeout: float, count: int, pop: bool
+    ) -> List[NatsMessage]:
+        self.logger.info(
+            "Getting the messages for the '%s' from the main queue", subscriber_name
+        )
+        return await self._port.get_messages(subscriber_name, timeout, count, pop)
+
+    async def get_messages_from_prefill_queue(
+        self, subscriber_name: str, timeout: float, count: int, pop: bool
+    ) -> List[NatsMessage]:
+        self.logger.info(
+            "Getting the messages for the '%s' from the prefill queue", subscriber_name
+        )
+        prefill_queue_name = PrefillKeys.queue_name(subscriber_name)
+        messages = await self._port.get_messages(
+            prefill_queue_name, timeout, count, pop
+        )
+        if len(messages) < count:
+            self.logger.info("All messages from the prefill queue have been delivered")
+            await self._port.delete_stream(prefill_queue_name)
+            messages.extend(
+                await self.get_messages_from_main_queue(
+                    subscriber_name, timeout, count - len(messages), pop
+                )
+            )
         return messages
 
     async def remove_message(self, msg: NatsMessage):

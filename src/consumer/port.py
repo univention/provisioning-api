@@ -89,5 +89,8 @@ class ConsumerPort:
     async def put_list_value(self, key: str, value: list[str]):
         await self.nats_adapter.put_value(key, ",".join(value))
 
+    async def stream_exists(self, prefill_queue_name: str) -> bool:
+        return await self.nats_adapter.stream_exists(prefill_queue_name)
+
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

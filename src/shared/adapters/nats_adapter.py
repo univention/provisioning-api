@@ -159,3 +159,10 @@ class NatsAdapter:
 
     async def wait_for_event(self) -> Msg:
         return await self.message_queue.get()
+
+    async def stream_exists(self, subject: str) -> bool:
+        try:
+            await self.js.stream_info(NatsKeys.stream(subject))
+        except NotFoundError:
+            return False
+        return True
