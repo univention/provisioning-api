@@ -10,6 +10,7 @@ data:
   DEBUG: "{{ .Values.config.debug }}"
   ROOT_PATH: "{{ .Values.config.rootPath }}"
   CORS_ALL: "{{ .Values.config.corsAll }}"
+  # TODO: This does not bundle nats
   {{- if .Values.nats.bundled }}
   NATS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "nats" "chartValues" .Values.nats "context" $.top) }}"
   NATS_PORT: "4222"

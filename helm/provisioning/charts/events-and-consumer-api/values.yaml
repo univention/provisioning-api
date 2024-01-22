@@ -123,6 +123,7 @@ service:
     timeoutSeconds: 10800
 
 
+# TODO: This does not bundle nats
 nats:
   bundled: true
 ...
