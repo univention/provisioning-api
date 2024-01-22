@@ -29,7 +29,6 @@ image:
 
 # -- Configuration of the UDM Listener that is notified on LDAP changes
 config:
-  environment: "production"
   # -- CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set.
   caCert: ""
   # -- Where to search for the CA Certificate file.

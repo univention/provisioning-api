@@ -9,7 +9,6 @@ data:
   CA_CERT: "{{ .caCert }}"
   CA_CERT_FILE: "{{ .caCertFile }}"
   DEBUG_LEVEL: "{{ .debugLevel }}"
-  ENVIRONMENT: "{{ .environment }}"
   LDAP_BASE_DN: "{{ .ldapBaseDn }}"
   LDAP_PASSWORD: "{{ .ldapPassword }}"
   LDAP_PASSWORD_FILE: "{{ .ldapPasswordFile }}"
