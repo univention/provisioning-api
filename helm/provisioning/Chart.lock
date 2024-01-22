@@ -6,13 +6,13 @@ dependencies:
   repository: https://nats-io.github.io/k8s/helm/charts/
   version: 1.1.7
 - name: events-and-consumer-api
-  repository: file://charts/events-and-consumer-api
-  version: 0.1.0
+  repository: ""
+  version: '*'
 - name: dispatcher
-  repository: file://charts/dispatcher
-  version: 0.1.0
+  repository: ""
+  version: '*'
 - name: udm-listener
-  repository: file://charts/udm-listener
-  version: 0.1.0
-digest: sha256:16705cdc5f873f512f7442ca46dee7bbcec713caa2df51cd4ae9e9baffcb8a63
-generated: "2024-01-18T14:34:18.247125797+01:00"
+  repository: ""
+  version: '*'
+digest: sha256:104c73cedd1183e401db567313d75737915fa57a6674e4bc81c4dc50cf19596a
+generated: "2024-01-22T22:21:01.962982+01:00"

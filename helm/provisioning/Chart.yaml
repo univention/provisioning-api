@@ -26,13 +26,10 @@ dependencies:
     version: "^1.1.5"
     condition: "nats.bundled"
   - name: "events-and-consumer-api"
-    version: "0.1.0"
-    repository: "file://charts/events-and-consumer-api"
+    version: "*"
   - name: "dispatcher"
-    version: "0.1.0"
-    repository: "file://charts/dispatcher"
+    version: "*"
   - name: "udm-listener"
-    version: "0.1.0"
-    repository: "file://charts/udm-listener"
+    version: "*"
 
 ...
