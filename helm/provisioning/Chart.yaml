@@ -13,9 +13,6 @@ home: "https://www.univention.de/"
 # Apply Semantic Versioning (https://semver.org/)
 version: "0.1.0"
 
-# Portal Version
-appVersion: "1.16.0"
-
 dependencies:
   - name: "common"
     repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
