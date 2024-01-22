@@ -108,6 +108,23 @@ async def create_prefill_message(
     await service.add_prefill_message(name, data)
 
 
+@router.post(
+    "/subscriptions/{name}/prefill-stream",
+    status_code=fastapi.status.HTTP_201_CREATED,
+    tags=["sink"],
+)
+async def create_prefill_stream(
+    name: str,
+    port: ConsumerPortDependency,
+):
+    """Create the prefill stream for the subscriber."""
+
+    # TODO: check authorization
+
+    service = MessageService(port)
+    await service.create_prefill_stream(name)
+
+
 @router.websocket("/subscriptions/{name}/ws")
 async def subscription_websocket(
     name: str,

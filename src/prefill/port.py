@@ -67,3 +67,6 @@ class PrefillPort:
 
     async def create_prefill_message(self, name: str, message: Message):
         await self._consumer_mes_adapter.create_prefill_message(name, message)
+
+    async def create_prefill_stream(self, subscriber_name: str):
+        await self._consumer_mes_adapter.create_prefill_stream(subscriber_name)

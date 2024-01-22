@@ -123,3 +123,6 @@ class MessageService:
         """
 
         await self._port.remove_message(msg)
+
+    async def create_prefill_stream(self, subscriber_name: str):
+        await self._port.create_stream(PrefillKeys.queue_name(subscriber_name))

@@ -43,3 +43,9 @@ class ConsumerMesAdapter:
             json=message.model_dump(),
         ):
             pass
+
+    async def create_prefill_stream(self, subscriber_name: str):
+        async with self._session.post(
+            f"{self.base_url}subscriptions/{subscriber_name}/prefill-stream",
+        ):
+            pass

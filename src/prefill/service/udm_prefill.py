@@ -44,7 +44,9 @@ class UDMPreFill(PreFillService):
                     await self._port.update_subscriber_queue_status(
                         self._subscriber_name, FillQueueStatus.running
                     )
+                    await self._port.create_prefill_stream(self._subscriber_name)
                     await self.fetch()
+
                 else:
                     # FIXME: unhandled realm
                     logging.error("Unhandled realm: %s", self._realm)

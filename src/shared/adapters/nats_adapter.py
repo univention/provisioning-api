@@ -166,3 +166,12 @@ class NatsAdapter:
         except NotFoundError:
             return False
         return True
+
+    async def create_stream(self, subject: str):
+        stream_name = NatsKeys.stream(subject)
+        try:
+            await self.js.stream_info(stream_name)
+            self.logger.info("A stream with the name '%s' already exists", stream_name)
+        except NotFoundError:
+            self.logger.info("Creating new stream with the name %s", stream_name)
+            await self.js.add_stream(name=stream_name, subjects=[subject])
