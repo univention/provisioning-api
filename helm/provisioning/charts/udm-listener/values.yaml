@@ -31,7 +31,7 @@ image:
 config:
   environment: "production"
   # -- CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set.
-  caCert: "/var/secrets/ca_cert"
+  caCert: ""
   # -- Where to search for the CA Certificate file.
   # caCertFile: "/var/secrets/ca_cert"
   caCertFile: ""
