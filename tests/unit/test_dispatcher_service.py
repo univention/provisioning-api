@@ -29,7 +29,9 @@ class TestDispatcherService:
         with pytest.raises(Exception) as e:
             await dispatcher_service.dispatch_events()
 
-        dispatcher_service._port.subscribe_to_queue.assert_called_once_with("incoming")
+        dispatcher_service._port.subscribe_to_queue.assert_called_once_with(
+            "incoming", "dispatcher-service"
+        )
         dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
         dispatcher_service._port.get_realm_topic_subscribers.assert_called_once_with(
             REALMS_TOPICS_STR

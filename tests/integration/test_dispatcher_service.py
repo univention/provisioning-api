@@ -53,7 +53,10 @@ class TestDispatcher:
 
         # check subscribing to the incoming queue
         port_with_mock_nats._nats_adapter.js.subscribe.assert_called_once_with(
-            "incoming", cb=port_with_mock_nats._nats_adapter.cb, manual_ack=True
+            "incoming",
+            cb=port_with_mock_nats._nats_adapter.cb,
+            durable="dispatcher-service",
+            manual_ack=True,
         )
         # check waiting for the event
         port_with_mock_nats._nats_adapter.wait_for_event.assert_has_calls(

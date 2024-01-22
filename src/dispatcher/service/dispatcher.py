@@ -16,7 +16,7 @@ class DispatcherService:
 
     async def dispatch_events(self):
         self._logger.info("Storing event in consumer queues")
-        await self._port.subscribe_to_queue("incoming")
+        await self._port.subscribe_to_queue("incoming", "dispatcher-service")
         while True:
             self._logger.info("Waiting for the event...")
             msg = await self._port.wait_for_event()

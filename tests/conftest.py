@@ -164,6 +164,10 @@ class FakeJs:
     async def delete_stream(name: str):
         pass
 
+    @staticmethod
+    async def consumer_info(stream: str, consumer: str):
+        pass
+
 
 class FakeKvStore:
     @classmethod

@@ -23,7 +23,7 @@ class UDMPreFill(PreFillService):
 
     async def handle_requests_to_prefill(self):
         self._logger.info("Handling the requests to prefill")
-        await self._port.subscribe_to_queue("prefill")
+        await self._port.subscribe_to_queue("prefill", "prefill-service")
         while True:
             self._logger.info("Waiting for the request...")
             msg = await self._port.wait_for_event()

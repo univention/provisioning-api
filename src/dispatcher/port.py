@@ -41,8 +41,8 @@ class DispatcherPort:
     async def send_event_to_consumer_queue(self, subject: str, message: Message):
         await self._nats_adapter.add_message(subject, message)
 
-    async def subscribe_to_queue(self, subject: str):
-        await self._nats_adapter.subscribe_to_queue(subject)
+    async def subscribe_to_queue(self, subject: str, consumer_name: str):
+        await self._nats_adapter.subscribe_to_queue(subject, consumer_name)
 
     async def wait_for_event(self) -> Msg:
         return await self._nats_adapter.wait_for_event()

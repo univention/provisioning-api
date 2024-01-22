@@ -43,8 +43,8 @@ class PrefillPort:
         await self._consumer_reg_adapter.close()
         await self._consumer_mes_adapter.close()
 
-    async def subscribe_to_queue(self, subject: str):
-        await self._nats_adapter.subscribe_to_queue(subject)
+    async def subscribe_to_queue(self, subject: str, consumer_name: str):
+        await self._nats_adapter.subscribe_to_queue(subject, consumer_name)
 
     async def wait_for_event(self) -> Msg:
         return await self._nats_adapter.wait_for_event()
