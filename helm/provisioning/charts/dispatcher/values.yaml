@@ -85,5 +85,6 @@ service:
     timeoutSeconds: 10800
 
 nats:
+  # TODO: This is not bundling nats
   bundled: true
 ...
