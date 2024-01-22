@@ -64,11 +64,11 @@ serviceAccount:
 
 
 ## Deployment resources
-resources:
-  requests:
-    memory: "512Mi"
-  limits:
-    memory: "4Gi"
+resources: {}
+  # requests:
+  #   memory: "512Mi"
+  # limits:
+  #   memory: "4Gi"
 
 ## Kubernetes Service
 service:
