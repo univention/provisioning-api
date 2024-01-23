@@ -44,6 +44,7 @@ udm-listener:
     ldapHostDn: "cn=admin,dc=univention-organization,dc=intranet"
     ldapPassword: "secret"
     ldapPort: "389"
+    natsHost: "nats"
     notifierServer: "ldap-notifier"
     tlsMode: "off"
 
