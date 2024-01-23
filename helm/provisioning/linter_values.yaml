@@ -36,7 +36,6 @@ udm-listener:
   image:
     tag: "latest"
   config:
-    environment: "production"
     caCert: "abcd1234"
     debugLevel: "4"
     ldapBaseDn: "dc=univention-organization,dc=intranet"
