@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.7.1...v0.8.0) (2024-01-23)
+
+
+### Features
+
+* **helm:** Lower the initial delay for the propers in udm-listener ([b137844](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b1378444ad144f566ecf56426abb1bd4abd4c9df))
+* **helm:** Reduce initial delay of probes in dispatcher chart ([ef605f7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ef605f73ba0d72ee898735adb9e1b6547d5fe856))
+* **helm:** Remove "config.environment" from udm-listener ([4967e19](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4967e19c0e7f364e9f7de71e85b918f8d5951a6b))
+* **helm:** Remove repositories of embedded charts ([7b1bd67](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7b1bd67aaf007fd05b4869586d3bdf0ed1e05b26))
+* **helm:** Update common-helm to 0.6.0 ([7b1f465](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7b1f465f149c3671a25e6367ba780eebc2e660df))
+
+
+### Bug Fixes
+
+* **helm:** Avoid setting resources as default in dispatcher ([995e384](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/995e384e7b8755948a6e1b67b37715ba3fe20dd5))
+* **helm:** Avoid setting resources in the default values of udm-listener ([e76c2d7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e76c2d7f0fcc5d25629f0226f77d09f9f7620acc))
+* **helm:** Drop appVersion ([0e967e0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0e967e0b0297e4c0545e4a982f3e15a60061819b))
+* **helm:** Remove appVersion in the dispatcher chart ([f0a3aa8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f0a3aa8f6421e93f48a2a4d461ba647df0e5e8fa))
+* **helm:** Remove invalid default value of "config.caCert" ([c6bae19](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c6bae1931aa73c857ce9f106ab44f95bf8f7bd23))
+
 ## [0.7.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.7.0...v0.7.1) (2024-01-19)
 
 
