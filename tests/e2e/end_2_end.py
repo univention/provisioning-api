@@ -6,7 +6,6 @@ import asyncio
 import requests
 import uuid
 
-from tests.conftest import REALM_TOPIC, TOPIC, BODY, PUBLISHER_NAME, REALM
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 
@@ -14,6 +13,11 @@ from udm_messaging.port import UDMMessagingPort
 from udm_messaging.service.udm import UDMMessagingService
 
 BASE_URL = "http://localhost:7777"
+
+REALM = "udm"
+TOPIC = "users/user"
+BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
+PUBLISHER_NAME = "udm-listener"
 
 
 async def test_workflow():
@@ -24,7 +28,7 @@ async def test_workflow():
         f"{BASE_URL}{subscriptions_api_prefix}/subscriptions",
         json={
             "name": name,
-            "realm_topic": REALM_TOPIC,
+            "realm_topic": [REALM, TOPIC],
             "request_prefill": False,
         },
     )

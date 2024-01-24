@@ -20,18 +20,53 @@ Tooling for provisioning LDAP objects to external services.
 
   An example implementation of a client.
 
-## Run
+## Usage Overview
 
 ### Start dependencies
 
-You can start a local NATS instance for testing:
+Build containers for testing:
 ```sh
-docker compose up --detach --remove-orphans nats
+docker compose build
 ```
 
-This will run NATS on its standard port 4222.
+Run containers:
 
-### Locally
+```sh
+docker compose up --detach --remove-orphans
+```
+
+### Create a Subscription
+To create a subscription, open http://localhost:7777/docs and find the method called 'Create Subscription'.
+Enter the following data into the request body:
+
+```sh
+{
+  "name": "subscriber1",
+  "realm_topic": [
+    "udm", "groups/group"
+  ],
+  "request_prefill": true
+}
+```
+
+### Trigger the LDAP
+
+To make a change in the LDAP, open http://localhost:8001.
+
+Enter with:
+  - **Login DN:** cn=admin,dc=univention-organization,dc=intranet
+  - **Password:** univention
+
+Find an entry with `univentionObjectType` = 'groups/group' and modify it.
+
+### Get the Messages
+
+To retrieve messages for the subscriber, open http://localhost:7777/docs.
+Find the method named 'Get Subscription Messages' and execute it.
+
+Now, you see the messages, that the subscriber received from the udm-pre-fill process and udm-listener
+
+### Installation
 
 Ensure that you have [`poetry`](https://python-poetry.org/docs/) installed.
 
@@ -45,25 +80,26 @@ Install the dependencies:
 poetry install --with dev
 ```
 
-Run the server in development mode (i.e. with hot-reloading):
-```sh
-poetry run dev
-```
-The server is available on port 7777.
-Find the OpenAPI schema here: http://localhost:7777/docs .
-
 ## Tests
 
-If you want to run integration tests, make sure, you run
-
-```sh
-docker compose run nats
-```
-
-first. Then:
+### Unit or Integration tests
 
 ```sh
 poetry run pytest <dir/of/test-subset>
+```
+
+### E2E tests
+
+Make sure you run
+
+```sh
+docker compose up --detach --remove-orphans
+```
+
+first, then
+
+```sh
+python tests/e2e/end_2_end.py
 ```
 
 ### Pre-commit
