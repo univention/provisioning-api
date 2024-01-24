@@ -10,7 +10,7 @@ from shared.models import FillQueueStatus
 from tests.conftest import (
     FLAT_MESSAGE_ENCODED,
     MSG_FOR_ONE_SUB,
-    FLAT_MES_FOR_ONE_SUB_ENCODED,
+    FLAT_MESSAGE_FOR_ONE_SUB_ENCODED,
     FLAT_MESSAGE_FOR_ONE_SUB,
 )
 from tests.conftest import MockNatsMQAdapter, MockNatsKVAdapter
@@ -116,7 +116,7 @@ class TestDispatcher:
         dispatcher_mock.mq_adapter._js.add_consumer.assert_called_once()
         dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
             SUBSCRIBER_INFO["name"],
-            FLAT_MES_FOR_ONE_SUB_ENCODED,
+            FLAT_MESSAGE_FOR_ONE_SUB_ENCODED,
             stream=f"stream:{SUBSCRIBER_NAME}",
         )
 

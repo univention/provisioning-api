@@ -57,7 +57,7 @@ FLAT_MESSAGE_ENCODED = (
 FLAT_MESSAGE_FOR_ONE_SUB = deepcopy(FLAT_MESSAGE)
 FLAT_MESSAGE_FOR_ONE_SUB["destination"] = SUBSCRIBER_NAME
 
-FLAT_MES_FOR_ONE_SUB_ENCODED = (
+FLAT_MESSAGE_FOR_ONE_SUB_ENCODED = (
     b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "users/user", '
     b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, '
     b'"destination": "0f084f8c-1093-4024-b215-55fe8631ddf6"}'
