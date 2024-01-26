@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.9.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.8.0...v0.9.0) (2024-01-26)
+
+
+### Features
+
+* add abstract adapters for MQ and KV Store ([d9e3beb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d9e3beb5fee3c1ff251adfb5b46d544b0d7e5015))
+* update readme ([af6cd13](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/af6cd136e2d6745d298bd99038609607cff0d058))
+
+
+### Bug Fixes
+
+* add licenses ([452c192](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/452c1920de4b3fb9202d936c17e7f68600cbf6f0))
+* pass image tag as an argument during build ([9e07a2f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9e07a2f71d1eec6c2b7e9724ced1e1508863b8fe))
+* split the nats adapter into MQ and KV store ([06b84ad](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/06b84ad1517f98ea805d0fd258d59be49162e540))
+* use lazy logging instead of f-string ([8e356e0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8e356e03fb25798d4adf389be26b77168e6e6ed8))
+* use lower() method for checking tls mode, use longer name for the variable ([971f7ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/971f7cad5db0c094745f7e326efb45fe52723c37))
+* use TLS_MODE instead of ldap_start_tls ([f25fdd8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f25fdd8cbe37e6e2ee981628e446aacdd3abd966))
+
 ## [0.8.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.7.1...v0.8.0) (2024-01-23)
 
 
