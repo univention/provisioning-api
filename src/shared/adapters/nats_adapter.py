@@ -107,7 +107,6 @@ class NatsAdapter:
     async def delete_stream(self, stream_name: str):
         """Delete the entire stream for a given name in NATS JetStream."""
         try:
-            await self.js.stream_info(NatsKeys.stream(stream_name))
             await self.js.delete_stream(NatsKeys.stream(stream_name))
         except NotFoundError:
             return None

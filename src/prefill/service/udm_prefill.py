@@ -5,6 +5,8 @@ import json
 from datetime import datetime
 import logging
 
+from nats.aio.msg import Msg
+
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
@@ -15,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class UDMPreFill(PreFillService):
+    max_prefill_attempts = 3
+    prefill_queue = "prefill"
+    prefill_failures_queue = "prefill-failures"
+
     def __init__(self, port: PrefillPort):
         super().__init__()
         self._port = port
@@ -23,48 +29,37 @@ class UDMPreFill(PreFillService):
 
     async def handle_requests_to_prefill(self):
         self._logger.info("Handling the requests to prefill")
-        await self._port.subscribe_to_queue("prefill", "prefill-service")
+        await self._port.subscribe_to_queue(self.prefill_queue, "prefill-service")
+        await self._port.prepare_prefill_failures_queue(self.prefill_failures_queue)
+
         while True:
             self._logger.info("Waiting for the request...")
             msg = await self._port.wait_for_event()
-            await msg.in_progress()
-
             try:
-                data = json.loads(msg.data)
-                validated_msg = PrefillMessage.model_validate(data)
+                validated_msg = self.parse_request_data(msg)
 
-                self._subscriber_name = validated_msg.subscriber_name
-                self._topic = validated_msg.topic
-                self._realm = validated_msg.realm
+                if msg.metadata.num_delivered > self.max_prefill_attempts:
+                    await self.add_request_to_prefill_failures(validated_msg, msg)
 
                 if self._realm == "udm":
                     self._logger.info(
                         "Started the prefill for '%s'", self._subscriber_name
                     )
+                    await msg.in_progress()
                     await self._port.update_subscriber_queue_status(
                         self._subscriber_name, FillQueueStatus.running
                     )
                     await self._port.create_prefill_stream(self._subscriber_name)
                     await self.fetch()
-
                 else:
                     # FIXME: unhandled realm
                     logging.error("Unhandled realm: %s", self._realm)
 
             except Exception as exc:
                 logger.error("Failed to launch pre-fill handler: %s", exc)
-
-                await msg.nak()  # TODO: handle failed requests
-
-                await self._port.update_subscriber_queue_status(
-                    self._subscriber_name, FillQueueStatus.failed
-                )
-
+                await self.mark_request_as_failed(msg)
             else:
-                await msg.ack()
-                await self._port.update_subscriber_queue_status(
-                    self._subscriber_name, FillQueueStatus.done
-                )
+                await self.mark_request_as_done(msg)
 
     async def fetch(self):
         """
@@ -122,3 +117,33 @@ class UDMPreFill(PreFillService):
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
         await self._port.create_prefill_message(self._subscriber_name, message)
+
+    async def add_request_to_prefill_failures(
+        self, validated_msg: PrefillMessage, msg: Msg
+    ):
+        self._logger.info("Adding request to the prefill failures queue")
+        await self._port.add_request_to_prefill_failures(
+            self.prefill_failures_queue, validated_msg
+        )
+        await msg.ack()
+
+    async def mark_request_as_done(self, msg: Msg):
+        await msg.ack()
+        await self._port.update_subscriber_queue_status(
+            self._subscriber_name, FillQueueStatus.done
+        )
+
+    async def mark_request_as_failed(self, msg: Msg):
+        await msg.nak()
+        await self._port.update_subscriber_queue_status(
+            self._subscriber_name, FillQueueStatus.failed
+        )
+
+    def parse_request_data(self, msg: Msg) -> PrefillMessage:
+        data = json.loads(msg.data)
+        validated_msg = PrefillMessage.model_validate(data)
+        self._logger.info("Received request with content: %s", data)
+        self._subscriber_name = validated_msg.subscriber_name
+        self._topic = validated_msg.topic
+        self._realm = validated_msg.realm
+        return validated_msg

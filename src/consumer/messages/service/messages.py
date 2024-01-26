@@ -125,4 +125,6 @@ class MessageService:
         await self._port.remove_message(msg)
 
     async def create_prefill_stream(self, subscriber_name: str):
+        # delete the previously created stream if it exists
+        await self._port.delete_stream(PrefillKeys.queue_name(subscriber_name))
         await self._port.create_stream(PrefillKeys.queue_name(subscriber_name))

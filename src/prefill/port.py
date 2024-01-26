@@ -11,6 +11,7 @@ from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.udm_adapter import UDMAdapter
 from shared.config import settings
 from shared.models import FillQueueStatus, Message
+from shared.models.queue import PrefillMessage
 
 
 class PrefillPort:
@@ -70,3 +71,12 @@ class PrefillPort:
 
     async def create_prefill_stream(self, subscriber_name: str):
         await self._consumer_mes_adapter.create_prefill_stream(subscriber_name)
+
+    async def add_request_to_prefill_failures(
+        self, queue_name: str, message: PrefillMessage
+    ):
+        await self._nats_adapter.add_message(queue_name, message)
+
+    async def prepare_prefill_failures_queue(self, queue_name: str):
+        await self._nats_adapter.create_stream(queue_name)
+        await self._nats_adapter.create_consumer(queue_name)
