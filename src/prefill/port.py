@@ -77,6 +77,8 @@ class PrefillPort:
     ):
         await self._nats_adapter.add_message(queue_name, message)
 
-    async def prepare_prefill_failures_queue(self, queue_name: str):
-        await self._nats_adapter.create_stream(queue_name)
-        await self._nats_adapter.create_consumer(queue_name)
+    async def create_stream(self, subject: str):
+        await self._nats_adapter.create_stream(subject)
+
+    async def create_consumer(self, subject: str):
+        await self._nats_adapter.create_consumer(subject)

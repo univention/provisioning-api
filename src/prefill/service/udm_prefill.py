@@ -30,7 +30,7 @@ class UDMPreFill(PreFillService):
     async def handle_requests_to_prefill(self):
         self._logger.info("Handling the requests to prefill")
         await self._port.subscribe_to_queue(self.prefill_queue, "prefill-service")
-        await self._port.prepare_prefill_failures_queue(self.prefill_failures_queue)
+        await self.prepare_prefill_failures_queue()
 
         while True:
             self._logger.info("Waiting for the request...")
@@ -40,6 +40,7 @@ class UDMPreFill(PreFillService):
 
                 if msg.metadata.num_delivered > self.max_prefill_attempts:
                     await self.add_request_to_prefill_failures(validated_msg, msg)
+                    continue
 
                 if self._realm == "udm":
                     self._logger.info(
@@ -73,6 +74,7 @@ class UDMPreFill(PreFillService):
             for module in udm_modules
             if match_subscription("udm", self._topic, "udm", module["name"])
         ]
+        print(udm_modules, self._topic)
 
         if len(udm_match) == 0:
             self._logger.warning("No UDM modules match object type %s", self._topic)
@@ -147,3 +149,7 @@ class UDMPreFill(PreFillService):
         self._topic = validated_msg.topic
         self._realm = validated_msg.realm
         return validated_msg
+
+    async def prepare_prefill_failures_queue(self):
+        await self._port.create_stream(self.prefill_failures_queue)
+        await self._port.create_consumer(self.prefill_failures_queue)

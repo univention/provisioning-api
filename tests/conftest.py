@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from copy import copy
+from copy import copy, deepcopy
 from datetime import datetime
 from typing import Union
 from unittest.mock import AsyncMock
@@ -26,6 +26,7 @@ from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
 from shared.models import Message
+from shared.models.queue import PrefillMessage
 
 REALM = "udm"
 TOPIC = "users/user"
@@ -48,16 +49,53 @@ MESSAGE = Message(
     topic=TOPIC,
     body=BODY,
 )
+PREFILL_MESSAGE = PrefillMessage(
+    publisher_name=PUBLISHER_NAME,
+    ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
+    realm=REALM,
+    topic=TOPIC,
+    subscriber_name=SUBSCRIBER_NAME,
+)
 
-FLAT_MESSAGE = {
+FLAT_BASE_MESSAGE = {
     "publisher_name": PUBLISHER_NAME,
     "ts": "2023-11-09T11:15:52.616061",
     "realm": REALM,
     "topic": TOPIC,
-    "body": BODY,
 }
+FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
+FLAT_MESSAGE["body"] = BODY
+
+FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
+FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
+MSG_PREFILL = Msg(
+    _client="nats",
+    data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
+    _metadata=Msg.Metadata(
+        sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
+        num_pending=0,
+        num_delivered=1,
+        timestamp=datetime(2023, 11, 9, 11, 15, 52, 616061),
+        stream="stream:prefill",
+        consumer="prefill-service",
+        domain=None,
+    ),
+)
+MSG_PREFILL_REDELIVERED = Msg(
+    _client="nats",
+    data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
+    _metadata=Msg.Metadata(
+        sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
+        num_pending=0,
+        num_delivered=4,
+        timestamp=datetime(2023, 11, 9, 11, 15, 52, 616061),
+        stream="stream:prefill",
+        consumer="prefill-service",
+        domain=None,
+    ),
+)
 
 BASE_KV_OBJ = KeyValue.Entry(
     "KV_bucket",
