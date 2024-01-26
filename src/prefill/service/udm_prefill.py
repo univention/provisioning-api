@@ -74,7 +74,6 @@ class UDMPreFill(PreFillService):
             for module in udm_modules
             if match_subscription("udm", self._topic, "udm", module["name"])
         ]
-        print(udm_modules, self._topic)
 
         if len(udm_match) == 0:
             self._logger.warning("No UDM modules match object type %s", self._topic)
