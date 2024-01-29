@@ -1,9 +1,50 @@
 ## Consumer Registration Flow
+
+### Without Prefill
 ```mermaid
 sequenceDiagram
     actor Consumer
     participant ConsumerRegAPI as Consumer Registration API
-    participant ConsumerMgmtAPI as Consumer Management API
+    participant ConsumerMessagesAPI as Consumer Messages API
+    participant NatsQ as Nats Queue
+    participant NatsKV as Nats Key Value
+    participant Dispatcher
+
+
+    Consumer->>ConsumerRegAPI: create new subscription
+    activate ConsumerRegAPI
+    Note over ConsumerRegAPI: see *1
+    ConsumerRegAPI->>NatsQ: Create queue
+    activate NatsQ
+    NatsQ-->>ConsumerRegAPI: ACK
+    deactivate NatsQ
+    ConsumerRegAPI->>NatsKV: Save subscription data to KV Store including queue(s) and prefill status:pending
+    activate NatsKV
+    NatsKV-->>ConsumerRegAPI: ACK
+    ConsumerRegAPI-->>Consumer: ACK
+    deactivate ConsumerRegAPI
+    Note over NatsKV: see *1
+    Consumer->>ConsumerMessagesAPI: Open Queue Stream
+    activate ConsumerMessagesAPI
+    ConsumerMessagesAPI->>NatsKV: Get Consumer Object from DB
+    NatsKV-->ConsumerMessagesAPI: Return Consumer Object from DB
+    ConsumerMessagesAPI->>NatsQ: Subscribe to events
+    NatsQ-->>ConsumerMessagesAPI: Stream queue events
+    ConsumerMessagesAPI-->>Consumer: Stream live events
+    NatsKV-->>Dispatcher: New Subscription
+    activate Dispatcher
+    deactivate NatsKV
+    Dispatcher-->>NatsQ: Start dispatching in `final queue`
+    deactivate Dispatcher
+    deactivate ConsumerMessagesAPI
+```
+
+### With Prefill
+```mermaid
+sequenceDiagram
+    actor Consumer
+    participant ConsumerRegAPI as Consumer Registration API
+    participant ConsumerMessagesAPI as Consumer Messages API
     participant NatsQ as Nats Queue
     participant NatsKV as Nats Key Value
     participant PrefillService as Prefill Service
@@ -12,6 +53,7 @@ sequenceDiagram
 
     Consumer->>ConsumerRegAPI: create new subscription
     activate ConsumerRegAPI
+    Note over ConsumerRegAPI: see *1
     ConsumerRegAPI->>NatsQ: Create queue(s)
     activate NatsQ
     NatsQ-->>ConsumerRegAPI: ACK
@@ -19,77 +61,62 @@ sequenceDiagram
     ConsumerRegAPI->>PrefillService: Prefill request
     activate PrefillService
     PrefillService-->>ConsumerRegAPI: ACK
+    Note over PrefillService: The Prefill flow<br/>is described<br/> in a separate diagram
     ConsumerRegAPI->>NatsKV: Save subscription data to KV Store including queue(s) and prefill status:pending
     activate NatsKV
     NatsKV-->>ConsumerRegAPI: ACK
     ConsumerRegAPI-->>Consumer: ACK
     deactivate ConsumerRegAPI
-    NatsKV-->>ConsumerMgmtAPI: New Subscription
-    activate ConsumerMgmtAPI
+    Note over NatsKV: see *1
+    Consumer->>ConsumerMessagesAPI: Open Queue Stream
+    activate ConsumerMessagesAPI
+    ConsumerMessagesAPI->>NatsKV: Get Consumer Object from DB
+    NatsKV-->ConsumerMessagesAPI: Return Consumer Object from DB
+    Note over ConsumerMessagesAPI: see *2
+    ConsumerMessagesAPI-->>Consumer: Stream `empty queue`
+    ConsumerMessagesAPI->>NatsKV: Watch Consumer Object Changes
     NatsKV-->>Dispatcher: New Subscription
     activate Dispatcher
-    deactivate NatsKV
-    ConsumerMgmtAPI->>ConsumerMgmtAPI: Activate `empty queue`
-    deactivate ConsumerMgmtAPI
     Dispatcher->>Dispatcher: Start dispatching in `final queue`
     PrefillService->>NatsQ: Starts Prefilling `prefill queue`
-    Consumer->>ConsumerMgmtAPI: Open Queue Stream
-    activate ConsumerMgmtAPI
-    ConsumerMgmtAPI-->>Consumer: Stream `empty queue`
     PrefillService->>ConsumerRegAPI: Prefill complete message
     deactivate PrefillService
     activate ConsumerRegAPI
     ConsumerRegAPI->>NatsKV: Updates subscription object
-    activate NatsKV
     NatsKV-->>ConsumerRegAPI: ACK
     deactivate ConsumerRegAPI
-    NatsKV-->>ConsumerMgmtAPI: Subscription status change
+    NatsKV-->>ConsumerMessagesAPI: Subscription prefill status:done
     deactivate NatsKV
-    ConsumerMgmtAPI->>ConsumerMgmtAPI: Switch to Prefill queue
-    ConsumerMgmtAPI-->>Consumer: Stream prefill events
-    ConsumerMgmtAPI->>ConsumerMgmtAPI: Prefill empty
-    ConsumerMgmtAPI-->>Consumer: Stream live events
+    ConsumerMessagesAPI->>NatsQ: Subscribe to events
+    NatsQ-->>ConsumerMessagesAPI: Stream queue events
+    ConsumerMessagesAPI->>ConsumerMessagesAPI: Switch to Prefill queue
+    ConsumerMessagesAPI-->>Consumer: Stream prefill events
+    ConsumerMessagesAPI->>ConsumerMessagesAPI: Prefill empty
+    ConsumerMessagesAPI-->>Consumer: Stream live events
     deactivate Dispatcher
-    deactivate ConsumerMgmtAPI
+    deactivate ConsumerMessagesAPI
 ```
 
-## Prefill Flow
-```mermaid
-sequenceDiagram
-    participant ConsumerRegAPI as Consumer Registration API
-    participant PrefillService as Prefill Service
-    participant NatsQ as Nats Queue
-    participant PrefillWorker as Prefill Worker
+All necessary data about consumers is persisted in the `Nats` key-value store. The Consumer Registration API has write-access to it while the Consumer Management API has read-access.
 
-    PrefillWorker->>NatsQ: Subscribe to events
-    ConsumerRegAPI->>PrefillService: Prefill request
-    activate PrefillService
-    PrefillService->>NatsQ: create worker task
-    activate NatsQ
-    NatsQ-->>PrefillService: ACK
-    NatsQ->>PrefillWorker: New Task
-    activate PrefillWorker
-    deactivate NatsQ
-    PrefillWorker->>PrefillWorker: Do the actual Prefill
-    PrefillService->>NatsQ: Watch queue status
-    activate NatsQ
-    PrefillWorker->>NatsQ: Acknowledge Task
-    deactivate PrefillWorker
-    NatsQ-->>PrefillService: Queue message acknowledged
-    PrefillService-->>ConsumerRegAPI: ACK
-    PrefillService->>ConsumerRegAPI: Prefill complete message
-    deactivate NatsQ
-    deactivate PrefillService
-```
+*1 No prefill for this example. What happens if a new Consumer is written to the key-value store, but no queues have been created yet. Currently the queue is created when the first message is sent by the dispatcher.
+Solutions:
+- The create new subscription request is only answered with a 200 OK if the needed queue(s) have been created and object has been persisted into the KV Store.
+If any of this failed, the request has to be retried
+- The ConsumerManagementAPI needs to retry for a bit and then fail if no queues are there. The Queue might be uninitialized until it's first message, which is an undefined time span.
+
+*2 The Prefill queue needs to be blocked. It should appear to the consumer as if the queue is empty. No matter how the queues are managed in the background.
 
 ## Simplified Prefill Flow
 
-The PrefillService ist just proxying requests. Yes it encapsulates the Prefill process but we distribute the Registration Orchestration across separate components.
+We decided to implement the "Simplified Prefill" as a first step.
 
-In this simplified version
-all Provisioning Orchestration is consolidated into one service.
-This makes it easier to develop and debug.
-The functionality can still be encapsulated into it's own module including Ports and Adapters.
+It's advantages are:
+- Simpler to develop
+- Simpler to debug
+- Less risky compared to the Kubernetes Operator solution.
+-
+
 
 ```mermaid
 sequenceDiagram
@@ -106,15 +133,15 @@ sequenceDiagram
     activate PrefillWorker
     deactivate NatsQ
     PrefillWorker->>PrefillWorker: Do the actual Prefill
-    ConsumerRegAPI->>NatsQ: Watch queue status
-    activate NatsQ
-    PrefillWorker->>NatsQ: Acknowledge Task
+    PrefillWorker->>NatsQ: In progress acknowledgement
+    PrefillWorker->>ConsumerRegAPI: Queue message acknowledged
+    PrefillWorker->>NatsQ: Final acknowledgement
     deactivate PrefillWorker
-    NatsQ-->>ConsumerRegAPI: Queue message acknowledged
-    deactivate NatsQ
     deactivate ConsumerRegAPI
 ```
 
+`create worker task` means that the Consumer Registration API creates a new task message in a dedicated Prefill Worker queue.
+This persists the prefill request and enables automatic retries.
 
 ## Prefill Flow Utilizing Kubernetes Jobs
 
@@ -124,26 +151,26 @@ We can use the operator pattern to accomplish prefill tasks as long as we don't 
 
 ### Intro
 
-The kubernetes operator pattern:
-an `operator` pod manages other kubernetes resources by interacting with the kubernetes api for inside the cluster.
+The Kubernetes operator pattern:
+an `operator` pod manages other Kubernetes resources by interacting with the Kubernetes API for inside the cluster.
 
 Operators frequently need two things:
-- RoleBinding to have read and write access to specific kubernetes object types.
-- Custom Resource Definition (CRD) extend the kubernetes api with custom Objects.
-These are frequently used to define the desired state that the operator should configure (Give me a 5 node Postgres cluster)
+- RoleBinding to have read and write access to specific Kubernetes object types.
+- Custom Resource Definition (CRD) extend the Kubernetes API with custom Objects.
+These are frequently used to define the desired state that the operator should configure (Give me a 5 node PostgreSQL cluster)
 
 Our understanding was, that this is not allowed in the `openDesk` context.
-Thorsten Rossner and Dominik Kaminski clarified this misconception:
+`Thorsten Rossner` and `Dominik Kaminski` clarified this misconception:
 
-The main `openDesk` requirement is: "everything needs to be installable in namespaces"
+The main `openDesk` requirement is: "everything needs to be installed in one namespace"
 - RoleBindings are namespace-specific (ClusterRoleBindings are the same but with cluster-scope)
 - CRD's are always cluster-scoped **and thus forbidden in the openDesk context**
 
 ### Advantages
 
 - Prefill containers are only running when needed
-- Kubernetes takes care of retries, exponential backoff...
-- What's happening is transparent to the user (Via the kubernetes API)
+- Kubernetes takes care of retries, exponential back-off...
+- What's happening is transparent to the user (Via the Kubernetes API)
 - Each prefill job gets it's own container
 - There are no long-running HTTP API or Daemon processes associated with Prefill.
 Instead most of the complexity is moved to the Kubernetes API
