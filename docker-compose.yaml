@@ -1,15 +1,19 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 services:
   app:
     build:
       context: .
-      dockerfile: docker/provisioning-dispatch/Dockerfile
+      dockerfile: docker/events-and-consumer-api/Dockerfile
       args:
         - UCS_BASE_IMAGE_TAG=latest
-    container_name: "provisioning-dispatcher-dev"
+    container_name: "events-and-consumer-api-dev"
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      UDM_HOST: "udm-rest-api"
     depends_on:
       - "nats"
     ports:
@@ -28,17 +32,18 @@ services:
   dispatcher:
     build:
       context: .
-      dockerfile: docker/dispatcher-service/Dockerfile
+      dockerfile: docker/dispatcher/Dockerfile
       args:
         - UCS_BASE_IMAGE_TAG=latest
-    container_name: "dispatcher-service"
+    container_name: "provisioning-dispatcher"
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      CONSUMER_EVENT_HOST: "app"
     depends_on:
       - "nats"
-
+      - "app"
 
   udm-listener:
     build:
@@ -77,9 +82,9 @@ services:
     platform: "linux/amd64"
     environment:
       nats_host: nats
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning-api/provisioning-dispatch-test:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/events-and-consumer-api-test:${IMAGE_TAG:-latest}
     build:
-      context: docker/provisioning-dispatch-test
+      context: docker/events-and-consumer-api-test
     volumes:
       - type: bind
         source: .
@@ -141,6 +146,7 @@ services:
 
   udm-rest-api:
     image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:latest
+    container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
       - 9979:9979

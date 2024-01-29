@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+
+apiVersion: "v2"
+type: "application"
+name: "provisioning"
+description: "A Helm chart for the Univention Management Stack Provisioning Service"
+home: "https://www.univention.de/"
+version: "0.1.0"
+
+dependencies:
+  - name: "common"
+    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
+    version: "0.*"
+  - name: "nats"
+    repository: "https://nats-io.github.io/k8s/helm/charts/"
+    version: "^1.1.5"
+    condition: "nats.bundled"
+  - name: "events-and-consumer-api"
+    version: "*"
+  - name: "dispatcher"
+    version: "*"
+  - name: "udm-listener"
+    version: "*"
+
+...

@@ -1,8 +1,11 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 ---
 
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.12.0"
+    ref: "v1.16.2"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
@@ -14,6 +17,8 @@ include:
       - "jobs/semantic-release-env.yaml"
       - "jobs/container-build-souvap.yaml"
       - "jobs/package-and-publish-helm-charts-souvap.yaml"
+      - "jobs/check-debian-updates.yaml"
+
   - project: "univention/dist/docker-services"
     ref: "master"
     file:
@@ -23,27 +28,27 @@ lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
-    - helm dep build helm/provisioning-api/charts/api
-    - helm dep build helm/provisioning-api/charts/dispatcher
-    - helm dep build helm/provisioning-api/charts/udm-listener
+    - helm dep build helm/provisioning/charts/events-and-consumer-api
+    - helm dep build helm/provisioning/charts/dispatcher
+    - helm dep build helm/provisioning/charts/udm-listener
 
 .build-matrix: &build-matrix
-  - IMAGE_NAME: "provisioning-dispatch"
+  - IMAGE_NAME: "events-and-consumer-api"
     KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
-  - IMAGE_NAME: "provisioning-dispatch-test"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+  - IMAGE_NAME: "events-and-consumer-api-test"
     KANIKO_ARGS: "--target test"
-    DOCKERFILE_PATH: "docker/provisioning-dispatch/Dockerfile"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
   - IMAGE_NAME: "udm-listener"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
   - IMAGE_NAME: "dispatcher"
     KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/dispatcher-service/Dockerfile"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "provisioning-dispatch"
+    - "events-and-consumer-api"
   - IMAGE_NAME:
     - "udm-listener"
   - IMAGE_NAME:
@@ -71,6 +76,10 @@ test-integration:
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: "never"
+    - when: "on_success"
   before_script:
     # Allow that the Docker API version is negotiated between client and server
     - unset DOCKER_API_VERSION
@@ -91,9 +100,13 @@ test-integration:
     - docker compose down --volumes
 
 # TODO: docker compose run nats ... somehow
-test-provisioning-dispatch:
+test-events-and-consumer-api:
   stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/provisioning-dispatch-test:${RELEASE_VERSION}"
+  image: "${CI_REGISTRY_IMAGE}/events-and-consumer-api-test:${RELEASE_VERSION}"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: "never"
+    - when: "on_success"
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
@@ -113,4 +126,9 @@ container-sign-souvap:
   parallel:
     matrix: *publish-matrix
 
+check-debian-updates:
+  parallel:
+    matrix: *publish-matrix
+  variables:
+    TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 ...

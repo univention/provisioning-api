@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+# Default values for provisioning.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+## Global values
+affinity: {}
+environment: {}
+fullnameOverride: ""
+nameOverride: ""
+nodeSelector: {}
+podAnnotations: {}
+podSecurityContext: {}
+replicaCount: 1
+securityContext: {}
+tolerations: []
+
+
+## Application-specific - events-and-consumer-api chart
+events-and-consumer-api: {}
+
+## Application-specific - dispatcher chart
+dispatcher: {}
+
+## Application-specific - udm-listener chart
+udm-listener: {}
+
+
+# -- NATS server settings.
+nats:
+  # -- Set to `true` if you want NATS to be installed as well.
+  bundled: true
+  config:
+    jetstream:
+      enabled: true
+
+      fileStorage:
+        pvc:
+          size: 1Gi
+  statefulSet:
+    spec:
+      template:
+        spec:
+          serviceAccountName: "nats"
+  container:
+    image:
+      repository: "nats"
+      tag: "2.10.5-alpine"
+      registry: "docker.io"
+  reloader:
+    image:
+      repository: "natsio/nats-server-config-reloader"
+      tag: "0.14.0"
+      registry: "docker.io"
+  natsBox:
+    container:
+      image:
+        repository: "natsio/nats-box"
+        tag: "0.14.1"
+        registry: "docker.io"
+
+...

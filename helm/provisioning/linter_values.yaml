@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+
+# Dummy values for running the Helm linter on provisioning.
+# Run it like this: helm lint -f values.yaml -f linter_values.yaml .
+
+
+## Application-specific - events-and-consumer-api chart
+events-and-consumer-api:
+  ingress:
+    host: "localhost"
+    tls:
+      enabled: false
+  image:
+    tag: "latest"
+  config:
+    logLevel: "DEBUG"
+    rootPath: "/univention/provisioning-api"
+    natsHost: "localhost"
+    natsPort: 4222
+
+
+## Application-specific - dispatcher chart
+dispatcher:
+  image:
+    tag: "latest"
+  config:
+    natsHost: ""
+    natsPort: 4222
+
+
+## Application-specific - udm-listener chart
+udm-listener:
+  image:
+    tag: "latest"
+  config:
+    environment: "production"
+    caCert: "abcd1234"
+    debugLevel: "4"
+    ldapBaseDn: "dc=univention-organization,dc=intranet"
+    ldapHost: "ldap-server"
+    ldapHostDn: "cn=admin,dc=univention-organization,dc=intranet"
+    ldapPassword: "secret"
+    ldapPort: "389"
+    notifierServer: "ldap-notifier"
+    tlsMode: "off"
+
+## Kubernetes ingress
+ingress:
+  enabled: false
+  host: "portal.example.develop.souvap-univention.de"
+
+
+## Istio based
+istio:
+  enabled: true
+  host: "portal.example.develop.souvap-univention.de"
+
+
+## Container deployment probes
+probes:
+  liveness:
+    enabled: false
+
+  readiness:
+    enabled: false
+
+...

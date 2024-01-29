@@ -1,12 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import logging
 
 import httpx
 import pytest
 
-
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from tests.conftest import (
-    REALMS_TOPICS,
+    REALMS_TOPICS_STR,
     REALM,
     TOPIC,
     PUBLISHER_NAME,
@@ -42,7 +44,7 @@ async def messages_client():
 class TestConsumer:
     async def test_create_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.post(
-            f"{api_prefix}/subscription/",
+            f"{api_prefix}/subscriptions",
             json={
                 "name": SUBSCRIBER_NAME,
                 "realm_topic": ["foo", "bar"],
@@ -53,21 +55,24 @@ class TestConsumer:
 
     async def test_get_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.get(
-            f"{api_prefix}/subscription/{SUBSCRIBER_NAME}"
+            f"{api_prefix}/subscriptions/{SUBSCRIBER_NAME}"
         )
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == SUBSCRIBER_NAME
         assert data["fill_queue"]
         assert data["fill_queue_status"] == FillQueueStatus.done
-        assert len(data["realms_topics"]) == len(REALMS_TOPICS)
+        assert len(data["realms_topics"]) == len([REALMS_TOPICS_STR])
         assert all(
-            (realm_topic in data["realms_topics"] for realm_topic in REALMS_TOPICS)
+            (
+                realm_topic in data["realms_topics"]
+                for realm_topic in [REALMS_TOPICS_STR]
+            )
         )
 
     async def test_delete_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.delete(
-            f"{api_prefix}/subscription/{SUBSCRIBER_NAME}?realm={REALM}&topic={TOPIC}",
+            f"{api_prefix}/subscriptions/{SUBSCRIBER_NAME}?realm={REALM}&topic={TOPIC}",
         )
         assert response.status_code == 200
 
@@ -76,7 +81,7 @@ class TestConsumer:
         messages_client: httpx.AsyncClient,
     ):
         response = await messages_client.get(
-            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message"
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages"
         )
         assert response.status_code == 200
         data = response.json()
@@ -97,7 +102,7 @@ class TestConsumer:
             "headers": {"Nats-Expected-Stream": f"stream:{SUBSCRIBER_NAME}"},
         }
         response = await messages_client.post(
-            f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/message/",
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages",
             json={"msg": nats_msg, "report": {"status": "ok"}},
         )
         assert response.status_code == 200

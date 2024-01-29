@@ -1,0 +1,18 @@
+dependencies:
+- name: common
+  repository: oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm
+  version: 0.6.0
+- name: nats
+  repository: https://nats-io.github.io/k8s/helm/charts/
+  version: 1.1.7
+- name: events-and-consumer-api
+  repository: ""
+  version: '*'
+- name: dispatcher
+  repository: ""
+  version: '*'
+- name: udm-listener
+  repository: ""
+  version: '*'
+digest: sha256:5839bcd0d035506652cba7baec2950cfe989c25f9aa8d9e91a7ff2b49a6bc2ed
+generated: "2024-01-22T22:21:51.24287+01:00"

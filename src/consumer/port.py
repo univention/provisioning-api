@@ -1,30 +1,30 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import contextlib
 import json
 from typing import List, Annotated, Optional, Union
 
 from fastapi import Depends
 
-from shared.adapters.nats_adapter import NatsAdapter
-from shared.adapters.redis_adapter import RedisAdapter
-from shared.config import settings
+from shared.adapters.nats_adapter import NatsMQAdapter
+from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.models import Message
 
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 
 class ConsumerPort:
     def __init__(self):
-        self.redis_adapter = RedisAdapter()
-        self.nats_adapter = NatsAdapter()
+        self.mq_adapter = NatsMQAdapter()
+        self.kv_adapter = NatsKVAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = ConsumerPort()
-        await port.nats_adapter.nats.connect(
-            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
-        )
-        await port.nats_adapter.create_kv_store()
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         try:
             yield port
         finally:
@@ -33,72 +33,68 @@ class ConsumerPort:
     @staticmethod
     async def port_dependency():
         port = ConsumerPort()
-        await port.nats_adapter.nats.connect(
-            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
-        )
-        await port.nats_adapter.create_kv_store()
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         try:
             yield port
         finally:
             await port.close()
 
     async def close(self):
-        await self.redis_adapter.close()
-        await self.nats_adapter.close()
+        await self.mq_adapter.close()
+        await self.kv_adapter.close()
 
     async def add_live_message(self, subject: str, message: Message):
-        await self.nats_adapter.add_message(subject, message)
+        await self.mq_adapter.add_message(subject, message)
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
-        await self.redis_adapter.add_prefill_message(subscriber_name, message)
+        await self.mq_adapter.add_message(subscriber_name, message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
-        await self.redis_adapter.delete_prefill_messages(subscriber_name)
+        pass
 
     async def get_next_message(
         self, subscriber_name: str, timeout: float, pop: bool
-    ) -> List[NatsMessage]:
-        return await self.nats_adapter.get_messages(subscriber_name, timeout, 1, pop)
+    ) -> List[MQMessage]:
+        return await self.mq_adapter.get_messages(subscriber_name, timeout, 1, pop)
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
-        return await self.nats_adapter.get_messages(
-            subscriber_name, timeout, count, pop
-        )
+    ) -> List[MQMessage]:
+        return await self.mq_adapter.get_messages(subscriber_name, timeout, count, pop)
 
-    async def remove_message(self, msg: NatsMessage):
-        await self.nats_adapter.remove_message(msg)
+    async def remove_message(self, msg: MQMessage):
+        await self.mq_adapter.remove_message(msg)
 
     async def delete_queue(self, stream_name: str):
-        await self.nats_adapter.delete_stream(stream_name)
+        await self.mq_adapter.delete_stream(stream_name)
 
     async def get_dict_value(self, name: str) -> Optional[dict]:
-        result = await self.nats_adapter.get_value(name)
+        result = await self.kv_adapter.get_value(name)
         return json.loads(result.value.decode("utf-8")) if result else None
 
     async def get_list_value(self, key: str) -> List[str]:
-        result = await self.nats_adapter.get_value(key)
+        result = await self.kv_adapter.get_value(key)
         return result.value.decode("utf-8").split(",") if result else []
 
     async def get_str_value(self, key: str) -> Optional[str]:
-        result = await self.nats_adapter.get_value(key)
+        result = await self.kv_adapter.get_value(key)
         return result.value.decode("utf-8") if result else None
 
     async def delete_kv_pair(self, key: str):
-        await self.nats_adapter.delete_kv_pair(key)
+        await self.kv_adapter.delete_kv_pair(key)
 
     async def put_value(self, key: str, value: Union[str, dict]):
-        await self.nats_adapter.put_value(key, value)
+        await self.kv_adapter.put_value(key, value)
 
     async def put_list_value(self, key: str, value: list[str]):
-        await self.nats_adapter.put_value(key, ",".join(value))
+        await self.kv_adapter.put_value(key, ",".join(value))
 
     async def create_stream(self, subject):
-        await self.nats_adapter.create_stream(subject)
+        await self.mq_adapter.create_stream(subject)
 
     async def create_consumer(self, subject):
-        await self.nats_adapter.create_consumer(subject)
+        await self.mq_adapter.create_consumer(subject)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

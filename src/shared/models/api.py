@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import enum
 from typing import Any, Dict, List
 from pydantic import BaseModel, Field
@@ -20,12 +23,11 @@ class Event(BaseModel):
     A message as it arrives on the API.
     """
 
-    # The realm of the message, e.g. `udm`.
-    realm: str
-    # The topic of the message, e.g. `users/user`.
-    topic: str
-    # The content of the message.
-    body: Dict[str, Any]
+    realm: str = Field(description="The realm of the message, e.g. `udm`.")
+
+    topic: str = Field(description="The topic of the message, e.g. `users/user`.")
+
+    body: Dict[str, Any] = Field(description="The content of the message.")
 
 
 class MessageProcessingStatus(str, enum.Enum):
@@ -36,5 +38,6 @@ class MessageProcessingStatus(str, enum.Enum):
 class MessageProcessingStatusReport(BaseModel):
     """A subscriber reporting whether a message was processed."""
 
-    # Whether the message was processed by the subscriber.
-    status: MessageProcessingStatus
+    status: MessageProcessingStatus = Field(
+        description="Whether the message was processed by the subscriber."
+    )

@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+{{ include "common.configMap" (dict "top" . "overrides" "udm-listener.configMap") }}
+{{- define "udm-listener.configMap" }}
+{{- with .top.Values.config }}
+data:
+  CA_CERT: "{{ .caCert }}"
+  CA_CERT_FILE: "{{ .caCertFile }}"
+  DEBUG_LEVEL: "{{ .debugLevel }}"
+  LDAP_BASE_DN: "{{ .ldapBaseDn }}"
+  LDAP_PASSWORD: "{{ .ldapPassword }}"
+  LDAP_PASSWORD_FILE: "{{ .ldapPasswordFile }}"
+  LDAP_HOST: "{{ .ldapHost }}"
+  LDAP_HOST_DN: "{{ .ldapHostDn }}"
+  LDAP_PORT: "{{ .ldapPort }}"
+  NOTIFIER_SERVER: "{{ default .ldapHost .notifierServer }}"
+  TLS_MODE: "{{ .tlsMode }}"
+{{ end }}
+{{ end }}
+...

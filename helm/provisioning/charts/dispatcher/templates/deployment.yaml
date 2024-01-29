@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+{{ include "common.deployment" (dict "top" . "overrides" "dispatcher.deployment") }}
+
+{{- define "dispatcher.deployment" }}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print .top.Template.BasePath "/configmap.yaml") .top | sha256sum | quote }}
+{{- end }}
+...

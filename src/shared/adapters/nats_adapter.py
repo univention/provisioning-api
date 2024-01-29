@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import asyncio
 import logging
 
@@ -10,8 +13,10 @@ from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
+from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
+from shared.config import settings
 from shared.models import Message
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 
 class NatsKeys:
@@ -27,29 +32,64 @@ class NatsKeys:
         return f"KV_{bucket}"
 
 
-class NatsAdapter:
+class NatsKVAdapter(BaseKVStoreAdapter):
     def __init__(self):
-        self.nats = NATS()
-        self.js = self.nats.jetstream()
-        self.kv_store: Optional[KeyValue] = None
-        self.message_queue = asyncio.Queue()
+        self._nats = NATS()
+        self._js = self._nats.jetstream()
+        self._kv_store: Optional[KeyValue] = None
         self.logger = logging.getLogger(__name__)
 
-    async def close(self):
-        await self.nats.close()
+    async def connect(self):
+        await self._nats.connect([settings.nats_server])
+        await self.create_kv_store()
 
-    async def create_kv_store(self):
-        self.kv_store = await self.js.create_key_value(bucket="Pub_Sub_KV")
+    async def close(self):
+        await self._nats.close()
+
+    async def create_kv_store(self, name: str = "Pub_Sub_KV"):
+        self._kv_store = await self._js.create_key_value(bucket=name)
+
+    async def delete_kv_pair(self, key: str):
+        await self._kv_store.delete(key)
+
+    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
+        try:
+            return await self._kv_store.get(key)
+        except KeyNotFoundError:
+            return None
+
+    async def put_value(self, key: str, value: Union[str, dict]):
+        if not value:
+            await self.delete_kv_pair(key)  # Avoid creating a pair with an empty value
+            return
+
+        if isinstance(value, dict):
+            value = json.dumps(value)
+        await self._kv_store.put(key, value.encode("utf-8"))
+
+
+class NatsMQAdapter(BaseMQAdapter):
+    def __init__(self):
+        self._nats = NATS()
+        self._js = self._nats.jetstream()
+        self._message_queue = asyncio.Queue()
+        self.logger = logging.getLogger(__name__)
+
+    async def connect(self):
+        await self._nats.connect([settings.nats_server])
+
+    async def close(self):
+        await self._nats.close()
 
     async def add_message(self, subject: str, message: Message):
         """Publish a message to a NATS subject."""
-        flat_message = message.flatten()
+        flat_message = message.model_dump()
         stream_name = NatsKeys.stream(subject)
 
         await self.create_stream(subject)
         await self.create_consumer(subject)
 
-        await self.js.publish(
+        await self._js.publish(
             subject,
             json.dumps(flat_message).encode("utf-8"),
             stream=stream_name,
@@ -58,19 +98,17 @@ class NatsAdapter:
 
     async def get_messages(
         self, subject: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         try:
-            await self.js.stream_info(NatsKeys.stream(subject))
+            await self._js.stream_info(NatsKeys.stream(subject))
         except NotFoundError:
             self.logger.error("The stream was not found")
             return []
 
-        sub = await self.js.pull_subscribe(
-            subject,
-            durable=f"durable_name:{subject}",
-            stream=NatsKeys.stream(subject),
+        sub = await self._js.pull_subscribe(
+            subject, durable=f"durable_name:{subject}", stream=NatsKeys.stream(subject)
         )
         try:
             msgs = await sub.fetch(count, timeout)
@@ -85,20 +123,20 @@ class NatsAdapter:
         for msg in msgs:
             data = json.loads(msg.data)
             msgs_to_return.append(
-                NatsMessage(
+                MQMessage(
                     subject=msg.subject, reply=msg.reply, data=data, headers=msg.headers
                 )
             )
 
         return msgs_to_return
 
-    async def remove_message(self, msg: Union[Msg, NatsMessage]):
+    async def remove_message(self, msg: Union[Msg, MQMessage]):
         """Delete a message from a NATS JetStream."""
-        if isinstance(msg, NatsMessage):
+        if isinstance(msg, MQMessage):
             msg.data["body"] = json.dumps(msg.data["body"])
             msg.data = json.dumps(msg.data)
             msg = Msg(
-                _client=self.nats,
+                _client=self._nats,
                 subject=msg.subject,
                 reply=msg.reply,
                 data=msg.data.encode("utf-8"),
@@ -109,68 +147,38 @@ class NatsAdapter:
     async def delete_stream(self, stream_name: str):
         """Delete the entire stream for a given name in NATS JetStream."""
         try:
-            await self.js.stream_info(NatsKeys.stream(stream_name))
-            await self.js.delete_stream(NatsKeys.stream(stream_name))
+            await self._js.stream_info(NatsKeys.stream(stream_name))
+            await self._js.delete_stream(NatsKeys.stream(stream_name))
         except NotFoundError:
             return None
 
-    async def delete_kv_pair(self, key: str):
-        await self.kv_store.delete(key)
-
-    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
-        try:
-            return await self.kv_store.get(key)
-        except KeyNotFoundError:
-            return None
-
-    async def put_value(self, key: str, value: Union[str, dict]):
-        if not value:
-            await self.delete_kv_pair(key)
-            return
-
-        if isinstance(value, dict):
-            value = json.dumps(value)
-        await self.kv_store.put(key, value.encode("utf-8"))
-
-    async def get_subscribers_for_key(self, key: str):
-        names = await self.get_value(key)
-        return names.value.decode("utf-8").split(",") if names else []
-
-    async def update_subscribers_for_key(self, key: str, name: str) -> None:
-        try:
-            subs = await self.kv_store.get(key)
-            updated_subs = subs.value.decode("utf-8") + f",{name}"
-            await self.put_value(key, updated_subs)
-        except KeyNotFoundError:
-            await self.put_value(key, name)
-
     async def cb(self, msg):
-        await self.message_queue.put(msg)
+        await self._message_queue.put(msg)
 
     async def subscribe_to_queue(self, subject):
-        await self.nats.subscribe(subject, cb=self.cb)
+        await self._nats.subscribe(subject, cb=self.cb)
 
     async def wait_for_event(self) -> Msg:
-        return await self.message_queue.get()
+        return await self._message_queue.get()
 
     async def create_stream(self, subject: str):
         stream_name = NatsKeys.stream(subject)
 
         try:
-            await self.js.stream_info(stream_name)
+            await self._js.stream_info(stream_name)
         except NotFoundError:
             self.logger.info(f"Creating new stream for {subject}")
-            await self.js.add_stream(name=stream_name, subjects=[subject])
+            await self._js.add_stream(name=stream_name, subjects=[subject])
 
     async def create_consumer(self, subject: str):
         stream_name = NatsKeys.stream(subject)
         durable_name = NatsKeys.durable_name(subject)
 
         try:
-            await self.js.consumer_info(stream_name, durable_name)
+            await self._js.consumer_info(stream_name, durable_name)
         except NotFoundError:
             self.logger.info(f"Creating new consumer for {subject}")
-            await self.js.add_consumer(
+            await self._js.add_consumer(
                 stream_name,
                 ConsumerConfig(durable_name=durable_name),
             )

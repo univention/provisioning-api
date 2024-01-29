@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import asyncio
 import pytest
 import requests
@@ -34,7 +37,7 @@ async def test_workflow():
     connection = connect_ldap_server()
 
     response = requests.post(
-        f"{BASE_URL}{subscriptions_api_prefix}/subscription",
+        f"{BASE_URL}{subscriptions_api_prefix}/subscriptions",
         json={
             "name": name,
             "realm_topic": [REALM, TOPIC],
@@ -87,7 +90,7 @@ async def test_workflow():
     connection.delete(dn)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=5&pop=true"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 

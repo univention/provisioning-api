@@ -1,8 +1,12 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import logging
 
 import aiohttp
-from types import TracebackType
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional
+
+from shared.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -13,33 +17,28 @@ class UDMAdapter:
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMAdapter("http://ucs/univention/udm", "Administrator", "univention") as adapter:
+    async with UDMAdapter("http://localhost:9979/udm", "username", "password") as adapter:
         await adapter.get_object_types()
     ```
     """
 
-    def __init__(self, base_url: str, username: str, password: str):
-        self.base_url = base_url
+    def __init__(self):
+        self.base_url = settings.udm_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(username, password)
+        self.auth = aiohttp.BasicAuth(settings.udm_username, settings.udm_password)
         self.headers = [("accept", "application/json")]
         self._session = None
 
-    async def __aenter__(self) -> "UDMAdapter":
+    async def connect(self) -> "UDMAdapter":
         if not self._session:
             self._session = aiohttp.ClientSession(
                 auth=self.auth, headers=self.headers, raise_for_status=True
             )
         return self
 
-    async def __aexit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc: Optional[BaseException],
-        tb: Optional[TracebackType],
-    ) -> None:
+    async def close(self) -> None:
         if self._session:
             await self._session.close()
 
@@ -48,7 +47,7 @@ class UDMAdapter:
 
         Each entry has the keys `name`, `title` and `href`.
         """
-        async with self._session.get(f"{self.base_url}/") as request:
+        async with self._session.get(f"{self.base_url}") as request:
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
@@ -69,11 +68,11 @@ class UDMAdapter:
             params["position"] = position
 
         async with self._session.get(
-            f"{self.base_url}/{object_type}/", params=params
+            f"{self.base_url}{object_type}/", params=params
         ) as request:
             response = await request.json()
             n_results = response["results"]
-            logger.info(f"Found {n_results} results for {object_type}.")
+            logger.info("Found %s results for %s.", n_results, object_type)
             if n_results > 0:
                 uris = [obj["uri"] for obj in response["_embedded"]["udm:object"]]
                 return uris

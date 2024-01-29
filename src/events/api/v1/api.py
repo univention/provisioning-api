@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import fastapi
 import logging
 
@@ -11,7 +14,7 @@ logger = logging.getLogger(__name__)
 router = fastapi.APIRouter()
 
 
-@router.post("/events/", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
+@router.post("/events", status_code=fastapi.status.HTTP_202_ACCEPTED, tags=["source"])
 async def create_new_message(
     data: Message,
     port: EventsPortDependency,

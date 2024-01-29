@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import httpx
 import pytest
 from tests.conftest import FLAT_MESSAGE
@@ -14,8 +17,6 @@ async def client():
 
 @pytest.mark.anyio
 class TestEvents:
-    async def test_add_event(
-        self, client: httpx.AsyncClient, override_dependencies_events
-    ):
-        response = await client.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
+    async def test_add_event(self, client: httpx.AsyncClient):
+        response = await client.post(f"{events_api_prefix}/events", json=FLAT_MESSAGE)
         assert response.status_code == 202

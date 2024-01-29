@@ -1,4 +1,8 @@
-import logging
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+from typing import Optional
+from prefill import init_queue as init_prefill_queue
 from typing import List
 
 import fastapi
@@ -7,25 +11,23 @@ from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 
-logger = logging.getLogger(__name__)
-
 router = fastapi.APIRouter()
 
 
-@router.get("/subscription/", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
+@router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
-    port: ConsumerPortDependency,
+    port: ConsumerPortDependency, realm_topic: Optional[str] = None
 ) -> List[shared.models.Subscriber]:
-    """Return all subscriptions."""
+    """Return a list of all known subscribers or with the given realm_topic."""
 
     # TODO: check authorization
 
     service = SubscriptionService(port)
-    return await service.get_subscribers()
+    return await service.get_subscribers(realm_topic)
 
 
 @router.get(
-    "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
 async def get_subscription(
     name: str, port: ConsumerPortDependency
@@ -45,7 +47,7 @@ async def get_subscription(
 
 
 @router.post(
-    "/subscription/", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
+    "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
 )
 async def create_subscription(
     subscriber: shared.models.NewSubscriber,
@@ -65,9 +67,16 @@ async def create_subscription(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
         )
 
+    if subscriber.fill_queue:
+        tasks.add_task(
+            init_prefill_queue,
+            subscriber.name,
+            subscriber.realm_topic,
+        )
+
 
 @router.delete(
-    "/subscription/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
 async def cancel_subscription(
     name: str, realm: str, topic: str, port: ConsumerPortDependency

@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+{{- if and .Values.istio.enabled .Values.istio.virtualService.enabled -}}
+---
+
+apiVersion: "networking.istio.io/v1beta1"
+kind: "VirtualService"
+metadata:
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+  {{- with .Values.istio.virtualService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  hosts:
+    - {{ required "The hostname has to be set in \"istio.host\"." .Values.istio.host | quote }}
+  gateways:
+    - {{ .Values.istio.gateway.externalGatewayName | default (printf "%s-%s" (include "common.names.fullname" .) "-gateway") }}
+  http:
+    - match:
+        - uri:
+            prefix: {{ .Values.provisioningApi.environment.apiPrefix | quote }}
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            port:
+              number: {{ .Values.service.ports.http.port }}
+            host: {{ include "common.names.fullname" . | quote }}
+      headers:
+        request:
+          set:
+            x-forwarded-host: "{{ .Values.istio.host }}"
+...
+{{- end }}

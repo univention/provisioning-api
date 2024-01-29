@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import pytest
 from fastapi.testclient import TestClient
 from tests.conftest import REALM, TOPIC, BODY, FLAT_MESSAGE
@@ -9,14 +12,14 @@ from consumer.main import app
 
 
 @pytest.mark.anyio
-def test_websocket(override_dependencies_events):
+def test_websocket():
     client = TestClient(app)
 
-    response = client.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
+    response = client.post(f"{events_api_prefix}/events", json=FLAT_MESSAGE)
     assert response.status_code == 202
 
     with client.websocket_connect(
-        f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/ws"
+        f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 

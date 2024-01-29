@@ -1,37 +1,27 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 from copy import deepcopy
-from unittest.mock import AsyncMock, patch, call
+from unittest.mock import AsyncMock, call
 import pytest
 
 from tests.conftest import (
     SUBSCRIBER_INFO,
-    REALM,
-    TOPIC,
     REALM_TOPIC,
     SUBSCRIBER_NAME,
-    REALMS_TOPICS,
+    REALMS_TOPICS_STR,
 )
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
 
 
 @pytest.fixture
-def port() -> AsyncMock:
-    return (
-        patch("consumer.subscriptions.service.subscription.ConsumerPort")
-        .start()
-        .return_value
-    )
-
-
-@pytest.fixture
-def sub_service(port) -> SubscriptionService:
-    sub_service = SubscriptionService(port)
-    return sub_service
+def sub_service() -> SubscriptionService:
+    return SubscriptionService(AsyncMock())
 
 
 @pytest.mark.anyio
 class TestSubscriptionService:
-    realm_topic = f"{REALM}:{TOPIC}"
     new_subscriber = NewSubscriber(
         name=SUBSCRIBER_NAME,
         realm_topic=REALM_TOPIC,
@@ -44,12 +34,12 @@ class TestSubscriptionService:
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
         subscriber = Subscriber(
             name=SUBSCRIBER_NAME,
-            realms_topics=REALMS_TOPICS,
+            realms_topics=[REALMS_TOPICS_STR],
             fill_queue=True,
             fill_queue_status="done",
         )
 
-        result = await sub_service.get_subscribers()
+        result = await sub_service.get_subscribers(None)
 
         sub_service._port.get_list_value.assert_called_once_with("subscribers")
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
@@ -58,7 +48,7 @@ class TestSubscriptionService:
     async def test_get_subscribers_empty_result(self, sub_service):
         sub_service._port.get_list_value = AsyncMock(return_value=[])
 
-        result = await sub_service.get_subscribers()
+        result = await sub_service.get_subscribers(None)
 
         sub_service._port.get_list_value.assert_called_once_with("subscribers")
         assert result == []
@@ -78,7 +68,6 @@ class TestSubscriptionService:
         new_sub = deepcopy(self.new_subscriber)
         new_sub.realm_topic = ["abc", "def"]
         sub_info = deepcopy(SUBSCRIBER_INFO)
-        sub_service._port.put_value = AsyncMock()
         sub_service._port.get_dict_value = AsyncMock(return_value=sub_info)
         sub_service._port.get_str_value = AsyncMock(return_value=None)
 
@@ -98,7 +87,6 @@ class TestSubscriptionService:
     async def test_create_subscription_existing_subscription(
         self, sub_service: SubscriptionService
     ):
-        sub_service._port.put_value = AsyncMock()
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
 
         with pytest.raises(ValueError) as e:
@@ -109,7 +97,6 @@ class TestSubscriptionService:
         assert "Subscription for the given realm_topic already exists" == str(e.value)
 
     async def test_add_subscriber(self, sub_service: SubscriptionService):
-        sub_service._port.put_value = AsyncMock()
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
         sub_service._port.get_str_value = AsyncMock(side_effect=[None, None])
         sub_service._port.create_stream = AsyncMock()
@@ -153,7 +140,6 @@ class TestSubscriptionService:
         self, sub_service: SubscriptionService
     ):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
-        sub_service._port.put_value = AsyncMock()
 
         with pytest.raises(ValueError) as e:
             await sub_service.set_subscriber_queue_status(
@@ -169,7 +155,6 @@ class TestSubscriptionService:
     ):
         sub_info = deepcopy(SUBSCRIBER_INFO)
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
-        sub_service._port.put_value = AsyncMock()
 
         result = await sub_service.set_subscriber_queue_status(
             SUBSCRIBER_NAME, FillQueueStatus.pending
@@ -184,7 +169,6 @@ class TestSubscriptionService:
         self, sub_service: SubscriptionService
     ):
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
-        sub_service._port.put_value = AsyncMock()
 
         with pytest.raises(ValueError) as e:
             await sub_service.cancel_subscription(SUBSCRIBER_NAME, "abc:def")
@@ -197,7 +181,6 @@ class TestSubscriptionService:
         self, sub_service: SubscriptionService
     ):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
-        sub_service._port.put_value = AsyncMock()
 
         with pytest.raises(ValueError) as e:
             await sub_service.cancel_subscription(SUBSCRIBER_NAME, "abc:def")
@@ -212,14 +195,12 @@ class TestSubscriptionService:
         res_sub_info["realms_topics"] = []
         sub_service._port.get_dict_value = AsyncMock(return_value=sub_info)
         sub_service._port.get_list_value = AsyncMock(return_value=[SUBSCRIBER_NAME])
-        sub_service._port.put_list_value = AsyncMock()
-        sub_service._port.put_value = AsyncMock()
 
         await sub_service.cancel_subscription(SUBSCRIBER_NAME, "udm:groups/group")
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        sub_service._port.get_list_value.assert_called_once_with(self.realm_topic)
-        sub_service._port.put_list_value.assert_called_once_with(self.realm_topic, [])
+        sub_service._port.get_list_value.assert_called_once_with(REALMS_TOPICS_STR)
+        sub_service._port.put_list_value.assert_called_once_with(REALMS_TOPICS_STR, [])
         sub_service._port.put_value.assert_called_once_with(
             self.subscriber, res_sub_info
         )

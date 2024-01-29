@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import asyncio
 
 from src.dispatcher.port import DispatcherPort
@@ -8,7 +11,7 @@ from daemoniker import Daemonizer
 async def run_dispatcher():
     async with DispatcherPort.port_context() as port:
         service = DispatcherService(port)
-        await service.store_event_in_consumer_queues()
+        await service.dispatch_events()
 
 
 def main():

@@ -1,4 +1,5 @@
-from typing import Generator, Any
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from fastapi.testclient import TestClient
 import httpx
@@ -27,11 +28,10 @@ async def consumer():
 async def test_udm_create_user_event_is_routed_correctly(
     producer: httpx.AsyncClient,
     consumer: httpx.AsyncClient,
-    override_dependencies_events: Generator[Any, Any, None],
 ):
     # register a consumer
     response = await consumer.post(
-        f"{subscriptions_api_prefix}/subscription/",
+        f"{subscriptions_api_prefix}/subscriptions",
         json={
             "name": SUBSCRIBER_NAME,
             "realm_topic": ["foo", "bar"],
@@ -41,13 +41,13 @@ async def test_udm_create_user_event_is_routed_correctly(
     assert response.status_code == 201
 
     # call event api with new user event
-    response = await producer.post(f"{events_api_prefix}/events/", json=FLAT_MESSAGE)
+    response = await producer.post(f"{events_api_prefix}/events", json=FLAT_MESSAGE)
     assert response.status_code == 202
 
     message_consumer = TestClient(app)
     # evaluate that the message about a new user is received by the consumer
     with message_consumer.websocket_connect(
-        f"{messages_api_prefix}/subscription/{SUBSCRIBER_NAME}/ws"
+        f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 
