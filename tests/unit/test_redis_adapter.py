@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 import pytest
 from fakeredis.aioredis import FakeRedis
 
-from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIBER_NAME
+from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIPTION_NAME
 from shared.adapters.redis_adapter import RedisAdapter
 from shared.models import FillQueueStatus
 
@@ -15,6 +15,11 @@ from shared.models import FillQueueStatus
 @pytest.fixture
 def fake_redis():
     return FakeRedis()
+
+
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
 
 
 @pytest.fixture
@@ -31,16 +36,16 @@ def pipeline() -> AsyncMock:
 
 @pytest.mark.anyio
 class TestRedisAdapter:
-    queue_name = f"queue:{SUBSCRIBER_NAME}"
-    subscriber_topics = f"subscriber_topics:{SUBSCRIBER_NAME}"
-    subscriber = f"subscriber:{SUBSCRIBER_NAME}"
+    queue_name = f"queue:{SUBSCRIPTION_NAME}"
+    subscriber_topics = f"subscriber_topics:{SUBSCRIPTION_NAME}"
+    subscriber = f"subscriber:{SUBSCRIPTION_NAME}"
 
     async def test_add_live_message(
         self, redis_adapter: RedisAdapter, fake_redis: FakeRedis
     ):
         fake_redis.xadd = AsyncMock()
 
-        result = await redis_adapter.add_live_message(SUBSCRIBER_NAME, MESSAGE)
+        result = await redis_adapter.add_live_message(SUBSCRIPTION_NAME, MESSAGE)
         fake_redis.xadd.assert_called_once()
         fake_redis.xadd.assert_called_once_with(self.queue_name, FLAT_MESSAGE, "*")
         assert result is None
@@ -50,7 +55,7 @@ class TestRedisAdapter:
     ):
         fake_redis.xadd = AsyncMock()
 
-        result = await redis_adapter.add_prefill_message(SUBSCRIBER_NAME, MESSAGE)
+        result = await redis_adapter.add_prefill_message(SUBSCRIPTION_NAME, MESSAGE)
 
         fake_redis.xadd.assert_called_once_with(self.queue_name, FLAT_MESSAGE, "0-*")
         assert result is None
@@ -60,7 +65,7 @@ class TestRedisAdapter:
     ):
         fake_redis.xtrim = AsyncMock()
 
-        result = await redis_adapter.delete_prefill_messages(SUBSCRIBER_NAME)
+        result = await redis_adapter.delete_prefill_messages(SUBSCRIPTION_NAME)
 
         fake_redis.xtrim.assert_called_once_with(self.queue_name, minid=1)
         assert result is None
@@ -70,7 +75,7 @@ class TestRedisAdapter:
     ):
         fake_redis.xread = AsyncMock(return_value={})
 
-        result = await redis_adapter.get_next_message(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_next_message(SUBSCRIPTION_NAME)
 
         fake_redis.xread.assert_called_once_with(
             {self.queue_name: "0-0"}, count=1, block=None
@@ -86,7 +91,7 @@ class TestRedisAdapter:
             return_value={self.queue_name: [[("1111", FLAT_MESSAGE)]]}
         )
 
-        result = await redis_adapter.get_next_message(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_next_message(SUBSCRIPTION_NAME)
 
         fake_redis.xread.assert_called_once_with(
             {self.queue_name: "0-0"}, count=1, block=None
@@ -98,7 +103,7 @@ class TestRedisAdapter:
     ):
         fake_redis.xrange = AsyncMock(return_value=[])
 
-        result = await redis_adapter.get_messages(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_messages(SUBSCRIPTION_NAME)
 
         fake_redis.xrange.assert_called_once_with(self.queue_name, "-", "+", None)
         assert result == []
@@ -112,7 +117,7 @@ class TestRedisAdapter:
             return_value=[("0000", FLAT_MESSAGE), ("1111", FLAT_MESSAGE)]
         )
 
-        result = await redis_adapter.get_messages(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_messages(SUBSCRIPTION_NAME)
 
         fake_redis.xrange.assert_called_once_with(self.queue_name, "-", "+", None)
         assert result == expected_result
@@ -122,7 +127,7 @@ class TestRedisAdapter:
     ):
         fake_redis.xdel = AsyncMock()
 
-        result = await redis_adapter.delete_message(SUBSCRIBER_NAME, "1111")
+        result = await redis_adapter.delete_message(SUBSCRIPTION_NAME, "1111")
 
         fake_redis.xdel.assert_called_once_with(self.queue_name, "1111")
         assert result is None
@@ -132,7 +137,7 @@ class TestRedisAdapter:
     ):
         fake_redis.xtrim = AsyncMock()
 
-        result = await redis_adapter.delete_queue(SUBSCRIBER_NAME)
+        result = await redis_adapter.delete_queue(SUBSCRIPTION_NAME)
 
         fake_redis.xtrim.assert_called_once_with(self.queue_name, maxlen=0)
         assert result is None
@@ -162,9 +167,9 @@ class TestRedisAdapter:
     ):
         fake_redis.sismember = AsyncMock(return_value=1)
 
-        result = await redis_adapter.get_subscriber_by_name(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_subscriber_by_name(SUBSCRIPTION_NAME)
 
-        fake_redis.sismember.assert_called_once_with("subscribers", SUBSCRIBER_NAME)
+        fake_redis.sismember.assert_called_once_with("subscribers", SUBSCRIPTION_NAME)
         assert result == 1
 
     async def test_get_subscriber_by_name_not_existing(
@@ -172,9 +177,9 @@ class TestRedisAdapter:
     ):
         fake_redis.sismember = AsyncMock(return_value=0)
 
-        result = await redis_adapter.get_subscriber_by_name(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_subscriber_by_name(SUBSCRIPTION_NAME)
 
-        fake_redis.sismember.assert_called_once_with("subscribers", SUBSCRIBER_NAME)
+        fake_redis.sismember.assert_called_once_with("subscribers", SUBSCRIPTION_NAME)
         assert result == 0
 
     async def test_get_subscriber_info(
@@ -182,16 +187,16 @@ class TestRedisAdapter:
     ):
         fake_redis.hgetall = AsyncMock(
             return_value={
-                "name": SUBSCRIBER_NAME,
+                "name": SUBSCRIPTION_NAME,
                 "request_prefill": True,
                 "prefill_queue_status": "done",
             }
         )
-        result = await redis_adapter.get_subscriber_info(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_subscriber_info(SUBSCRIPTION_NAME)
 
         fake_redis.hgetall.assert_called_once_with(self.subscriber)
         assert result == {
-            "name": SUBSCRIBER_NAME,
+            "name": SUBSCRIPTION_NAME,
             "request_prefill": True,
             "prefill_queue_status": "done",
         }
@@ -201,7 +206,7 @@ class TestRedisAdapter:
     ):
         fake_redis.smembers = AsyncMock(return_value=["foo:bar", "abc:def"])
 
-        result = await redis_adapter.get_subscriber_topics(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_subscriber_topics(SUBSCRIPTION_NAME)
 
         fake_redis.smembers.assert_called_once_with(self.subscriber_topics)
         assert result == ["foo:bar", "abc:def"]
@@ -211,7 +216,7 @@ class TestRedisAdapter:
     ):
         fake_redis.smembers = AsyncMock(return_value=[])
 
-        result = await redis_adapter.get_subscriber_topics(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_subscriber_topics(SUBSCRIPTION_NAME)
 
         fake_redis.smembers.assert_called_once_with(self.subscriber_topics)
         assert result == []
@@ -224,13 +229,13 @@ class TestRedisAdapter:
         pipe = pipeline.return_value.__aenter__.return_value
 
         result = await redis_adapter.add_subscriber(
-            SUBSCRIBER_NAME, realms_topics, True, FillQueueStatus.done
+            SUBSCRIPTION_NAME, realms_topics, True, FillQueueStatus.done
         )
 
         pipeline.assert_called_once()
         pipe.sadd.assert_has_calls(
             [
-                call("subscribers", SUBSCRIBER_NAME),
+                call("subscribers", SUBSCRIPTION_NAME),
                 call(self.subscriber_topics, "foo:bar"),
                 call(self.subscriber_topics, "abc:def"),
             ]
@@ -238,7 +243,7 @@ class TestRedisAdapter:
         pipe.hset.assert_called_once_with(
             self.subscriber,
             mapping={
-                "name": SUBSCRIBER_NAME,
+                "name": SUBSCRIPTION_NAME,
                 "request_prefill": 1,
                 "prefill_queue_status": FillQueueStatus.done,
             },
@@ -251,7 +256,7 @@ class TestRedisAdapter:
     ):
         fake_redis.hget = AsyncMock(return_value="value")
 
-        result = await redis_adapter.get_subscriber_queue_status(SUBSCRIBER_NAME)
+        result = await redis_adapter.get_subscriber_queue_status(SUBSCRIPTION_NAME)
 
         fake_redis.hget.assert_called_once_with(self.subscriber, "prefill_queue_status")
         assert result == "value"
@@ -262,7 +267,7 @@ class TestRedisAdapter:
         fake_redis.hset = AsyncMock()
 
         result = await redis_adapter.set_subscriber_queue_status(
-            SUBSCRIBER_NAME, FillQueueStatus.pending
+            SUBSCRIPTION_NAME, FillQueueStatus.pending
         )
 
         fake_redis.hset.assert_called_once_with(
@@ -275,11 +280,11 @@ class TestRedisAdapter:
     ):
         pipe = pipeline.return_value.__aenter__.return_value
 
-        result = await redis_adapter.delete_subscriber(SUBSCRIBER_NAME)
+        result = await redis_adapter.delete_subscriber(SUBSCRIPTION_NAME)
 
         pipe.delete.assert_has_calls(
             [call(self.subscriber_topics), call(self.subscriber)]
         )
-        pipe.srem.assert_called_once_with("subscribers", SUBSCRIBER_NAME)
+        pipe.srem.assert_called_once_with("subscribers", SUBSCRIPTION_NAME)
         pipe.execute.assert_called_once()
         assert result is None

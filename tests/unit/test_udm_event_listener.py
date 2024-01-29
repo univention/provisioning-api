@@ -3,6 +3,12 @@
 
 import pytest
 
+
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 """
 - The UDM listener is triggered with an LDAP change event
 - It will enrich its LDAP object with UDM data for it to become a UDM object

@@ -19,13 +19,13 @@ router = fastapi.APIRouter()
 @router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
     port: ConsumerPortDependency, realm_topic: Optional[str] = None
-) -> List[shared.models.Subscriber]:
+) -> List[shared.models.Subscription]:
     """Return a list of all known subscribers or with the given realm_topic."""
 
     # TODO: check authorization
 
     service = SubscriptionService(port)
-    return await service.get_subscribers(realm_topic)
+    return await service.get_subscriptions(realm_topic)
 
 
 @router.get(
@@ -33,7 +33,7 @@ async def get_subscriptions(
 )
 async def get_subscription(
     name: str, port: ConsumerPortDependency
-) -> shared.models.Subscriber:
+) -> shared.models.Subscription:
     """Return information about a subscription."""
 
     # TODO: check authorization
@@ -41,7 +41,7 @@ async def get_subscription(
     service = SubscriptionService(port)
 
     try:
-        subscriber = await service.get_subscriber(name)
+        subscriber = await service.get_subscription(name)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
@@ -52,7 +52,7 @@ async def get_subscription(
     "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
 )
 async def create_subscription(
-    subscriber: shared.models.NewSubscriber,
+    subscriber: shared.models.NewSubscription,
     port: ConsumerPortDependency,
 ):
     """Create a new subscription."""
@@ -85,7 +85,7 @@ async def cancel_subscription(
     service = SubscriptionService(port)
 
     try:
-        await service.cancel_subscription(name, f"{realm}:{topic}")
+        await service.cancel_subscription(name, realm, topic)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
@@ -103,6 +103,6 @@ async def update_subscriber_queue_status(
     service = SubscriptionService(port)
 
     try:
-        await service.set_subscriber_queue_status(name, prefill_queue_status)
+        await service.set_subscription_queue_status(name, prefill_queue_status)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))

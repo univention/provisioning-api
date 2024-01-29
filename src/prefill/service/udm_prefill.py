@@ -44,13 +44,13 @@ class UDMPreFill(PreFillService):
 
                 if self._realm == "udm":
                     self._logger.info(
-                        "Started the prefill for '%s'", self._subscriber_name
+                        "Started the prefill for '%s'", self._subscription_name
                     )
                     await msg.in_progress()
                     await self._port.update_subscriber_queue_status(
-                        self._subscriber_name, FillQueueStatus.running
+                        self._subscription_name, FillQueueStatus.running
                     )
-                    await self._port.create_prefill_stream(self._subscriber_name)
+                    await self._port.create_prefill_stream(self._subscription_name)
                     await self.fetch()
                 else:
                     # FIXME: unhandled realm
@@ -117,7 +117,7 @@ class UDMPreFill(PreFillService):
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
-        await self._port.create_prefill_message(self._subscriber_name, message)
+        await self._port.create_prefill_message(self._subscription_name, message)
 
     async def add_request_to_prefill_failures(
         self, validated_msg: PrefillMessage, msg: Msg
@@ -131,20 +131,20 @@ class UDMPreFill(PreFillService):
     async def mark_request_as_done(self, msg: Msg):
         await msg.ack()
         await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.done
+            self._subscription_name, FillQueueStatus.done
         )
 
     async def mark_request_as_failed(self, msg: Msg):
         await msg.nak()
         await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.failed
+            self._subscription_name, FillQueueStatus.failed
         )
 
     def parse_request_data(self, msg: Msg) -> PrefillMessage:
         data = json.loads(msg.data)
         validated_msg = PrefillMessage.model_validate(data)
         self._logger.info("Received request with content: %s", data)
-        self._subscriber_name = validated_msg.subscriber_name
+        self._subscription_name = validated_msg.subscription_name
         self._topic = validated_msg.topic
         self._realm = validated_msg.realm
         return validated_msg

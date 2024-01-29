@@ -44,8 +44,8 @@ class ConsumerMesAdapter:
         ):
             pass
 
-    async def create_prefill_stream(self, subscriber_name: str):
+    async def create_prefill_stream(self, subscription_name: str):
         async with self._session.post(
-            f"{self.base_url}subscriptions/{subscriber_name}/prefill-stream",
+            f"{self.base_url}subscriptions/{subscription_name}/prefill-stream",
         ):
             pass

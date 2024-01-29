@@ -14,6 +14,11 @@ from dispatcher.port import DispatcherPort
 from dispatcher.service.dispatcher import DispatcherService
 
 
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 @pytest.fixture
 async def port_with_mock_nats():
     port = DispatcherPort()

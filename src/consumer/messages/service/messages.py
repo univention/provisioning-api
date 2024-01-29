@@ -12,8 +12,8 @@ from shared.models.queue import NatsMessage, Message
 
 
 class PrefillKeys:
-    def queue_name(subscriber_name: str) -> str:
-        return f"prefill_{subscriber_name}"
+    def queue_name(subscription_name: str) -> str:
+        return f"prefill_{subscription_name}"
 
 
 class MessageService:
@@ -68,7 +68,7 @@ class MessageService:
         """
 
         sub_service = SubscriptionService(self._port)
-        queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
+        queue_status = await sub_service.get_subscription_queue_status(subscriber_name)
 
         messages = []
         prefill_stream = await self._port.stream_exists(

@@ -14,6 +14,11 @@ def dispatcher_service() -> DispatcherService:
     return DispatcherService(AsyncMock())
 
 
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 @pytest.mark.anyio
 class TestDispatcherService:
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):

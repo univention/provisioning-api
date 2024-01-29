@@ -34,11 +34,12 @@ BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
 REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
-SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 SUBSCRIBER_INFO = {
-    "name": SUBSCRIBER_NAME,
-    "realms_topics": [REALMS_TOPICS_STR],
+    "name": SUBSCRIPTION_NAME,
+    "realm": REALM,
+    "topic": TOPIC,
     "request_prefill": True,
     "prefill_queue_status": "done",
 }
@@ -54,7 +55,7 @@ PREFILL_MESSAGE = PrefillMessage(
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
     realm=REALM,
     topic=TOPIC,
-    subscriber_name=SUBSCRIBER_NAME,
+    subscription_name=SUBSCRIPTION_NAME,
 )
 
 FLAT_BASE_MESSAGE = {
@@ -67,7 +68,7 @@ FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_MESSAGE["body"] = BODY
 
 FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
-FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
+FLAT_PREFILL_MESSAGE["subscription_name"] = SUBSCRIPTION_NAME
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
 MSG_PREFILL = Msg(
@@ -108,9 +109,9 @@ BASE_KV_OBJ = KeyValue.Entry(
 )
 
 kv_sub_info = copy(BASE_KV_OBJ)
-kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
+kv_sub_info.key = f"subscription:{SUBSCRIPTION_NAME}"
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:users/user"], "request_prefill": true, '
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realm": "udm", "topic": "users/user", "request_prefill": true, '
     b'"prefill_queue_status": "done"}'
 )
 
@@ -203,6 +204,10 @@ class FakeJs:
         pass
 
     @staticmethod
+    async def delete_consumer(stream: str, consumer: str):
+        pass
+
+    @staticmethod
     async def consumer_info(stream: str, consumer: str):
         pass
 
@@ -217,10 +222,11 @@ class FakeKvStore:
         values = {
             "abc:def": kv_subs,
             "foo:bar": kv_subs,
-            f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info,
+            f"subscription:{SUBSCRIPTION_NAME}": kv_sub_info,
             "udm:users/user": kv_subs,
+            "subscriptions": kv_subs,
         }
-        return values[key]
+        return values.get(key)
 
     @classmethod
     async def put(cls, key: str, value: Union[str, dict]):
@@ -241,13 +247,8 @@ async def events_port_fake_dependency() -> EventsPort:
 
 async def consumer_port_fake_dependency_without_sub():
     port = await consumer_port_fake_dependency()
-    port.nats_adapter.get_subscriber = AsyncMock(return_value=None)
+    port.nats_adapter.get_subscription = AsyncMock(return_value=None)
     return port
-
-
-@pytest.fixture(scope="session", autouse=True)
-def anyio_backend():
-    return "asyncio"
 
 
 @pytest.fixture(autouse=True)

@@ -7,7 +7,7 @@ from typing import Optional
 
 class PreFillService(abc.ABC):
     def __init__(self):
-        self._subscriber_name: Optional[str] = None
+        self._subscription_name: Optional[str] = None
         self._topic: Optional[str] = None
         self._realm: Optional[str] = None
 

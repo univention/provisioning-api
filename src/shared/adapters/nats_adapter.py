@@ -111,6 +111,14 @@ class NatsAdapter:
         except NotFoundError:
             return None
 
+    async def delete_consumer(self, subject: str):
+        try:
+            await self.js.delete_consumer(
+                NatsKeys.stream(subject), NatsKeys.durable_name(subject)
+            )
+        except NotFoundError:
+            return None
+
     async def delete_kv_pair(self, key: str):
         await self.kv_store.delete(key)
 

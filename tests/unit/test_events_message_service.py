@@ -13,6 +13,11 @@ def message_service() -> EventsService:
     return EventsService(AsyncMock())
 
 
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 @pytest.mark.anyio
 class TestEventsMessageService:
     async def test_add_live_message(self, message_service: EventsService):

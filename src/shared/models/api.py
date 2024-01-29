@@ -2,17 +2,17 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import enum
-from typing import Any, Dict, List
+from typing import Any, Dict
 from pydantic import BaseModel, Field
 
 
-class NewSubscriber(BaseModel):
-    """Request to register a subscriber."""
+class NewSubscription(BaseModel):
+    """Request to register a subscription."""
 
-    name: str = Field(description="The identifier of the subscriber.")
-    realm_topic: List[str] = Field(
-        description="Realm and topic that this subscriber subscribes to."
-    )
+    name: str = Field(description="The identifier of the subscription.")
+
+    realm: str = Field(description="A `realm` that this subscriber subscribes to.")
+    topic: str = Field(description="A `topic` that this subscriber subscribes to.")
     request_prefill: bool = Field(
         description="Whether pre-filling of the queue was requested."
     )

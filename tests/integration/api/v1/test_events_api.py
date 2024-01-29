@@ -15,6 +15,11 @@ async def client():
         yield client
 
 
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 @pytest.mark.anyio
 class TestEvents:
     async def test_add_event(self, client: httpx.AsyncClient):

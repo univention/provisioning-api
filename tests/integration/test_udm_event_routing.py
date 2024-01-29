@@ -3,6 +3,12 @@
 
 import pytest
 
+
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
+
 """
 - LDAP Change is triggered via UDM REST API
 - LDAP Notifier will notify its listeners

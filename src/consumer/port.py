@@ -68,6 +68,9 @@ class ConsumerPort:
     async def delete_stream(self, stream_name: str):
         await self.nats_adapter.delete_stream(stream_name)
 
+    async def delete_consumer(self, stream_name: str):
+        await self.nats_adapter.delete_consumer(stream_name)
+
     async def get_dict_value(self, name: str) -> Optional[dict]:
         result = await self.nats_adapter.get_value(name)
         return json.loads(result.value.decode("utf-8")) if result else None
