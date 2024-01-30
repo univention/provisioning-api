@@ -54,7 +54,7 @@ async def test_workflow():
     )
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=5&pop=true"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
@@ -72,7 +72,7 @@ async def test_workflow():
     connection.modify(dn, changes)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscription/{name}/message?count=5&pop=true"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
