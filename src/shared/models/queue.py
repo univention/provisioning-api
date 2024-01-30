@@ -66,7 +66,7 @@ class UDMMessage(BaseMessage):
         )
 
 
-class NatsMessage(BaseModel):
+class MQMessage(BaseModel):
     subject: str = ""
     reply: str = ""
     data: dict = {}

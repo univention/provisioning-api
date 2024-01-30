@@ -4,32 +4,22 @@
 import json
 from copy import copy, deepcopy
 from datetime import datetime
-from typing import Union
 from unittest.mock import AsyncMock
 
 import pytest
-from fakeredis import aioredis
 from nats.aio.msg import Msg
-from nats.js.api import ConsumerConfig
+from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
-from redis._parsers.helpers import (
-    parse_xread_resp3,
-    string_keys_to_dict,
-    bool_ok,
-    parse_command_resp3,
-    parse_sentinel_state_resp3,
-    parse_sentinel_masters_resp3,
-    parse_sentinel_slaves_and_sentinels_resp3,
-)
-from redis.utils import str_if_bytes
 from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
+from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import Message
+from shared.models.queue import MQMessage
 from shared.models.queue import PrefillMessage
 
 REALM = "udm"
-TOPIC = "users/user"
+TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
 REALM_TOPIC = [REALM, TOPIC]
@@ -97,6 +87,24 @@ MSG_PREFILL_REDELIVERED = Msg(
     ),
 )
 
+MQMESSAGE = MQMessage(
+    subject="",
+    reply="",
+    data={
+        "publisher_name": "udm-listener",
+        "ts": "2023-11-09T11:15:52.616061",
+        "realm": "udm",
+        "topic": "groups/group",
+        "body": {"new": {"New": "Object"}, "old": {"Old": "Object"}},
+    },
+    headers=None,
+)
+FLAT_MESSAGE_ENCODED = (
+    b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "groups/group", '
+    b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}}'
+)
+
+
 BASE_KV_OBJ = KeyValue.Entry(
     "KV_bucket",
     "",
@@ -110,7 +118,7 @@ BASE_KV_OBJ = KeyValue.Entry(
 kv_sub_info = copy(BASE_KV_OBJ)
 kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:users/user"], "request_prefill": true, '
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:groups/group"], "request_prefill": true, '
     b'"prefill_queue_status": "done"}'
 )
 
@@ -119,130 +127,63 @@ kv_subs.key = "abc:def"
 kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
 
 
-async def fake_redis():
-    connection = aioredis.FakeRedis(decode_responses=True, protocol=2)
-    connection.response_callbacks.update(
-        {
-            # Because fakeredis does not support RESP3 protocol, we need to manually patch some
-            # responses of stream commands. Here is a list of operations we might need in the future:
-            # ZRANGE ZINTER ZPOPMAX ZPOPMIN ZRANGEBYSCORE ZREVRANGE ZREVRANGEBYSCORE ZUNION HGETALL XREADGROUP"
-            **string_keys_to_dict("XREAD XREADGROUP", parse_xread_resp3),
-            "ACL LOG": lambda r: [
-                {str_if_bytes(key): str_if_bytes(value) for key, value in x.items()}
-                for x in r
-            ]
-            if isinstance(r, list)
-            else bool_ok(r),
-            "COMMAND": parse_command_resp3,
-            "CONFIG GET": lambda r: {
-                str_if_bytes(key)
-                if key is not None
-                else None: str_if_bytes(value)
-                if value is not None
-                else None
-                for key, value in r.items()
-            },
-            "MEMORY STATS": lambda r: {
-                str_if_bytes(key): value for key, value in r.items()
-            },
-            "SENTINEL MASTER": parse_sentinel_state_resp3,
-            "SENTINEL MASTERS": parse_sentinel_masters_resp3,
-            "SENTINEL SENTINELS": parse_sentinel_slaves_and_sentinels_resp3,
-            "SENTINEL SLAVES": parse_sentinel_slaves_and_sentinels_resp3,
-            "STRALGO": lambda r, **options: {
-                str_if_bytes(key): str_if_bytes(value) for key, value in r.items()
-            }
-            if isinstance(r, dict)
-            else str_if_bytes(r),
-            "XINFO CONSUMERS": lambda r: [
-                {str_if_bytes(key): value for key, value in x.items()} for x in r
-            ],
-            "XINFO GROUPS": lambda r: [
-                {str_if_bytes(key): value for key, value in d.items()} for d in r
-            ],
-        }
-    )
-
-    try:
-        return connection
-    finally:
-        await connection.aclose()
+class FakeMessageQueue(AsyncMock):
+    @classmethod
+    async def get(cls):
+        return MSG
 
 
-def set_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
-    port.nats_adapter.kv_store = FakeKvStore()
-    port.nats_adapter.js = FakeJs()
-
-
-class FakeJs:
+class FakeJs(AsyncMock):
     sub = AsyncMock()
     sub.fetch = AsyncMock(return_value=[MSG])
     Msg.ack = AsyncMock()
 
-    async def pull_subscribe(self, subject: str, durable: str, stream: str):
-        return self.sub
-
-    @staticmethod
-    async def stream_info(name: str):
-        pass
-
-    @staticmethod
-    async def publish(subject: str, payload: bytes, stream: str):
-        pass
-
-    @staticmethod
-    async def delete_msg(name: str):
-        pass
-
-    @staticmethod
-    async def add_consumer(stream: str, config: ConsumerConfig):
-        pass
-
-    @staticmethod
-    async def delete_stream(name: str):
-        pass
-
-    @staticmethod
-    async def consumer_info(stream: str, consumer: str):
-        pass
-
-
-class FakeKvStore:
     @classmethod
-    async def delete(cls, key: str):
-        pass
+    async def pull_subscribe(cls, subject: str, durable: str, stream: str):
+        return cls.sub
 
+
+class FakeKvStore(AsyncMock):
     @classmethod
     async def get(cls, key: str):
         values = {
             "abc:def": kv_subs,
             "foo:bar": kv_subs,
             f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info,
-            "udm:users/user": kv_subs,
+            "udm:groups/group": kv_subs,
         }
-        return values[key]
-
-    @classmethod
-    async def put(cls, key: str, value: Union[str, dict]):
-        pass
+        if values.get(key):
+            return values.get(key)
+        raise KeyNotFoundError
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    set_fake_kv_store_and_js(port)
+    port.mq_adapter = MockNatsMQAdapter()
+    port.kv_adapter = MockNatsKVAdapter()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    set_fake_kv_store_and_js(port)
+    port.mq_adapter = MockNatsMQAdapter()
     return port
 
 
-async def consumer_port_fake_dependency_without_sub():
-    port = await consumer_port_fake_dependency()
-    port.nats_adapter.get_subscriber = AsyncMock(return_value=None)
-    return port
+class MockNatsMQAdapter(NatsMQAdapter):
+    def __init__(self):
+        super().__init__()
+        self._nats = AsyncMock()
+        self._js = FakeJs()
+        self._message_queue = FakeMessageQueue()
+
+
+class MockNatsKVAdapter(NatsKVAdapter):
+    def __init__(self):
+        super().__init__()
+        self._nats = AsyncMock()
+        self._js = FakeJs()
+        self._kv_store = FakeKvStore()
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import logging
 from typing import List, Optional
 
 import fastapi
@@ -10,8 +9,6 @@ from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import FillQueueStatus
-
-logger = logging.getLogger(__name__)
 
 router = fastapi.APIRouter()
 

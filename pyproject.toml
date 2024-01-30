@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "provisioning-service"
+name = "provisioning"
 version = "0.1.0"
 description = "Univention Management Stack - Provisioning Service"
 authors = [
@@ -21,14 +21,13 @@ pydantic-settings = "^2.0.3"
 python = "^3.7"
 pyyaml = "^6.0.1"
 uvicorn = "^0.21.1"
-redis = "^5.0.0"
 aiohttp = "^3.8.5"
 websockets = "^11.0.3"
 nats-py = "^2.6.0"
 trio = "^0.22.2"
 daemoniker = "^0.2.3"
 requests = "^2.31.0"
-tornado="^6.2.0"
+ldap3 = "^2.9.1"
 
 [tool.poetry.scripts]
 dev = "consumer:start_dev"
@@ -40,7 +39,6 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 httpx = "^0.24.0"
 pytest = "^7.4.2"
-fakeredis = "2.19.0"
 pytest-cov = "4.1"
 
 [tool.ruff]

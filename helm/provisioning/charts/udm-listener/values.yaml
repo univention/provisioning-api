@@ -10,7 +10,7 @@
 ## Global values
 affinity: {}
 environment: {}
-fullnameOverride: "udm-listener"
+fullnameOverride: ""
 nameOverride: ""
 nodeSelector: {}
 podAnnotations: {}
@@ -29,9 +29,8 @@ image:
 
 # -- Configuration of the UDM Listener that is notified on LDAP changes
 config:
-  environment: "production"
   # -- CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set.
-  caCert: "/var/secrets/ca_cert"
+  caCert: ""
   # -- Where to search for the CA Certificate file.
   # caCertFile: "/var/secrets/ca_cert"
   caCertFile: ""
@@ -46,6 +45,10 @@ config:
   # -- Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set
   ldapHostIp: null
   ldapPort: "389"
+  # -- NATS: host
+  natsHost: null
+  # -- NATS: port
+  natsPort: 4222
   # -- Defaults to "ldapHost" if not set.
   notifierServer: "ldap-notifier"
   # -- Whether to start encryption and validate certificates.
@@ -57,18 +60,18 @@ config:
 probes:
   liveness:
     enabled: true
-    initialDelaySeconds: 120
+    initialDelaySeconds: 10
     timeoutSeconds: 3
-    periodSeconds: 30
-    failureThreshold: 3
+    periodSeconds: 10
+    failureThreshold: 30
     successThreshold: 1
 
   readiness:
     enabled: true
-    initialDelaySeconds: 30
+    initialDelaySeconds: 10
     timeoutSeconds: 3
-    periodSeconds: 15
-    failureThreshold: 30
+    periodSeconds: 10
+    failureThreshold: 3
     successThreshold: 1
 
 
@@ -82,10 +85,10 @@ serviceAccount:
   name: ""
 
 ## Deployment resources
-resources:
-  requests:
-    memory: "512Mi"
-  limits:
-    memory: "4Gi"
+resources: {}
+  # requests:
+  #   memory: "512Mi"
+  # limits:
+  #   memory: "4Gi"
 
 ...

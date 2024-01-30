@@ -9,13 +9,14 @@ data:
   CA_CERT: "{{ .caCert }}"
   CA_CERT_FILE: "{{ .caCertFile }}"
   DEBUG_LEVEL: "{{ .debugLevel }}"
-  ENVIRONMENT: "{{ .environment }}"
   LDAP_BASE_DN: "{{ .ldapBaseDn }}"
   LDAP_PASSWORD: "{{ .ldapPassword }}"
   LDAP_PASSWORD_FILE: "{{ .ldapPasswordFile }}"
   LDAP_HOST: "{{ .ldapHost }}"
   LDAP_HOST_DN: "{{ .ldapHostDn }}"
   LDAP_PORT: "{{ .ldapPort }}"
+  NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .natsHost | quote }}
+  NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .natsPort | quote }}
   NOTIFIER_SERVER: "{{ default .ldapHost .notifierServer }}"
   TLS_MODE: "{{ .tlsMode }}"
 {{ end }}

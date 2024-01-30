@@ -8,7 +8,7 @@ from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import FillQueueStatus
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import MQMessage, Message
 
 
 class PrefillKeys:
@@ -36,7 +36,7 @@ class MessageService:
         pop: bool,
         timeout: float = 5,
         skip_prefill: Optional[bool] = False,
-    ) -> Optional[NatsMessage]:
+    ) -> Optional[MQMessage]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_name: Name of the subscriber.
@@ -56,8 +56,8 @@ class MessageService:
         timeout: float,
         count: int,
         pop: bool,
-        skip_prefill: Optional[bool] = False,
-    ) -> List[NatsMessage]:
+        skip_prefill: Optional[bool],
+    ) -> List[MQMessage]:
         """Return messages from a given queue.
 
         :param str subscriber_name: Name of the subscriber.
@@ -90,7 +90,7 @@ class MessageService:
 
     async def get_messages_from_main_queue(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         self.logger.info(
             "Getting the messages for the '%s' from the main queue", subscriber_name
         )
@@ -98,7 +98,7 @@ class MessageService:
 
     async def get_messages_from_prefill_queue(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[NatsMessage]:
+    ) -> List[MQMessage]:
         self.logger.info(
             "Getting the messages for the '%s' from the prefill queue", subscriber_name
         )
@@ -116,7 +116,7 @@ class MessageService:
             )
         return messages
 
-    async def remove_message(self, msg: NatsMessage):
+    async def remove_message(self, msg: MQMessage):
         """Remove a message from the subscriber's queue.
 
         :param msg: fetched message.

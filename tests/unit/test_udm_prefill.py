@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
 
@@ -21,7 +24,7 @@ def udm_prefill() -> UDMPreFill:
 @pytest.mark.anyio
 class TestUDMPreFill:
     mocked_date = datetime(2023, 11, 9, 11, 15, 52, 616061)
-    object_type = "users/user"
+    object_type = "groups/group"
     url = f"http://udm-rest-api:9979/udm/{object_type}/..."
     udm_modules = {
         "name": object_type,

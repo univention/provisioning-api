@@ -7,9 +7,8 @@ from nats.aio.msg import Msg
 
 from shared.adapters.consumer_mes_adapter import ConsumerMesAdapter
 from shared.adapters.consumer_reg_adapter import ConsumerRegAdapter
-from shared.adapters.nats_adapter import NatsAdapter
+from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
-from shared.config import settings
 from shared.models import FillQueueStatus, Message
 from shared.models.queue import PrefillMessage
 
@@ -17,7 +16,7 @@ from shared.models.queue import PrefillMessage
 class PrefillPort:
     def __init__(self):
         self._udm_adapter = UDMAdapter()
-        self._nats_adapter = NatsAdapter()
+        self.mq_adapter = NatsMQAdapter()
         self._consumer_reg_adapter = ConsumerRegAdapter()
         self._consumer_mes_adapter = ConsumerMesAdapter()
 
@@ -26,10 +25,7 @@ class PrefillPort:
     async def port_context():
         port = PrefillPort()
         await port._udm_adapter.connect()
-        await port._nats_adapter.nats.connect(
-            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
-        )
-        await port._nats_adapter.create_kv_store()
+        await port.mq_adapter.connect()
         await port._consumer_reg_adapter.connect()
         await port._consumer_mes_adapter.connect()
 
@@ -40,15 +36,15 @@ class PrefillPort:
 
     async def close(self):
         await self._udm_adapter.close()
-        await self._nats_adapter.close()
+        await self.mq_adapter.close()
         await self._consumer_reg_adapter.close()
         await self._consumer_mes_adapter.close()
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self._nats_adapter.subscribe_to_queue(subject, deliver_subject)
+        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
 
     async def wait_for_event(self) -> Msg:
-        return await self._nats_adapter.wait_for_event()
+        return await self.mq_adapter.wait_for_event()
 
     async def get_object_types(self):
         return await self._udm_adapter.get_object_types()
@@ -75,10 +71,10 @@ class PrefillPort:
     async def add_request_to_prefill_failures(
         self, queue_name: str, message: PrefillMessage
     ):
-        await self._nats_adapter.add_message(queue_name, message)
+        await self.mq_adapter.add_message(queue_name, message)
 
     async def create_stream(self, subject: str):
-        await self._nats_adapter.create_stream(subject)
+        await self.mq_adapter.create_stream(subject)
 
     async def create_consumer(self, subject: str):
-        await self._nats_adapter.create_consumer(subject)
+        await self.mq_adapter.create_consumer(subject)

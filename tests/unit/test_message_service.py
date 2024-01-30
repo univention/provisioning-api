@@ -8,7 +8,7 @@ from consumer.messages.service.messages import PrefillKeys
 from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIBER_NAME
 from consumer.messages.service import MessageService
 from shared.models import FillQueueStatus
-from shared.models.queue import NatsMessage
+from shared.models.queue import MQMessage
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ class TestMessageService:
         message_service._port.stream_exists = AsyncMock(return_value=True)
 
         result = await message_service.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=2, pop=True
+            SUBSCRIBER_NAME, timeout=5, count=2, pop=True, skip_prefill=False
         )
 
         sub_service.get_subscriber_queue_status.assert_called_once_with(SUBSCRIBER_NAME)
@@ -111,7 +111,7 @@ class TestMessageService:
         message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
 
         result = await message_service.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=2, pop=True
+            SUBSCRIBER_NAME, timeout=5, count=2, pop=True, skip_prefill=False
         )
 
         sub_service.get_subscriber_queue_status.assert_called_once_with(SUBSCRIBER_NAME)
@@ -133,7 +133,7 @@ class TestMessageService:
         )
 
         result = await message_service.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=2, pop=True
+            SUBSCRIBER_NAME, timeout=5, count=2, pop=True, skip_prefill=False
         )
 
         sub_service.get_subscriber_queue_status.assert_called_once_with(SUBSCRIBER_NAME)
@@ -159,7 +159,7 @@ class TestMessageService:
         message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
 
         result = await message_service.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=2, pop=True
+            SUBSCRIBER_NAME, timeout=5, count=2, pop=True, skip_prefill=False
         )
 
         sub_service.get_subscriber_queue_status.assert_called_once_with(SUBSCRIBER_NAME)
@@ -171,7 +171,8 @@ class TestMessageService:
         assert result == [MESSAGE, MESSAGE]
 
     async def test_remove_message(self, message_service: MessageService):
-        msg = NatsMessage(data=FLAT_MESSAGE)
+        message_service._port.remove_message = AsyncMock()
+        msg = MQMessage(data=FLAT_MESSAGE)
 
         result = await message_service.remove_message(msg)
 

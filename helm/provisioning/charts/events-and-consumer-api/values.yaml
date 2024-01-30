@@ -10,7 +10,7 @@
 ## Global values
 affinity: {}
 environment: {}
-fullnameOverride: "events-and-consumer-api"
+fullnameOverride: ""
 nameOverride: ""
 nodeSelector: {}
 podAnnotations: {}

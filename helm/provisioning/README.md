@@ -1,10 +1,9 @@
-# provisioning-service
+# provisioning
 
-A Helm chart for the Univention Portal Provisioning API
+A Helm chart for the Univention Management Stack Provisioning Service
 
 - **Version**: 0.1.0
 - **Type**: application
-- **AppVersion**: 1.16.0
 - **Homepage:** <https://www.univention.de/>
 
 ## TL;DR
@@ -49,11 +48,11 @@ kubectl delete pvc -l release=provisioning-api
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://charts/dispatcher | dispatcher | 0.1.0 |
-| file://charts/events-and-consumer-api | events-and-consumer-api | 0.1.0 |
-| file://charts/udm-listener | udm-listener | 0.1.0 |
+|  | dispatcher | * |
+|  | events-and-consumer-api | * |
+|  | udm-listener | * |
 | https://nats-io.github.io/k8s/helm/charts/ | nats | ^1.1.5 |
-| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | ums-common(common) | ^0.2.0 |
+| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | common | 0.* |
 
 ## Values
 

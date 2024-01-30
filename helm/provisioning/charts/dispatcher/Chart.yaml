@@ -6,15 +6,12 @@
 apiVersion: "v2"
 type: "application"
 name: "dispatcher"
-description: "A Helm chart for the Univention Portal Provisioning API"
+description: "A Helm chart for the Univention Portal Provisioning Dispatcher"
 home: "https://www.univention.de/"
 
 # Chart version
 # Apply Semantic Versioning (https://semver.org/)
 version: "0.1.0"
-
-# Portal Version
-appVersion: "1.16.0"
 
 dependencies:
   - name: "common"

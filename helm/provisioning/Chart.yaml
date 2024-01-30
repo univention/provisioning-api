@@ -5,34 +5,24 @@
 
 apiVersion: "v2"
 type: "application"
-name: "provisioning-service"
-description: "A Helm chart for the Univention Portal Provisioning API"
+name: "provisioning"
+description: "A Helm chart for the Univention Management Stack Provisioning Service"
 home: "https://www.univention.de/"
-
-# Chart version
-# Apply Semantic Versioning (https://semver.org/)
 version: "0.1.0"
-
-# Portal Version
-appVersion: "1.16.0"
 
 dependencies:
   - name: "common"
-    alias: "ums-common"
     repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
-    version: "^0.2.0"
+    version: "0.*"
   - name: "nats"
     repository: "https://nats-io.github.io/k8s/helm/charts/"
     version: "^1.1.5"
     condition: "nats.bundled"
   - name: "events-and-consumer-api"
-    version: "0.1.0"
-    repository: "file://charts/events-and-consumer-api"
+    version: "*"
   - name: "dispatcher"
-    version: "0.1.0"
-    repository: "file://charts/dispatcher"
+    version: "*"
   - name: "udm-listener"
-    version: "0.1.0"
-    repository: "file://charts/udm-listener"
+    version: "*"
 
 ...

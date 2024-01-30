@@ -10,6 +10,8 @@ metadata:
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
 spec:
+  serviceName: {{ include "common.names.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "common.labels.matchLabels" . | nindent 6 }}

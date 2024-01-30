@@ -1,5 +1,112 @@
 # Changelog
 
+## [0.9.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.2...v0.9.3) (2024-01-30)
+
+
+### Bug Fixes
+
+* **udm-listener:** Missing serviceName and replicaCount ([3aae8b9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3aae8b99dc4586dc526f156c1075e7d397fe1bad))
+
+## [0.9.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.1...v0.9.2) (2024-01-30)
+
+
+### Bug Fixes
+
+* create stream and consumer during creating new subscriber ([5e14f6f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5e14f6f9907141d9d19def2cf76bfea4d431479e))
+* make ldap_server_uri a propetry, not attribute ([227c321](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/227c321fbec75bf488f934c02d503bd9a538c809))
+* merge main ([f34062c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f34062c9d9251ecf80aaac0100ddf88f07c99920))
+* merge main ([2eaf1ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2eaf1ca35f629b9e7f153a7a97e22886e075875c))
+* reuse connection to ldap, use ldap_host property ([b15c47e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b15c47e2b0ce253e5445411ef19686e163262a7f))
+
+## [0.9.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.0...v0.9.1) (2024-01-29)
+
+
+### Bug Fixes
+
+* **helm:** Allow to configure the NATS hostname for listener chart ([8a58663](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8a586637c1e79baa2354cef456ef081bb80deec9))
+* **helm:** Avoid to render an undefined AppVersion into the README ([6ee5cde](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6ee5cdefe0fb14c3ee65c781dae9185543fc0f61))
+* **helm:** Remove unused key "environment" from linter_values of listener chart ([1dc6ec3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1dc6ec3715c0428803b53dd29e714b166eb62e69))
+
+## [0.9.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.8.0...v0.9.0) (2024-01-26)
+
+
+### Features
+
+* add abstract adapters for MQ and KV Store ([d9e3beb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d9e3beb5fee3c1ff251adfb5b46d544b0d7e5015))
+* update readme ([af6cd13](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/af6cd136e2d6745d298bd99038609607cff0d058))
+
+
+### Bug Fixes
+
+* add licenses ([452c192](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/452c1920de4b3fb9202d936c17e7f68600cbf6f0))
+* pass image tag as an argument during build ([9e07a2f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9e07a2f71d1eec6c2b7e9724ced1e1508863b8fe))
+* split the nats adapter into MQ and KV store ([06b84ad](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/06b84ad1517f98ea805d0fd258d59be49162e540))
+* use lazy logging instead of f-string ([8e356e0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8e356e03fb25798d4adf389be26b77168e6e6ed8))
+* use lower() method for checking tls mode, use longer name for the variable ([971f7ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/971f7cad5db0c094745f7e326efb45fe52723c37))
+* use TLS_MODE instead of ldap_start_tls ([f25fdd8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f25fdd8cbe37e6e2ee981628e446aacdd3abd966))
+
+## [0.8.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.7.1...v0.8.0) (2024-01-23)
+
+
+### Features
+
+* **helm:** Lower the initial delay for the propers in udm-listener ([b137844](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b1378444ad144f566ecf56426abb1bd4abd4c9df))
+* **helm:** Reduce initial delay of probes in dispatcher chart ([ef605f7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ef605f73ba0d72ee898735adb9e1b6547d5fe856))
+* **helm:** Remove "config.environment" from udm-listener ([4967e19](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4967e19c0e7f364e9f7de71e85b918f8d5951a6b))
+* **helm:** Remove repositories of embedded charts ([7b1bd67](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7b1bd67aaf007fd05b4869586d3bdf0ed1e05b26))
+* **helm:** Update common-helm to 0.6.0 ([7b1f465](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7b1f465f149c3671a25e6367ba780eebc2e660df))
+
+
+### Bug Fixes
+
+* **helm:** Avoid setting resources as default in dispatcher ([995e384](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/995e384e7b8755948a6e1b67b37715ba3fe20dd5))
+* **helm:** Avoid setting resources in the default values of udm-listener ([e76c2d7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e76c2d7f0fcc5d25629f0226f77d09f9f7620acc))
+* **helm:** Drop appVersion ([0e967e0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0e967e0b0297e4c0545e4a982f3e15a60061819b))
+* **helm:** Remove appVersion in the dispatcher chart ([f0a3aa8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f0a3aa8f6421e93f48a2a4d461ba647df0e5e8fa))
+* **helm:** Remove invalid default value of "config.caCert" ([c6bae19](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c6bae1931aa73c857ce9f106ab44f95bf8f7bd23))
+
+## [0.7.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.7.0...v0.7.1) (2024-01-19)
+
+
+### Bug Fixes
+
+* remove fullnameOverrides to get provisioning- prefix ([5d665df](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5d665dfd567485e87fdf12f8321c61144773dbe6))
+
+## [0.7.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.6.0...v0.7.0) (2024-01-18)
+
+
+### Features
+
+* **ci:** add debian update check jobs for scheduled pipeline ([1fd8495](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1fd84955d00f8817090dafadb1c6f875c4148d0a))
+* **ci:** add debian update check jobs for scheduled pipeline ([1d87650](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1d87650e9fbde98c3927a43493a6f0296dc8e731))
+
+## [0.6.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.5.2...v0.6.0) (2024-01-17)
+
+
+### Features
+
+* add adapter for Consumer Registration API, send event to incoming queue due to blocked consumer queue ([a84f17f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a84f17f13a87d4a3156bc2703b72144798b57e99))
+* add field 'receivers' to the Message, use Field for description ([82a78cb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/82a78cb46309c3a3a160ab1aac1db825c0c65963))
+* wait for pre-fill to finish during getting messages ([18a094a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/18a094a655b1fdc04639d6105f9c28d80a6bd12c))
+
+
+### Bug Fixes
+
+* add licenses ([8df66a3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8df66a391e48f0624456b133d0f60b5c98d7fcff))
+* fix typo in the settings variables ([0e4a993](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0e4a99366312c7afd10e374511cf4dfcbec26ace))
+* get realm_topic subs using Consumer REST API, remove trailing forward-slash from endpoints ([6362ee7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6362ee70fbcf9f62f5f2d0f522bbbfe8f01a6451))
+* pin versions in apt get install, set the SHELL option -o pipefail ([29a139c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/29a139cc6d2ddae355a44b50f23e8d772079bc15))
+* remove context manager from EventAdapter ([c850699](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c8506998993a489f6a6aa0352762be5697350b08))
+* rename connection settings after their purpose ([c9857ce](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c9857ce131a1bf2ca6db89442bb158c15660f138))
+* rename docker stages, remove unused workdir argument ([d1758aa](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d1758aa375b1b6d116828802fedbcec9c51cafb4))
+* replace flatten and inflate methods ([bd4b990](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd4b990b76a40f829cd1473d9fba0ac9f79c3d20))
+* return back WORKDIR argument ([6984407](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/69844070d1960e17e5d4e21547aad12effc1be9a))
+* return calling prefill, fix connection to the UDM REST, refactor settings ([539bd81](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/539bd81d50f098c552a46c18fe6b700116f4a46f))
+* update project name ([f3b8848](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f3b8848ad508ea66372155ef6843806fb76aacf6))
+* use listener-base image to install dependencies ([0c9fad3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0c9fad3b95b54ee9a3a8d7019bae854fc7abfb73))
+* use pluralization for endpoints ([e92f9c5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e92f9c51e803b94980cf983d3b515699d51c6d22))
+* use univention module from udm-rest-image ([b143271](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b1432713b11fd58f7a1706111c605e43227f3d94))
+
 ## [0.5.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning-api/compare/v0.5.1...v0.5.2) (2024-01-04)
 
 

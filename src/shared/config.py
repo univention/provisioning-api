@@ -15,15 +15,14 @@ class Settings(BaseSettings):
     # FastAPI: disable CORS checks
     cors_all: bool = False
 
-    # Redis: host
-    redis_host: str = "localhost"
-    # Redis: port
-    redis_port: int = 6379
-
     # Nats: host
     nats_host: str = "localhost"
     # Nats: port
     nats_port: int = 4222
+
+    @property
+    def nats_server(self) -> str:
+        return f"nats://{self.nats_host}:{self.nats_port}"
 
     # UDM REST API: host
     udm_host: str = "localhost"
@@ -63,14 +62,20 @@ class Settings(BaseSettings):
 
     # LDAP : port
     ldap_port: int = 389
-    # LDAP : start_tls
-    ldap_start_tls: int = 0
+    # LDAP : host
+    ldap_host: str = "localhost"
+    # LDAP : tls_mode
+    tls_mode: str = "off"
     # LDAP : base_dn
     ldap_base_dn: str = "dc=univention-organization,dc=intranet"
     # LDAP : host_dn
     ldap_host_dn: str = "cn=admin,dc=univention-organization,dc=intranet"
     # LDAP : password
     ldap_password: str = "univention"
+
+    @property
+    def ldap_server_uri(self) -> str:
+        return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
 
 settings = Settings()

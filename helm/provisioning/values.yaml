@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ---
-# Default values for the provisioning-service.
+# Default values for provisioning.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 

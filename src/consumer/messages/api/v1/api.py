@@ -16,7 +16,7 @@ from shared.models import (
     MessageProcessingStatus,
 )
 
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ manager = SinkManager()
 )
 async def post_message_status(
     name: str,
-    msg: NatsMessage,
+    msg: MQMessage,
     port: ConsumerPortDependency,
     report: MessageProcessingStatusReport,
 ):
@@ -64,7 +64,7 @@ async def get_subscription_messages(
     timeout: float = 5,
     pop: bool = False,
     skip_prefill: bool = False,
-) -> List[NatsMessage]:
+) -> List[MQMessage]:
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
@@ -79,7 +79,7 @@ async def get_subscription_messages(
     tags=["sink"],
 )
 async def remove_message(
-    msg: NatsMessage,
+    msg: MQMessage,
     port: ConsumerPortDependency,
 ):
     """Remove message."""
@@ -159,7 +159,7 @@ async def subscription_websocket(
                 report = MessageProcessingStatusReport(**json.loads(reply))
             except Exception:
                 logger.error(
-                    f"{name} > Unexpected input from WebSocket client: {reply}"
+                    "%s > Unexpected input from WebSocket client: %s", name, reply
                 )
                 break
 
@@ -167,12 +167,12 @@ async def subscription_websocket(
                 await service.remove_message(nats_mess)
             else:
                 logger.error(
-                    f"{name} > WebSocket client reported status: {report.status}"
+                    "%s > WebSocket client reported status: %s", name, report.status
                 )
                 break
     except fastapi.WebSocketDisconnect:
-        logger.info(f"{name} WebSocket client disconnected.")
+        logger.info("%s WebSocket client disconnected.", name)
     except Exception as exc:
-        logger.warning(f"{name} WebSocket failed: {exc}")
+        logger.warning("%s WebSocket failed: %s", name, exc)
     finally:
         await manager.close(name)
