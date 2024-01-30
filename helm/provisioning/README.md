@@ -4,7 +4,6 @@ A Helm chart for the Univention Management Stack Provisioning Service
 
 - **Version**: 0.1.0
 - **Type**: application
-- **AppVersion**:
 - **Homepage:** <https://www.univention.de/>
 
 ## TL;DR

@@ -36,7 +36,6 @@ udm-listener:
   image:
     tag: "latest"
   config:
-    environment: "production"
     caCert: "abcd1234"
     debugLevel: "4"
     ldapBaseDn: "dc=univention-organization,dc=intranet"
@@ -44,6 +43,7 @@ udm-listener:
     ldapHostDn: "cn=admin,dc=univention-organization,dc=intranet"
     ldapPassword: "secret"
     ldapPort: "389"
+    natsHost: "nats"
     notifierServer: "ldap-notifier"
     tlsMode: "off"
 

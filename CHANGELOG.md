@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.0...v0.9.1) (2024-01-29)
+
+
+### Bug Fixes
+
+* **helm:** Allow to configure the NATS hostname for listener chart ([8a58663](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8a586637c1e79baa2354cef456ef081bb80deec9))
+* **helm:** Avoid to render an undefined AppVersion into the README ([6ee5cde](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6ee5cdefe0fb14c3ee65c781dae9185543fc0f61))
+* **helm:** Remove unused key "environment" from linter_values of listener chart ([1dc6ec3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1dc6ec3715c0428803b53dd29e714b166eb62e69))
+
 ## [0.9.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.8.0...v0.9.0) (2024-01-26)
 
 
