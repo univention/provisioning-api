@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.1...v0.9.2) (2024-01-30)
+
+
+### Bug Fixes
+
+* create stream and consumer during creating new subscriber ([5e14f6f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5e14f6f9907141d9d19def2cf76bfea4d431479e))
+* make ldap_server_uri a propetry, not attribute ([227c321](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/227c321fbec75bf488f934c02d503bd9a538c809))
+* merge main ([f34062c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f34062c9d9251ecf80aaac0100ddf88f07c99920))
+* merge main ([2eaf1ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2eaf1ca35f629b9e7f153a7a97e22886e075875c))
+* reuse connection to ldap, use ldap_host property ([b15c47e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b15c47e2b0ce253e5445411ef19686e163262a7f))
+
 ## [0.9.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.0...v0.9.1) (2024-01-29)
 
 
