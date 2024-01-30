@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.2...v0.9.3) (2024-01-30)
+
+
+### Bug Fixes
+
+* **udm-listener:** Missing serviceName and replicaCount ([3aae8b9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3aae8b99dc4586dc526f156c1075e7d397fe1bad))
+
 ## [0.9.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.1...v0.9.2) (2024-01-30)
 
 
