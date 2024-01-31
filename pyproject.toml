@@ -40,6 +40,16 @@ optional = true
 httpx = "^0.24.0"
 pytest = "^7.4.2"
 pytest-cov = "4.1"
+univention-admin-rest-client = "^0.1.0"
+
+[[tool.poetry.source]]
+name = "ucs"
+url = "https://git.knut.univention.de/api/v4/projects/3/packages/pypi/simple"
+priority = "supplemental"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
 
 [tool.ruff]
 line-length = 120

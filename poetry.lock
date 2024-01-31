@@ -1272,6 +1272,40 @@ files = [
 ]
 
 [[package]]
+name = "univention-admin-rest-client"
+version = "0.1.0"
+description = "Python and Bash clients for the UDM-REST-API"
+optional = false
+python-versions = "*"
+files = [
+    {file = "univention_admin_rest_client-0.1.0-py2.py3-none-any.whl", hash = "sha256:192711c25490941cb0b74d1eba3a6071fbe4dd777434b8c95ca18bc73d2bc06e"},
+    {file = "univention_admin_rest_client-0.1.0.tar.gz", hash = "sha256:5cb953425b16a7f439c3cf6a6d9c4f8b1a0657953db9fbe3b06714b77e406036"},
+]
+
+[package.dependencies]
+requests = "*"
+uritemplate = "*"
+
+[package.extras]
+test = ["univention-admin-rest-client-test"]
+
+[package.source]
+type = "legacy"
+url = "https://git.knut.univention.de/api/v4/projects/3/packages/pypi/simple"
+reference = "ucs"
+
+[[package]]
+name = "uritemplate"
+version = "4.1.1"
+description = "Implementation of RFC 6570 URI Templates"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "uritemplate-4.1.1-py2.py3-none-any.whl", hash = "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"},
+    {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
+]
+
+[[package]]
 name = "urllib3"
 version = "2.0.7"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -1508,4 +1542,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "7141835a325ec151a8a3d55eeee7ab44c2d089e9cd55b22de7abd92fd988708d"
+content-hash = "6ebeec1a370cda348c55e3b2d1959868da797017ac6f8346bf65095a09b31078"
