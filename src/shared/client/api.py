@@ -2,11 +2,13 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import contextlib
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
 
 import shared.models.api
+from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
+from consumer.messages.api import v1_prefix as messages_api_prefix
 
 
 class AsyncClient:
@@ -21,37 +23,59 @@ class AsyncClient:
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
+            # TODO: do this with propper logging
             print(subscriber.model_dump())
             async with session.post(
-                f"{self.base_url}/v1/subscriptions", json=subscriber.model_dump()
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions",
+                json=subscriber.model_dump(),
             ):
                 # either return nothing or let `.post` throw
                 pass
 
-    async def cancel_subscription(self, name: str):
+    async def cancel_subscription(self, name: str, realm: str, topic: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.delete(f"{self.base_url}/v1/subscriptions/{name}"):
+            async with session.delete(
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+                params={"realm": realm, "topic": topic},
+            ):
                 # either return nothing or let `.post` throw
                 pass
 
     async def get_subscription(self, name: str) -> shared.models.subscriber.Subscriber:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}/v1/subscriptions/{name}"
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}"
             ) as response:
                 data = await response.json()
-                return shared.models.api.Subscriber.model_validate(data)
+                return shared.models.subscriber.Subscriber.model_validate(data)
 
     async def get_subscription_messages(
-        self, name: str, count=None, first=None, last=None
+        self,
+        name: str,
+        count: Optional[int] = None,
+        timeout: Optional[float] = None,
+        pop: Optional[bool] = None,
+        force: Optional[bool] = None,
     ) -> List[Tuple[str, shared.models.queue.Message]]:
+        _params = {
+            "count": count,
+            "timeout": timeout,
+            "pop": pop,
+            "force": force,
+        }
+        params = {k: v for k, v in _params.items() if v is not None}
+
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}/v1/subscriptions/{name}/messages",
-                params=dict(count=count, first=first, last=last),
+                f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages",
+                params=params,
             ) as response:
                 msgs = await response.json()
-                return [shared.models.api.Message.model_validate(msg) for msg in msgs]
+                # FIXME:
+                return [
+                    ("foobar", shared.models.queue.Message.model_validate(msg))
+                    for msg in msgs
+                ]
 
     async def set_message_status(
         self,
@@ -63,7 +87,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}/v1/subscriptions/{name}/messages/{message_id}",
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/messages/{message_id}",
                 json=report.model_dump(),
             ):
                 # either return nothing or let `.post` throw
@@ -71,16 +95,20 @@ class AsyncClient:
 
     async def get_subscriptions(self) -> List[shared.models.subscriber.Subscriber]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.get(f"{self.base_url}/v1/subscriptions") as response:
+            async with session.get(
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions"
+            ) as response:
                 data = await response.json()
-                return shared.models.api.Subscriber.model_validate(data)
+                # TODO: parse a list of subscriptions instead
+                return shared.models.subscriber.Subscriber.model_validate(data)
 
     async def submit_message(self, realm: str, topic: str, body: Dict[str, Any]):
         message = shared.models.api.Event(realm=realm, topic=topic, body=body)
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}/v1/messages", json=message.model_dump()
+                f"{self.base_url}{subscriptions_api_prefix}/messages",
+                json=message.model_dump(),
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -89,7 +117,7 @@ class AsyncClient:
     async def stream(self, name: str):
         async with aiohttp.ClientSession() as session:
             async with session.ws_connect(
-                f"{self.base_url}/v1/subscriptions/{name}/ws"
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/ws"
             ) as websocket:
                 yield AsyncClientStream(websocket)
 
