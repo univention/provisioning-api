@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import enum
+from typing import List
 
 from pydantic import Field, BaseModel
 
@@ -18,11 +19,10 @@ class FillQueueStatus(str, enum.Enum):
 
 
 class Subscription(BaseModel):
-    """A registered subscriber."""
-
-    name: str = Field(description="The identifier of the subscriber.")
+    """A registered subscription."""
 
     realm: str = Field(description="A `realm` that this subscriber subscribes to.")
+
     topic: str = Field(description="A `topic` that this subscriber subscribes to.")
 
     request_prefill: bool = Field(
@@ -31,4 +31,12 @@ class Subscription(BaseModel):
 
     prefill_queue_status: FillQueueStatus = Field(
         description="Pre-filling the queue: status."
+    )
+
+
+class Subscriber(BaseModel):
+    name: str = Field(description="The identifier of the subscriber.")
+
+    subscriptions: List[Subscription] = Field(
+        description="List of subscriptions of the subscriber"
     )

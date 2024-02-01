@@ -23,7 +23,7 @@ class UDMMessagingPort:
         await port._nats_adapter.nats.connect(
             servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
         )
-        await port._nats_adapter.create_kv_store()
+        await port._nats_adapter.create_kv_store("listener")
         await port._event_adapter.connect()
 
         try:
@@ -36,11 +36,11 @@ class UDMMessagingPort:
         await self._event_adapter.close()
 
     async def retrieve(self, url: str):
-        result = await self._nats_adapter.get_value(url)
+        result = await self._nats_adapter.get_value(url, "listener")
         return json.loads(result.value.decode("utf-8")) if result else None
 
     async def store(self, url: str, new_obj: str):
-        await self._nats_adapter.put_value(url, new_obj)
+        await self._nats_adapter.put_value(url, new_obj, "listener")
 
     async def send_event(self, message: Message):
         await self._event_adapter.send_event(message)

@@ -11,7 +11,7 @@ from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
 from shared.models import FillQueueStatus
-from shared.models.queue import PrefillMessage, Message
+from shared.models.queue import PrefillMessage, Message, PrefillStream
 
 logger = logging.getLogger(__name__)
 
@@ -46,11 +46,13 @@ class UDMPreFill(PreFillService):
                     self._logger.info(
                         "Started the prefill for '%s'", self._subscription_name
                     )
-                    await msg.in_progress()
-                    await self._port.update_subscriber_queue_status(
-                        self._subscription_name, FillQueueStatus.running
+                    await self.mark_request_as_running(msg)
+                    prefill_stream = PrefillStream(
+                        subscriber_name=self._subscription_name,
+                        realm=self._realm,
+                        topic=self._topic,
                     )
-                    await self._port.create_prefill_stream(self._subscription_name)
+                    await self._port.create_prefill_stream(prefill_stream)
                     await self.fetch()
                 else:
                     # FIXME: unhandled realm
@@ -130,15 +132,15 @@ class UDMPreFill(PreFillService):
 
     async def mark_request_as_done(self, msg: Msg):
         await msg.ack()
-        await self._port.update_subscriber_queue_status(
-            self._subscription_name, FillQueueStatus.done
-        )
+        await self.update_subscriber_queue_status(FillQueueStatus.done)
 
     async def mark_request_as_failed(self, msg: Msg):
         await msg.nak()
-        await self._port.update_subscriber_queue_status(
-            self._subscription_name, FillQueueStatus.failed
-        )
+        await self.update_subscriber_queue_status(FillQueueStatus.failed)
+
+    async def mark_request_as_running(self, msg: Msg):
+        await msg.in_progress()
+        await self.update_subscriber_queue_status(FillQueueStatus.running)
 
     def parse_request_data(self, msg: Msg) -> PrefillMessage:
         data = json.loads(msg.data)
@@ -152,3 +154,8 @@ class UDMPreFill(PreFillService):
     async def prepare_prefill_failures_queue(self):
         await self._port.create_stream(self.prefill_failures_queue)
         await self._port.create_consumer(self.prefill_failures_queue)
+
+    async def update_subscriber_queue_status(self, queue_status: FillQueueStatus):
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, f"{self._realm}:{self._topic}", queue_status
+        )

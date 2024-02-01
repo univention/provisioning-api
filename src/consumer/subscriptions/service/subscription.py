@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import asyncio
+import base64
 import logging
 import re
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from consumer.port import ConsumerPort
 from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscription, NewSubscription, FillQueueStatus
 from shared.models.queue import PrefillMessage
+from shared.models.subscription import Subscriber
 
 manager = SinkManager()
 
@@ -30,7 +32,7 @@ def match_subscription(
 
 
 class SubscriptionKeys:
-    subscriptions = "subscriptions"
+    subscribers = "subscribers"
 
     def subscription(subscription_name: str) -> str:
         return f"subscription:{subscription_name}"
@@ -41,135 +43,162 @@ class SubscriptionService:
         self._port = port
         self.logger = logging.getLogger(__name__)
 
-    async def get_subscriptions(
-        self, realm_topic: Optional[None]
-    ) -> List[Subscription]:
+    async def get_subscribers(self) -> List[Union[Subscriber, str]]:
         """
-        Return a list of all known subscriptions or with the given realm_topic.
+        Return a list of all known subscribers.
         """
 
-        names = await self.get_subscription_names(
-            realm_topic or SubscriptionKeys.subscriptions
-        )
-        subscriptions = [await self.get_subscription(name) for name in names]
+        names = await self.get_subscribers_names(SubscriptionKeys.subscribers)
+        subscriptions = [await self.get_subscriber_info(name) for name in names]
         return subscriptions
 
-    async def get_subscription_names(self, key: str):
-        return await self._port.get_list_value(key)
+    async def get_realm_topic_subscribers(self, realm_topic: Optional[str]):
+        if not realm_topic:
+            return []
 
-    async def get_subscription(self, name: str) -> Subscription:
-        """
-        Get information about a registered subscription.
-        """
-        sub = await self.get_subscription_info(name)
-        if not sub:
-            raise ValueError("Subscription not found.")
+        names = await self.get_subscribers_names(SubscriptionKeys.subscribers)
+        encoded_realm_topic = base64.b64encode(realm_topic.encode()).decode()
 
-        return sub
+        subscription_infos = await asyncio.gather(
+            *[self.get_subscription_info(encoded_realm_topic, name) for name in names]
+        )
 
-    async def create_subscription(self, sub: NewSubscription):
+        subscribers = [
+            name
+            for name, subscription_info in zip(names, subscription_infos)
+            if subscription_info
+        ]
+        return subscribers
+
+    async def get_subscribers_names(self, key: str):
+        return await self._port.get_list_value(key, "main")
+
+    async def create_subscription(self, new_sub: NewSubscription):
         """
         Create a new subscription.
         """
-        if sub.request_prefill:
+        if new_sub.request_prefill:
             prefill_queue_status = FillQueueStatus.pending
         else:
             prefill_queue_status = FillQueueStatus.done
 
-        sub_info = await self.get_subscription_info(sub.name)
-        if sub_info:
-            raise ValueError("The subscription with the given name already exists")
+        encoded_realm_topic = base64.b64encode(
+            f"{new_sub.realm}:{new_sub.topic}".encode()
+        ).decode()
+
+        if not await self._port.subscriber_exists(new_sub.name):
+            await self._port.create_subscriber(new_sub.name)
+            await self.add_sub_to_subscribers(new_sub.name)
+
+        if await self.get_subscription_info(encoded_realm_topic, new_sub.name):
+            raise ValueError(
+                "The subscription with the given realm_topic already exists"
+            )
         else:
             sub_info = Subscription(
-                name=sub.name,
-                realm=sub.realm,
-                topic=sub.topic,
-                request_prefill=sub.request_prefill,
+                realm=new_sub.realm,
+                topic=new_sub.topic,
+                request_prefill=new_sub.request_prefill,
                 prefill_queue_status=prefill_queue_status,
             )
-            await self.set_sub_info(sub.name, sub_info)
-            await self.add_sub_to_subscriptions(sub.name)
-            await self.update_realm_topic_subscriptions(
-                f"{sub.realm}:{sub.topic}", sub.name
-            )
-            await self._port.create_stream(sub.name)
-            await self._port.create_consumer(sub.name)
+            await self.set_sub_info(sub_info, bucket=new_sub.name)
+
+            encoded_realm_topic = base64.b64encode(
+                f"{new_sub.realm}:{new_sub.topic}".encode()
+            ).decode()
+            await self._port.create_stream(f"{new_sub.name}_{encoded_realm_topic}")
+            await self._port.create_consumer(f"{new_sub.name}_{encoded_realm_topic}")
 
             self.logger.info("Subscription was created")
 
     async def update_realm_topic_subscriptions(self, realm_topic_str: str, name: str):
-        await self.update_subscriptions_names(realm_topic_str, name)
+        await self.update_subscribers_names(realm_topic_str, name)
 
-    async def get_subscription_info(self, name: str) -> Optional[Subscription]:
-        result = await self._port.get_dict_value(SubscriptionKeys.subscription(name))
+    async def get_subscription_names(self, subscriber_name: str):
+        return await self._port.get_subscription_names(subscriber_name)
+
+    async def get_subscriber_info(self, subscriber_name: str) -> Optional[Subscriber]:
+        if not await self._port.subscriber_exists(subscriber_name):
+            raise ValueError("Subscriber was not found.")
+
+        names = await self.get_subscription_names(subscriber_name)
+        subscriptions = [
+            await self.get_subscription_info(name, subscriber_name) for name in names
+        ]
+
+        sub = Subscriber(name=subscriber_name, subscriptions=subscriptions)
+        return sub
+
+    async def get_subscription_info(self, key: str, bucket: str) -> Subscription:
+        result = await self._port.get_dict_value(key, bucket)
         return Subscription.model_validate(result) if result else result
 
     async def get_subscription_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscription."""
-
-        sub_info = await self.get_subscription_info(name)
+        bucket, key = name.split("_")
+        sub_info = await self.get_subscription_info(key, bucket)
         if not sub_info:
-            raise ValueError("Subscription not found.")
+            raise ValueError("Subscription was not found.")
 
         return sub_info.prefill_queue_status
 
-    async def set_subscription_queue_status(self, name: str, status: FillQueueStatus):
+    async def set_subscription_queue_status(
+        self, name: str, realm_topic: str, status: FillQueueStatus
+    ):
         """Set the pre-fill status of the given subscription."""
-        sub_info = await self.get_subscription_info(name)
+        encoded_realm_topic = base64.b64encode(realm_topic.encode()).decode()
+        sub_info = await self.get_subscription_info(encoded_realm_topic, name)
         if not sub_info:
-            raise ValueError("Subscription not found.")
+            raise ValueError("Subscription was not found.")
 
         sub_info.prefill_queue_status = status.name
-        await self.set_sub_info(name, sub_info)
+        await self.set_sub_info(sub_info, bucket=name)
 
-    async def cancel_subscription(self, name: str, realm: str, topic: str):
-        sub_info = await self.get_subscription_info(name)
+    async def cancel_subscription(self, name: str, realm_topic: str):
+        encoded_realm_topic = base64.b64encode(realm_topic.encode()).decode()
+        sub_info = await self.get_subscription_info(encoded_realm_topic, name)
         if not sub_info:
-            raise ValueError("Subscription not found.")
+            raise ValueError("Subscription was not found.")
 
-        await self.delete_sub_from_realm_topic(f"{realm}:{topic}", name)
-        await self.delete_sub_info(name)
-        await self.delete_sub_from_subscriptions(name)
-        await self._port.delete_stream(name)
-        await self._port.delete_consumer(name)
+        await self.delete_sub_info(encoded_realm_topic, name)
+        await self._port.delete_stream(f"{name}_{encoded_realm_topic}")
+        await self._port.delete_consumer(f"{name}_{encoded_realm_topic}")
 
-    async def set_sub_info(self, name, sub_info: Subscription):
+    async def set_sub_info(self, sub_info: Subscription, bucket: str):
+        encoded_realm_topic = base64.b64encode(
+            f"{sub_info.realm}:{sub_info.topic}".encode()
+        ).decode()
+
         await self._port.put_value(
-            SubscriptionKeys.subscription(name), sub_info.model_dump()
+            encoded_realm_topic, sub_info.model_dump(), bucket=bucket
         )
 
-    async def delete_sub_from_subscriptions(self, name: str):
-        await self.delete_subscription_from_values(SubscriptionKeys.subscriptions, name)
+    async def delete_subscriber(self, name: str):
+        await self.delete_subscriber_from_values(SubscriptionKeys.subscribers, name)
+        await self._port.delete_subscriber(name)
+        self.logger.info("Subscriber was deleted")
 
-    async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
-        await self.delete_subscription_from_values(realm_topic_str, name)
+    async def delete_sub_info(self, key: str, bucket: str):
+        await self._port.delete_kv_pair(key, bucket)
 
-    async def delete_sub_info(self, name: str):
-        await self._port.delete_kv_pair(SubscriptionKeys.subscription(name))
+    async def delete_subscriber_from_values(self, key: str, name: str):
+        self.logger.debug("Deleting subscriber '%s' from '%s'", name, key)
 
-    async def delete_subscription_from_values(self, key: str, name: str):
-        self.logger.debug("Deleting subscription '%s' from '%s'", name, key)
-
-        subs = await self._port.get_list_value(key)
-        if not subs:
-            raise ValueError("There are no subscriptions")
-
+        subs = await self._port.get_list_value(key, "main")
         if name not in subs:
-            raise ValueError("The subscription with the given name does not exist")
+            raise ValueError("Subscriber was not found")
 
         subs.remove(name)
-        await self._port.put_list_value(key, subs)
+        await self._port.put_list_value(key, subs, "main")
 
-        self.logger.info("Subscription was deleted")
-
-    async def update_subscriptions_names(self, key: str, value: str) -> None:
-        subs = await self._port.get_str_value(key)
+    async def update_subscribers_names(self, key: str, value: str) -> None:
+        subs = await self._port.get_str_value(key, "main")
         if subs:
             value = subs + f",{value}"
-        await self._port.put_value(key, value)
+        await self._port.put_value(key, value, bucket="main")
 
-    async def add_sub_to_subscriptions(self, name: str):
-        await self.update_subscriptions_names(SubscriptionKeys.subscriptions, name)
+    async def add_sub_to_subscribers(self, name: str):
+        await self.update_subscribers_names(SubscriptionKeys.subscribers, name)
 
     async def send_request_to_prefill(self, subscriber: NewSubscription):
         self.logger.info("Sending the request to prefill")

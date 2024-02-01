@@ -41,6 +41,12 @@ class PrefillMessage(BaseMessage):
     )
 
 
+class PrefillStream(BaseModel):
+    subscriber_name: str
+    realm: str
+    topic: str
+
+
 class UDMMessage(BaseMessage):
     """A message emitted from the UDM REST API."""
 

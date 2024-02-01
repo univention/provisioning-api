@@ -71,26 +71,26 @@ class ConsumerPort:
     async def delete_consumer(self, stream_name: str):
         await self.nats_adapter.delete_consumer(stream_name)
 
-    async def get_dict_value(self, name: str) -> Optional[dict]:
-        result = await self.nats_adapter.get_value(name)
+    async def get_dict_value(self, name: str, bucket: str) -> Optional[dict]:
+        result = await self.nats_adapter.get_value(name, bucket)
         return json.loads(result.value.decode("utf-8")) if result else None
 
-    async def get_list_value(self, key: str) -> List[str]:
-        result = await self.nats_adapter.get_value(key)
+    async def get_list_value(self, key: str, bucket: str) -> List[str]:
+        result = await self.nats_adapter.get_value(key, bucket)
         return result.value.decode("utf-8").split(",") if result else []
 
-    async def get_str_value(self, key: str) -> Optional[str]:
-        result = await self.nats_adapter.get_value(key)
+    async def get_str_value(self, key: str, bucket: str) -> Optional[str]:
+        result = await self.nats_adapter.get_value(key, bucket)
         return result.value.decode("utf-8") if result else None
 
-    async def delete_kv_pair(self, key: str):
-        await self.nats_adapter.delete_kv_pair(key)
+    async def delete_kv_pair(self, key: str, bucket: str):
+        await self.nats_adapter.delete_kv_pair(key, bucket)
 
-    async def put_value(self, key: str, value: Union[str, dict]):
-        await self.nats_adapter.put_value(key, value)
+    async def put_value(self, key: str, value: Union[str, dict], bucket: str):
+        await self.nats_adapter.put_value(key, value, bucket)
 
-    async def put_list_value(self, key: str, value: list[str]):
-        await self.nats_adapter.put_value(key, ",".join(value))
+    async def put_list_value(self, key: str, value: List[str], bucket: str):
+        await self.nats_adapter.put_value(key, ",".join(value), bucket)
 
     async def stream_exists(self, prefill_queue_name: str) -> bool:
         return await self.nats_adapter.stream_exists(prefill_queue_name)
@@ -100,6 +100,18 @@ class ConsumerPort:
 
     async def create_consumer(self, subject):
         await self.nats_adapter.create_consumer(subject)
+
+    async def get_subscription_names(self, bucket: str) -> List[str]:
+        return await self.nats_adapter.get_keys(bucket)
+
+    async def subscriber_exists(self, bucket: str):
+        return await self.nats_adapter.get_kv_store(bucket)
+
+    async def create_subscriber(self, name: str):
+        await self.nats_adapter.create_kv_store(name)
+
+    async def delete_subscriber(self, name: str):
+        await self.nats_adapter.delete_kv_store(name)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

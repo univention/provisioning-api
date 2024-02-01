@@ -49,10 +49,10 @@ class TestSubscriptionService:
             prefill_queue_status="done",
         )
 
-        result = await sub_service.get_subscriptions(None)
+        result = await sub_service.get_subscribers(None)
 
         sub_service._port.get_list_value.assert_called_once_with(
-            SubscriptionKeys.subscriptions
+            SubscriptionKeys.subscribers
         )
         sub_service._port.get_dict_value.assert_called_once_with(self.subscription)
         assert result == [subscriber]
@@ -60,10 +60,10 @@ class TestSubscriptionService:
     async def test_get_subscribers_empty_result(self, sub_service):
         sub_service._port.get_list_value = AsyncMock(return_value=[])
 
-        result = await sub_service.get_subscriptions(None)
+        result = await sub_service.get_subscribers(None)
 
         sub_service._port.get_list_value.assert_called_once_with(
-            SubscriptionKeys.subscriptions
+            SubscriptionKeys.subscribers
         )
         assert result == []
 
@@ -71,7 +71,7 @@ class TestSubscriptionService:
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
 
         with pytest.raises(ValueError) as e:
-            await sub_service.get_subscription(SUBSCRIPTION_NAME)
+            await sub_service.get_subscriber_info(SUBSCRIPTION_NAME)
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscription)
         assert "Subscription not found." == str(e.value)
@@ -96,11 +96,11 @@ class TestSubscriptionService:
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscription)
         sub_service._port.get_str_value.assert_has_calls(
-            [call(SubscriptionKeys.subscriptions), call("udm:users/user")]
+            [call(SubscriptionKeys.subscribers), call("udm:users/user")]
         )
         sub_service._port.put_value.assert_has_calls(
             [
-                call(SubscriptionKeys.subscriptions, SUBSCRIPTION_NAME),
+                call(SubscriptionKeys.subscribers, SUBSCRIPTION_NAME),
                 call("udm:users/user", SUBSCRIPTION_NAME),
             ]
         )
@@ -190,7 +190,7 @@ class TestSubscriptionService:
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscription)
         sub_service._port.get_list_value.assert_has_calls(
-            [call("udm:users/user"), call(SubscriptionKeys.subscriptions)]
+            [call("udm:users/user"), call(SubscriptionKeys.subscribers)]
         )
         sub_service._port.put_list_value.assert_has_calls(
             [call("udm:users/user", []), call("subscriptions", [])]

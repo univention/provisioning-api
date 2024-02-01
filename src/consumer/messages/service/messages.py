@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import base64
 import logging
 from typing import List, Optional
 
@@ -8,7 +8,7 @@ from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import FillQueueStatus
-from shared.models.queue import NatsMessage, Message
+from shared.models.queue import NatsMessage, Message, PrefillStream
 
 
 class PrefillKeys:
@@ -23,7 +23,11 @@ class MessageService:
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Add the given message to the subscriber's prefill queue."""
-        await self._port.add_message(PrefillKeys.queue_name(subscriber_name), message)
+        encoded_realm_topic = base64.b64encode(
+            f"{message.realm}:{message.topic}".encode()
+        ).decode()
+        queue_name = f"{subscriber_name}_{encoded_realm_topic}"
+        await self._port.add_message(PrefillKeys.queue_name(queue_name), message)
 
     async def delete_prefill_messages(self, subscriber_name: str):
         """Delete the pre-fill message from the subscriber's queue."""
@@ -68,41 +72,49 @@ class MessageService:
         """
 
         sub_service = SubscriptionService(self._port)
-        queue_status = await sub_service.get_subscription_queue_status(subscriber_name)
+        subscriptions = await sub_service.get_subscription_names(subscriber_name)
 
         messages = []
-        prefill_stream = await self._port.stream_exists(
-            PrefillKeys.queue_name(subscriber_name)
-        )
+        for sub in subscriptions:
+            queue_name = f"{subscriber_name}_{sub}"
+            queue_status = await sub_service.get_subscription_queue_status(queue_name)
 
-        if queue_status == FillQueueStatus.done and prefill_stream:
-            messages = await self.get_messages_from_prefill_queue(
-                subscriber_name, timeout, count, pop
+            prefill_stream = await self._port.stream_exists(
+                PrefillKeys.queue_name(queue_name)
             )
-        elif skip_prefill or not prefill_stream:
-            messages.extend(
-                await self.get_messages_from_main_queue(
-                    subscriber_name, timeout, count, pop
+
+            if queue_status == FillQueueStatus.done and prefill_stream:
+                messages.extend(
+                    await self.get_messages_from_prefill_queue(
+                        queue_name, timeout, count, pop
+                    )
                 )
-            )
+            elif skip_prefill or not prefill_stream:
+                messages.extend(
+                    await self.get_messages_from_main_queue(
+                        queue_name, timeout, count, pop
+                    )
+                )
+            if len(messages) == count:
+                break
 
         return messages
 
     async def get_messages_from_main_queue(
-        self, subscriber_name: str, timeout: float, count: int, pop: bool
+        self, queue_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:
         self.logger.info(
-            "Getting the messages for the '%s' from the main queue", subscriber_name
+            "Getting the messages for the '%s' from the main queue", queue_name
         )
-        return await self._port.get_messages(subscriber_name, timeout, count, pop)
+        return await self._port.get_messages(queue_name, timeout, count, pop)
 
     async def get_messages_from_prefill_queue(
-        self, subscriber_name: str, timeout: float, count: int, pop: bool
+        self, queue_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:
         self.logger.info(
-            "Getting the messages for the '%s' from the prefill queue", subscriber_name
+            "Getting the messages for the '%s' from the prefill queue", queue_name
         )
-        prefill_queue_name = PrefillKeys.queue_name(subscriber_name)
+        prefill_queue_name = PrefillKeys.queue_name(queue_name)
         messages = await self._port.get_messages(
             prefill_queue_name, timeout, count, pop
         )
@@ -111,7 +123,7 @@ class MessageService:
             await self._port.delete_stream(prefill_queue_name)
             messages.extend(
                 await self.get_messages_from_main_queue(
-                    subscriber_name, timeout, count - len(messages), pop
+                    queue_name, timeout, count - len(messages), pop
                 )
             )
         return messages
@@ -124,7 +136,19 @@ class MessageService:
 
         await self._port.remove_message(msg)
 
-    async def create_prefill_stream(self, subscriber_name: str):
+    async def create_prefill_stream(self, data: PrefillStream):
+        encoded_realm_topic = base64.b64encode(
+            f"{data.realm}:{data.topic}".encode()
+        ).decode()
+        queue_name = f"{data.subscriber_name}_{encoded_realm_topic}"
         # delete the previously created stream if it exists
-        await self._port.delete_stream(PrefillKeys.queue_name(subscriber_name))
-        await self._port.create_stream(PrefillKeys.queue_name(subscriber_name))
+        await self._port.delete_stream(PrefillKeys.queue_name(queue_name))
+        await self._port.create_stream(PrefillKeys.queue_name(queue_name))
+        await self._port.create_consumer(PrefillKeys.queue_name(queue_name))
+
+    async def add_message(self, name: str, msg: Message):
+        encoded_realm_topic = base64.b64encode(
+            f"{msg.realm}:{msg.topic}".encode()
+        ).decode()
+        queue_name = f"{name}_{encoded_realm_topic}"
+        await self._port.add_message(queue_name, msg)

@@ -7,6 +7,7 @@ import aiohttp
 
 from shared.config import settings
 from shared.models import Message
+from shared.models.queue import PrefillStream
 
 
 class ConsumerMesAdapter:
@@ -39,13 +40,21 @@ class ConsumerMesAdapter:
 
     async def create_prefill_message(self, name: str, message: Message):
         async with self._session.post(
-            f"{self.base_url}subscriptions/{name}/prefill-messages",
+            f"{self.base_url}subscribers/{name}/prefill-messages",
             json=message.model_dump(),
         ):
             pass
 
-    async def create_prefill_stream(self, subscription_name: str):
+    async def create_prefill_stream(self, prefill_stream: PrefillStream):
         async with self._session.post(
-            f"{self.base_url}subscriptions/{subscription_name}/prefill-stream",
+            f"{self.base_url}prefill-streams",
+            json=prefill_stream.model_dump(),
+        ):
+            pass
+
+    async def send_message(self, name: str, message: Message):
+        async with self._session.post(
+            f"{self.base_url}subscribers/{name}/messages",
+            json=message.model_dump(),
         ):
             pass

@@ -41,7 +41,7 @@ class TestDispatcherService:
         dispatcher_service._port.get_realm_topic_subscribers.assert_called_once_with(
             REALMS_TOPICS_STR
         )
-        dispatcher_service._port.send_event_to_consumer_queue.assert_called_once_with(
+        dispatcher_service._port.send_message_to_subscriber.assert_called_once_with(
             SUBSCRIBER_INFO["name"], MESSAGE
         )
         assert "Stop waiting for the new event" == str(e.value)

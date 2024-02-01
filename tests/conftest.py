@@ -247,7 +247,7 @@ async def events_port_fake_dependency() -> EventsPort:
 
 async def consumer_port_fake_dependency_without_sub():
     port = await consumer_port_fake_dependency()
-    port.nats_adapter.get_subscription = AsyncMock(return_value=None)
+    port.nats_adapter.get_subscriber = AsyncMock(return_value=None)
     return port
 
 
