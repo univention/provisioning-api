@@ -55,7 +55,7 @@ PREFILL_MESSAGE = PrefillMessage(
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
     realm=REALM,
     topic=TOPIC,
-    subscription_name=SUBSCRIPTION_NAME,
+    subscriber_name=SUBSCRIPTION_NAME,
 )
 
 FLAT_BASE_MESSAGE = {

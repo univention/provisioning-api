@@ -207,6 +207,6 @@ class SubscriptionService:
             ts=datetime.now(),
             realm=subscriber.realm,
             topic=subscriber.topic,
-            subscription_name=subscriber.name,
+            subscriber_name=subscriber.name,
         )
         await self._port.add_message("prefill", message)

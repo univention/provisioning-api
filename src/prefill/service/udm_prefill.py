@@ -44,11 +44,13 @@ class UDMPreFill(PreFillService):
 
                 if self._realm == "udm":
                     self._logger.info(
-                        "Started the prefill for '%s'", self._subscription_name
+                        "Started the prefill for the subscriber %s with the topic %s",
+                        self._subscriber_name,
+                        self._topic,
                     )
                     await self.mark_request_as_running(msg)
                     prefill_stream = PrefillStream(
-                        subscriber_name=self._subscription_name,
+                        subscriber_name=self._subscriber_name,
                         realm=self._realm,
                         topic=self._topic,
                     )
@@ -119,7 +121,7 @@ class UDMPreFill(PreFillService):
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
-        await self._port.create_prefill_message(self._subscription_name, message)
+        await self._port.create_prefill_message(self._subscriber_name, message)
 
     async def add_request_to_prefill_failures(
         self, validated_msg: PrefillMessage, msg: Msg
@@ -146,7 +148,7 @@ class UDMPreFill(PreFillService):
         data = json.loads(msg.data)
         validated_msg = PrefillMessage.model_validate(data)
         self._logger.info("Received request with content: %s", data)
-        self._subscription_name = validated_msg.subscription_name
+        self._subscriber_name = validated_msg.subscriber_name
         self._topic = validated_msg.topic
         self._realm = validated_msg.realm
         return validated_msg
@@ -157,5 +159,5 @@ class UDMPreFill(PreFillService):
 
     async def update_subscriber_queue_status(self, queue_status: FillQueueStatus):
         await self._port.update_subscription_queue_status(
-            self._subscription_name, f"{self._realm}:{self._topic}", queue_status
+            self._subscriber_name, f"{self._realm}:{self._topic}", queue_status
         )

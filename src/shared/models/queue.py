@@ -36,7 +36,7 @@ class Message(BaseMessage):
 class PrefillMessage(BaseMessage):
     """This class represents the message used to send a request to the Prefill Service."""
 
-    subscription_name: str = Field(
+    subscriber_name: str = Field(
         description="The name of the subscriber who requested the prefilling queue"
     )
 

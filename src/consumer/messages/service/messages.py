@@ -29,10 +29,10 @@ class MessageService:
         queue_name = f"{subscriber_name}_{encoded_realm_topic}"
         await self._port.add_message(PrefillKeys.queue_name(queue_name), message)
 
-    async def delete_prefill_messages(self, subscriber_name: str):
+    async def delete_prefill_messages(self, queue_name: str):
         """Delete the pre-fill message from the subscriber's queue."""
 
-        await self._port.delete_prefill_messages(subscriber_name)
+        await self._port.delete_prefill_messages(queue_name)
 
     async def get_next_message(
         self,
@@ -103,22 +103,20 @@ class MessageService:
     async def get_messages_from_main_queue(
         self, queue_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:
-        self.logger.info(
-            "Getting the messages for the '%s' from the main queue", queue_name
-        )
+        self.logger.info("Getting the messages from the main queue: '%s'", queue_name)
         return await self._port.get_messages(queue_name, timeout, count, pop)
 
     async def get_messages_from_prefill_queue(
         self, queue_name: str, timeout: float, count: int, pop: bool
     ) -> List[NatsMessage]:
-        self.logger.info(
-            "Getting the messages for the '%s' from the prefill queue", queue_name
-        )
         prefill_queue_name = PrefillKeys.queue_name(queue_name)
+        self.logger.info(
+            "Getting the messages from the prefill queue: '%s'", prefill_queue_name
+        )
         messages = await self._port.get_messages(
             prefill_queue_name, timeout, count, pop
         )
-        if len(messages) < count:
+        if len(messages) < count and pop:
             self.logger.info("All messages from the prefill queue have been delivered")
             await self._port.delete_stream(prefill_queue_name)
             messages.extend(
