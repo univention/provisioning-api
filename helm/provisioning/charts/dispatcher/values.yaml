@@ -29,9 +29,9 @@ image:
 # -- Configuration of the dispatcher component
 config:
   # -- NATS: host (required if nats.bundled == false)
-  natsHost: "localhost"
+  natsHost: null
   # -- NATS: port (required if nats.bundled == false)
-  natsPort: 4222
+  natsPort: "4222"
 
 
 ## Container deployment probes

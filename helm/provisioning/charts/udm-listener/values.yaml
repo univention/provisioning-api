@@ -45,10 +45,10 @@ config:
   # -- Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set
   ldapHostIp: null
   ldapPort: "389"
-  # -- NATS: host
+  # -- NATS: host (required if nats.bundled == false)
   natsHost: null
-  # -- NATS: port
-  natsPort: 4222
+  # -- NATS: port (required if nats.bundled == false)
+  natsPort: "4222"
   # -- Defaults to "ldapHost" if not set.
   notifierServer: "ldap-notifier"
   # -- Whether to start encryption and validate certificates.
@@ -90,5 +90,8 @@ resources: {}
   #   memory: "512Mi"
   # limits:
   #   memory: "4Gi"
+
+nats:
+  bundled: true
 
 ...

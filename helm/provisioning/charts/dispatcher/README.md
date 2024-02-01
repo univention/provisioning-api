@@ -17,9 +17,9 @@ A Helm chart for the Univention Portal Provisioning Dispatcher
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"natsHost":"localhost","natsPort":4222}` | Configuration of the dispatcher component |
-| config.natsHost | string | `"localhost"` | NATS: host (required if nats.bundled == false) |
-| config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
+| config | object | `{"natsHost":null,"natsPort":"4222"}` | Configuration of the dispatcher component |
+| config.natsHost | string | `nil` | NATS: host (required if nats.bundled == false) |
+| config.natsPort | string | `"4222"` | NATS: port (required if nats.bundled == false) |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
 | image.imagePullPolicy | string | `"Always"` |  |

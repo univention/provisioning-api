@@ -17,14 +17,14 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"4","ldapBaseDn":null,"ldapHost":"ldap-server","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPort":4222,"notifierServer":"ldap-notifier","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"4","ldapBaseDn":null,"ldapHost":"ldap-server","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPort":"4222","notifierServer":"ldap-notifier","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.ldapHostIp | string | `nil` | Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set |
 | config.ldapPassword | string | `""` | LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set. |
 | config.ldapPasswordFile | string | `"/var/secrets/ldap_secret"` | The path to the "ldapPasswordFile" docker secret or a plain file |
-| config.natsHost | string | `nil` | NATS: host |
-| config.natsPort | int | `4222` | NATS: port |
+| config.natsHost | string | `nil` | NATS: host (required if nats.bundled == false) |
+| config.natsPort | string | `"4222"` | NATS: port (required if nats.bundled == false) |
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | environment | object | `{}` |  |
@@ -34,6 +34,7 @@ A Helm chart for the Univention Portal Provisioning API
 | image.repository | string | `"univention/customers/dataport/upx/provisioning/udm-listener"` |  |
 | image.tag | string | `"latest"` |  |
 | nameOverride | string | `""` |  |
+| nats.bundled | bool | `true` |  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
