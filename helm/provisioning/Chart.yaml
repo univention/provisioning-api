@@ -12,7 +12,7 @@ dependencies:
     repository: "oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts"
   - name: "nats"
     # version: "^0.x.x"
-    version: "0.0.1-pre-feat-initial-release"
+    version: "0.0.1"
     repository: "oci://registry.souvap-univention.de/souvap/tooling/charts/univention"
     condition: "nats.enabled"
 description: "A Helm Chart that deploys the provisioning services"
@@ -22,5 +22,5 @@ name: "provisioning"
 sources:
   - "https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/tree/main/helm/provisioning?ref_type=heads"
 type: "application"
-version: "0.0.1"
+version: "0.13.0"
 ...

@@ -451,28 +451,56 @@ updateStrategy:
   # are destroyed first.
   type: "RollingUpdate"
 
+
 api:
   image:
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "univention/customers/dataport/upx/provisioning/events-and-consumer-api"
-    tag: "1.0.0-pre-feat-bsi-compliance@sha256:3619f06dd49db9ac795648f87f9e99be808a06d52d0fe344cb3e8bb1bfa64a48"
+    tag: "0.13.0"
+  # If specified environment variables will be set on the container
+  credentialSecretName: ""
   config:
-    logLevel: "INFO"
-    debug: "true"
-    rootPath: "/univention/provisioning-api"
-    corsAll: "false"
+    # Python log level
+    LOG_LEVEL: "INFO"
+    ## api
+    # FastAPI: debug mode
+    DEBUG: "true"
+    # FastAPI: webserver root path
+    ROOT_PATH: "/univention/provisioning-api"
+    # FastAPI: disable CORS checks
+    CORS_ALL: "false"
 
 dispatcher:
   image:
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "univention/customers/dataport/upx/provisioning/dispatcher"
-    tag: "1.0.0-pre-feat-bsi-compliance@sha256:4ecac6666978c59e1a4d8e813e6603407f9d12a174bcc5c41de94eb6ce8c51b2"
+    tag: "0.13.0"
+  # If specified environment variables will be set on the container
+  credentialSecretName: ""
+  config:
+    # Python log level
+    LOG_LEVEL: "INFO"
+    ## dispatcher
+    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    UDM_HOST: ""
+    # UDM REST API: port
+    UDM_PORT: 9979
+    # UDM REST API: username
+    UDM_USERNAME: "cn=admin"
 
 prefill:
   image:
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "univention/customers/dataport/upx/provisioning/prefill"
-    tag: "1.0.0-pre-feat-bsi-compliance@sha256:bde27a7a4059a45d03eff91b8d32a1cfb0b7484a734109388f798791a1e95711"
+    tag: "0.13.0"
+  # If specified environment variables will be set on the container
+  credentialSecretName: ""
+  config:
+    # Python log level
+    LOG_LEVEL: "INFO"
 
 # -- NATS server settings.
 nats:

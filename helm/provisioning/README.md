@@ -1,6 +1,6 @@
 # provisioning
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm Chart that deploys the provisioning services
 
@@ -13,7 +13,7 @@ A Helm Chart that deploys the provisioning services
 | Repository | Name | Version |
 |------------|------|---------|
 | oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts | common | ^2.x.x |
-| oci://registry.souvap-univention.de/souvap/tooling/charts/univention | nats | 0.0.1-pre-feat-initial-release |
+| oci://registry.souvap-univention.de/souvap/tooling/charts/univention | nats | 0.0.1 |
 
 ## Values
 
@@ -22,13 +22,15 @@ A Helm Chart that deploys the provisioning services
 | additionalAnnotations | object | `{}` | Additional custom annotations to add to all deployed objects. |
 | additionalLabels | object | `{}` | Additional custom labels to add to all deployed objects. |
 | affinity | object | `{}` | Affinity for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set. |
-| api.config.corsAll | string | `"false"` |  |
-| api.config.debug | string | `"true"` |  |
-| api.config.logLevel | string | `"INFO"` |  |
-| api.config.rootPath | string | `"/univention/provisioning-api"` |  |
+| api.config.CORS_ALL | string | `"false"` |  |
+| api.config.DEBUG | string | `"true"` |  |
+| api.config.LOG_LEVEL | string | `"INFO"` |  |
+| api.config.ROOT_PATH | string | `"/univention/provisioning-api"` |  |
+| api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| api.image.registry | string | `""` |  |
 | api.image.repository | string | `"univention/customers/dataport/upx/provisioning/events-and-consumer-api"` |  |
-| api.image.tag | string | `"1.0.0-pre-feat-bsi-compliance@sha256:3619f06dd49db9ac795648f87f9e99be808a06d52d0fe344cb3e8bb1bfa64a48"` |  |
+| api.image.tag | string | `"0.13.0"` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
 | containerSecurityContext.enabled | bool | `true` | Enable security context. |
@@ -37,9 +39,15 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.runAsNonRoot | bool | `true` | Run container as a user. |
 | containerSecurityContext.runAsUser | int | `1000` | Process user id. |
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
+| dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
+| dispatcher.config.UDM_HOST | string | `""` |  |
+| dispatcher.config.UDM_PORT | int | `9979` |  |
+| dispatcher.config.UDM_USERNAME | string | `"cn=admin"` |  |
+| dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"univention/customers/dataport/upx/provisioning/dispatcher"` |  |
-| dispatcher.image.tag | string | `"1.0.0-pre-feat-bsi-compliance@sha256:4ecac6666978c59e1a4d8e813e6603407f9d12a174bcc5c41de94eb6ce8c51b2"` |  |
+| dispatcher.image.tag | string | `"0.13.0"` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
@@ -112,9 +120,12 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.fsGroup | int | `1000` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
+| prefill.config.LOG_LEVEL | string | `"INFO"` |  |
+| prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"univention/customers/dataport/upx/provisioning/prefill"` |  |
-| prefill.image.tag | string | `"1.0.0-pre-feat-bsi-compliance@sha256:bde27a7a4059a45d03eff91b8d32a1cfb0b7484a734109388f798791a1e95711"` |  |
+| prefill.image.tag | string | `"0.13.0"` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |

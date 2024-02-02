@@ -72,6 +72,10 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
+          {{- if .Values.api.credentialSecretName }}
+            - secretRef:
+                name: {{ .Values.api.credentialSecretName | quote }}
+          {{- end }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

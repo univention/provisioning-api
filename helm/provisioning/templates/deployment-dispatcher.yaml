@@ -70,6 +70,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
+            - configMapRef:
+                name: {{ printf "%s-dispatcher" (include "common.names.fullname" .) }}
+          {{- if .Values.dispatcher.credentialSecretName }}
+            - secretRef:
+                name: {{ .Values.dispatcher.credentialSecretName | quote }}
+          {{- end }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
