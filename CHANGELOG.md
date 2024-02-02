@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.4...v0.9.5) (2024-02-02)
+
+
+### Bug Fixes
+
+* **helm:** remove liveness and readyness probes from dispatcher ([6070490](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/60704902a08d639884012ea3dfcf4d27a9b8a7fe))
+
 ## [0.9.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.3...v0.9.4) (2024-02-02)
 
 
