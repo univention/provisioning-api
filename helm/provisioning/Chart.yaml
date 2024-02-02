@@ -2,27 +2,25 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ---
-
+annotations:
+  category: "Security"
+  licenses: "AGPL-3.0-only"
 apiVersion: "v2"
-type: "application"
-name: "provisioning"
-description: "A Helm chart for the Univention Management Stack Provisioning Service"
-home: "https://www.univention.de/"
-version: "0.1.0"
-
 dependencies:
   - name: "common"
-    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
-    version: "0.*"
+    version: "^2.x.x"
+    repository: "oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts"
   - name: "nats"
-    repository: "https://nats-io.github.io/k8s/helm/charts/"
-    version: "^1.1.5"
-    condition: "nats.bundled"
-  - name: "events-and-consumer-api"
-    version: "*"
-  - name: "dispatcher"
-    version: "*"
-  - name: "udm-listener"
-    version: "*"
-
+    # version: "^0.x.x"
+    version: "0.0.1-pre-feat-initial-release"
+    repository: "oci://registry.souvap-univention.de/souvap/tooling/charts/univention"
+    condition: "nats.enabled"
+description: "A Helm Chart that deploys the provisioning services"
+keywords:
+  - "provisioning"
+name: "provisioning"
+sources:
+  - "https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/tree/main/helm/provisioning?ref_type=heads"
+type: "application"
+version: "0.0.1"
 ...

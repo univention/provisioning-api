@@ -5,7 +5,7 @@
 
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.16.2"
+    ref: "v1.20.0"
     file:
       # TODO: Sphinx docs inherits a stage definition from upstream,
       # has to be included before our default stages to avoid trouble.
@@ -28,9 +28,6 @@ lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
-    - helm dep build helm/provisioning/charts/events-and-consumer-api
-    - helm dep build helm/provisioning/charts/dispatcher
-    - helm dep build helm/provisioning/charts/udm-listener
 
 .build-matrix: &build-matrix
   - IMAGE_NAME: "events-and-consumer-api"
@@ -49,6 +46,9 @@ lint-pre-commit:
     DOCKERFILE_PATH: "docker/test/Dockerfile"
   - IMAGE_NAME: "example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
+  - IMAGE_NAME: "prefill"
+    KANIKO_ARGS: "--target final"
+    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
@@ -59,6 +59,8 @@ lint-pre-commit:
     - "dispatcher"
   - IMAGE_NAME:
     - "example-client"
+  - IMAGE_NAME:
+    - "prefill"
 
 container-build:
   parallel:

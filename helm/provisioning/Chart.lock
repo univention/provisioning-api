@@ -1,18 +1,9 @@
 dependencies:
 - name: common
-  repository: oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm
-  version: 0.6.0
+  repository: oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts
+  version: 2.13.3
 - name: nats
-  repository: https://nats-io.github.io/k8s/helm/charts/
-  version: 1.1.7
-- name: events-and-consumer-api
-  repository: ""
-  version: '*'
-- name: dispatcher
-  repository: ""
-  version: '*'
-- name: udm-listener
-  repository: ""
-  version: '*'
-digest: sha256:5839bcd0d035506652cba7baec2950cfe989c25f9aa8d9e91a7ff2b49a6bc2ed
-generated: "2024-01-22T22:21:51.24287+01:00"
+  repository: oci://registry.souvap-univention.de/souvap/tooling/charts/univention
+  version: 0.0.1-pre-feat-initial-release
+digest: sha256:a12a4fc5644a601116b97dbc81a5cf9b7a3c4770d392aff807ffc2e73d21b101
+generated: "2024-02-16T12:32:41.73874+01:00"
