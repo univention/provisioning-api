@@ -15,7 +15,7 @@ from udm_messaging.service.udm import UDMMessagingService
 BASE_URL = "http://localhost:7777"
 
 REALM = "udm"
-TOPIC = "users/user"
+TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
 

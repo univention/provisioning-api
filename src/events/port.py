@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import contextlib
 from typing import Annotated
 
 from fastapi import Depends
@@ -14,19 +13,6 @@ from shared.models import Message
 class EventsPort:
     def __init__(self):
         self.nats_adapter = NatsAdapter()
-
-    @staticmethod
-    @contextlib.asynccontextmanager
-    async def port_context():
-        port = EventsPort()
-        await port.nats_adapter.nats.connect(
-            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
-        )
-        await port.nats_adapter.create_kv_store()
-        try:
-            yield port
-        finally:
-            await port.close()
 
     @staticmethod
     async def port_dependency():

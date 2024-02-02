@@ -26,30 +26,32 @@ router = fastapi.APIRouter()
 manager = SinkManager()
 
 
-# TODO: fix post_message_status endpoint
-# @router.post(
-#     "",
-#     status_code=fastapi.status.HTTP_200_OK,
-#     tags=["sink"],
-# )
-# async def post_message_status(
-#         name: str,
-#         msg: Message,
-#         port: ConsumerPortDependency,
-#         report: MessageProcessingStatusReport,
-# ):
-#     """Report on the processing of the given message."""
-#     # TODO: check authorization
-#
-#     service = MessageService(port)
-#     if report.status == MessageProcessingStatus.ok:
-#         # Modifying the queue interferes with connected WebSocket clients,
-#         # so disconnect them first.
-#         await manager.close(name)
-#         await service.remove_message(msg)
-#     else:
-#         # message was not processed, nothing to do...
-#         pass
+@router.post(
+    "/subscribers/{name}/messages-status",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["sink"],
+)
+async def post_message_status(
+    name: str,
+    msg: NatsMessage,
+    port: ConsumerPortDependency,
+    report: MessageProcessingStatusReport,
+):
+    """Report on the processing of the given message."""
+
+    # TODO: check authorization
+
+    service = MessageService(port)
+
+    if report.status == MessageProcessingStatus.ok:
+        # Modifying the queue interferes with connected WebSocket clients,
+        # so disconnect them first.
+        await manager.close(name)
+
+        await service.remove_message(msg)
+    else:
+        # message was not processed, nothing to do...
+        pass
 
 
 @router.post(

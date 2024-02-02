@@ -1,15 +1,20 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
 from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
 
 import pytest
 
 from prefill.service.udm_prefill import UDMPreFill
-from shared.models import Message
+from shared.models import Message, FillQueueStatus
 from tests.conftest import (
-    SUBSCRIPTION_NAME,
+    SUBSCRIBER_NAME,
     MSG_PREFILL,
     PREFILL_MESSAGE,
     MSG_PREFILL_REDELIVERED,
+    REALMS_TOPICS_STR,
+    PREFILL_STREAM,
 )
 
 
@@ -31,7 +36,7 @@ def udm_prefill() -> UDMPreFill:
 @pytest.mark.anyio
 class TestUDMPreFill:
     mocked_date = datetime(2023, 11, 9, 11, 15, 52, 616061)
-    object_type = "users/user"
+    object_type = "groups/group"
     url = f"http://udm-rest-api:9979/udm/{object_type}/..."
     udm_modules = {
         "name": object_type,
@@ -85,9 +90,16 @@ class TestUDMPreFill:
         MSG_PREFILL.in_progress.assert_called_once_with()
         MSG_PREFILL.ack.assert_called_once_with()
         udm_prefill._port.create_prefill_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, self.msg
+            SUBSCRIBER_NAME, self.msg
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
+        udm_prefill._port.create_prefill_stream.assert_called_once_with(PREFILL_STREAM)
+        udm_prefill._port.update_subscription_queue_status.assert_has_calls(
+            [
+                call(SUBSCRIBER_NAME, REALMS_TOPICS_STR, FillQueueStatus.running),
+                call(SUBSCRIBER_NAME, REALMS_TOPICS_STR, FillQueueStatus.done),
+            ]
+        )
 
         assert "Stop waiting for the new event" == str(e.value)
 
@@ -122,6 +134,8 @@ class TestUDMPreFill:
         udm_prefill._port.add_request_to_prefill_failures.assert_called_once_with(
             "prefill-failures", PREFILL_MESSAGE
         )
+        udm_prefill._port.create_prefill_stream.assert_not_called()
+        udm_prefill._port.update_subscription_queue_status.assert_not_called()
 
         assert "Stop waiting for the new event" == str(e.value)
 

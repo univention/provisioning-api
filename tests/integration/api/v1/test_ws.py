@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.conftest import REALM, TOPIC, BODY, FLAT_MESSAGE
 
-from tests.conftest import SUBSCRIPTION_NAME
+from tests.conftest import SUBSCRIBER_NAME
 from consumer.messages.api import v1_prefix as messages_api_prefix
 from events.api import v1_prefix as events_api_prefix
 from consumer.main import app
@@ -24,7 +24,7 @@ def test_websocket():
     assert response.status_code == 202
 
     with client.websocket_connect(
-        f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/ws"
+        f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/ws"
     ) as ws_client:
         data = ws_client.receive_json()
 

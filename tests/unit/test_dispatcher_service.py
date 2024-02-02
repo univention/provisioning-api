@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, call
 import pytest
 
 from dispatcher.service.dispatcher import DispatcherService
-from tests.conftest import MSG, SUBSCRIBER_INFO, REALMS_TOPICS_STR, MESSAGE
+from tests.conftest import (
+    MSG,
+    REALMS_TOPICS_STR,
+    MESSAGE,
+    SUBSCRIBER_NAME,
+)
 
 
 @pytest.fixture
@@ -23,7 +28,7 @@ def anyio_backend():
 class TestDispatcherService:
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
         dispatcher_service._port.get_realm_topic_subscribers = AsyncMock(
-            return_value=[SUBSCRIBER_INFO]
+            return_value=[SUBSCRIBER_NAME]
         )
         dispatcher_service._port.wait_for_event = AsyncMock(
             side_effect=[MSG, Exception("Stop waiting for the new event")]
@@ -42,6 +47,6 @@ class TestDispatcherService:
             REALMS_TOPICS_STR
         )
         dispatcher_service._port.send_message_to_subscriber.assert_called_once_with(
-            SUBSCRIBER_INFO["name"], MESSAGE
+            SUBSCRIBER_NAME, MESSAGE
         )
         assert "Stop waiting for the new event" == str(e.value)

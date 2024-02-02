@@ -26,22 +26,30 @@ from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
 from shared.models import Message
-from shared.models.queue import PrefillMessage
+from shared.models.queue import PrefillMessage, PrefillStream
 
 REALM = "udm"
-TOPIC = "users/user"
+TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
-REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
-SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 
-SUBSCRIBER_INFO = {
-    "name": SUBSCRIPTION_NAME,
+PREFILL_STREAM = PrefillStream(
+    subscriber_name=SUBSCRIBER_NAME, realm=REALM, topic=TOPIC
+)
+
+SUBSCRIBER_BUCKET = KeyValue(
+    name=SUBSCRIBER_NAME, stream="", pre="", js="js", direct=True
+)
+
+ENCODED_REALM_TOPIC = "dWRtOmdyb3Vwcy9ncm91cA=="
+SUBSCRIPTION_STREAM_NAME = f"{SUBSCRIBER_NAME}_{ENCODED_REALM_TOPIC}"
+SUBSCRIPTION_INFO = {
     "realm": REALM,
     "topic": TOPIC,
     "request_prefill": True,
-    "prefill_queue_status": "done",
+    "prefill_queue_status": "pending",
 }
 MESSAGE = Message(
     publisher_name=PUBLISHER_NAME,
@@ -55,7 +63,7 @@ PREFILL_MESSAGE = PrefillMessage(
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
     realm=REALM,
     topic=TOPIC,
-    subscriber_name=SUBSCRIPTION_NAME,
+    subscriber_name=SUBSCRIBER_NAME,
 )
 
 FLAT_BASE_MESSAGE = {
@@ -68,7 +76,7 @@ FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_MESSAGE["body"] = BODY
 
 FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
-FLAT_PREFILL_MESSAGE["subscription_name"] = SUBSCRIPTION_NAME
+FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
 
 MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
 MSG_PREFILL = Msg(
@@ -109,9 +117,9 @@ BASE_KV_OBJ = KeyValue.Entry(
 )
 
 kv_sub_info = copy(BASE_KV_OBJ)
-kv_sub_info.key = f"subscription:{SUBSCRIPTION_NAME}"
+kv_sub_info.key = ENCODED_REALM_TOPIC
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realm": "udm", "topic": "users/user", "request_prefill": true, '
+    b'{"realm": "udm", "topic": "groups/group", "request_prefill": true, '
     b'"prefill_queue_status": "done"}'
 )
 
@@ -170,9 +178,29 @@ async def fake_redis():
         await connection.aclose()
 
 
-def set_fake_kv_store_and_js(port: Union[ConsumerPort, EventsPort]):
-    port.nats_adapter.kv_store = FakeKvStore()
-    port.nats_adapter.js = FakeJs()
+class FakeKvStore:
+    @classmethod
+    async def delete(cls, key: str):
+        pass
+
+    @classmethod
+    async def get(cls, key: str):
+        values = {
+            "abc:def": kv_subs,
+            "foo:bar": kv_subs,
+            "udm:groups/group": kv_subs,
+            "subscriptions": kv_subs,
+            ENCODED_REALM_TOPIC: kv_sub_info,
+        }
+        return values.get(key)
+
+    @classmethod
+    async def put(cls, key: str, value: Union[str, dict]):
+        pass
+
+    @classmethod
+    async def keys(cls):
+        return [ENCODED_REALM_TOPIC]
 
 
 class FakeJs:
@@ -211,37 +239,28 @@ class FakeJs:
     async def consumer_info(stream: str, consumer: str):
         pass
 
-
-class FakeKvStore:
-    @classmethod
-    async def delete(cls, key: str):
+    @staticmethod
+    async def delete_key_value(bucket: str):
         pass
 
-    @classmethod
-    async def get(cls, key: str):
-        values = {
-            "abc:def": kv_subs,
-            "foo:bar": kv_subs,
-            f"subscription:{SUBSCRIPTION_NAME}": kv_sub_info,
-            "udm:users/user": kv_subs,
-            "subscriptions": kv_subs,
-        }
-        return values.get(key)
+    @staticmethod
+    async def key_value(bucket: str):
+        return FakeKvStore()
 
-    @classmethod
-    async def put(cls, key: str, value: Union[str, dict]):
+    @staticmethod
+    async def create_key_value(bucket: str):
         pass
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
     port = ConsumerPort()
-    set_fake_kv_store_and_js(port)
+    port.nats_adapter.js = FakeJs()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
     port = EventsPort()
-    set_fake_kv_store_and_js(port)
+    port.nats_adapter.js = FakeJs()
     return port
 
 

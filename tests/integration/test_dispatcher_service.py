@@ -7,7 +7,7 @@ import aiohttp
 import pytest
 from nats.aio.msg import Msg
 
-from tests.conftest import SUBSCRIBER_INFO, MESSAGE
+from tests.conftest import SUBSCRIBER_NAME, FLAT_MESSAGE
 
 from tests.conftest import FakeKvStore, FakeJs, MSG
 from dispatcher.port import DispatcherPort
@@ -34,19 +34,22 @@ async def port_with_mock_nats():
     Msg.ack = AsyncMock()
     async with aiohttp.ClientSession() as session:
         port._consumer_reg_adapter._session = session
+        port._consumer_mes_adapter._session = session
     return port
 
 
 @pytest.mark.anyio
 class TestDispatcher:
+    @patch("src.shared.adapters.consumer_mes_adapter.aiohttp.ClientSession.post")
     @patch("src.shared.adapters.consumer_reg_adapter.aiohttp.ClientSession.get")
     async def test_dispatch_events(
         self,
         mock_get,
+        mock_post,
         port_with_mock_nats: DispatcherPort,
     ):
         mock_get.return_value.__aenter__.return_value.json = AsyncMock(
-            return_value=[SUBSCRIBER_INFO]
+            return_value=[SUBSCRIBER_NAME]
         )
 
         # trigger dispatcher to retrieve event from incoming queue
@@ -69,9 +72,10 @@ class TestDispatcher:
         )
         # check getting subscribers for the realm_topic
         mock_get.assert_called_once_with(
-            "http://localhost:7777/subscriptions/v1/subscriptions?realm_topic=udm:users/user"
+            "http://localhost:7777/subscriptions/v1/subscribers/filter?realm_topic=udm:groups/group"
         )
-        # check storing event in the consumer queue
-        port_with_mock_nats._nats_adapter.add_message.assert_called_once_with(
-            SUBSCRIBER_INFO["name"], MESSAGE
+        # check sending message to the subscriber
+        mock_post.assert_called_once_with(
+            f"http://localhost:7777/messages/v1/subscribers/{SUBSCRIBER_NAME}/messages",
+            json=FLAT_MESSAGE,
         )

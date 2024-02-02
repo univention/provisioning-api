@@ -134,15 +134,15 @@ class UDMPreFill(PreFillService):
 
     async def mark_request_as_done(self, msg: Msg):
         await msg.ack()
-        await self.update_subscriber_queue_status(FillQueueStatus.done)
+        await self.update_subscription_queue_status(FillQueueStatus.done)
 
     async def mark_request_as_failed(self, msg: Msg):
         await msg.nak()
-        await self.update_subscriber_queue_status(FillQueueStatus.failed)
+        await self.update_subscription_queue_status(FillQueueStatus.failed)
 
     async def mark_request_as_running(self, msg: Msg):
         await msg.in_progress()
-        await self.update_subscriber_queue_status(FillQueueStatus.running)
+        await self.update_subscription_queue_status(FillQueueStatus.running)
 
     def parse_request_data(self, msg: Msg) -> PrefillMessage:
         data = json.loads(msg.data)
@@ -157,7 +157,7 @@ class UDMPreFill(PreFillService):
         await self._port.create_stream(self.prefill_failures_queue)
         await self._port.create_consumer(self.prefill_failures_queue)
 
-    async def update_subscriber_queue_status(self, queue_status: FillQueueStatus):
+    async def update_subscription_queue_status(self, queue_status: FillQueueStatus):
         await self._port.update_subscription_queue_status(
             self._subscriber_name, f"{self._realm}:{self._topic}", queue_status
         )

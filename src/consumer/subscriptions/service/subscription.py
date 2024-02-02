@@ -34,9 +34,6 @@ def match_subscription(
 class SubscriptionKeys:
     subscribers = "subscribers"
 
-    def subscription(subscription_name: str) -> str:
-        return f"subscription:{subscription_name}"
-
 
 class SubscriptionService:
     def __init__(self, port: ConsumerPort):
@@ -111,10 +108,7 @@ class SubscriptionService:
 
             self.logger.info("Subscription was created")
 
-    async def update_realm_topic_subscriptions(self, realm_topic_str: str, name: str):
-        await self.update_subscribers_names(realm_topic_str, name)
-
-    async def get_subscription_names(self, subscriber_name: str):
+    async def get_subscription_names(self, subscriber_name: str) -> List[str]:
         return await self._port.get_subscription_names(subscriber_name)
 
     async def get_subscriber_info(self, subscriber_name: str) -> Optional[Subscriber]:
@@ -133,10 +127,11 @@ class SubscriptionService:
         result = await self._port.get_dict_value(key, bucket)
         return Subscription.model_validate(result) if result else result
 
-    async def get_subscription_queue_status(self, name: str) -> FillQueueStatus:
+    async def get_subscription_queue_status(
+        self, name: str, realm_topic: str
+    ) -> FillQueueStatus:
         """Get the pre-fill status of the given subscription."""
-        bucket, key = name.split("_")
-        sub_info = await self.get_subscription_info(key, bucket)
+        sub_info = await self.get_subscription_info(realm_topic, name)
         if not sub_info:
             raise ValueError("Subscription was not found.")
 
@@ -174,14 +169,15 @@ class SubscriptionService:
         )
 
     async def delete_subscriber(self, name: str):
-        await self.delete_subscriber_from_values(SubscriptionKeys.subscribers, name)
+        await self.delete_subscriber_from_subscribers(name)
         await self._port.delete_subscriber(name)
         self.logger.info("Subscriber was deleted")
 
     async def delete_sub_info(self, key: str, bucket: str):
         await self._port.delete_kv_pair(key, bucket)
 
-    async def delete_subscriber_from_values(self, key: str, name: str):
+    async def delete_subscriber_from_subscribers(self, name: str):
+        key = SubscriptionKeys.subscribers
         self.logger.debug("Deleting subscriber '%s' from '%s'", name, key)
 
         subs = await self._port.get_list_value(key, "main")

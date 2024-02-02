@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import contextlib
 import json
 from typing import List, Annotated, Optional, Union
 
 from fastapi import Depends
+from nats.js.kv import KeyValue
 
 from shared.adapters.nats_adapter import NatsAdapter
 from shared.adapters.redis_adapter import RedisAdapter
@@ -19,19 +19,6 @@ class ConsumerPort:
     def __init__(self):
         self.redis_adapter = RedisAdapter()
         self.nats_adapter = NatsAdapter()
-
-    @staticmethod
-    @contextlib.asynccontextmanager
-    async def port_context():
-        port = ConsumerPort()
-        await port.nats_adapter.nats.connect(
-            servers=[f"nats://{settings.nats_host}:{settings.nats_port}"]
-        )
-        await port.nats_adapter.create_kv_store()
-        try:
-            yield port
-        finally:
-            await port.close()
 
     @staticmethod
     async def port_dependency():
@@ -104,7 +91,7 @@ class ConsumerPort:
     async def get_subscription_names(self, bucket: str) -> List[str]:
         return await self.nats_adapter.get_keys(bucket)
 
-    async def subscriber_exists(self, bucket: str):
+    async def subscriber_exists(self, bucket: str) -> Optional[KeyValue]:
         return await self.nats_adapter.get_kv_store(bucket)
 
     async def create_subscriber(self, name: str):

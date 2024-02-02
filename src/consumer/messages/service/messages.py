@@ -77,7 +77,9 @@ class MessageService:
         messages = []
         for sub in subscriptions:
             queue_name = f"{subscriber_name}_{sub}"
-            queue_status = await sub_service.get_subscription_queue_status(queue_name)
+            queue_status = await sub_service.get_subscription_queue_status(
+                subscriber_name, sub
+            )
 
             prefill_stream = await self._port.stream_exists(
                 PrefillKeys.queue_name(queue_name)
