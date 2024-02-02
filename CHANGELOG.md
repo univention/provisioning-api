@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.3...v0.9.4) (2024-02-02)
+
+
+### Bug Fixes
+
+* **helm:** Unify and fix nats server config ([fa2abb7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fa2abb766cd3febc6ea9faf8ae0ed26035db3d17))
+
 ## [0.9.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.2...v0.9.3) (2024-01-30)
 
 
