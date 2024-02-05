@@ -5,6 +5,8 @@ import uuid
 import pytest
 
 import shared.client
+from shared.models.api import MessageProcessingStatus
+import shared.models.queue
 
 from tests.conftest import (
     REALM_TOPIC,
@@ -55,7 +57,8 @@ async def test_get_empty_messages(
 async def test_get_real_messages(
     provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
 ):
-    groups = udm.get("groups/group")
+    groups = udm.get(TOPIC)
+    assert groups
     group = groups.new()
     group.properties["name"] = str(uuid.uuid1())
     group.save()
@@ -69,7 +72,7 @@ async def test_get_real_messages(
 
 
 @pytest.mark.xfail()
-async def test_get_messages_timeout_zero(
+async def test_get_messages_zero_timeout(
     provisioning_client: shared.client.AsyncClient, simple_subscription: str
 ):
     response = await provisioning_client.get_subscription_messages(
@@ -78,3 +81,27 @@ async def test_get_messages_timeout_zero(
     )
 
     assert response == []
+
+
+async def test_acknowledge_messages(
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
+):
+    groups = udm.get(TOPIC)
+    assert groups
+    group = groups.new()
+    group.properties["name"] = str(uuid.uuid1())
+    group.save()
+
+    response = await provisioning_client.get_subscription_messages(
+        name=simple_subscription,
+        timeout=5,
+    )
+
+    assert len(response) == 1
+    message = response[0]
+
+    response = await provisioning_client.set_message_status(
+        simple_subscription,
+        message,
+        MessageProcessingStatus.ok,
+    )

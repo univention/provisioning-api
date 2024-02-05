@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import contextlib
 from typing import Any, Dict, List, Optional
 
 import aiohttp
@@ -9,6 +8,7 @@ import aiohttp
 import shared.models.api
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
+from shared.models.queue import MQMessage
 
 
 class AsyncClient:
@@ -71,7 +71,6 @@ class AsyncClient:
                 params=params,
             ) as response:
                 msgs = await response.json()
-                # FIXME:
                 return [
                     shared.models.queue.MQMessage.model_validate(msg) for msg in msgs
                 ]
@@ -79,15 +78,15 @@ class AsyncClient:
     async def set_message_status(
         self,
         name: str,
-        message_id: str,
+        message: MQMessage,
         status: shared.models.api.MessageProcessingStatus,
     ):
         report = shared.models.api.MessageProcessingStatusReport(status=status)
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/messages/{message_id}",
-                json=report.model_dump(),
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/messages/",
+                json={"msg": message.model_dump(), "report": report.model_dump()},
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -99,7 +98,7 @@ class AsyncClient:
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead
-                return shared.models.subscriber.Subscriber.model_validate(data)
+                return [shared.models.subscriber.Subscriber.model_validate(data)]
 
     async def submit_message(self, realm: str, topic: str, body: Dict[str, Any]):
         message = shared.models.api.Event(realm=realm, topic=topic, body=body)
@@ -111,24 +110,3 @@ class AsyncClient:
             ):
                 # either return nothing or let `.post` throw
                 pass
-
-    @contextlib.asynccontextmanager
-    async def stream(self, name: str):
-        async with aiohttp.ClientSession() as session:
-            async with session.ws_connect(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/ws"
-            ) as websocket:
-                yield AsyncClientStream(websocket)
-
-
-class AsyncClientStream:
-    def __init__(self, websocket: aiohttp.ClientWebSocketResponse):
-        self.websocket = websocket
-
-    async def receive_message(self) -> shared.models.queue.Message:
-        data = await self.websocket.receive_json()
-        return shared.models.queue.Message.model_validate(data)
-
-    async def send_report(self, status: shared.models.api.MessageProcessingStatus):
-        report = shared.models.api.MessageProcessingStatusReport(status=status)
-        await self.websocket.send_json(report.model_dump())

@@ -11,6 +11,11 @@ from univention.admin.rest.client import UDM
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
+        "--provisioning-api-base-url",
+        default="http://localhost:7777/",
+        help="Base URL of the UDM REST API",
+    )
+    parser.addoption(
         "--udm-rest-api-base-url",
         default="http://localhost:9979/udm/",
         help="Base URL of the UDM REST API",
