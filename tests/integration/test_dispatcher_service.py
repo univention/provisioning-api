@@ -32,13 +32,15 @@ async def dispatcher_mock() -> DispatcherPort:
     Msg.in_progress = AsyncMock()
     Msg.ack = AsyncMock()
     async with aiohttp.ClientSession() as session:
-        port._consumer_reg_adapter._session = session
+        port._consumer_registration_adapter._session = session
     return port
 
 
 @pytest.mark.anyio
 class TestDispatcher:
-    @patch("src.shared.adapters.consumer_reg_adapter.aiohttp.ClientSession.get")
+    @patch(
+        "src.shared.adapters.consumer_registration_adapter.aiohttp.ClientSession.get"
+    )
     async def test_dispatch_events(
         self,
         mock_get,

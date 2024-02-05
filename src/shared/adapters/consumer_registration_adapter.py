@@ -6,17 +6,17 @@ import logging
 import aiohttp
 
 from shared.config import settings
-from shared.models import Message
+from shared.models import FillQueueStatus
 
 
-class ConsumerMesAdapter:
+class ConsumerRegistrationAdapter:
     """
-    Client for the Consumer Messages REST API`.
+    Client for the Consumer Registration REST API, providing the interfaces required by `DispatcherService`.
     ```
     """
 
     def __init__(self):
-        self.base_url = settings.consumer_mes_url
+        self.base_url = settings.consumer_registration_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
@@ -37,15 +37,16 @@ class ConsumerMesAdapter:
         if self._session:
             await self._session.close()
 
-    async def create_prefill_message(self, name: str, message: Message):
-        async with self._session.post(
-            f"{self.base_url}subscriptions/{name}/prefill-messages",
-            json=message.model_dump(),
-        ):
-            pass
+    async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
+        async with self._session.get(
+            f"{self.base_url}subscriptions?realm_topic={realm_topic}"
+        ) as request:
+            return await request.json()
 
-    async def create_prefill_stream(self, subscriber_name: str):
-        async with self._session.post(
-            f"{self.base_url}subscriptions/{subscriber_name}/prefill-stream",
+    async def update_subscriber_queue_status(
+        self, name: str, queue_status: FillQueueStatus
+    ) -> None:
+        async with self._session.patch(
+            f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
         ):
             pass

@@ -51,11 +51,11 @@ class Settings(BaseSettings):
         return f"http://{self.consumer_event_host}:{self.consumer_event_port}/events/v1"
 
     @property
-    def consumer_reg_url(self) -> str:
+    def consumer_registration_url(self) -> str:
         return f"http://{self.consumer_event_host}:{self.consumer_event_port}/subscriptions/v1"
 
     @property
-    def consumer_mes_url(self) -> str:
+    def consumer_messages_url(self) -> str:
         return (
             f"http://{self.consumer_event_host}:{self.consumer_event_port}/messages/v1"
         )

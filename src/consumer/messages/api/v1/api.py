@@ -95,7 +95,7 @@ async def remove_message(
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )
-async def create_prefill_message(
+async def post_message_to_prefill_queue(
     name: str,
     data: Message,
     port: ConsumerPortDependency,

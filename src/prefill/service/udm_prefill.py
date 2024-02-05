@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class UDMPreFill(PreFillService):
-    max_prefill_attempts = 3
     prefill_queue = "prefill"
     prefill_failures_queue = "prefill-failures"
 

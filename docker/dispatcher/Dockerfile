@@ -89,7 +89,5 @@ WORKDIR ${WORKDIR}
 
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
-EXPOSE 7777
-
 # run
 ENTRYPOINT ["./.venv/bin/python3", "-m", "src.dispatcher.main"]

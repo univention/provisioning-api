@@ -7,7 +7,7 @@ import logging
 
 from nats.aio.msg import Msg
 
-from shared.adapters.consumer_reg_adapter import ConsumerRegAdapter
+from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class DispatcherPort:
     def __init__(self):
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
-        self._consumer_reg_adapter = ConsumerRegAdapter()
+        self._consumer_registration_adapter = ConsumerRegistrationAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -25,7 +25,7 @@ class DispatcherPort:
         port = DispatcherPort()
         await port.mq_adapter.connect()
         await port.kv_adapter.connect()
-        await port._consumer_reg_adapter.connect()
+        await port._consumer_registration_adapter.connect()
 
         try:
             yield port
@@ -35,7 +35,7 @@ class DispatcherPort:
     async def close(self):
         await self.mq_adapter.close()
         await self.kv_adapter.close()
-        await self._consumer_reg_adapter.close()
+        await self._consumer_registration_adapter.close()
 
     async def send_event_to_consumer_queue(self, subject: str, message):
         await self.mq_adapter.add_message(subject, message)
@@ -51,4 +51,6 @@ class DispatcherPort:
         return await self.mq_adapter.wait_for_event()
 
     async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
-        return await self._consumer_reg_adapter.get_realm_topic_subscribers(realm_topic)
+        return await self._consumer_registration_adapter.get_realm_topic_subscribers(
+            realm_topic
+        )

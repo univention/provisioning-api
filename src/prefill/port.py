@@ -5,8 +5,8 @@ import contextlib
 
 from nats.aio.msg import Msg
 
-from shared.adapters.consumer_mes_adapter import ConsumerMesAdapter
-from shared.adapters.consumer_reg_adapter import ConsumerRegAdapter
+from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
+from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
 from shared.models import FillQueueStatus, Message
@@ -17,8 +17,8 @@ class PrefillPort:
     def __init__(self):
         self._udm_adapter = UDMAdapter()
         self.mq_adapter = NatsMQAdapter()
-        self._consumer_reg_adapter = ConsumerRegAdapter()
-        self._consumer_mes_adapter = ConsumerMesAdapter()
+        self._consumer_registration_adapter = ConsumerRegistrationAdapter()
+        self._consumer_messages_adapter = ConsumerMessagesAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -26,8 +26,8 @@ class PrefillPort:
         port = PrefillPort()
         await port._udm_adapter.connect()
         await port.mq_adapter.connect()
-        await port._consumer_reg_adapter.connect()
-        await port._consumer_mes_adapter.connect()
+        await port._consumer_registration_adapter.connect()
+        await port._consumer_messages_adapter.connect()
 
         try:
             yield port
@@ -37,8 +37,8 @@ class PrefillPort:
     async def close(self):
         await self._udm_adapter.close()
         await self.mq_adapter.close()
-        await self._consumer_reg_adapter.close()
-        await self._consumer_mes_adapter.close()
+        await self._consumer_registration_adapter.close()
+        await self._consumer_messages_adapter.close()
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
@@ -58,15 +58,15 @@ class PrefillPort:
     async def update_subscriber_queue_status(
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
-        await self._consumer_reg_adapter.update_subscriber_queue_status(
+        await self._consumer_registration_adapter.update_subscriber_queue_status(
             name, queue_status
         )
 
     async def create_prefill_message(self, name: str, message: Message):
-        await self._consumer_mes_adapter.create_prefill_message(name, message)
+        await self._consumer_messages_adapter.create_prefill_message(name, message)
 
     async def create_prefill_stream(self, subscriber_name: str):
-        await self._consumer_mes_adapter.create_prefill_stream(subscriber_name)
+        await self._consumer_messages_adapter.create_prefill_stream(subscriber_name)
 
     async def add_request_to_prefill_failures(
         self, queue_name: str, message: PrefillMessage
