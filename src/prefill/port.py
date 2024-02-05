@@ -3,14 +3,12 @@
 
 import contextlib
 
-from nats.aio.msg import Msg
-
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
 from shared.models import FillQueueStatus, Message
-from shared.models.queue import PrefillMessage
+from shared.models.queue import PrefillMessage, MQMessage
 
 
 class PrefillPort:
@@ -43,7 +41,7 @@ class PrefillPort:
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
 
-    async def wait_for_event(self) -> Msg:
+    async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()
 
     async def get_object_types(self):
@@ -78,3 +76,12 @@ class PrefillPort:
 
     async def create_consumer(self, subject: str):
         await self.mq_adapter.create_consumer(subject)
+
+    async def acknowledge_message(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_message(message)
+
+    async def negatively_acknowledge_message(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_message(message)
+
+    async def acknowledge_in_progress(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_message(message)

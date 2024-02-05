@@ -83,12 +83,12 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def add_message(self, subject: str, message: BaseMessage):
         """Publish a message to a NATS subject."""
-        flat_message = message.model_dump()
+
         stream_name = NatsKeys.stream(subject)
 
         await self._js.publish(
             subject,
-            json.dumps(flat_message).encode("utf-8"),
+            json.dumps(message.model_dump()).encode("utf-8"),
             stream=stream_name,
         )
         self.logger.info("Message was published")
@@ -118,29 +118,36 @@ class NatsMQAdapter(BaseMQAdapter):
             for msg in msgs:
                 await self.remove_message(msg)
 
-        msgs_to_return = []
-        for msg in msgs:
-            data = json.loads(msg.data)
-            msgs_to_return.append(
-                MQMessage(
-                    subject=msg.subject, reply=msg.reply, data=data, headers=msg.headers
-                )
-            )
-
+        msgs_to_return = [self.construct_mq_message(msg) for msg in msgs]
         return msgs_to_return
+
+    def construct_nats_message(self, message: MQMessage) -> Msg:
+        data = message.data
+        msg = Msg(
+            _client=self._nats,
+            subject=message.subject,
+            reply=message.reply,
+            data=json.dumps(data).encode("utf-8"),
+            headers=message.headers,
+        )
+        return msg
+
+    @staticmethod
+    def construct_mq_message(msg: Msg) -> MQMessage:
+        data = json.loads(msg.data)
+        message = MQMessage(
+            subject=msg.subject,
+            reply=msg.reply,
+            data=data,
+            headers=msg.headers,
+            num_delivered=msg.metadata.num_delivered,
+        )
+        return message
 
     async def remove_message(self, msg: Union[Msg, MQMessage]):
         """Delete a message from a NATS JetStream."""
         if isinstance(msg, MQMessage):
-            msg.data["body"] = json.dumps(msg.data["body"])
-            msg.data = json.dumps(msg.data)
-            msg = Msg(
-                _client=self._nats,
-                subject=msg.subject,
-                reply=msg.reply,
-                data=msg.data.encode("utf-8"),
-                headers=msg.headers,
-            )
+            msg = self.construct_nats_message(msg)
         await msg.ack()
 
     async def delete_stream(self, stream_name: str):
@@ -161,8 +168,10 @@ class NatsMQAdapter(BaseMQAdapter):
             subject, cb=self.cb, durable=NatsKeys.durable_name(subject), manual_ack=True
         )
 
-    async def wait_for_event(self) -> Msg:
-        return await self._message_queue.get()
+    async def wait_for_event(self) -> MQMessage:
+        msg = await self._message_queue.get()
+        message = self.construct_mq_message(msg)
+        return message
 
     async def stream_exists(self, subject: str) -> bool:
         try:
@@ -196,3 +205,15 @@ class NatsMQAdapter(BaseMQAdapter):
                     durable_name=durable_name, deliver_subject=deliver_subject
                 ),
             )
+
+    async def acknowledge_message(self, message: MQMessage):
+        msg = self.construct_nats_message(message)
+        await msg.ack()
+
+    async def negatively_acknowledge_message(self, message: MQMessage):
+        msg = self.construct_nats_message(message)
+        await msg.nak()
+
+    async def acknowledge_in_progress(self, message: MQMessage):
+        msg = self.construct_nats_message(message)
+        await msg.in_progress()

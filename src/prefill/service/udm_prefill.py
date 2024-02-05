@@ -1,17 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-import json
 
 from datetime import datetime
 import logging
-
-from nats.aio.msg import Msg
 
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
 from shared.models import FillQueueStatus
-from shared.models.queue import PrefillMessage, Message
+from shared.models.queue import PrefillMessage, Message, MQMessage
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +34,7 @@ class UDMPreFill(PreFillService):
             try:
                 validated_msg = self.parse_request_data(msg)
 
-                if msg.metadata.num_delivered > self.max_prefill_attempts:
+                if msg.num_delivered > self.max_prefill_attempts:
                     await self.add_request_to_prefill_failures(validated_msg, msg)
                     continue
 
@@ -45,7 +42,7 @@ class UDMPreFill(PreFillService):
                     self._logger.info(
                         "Started the prefill for '%s'", self._subscriber_name
                     )
-                    await msg.in_progress()
+                    await self._port.acknowledge_in_progress(msg)
                     await self._port.update_subscriber_queue_status(
                         self._subscriber_name, FillQueueStatus.running
                     )
@@ -119,30 +116,29 @@ class UDMPreFill(PreFillService):
         await self._port.create_prefill_message(self._subscriber_name, message)
 
     async def add_request_to_prefill_failures(
-        self, validated_msg: PrefillMessage, msg: Msg
+        self, validated_msg: PrefillMessage, message: MQMessage
     ):
         self._logger.info("Adding request to the prefill failures queue")
         await self._port.add_request_to_prefill_failures(
             self.prefill_failures_queue, validated_msg
         )
-        await msg.ack()
+        await self._port.acknowledge_message(message)
 
-    async def mark_request_as_done(self, msg: Msg):
-        await msg.ack()
+    async def mark_request_as_done(self, msg: MQMessage):
+        await self._port.acknowledge_message(msg)
         await self._port.update_subscriber_queue_status(
             self._subscriber_name, FillQueueStatus.done
         )
 
-    async def mark_request_as_failed(self, msg: Msg):
-        await msg.nak()
+    async def mark_request_as_failed(self, message: MQMessage):
+        await self._port.negatively_acknowledge_message(message)
         await self._port.update_subscriber_queue_status(
             self._subscriber_name, FillQueueStatus.failed
         )
 
-    def parse_request_data(self, msg: Msg) -> PrefillMessage:
-        data = json.loads(msg.data)
-        validated_msg = PrefillMessage.model_validate(data)
-        self._logger.info("Received request with content: %s", data)
+    def parse_request_data(self, message: MQMessage) -> PrefillMessage:
+        validated_msg = PrefillMessage.model_validate(message.data)
+        self._logger.info("Received request with content: %s", message.data)
         self._subscriber_name = validated_msg.subscriber_name
         self._topic = validated_msg.topic
         self._realm = validated_msg.realm

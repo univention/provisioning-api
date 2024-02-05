@@ -71,3 +71,4 @@ class MQMessage(BaseModel):
     reply: str = ""
     data: dict = {}
     headers: Optional[Dict[str, str]] = None
+    num_delivered: int = 0

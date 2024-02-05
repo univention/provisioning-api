@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import json
 import logging
 
 from src.dispatcher.port import DispatcherPort
@@ -19,13 +18,12 @@ class DispatcherService:
         await self._port.subscribe_to_queue("incoming", "dispatcher-service")
         while True:
             self._logger.info("Waiting for the event...")
-            msg = await self._port.wait_for_event()
-            await msg.in_progress()
+            message = await self._port.wait_for_event()
+            await self._port.acknowledge_in_progress(message)
 
             try:
-                data = json.loads(msg.data)
-                validated_msg = Message.model_validate(data)
-                self._logger.info("Received message with content: %s", data)
+                self._logger.info("Received message with content: %s", message.data)
+                validated_msg = Message.model_validate(message.data)
 
                 subscribers = await self._port.get_realm_topic_subscribers(
                     f"{validated_msg.realm}:{validated_msg.topic}"
@@ -39,7 +37,9 @@ class DispatcherService:
             except Exception as exc:
                 self._logger.error("Failed to dispatch the event: %s", exc)
 
-                await msg.nak()  # TODO: handle failed events
+                await self._port.negatively_acknowledge_message(
+                    message
+                )  # TODO: handle failed events
 
             else:
-                await msg.ack()
+                await self._port.acknowledge_message(message)

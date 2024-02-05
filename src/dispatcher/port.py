@@ -5,10 +5,9 @@ from typing import List
 import contextlib
 import logging
 
-from nats.aio.msg import Msg
-
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
+from shared.models.queue import MQMessage
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +46,19 @@ class DispatcherPort:
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
 
-    async def wait_for_event(self) -> Msg:
+    async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()
 
     async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
         return await self._consumer_registration_adapter.get_realm_topic_subscribers(
             realm_topic
         )
+
+    async def acknowledge_message(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_message(message)
+
+    async def negatively_acknowledge_message(self, message: MQMessage):
+        await self.mq_adapter.negatively_acknowledge_message(message)
+
+    async def acknowledge_in_progress(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_in_progress(message)
