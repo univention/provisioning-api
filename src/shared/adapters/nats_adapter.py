@@ -158,7 +158,7 @@ class NatsMQAdapter(BaseMQAdapter):
         await self.create_consumer(subject, deliver_subject)
 
         await self._js.subscribe(
-            subject, cb=self.cb, durable=deliver_subject, manual_ack=True
+            subject, cb=self.cb, durable=NatsKeys.durable_name(subject), manual_ack=True
         )
 
     async def wait_for_event(self) -> Msg:
