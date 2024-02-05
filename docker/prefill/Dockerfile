@@ -1,5 +1,5 @@
 ###############################################################################
-# Dockerfile for UDM Provisioning Dispatch
+# Dockerfile for Provisioning Prefill
 #
 # Copyright 2021 Univention GmbH
 #
