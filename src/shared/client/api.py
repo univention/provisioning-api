@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import contextlib
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 
@@ -56,7 +56,7 @@ class AsyncClient:
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
         force: Optional[bool] = None,
-    ) -> List[Tuple[str, shared.models.queue.Message]]:
+    ) -> List[shared.models.queue.MQMessage]:
         _params = {
             "count": count,
             "timeout": timeout,
@@ -73,8 +73,7 @@ class AsyncClient:
                 msgs = await response.json()
                 # FIXME:
                 return [
-                    ("foobar", shared.models.queue.Message.model_validate(msg))
-                    for msg in msgs
+                    shared.models.queue.MQMessage.model_validate(msg) for msg in msgs
                 ]
 
     async def set_message_status(

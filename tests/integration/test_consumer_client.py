@@ -11,6 +11,7 @@ from tests.conftest import (
     REALM,
     TOPIC,
 )
+from univention.admin.rest.client import UDM
 
 
 @pytest.fixture
@@ -52,14 +53,19 @@ async def test_get_empty_messages(
 
 
 async def test_get_real_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
 ):
+    groups = udm.get("groups/group")
+    group = groups.new()
+    group.properties["name"] = str(uuid.uuid1())
+    group.save()
+
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
-        timeout=1,
+        timeout=5,
     )
 
-    assert response == []
+    assert len(response) == 1
 
 
 @pytest.mark.xfail()
