@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import contextlib
 import json
 from typing import List, Annotated, Optional, Union
 
@@ -19,17 +18,6 @@ class ConsumerPort:
     def __init__(self):
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
-
-    @staticmethod
-    @contextlib.asynccontextmanager
-    async def port_context():
-        port = ConsumerPort()
-        await port.mq_adapter.connect()
-        await port.kv_adapter.connect()
-        try:
-            yield port
-        finally:
-            await port.close()
 
     @staticmethod
     async def port_dependency():
@@ -91,6 +79,9 @@ class ConsumerPort:
 
     async def stream_exists(self, prefill_queue_name: str) -> bool:
         return await self.mq_adapter.stream_exists(prefill_queue_name)
+
+    async def delete_consumer(self, stream_name: str):
+        await self.mq_adapter.delete_consumer(stream_name)
 
 
 ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]

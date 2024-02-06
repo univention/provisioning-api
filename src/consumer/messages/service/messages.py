@@ -11,9 +11,7 @@ from shared.models import FillQueueStatus
 from shared.models.queue import MQMessage, Message
 
 
-class PrefillKeys:
-    def queue_name(subscriber_name: str) -> str:
-        return f"prefill_{subscriber_name}"
+PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"
 
 
 class MessageService:
@@ -23,12 +21,16 @@ class MessageService:
 
     async def add_prefill_message(self, subscriber_name: str, message: Message):
         """Add the given message to the subscriber's prefill queue."""
-        await self._port.add_message(PrefillKeys.queue_name(subscriber_name), message)
+        await self._port.add_message(
+            PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name), message
+        )
 
     async def delete_prefill_messages(self, subscriber_name: str):
         """Delete the pre-fill message from the subscriber's queue."""
 
-        await self._port.delete_prefill_messages(subscriber_name)
+        await self._port.delete_prefill_messages(
+            PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name)
+        )
 
     async def get_next_message(
         self,
@@ -72,7 +74,7 @@ class MessageService:
 
         messages = []
         prefill_stream = await self._port.stream_exists(
-            PrefillKeys.queue_name(subscriber_name)
+            PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name)
         )
 
         if queue_status == FillQueueStatus.done and prefill_stream:
@@ -89,32 +91,30 @@ class MessageService:
         return messages
 
     async def get_messages_from_main_queue(
-        self, subscriber_name: str, timeout: float, count: int, pop: bool
+        self, subject: str, timeout: float, count: int, pop: bool
     ) -> List[MQMessage]:
         self.logger.info(
-            "Getting the messages for the '%s' from the main queue", subscriber_name
+            "Getting the messages for the '%s' from the main queue", subject
         )
-        return await self._port.get_messages(subscriber_name, timeout, count, pop)
+        return await self._port.get_messages(subject, timeout, count, pop)
 
     async def get_messages_from_prefill_queue(
-        self, subscriber_name: str, timeout: float, count: int, pop: bool
+        self, subject: str, timeout: float, count: int, pop: bool
     ) -> List[MQMessage]:
         self.logger.info(
-            "Getting the messages for the '%s' from the prefill queue", subscriber_name
+            "Getting the messages for the '%s' from the prefill queue", subject
         )
-        prefill_queue_name = PrefillKeys.queue_name(subscriber_name)
-        messages = await self._port.get_messages(
-            prefill_queue_name, timeout, count, pop
-        )
+        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subject)
+        messages = await self._port.get_messages(prefill_subject, timeout, count, pop)
         if len(messages) < count:
             self.logger.info("All messages from the prefill queue have been delivered")
             messages.extend(
                 await self.get_messages_from_main_queue(
-                    subscriber_name, timeout, count - len(messages), pop
+                    subject, timeout, count - len(messages), pop
                 )
             )
             if pop:
-                await self._port.delete_stream(prefill_queue_name)
+                await self._port.delete_stream(prefill_subject)
         return messages
 
     async def remove_message(self, msg: MQMessage):
@@ -127,5 +127,9 @@ class MessageService:
 
     async def create_prefill_stream(self, subscriber_name: str):
         # delete the previously created stream if it exists
-        await self._port.delete_stream(PrefillKeys.queue_name(subscriber_name))
-        await self._port.create_stream(PrefillKeys.queue_name(subscriber_name))
+        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name)
+        await self._port.delete_stream(prefill_subject)
+        await self._port.create_stream(prefill_subject)
+
+    async def add_message(self, name: str, msg: Message):
+        await self._port.add_message(name, msg)

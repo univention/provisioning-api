@@ -91,7 +91,7 @@ class NatsMQAdapter(BaseMQAdapter):
             json.dumps(message.model_dump()).encode("utf-8"),
             stream=stream_name,
         )
-        self.logger.info("Message was published")
+        self.logger.info("Message was published to the stream: %s", stream_name)
 
     async def get_messages(
         self, subject: str, timeout: float, count: int, pop: bool
@@ -157,6 +157,14 @@ class NatsMQAdapter(BaseMQAdapter):
         except NotFoundError:
             return None
 
+    async def delete_consumer(self, subject: str):
+        try:
+            await self._js.delete_consumer(
+                NatsKeys.stream(subject), NatsKeys.durable_name(subject)
+            )
+        except NotFoundError:
+            return None
+
     async def cb(self, msg):
         await self._message_queue.put(msg)
 
@@ -197,6 +205,9 @@ class NatsMQAdapter(BaseMQAdapter):
 
         try:
             await self._js.consumer_info(stream_name, durable_name)
+            self.logger.info(
+                "A consumer with the name '%s' already exists", durable_name
+            )
         except NotFoundError:
             self.logger.info("Creating new consumer with the name %s", durable_name)
             await self._js.add_consumer(

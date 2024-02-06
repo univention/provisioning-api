@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import List
+from typing import List, Annotated
 
 import fastapi
 import json
 import logging
+
+from fastapi import Query
 
 from consumer.messages.service.messages import MessageService
 from consumer.port import ConsumerPortDependency
@@ -25,7 +27,7 @@ manager = SinkManager()
 
 
 @router.post(
-    "/subscriptions/{name}/messages",
+    "/subscribers/{name}/messages-status",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -52,20 +54,38 @@ async def post_message_status(
         pass
 
 
-@router.get(
-    "/subscriptions/{name}/messages",
+@router.post(
+    "/subscribers/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
-async def get_subscription_messages(
+async def post_message_to_subscriber_queue(
+    name: str,
+    msg: Message,
+    port: ConsumerPortDependency,
+):
+    """Post the message to the subscriber's queue."""
+
+    # TODO: check authorization
+
+    service = MessageService(port)
+    await service.add_message(name, msg)
+
+
+@router.get(
+    "/subscribers/{name}/messages",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["sink"],
+)
+async def get_subscriber_messages(
     name: str,
     port: ConsumerPortDependency,
-    count: int = 1,
+    count: Annotated[int, Query(ge=1)] = 1,
     timeout: float = 5,
     pop: bool = False,
     skip_prefill: bool = False,
 ) -> List[MQMessage]:
-    """Return the next pending message(s) for the given subscription."""
+    """Return the next pending message(s) for the given subscriber."""
 
     # TODO: check authorization
 
@@ -91,7 +111,7 @@ async def remove_message(
 
 
 @router.post(
-    "/subscriptions/{name}/prefill-messages",
+    "/subscribers/{name}/prefill-messages",
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )
@@ -100,7 +120,7 @@ async def post_message_to_prefill_queue(
     data: Message,
     port: ConsumerPortDependency,
 ):
-    """Create the prefill message for the subscriber."""
+    """Post the prefill message to the subscriber's prefill queue."""
 
     # TODO: check authorization
 
@@ -109,7 +129,7 @@ async def post_message_to_prefill_queue(
 
 
 @router.post(
-    "/subscriptions/{name}/prefill-stream",
+    "/subscribers/{name}/prefill-stream",
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )

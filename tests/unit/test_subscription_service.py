@@ -71,7 +71,7 @@ class TestSubscriptionService:
         sub_service._port.get_dict_value = AsyncMock(return_value=sub_info)
         sub_service._port.get_str_value = AsyncMock(return_value=None)
 
-        await sub_service.create_subscription(new_sub)
+        await sub_service.create_subscriber(new_sub)
 
         sub_info["realms_topics"].append("abc:def")
 
@@ -90,7 +90,7 @@ class TestSubscriptionService:
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
 
         with pytest.raises(ValueError) as e:
-            await sub_service.create_subscription(self.new_subscriber)
+            await sub_service.create_subscriber(self.new_subscriber)
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
         sub_service._port.put_value.assert_not_called()
@@ -102,7 +102,7 @@ class TestSubscriptionService:
         sub_service._port.create_stream = AsyncMock()
         sub_service._port.create_consumer = AsyncMock()
 
-        await sub_service.create_subscription(self.new_subscriber)
+        await sub_service.create_subscriber(self.new_subscriber)
 
         sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
         sub_service._port.get_str_value.assert_has_calls(

@@ -24,7 +24,7 @@ class Subscriber(BaseModel):
     name: str = Field(description="The identifier of the subscriber.")
 
     realms_topics: List[str] = Field(
-        description="A list of `(realm, topic)` that this subscriber subscribes to."
+        description="A list of `realm:topic` that this subscriber subscribes to, e.g. `udm:users/user`."
     )
 
     request_prefill: bool = Field(

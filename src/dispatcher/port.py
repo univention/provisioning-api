@@ -5,9 +5,10 @@ from typing import List
 import contextlib
 import logging
 
+from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from shared.models.queue import MQMessage
+from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class DispatcherPort:
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
         self._consumer_registration_adapter = ConsumerRegistrationAdapter()
+        self._consumer_messages_adapter = ConsumerMessagesAdapter()
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -25,6 +27,7 @@ class DispatcherPort:
         await port.mq_adapter.connect()
         await port.kv_adapter.connect()
         await port._consumer_registration_adapter.connect()
+        await port._consumer_messages_adapter.connect()
 
         try:
             yield port
@@ -35,9 +38,10 @@ class DispatcherPort:
         await self.mq_adapter.close()
         await self.kv_adapter.close()
         await self._consumer_registration_adapter.close()
+        await self._consumer_messages_adapter.close()
 
-    async def send_event_to_consumer_queue(self, subject: str, message):
-        await self.mq_adapter.add_message(subject, message)
+    async def send_message_to_subscriber(self, name: str, message: Message):
+        await self._consumer_messages_adapter.send_message(name, message)
 
     async def get_list_value(self, key: str) -> List[str]:
         result = await self.kv_adapter.get_value(key)
@@ -49,7 +53,7 @@ class DispatcherPort:
     async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()
 
-    async def get_realm_topic_subscribers(self, realm_topic: str) -> list[dict]:
+    async def get_realm_topic_subscribers(self, realm_topic: str) -> List[str]:
         return await self._consumer_registration_adapter.get_realm_topic_subscribers(
             realm_topic
         )
