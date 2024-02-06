@@ -37,11 +37,11 @@ class PrefillMessage(BaseMessage):
     """This class represents the message used to send a request to the Prefill Service."""
 
     subscription_name: str = Field(
-        description="The name of the subscriber who requested the prefilling queue"
+        description="The name of the subscription that requested the prefilling queue"
     )
 
     realms_topics: List[List[str]] = Field(
-        description="A list of `realm:topic` that this subscriber subscribes to, e.g. `udm:users/user`.",
+        description="A list of `realm:topic` that this subscriber subscribes to, e.g. [[`udm:users/user`]].",
     )
 
 

@@ -9,9 +9,9 @@ from nats.js.errors import NotFoundError
 
 from shared.adapters.nats_adapter import NatsKeys
 from tests.conftest import (
-    SUBSCRIBER_NAME,
+    SUBSCRIPTION_NAME,
     kv_sub_info,
-    SUBSCRIBER_INFO,
+    SUBSCRIPTION_INFO,
     MSG,
     MESSAGE,
     MQMESSAGE,
@@ -41,8 +41,6 @@ def mock_fetch(mock_nats_mq_adapter):
 
 @pytest.mark.anyio
 class TestNatsKVAdapter:
-    key = f"subscriber:{SUBSCRIBER_NAME}"
-
     async def test_connect(self, mock_nats_kv_adapter):
         result = await mock_nats_kv_adapter.connect()
 
@@ -67,13 +65,13 @@ class TestNatsKVAdapter:
         assert result is None
 
     async def test_delete_kv_pair(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.delete_kv_pair(self.key)
+        result = await mock_nats_kv_adapter.delete_kv_pair(SUBSCRIPTION_NAME)
 
-        mock_nats_kv_adapter._kv_store.delete.assert_called_once_with(self.key)
+        mock_nats_kv_adapter._kv_store.delete.assert_called_once_with(SUBSCRIPTION_NAME)
         assert result is None
 
     async def test_get_value(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.get_value(self.key)
+        result = await mock_nats_kv_adapter.get_value(SUBSCRIPTION_NAME)
 
         assert result == kv_sub_info
 
@@ -83,18 +81,20 @@ class TestNatsKVAdapter:
         assert result is None
 
     async def test_put_value(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.put_value(self.key, SUBSCRIBER_INFO)
+        result = await mock_nats_kv_adapter.put_value(
+            SUBSCRIPTION_NAME, SUBSCRIPTION_INFO
+        )
 
         mock_nats_kv_adapter._kv_store.put.assert_called_once_with(
-            self.key, kv_sub_info.value
+            SUBSCRIPTION_NAME, kv_sub_info.value
         )
         mock_nats_kv_adapter._kv_store.delete.assert_not_called()
         assert result is None
 
     async def test_put_empty_value(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.put_value(self.key, "")
+        result = await mock_nats_kv_adapter.put_value(SUBSCRIPTION_NAME, "")
 
-        mock_nats_kv_adapter._kv_store.delete.assert_called_once_with(self.key)
+        mock_nats_kv_adapter._kv_store.delete.assert_called_once_with(SUBSCRIPTION_NAME)
         mock_nats_kv_adapter._kv_store.put.assert_not_called()
         assert result is None
 
@@ -116,12 +116,12 @@ class TestNatsMQAdapter:
         assert result is None
 
     async def test_add_message_new_stream(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.add_message(SUBSCRIBER_NAME, MESSAGE)
+        result = await mock_nats_mq_adapter.add_message(SUBSCRIPTION_NAME, MESSAGE)
 
         mock_nats_mq_adapter._js.publish.assert_called_once_with(
-            SUBSCRIBER_NAME,
+            SUBSCRIPTION_NAME,
             FLAT_MESSAGE_ENCODED,
-            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+            stream=NatsKeys.stream(SUBSCRIPTION_NAME),
         )
         assert result is None
 
@@ -129,16 +129,16 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter.remove_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=1, pop=False
+            SUBSCRIPTION_NAME, timeout=5, count=1, pop=False
         )
 
         mock_nats_mq_adapter._js.stream_info.assert_called_once_with(
-            NatsKeys.stream(SUBSCRIBER_NAME)
+            NatsKeys.stream(SUBSCRIPTION_NAME)
         )
         mock_nats_mq_adapter._js.pull_subscribe.assert_called_once_with(
-            SUBSCRIBER_NAME,
-            durable=f"durable_name:{SUBSCRIBER_NAME}",
-            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+            SUBSCRIPTION_NAME,
+            durable=f"durable_name:{SUBSCRIPTION_NAME}",
+            stream=NatsKeys.stream(SUBSCRIPTION_NAME),
         )
         mock_fetch.assert_called_once_with(1, 5)
         mock_nats_mq_adapter.remove_message.assert_not_called()
@@ -148,16 +148,16 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter.remove_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=1, pop=True
+            SUBSCRIPTION_NAME, timeout=5, count=1, pop=True
         )
 
         mock_nats_mq_adapter._js.stream_info.assert_called_once_with(
-            NatsKeys.stream(SUBSCRIBER_NAME)
+            NatsKeys.stream(SUBSCRIPTION_NAME)
         )
         mock_nats_mq_adapter._js.pull_subscribe.assert_called_once_with(
-            SUBSCRIBER_NAME,
-            durable=f"durable_name:{SUBSCRIBER_NAME}",
-            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+            SUBSCRIPTION_NAME,
+            durable=f"durable_name:{SUBSCRIPTION_NAME}",
+            stream=NatsKeys.stream(SUBSCRIPTION_NAME),
         )
         mock_fetch.assert_called_once_with(1, 5)
         mock_nats_mq_adapter.remove_message.assert_called_once_with(MSG)
@@ -168,11 +168,11 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter.remove_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=1, pop=False
+            SUBSCRIPTION_NAME, timeout=5, count=1, pop=False
         )
 
         mock_nats_mq_adapter._js.stream_info.assert_called_once_with(
-            NatsKeys.stream(SUBSCRIBER_NAME)
+            NatsKeys.stream(SUBSCRIPTION_NAME)
         )
         mock_nats_mq_adapter._js.pull_subscribe.assert_not_called()
         mock_fetch.assert_not_called()
@@ -186,16 +186,16 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter.remove_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
-            SUBSCRIBER_NAME, timeout=5, count=1, pop=False
+            SUBSCRIPTION_NAME, timeout=5, count=1, pop=False
         )
 
         mock_nats_mq_adapter._js.stream_info.assert_called_once_with(
-            NatsKeys.stream(SUBSCRIBER_NAME)
+            NatsKeys.stream(SUBSCRIPTION_NAME)
         )
         mock_nats_mq_adapter._js.pull_subscribe.assert_called_once_with(
-            SUBSCRIBER_NAME,
-            durable=f"durable_name:{SUBSCRIBER_NAME}",
-            stream=NatsKeys.stream(SUBSCRIBER_NAME),
+            SUBSCRIPTION_NAME,
+            durable=f"durable_name:{SUBSCRIPTION_NAME}",
+            stream=NatsKeys.stream(SUBSCRIPTION_NAME),
         )
         sub.fetch.assert_called_once_with(1, 5)
         mock_nats_mq_adapter.remove_message.assert_not_called()
@@ -211,20 +211,20 @@ class TestNatsMQAdapter:
         assert result is None
 
     async def test_delete_stream(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.delete_stream(SUBSCRIBER_NAME)
+        result = await mock_nats_mq_adapter.delete_stream(SUBSCRIPTION_NAME)
 
         mock_nats_mq_adapter._js.delete_stream.assert_called_once_with(
-            NatsKeys.stream(SUBSCRIBER_NAME)
+            NatsKeys.stream(SUBSCRIPTION_NAME)
         )
         assert result is None
 
     async def test_delete_stream_not_found(self, mock_nats_mq_adapter):
         mock_nats_mq_adapter._js.delete_stream = AsyncMock(side_effect=NotFoundError)
 
-        result = await mock_nats_mq_adapter.delete_stream(SUBSCRIBER_NAME)
+        result = await mock_nats_mq_adapter.delete_stream(SUBSCRIPTION_NAME)
 
         mock_nats_mq_adapter._js.delete_stream.assert_called_once_with(
-            NatsKeys.stream(SUBSCRIBER_NAME)
+            NatsKeys.stream(SUBSCRIPTION_NAME)
         )
         assert result is None
 

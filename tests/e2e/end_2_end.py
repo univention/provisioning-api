@@ -40,7 +40,7 @@ async def test_workflow():
         f"{BASE_URL}{subscriptions_api_prefix}/subscriptions",
         json={
             "name": name,
-            "realm_topic": [REALM, TOPIC],
+            "realms_topics": [[REALM, TOPIC]],
             "request_prefill": False,
         },
     )

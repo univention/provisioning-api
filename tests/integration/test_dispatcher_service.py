@@ -7,18 +7,20 @@ import aiohttp
 import pytest
 from nats.aio.msg import Msg
 
-from tests.conftest import FLAT_MESSAGE_ENCODED
+from tests.conftest import FLAT_MESSAGE
 
 from tests.conftest import MockNatsMQAdapter, MockNatsKVAdapter
 
-from tests.conftest import (
-    SUBSCRIBER_INFO,
-    SUBSCRIBER_NAME,
-)
+from tests.conftest import SUBSCRIPTION_NAME
 
 from tests.conftest import MSG
 from dispatcher.port import DispatcherPort
 from dispatcher.service.dispatcher import DispatcherService
+
+
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
 
 
 @pytest.fixture
@@ -33,6 +35,7 @@ async def dispatcher_mock() -> DispatcherPort:
     Msg.ack = AsyncMock()
     async with aiohttp.ClientSession() as session:
         port._consumer_registration_adapter._session = session
+        port._consumer_messages_adapter._session = session
     return port
 
 
@@ -41,8 +44,10 @@ class TestDispatcher:
     @patch(
         "src.shared.adapters.consumer_registration_adapter.aiohttp.ClientSession.get"
     )
+    @patch("src.shared.adapters.consumer_messages_adapter.aiohttp.ClientSession.post")
     async def test_dispatch_events(
         self,
+        mock_post,
         mock_get,
         dispatcher_mock: DispatcherPort,
     ):
@@ -51,7 +56,7 @@ class TestDispatcher:
         specifically verifying the usage of the NATS and jetstream. If the technology changes, the test will fail
         """
         mock_get.return_value.__aenter__.return_value.json = AsyncMock(
-            return_value=[SUBSCRIBER_INFO]
+            return_value=[SUBSCRIPTION_NAME]
         )
 
         # trigger dispatcher to retrieve event from incoming queue
@@ -71,13 +76,12 @@ class TestDispatcher:
         )
         # check waiting for the event
         dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
-        # check getting subscribers for the realm_topic
+        # check getting subscriptions for the realm_topic
         mock_get.assert_called_once_with(
-            "http://localhost:7777/subscriptions/v1/subscriptions?realm_topic=udm:groups/group"
+            "http://localhost:7777/subscriptions/v1/subscriptions/filter?realm_topic=udm:groups/group"
         )
         # check storing event in the consumer queue
-        dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
-            SUBSCRIBER_INFO["name"],
-            FLAT_MESSAGE_ENCODED,
-            stream=f"stream:{SUBSCRIBER_NAME}",
+        mock_post.assert_called_once_with(
+            f"http://localhost:7777/messages/v1/subscriptions/{SUBSCRIPTION_NAME}/messages",
+            json=FLAT_MESSAGE,
         )

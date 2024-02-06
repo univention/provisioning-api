@@ -19,7 +19,7 @@ class FillQueueStatus(str, enum.Enum):
 
 
 class Subscription(BaseModel):
-    """A registered subscriber."""
+    """A registered subscription."""
 
     name: str = Field(description="The identifier of the subscription.")
 

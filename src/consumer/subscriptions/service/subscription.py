@@ -70,7 +70,6 @@ class SubscriptionService:
         sub_info = await self.get_subscription_info(new_sub.name)
         if sub_info:
             raise ValueError("Subscription with the given name already exists")
-
         else:
             self.logger.debug(
                 "Creating new subscription with the name: %s", new_sub.name
@@ -93,7 +92,7 @@ class SubscriptionService:
             await self._port.create_stream(new_sub.name)
             await self._port.create_consumer(new_sub.name)
 
-            self.logger.info("New subscriber was created")
+            self.logger.info("New subscription was created")
 
     async def update_realm_topic_subscriptions(
         self, realms_topics: List[str], name: str
@@ -177,13 +176,13 @@ class SubscriptionService:
     async def add_sub_to_subscriptions(self, name: str):
         await self.update_subscription_names(SUBSCRIPTIONS, name)
 
-    async def send_request_to_prefill(self, subscriber: NewSubscription):
+    async def send_request_to_prefill(self, subscription: NewSubscription):
         self.logger.info("Sending the requests to prefill")
         message = PrefillMessage(
             publisher_name="consumer-registration",
             ts=datetime.now(),
-            realms_topics=subscriber.realms_topics,
-            subscription_name=subscriber.name,
+            realms_topics=subscription.realms_topics,
+            subscription_name=subscription.name,
         )
         await self._port.add_message("prefill", message)
 
