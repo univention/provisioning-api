@@ -41,9 +41,9 @@ Enter the following data into the request body:
 
 ```sh
 {
-  "name": "subscriber1",
-  "realm_topic": [
-    "udm", "groups/group"
+  "name": "subscription1",
+  "realms_topics": [
+    ["udm", "groups/group"]
   ],
   "request_prefill": true
 }
