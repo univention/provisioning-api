@@ -17,7 +17,7 @@ from tests.conftest import (
     FLAT_MESSAGE,
     SUBSCRIBER_NAME,
 )
-from shared.models.subscriber import FillQueueStatus
+from shared.models.subscription import FillQueueStatus
 from consumer.subscriptions.api import v1_prefix as api_prefix
 from consumer.main import app as messages_app
 from consumer.main import app as subscriptions_app

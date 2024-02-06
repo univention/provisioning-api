@@ -7,8 +7,7 @@ from typing import List, Optional
 from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import FillQueueStatus
-from shared.models.queue import MQMessage, Message
+from shared.models import FillQueueStatus, MQMessage, Message
 
 
 PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"
@@ -19,42 +18,42 @@ class MessageService:
         self._port = port
         self.logger = logging.getLogger(__name__)
 
-    async def add_prefill_message(self, subscriber_name: str, message: Message):
-        """Add the given message to the subscriber's prefill queue."""
+    async def add_prefill_message(self, subscription_name: str, message: Message):
+        """Add the given message to the subscription's prefill queue."""
         await self._port.add_message(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name), message
+            PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name), message
         )
 
-    async def delete_prefill_messages(self, subscriber_name: str):
-        """Delete the pre-fill message from the subscriber's queue."""
+    async def delete_prefill_messages(self, subscription_name: str):
+        """Delete the pre-fill message from the subscription's queue."""
 
         await self._port.delete_prefill_messages(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name)
+            PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
         )
 
     async def get_next_message(
         self,
-        subscriber_name: str,
+        subscription_name: str,
         pop: bool,
         timeout: float = 5,
         skip_prefill: Optional[bool] = False,
     ) -> Optional[MQMessage]:
-        """Retrieve the first message from the subscriber's stream.
+        """Retrieve the first message from the subscription's stream.
 
-        :param str subscriber_name: Name of the subscriber.
+        :param str subscription_name: Name of the subscription.
         :param bool pop: If the message should be deleted after request.
         :param float timeout: Max duration of the request before it expires.
         :param bool skip_prefill: List message, even if the pre-filling is not done?
         """
 
         response = await self.get_messages(
-            subscriber_name, timeout, count=1, pop=pop, skip_prefill=skip_prefill
+            subscription_name, timeout, count=1, pop=pop, skip_prefill=skip_prefill
         )
         return response[0] if response else None
 
     async def get_messages(
         self,
-        subscriber_name: str,
+        subscription_name: str,
         timeout: float,
         count: int,
         pop: bool,
@@ -62,7 +61,7 @@ class MessageService:
     ) -> List[MQMessage]:
         """Return messages from a given queue.
 
-        :param str subscriber_name: Name of the subscriber.
+        :param str subscription_name: Name of the subscription.
         :param float timeout: Max duration of the request before it expires.
         :param int count: How many messages to return at most.
         :param bool pop: If messages should be deleted after request.
@@ -70,21 +69,23 @@ class MessageService:
         """
 
         sub_service = SubscriptionService(self._port)
-        queue_status = await sub_service.get_subscriber_queue_status(subscriber_name)
+        queue_status = await sub_service.get_subscription_queue_status(
+            subscription_name
+        )
 
         messages = []
         prefill_stream = await self._port.stream_exists(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name)
+            PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
         )
 
         if queue_status == FillQueueStatus.done and prefill_stream:
             messages = await self.get_messages_from_prefill_queue(
-                subscriber_name, timeout, count, pop
+                subscription_name, timeout, count, pop
             )
         elif skip_prefill or not prefill_stream:
             messages.extend(
                 await self.get_messages_from_main_queue(
-                    subscriber_name, timeout, count, pop
+                    subscription_name, timeout, count, pop
                 )
             )
 
@@ -118,16 +119,16 @@ class MessageService:
         return messages
 
     async def remove_message(self, msg: MQMessage):
-        """Remove a message from the subscriber's queue.
+        """Remove a message from the subscription's queue.
 
         :param msg: fetched message.
         """
 
         await self._port.remove_message(msg)
 
-    async def create_prefill_stream(self, subscriber_name: str):
+    async def create_prefill_stream(self, subscription_name: str):
         # delete the previously created stream if it exists
-        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscriber_name)
+        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
         await self._port.delete_stream(prefill_subject)
         await self._port.create_stream(prefill_subject)
 

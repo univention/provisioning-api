@@ -36,13 +36,15 @@ class ConsumerPort:
     async def add_message(self, subject: str, message: Union[Message, PrefillMessage]):
         await self.mq_adapter.add_message(subject, message)
 
-    async def delete_prefill_messages(self, subscriber_name: str):
+    async def delete_prefill_messages(self, subscription_name: str):
         pass
 
     async def get_messages(
-        self, subscriber_name: str, timeout: float, count: int, pop: bool
+        self, subscription_name: str, timeout: float, count: int, pop: bool
     ) -> List[MQMessage]:
-        return await self.mq_adapter.get_messages(subscriber_name, timeout, count, pop)
+        return await self.mq_adapter.get_messages(
+            subscription_name, timeout, count, pop
+        )
 
     async def remove_message(self, msg: MQMessage):
         await self.mq_adapter.remove_message(msg)

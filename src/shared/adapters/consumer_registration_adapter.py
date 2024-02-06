@@ -37,16 +37,16 @@ class ConsumerRegistrationAdapter:
         if self._session:
             await self._session.close()
 
-    async def get_realm_topic_subscribers(self, realm_topic: str) -> list[str]:
+    async def get_realm_topic_subscriptions(self, realm_topic: str) -> list[str]:
         async with self._session.get(
-            f"{self.base_url}subscribers/filter?realm_topic={realm_topic}"
+            f"{self.base_url}subscriptions/filter?realm_topic={realm_topic}"
         ) as request:
             return await request.json()
 
-    async def update_subscriber_queue_status(
+    async def update_subscription_queue_status(
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
         async with self._session.patch(
-            f"{self.base_url}subscribers/{name}?prefill_queue_status={queue_status.value}"
+            f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
         ):
             pass

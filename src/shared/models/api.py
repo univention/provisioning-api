@@ -6,10 +6,10 @@ from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 
-class NewSubscriber(BaseModel):
-    """Request to register a subscriber."""
+class NewSubscription(BaseModel):
+    """Request to register a subscription."""
 
-    name: str = Field(description="The identifier of the subscriber.")
+    name: str = Field(description="The identifier of the subscription.")
     realms_topics: List[List[str]] = Field(
         description="A list of `[realm, topic]` lists that this subscriber subscribes to."
     )

@@ -40,7 +40,7 @@ class DispatcherPort:
         await self._consumer_registration_adapter.close()
         await self._consumer_messages_adapter.close()
 
-    async def send_message_to_subscriber(self, name: str, message: Message):
+    async def send_message_to_subscription(self, name: str, message: Message):
         await self._consumer_messages_adapter.send_message(name, message)
 
     async def get_list_value(self, key: str) -> List[str]:
@@ -53,8 +53,8 @@ class DispatcherPort:
     async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()
 
-    async def get_realm_topic_subscribers(self, realm_topic: str) -> List[str]:
-        return await self._consumer_registration_adapter.get_realm_topic_subscribers(
+    async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
+        return await self._consumer_registration_adapter.get_realm_topic_subscriptions(
             realm_topic
         )
 

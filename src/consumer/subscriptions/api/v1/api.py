@@ -4,47 +4,44 @@
 from typing import List
 
 import fastapi
-import shared.models
 from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import FillQueueStatus
+from shared.models import FillQueueStatus, Subscription, NewSubscription
 
 router = fastapi.APIRouter()
 
 
-@router.get("/subscribers", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
-async def get_subscribers(
+@router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
+async def get_subscriptions(
     port: ConsumerPortDependency,
-) -> List[shared.models.Subscriber]:
-    """Return a list of all known subscribers."""
+) -> List[Subscription]:
+    """Return a list of all known subscriptions."""
 
     # TODO: check authorization
 
     service = SubscriptionService(port)
-    return await service.get_subscribers()
+    return await service.get_subscriptions()
 
 
 @router.get(
-    "/subscribers/filter", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/filter", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def get_realm_topic_subscribers(
+async def get_realm_topic_subscriptions(
     port: ConsumerPortDependency, realm_topic: str
 ) -> List[str]:
-    """Returns a list of subscriber names with the given realm_topic."""
+    """Returns a list of subscriptions names with the given realm_topic."""
 
     # TODO: check authorization
 
     service = SubscriptionService(port)
-    return await service.get_realm_topic_subscribers(realm_topic)
+    return await service.get_realm_topic_subscriptions(realm_topic)
 
 
 @router.get(
-    "/subscribers/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def get_subscriber(
-    name: str, port: ConsumerPortDependency
-) -> shared.models.Subscriber:
+async def get_subscription(name: str, port: ConsumerPortDependency) -> Subscription:
     """Return information about a subscription."""
 
     # TODO: check authorization
@@ -52,37 +49,39 @@ async def get_subscriber(
     service = SubscriptionService(port)
 
     try:
-        return await service.get_subscriber(name)
+        return await service.get_subscription(name)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
 
-@router.post("/subscribers", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"])
-async def create_subscriber(
-    subscriber: shared.models.NewSubscriber,
+@router.post(
+    "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
+)
+async def create_subscription(
+    subscription: NewSubscription,
     port: ConsumerPortDependency,
 ):
-    """Create a new subscriber."""
+    """Create a new subscription."""
 
-    # TODO: check authorization for `new_sub.subscriber_name` / `new_sub.realms_topics`
+    # TODO: check authorization for `new_sub.subscription_name` / `new_sub.realms_topics`
 
     service = SubscriptionService(port)
 
     try:
-        await service.create_subscriber(subscriber)
+        await service.create_subscription(subscription)
     except ValueError as err:
         raise fastapi.HTTPException(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
         )
 
-    if subscriber.request_prefill:
-        await service.send_request_to_prefill(subscriber)
+    if subscription.request_prefill:
+        await service.send_request_to_prefill(subscription)
 
 
 @router.delete(
-    "/subscribers/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def delete_subscriber(name: str, port: ConsumerPortDependency):
+async def delete_subscription(name: str, port: ConsumerPortDependency):
     """Delete a subscription."""
 
     # TODO: check authorization
@@ -90,24 +89,24 @@ async def delete_subscriber(name: str, port: ConsumerPortDependency):
     service = SubscriptionService(port)
 
     try:
-        await service.delete_subscriber(name)
+        await service.delete_subscription(name)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
 
 @router.patch(
-    "/subscribers/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
 )
-async def update_subscriber_queue_status(
+async def update_subscription_queue_status(
     name: str, prefill_queue_status: FillQueueStatus, port: ConsumerPortDependency
 ):
-    """Update subscriber's prefill queue status"""
+    """Update subscription's prefill queue status"""
 
     # TODO: check authorization
 
     service = SubscriptionService(port)
 
     try:
-        await service.set_subscriber_queue_status(name, prefill_queue_status)
+        await service.set_subscription_queue_status(name, prefill_queue_status)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))

@@ -39,20 +39,20 @@ class ConsumerMessagesAdapter:
 
     async def create_prefill_message(self, name: str, message: Message):
         async with self._session.post(
-            f"{self.base_url}subscribers/{name}/prefill-messages",
+            f"{self.base_url}subscriptions/{name}/prefill-messages",
             json=message.model_dump(),
         ):
             pass
 
-    async def create_prefill_stream(self, subscriber_name: str):
+    async def create_prefill_stream(self, subscription_name: str):
         async with self._session.post(
-            f"{self.base_url}subscribers/{subscriber_name}/prefill-stream",
+            f"{self.base_url}subscriptions/{subscription_name}/prefill-stream",
         ):
             pass
 
     async def send_message(self, name: str, message: Message):
         async with self._session.post(
-            f"{self.base_url}subscribers/{name}/messages",
+            f"{self.base_url}subscriptions/{name}/messages",
             json=message.model_dump(),
         ):
             pass

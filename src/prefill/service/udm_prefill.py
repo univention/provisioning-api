@@ -38,7 +38,9 @@ class UDMPreFill(PreFillService):
                     continue
 
                 self._logger.info("Received request with content: %s", validated_msg)
-                self._subscriber_name = validated_msg.subscriber_name
+                self._subscription_name = validated_msg.subscription_name
+
+                await self._port.create_prefill_stream(self._subscription_name)
 
                 for realm, topic in validated_msg.realms_topics:
                     self._realm = realm
@@ -59,11 +61,10 @@ class UDMPreFill(PreFillService):
     async def start_prefill_process(self, message: MQMessage):
         self._logger.info(
             "Started the prefill for the subscriber %s with the topic %s",
-            self._subscriber_name,
+            self._subscription_name,
             self._topic,
         )
         await self.mark_request_as_running(message)
-        await self._port.create_prefill_stream(self._subscriber_name)
         await self.fetch()
 
     async def fetch(self):
@@ -121,7 +122,7 @@ class UDMPreFill(PreFillService):
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
-        await self._port.create_prefill_message(self._subscriber_name, message)
+        await self._port.create_prefill_message(self._subscription_name, message)
 
     async def add_request_to_prefill_failures(
         self, validated_msg: PrefillMessage, message: MQMessage
@@ -134,20 +135,20 @@ class UDMPreFill(PreFillService):
 
     async def mark_request_as_done(self, msg: MQMessage):
         await self._port.acknowledge_message(msg)
-        await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.done
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.done
         )
 
     async def mark_request_as_failed(self, message: MQMessage):
         await self._port.acknowledge_message_negatively(message)
-        await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.failed
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.failed
         )
 
     async def mark_request_as_running(self, message: MQMessage):
         await self._port.acknowledge_message_in_progress(message)
-        await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.running
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.running
         )
 
     async def prepare_prefill_failures_queue(self):

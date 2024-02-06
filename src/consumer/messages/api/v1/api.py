@@ -16,9 +16,9 @@ from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
 from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
+    MQMessage,
+    Message,
 )
-
-from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ manager = SinkManager()
 
 
 @router.post(
-    "/subscribers/{name}/messages-status",
+    "/subscriptions/{name}/messages-status",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -55,16 +55,16 @@ async def post_message_status(
 
 
 @router.post(
-    "/subscribers/{name}/messages",
+    "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
-async def post_message_to_subscriber_queue(
+async def post_message_to_subscription_queue(
     name: str,
     msg: Message,
     port: ConsumerPortDependency,
 ):
-    """Post the message to the subscriber's queue."""
+    """Post the message to the subscription's queue."""
 
     # TODO: check authorization
 
@@ -73,11 +73,11 @@ async def post_message_to_subscriber_queue(
 
 
 @router.get(
-    "/subscribers/{name}/messages",
+    "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
-async def get_subscriber_messages(
+async def get_subscription_messages(
     name: str,
     port: ConsumerPortDependency,
     count: Annotated[int, Query(ge=1)] = 1,
@@ -85,7 +85,7 @@ async def get_subscriber_messages(
     pop: bool = False,
     skip_prefill: bool = False,
 ) -> List[MQMessage]:
-    """Return the next pending message(s) for the given subscriber."""
+    """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
 
@@ -111,16 +111,16 @@ async def remove_message(
 
 
 @router.post(
-    "/subscribers/{name}/prefill-messages",
+    "/subscriptions/{name}/prefill-messages",
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )
-async def post_message_to_prefill_queue(
+async def post_message_to_subscription_prefill_queue(
     name: str,
     data: Message,
     port: ConsumerPortDependency,
 ):
-    """Post the prefill message to the subscriber's prefill queue."""
+    """Post the prefill message to the subscription's prefill queue."""
 
     # TODO: check authorization
 
@@ -129,7 +129,7 @@ async def post_message_to_prefill_queue(
 
 
 @router.post(
-    "/subscribers/{name}/prefill-stream",
+    "/subscriptions/{name}/prefill-stream",
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )
@@ -137,7 +137,7 @@ async def create_prefill_stream(
     name: str,
     port: ConsumerPortDependency,
 ):
-    """Create the prefill stream for the subscriber."""
+    """Create the prefill stream for the subscription."""
 
     # TODO: check authorization
 

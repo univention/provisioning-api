@@ -44,7 +44,7 @@ PREFILL_MESSAGE = PrefillMessage(
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
     realm=REALM,
     topic=TOPIC,
-    subscriber_name=SUBSCRIBER_NAME,
+    subscription_name=SUBSCRIBER_NAME,
 )
 
 FLAT_BASE_MESSAGE = {
@@ -57,7 +57,7 @@ FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_MESSAGE["body"] = BODY
 
 FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
-FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
+FLAT_PREFILL_MESSAGE["subscription_name"] = SUBSCRIBER_NAME
 
 MSG = Msg(
     _client="nats",

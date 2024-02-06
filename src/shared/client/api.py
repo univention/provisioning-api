@@ -16,7 +16,7 @@ class AsyncClient:
     async def create_subscription(
         self, name: str, realms_topics: List[List[str]], request_prefill: bool = False
     ):
-        subscriber = shared.models.api.NewSubscriber(
+        subscriber = shared.models.api.NewSubscription(
             name=name, realms_topics=realms_topics, request_prefill=request_prefill
         )
 
@@ -34,7 +34,9 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscription(self, name: str) -> shared.models.subscriber.Subscriber:
+    async def get_subscription(
+        self, name: str
+    ) -> shared.models.subscriber.Subscription:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}/v1/subscriptions/{name}"
@@ -69,7 +71,7 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscriptions(self) -> List[shared.models.subscriber.Subscriber]:
+    async def get_subscriptions(self) -> List[shared.models.subscriber.Subscription]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(f"{self.base_url}/v1/subscriptions") as response:
                 data = await response.json()

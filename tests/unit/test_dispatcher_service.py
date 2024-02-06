@@ -17,7 +17,7 @@ def dispatcher_service() -> DispatcherService:
 @pytest.mark.anyio
 class TestDispatcherService:
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
-        dispatcher_service._port.get_realm_topic_subscribers = AsyncMock(
+        dispatcher_service._port.get_realm_topic_subscriptions = AsyncMock(
             return_value=[SUBSCRIBER_INFO]
         )
         dispatcher_service._port.wait_for_event = AsyncMock(
@@ -31,7 +31,7 @@ class TestDispatcherService:
             "incoming", "dispatcher-service"
         )
         dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
-        dispatcher_service._port.get_realm_topic_subscribers.assert_called_once_with(
+        dispatcher_service._port.get_realm_topic_subscriptions.assert_called_once_with(
             REALMS_TOPICS_STR
         )
         dispatcher_service._port.send_event_to_consumer_queue.assert_called_once_with(

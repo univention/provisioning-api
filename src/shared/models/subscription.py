@@ -18,13 +18,13 @@ class FillQueueStatus(str, enum.Enum):
     done = "done"
 
 
-class Subscriber(BaseModel):
+class Subscription(BaseModel):
     """A registered subscriber."""
 
-    name: str = Field(description="The identifier of the subscriber.")
+    name: str = Field(description="The identifier of the subscription.")
 
     realms_topics: List[str] = Field(
-        description="A list of `realm:topic` that this subscriber subscribes to, e.g. `udm:users/user`."
+        description="A list of `realm:topic` that this subscription subscribes to, e.g. `udm:users/user`."
     )
 
     request_prefill: bool = Field(
