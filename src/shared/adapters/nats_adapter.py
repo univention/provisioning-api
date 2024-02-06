@@ -210,10 +210,10 @@ class NatsMQAdapter(BaseMQAdapter):
         msg = self.construct_nats_message(message)
         await msg.ack()
 
-    async def negatively_acknowledge_message(self, message: MQMessage):
+    async def acknowledge_message_negatively(self, message: MQMessage):
         msg = self.construct_nats_message(message)
         await msg.nak()
 
-    async def acknowledge_in_progress(self, message: MQMessage):
+    async def acknowledge_message_in_progress(self, message: MQMessage):
         msg = self.construct_nats_message(message)
         await msg.in_progress()

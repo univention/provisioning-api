@@ -42,7 +42,7 @@ class UDMPreFill(PreFillService):
                     self._logger.info(
                         "Started the prefill for '%s'", self._subscriber_name
                     )
-                    await self._port.acknowledge_in_progress(msg)
+                    await self._port.acknowledge_message_in_progress(msg)
                     await self._port.update_subscriber_queue_status(
                         self._subscriber_name, FillQueueStatus.running
                     )
@@ -131,7 +131,7 @@ class UDMPreFill(PreFillService):
         )
 
     async def mark_request_as_failed(self, message: MQMessage):
-        await self._port.negatively_acknowledge_message(message)
+        await self._port.acknowledge_message_negatively(message)
         await self._port.update_subscriber_queue_status(
             self._subscriber_name, FillQueueStatus.failed
         )

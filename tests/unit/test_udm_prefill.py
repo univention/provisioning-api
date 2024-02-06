@@ -10,9 +10,9 @@ from prefill.service.udm_prefill import UDMPreFill
 from shared.models import Message
 from tests.conftest import (
     SUBSCRIBER_NAME,
-    MSG_PREFILL,
     PREFILL_MESSAGE,
-    MSG_PREFILL_REDELIVERED,
+    MQMESSAGE_PREFILL,
+    MQMESSAGE_PREFILL_REDELIVERED,
 )
 
 
@@ -54,13 +54,11 @@ class TestUDMPreFill:
     async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill):
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._port.wait_for_event = AsyncMock(
-            side_effect=[MSG_PREFILL, Exception("Stop waiting for the new event")]
+            side_effect=[MQMESSAGE_PREFILL, Exception("Stop waiting for the new event")]
         )
         udm_prefill._port.get_object_types = AsyncMock(return_value=[self.udm_modules])
         udm_prefill._port.list_objects = AsyncMock(return_value=[self.url])
         udm_prefill._port.get_object = AsyncMock(return_value=self.obj)
-        MSG_PREFILL.in_progress = AsyncMock()
-        MSG_PREFILL.ack = AsyncMock()
 
         with pytest.raises(Exception) as e:
             await udm_prefill.handle_requests_to_prefill()
@@ -74,8 +72,10 @@ class TestUDMPreFill:
         udm_prefill._port.get_object_types.assert_called_once_with()
         udm_prefill._port.list_objects.assert_called_once_with(self.object_type)
         udm_prefill._port.get_object.assert_called_once_with(self.url)
-        MSG_PREFILL.in_progress.assert_called_once_with()
-        MSG_PREFILL.ack.assert_called_once_with()
+        udm_prefill._port.acknowledge_message_in_progress.assert_called_once_with(
+            MQMESSAGE_PREFILL
+        )
+        udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
         udm_prefill._port.create_prefill_message.assert_called_once_with(
             SUBSCRIBER_NAME, self.msg
         )
@@ -90,12 +90,10 @@ class TestUDMPreFill:
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._port.wait_for_event = AsyncMock(
             side_effect=[
-                MSG_PREFILL_REDELIVERED,
+                MQMESSAGE_PREFILL_REDELIVERED,
                 Exception("Stop waiting for the new event"),
             ]
         )
-        MSG_PREFILL_REDELIVERED.in_progress = AsyncMock()
-        MSG_PREFILL_REDELIVERED.ack = AsyncMock()
 
         with pytest.raises(Exception) as e:
             await udm_prefill.handle_requests_to_prefill()
@@ -109,8 +107,10 @@ class TestUDMPreFill:
         udm_prefill._port.get_object_types.assert_not_called()
         udm_prefill._port.list_objects.assert_not_called()
         udm_prefill._port.get_object.assert_not_called()
-        MSG_PREFILL_REDELIVERED.in_progress.assert_not_called()
-        MSG_PREFILL_REDELIVERED.ack.assert_called_once_with()
+        udm_prefill._port.acknowledge_message_in_progress.assert_not_called()
+        udm_prefill._port.acknowledge_message.assert_called_once_with(
+            MQMESSAGE_PREFILL_REDELIVERED
+        )
         udm_prefill._port.create_prefill_message.assert_not_called()
         udm_prefill._port.add_request_to_prefill_failures.assert_called_once_with(
             "prefill-failures", PREFILL_MESSAGE

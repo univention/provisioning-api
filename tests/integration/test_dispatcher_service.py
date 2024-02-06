@@ -66,7 +66,7 @@ class TestDispatcher:
         dispatcher_mock.mq_adapter._js.subscribe.assert_called_once_with(
             "incoming",
             cb=dispatcher_mock.mq_adapter.cb,
-            durable="dispatcher-service",
+            durable="durable_name:incoming",
             manual_ack=True,
         )
         # check waiting for the event

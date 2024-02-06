@@ -59,7 +59,19 @@ FLAT_MESSAGE["body"] = BODY
 FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
 
-MSG = Msg(_client="nats", data=json.dumps(FLAT_MESSAGE).encode())
+MSG = Msg(
+    _client="nats",
+    data=json.dumps(FLAT_MESSAGE).encode(),
+    _metadata=Msg.Metadata(
+        sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
+        num_pending=0,
+        num_delivered=1,
+        timestamp=datetime(2023, 11, 9, 11, 15, 52, 616061),
+        stream=f"stream:{SUBSCRIBER_NAME}",
+        consumer=SUBSCRIBER_NAME,
+        domain=None,
+    ),
+)
 MSG_PREFILL = Msg(
     _client="nats",
     data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
@@ -88,22 +100,19 @@ MSG_PREFILL_REDELIVERED = Msg(
 )
 
 MQMESSAGE = MQMessage(
-    subject="",
-    reply="",
-    data={
-        "publisher_name": "udm-listener",
-        "ts": "2023-11-09T11:15:52.616061",
-        "realm": "udm",
-        "topic": "groups/group",
-        "body": {"new": {"New": "Object"}, "old": {"Old": "Object"}},
-    },
-    headers=None,
+    subject="", reply="", data=FLAT_MESSAGE, headers=None, num_delivered=1
 )
+
+MQMESSAGE_PREFILL = deepcopy(MQMESSAGE)
+MQMESSAGE_PREFILL.data = FLAT_PREFILL_MESSAGE
+
+MQMESSAGE_PREFILL_REDELIVERED = deepcopy(MQMESSAGE_PREFILL)
+MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 4
+
 FLAT_MESSAGE_ENCODED = (
     b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "groups/group", '
     b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}}'
 )
-
 
 BASE_KV_OBJ = KeyValue.Entry(
     "KV_bucket",

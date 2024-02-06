@@ -80,8 +80,8 @@ class PrefillPort:
     async def acknowledge_message(self, message: MQMessage):
         await self.mq_adapter.acknowledge_message(message)
 
-    async def negatively_acknowledge_message(self, message: MQMessage):
-        await self.mq_adapter.acknowledge_message(message)
+    async def acknowledge_message_negatively(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_message_negatively(message)
 
-    async def acknowledge_in_progress(self, message: MQMessage):
-        await self.mq_adapter.acknowledge_message(message)
+    async def acknowledge_message_in_progress(self, message: MQMessage):
+        await self.mq_adapter.acknowledge_message_in_progress(message)

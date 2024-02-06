@@ -108,12 +108,13 @@ class MessageService:
         )
         if len(messages) < count:
             self.logger.info("All messages from the prefill queue have been delivered")
-            await self._port.delete_stream(prefill_queue_name)
             messages.extend(
                 await self.get_messages_from_main_queue(
                     subscriber_name, timeout, count - len(messages), pop
                 )
             )
+            if pop:
+                await self._port.delete_stream(prefill_queue_name)
         return messages
 
     async def remove_message(self, msg: MQMessage):

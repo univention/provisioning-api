@@ -19,7 +19,7 @@ class DispatcherService:
         while True:
             self._logger.info("Waiting for the event...")
             message = await self._port.wait_for_event()
-            await self._port.acknowledge_in_progress(message)
+            await self._port.acknowledge_message_in_progress(message)
 
             try:
                 self._logger.info("Received message with content: %s", message.data)
@@ -37,7 +37,7 @@ class DispatcherService:
             except Exception as exc:
                 self._logger.error("Failed to dispatch the event: %s", exc)
 
-                await self._port.negatively_acknowledge_message(
+                await self._port.acknowledge_message_negatively(
                     message
                 )  # TODO: handle failed events
 

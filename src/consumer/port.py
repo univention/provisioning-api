@@ -51,11 +51,6 @@ class ConsumerPort:
     async def delete_prefill_messages(self, subscriber_name: str):
         pass
 
-    async def get_next_message(
-        self, subscriber_name: str, timeout: float, pop: bool
-    ) -> List[MQMessage]:
-        return await self.mq_adapter.get_messages(subscriber_name, timeout, 1, pop)
-
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
     ) -> List[MQMessage]:

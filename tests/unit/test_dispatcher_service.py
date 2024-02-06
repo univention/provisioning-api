@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, call
 import pytest
 
 from dispatcher.service.dispatcher import DispatcherService
-from tests.conftest import MSG, SUBSCRIBER_INFO, REALMS_TOPICS_STR, MESSAGE
+from tests.conftest import SUBSCRIBER_INFO, REALMS_TOPICS_STR, MESSAGE, MQMESSAGE
 
 
 @pytest.fixture
@@ -21,10 +21,8 @@ class TestDispatcherService:
             return_value=[SUBSCRIBER_INFO]
         )
         dispatcher_service._port.wait_for_event = AsyncMock(
-            side_effect=[MSG, Exception("Stop waiting for the new event")]
+            side_effect=[MQMESSAGE, Exception("Stop waiting for the new event")]
         )
-        MSG.in_progress = AsyncMock()
-        MSG.ack = AsyncMock()
 
         with pytest.raises(Exception) as e:
             await dispatcher_service.dispatch_events()
@@ -39,4 +37,8 @@ class TestDispatcherService:
         dispatcher_service._port.send_event_to_consumer_queue.assert_called_once_with(
             SUBSCRIBER_INFO["name"], MESSAGE
         )
+        dispatcher_service._port.acknowledge_message_in_progress.assert_called_once_with(
+            MQMESSAGE
+        )
+        dispatcher_service._port.acknowledge_message.assert_called_once_with(MQMESSAGE)
         assert "Stop waiting for the new event" == str(e.value)
