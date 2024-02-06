@@ -29,28 +29,17 @@ image:
 # -- Configuration of the dispatcher component
 config:
   # -- NATS: host (required if nats.bundled == false)
-  natsHost: "localhost"
+  natsHost: null
   # -- NATS: port (required if nats.bundled == false)
-  natsPort: 4222
+  natsPort: "4222"
 
 
 ## Container deployment probes
 probes:
   liveness:
-    enabled: true
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
-    periodSeconds: 10
-    failureThreshold: 30
-    successThreshold: 1
-
+    enabled: false
   readiness:
-    enabled: true
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
-    periodSeconds: 10
-    failureThreshold: 3
-    successThreshold: 1
+    enabled: false
 
 
 serviceAccount:

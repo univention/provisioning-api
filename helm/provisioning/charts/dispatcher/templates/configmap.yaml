@@ -10,8 +10,8 @@ data:
   NATS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "nats" "chartValues" .Values.nats "context" $.top) }}"
   NATS_PORT: "4222"
   {{- else }}
-  NATS_HOST: {{ required "The parameter \"nats.connection.host\" is required." .Values.nats.connection.host | quote }}
-  NATS_PORT: {{ required "The parameter \"nats.connection.port\" is required." .Values.nats.connection.port | quote }}
+  NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .Values.config.natsHost | quote }}
+  NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
   {{- end }}
 {{ end }}
 {{ end }}

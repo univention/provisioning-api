@@ -27,7 +27,7 @@ dispatcher:
   image:
     tag: "latest"
   config:
-    natsHost: ""
+    natsHost: "localhost"
     natsPort: 4222
 
 
@@ -43,7 +43,8 @@ udm-listener:
     ldapHostDn: "cn=admin,dc=univention-organization,dc=intranet"
     ldapPassword: "secret"
     ldapPort: "389"
-    natsHost: "nats"
+    natsHost: "localhost"
+    natsPort: 4222
     notifierServer: "ldap-notifier"
     tlsMode: "off"
 
