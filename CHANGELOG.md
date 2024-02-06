@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.5...v0.10.0) (2024-02-06)
+
+
+### Features
+
+* add endpoint for creating prefill stream to the Consumer Messages API ([5bad721](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5bad72157216e7eec280dc6448c8b5ed170cabcb))
+* add endpoints for updating queue status, for sending message to the sub's prefill queue, create adapter for Consumer Messages ([c72d1a4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c72d1a4d74a8464d28b1882714ebec719a897090))
+* add sending the request to the prefill, add prefill container, get messages from prefill queue first ([79f4cb3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/79f4cb381e7189c42f9bb679209381df316d2dfa))
+* create prefill deamon, fix Dispatcher, fix subscribing to the queue ([2e6292b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2e6292bca659d72c1ab918727cddfdaa129f855f))
+* handle failed prefill request, delete consumer prefill queue before creation ([8319498](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/831949882e05a819056c6f5564289212d10107e2))
+
+
+### Bug Fixes
+
+* add licenses ([a914113](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a914113bb3b8315c389dd2e3cda96cf0e1db390f))
+* create durable consumer before subscribing to the stream ([e3c6600](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e3c66005205c6183da23aa8e35dbe1e260122e5f))
+* delete unused print ([b4a9688](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b4a96882dfb47c85b917af15cc623397bdc20e2b))
+* do not delete prefill queue if pop is False, fix tests ([5abfb27](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5abfb27b6a803f168aa5e294c97507b09cc5b6ac))
+* fix creating consumer, create stream and consumer during creating new subscriber ([db60a2d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/db60a2dac917dd50fbd1426a2fdf56b3e2b39fd2))
+* fix handling failed prefill requests, add tests for prefill logic ([e1b9c7a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e1b9c7abe79a0f60b9b4ad935c31957bcf7e77c8))
+* fix the method of getting messages ([d22ba30](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d22ba303265dc8f9d2a104f2839edb30cd24ffe1))
+* merge main ([b6c9ef3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b6c9ef3bfbf2c8d89e0486b2c673b0b47587e461))
+* merge main ([324fee8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/324fee8b489f5af8b2b65d170437cd4fb4aaada2))
+* remove dispatcher logic for sending events to the incoming queue ([5dc3ae3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5dc3ae38d13a9c2bcef11b0c49efd1786391d70e))
+* remove nats logic from dispatcher and prefill ([a542f79](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a542f798b7ff213d4e1f3b30864911fbea0b2347))
+* use correct durable name for subscribing to queue ([1362bba](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1362bba9a03731796ae8935b5e39f84252e1ac52))
+
 ## [0.9.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.4...v0.9.5) (2024-02-02)
 
 
