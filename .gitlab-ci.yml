@@ -110,7 +110,7 @@ test-events-and-consumer-api:
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
-    - poetry run pytest --ignore=tests/integration/ --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
+    - poetry run pytest --ignore=tests/integration/ --ignore=tests/e2e --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
