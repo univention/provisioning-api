@@ -3,6 +3,7 @@
 
 import uuid
 import pytest
+import requests
 
 import shared.client
 from shared.models.api import MessageProcessingStatus
@@ -27,7 +28,7 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient):
     await provisioning_client.create_subscription(
         name=subscriber_name,
         realm_topic=REALM_TOPIC,
-        fill_queue=False,
+        request_prefill=False,
     )
 
     yield subscriber_name
@@ -49,6 +50,41 @@ async def test_get_empty_messages(
         name=simple_subscription,
         count=1,
         timeout=1,
+    )
+
+    assert response == []
+
+
+async def test_send_message(
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+):
+    requests.post(
+        "http://localhost:7777/events/v1/events",
+        json={
+            "publisher_name": "consumer_client_tests",
+            "ts": "2024-02-07T09:01:33.835Z",
+            "realm": REALM,
+            "topic": TOPIC,
+            "body": {"foo": "bar"},
+        },
+    )
+
+    response = await provisioning_client.get_subscription_messages(
+        name=simple_subscription,
+        count=1,
+        timeout=1,
+    )
+
+    assert len(response) == 1
+    assert response[0].data["body"]["foo"] == "bar"
+
+
+@pytest.mark.xfail()
+async def test_pop_message(
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+):
+    response = await provisioning_client.get_subscription_messages(
+        name=simple_subscription, count=1, timeout=1, pop=True
     )
 
     assert response == []

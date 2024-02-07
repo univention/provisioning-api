@@ -16,10 +16,10 @@ class AsyncClient:
         self.base_url = base_url
 
     async def create_subscription(
-        self, name: str, realms_topics: List[List[str]], request_prefill: bool = False
+        self, name: str, realm_topic: List[str], request_prefill: bool = False
     ):
         subscriber = shared.models.api.NewSubscriber(
-            name=name, realms_topics=realms_topics, request_prefill=request_prefill
+            name=name, realm_topic=realm_topic, request_prefill=request_prefill
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
@@ -85,7 +85,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/messages/",
+                f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages/",
                 json={"msg": message.model_dump(), "report": report.model_dump()},
             ):
                 # either return nothing or let `.post` throw
