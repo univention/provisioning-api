@@ -29,6 +29,11 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="session")
+def provisioning_base_url(pytestconfig):
+    return pytestconfig.option.provisioning_api_base_url
+
+
+@pytest.fixture(scope="session")
 def udm_admin_username(pytestconfig):
     return pytestconfig.option.udm_admin_username
 

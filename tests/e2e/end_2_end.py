@@ -14,6 +14,7 @@ import ldap3
 REALM = "udm"
 TOPIC = "groups/group"
 PUBLISHER_NAME = "udm-listener"
+# TODO: update to use provisioning_api_base_url  pytest fixture
 BASE_URL = "http://localhost:7777"
 
 

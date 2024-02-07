@@ -59,10 +59,12 @@ async def test_get_empty_messages(
 
 
 async def test_send_message(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: shared.client.AsyncClient,
+    simple_subscription: str,
+    provisioning_base_url: str,
 ):
     requests.post(
-        "http://localhost:7777/events/v1/events",
+        f"{provisioning_base_url}events/v1/events",
         json={
             "publisher_name": "consumer_client_tests",
             "ts": "2024-02-07T09:01:33.835Z",
