@@ -31,11 +31,11 @@ manager = SinkManager()
 )
 async def post_message_status(
     name: str,
-    msg: MQMessage,
+    seq_num_list: List[int],
     port: ConsumerPortDependency,
     report: MessageProcessingStatusReport,
 ):
-    """Report on the processing of the given message."""
+    """Report on the processing of the given messages."""
 
     # TODO: check authorization
 
@@ -44,9 +44,8 @@ async def post_message_status(
     if report.status == MessageProcessingStatus.ok:
         # Modifying the queue interferes with connected WebSocket clients,
         # so disconnect them first.
-        await manager.close(name)
 
-        await service.remove_message(msg)
+        await service.delete_messages(name, seq_num_list)
     else:
         # message was not processed, nothing to do...
         pass
@@ -71,23 +70,6 @@ async def get_subscription_messages(
 
     service = MessageService(port)
     return await service.get_messages(name, timeout, count, pop, skip_prefill)
-
-
-@router.delete(
-    "/messages",
-    status_code=fastapi.status.HTTP_200_OK,
-    tags=["sink"],
-)
-async def remove_message(
-    msg: MQMessage,
-    port: ConsumerPortDependency,
-):
-    """Remove message."""
-
-    # TODO: check authorization
-
-    service = MessageService(port)
-    return await service.remove_message(msg)
 
 
 @router.post(
@@ -141,16 +123,16 @@ async def subscription_websocket(
 
     try:
         while True:
-            nats_mess = await service.get_next_message(name, False, 250)
-            if not nats_mess:
+            mq_msg = await service.get_next_message(name, False, 250)
+            if not mq_msg:
                 continue
 
             message = Message(
-                publisher_name=nats_mess.data["publisher_name"],
-                ts=nats_mess.data["ts"],
-                realm=nats_mess.data["realm"],
-                topic=nats_mess.data["topic"],
-                body=nats_mess.data["body"],
+                publisher_name=mq_msg.data["publisher_name"],
+                ts=mq_msg.data["ts"],
+                realm=mq_msg.data["realm"],
+                topic=mq_msg.data["topic"],
+                body=mq_msg.data["body"],
             )
             await sink.send_message(message)
 
@@ -164,7 +146,7 @@ async def subscription_websocket(
                 break
 
             if report.status == MessageProcessingStatus.ok:
-                await service.remove_message(nats_mess)
+                await service.delete_messages(name, [mq_msg.sequence_number])
             else:
                 logger.error(
                     "%s > WebSocket client reported status: %s", name, report.status

@@ -116,7 +116,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
         if pop:
             for msg in msgs:
-                await self.remove_message(msg)
+                await msg.ack()
 
         msgs_to_return = [self.construct_mq_message(msg) for msg in msgs]
         return msgs_to_return
@@ -141,14 +141,9 @@ class NatsMQAdapter(BaseMQAdapter):
             data=data,
             headers=msg.headers,
             num_delivered=msg.metadata.num_delivered,
+            sequence_number=msg.reply.split(".")[-4],
         )
         return message
-
-    async def remove_message(self, msg: Union[Msg, MQMessage]):
-        """Delete a message from a NATS JetStream."""
-        if isinstance(msg, MQMessage):
-            msg = self.construct_nats_message(msg)
-        await msg.ack()
 
     async def delete_stream(self, stream_name: str):
         """Delete the entire stream for a given name in NATS JetStream."""
@@ -220,3 +215,12 @@ class NatsMQAdapter(BaseMQAdapter):
     async def acknowledge_message_in_progress(self, message: MQMessage):
         msg = self.construct_nats_message(message)
         await msg.in_progress()
+
+    async def delete_message(self, stream_name: str, seq_num: int):
+        self.logger.info("Deleting message from the stream: %s", stream_name)
+        try:
+            await self._js.get_msg(NatsKeys.stream(stream_name), seq_num)
+            await self._js.delete_msg(NatsKeys.stream(stream_name), seq_num)
+            self.logger.info("Message was deleted")
+        except NotFoundError as exc:
+            self.logger.error("Failed to delete the message: %s", exc.description)

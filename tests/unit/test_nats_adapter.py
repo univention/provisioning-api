@@ -126,7 +126,7 @@ class TestNatsMQAdapter:
         assert result is None
 
     async def test_get_messages(self, mock_nats_mq_adapter, mock_fetch):
-        mock_nats_mq_adapter.remove_message = AsyncMock()
+        mock_nats_mq_adapter.delete_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
             SUBSCRIBER_NAME, timeout=5, count=1, pop=False
@@ -141,11 +141,11 @@ class TestNatsMQAdapter:
             stream=NatsKeys.stream(SUBSCRIBER_NAME),
         )
         mock_fetch.assert_called_once_with(1, 5)
-        mock_nats_mq_adapter.remove_message.assert_not_called()
+        mock_nats_mq_adapter.delete_message.assert_not_called()
         assert result == [MQMESSAGE]
 
     async def test_get_messages_with_removing(self, mock_nats_mq_adapter, mock_fetch):
-        mock_nats_mq_adapter.remove_message = AsyncMock()
+        mock_nats_mq_adapter.delete_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
             SUBSCRIBER_NAME, timeout=5, count=1, pop=True
@@ -160,12 +160,12 @@ class TestNatsMQAdapter:
             stream=NatsKeys.stream(SUBSCRIBER_NAME),
         )
         mock_fetch.assert_called_once_with(1, 5)
-        mock_nats_mq_adapter.remove_message.assert_called_once_with(MSG)
+        mock_nats_mq_adapter.delete_message.assert_called_once_with(MSG)
         assert result == [MQMESSAGE]
 
     async def test_get_messages_without_stream(self, mock_nats_mq_adapter, mock_fetch):
         mock_nats_mq_adapter._js.stream_info = AsyncMock(side_effect=NotFoundError)
-        mock_nats_mq_adapter.remove_message = AsyncMock()
+        mock_nats_mq_adapter.delete_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
             SUBSCRIBER_NAME, timeout=5, count=1, pop=False
@@ -176,14 +176,14 @@ class TestNatsMQAdapter:
         )
         mock_nats_mq_adapter._js.pull_subscribe.assert_not_called()
         mock_fetch.assert_not_called()
-        mock_nats_mq_adapter.remove_message.assert_not_called()
+        mock_nats_mq_adapter.delete_message.assert_not_called()
         assert result == []
 
     async def test_get_messages_timeout_error(self, mock_nats_mq_adapter):
         sub = AsyncMock()
         sub.fetch = AsyncMock(side_effect=asyncio.TimeoutError)
         mock_nats_mq_adapter._js.pull_subscribe = AsyncMock(return_value=sub)
-        mock_nats_mq_adapter.remove_message = AsyncMock()
+        mock_nats_mq_adapter.delete_message = AsyncMock()
 
         result = await mock_nats_mq_adapter.get_messages(
             SUBSCRIBER_NAME, timeout=5, count=1, pop=False
@@ -198,14 +198,14 @@ class TestNatsMQAdapter:
             stream=NatsKeys.stream(SUBSCRIBER_NAME),
         )
         sub.fetch.assert_called_once_with(1, 5)
-        mock_nats_mq_adapter.remove_message.assert_not_called()
+        mock_nats_mq_adapter.delete_message.assert_not_called()
         assert result == []
 
     @pytest.mark.parametrize("message", [MQMESSAGE, MSG])
     async def test_remove_message_with_custom_message(
         self, mock_nats_mq_adapter, message
     ):
-        result = await mock_nats_mq_adapter.remove_message(message)
+        result = await mock_nats_mq_adapter.delete_message(message)
 
         MSG.ack.assert_called_with()
         assert result is None

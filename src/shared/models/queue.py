@@ -67,8 +67,9 @@ class UDMMessage(BaseMessage):
 
 
 class MQMessage(BaseModel):
-    subject: str = ""
-    reply: str = ""
-    data: dict = {}
+    subject: str
+    reply: str
+    data: dict
+    num_delivered: int
+    sequence_number: int
     headers: Optional[Dict[str, str]] = None
-    num_delivered: int = 0

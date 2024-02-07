@@ -171,12 +171,12 @@ class TestMessageService:
         assert result == [MESSAGE, MESSAGE]
 
     async def test_remove_message(self, message_service: MessageService):
-        message_service._port.remove_message = AsyncMock()
+        message_service._port.delete_message = AsyncMock()
         msg = MQMessage(data=FLAT_MESSAGE)
 
-        result = await message_service.remove_message(msg)
+        result = await message_service.delete_messages(msg)
 
-        message_service._port.remove_message.assert_called_once_with(msg)
+        message_service._port.delete_message.assert_called_once_with(msg)
         assert result is None
 
     async def test_create_prefill_stream(self, message_service: MessageService):

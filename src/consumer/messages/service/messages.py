@@ -119,13 +119,11 @@ class MessageService:
                 await self._port.delete_stream(prefill_queue_name)
         return messages
 
-    async def remove_message(self, msg: MQMessage):
-        """Remove a message from the subscriber's queue.
+    async def delete_messages(self, stream_name: str, seq_num_list: List[int]):
+        """Delete the messages from the subscriber's queue."""
 
-        :param msg: fetched message.
-        """
-
-        await self._port.remove_message(msg)
+        for seq_num in seq_num_list:
+            await self._port.delete_message(stream_name, seq_num)
 
     async def create_prefill_stream(self, subscriber_name: str):
         # delete the previously created stream if it exists

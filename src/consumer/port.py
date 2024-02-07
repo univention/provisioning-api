@@ -56,8 +56,8 @@ class ConsumerPort:
     ) -> List[MQMessage]:
         return await self.mq_adapter.get_messages(subscriber_name, timeout, count, pop)
 
-    async def remove_message(self, msg: MQMessage):
-        await self.mq_adapter.remove_message(msg)
+    async def delete_message(self, stream_name: str, seq_num: int):
+        await self.mq_adapter.delete_message(stream_name, seq_num)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
