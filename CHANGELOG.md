@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.10.0...v0.10.1) (2024-02-07)
+
+
+### Bug Fixes
+
+* **consumer-client:** add client E2E test including event generation via UDM ([4142f9f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4142f9f6ea17a58ce19130200c0f1a2e8eef50b0))
+* **consumer-client:** add UDM REST API Client as new dev dependency ([51b9fb2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/51b9fb200fec356ea9026d19144f67dccbae1964))
+* **consumer-client:** adjust async client after rebase ([bd19198](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd191982660bccffd6926df79c9a8f57cdd09fbd))
+* **consumer-client:** fix outdated code and add tests ([98df94d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/98df94d91c93cf3dbb8ebf2d948756ef8701a98e))
+* **consumer-client:** fix outdated code and add tests ([f98558b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f98558b5e8087c63214650816e2f42c35cfbedf2))
+
 ## [0.10.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.9.5...v0.10.0) (2024-02-06)
 
 
