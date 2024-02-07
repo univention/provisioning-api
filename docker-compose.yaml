@@ -2,7 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 services:
-  app:
+  events-and-consumer-api:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/events-and-consumer-api:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
@@ -30,6 +31,7 @@ services:
     command: --jetstream -m 8222 -p 4222
 
   dispatcher:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/dispatcher:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
@@ -40,12 +42,13 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
-      CONSUMER_EVENT_HOST: "app"
+      CONSUMER_EVENT_HOST: "events-and-consumer-api"
     depends_on:
       - "nats"
-      - "app"
+      - "events-and-consumer-api"
 
   prefill:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/prefill:1.0.0-pre-feat-bsi-compliance"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
@@ -56,13 +59,14 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
-      CONSUMER_EVENT_HOST: "app"
+      CONSUMER_EVENT_HOST: "events-and-consumer-api"
       UDM_HOST: "udm-rest-api"
     depends_on:
       - "nats"
-      - "app"
+      - "events-and-consumer-api"
 
   udm-listener:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/udm-listener:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
@@ -75,11 +79,15 @@ services:
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
       NOTIFIER_SERVER: "localhost"
-      DEBUG_LEVEL: "4"
+      DEBUG_LEVEL: "3"
       TLS_MODE: "off"
       LDAP_PASSWORD: "univention"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
     network_mode: "host"
+    depends_on:
+      - "nats"
+      - "ldap-server"
+      - "ldap-notifier"
 
   ldap-notifier:
     platform: linux/amd64
@@ -110,18 +118,18 @@ services:
 
 
   test:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/test:${IMAGE_TAG:-latest}"
+    build:
+      context: .
+      dockerfile: docker/test/Dockerfile
+      args:
+        - UCS_BASE_IMAGE_TAG=latest
+    working_dir: /app
     profiles:
       - test
     platform: "linux/amd64"
     environment:
       nats_host: nats
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/events-and-consumer-api-test:${IMAGE_TAG:-latest}
-    build:
-      context: docker/events-and-consumer-api-test
-    volumes:
-      - type: bind
-        source: .
-        target: /app/
 
   # Environment of the pre-commit linter.
   pre-commit:
