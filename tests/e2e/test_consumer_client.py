@@ -6,6 +6,7 @@ import pytest
 import requests
 
 import shared.client
+from shared.client.config import settings
 from shared.models.api import MessageProcessingStatus
 import shared.models.queue
 
@@ -16,10 +17,12 @@ from tests.conftest import (
 )
 from univention.admin.rest.client import UDM
 
+settings.provisioning_api_host = "localhost"
+
 
 @pytest.fixture
 def provisioning_client() -> shared.client.AsyncClient:
-    return shared.client.AsyncClient("http://localhost:7777")
+    return shared.client.AsyncClient()
 
 
 @pytest.fixture

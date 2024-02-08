@@ -11,7 +11,7 @@ FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as build
 ARG WORKDIR
 WORKDIR ${WORKDIR}
 
-ARG USER=dispatcher
+ARG USER=fastapi
 RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
@@ -49,12 +49,6 @@ RUN \
     poetry install --only main
 
 ###############################################
-# Stage 2: test image
-FROM build as test
-
-RUN poetry install --with dev
-
-###############################################
 # Stage 2: final image
 FROM build as final
 ARG WORKDIR
@@ -62,5 +56,4 @@ WORKDIR ${WORKDIR}
 
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
-# run
-ENTRYPOINT ["./.venv/bin/python3", "-m", "src.dispatcher.main"]
+ENTRYPOINT ["poetry", "run", "client"]

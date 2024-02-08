@@ -80,6 +80,13 @@ Install the dependencies:
 poetry install --with dev
 ```
 
+### Run the example client
+
+```sh
+docker compose up example-client
+```
+
+
 ## Tests
 
 ### Unit or Integration tests

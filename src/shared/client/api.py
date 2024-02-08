@@ -5,15 +5,26 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 
+import logging
+
 import shared.models.api
-from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
-from consumer.messages.api import v1_prefix as messages_api_prefix
 from shared.models.queue import MQMessage
 
+from shared.client.config import settings
 
+logger = logging.getLogger(__file__)
+
+
+# TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    def __init__(self, base_url):
-        self.base_url = base_url
+    async def create_subscriptions(
+        self, name: str, realms_topics: List[str], request_prefill: bool = False
+    ):
+        logger.info("creating subscriptions for %s", str(realms_topics))
+        for realm_topic in realms_topics:
+            await self.create_subscription(
+                name, realm_topic.split(":"), request_prefill
+            )
 
     async def create_subscription(
         self, name: str, realm_topic: List[str], request_prefill: bool = False
@@ -26,7 +37,7 @@ class AsyncClient:
             # TODO: do this with propper logging
             print(subscriber.model_dump())
             async with session.post(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions",
+                f"{settings.consumer_registration_url}/subscriptions",
                 json=subscriber.model_dump(),
             ):
                 # either return nothing or let `.post` throw
@@ -35,7 +46,7 @@ class AsyncClient:
     async def cancel_subscription(self, name: str, realm: str, topic: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.delete(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+                f"{settings.consumer_registration_url}/subscriptions/{name}",
                 params={"realm": realm, "topic": topic},
             ):
                 # either return nothing or let `.post` throw
@@ -44,7 +55,7 @@ class AsyncClient:
     async def get_subscription(self, name: str) -> shared.models.subscriber.Subscriber:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}"
+                f"{settings.consumer_registration_url}/subscriptions/{name}"
             ) as response:
                 data = await response.json()
                 return shared.models.subscriber.Subscriber.model_validate(data)
@@ -67,7 +78,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages",
+                f"{settings.consumer_messages_url}/subscriptions/{name}/messages",
                 params=params,
             ) as response:
                 msgs = await response.json()
@@ -85,7 +96,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages/",
+                f"{settings.consumer_messages_url}/subscriptions/{name}/messages/",
                 json={"msg": message.model_dump(), "report": report.model_dump()},
             ):
                 # either return nothing or let `.post` throw
@@ -94,7 +105,7 @@ class AsyncClient:
     async def get_subscriptions(self) -> List[shared.models.subscriber.Subscriber]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions"
+                f"{settings.consumer_registration_url}/subscriptions"
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead
@@ -105,7 +116,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}{subscriptions_api_prefix}/messages",
+                f"{settings.consumer_registration_url}/messages",
                 json=message.model_dump(),
             ):
                 # either return nothing or let `.post` throw
