@@ -17,9 +17,9 @@ A Helm chart for the Univention Portal Provisioning Dispatcher
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"natsHost":"localhost","natsPort":4222}` | Configuration of the dispatcher component |
-| config.natsHost | string | `"localhost"` | NATS: host (required if nats.bundled == false) |
-| config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
+| config | object | `{"natsHost":null,"natsPort":"4222"}` | Configuration of the dispatcher component |
+| config.natsHost | string | `nil` | NATS: host (required if nats.bundled == false) |
+| config.natsPort | string | `"4222"` | NATS: port (required if nats.bundled == false) |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
@@ -31,18 +31,8 @@ A Helm chart for the Univention Portal Provisioning Dispatcher
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
-| probes.liveness.enabled | bool | `true` |  |
-| probes.liveness.failureThreshold | int | `30` |  |
-| probes.liveness.initialDelaySeconds | int | `10` |  |
-| probes.liveness.periodSeconds | int | `10` |  |
-| probes.liveness.successThreshold | int | `1` |  |
-| probes.liveness.timeoutSeconds | int | `3` |  |
-| probes.readiness.enabled | bool | `true` |  |
-| probes.readiness.failureThreshold | int | `3` |  |
-| probes.readiness.initialDelaySeconds | int | `10` |  |
-| probes.readiness.periodSeconds | int | `10` |  |
-| probes.readiness.successThreshold | int | `1` |  |
-| probes.readiness.timeoutSeconds | int | `3` |  |
+| probes.liveness.enabled | bool | `false` |  |
+| probes.readiness.enabled | bool | `false` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
 | securityContext | object | `{}` |  |

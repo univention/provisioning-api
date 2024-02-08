@@ -168,12 +168,15 @@ class NatsMQAdapter(BaseMQAdapter):
     async def cb(self, msg):
         await self._message_queue.put(msg)
 
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.create_stream(subject)
-        await self.create_consumer(subject, deliver_subject)
+    async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
+        await self.create_stream(stream_subject)
+        await self.create_consumer(stream_subject, deliver_subject)
 
         await self._js.subscribe(
-            subject, cb=self.cb, durable=NatsKeys.durable_name(subject), manual_ack=True
+            stream_subject,
+            cb=self.cb,
+            durable=NatsKeys.durable_name(stream_subject),
+            manual_ack=True,
         )
 
     async def wait_for_event(self) -> MQMessage:

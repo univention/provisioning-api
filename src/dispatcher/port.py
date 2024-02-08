@@ -47,8 +47,8 @@ class DispatcherPort:
         result = await self.kv_adapter.get_value(key)
         return result.value.decode("utf-8").split(",") if result else []
 
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
+    async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
+        await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)
 
     async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()

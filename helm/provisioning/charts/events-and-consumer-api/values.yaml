@@ -37,10 +37,9 @@ config:
   # -- FastAPI: disable CORS checks
   corsAll: false
   # -- NATS: host (required if nats.bundled == false)
-  natsHost: "localhost"
+  natsHost: null
   # -- NATS: port (required if nats.bundled == false)
-  natsPort: 4222
-
+  natsPort: "4222"
 
 ## Kubernetes ingress
 ingress:
@@ -121,7 +120,6 @@ service:
   sessionAffinity:
     enabled: false
     timeoutSeconds: 10800
-
 
 nats:
   bundled: true

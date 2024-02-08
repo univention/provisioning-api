@@ -17,12 +17,12 @@ A Helm chart for the Univention Management Stack Provisioning Events and Consume
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"corsAll":false,"debug":true,"logLevel":"INFO","natsHost":"localhost","natsPort":4222,"rootPath":"/univention/provisioning-api"}` | Application specific |
+| config | object | `{"corsAll":false,"debug":true,"logLevel":"INFO","natsHost":null,"natsPort":"4222","rootPath":"/univention/provisioning-api"}` | Application specific |
 | config.corsAll | bool | `false` | FastAPI: disable CORS checks |
 | config.debug | bool | `true` | FastAPI: debug mode |
 | config.logLevel | string | `"INFO"` | Python log level |
-| config.natsHost | string | `"localhost"` | NATS: host (required if nats.bundled == false) |
-| config.natsPort | int | `4222` | NATS: port (required if nats.bundled == false) |
+| config.natsHost | string | `nil` | NATS: host (required if nats.bundled == false) |
+| config.natsPort | string | `"4222"` | NATS: port (required if nats.bundled == false) |
 | config.rootPath | string | `"/univention/provisioning-api"` | FastAPI: webserver root path |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |

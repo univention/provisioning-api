@@ -38,8 +38,8 @@ class PrefillPort:
         await self._consumer_registration_adapter.close()
         await self._consumer_messages_adapter.close()
 
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
+    async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
+        await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)
 
     async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()

@@ -4,21 +4,26 @@
 ---
 {{ include "common.configMap" (dict "top" . "overrides" "udm-listener.configMap") }}
 {{- define "udm-listener.configMap" }}
-{{- with .top.Values.config }}
+{{- with .top }}
 data:
-  CA_CERT: "{{ .caCert }}"
-  CA_CERT_FILE: "{{ .caCertFile }}"
-  DEBUG_LEVEL: "{{ .debugLevel }}"
-  LDAP_BASE_DN: "{{ .ldapBaseDn }}"
-  LDAP_PASSWORD: "{{ .ldapPassword }}"
-  LDAP_PASSWORD_FILE: "{{ .ldapPasswordFile }}"
-  LDAP_HOST: "{{ .ldapHost }}"
-  LDAP_HOST_DN: "{{ .ldapHostDn }}"
-  LDAP_PORT: "{{ .ldapPort }}"
-  NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .natsHost | quote }}
-  NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .natsPort | quote }}
-  NOTIFIER_SERVER: "{{ default .ldapHost .notifierServer }}"
-  TLS_MODE: "{{ .tlsMode }}"
+  CA_CERT: "{{ .Values.config.caCert }}"
+  CA_CERT_FILE: "{{ .Values.config.caCertFile }}"
+  DEBUG_LEVEL: "{{ .Values.config.debugLevel }}"
+  LDAP_BASE_DN: "{{ .Values.config.ldapBaseDn }}"
+  LDAP_PASSWORD: "{{ .Values.config.ldapPassword }}"
+  LDAP_PASSWORD_FILE: "{{ .Values.config.ldapPasswordFile }}"
+  LDAP_HOST: "{{ .Values.config.ldapHost }}"
+  LDAP_HOST_DN: "{{ .Values.config.ldapHostDn }}"
+  LDAP_PORT: "{{ .Values.config.ldapPort }}"
+  {{- if .Values.nats.bundled }}
+  NATS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "nats" "chartValues" .Values.nats "context" $.top) }}"
+  NATS_PORT: "4222"
+  {{- else }}
+  NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .Values.config.natsHost | quote }}
+  NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
+  {{- end }}
+  NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
+  TLS_MODE: "{{ .Values.config.tlsMode }}"
 {{ end }}
 {{ end }}
 ...

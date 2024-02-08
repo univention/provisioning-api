@@ -68,6 +68,8 @@ class MessageService:
         :param bool skip_prefill: List messages, even if the pre-filling is not done?
         """
 
+        # TODO: Timeout of 0 leads to internal server error
+
         sub_service = SubscriptionService(self._port)
         queue_status = await sub_service.get_subscription_queue_status(
             subscription_name
