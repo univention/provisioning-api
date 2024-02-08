@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, ClassVar, Dict, Optional
 
 from pydantic import BaseModel, Field, field_serializer
@@ -73,3 +74,8 @@ class MQMessage(BaseModel):
     num_delivered: int
     sequence_number: int
     headers: Optional[Dict[str, str]] = None
+
+
+class QueueType(str, Enum):
+    main = "main"
+    prefill = "prefill"

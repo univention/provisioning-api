@@ -14,8 +14,8 @@ from tests.conftest import (
     TOPIC,
     PUBLISHER_NAME,
     BODY,
-    FLAT_MESSAGE,
     SUBSCRIBER_NAME,
+    REPORT,
 )
 from shared.models.subscriber import FillQueueStatus
 from consumer.subscriptions.api import v1_prefix as api_prefix
@@ -92,18 +92,12 @@ class TestConsumer:
         assert data[0]["data"]["body"] == BODY
         assert data[0]["data"]["publisher_name"] == PUBLISHER_NAME
 
-    async def test_delete_message(
+    async def test_post_message_status(
         self,
         messages_client: httpx.AsyncClient,
     ):
-        nats_msg = {
-            "subject": SUBSCRIBER_NAME,
-            "reply": f"$JS.ACK.stream:{SUBSCRIBER_NAME}.durable_name:{SUBSCRIBER_NAME}.4.8.19.1699615014739091916.0",
-            "data": FLAT_MESSAGE,
-            "headers": {"Nats-Expected-Stream": f"stream:{SUBSCRIBER_NAME}"},
-        }
         response = await messages_client.post(
             f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages",
-            json={"msg": nats_msg, "report": {"status": "ok"}},
+            json=REPORT.model_dump(),
         )
         assert response.status_code == 200

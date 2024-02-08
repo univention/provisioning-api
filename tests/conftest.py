@@ -14,8 +14,12 @@ from consumer.port import ConsumerPort
 from consumer.main import app
 from events.port import EventsPort
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from shared.models import Message
-from shared.models.queue import MQMessage
+from shared.models import (
+    Message,
+    MessageProcessingStatusReport,
+    MessageProcessingStatus,
+)
+from shared.models.queue import MQMessage, QueueType
 from shared.models.queue import PrefillMessage
 
 REALM = "udm"
@@ -25,6 +29,11 @@ PUBLISHER_NAME = "udm-listener"
 REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
 SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+REPLY = f"$JS.ACK.stream:{SUBSCRIBER_NAME}.durable_name:{SUBSCRIBER_NAME}.1.1.1.1699615014739091916.0"
+
+REPORT = MessageProcessingStatusReport(
+    status=MessageProcessingStatus.ok, messages_seq_num=[1], queue_type=QueueType.main
+)
 
 SUBSCRIBER_INFO = {
     "name": SUBSCRIBER_NAME,
@@ -61,6 +70,7 @@ FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
 
 MSG = Msg(
     _client="nats",
+    reply=REPLY,
     data=json.dumps(FLAT_MESSAGE).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
@@ -74,6 +84,7 @@ MSG = Msg(
 )
 MSG_PREFILL = Msg(
     _client="nats",
+    reply=REPLY,
     data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
@@ -87,6 +98,7 @@ MSG_PREFILL = Msg(
 )
 MSG_PREFILL_REDELIVERED = Msg(
     _client="nats",
+    reply=REPLY,
     data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
@@ -100,7 +112,12 @@ MSG_PREFILL_REDELIVERED = Msg(
 )
 
 MQMESSAGE = MQMessage(
-    subject="", reply="", data=FLAT_MESSAGE, headers=None, num_delivered=1
+    subject="",
+    reply=REPLY,
+    data=FLAT_MESSAGE,
+    headers=None,
+    num_delivered=1,
+    sequence_number=1,
 )
 
 MQMESSAGE_PREFILL = deepcopy(MQMESSAGE)

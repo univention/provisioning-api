@@ -5,6 +5,8 @@ import enum
 from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
+from shared.models.queue import QueueType
+
 
 class NewSubscriber(BaseModel):
     """Request to register a subscriber."""
@@ -40,4 +42,10 @@ class MessageProcessingStatusReport(BaseModel):
 
     status: MessageProcessingStatus = Field(
         description="Whether the message was processed by the subscriber."
+    )
+    messages_seq_num: List[int] = Field(
+        description="A list of sequence numbers representing the processed messages."
+    )
+    queue_type: QueueType = Field(
+        description="The type of queue from which messages should be removed"
     )

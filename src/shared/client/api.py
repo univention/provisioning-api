@@ -8,7 +8,7 @@ import aiohttp
 import shared.models.api
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
-from shared.models.queue import MQMessage
+from shared.models.queue import QueueType
 
 
 class AsyncClient:
@@ -78,15 +78,18 @@ class AsyncClient:
     async def set_message_status(
         self,
         name: str,
-        message: MQMessage,
+        messages_seq_num: List[int],
+        queue_type: QueueType,
         status: shared.models.api.MessageProcessingStatus,
     ):
-        report = shared.models.api.MessageProcessingStatusReport(status=status)
+        report = shared.models.api.MessageProcessingStatusReport(
+            status=status, messages_seq_num=messages_seq_num, queue_type=queue_type
+        )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
                 f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages/",
-                json={"msg": message.model_dump(), "report": report.model_dump()},
+                json=report.model_dump(),
             ):
                 # either return nothing or let `.post` throw
                 pass

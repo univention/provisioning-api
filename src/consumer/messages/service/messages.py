@@ -7,8 +7,8 @@ from typing import List, Optional
 from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import FillQueueStatus
-from shared.models.queue import MQMessage, Message
+from shared.models import FillQueueStatus, MessageProcessingStatusReport
+from shared.models.queue import MQMessage, Message, QueueType
 
 
 class PrefillKeys:
@@ -119,10 +119,17 @@ class MessageService:
                 await self._port.delete_stream(prefill_queue_name)
         return messages
 
-    async def delete_messages(self, stream_name: str, seq_num_list: List[int]):
+    async def delete_messages(
+        self, subscription_name: str, report: MessageProcessingStatusReport
+    ):
         """Delete the messages from the subscriber's queue."""
 
-        for seq_num in seq_num_list:
+        if report.queue_type == QueueType.prefill:
+            stream_name = PrefillKeys.queue_name(subscription_name)
+        else:
+            stream_name = subscription_name
+
+        for seq_num in report.messages_seq_num:
             await self._port.delete_message(stream_name, seq_num)
 
     async def create_prefill_stream(self, subscriber_name: str):
