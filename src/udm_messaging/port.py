@@ -5,6 +5,8 @@ import contextlib
 import json
 from typing import Optional
 
+from fastapi.security import HTTPBasicCredentials
+
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.adapters.event_adapter import EventAdapter
 from shared.adapters.udm_adapter import UDMAdapter
@@ -21,8 +23,11 @@ class UDMMessagingPort:
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
+        # FIXME: create credentials for this service
+        credentials = HTTPBasicCredentials(username="admin", password="provisioning")
+
         port = UDMMessagingPort()
-        await port.kv_adapter.connect()
+        await port.kv_adapter.connect(credentials)
         await port._event_adapter.connect()
         try:
             yield port

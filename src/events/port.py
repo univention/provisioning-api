@@ -4,6 +4,7 @@
 from typing import Annotated
 
 from fastapi import Depends
+from fastapi.security import HTTPBasicCredentials
 
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.models import Message
@@ -15,8 +16,11 @@ class EventsPort:
 
     @staticmethod
     async def port_dependency():
+        # FIXME: create credentials for this service
+        credentials = HTTPBasicCredentials(username="admin", password="provisioning")
+
         port = EventsPort()
-        await port.mq_adapter.connect()
+        await port.mq_adapter.connect(credentials)
         try:
             yield port
         finally:

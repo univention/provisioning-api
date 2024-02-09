@@ -5,6 +5,8 @@ from typing import List
 import contextlib
 import logging
 
+from fastapi.security import HTTPBasicCredentials
+
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
@@ -23,9 +25,12 @@ class DispatcherPort:
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
+        # FIXME: create credentials for this service
+        credentials = HTTPBasicCredentials(username="admin", password="provisioning")
+
         port = DispatcherPort()
-        await port.mq_adapter.connect()
-        await port.kv_adapter.connect()
+        await port.mq_adapter.connect(credentials)
+        await port.kv_adapter.connect(credentials)
         await port._consumer_registration_adapter.connect()
         await port._consumer_messages_adapter.connect()
 

@@ -4,6 +4,7 @@
 from abc import ABC, abstractmethod
 from typing import Union, Optional
 
+from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
@@ -15,7 +16,7 @@ class BaseKVStoreAdapter(ABC):
     """The base class for key-value store adapters."""
 
     @abstractmethod
-    async def connect(self):
+    async def connect(self, credentials: HTTPBasicCredentials):
         pass
 
     @abstractmethod
@@ -43,7 +44,7 @@ class BaseMQAdapter(ABC):
     """The base class for message queue adapters."""
 
     @abstractmethod
-    async def connect(self):
+    async def connect(self, credentials: HTTPBasicCredentials):
         pass
 
     @abstractmethod

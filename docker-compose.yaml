@@ -27,7 +27,10 @@ services:
       - "4222:4222" # Client connections
       - "6222:6222" # Route connections
       - "8222:8222" # HTTP monitoring port
-    command: --jetstream -m 8222 -p 4222
+    command: --jetstream -m 8222 -p 4222 -c /etc/nats/nats.conf
+    volumes:
+      - ./config/:/etc/nats
+
 
   dispatcher:
     build:

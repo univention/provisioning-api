@@ -3,6 +3,8 @@
 
 import contextlib
 
+from fastapi.security import HTTPBasicCredentials
+
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
@@ -21,9 +23,12 @@ class PrefillPort:
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
+        # FIXME: create credentials for this service
+        credentials = HTTPBasicCredentials(username="admin", password="provisioning")
+
         port = PrefillPort()
         await port._udm_adapter.connect()
-        await port.mq_adapter.connect()
+        await port.mq_adapter.connect(credentials)
         await port._consumer_registration_adapter.connect()
         await port._consumer_messages_adapter.connect()
 
