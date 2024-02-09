@@ -59,7 +59,7 @@ class TestSubscriptionService:
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
 
         with pytest.raises(ValueError) as e:
-            await sub_service.get_subscription(SUBSCRIPTION_NAME)
+            await sub_service.get_subscription_info(SUBSCRIPTION_NAME)
 
         sub_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME)
         assert "Subscription was not found." == str(e.value)

@@ -10,9 +10,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .messages.api import router as dispatcher_api_router
-from .subscriptions.api import router as consumer_api_router
+from .messages.api import router as messages_api_router
+from .subscriptions.api import router as subscriptions_api_router
 from events.api import router as events_api_router
+from admin.api import router as admin_api_router
 from shared.config import settings
 
 # TODO split up logging
@@ -54,9 +55,10 @@ if settings.cors_all:
         allow_headers=["*"],
     )
 
-app.include_router(dispatcher_api_router)
-app.include_router(consumer_api_router)
+app.include_router(messages_api_router)
+app.include_router(subscriptions_api_router)
 app.include_router(events_api_router)
+app.include_router(admin_api_router)
 
 
 @app.exception_handler(RequestValidationError)

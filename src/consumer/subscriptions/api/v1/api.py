@@ -7,21 +7,9 @@ import fastapi
 from consumer.port import ConsumerPortDependency
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import FillQueueStatus, Subscription, NewSubscription
+from shared.models import FillQueueStatus, Subscription
 
 router = fastapi.APIRouter()
-
-
-@router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
-async def get_subscriptions(
-    port: ConsumerPortDependency,
-) -> List[Subscription]:
-    """Return a list of all known subscriptions."""
-
-    # TODO: check authorization
-
-    service = SubscriptionService(port)
-    return await service.get_subscriptions()
 
 
 @router.get(
@@ -52,30 +40,6 @@ async def get_subscription(name: str, port: ConsumerPortDependency) -> Subscript
         return await service.get_subscription(name)
     except ValueError as err:
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
-
-
-@router.post(
-    "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["sink"]
-)
-async def create_subscription(
-    subscription: NewSubscription,
-    port: ConsumerPortDependency,
-):
-    """Create a new subscription."""
-
-    # TODO: check authorization for `new_sub.subscription_name` / `new_sub.realms_topics`
-
-    service = SubscriptionService(port)
-
-    try:
-        await service.create_subscription(subscription)
-    except ValueError as err:
-        raise fastapi.HTTPException(
-            fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
-        )
-
-    if subscription.request_prefill:
-        await service.send_request_to_prefill(subscription)
 
 
 @router.delete(
