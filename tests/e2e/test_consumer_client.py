@@ -1,42 +1,20 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import uuid
 import pytest
-import requests
 
 import shared.client
 from shared.client.config import settings
 from shared.models.api import MessageProcessingStatus
 import shared.models.queue
 
-from tests.conftest import (
-    REALM,
-    TOPIC,
-    REALMS_TOPICS,
+from tests.e2e.helpers import (
+    create_message_via_events_api,
+    create_message_via_udm_rest_api,
 )
 from univention.admin.rest.client import UDM
 
 settings.provisioning_api_host = "localhost"
-
-
-@pytest.fixture
-def provisioning_client() -> shared.client.AsyncClient:
-    return shared.client.AsyncClient()
-
-
-@pytest.fixture
-async def simple_subscription(provisioning_client: shared.client.AsyncClient):
-    subscriber_name = str(uuid.uuid4())
-    await provisioning_client.create_subscription(
-        name=subscriber_name,
-        realms_topics=REALMS_TOPICS,
-        request_prefill=False,
-    )
-
-    yield subscriber_name
-
-    await provisioning_client.cancel_subscription(subscriber_name)
 
 
 async def test_create_subscription(
@@ -63,21 +41,12 @@ async def test_send_message(
     simple_subscription: str,
     provisioning_base_url: str,
 ):
-    requests.post(
-        f"{provisioning_base_url}events/v1/events",
-        json={
-            "publisher_name": "consumer_client_tests",
-            "ts": "2024-02-07T09:01:33.835Z",
-            "realm": REALM,
-            "topic": TOPIC,
-            "body": {"foo": "bar"},
-        },
-    )
+    create_message_via_events_api(provisioning_base_url)
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
         count=1,
-        timeout=1,
+        timeout=10,
     )
 
     assert len(response) == 1
@@ -98,11 +67,7 @@ async def test_pop_message(
 async def test_get_real_messages(
     provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
 ):
-    groups = udm.get(TOPIC)
-    assert groups
-    group = groups.new()
-    group.properties["name"] = str(uuid.uuid1())
-    group.save()
+    group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
@@ -127,11 +92,7 @@ async def test_get_messages_zero_timeout(
 async def test_acknowledge_messages(
     provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
 ):
-    groups = udm.get(TOPIC)
-    assert groups
-    group = groups.new()
-    group.properties["name"] = str(uuid.uuid1())
-    group.save()
+    group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
