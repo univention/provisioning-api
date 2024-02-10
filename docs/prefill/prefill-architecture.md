@@ -1,3 +1,5 @@
+# Prefill documentation
+
 ## Consumer Registration Flow
 
 ### Without Prefill
@@ -6,8 +8,8 @@ sequenceDiagram
     actor Consumer
     participant ConsumerRegAPI as Consumer Registration API
     participant ConsumerMessagesAPI as Consumer Messages API
-    participant NatsQ as Nats Queue
-    participant NatsKV as Nats Key Value
+    participant NatsQ as MOM Backend (NatsQ)
+    participant NatsKV as Consumer Registry (NatsKV)
     participant Dispatcher
 
 
@@ -30,14 +32,20 @@ sequenceDiagram
     NatsKV-->ConsumerMessagesAPI: Return Consumer Object from DB
     ConsumerMessagesAPI->>NatsQ: Subscribe to events
     NatsQ-->>ConsumerMessagesAPI: Stream queue events
-    ConsumerMessagesAPI-->>Consumer: Stream live events
     NatsKV-->>Dispatcher: New Subscription
     activate Dispatcher
     deactivate NatsKV
     Dispatcher-->>NatsQ: Start dispatching in `final queue`
+    ConsumerMessagesAPI-->>Consumer: Stream live events
     deactivate Dispatcher
     deactivate ConsumerMessagesAPI
 ```
+
+*1 No prefill for this example. What happens if a new Consumer is written to the key-value store, but no queues have been created yet. Currently the queue is created when the first message is sent by the dispatcher.
+Solutions:
+- The create new subscription request is only answered with a 200 OK if the needed queue(s) have been created and object has been persisted into the KV Store.
+If any of this failed, the request has to be retried
+- The ConsumerManagementAPI needs to retry for a bit and then fail if no queues are there. The Queue might be uninitialized until it's first message, which is an undefined time span.
 
 ### With Prefill
 ```mermaid
@@ -45,15 +53,14 @@ sequenceDiagram
     actor Consumer
     participant ConsumerRegAPI as Consumer Registration API
     participant ConsumerMessagesAPI as Consumer Messages API
-    participant NatsQ as Nats Queue
-    participant NatsKV as Nats Key Value
+    participant NatsQ as MOM Backend (NatsQ)
+    participant NatsKV as Consumer Registry (NatsKV)
     participant PrefillService as Prefill Service
     participant Dispatcher
 
 
     Consumer->>ConsumerRegAPI: create new subscription
     activate ConsumerRegAPI
-    Note over ConsumerRegAPI: see *1
     ConsumerRegAPI->>NatsQ: Create queue(s)
     activate NatsQ
     NatsQ-->>ConsumerRegAPI: ACK
@@ -67,7 +74,6 @@ sequenceDiagram
     NatsKV-->>ConsumerRegAPI: ACK
     ConsumerRegAPI-->>Consumer: ACK
     deactivate ConsumerRegAPI
-    Note over NatsKV: see *1
     Consumer->>ConsumerMessagesAPI: Open Queue Stream
     activate ConsumerMessagesAPI
     ConsumerMessagesAPI->>NatsKV: Get Consumer Object from DB
@@ -79,7 +85,7 @@ sequenceDiagram
     activate Dispatcher
     Dispatcher->>Dispatcher: Start dispatching in `final queue`
     PrefillService->>NatsQ: Starts Prefilling `prefill queue`
-    PrefillService->>ConsumerRegAPI: Prefill complete message
+    PrefillService->>ConsumerRegAPI: Prefill complete message Prefill(subscription-id)
     deactivate PrefillService
     activate ConsumerRegAPI
     ConsumerRegAPI->>NatsKV: Updates subscription object
@@ -99,12 +105,6 @@ sequenceDiagram
 
 All necessary data about consumers is persisted in the `Nats` key-value store. The Consumer Registration API has write-access to it while the Consumer Management API has read-access.
 
-*1 No prefill for this example. What happens if a new Consumer is written to the key-value store, but no queues have been created yet. Currently the queue is created when the first message is sent by the dispatcher.
-Solutions:
-- The create new subscription request is only answered with a 200 OK if the needed queue(s) have been created and object has been persisted into the KV Store.
-If any of this failed, the request has to be retried
-- The ConsumerManagementAPI needs to retry for a bit and then fail if no queues are there. The Queue might be uninitialized until it's first message, which is an undefined time span.
-
 *2 The Prefill queue needs to be blocked. It should appear to the consumer as if the queue is empty. No matter how the queues are managed in the background.
 
 ## Simplified Prefill Flow
@@ -115,13 +115,11 @@ It's advantages are:
 - Simpler to develop
 - Simpler to debug
 - Less risky compared to the Kubernetes Operator solution.
--
-
 
 ```mermaid
 sequenceDiagram
     participant ConsumerRegAPI as Consumer Registration API
-    participant NatsQ as Nats Queue
+    participant NatsQ as MOM Backend (NatsQ)
     participant PrefillWorker as Prefill Worker
 
     PrefillWorker->>NatsQ: Subscribe to events
@@ -133,9 +131,9 @@ sequenceDiagram
     activate PrefillWorker
     deactivate NatsQ
     PrefillWorker->>PrefillWorker: Do the actual Prefill
-    PrefillWorker->>NatsQ: In progress acknowledgement
-    PrefillWorker->>ConsumerRegAPI: Queue message acknowledged
-    PrefillWorker->>NatsQ: Final acknowledgement
+    PrefillWorker->>NatsQ: In progress acknowledgement (reset retry timeout)
+    PrefillWorker->>ConsumerRegAPI: Prefill complete message Prefill(subscription-id)
+    PrefillWorker->>NatsQ: Remove prefill message from queue
     deactivate PrefillWorker
     deactivate ConsumerRegAPI
 ```
@@ -143,7 +141,7 @@ sequenceDiagram
 `create worker task` means that the Consumer Registration API creates a new task message in a dedicated Prefill Worker queue.
 This persists the prefill request and enables automatic retries.
 
-## Prefill Flow Utilizing Kubernetes Jobs
+## Possible future alternative: Prefill Flow Utilizing Kubernetes Jobs
 
 ### TLDR
 
