@@ -6,6 +6,7 @@ import pytest
 import requests
 
 import shared.client
+from shared.config import settings
 from shared.models.api import MessageProcessingStatus
 import shared.models.queue
 
@@ -25,11 +26,17 @@ def provisioning_client() -> shared.client.AsyncClient:
 @pytest.fixture
 async def simple_subscription(provisioning_client: shared.client.AsyncClient):
     subscriber_name = str(uuid.uuid4())
-    await provisioning_client.create_subscription(
-        name=subscriber_name,
-        realms_topics=REALMS_TOPICS,
-        request_prefill=False,
+
+    response = requests.post(
+        "http://localhost:7777/admin/v1/subscriptions",
+        json={
+            "name": subscriber_name,
+            "realms_topics": REALMS_TOPICS,
+            "request_prefill": False,
+        },
+        auth=(settings.admin_username, settings.admin_password),
     )
+    assert response.status_code == 201
 
     yield subscriber_name
 

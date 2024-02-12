@@ -103,7 +103,7 @@ def handle_any_message(msg: shared.client.Message):
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("base_url", help="URL of the provisioning dispatcher")
-    parser.add_argument("realm_topic", nargs="+", help="[realm]:[topic]")
+    parser.add_argument("realms_topics", nargs="+", help="[realm]:[topic]")
     parser.add_argument(
         "--name", "-n", default=str(uuid.uuid4()), help="Name of the subscriber"
     )
@@ -111,10 +111,11 @@ async def main():
     args = parser.parse_args()
 
     name = args.name
-    realms_topics = [entry.split(":") for entry in args.realm_topic]
 
     client = shared.client.AsyncClient(args.base_url)
-    await client.create_subscription(name, realms_topics, args.fill)
+
+    # realms_topics = [entry.split(":") for entry in args.realms_topics]
+    # create a subscription through the admin
 
     async with client.stream(name) as stream:
         while True:

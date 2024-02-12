@@ -10,6 +10,7 @@ from fastapi.security import HTTPBasicCredentials
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
+from shared.config import settings
 from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,9 @@ class DispatcherPort:
     @contextlib.asynccontextmanager
     async def port_context():
         # FIXME: create credentials for this service
-        credentials = HTTPBasicCredentials(username="admin", password="provisioning")
+        credentials = HTTPBasicCredentials(
+            username=settings.admin_username, password=settings.admin_password
+        )
 
         port = DispatcherPort()
         await port.mq_adapter.connect(credentials)

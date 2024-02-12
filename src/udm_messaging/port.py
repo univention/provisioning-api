@@ -10,6 +10,7 @@ from fastapi.security import HTTPBasicCredentials
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.adapters.event_adapter import EventAdapter
 from shared.adapters.udm_adapter import UDMAdapter
+from shared.config import settings
 
 from shared.models import Message
 
@@ -24,7 +25,9 @@ class UDMMessagingPort:
     @contextlib.asynccontextmanager
     async def port_context():
         # FIXME: create credentials for this service
-        credentials = HTTPBasicCredentials(username="admin", password="provisioning")
+        credentials = HTTPBasicCredentials(
+            username=settings.admin_username, password=settings.admin_password
+        )
 
         port = UDMMessagingPort()
         await port.kv_adapter.connect(credentials)
