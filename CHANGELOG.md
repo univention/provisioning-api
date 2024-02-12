@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.10.1...v0.11.0) (2024-02-12)
+
+
+### Features
+
+* **client:** Containerize example client ([c9f8f86](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c9f8f86acd663741e9807485fe45390aa253d503))
+
 ## [0.10.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.10.0...v0.10.1) (2024-02-07)
 
 
