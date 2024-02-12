@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
 
@@ -22,7 +22,10 @@ class AsyncClient:
         self.base_url = base_url
 
     async def create_subscription(
-        self, name: str, realms_topics: List[List[str]], request_prefill: bool = False
+        self,
+        name: str,
+        realms_topics: List[Tuple[str, str]],
+        request_prefill: bool = False,
     ):
         subscriber = NewSubscription(
             name=name, realms_topics=realms_topics, request_prefill=request_prefill

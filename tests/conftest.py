@@ -24,7 +24,7 @@ TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = "udm-listener"
 REALM_TOPIC = [REALM, TOPIC]
-REALMS_TOPICS = [[REALM, TOPIC]]
+REALMS_TOPICS = [(REALM, TOPIC)]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 

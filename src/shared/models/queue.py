@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Optional, List
+from typing import Any, ClassVar, Dict, Optional, List, Tuple
 
 from pydantic import BaseModel, Field, field_serializer
 
@@ -40,8 +40,8 @@ class PrefillMessage(BaseMessage):
         description="The name of the subscription that requested the prefilling queue"
     )
 
-    realms_topics: List[List[str]] = Field(
-        description="A list of `realm:topic` that this subscriber subscribes to, e.g. [[`udm:users/user`]].",
+    realms_topics: List[Tuple[str, str]] = Field(
+        description="A list of `(realm, topic)` that this subscriber subscribes to, e.g. [('udm', 'users/user')]."
     )
 
 
