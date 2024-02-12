@@ -135,13 +135,14 @@ class NatsMQAdapter(BaseMQAdapter):
     @staticmethod
     def construct_mq_message(msg: Msg) -> MQMessage:
         data = json.loads(msg.data)
+        sequence_number = msg.reply.split(".")[-4]
         message = MQMessage(
             subject=msg.subject,
             reply=msg.reply,
             data=data,
             headers=msg.headers,
             num_delivered=msg.metadata.num_delivered,
-            sequence_number=msg.reply.split(".")[-4],
+            sequence_number=sequence_number,
         )
         return message
 
