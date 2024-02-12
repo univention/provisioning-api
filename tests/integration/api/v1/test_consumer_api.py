@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import uuid
-
 import httpx
 import pytest
 
@@ -45,18 +43,6 @@ async def messages_client():
 
 @pytest.mark.anyio
 class TestConsumer:
-    async def test_create_subscription(self, subscriptions_client: httpx.AsyncClient):
-        name = str(uuid.uuid4())
-        response = await subscriptions_client.post(
-            f"{api_prefix}/subscriptions",
-            json={
-                "name": name,
-                "realms_topics": [["foo", "bar"]],
-                "request_prefill": False,
-            },
-        )
-        assert response.status_code == 201
-
     async def test_get_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.get(
             f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}"

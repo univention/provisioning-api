@@ -18,6 +18,7 @@ from tests.conftest import (
     MockNatsMQAdapter,
     MockNatsKVAdapter,
     FLAT_MESSAGE_ENCODED,
+    CREDENTIALS,
 )
 
 
@@ -42,10 +43,13 @@ def mock_fetch(mock_nats_mq_adapter):
 @pytest.mark.anyio
 class TestNatsKVAdapter:
     async def test_connect(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.connect()
+        result = await mock_nats_kv_adapter.connect(CREDENTIALS)
 
         mock_nats_kv_adapter._nats.connect.assert_called_once_with(
-            ["nats://localhost:4222"]
+            ["nats://localhost:4222"],
+            user=CREDENTIALS.username,
+            password=CREDENTIALS.password,
+            max_reconnect_attempts=5,
         )
         mock_nats_kv_adapter._js.create_key_value.assert_called_once()
         assert result is None
@@ -102,10 +106,13 @@ class TestNatsKVAdapter:
 @pytest.mark.anyio
 class TestNatsMQAdapter:
     async def test_connect(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.connect()
+        result = await mock_nats_mq_adapter.connect(CREDENTIALS)
 
         mock_nats_mq_adapter._nats.connect.assert_called_once_with(
-            ["nats://localhost:4222"]
+            ["nats://localhost:4222"],
+            user=CREDENTIALS.username,
+            password=CREDENTIALS.password,
+            max_reconnect_attempts=5,
         )
         assert result is None
 

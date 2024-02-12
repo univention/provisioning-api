@@ -7,9 +7,12 @@ from datetime import datetime
 from unittest.mock import AsyncMock
 
 import pytest
+from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
+
+from admin.port import AdminPort
 from consumer.port import ConsumerPort
 from consumer.main import app
 from consumer.subscriptions.service.subscription import SUBSCRIPTIONS
@@ -137,6 +140,8 @@ kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
 kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
 
+CREDENTIALS = HTTPBasicCredentials(username="user", password="password")
+
 
 class FakeMessageQueue(AsyncMock):
     @classmethod
@@ -182,6 +187,13 @@ async def events_port_fake_dependency() -> EventsPort:
     return port
 
 
+async def admin_port_fake_dependency() -> AdminPort:
+    port = AdminPort()
+    port.mq_adapter = MockNatsMQAdapter()
+    port.kv_adapter = MockNatsKVAdapter()
+    return port
+
+
 class MockNatsMQAdapter(NatsMQAdapter):
     def __init__(self):
         super().__init__()
@@ -206,10 +218,11 @@ def anyio_backend():
 @pytest.fixture(autouse=True)
 def override_dependencies():
     # Override original port
-    app.dependency_overrides[
-        ConsumerPort.port_dependency
-    ] = consumer_port_fake_dependency
-    app.dependency_overrides[EventsPort.port_dependency] = events_port_fake_dependency
+    app.dependency_overrides = {
+        ConsumerPort.port_dependency: consumer_port_fake_dependency,
+        EventsPort.port_dependency: events_port_fake_dependency,
+        AdminPort.port_dependency: admin_port_fake_dependency,
+    }
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests
     app.dependency_overrides.clear()

@@ -18,8 +18,6 @@ async def get_subscriptions(
 ) -> List[Subscription]:
     """Return a list of all known subscriptions."""
 
-    # TODO: check authorization
-
     service = AdminService(port)
     return await service.get_subscriptions()
 
@@ -32,8 +30,6 @@ async def create_subscription(
     port: AdminPortDependency,
 ):
     """Create a new subscription."""
-
-    # TODO: check authorization for `new_sub.subscription_name` / `new_sub.realms_topics`
 
     service = AdminService(port)
 
