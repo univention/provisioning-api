@@ -8,7 +8,7 @@ from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import FillQueueStatus, MessageProcessingStatusReport
-from shared.models.queue import MQMessage, Message, QueueType
+from shared.models.queue import Message, PublisherName, ProvisioningMessage
 
 
 class PrefillKeys:
@@ -36,7 +36,7 @@ class MessageService:
         pop: bool,
         timeout: float = 5,
         skip_prefill: Optional[bool] = False,
-    ) -> Optional[MQMessage]:
+    ) -> Optional[ProvisioningMessage]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_name: Name of the subscriber.
@@ -57,7 +57,7 @@ class MessageService:
         count: int,
         pop: bool,
         skip_prefill: Optional[bool],
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         """Return messages from a given queue.
 
         :param str subscriber_name: Name of the subscriber.
@@ -92,7 +92,7 @@ class MessageService:
 
     async def get_messages_from_main_queue(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         self.logger.info(
             "Getting the messages for the '%s' from the main queue", subscriber_name
         )
@@ -100,7 +100,7 @@ class MessageService:
 
     async def get_messages_from_prefill_queue(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         self.logger.info(
             "Getting the messages for the '%s' from the prefill queue", subscriber_name
         )
@@ -124,7 +124,7 @@ class MessageService:
     ):
         """Delete the messages from the subscriber's queue."""
 
-        if report.queue_type == QueueType.prefill:
+        if report.publisher_name == PublisherName.udm_pre_fill:
             stream_name = PrefillKeys.queue_name(subscription_name)
         else:
             stream_name = subscription_name

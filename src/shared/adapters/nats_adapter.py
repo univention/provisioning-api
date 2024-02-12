@@ -13,7 +13,7 @@ from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from shared.models.queue import BaseMessage
+from shared.models.queue import BaseMessage, ProvisioningMessage
 from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
 from shared.models.queue import MQMessage
@@ -95,7 +95,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def get_messages(
         self, subject: str, timeout: float, count: int, pop: bool
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         try:
@@ -118,8 +118,22 @@ class NatsMQAdapter(BaseMQAdapter):
             for msg in msgs:
                 await msg.ack()
 
-        msgs_to_return = [self.construct_mq_message(msg) for msg in msgs]
+        msgs_to_return = [self.construct_provisioning_message(msg) for msg in msgs]
         return msgs_to_return
+
+    @staticmethod
+    def construct_provisioning_message(msg: Msg) -> ProvisioningMessage:
+        data = json.loads(msg.data)
+        sequence_number = msg.reply.split(".")[-4]
+        message = ProvisioningMessage(
+            sequence_number=sequence_number,
+            publisher_name=data["publisher_name"],
+            ts=data["ts"],
+            realm=data["realm"],
+            topic=data["topic"],
+            body=data["body"],
+        )
+        return message
 
     def construct_nats_message(self, message: MQMessage) -> Msg:
         data = message.data

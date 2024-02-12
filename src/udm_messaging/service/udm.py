@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional
 
 from shared.config import settings
-from shared.models import Message
+from shared.models import Message, PublisherName
 from udm_messaging.port import UDMMessagingPort
 
 import json
@@ -46,7 +46,7 @@ class UDMMessagingService(univention.admin.uldap.access):
         object_type = new_obj["objectType"] if new_obj else old_obj["objectType"]
 
         message = Message(
-            publisher_name="udm-listener",
+            publisher_name=PublisherName.udm_listener,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,

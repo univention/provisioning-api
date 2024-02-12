@@ -11,9 +11,11 @@ from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
 
+from shared.models import PublisherName
+
 REALM = "udm"
 TOPIC = "groups/group"
-PUBLISHER_NAME = "udm-listener"
+PUBLISHER_NAME = PublisherName.udm_listener
 BASE_URL = "http://localhost:7777"
 
 

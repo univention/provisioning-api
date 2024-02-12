@@ -1,17 +1,25 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
 from datetime import datetime
+
 from enum import Enum
 from typing import Any, ClassVar, Dict, Optional
 
 from pydantic import BaseModel, Field, field_serializer
 
 
+class PublisherName(str, Enum):
+    udm_listener = "udm-listener"
+    udm_pre_fill = "udm-pre-fill"
+    consumer_registration = "consumer-registration"
+
+
 class BaseMessage(BaseModel):
     """The common header properties of each message."""
 
-    publisher_name: str = Field(description="The name of the publisher of the message.")
+    publisher_name: PublisherName = Field(
+        description="The name of the publisher of the message."
+    )
 
     ts: datetime = Field(
         description="The timestamp when the message was received by the dispatcher."
@@ -76,6 +84,7 @@ class MQMessage(BaseModel):
     headers: Optional[Dict[str, str]] = None
 
 
-class QueueType(str, Enum):
-    main = "main"
-    prefill = "prefill"
+class ProvisioningMessage(Message):
+    sequence_number: int = Field(
+        description="The sequence number associated with the message."
+    )

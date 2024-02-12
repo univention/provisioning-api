@@ -19,20 +19,22 @@ from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
 )
-from shared.models.queue import MQMessage, QueueType
+from shared.models.queue import MQMessage, PublisherName, ProvisioningMessage
 from shared.models.queue import PrefillMessage
 
 REALM = "udm"
 TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
-PUBLISHER_NAME = "udm-listener"
+PUBLISHER_NAME = PublisherName.udm_listener
 REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
 SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 REPLY = f"$JS.ACK.stream:{SUBSCRIBER_NAME}.durable_name:{SUBSCRIBER_NAME}.1.1.1.1699615014739091916.0"
 
 REPORT = MessageProcessingStatusReport(
-    status=MessageProcessingStatus.ok, messages_seq_num=[1], queue_type=QueueType.main
+    status=MessageProcessingStatus.ok,
+    messages_seq_num=[1],
+    publisher_name=PublisherName.udm_listener,
 )
 
 SUBSCRIBER_INFO = {
@@ -54,6 +56,14 @@ PREFILL_MESSAGE = PrefillMessage(
     realm=REALM,
     topic=TOPIC,
     subscriber_name=SUBSCRIBER_NAME,
+)
+PROVISIONING_MESSAGE = ProvisioningMessage(
+    publisher_name=PUBLISHER_NAME,
+    ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
+    realm=REALM,
+    topic=TOPIC,
+    body=BODY,
+    sequence_number=1,
 )
 
 FLAT_BASE_MESSAGE = {

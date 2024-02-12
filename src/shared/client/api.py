@@ -8,7 +8,7 @@ import aiohttp
 import shared.models.api
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
-from shared.models.queue import QueueType
+from shared.models import PublisherName
 
 
 class AsyncClient:
@@ -56,7 +56,7 @@ class AsyncClient:
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
         force: Optional[bool] = None,
-    ) -> List[shared.models.queue.MQMessage]:
+    ) -> List[shared.models.queue.ProvisioningMessage]:
         _params = {
             "count": count,
             "timeout": timeout,
@@ -72,18 +72,21 @@ class AsyncClient:
             ) as response:
                 msgs = await response.json()
                 return [
-                    shared.models.queue.MQMessage.model_validate(msg) for msg in msgs
+                    shared.models.queue.ProvisioningMessage.model_validate(msg)
+                    for msg in msgs
                 ]
 
     async def set_message_status(
         self,
         name: str,
         messages_seq_num: List[int],
-        queue_type: QueueType,
+        publisher_name: PublisherName,
         status: shared.models.api.MessageProcessingStatus,
     ):
         report = shared.models.api.MessageProcessingStatusReport(
-            status=status, messages_seq_num=messages_seq_num, queue_type=queue_type
+            status=status,
+            messages_seq_num=messages_seq_num,
+            publisher_name=publisher_name,
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:

@@ -7,5 +7,5 @@ from .api import (
     Event,  # noqa: F401
     NewSubscriber,  # noqa: F401
 )
-from .queue import Message  # noqa: F401
+from .queue import Message, PublisherName, ProvisioningMessage  # noqa: F401
 from .subscriber import FillQueueStatus, Subscriber  # noqa: F401

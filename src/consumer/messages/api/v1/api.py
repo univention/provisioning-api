@@ -16,7 +16,7 @@ from shared.models import (
     MessageProcessingStatus,
 )
 
-from shared.models.queue import MQMessage, Message
+from shared.models.queue import Message, ProvisioningMessage
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ async def get_subscription_messages(
     timeout: float = 5,
     pop: bool = False,
     skip_prefill: bool = False,
-) -> List[MQMessage]:
+) -> List[ProvisioningMessage]:
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
@@ -122,18 +122,11 @@ async def subscription_websocket(
 
     try:
         while True:
-            mq_msg = await service.get_next_message(name, False, 250)
-            if not mq_msg:
+            message = await service.get_next_message(name, False, 250)
+            if not message:
                 continue
 
-            message = Message(
-                publisher_name=mq_msg.data["publisher_name"],
-                ts=mq_msg.data["ts"],
-                realm=mq_msg.data["realm"],
-                topic=mq_msg.data["topic"],
-                body=mq_msg.data["body"],
-            )
-            await sink.send_message(message)
+            await sink.send_message(Message.model_validate(message))
 
             reply = await websocket.receive_text()
             try:
@@ -145,7 +138,7 @@ async def subscription_websocket(
                 break
 
             if report.status == MessageProcessingStatus.ok:
-                await service.delete_messages(name, [mq_msg.sequence_number])
+                await service.delete_messages(name, report)
             else:
                 logger.error(
                     "%s > WebSocket client reported status: %s", name, report.status

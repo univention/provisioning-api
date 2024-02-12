@@ -11,7 +11,7 @@ from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.models import Message
 
-from shared.models.queue import MQMessage
+from shared.models.queue import ProvisioningMessage
 from shared.models.queue import PrefillMessage
 
 
@@ -53,7 +53,7 @@ class ConsumerPort:
 
     async def get_messages(
         self, subscriber_name: str, timeout: float, count: int, pop: bool
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         return await self.mq_adapter.get_messages(subscriber_name, timeout, count, pop)
 
     async def delete_message(self, stream_name: str, seq_num: int):

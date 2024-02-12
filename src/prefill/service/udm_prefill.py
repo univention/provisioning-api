@@ -8,7 +8,7 @@ from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from consumer.subscriptions.service.subscription import match_subscription
 from shared.models import FillQueueStatus
-from shared.models.queue import PrefillMessage, Message, MQMessage
+from shared.models.queue import PrefillMessage, Message, MQMessage, PublisherName
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class UDMPreFill(PreFillService):
         obj = await self._port.get_object(url)
 
         message = Message(
-            publisher_name="udm-pre-fill",
+            publisher_name=PublisherName.udm_pre_fill,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,

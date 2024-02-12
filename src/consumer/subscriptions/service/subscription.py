@@ -9,7 +9,7 @@ from typing import List, Optional
 from consumer.port import ConsumerPort
 from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscriber, NewSubscriber, FillQueueStatus
-from shared.models.queue import PrefillMessage
+from shared.models.queue import PrefillMessage, PublisherName
 
 manager = SinkManager()
 
@@ -209,7 +209,7 @@ class SubscriptionService:
     async def send_request_to_prefill(self, subscriber: NewSubscriber):
         self.logger.info("Sending the request to prefill")
         message = PrefillMessage(
-            publisher_name="consumer-registration",
+            publisher_name=PublisherName.consumer_registration,
             ts=datetime.now(),
             realm=subscriber.realm_topic[0],
             topic=subscriber.realm_topic[1],

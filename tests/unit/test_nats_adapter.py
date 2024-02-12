@@ -18,6 +18,7 @@ from tests.conftest import (
     MockNatsMQAdapter,
     MockNatsKVAdapter,
     FLAT_MESSAGE_ENCODED,
+    PROVISIONING_MESSAGE,
 )
 
 
@@ -142,7 +143,7 @@ class TestNatsMQAdapter:
         )
         mock_fetch.assert_called_once_with(1, 5)
         mock_nats_mq_adapter.delete_message.assert_not_called()
-        assert result == [MQMESSAGE]
+        assert result == [PROVISIONING_MESSAGE]
 
     async def test_get_messages_with_removing(self, mock_nats_mq_adapter, mock_fetch):
         mock_nats_mq_adapter.delete_message = AsyncMock()
@@ -161,7 +162,7 @@ class TestNatsMQAdapter:
         )
         mock_fetch.assert_called_once_with(1, 5)
         MSG.ack.assert_called_with()
-        assert result == [MQMESSAGE]
+        assert result == [PROVISIONING_MESSAGE]
 
     async def test_get_messages_without_stream(self, mock_nats_mq_adapter, mock_fetch):
         mock_nats_mq_adapter._js.stream_info = AsyncMock(side_effect=NotFoundError)
