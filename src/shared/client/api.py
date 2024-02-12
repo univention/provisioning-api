@@ -8,7 +8,6 @@ import aiohttp
 import shared.models.api
 from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
-from shared.models import PublisherName
 
 
 class AsyncClient:
@@ -76,23 +75,11 @@ class AsyncClient:
                     for msg in msgs
                 ]
 
-    async def set_message_status(
-        self,
-        name: str,
-        messages_seq_num: List[int],
-        publisher_name: PublisherName,
-        status: shared.models.api.MessageProcessingStatus,
-    ):
-        report = shared.models.api.MessageProcessingStatusReport(
-            status=status,
-            messages_seq_num=messages_seq_num,
-            publisher_name=publisher_name,
-        )
-
+    async def set_message_status(self, name: str, reports: List[dict]):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
                 f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages/",
-                json=report.model_dump(),
+                json=reports,
             ):
                 # either return nothing or let `.post` throw
                 pass

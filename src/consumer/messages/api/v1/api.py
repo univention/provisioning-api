@@ -29,9 +29,9 @@ manager = SinkManager()
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
-async def post_message_status(
+async def post_messages_status(
     subscription_name: str,
-    report: MessageProcessingStatusReport,
+    reports: List[MessageProcessingStatusReport],
     port: ConsumerPortDependency,
 ):
     """Report on the processing of the given messages."""
@@ -40,14 +40,7 @@ async def post_message_status(
 
     service = MessageService(port)
 
-    if report.status == MessageProcessingStatus.ok:
-        # Modifying the queue interferes with connected WebSocket clients,
-        # so disconnect them first.
-
-        await service.delete_messages(subscription_name, report)
-    else:
-        # message was not processed, nothing to do...
-        pass
+    await service.post_message_status(subscription_name, reports)
 
 
 @router.get(
@@ -138,7 +131,7 @@ async def subscription_websocket(
                 break
 
             if report.status == MessageProcessingStatus.ok:
-                await service.delete_messages(name, report)
+                await service.delete_message(name, report)
             else:
                 logger.error(
                     "%s > WebSocket client reported status: %s", name, report.status

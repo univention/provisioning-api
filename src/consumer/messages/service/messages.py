@@ -7,7 +7,11 @@ from typing import List, Optional
 from consumer.port import ConsumerPort
 
 from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import FillQueueStatus, MessageProcessingStatusReport
+from shared.models import (
+    FillQueueStatus,
+    MessageProcessingStatusReport,
+    MessageProcessingStatus,
+)
 from shared.models.queue import Message, PublisherName, ProvisioningMessage
 
 
@@ -119,7 +123,20 @@ class MessageService:
                 await self._port.delete_stream(prefill_queue_name)
         return messages
 
-    async def delete_messages(
+    async def post_message_status(
+        self, subscription_name: str, reports: List[MessageProcessingStatusReport]
+    ):
+        for report in reports:
+            if report.status == MessageProcessingStatus.ok:
+                # Modifying the queue interferes with connected WebSocket clients,
+                # so disconnect them first.
+
+                await self.delete_message(subscription_name, report)
+            else:
+                # message was not processed, nothing to do...
+                continue
+
+    async def delete_message(
         self, subscription_name: str, report: MessageProcessingStatusReport
     ):
         """Delete the messages from the subscriber's queue."""
@@ -129,8 +146,7 @@ class MessageService:
         else:
             stream_name = subscription_name
 
-        for seq_num in report.messages_seq_num:
-            await self._port.delete_message(stream_name, seq_num)
+        await self._port.delete_message(stream_name, report.message_seq_num)
 
     async def create_prefill_stream(self, subscriber_name: str):
         # delete the previously created stream if it exists

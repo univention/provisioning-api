@@ -99,6 +99,6 @@ class TestConsumer:
     ):
         response = await messages_client.post(
             f"{messages_api_prefix}/subscriptions/{SUBSCRIBER_NAME}/messages",
-            json=REPORT.model_dump(),
+            json=[REPORT.model_dump()],
         )
         assert response.status_code == 200

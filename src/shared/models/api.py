@@ -43,8 +43,8 @@ class MessageProcessingStatusReport(BaseModel):
     status: MessageProcessingStatus = Field(
         description="Whether the message was processed by the subscriber."
     )
-    messages_seq_num: List[int] = Field(
-        description="A list of sequence numbers representing the processed messages."
+    message_seq_num: int = Field(
+        description="A sequence number representing the processed message."
     )
     publisher_name: PublisherName = Field(
         description="The type of queue from which messages should be removed"

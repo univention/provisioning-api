@@ -33,7 +33,7 @@ REPLY = f"$JS.ACK.stream:{SUBSCRIBER_NAME}.durable_name:{SUBSCRIBER_NAME}.1.1.1.
 
 REPORT = MessageProcessingStatusReport(
     status=MessageProcessingStatus.ok,
-    messages_seq_num=[1],
+    message_seq_num=1,
     publisher_name=PublisherName.udm_listener,
 )
 

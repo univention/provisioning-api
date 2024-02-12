@@ -172,7 +172,7 @@ class TestMessageService:
     async def test_remove_message(self, message_service: MessageService):
         message_service._port.delete_message = AsyncMock()
 
-        result = await message_service.delete_messages(SUBSCRIBER_NAME, REPORT)
+        result = await message_service.delete_message(SUBSCRIBER_NAME, REPORT)
 
         message_service._port.delete_message.assert_called_once_with(SUBSCRIBER_NAME, 1)
         assert result is None
