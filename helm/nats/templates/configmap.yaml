@@ -1,0 +1,72 @@
+{{/*
+SPDX-FileCopyrightText: 2024 Univention GmbH
+SPDX-License-Identifier: AGPL-3.0-only
+*/}}
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: "{{ printf "%s-config" (include "common.names.fullname" .) }}"
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  nats.conf: |
+    {
+      server_name: $SERVER_NAME
+      pid_file: "/var/run/nats.pid"
+      port: 4222
+      http_port: 8222
+      lame_duck_duration: {{ .Values.config.lame_duck_duration | required ".Values.config.lame_duck_duration is required" }}
+      lame_duck_grace_period: {{ .Values.config.lame_duck_grace_period | required ".Values.config.lame_duck_grace_period is required" }}
+      {{- if gt (.Values.config.cluster.replicas | int) 1 }}
+      cluster {
+        name: $CLUSTER_NAME
+        cluster_advertise: $CLUSTER_ADVERTISE
+        port: 6222
+        routes: [
+          $ROUTES
+        ]
+        {{- if .Values.config.tls.enabled }}
+        tls {
+          cert_file: {{ .Values.config.tls.cert_file | required ".Values.config.tls.cert_file is required" }}
+          key_file: {{ .Values.config.tls.key_file | required ".Values.config.tls.key_file is required" }}
+          ca_file: {{ .Values.config.tls.ca_file | required ".Values.config.tls.ca_file is required" }}
+          verify: {{ .Values.config.tls.verify | required ".Values.config.tls.verify is required" }}
+          verify_and_map: {{ .Values.config.tls.verify_and_map | required ".Values.config.tls.verify_and_map is required" }}
+        }
+        {{- end }}
+        connect_retries: {{ .Values.config.cluster.connect_retries | required ".Values.config.cluster.connect_retries is required" }}
+        {{- if .Values.config.cluster.authorization.enabled }}
+        {{ include "nats.cluster.authorization" . | nindent 8}}
+        {{- end }}
+      }
+      {{- end }}
+      {{- if .Values.config.jetstream.enabled }}
+      jetstream {
+        max_file_store: {{ .Values.config.jetstream.fileStore.pvc.size | required ".Values.config.jetstream.fileStore.pvc.size is required" }}
+        max_memory_store: {{ .Values.config.jetstream.memoryStore.size | required ".Values.config.jetstream.memoryStore.size is required" }}
+        store_dir: "/data"
+      }
+      {{- end }}
+      {{- if .Values.config.tls.enabled }}
+      tls {
+        cert_file: {{ .Values.config.tls.cert_file | required ".Values.config.tls.cert_file is required" }}
+        key_file: {{ .Values.config.tls.key_file | required ".Values.config.tls.key_file is required" }}
+        ca_file: {{ .Values.config.tls.ca_file | required ".Values.config.tls.ca_file is required" }}
+        verify: {{ .Values.config.tls.verify | required ".Values.config.tls.verify is required" }}
+        verify_and_map: {{ .Values.config.tls.verify_and_map | required ".Values.config.tls.verify_and_map is required" }}
+      }
+      {{- end }}
+      {{- if .Values.config.authorization.enabled }}
+      {{ include "nats.authorization" . | nindent 6}}
+      {{- end }}
+
+    }
+...

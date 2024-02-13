@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+config:
+  cluster:
+    replicas: 1
+  authorization:
+    enabled: true
+    token: "$NATS_TOKEN"
+
+extraEnvVars:
+  - name: NATS_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: nats-credentials
+        key: client_token
+
+extraSecrets:
+  - name: nats-credentials
+    stringData:
+      client_token: "clientsecret"
