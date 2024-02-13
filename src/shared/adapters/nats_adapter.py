@@ -11,6 +11,7 @@ from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
+from nats.errors import NoServersError
 from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
@@ -51,7 +52,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
                 password=credentials.password,
                 max_reconnect_attempts=MAX_RECONNECT_ATTEMPTS,
             )
-        except Exception:
+        except NoServersError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
@@ -101,7 +102,7 @@ class NatsMQAdapter(BaseMQAdapter):
                 max_reconnect_attempts=MAX_RECONNECT_ATTEMPTS,
             )
 
-        except Exception:
+        except NoServersError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
