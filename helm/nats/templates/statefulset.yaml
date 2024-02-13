@@ -1,0 +1,248 @@
+{{/*
+SPDX-FileCopyrightText: 2024 Univention GmbH
+SPDX-License-Identifier: AGPL-3.0-only
+*/}}
+---
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: "StatefulSet"
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: "{{ printf "%s-headless" (include "common.names.fullname" .) }}"
+  replicas: {{ .Values.config.cluster.replicas }}
+  podManagementPolicy: {{ .Values.podManagementPolicy | default "OrderedReady" }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: "nats-data"
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.config.jetstream.fileStore.pvc.size | quote }}
+        {{- if .Values.persistence.storageClassName }}
+        storageClassName: {{ .Values.persistence.storageClassName | quote }}
+        {{- end }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "common.labels.matchLabels" . | nindent 6 }}
+  updateStrategy: {{ include "common.tplvalues.render" (dict "value" .Values.updateStrategy "context" .) | nindent 4 }}
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "common.labels.standard" . | nindent 8 }}
+    spec:
+      {{- if or .Values.imagePullSecrets .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.global.imagePullSecrets }}
+        - name: "{{ . }}"
+        {{- end }}
+        {{- range .Values.imagePullSecrets }}
+        - name: "{{ . }}"
+        {{- end }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity: {{- include "common.tplvalues.render" (dict "value" .Values.affinity "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "nats.serviceAccountName" . }}
+      {{- end }}
+      {{- if .Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- end }}
+      containers:
+        - name: "nats"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ coalesce .Values.nats.image.registry .Values.global.imageRegistry }}/{{ .Values.nats.image.repository }}:{{ .Values.nats.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.nats.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          env:
+            - name: SERVER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CLUSTER_ADVERTISE
+              value: $(SERVER_NAME).nats.$(NAMESPACE).svc.cluster.local
+            - name: CLUSTER_NAME
+              value: {{ include "common.names.fullname" . | quote }}
+          {{- with .Values.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if gt (.Values.config.cluster.replicas | int) 1 }}
+          {{- $auth := "" }}
+          {{- if .Values.config.cluster.authorization.enabled }}
+            {{- $auth = printf "%s:$(%s)@" .Values.config.cluster.authorization.user .Values.config.cluster.authorization.passwordVariable -}}
+          {{- end }}
+            - name: ROUTES
+              value: {{ "" }}
+          {{- range $i, $_ := until (int .Values.config.cluster.replicas) }}
+            {{- printf "nats://%s%s-%d.%s:%d," $auth (include "nats.podNamePrefix" $) $i (include "nats.headlessServiceName" $) 6222 }}
+          {{- end }}
+          {{- end }}
+          args:
+            - --config
+            - /etc/nats-config/nats.conf
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe "context" .) | nindent 12 }}
+          ports:
+            {{- range $key, $value := .Values.service.ports }}
+            - name: {{ $key }}
+              containerPort: {{ $value.containerPort }}
+              protocol: {{ $value.protocol }}
+            {{- end }}
+          {{- if .Values.resources }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources "context" .) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: var-run-volume
+              mountPath: /var/run
+            - name: config-volume
+              mountPath: /etc/nats-config
+            {{- if .Values.config.jetstream.enabled }}
+            - name: nats-data
+              mountPath: {{ .Values.config.jetstream.fileStore.dir | quote}}
+            {{- end }}
+            {{- if .Values.config.tls.enabled }}
+            - name: {{ printf "%s-tls-volume" (include "common.names.fullname" .) }}
+              mountPath: /certificates
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
+            {{- end }}
+        {{- if .Values.reloader.enabled }}
+        - name: "reloader"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ coalesce .Values.reloader.image.registry .Values.global.imageRegistry }}/{{ .Values.reloader.image.repository }}:{{ .Values.reloader.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.reloader.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          env:
+            - name: SERVER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          args:
+            - -pid
+            - /var/run/nats.pid
+            - -config
+            - /etc/nats-config/nats.conf
+          {{- if .Values.reloader.resources }}
+          resources:
+          {{- with .Values.reloader.resources }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nats-config
+            - name: var-run-volume
+              mountPath: /var/run
+        {{- end }}
+        {{- if .Values.natsBox.enabled }}
+        - name: "nats-box"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ coalesce .Values.natsBox.image.registry .Values.global.imageRegistry }}/{{ .Values.natsBox.image.repository }}:{{ .Values.natsBox.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.natsBox.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          workingDir: /home/nats
+          env:
+            - name: SERVER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          {{- with .Values.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+            {{- if .Values.config.authorization.enabled }}
+            {{- if .Values.config.authorization.token }}
+            - name: NATS_URL
+              value: "{{ printf "nats://$(NATS_TOKEN)@$(SERVER_NAME).%s-headless.$(NAMESPACE).svc.cluster.local:4222" (include "common.names.fullname" .) }}"
+            {{- else }}
+            - name: NATS_URL
+              value: "{{ printf "nats://$(SERVER_NAME).%s-headless.$(NAMESPACE).svc.cluster.local:4222" (include "common.names.fullname" .) }}"
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.tls.enabled }}
+            - name: NATS_CERT
+              value: {{ .Values.config.tls.cert_file }}
+            - name: NATS_KEY
+              value: {{ .Values.config.tls.key_file }}
+            - name: NATS_CA
+              value: {{ .Values.config.tls.ca_file }}
+            {{- end }}
+          args:
+            - sh
+            - -c
+            - 'trap true INT TERM; sleep infinity & wait'
+          {{- if .Values.reloader.resources }}
+          resources:
+          {{- with .Values.natsBox.resources }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.config.tls.enabled }}
+            - name: {{ printf "%s-tls-volume" (include "common.names.fullname" .) }}
+              mountPath: /certificates
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
+            {{- end }}
+        {{- end }}
+      volumes:
+        - name: "var-run-volume"
+          emptyDir: {}
+        - name: "config-volume"
+          configMap:
+            name: {{ printf "%s-config" (include "common.names.fullname" .) }}
+            defaultMode: 420
+        {{- if .Values.config.tls.enabled }}
+        - name: {{ printf "%s-tls-volume" (include "common.names.fullname" .) }}
+          secret:
+            defaultMode: 0400
+            secretName: {{ .Values.config.tls.certificateSecret | quote }}
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
+        {{- end }}
+...

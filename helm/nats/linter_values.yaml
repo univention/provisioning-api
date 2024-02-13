@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+resources:
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+  requests:
+    cpu: "100m"
+    memory: "64Mi"
+reloader:
+  resources:
+    limits:
+      cpu: "1"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "64Mi"
+natsBox:
+  resources:
+    limits:
+      cpu: "1"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "64Mi"
+
+config:
+  cluster:
+    replicas: 3
+    authorization:
+      enabled: true
+      user: "clusterauth"
+      passwordVariable: "NATS_CLUSTER_PASSWORD"
+  authorization:
+    enabled: true
+    users:
+      - user: "admin"
+        password: "$NATS_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
+
+extraEnvVars:
+  - name: NATS_USER
+    value: "admin"
+
+  - name: NATS_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: nats-credentials
+        key: admin_password
+
+  - name: NATS_CLUSTER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: nats-credentials
+        key: cluster_password
+
+extraSecrets:
+  - name: nats-credentials
+    stringData:
+      admin_password: "nimda"
+      cluster_password: "secret"

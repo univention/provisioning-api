@@ -1,0 +1,440 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+# The global properties are used to configure multiple charts at once.
+global:
+  # -- Container registry address.
+  imageRegistry: "docker.io"
+
+  # -- Credentials to fetch images from private registry.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  #
+  # imagePullSecrets:
+  #   - "docker-registry"
+  imagePullSecrets: []
+
+  # -- Define an ImagePullPolicy.
+  #
+  # Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+  #
+  # "IfNotPresent" => The image is pulled only if it is not already present locally.
+  # "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to
+  #             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached
+  #             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved
+  #             digest, and uses that image to launch the container.
+  # "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the
+  #            kubelet attempts to start the container; otherwise, startup fails.
+  imagePullPolicy: "IfNotPresent"
+
+# -- Additional custom annotations to add to all deployed objects.
+additionalAnnotations: {}
+
+# -- Additional custom labels to add to all deployed objects.
+additionalLabels: {}
+
+# -- Affinity for pod assignment.
+# Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+# Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set.
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - nats
+        topologyKey: kubernetes.io/hostname
+
+# Security Context.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+containerSecurityContext:
+  # -- Enable container privileged escalation.
+  allowPrivilegeEscalation: false
+  # -- Security capabilities for container.
+  capabilities:
+    drop:
+      - "ALL"
+  # -- Enable security context.
+  enabled: true
+  # -- Process user id.
+  runAsUser: 1000
+  # -- Process group id.
+  runAsGroup: 1000
+  # Set Seccomp profile.
+  seccompProfile:
+    # -- Disallow custom Seccomp profile by setting it to RuntimeDefault.
+    type: "RuntimeDefault"
+  # -- Mounts the container's root filesystem as read-only.
+  readOnlyRootFilesystem: true
+  # -- Run container as a user.
+  runAsNonRoot: true
+
+# -- Array with extra environment variables to add to containers.
+#
+# extraEnvVars:
+#   - name: FOO
+#     value: "bar"
+extraEnvVars: []
+
+# -- Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates)
+extraSecrets: []
+
+# -- Optionally specify an extra list of additional volumes.
+extraVolumes: []
+
+# -- Optionally specify an extra list of additional volumeMounts.
+extraVolumeMounts: []
+
+# -- Provide a name to substitute for the full names of resources.
+# fullnameOverride: ""
+
+# -- Credentials to fetch images from private registry.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+#
+# imagePullSecrets:
+#   - "docker-registry"
+imagePullSecrets: []
+
+# -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
+imagePullPolicy: "IfNotPresent"
+
+# -- Lifecycle to automate configuration before or after startup.
+lifecycleHooks:
+  preStop:
+    exec:
+      command:
+        - nats-server
+        - -sl=ldm=/var/run/nats.pid
+
+#  Configure extra options for containers probes.
+livenessProbe:
+  # -- Number of failed executions until container is terminated.
+  failureThreshold: 3
+  # -- Delay after container start until LivenessProbe is executed.
+  initialDelaySeconds: 10
+  # -- Time between probe executions.
+  periodSeconds: 30
+  # -- Number of successful executions after failed ones until container is marked healthy.
+  successThreshold: 1
+  # -- Timeout for command return.
+  timeoutSeconds: 5
+  httpGet:
+    path: /healthz?js-enabled-only=true
+    port: monitor
+    scheme: HTTP
+
+# -- String to partially override release name.
+nameOverride: ""
+
+# -- Node labels for pod assignment.
+# Ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+# Database persistence settings.
+persistence:
+  # -- The volume access modes, some of "ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod".
+  #
+  # "ReadWriteOnce" => The volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can
+  #                    allow multiple pods to access the volume when the pods are running on the same node.
+  # "ReadOnlyMany" => The volume can be mounted as read-only by many nodes.
+  # "ReadWriteMany" => The volume can be mounted as read-write by many nodes.
+  # "ReadWriteOncePod" => The volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if
+  #                       you want to ensure that only one pod across whole cluster can read that PVC or write to it.
+  #
+  accessModes:
+    - "ReadWriteOnce"
+
+  # -- Annotations for the PVC.
+  annotations: {}
+
+  # -- Custom PVC data source.
+  dataSource: {}
+
+  # -- Enable data persistence (true) or use temporary storage (false).
+  enabled: true
+
+  # -- Use an already existing claim.
+  existingClaim: ""
+
+  # -- Labels for the PVC.
+  labels: {}
+
+  # -- The volume size with unit.
+  size: "10Gi"
+
+  # -- The (storage) class of PV.
+  storageClass: ""
+
+  # -- Selector to match an existing Persistent Volume (this value is evaluated as a template).
+  #
+  # selector:
+  #   matchLabels:
+  #     app: my-app
+  #
+  selector: {}
+
+# -- Pod Annotations.
+# Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+
+# -- Pod Labels.
+# Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+# Pod Security Context.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext:
+  # -- Enable security context.
+  enabled: true
+
+  # -- If specified, all processes of the container are also part of the supplementary group.
+  fsGroup: 1000
+
+  # -- Change ownership and permission of the volume before being exposed inside a Pod.
+  fsGroupChangePolicy: "Always"
+
+  # -- Allow binding to ports below 1024 without root access.
+  sysctls:
+    - name: "net.ipv4.ip_unprivileged_port_start"
+      value: "1"
+
+# -- Pod management policy. Parallel means that the pods are created in parallel and not in sequence.
+# Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+podManagementPolicy: "Parallel"
+
+#  Configure extra options for containers probes.
+readinessProbe:
+  # -- Delay after container start until ReadinessProbe is executed.
+  initialDelaySeconds: 10
+  # -- Number of failed executions until container is terminated.
+  failureThreshold: 3
+  # -- Time between probe executions.
+  periodSeconds: 10
+  # -- Number of successful executions after failed ones until container is marked healthy.
+  successThreshold: 1
+  # -- Timeout for command return.
+  timeoutSeconds: 5
+  httpGet:
+    path: /healthz?js-enabled-only=true
+    port: monitor
+    scheme: HTTP
+
+# Configure resource requests and limits.
+#
+# Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+resources:
+  limits:
+    # -- The max number of RAM to consume.
+    memory: "1Gi"
+  requests:
+    # -- The number of CPUs which has to be available on the scheduled node.
+    cpu: "100m"
+    # -- The number of RAM which has to be available on the scheduled node.
+    memory: "64Mi"
+
+# Define and create Kubernetes Service.
+#
+# Ref.: https://kubernetes.io/docs/concepts/services-networking/service
+service:
+  # -- Additional custom annotations.
+  annotations: {}
+  # -- Enable kubernetes service creation.
+  enabled: true
+  # "ClusterIP" => Exposes the Service on a cluster-internal IP. Choosing this value makes the Service only reachable
+  #                from within the cluster. This is the default that is used if you don't explicitly specify a type for
+  #                a Service.
+  # "NodePort" => Exposes the Service on each Node's IP at a static port (the NodePort). To make the node port
+  #               available, Kubernetes sets up a cluster IP address, the same as if you had requested a Service of
+  #               type: ClusterIP.
+  # "LoadBalancer" => Exposes the Service externally using a cloud provider's load balancer.
+  #
+  # Ref.: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  # -- Choose the kind of Service, one of "ClusterIP", "NodePort" or "LoadBalancer".
+  type: "ClusterIP"
+
+  # Define the ports of Service.
+  # You can set the port value to an arbitrary value, it will map the container port by name.
+  #
+  ports:
+    client:
+      containerPort: 4222
+      port: 4222
+      protocol: TCP
+    cluster:
+      containerPort: 6222
+      port: 6222
+      protocol: TCP
+    monitor:
+      containerPort: 8222
+      port: 8222
+      protocol: TCP
+
+# Configure resource requests and limits.
+#
+# Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+
+# Service account to use.
+# Ref.: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+  ## Can be set to false if pods using this serviceAccount do not need to use K8s API
+  ##
+  automountServiceAccountToken: false
+  # -- Additional custom labels for the ServiceAccount.
+  labels: {}
+
+#  Configure extra options for containers probes.
+startupProbe:
+  # -- Enables kubernetes StartupProbe.
+  enabled: true
+  # -- Delay after container start until StartupProbe is executed.
+  initialDelaySeconds: 10
+  # -- Number of failed executions until container is terminated.
+  failureThreshold: 90
+  # -- Time between probe executions.
+  periodSeconds: 10
+  # -- Number of successful executions after failed ones until container is marked healthy.
+  successThreshold: 1
+  # -- Timeout for command return.
+  timeoutSeconds: 5
+  httpGet:
+    path: /healthz?js-enabled-only=true
+    port: monitor
+    scheme: HTTP
+
+# -- In seconds, time the given to the pod needs to terminate gracefully.
+# Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+terminationGracePeriodSeconds: ""
+
+# -- Tolerations for pod assignment.
+# Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+# -- Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in.
+# Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+#
+# topologySpreadConstraints:
+#   - maxSkew: 1
+#     topologyKey: failure-domain.beta.kubernetes.io/zone
+#     whenUnsatisfiable: DoNotSchedule
+topologySpreadConstraints: []
+
+# Set up update strategy.
+#
+# Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+#
+# Example:
+# updateStrategy:
+#  type: RollingUpdate
+#  rollingUpdate:
+#    maxSurge: 25%
+#    maxUnavailable: 25%
+updateStrategy:
+  # -- Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods
+  # are destroyed first.
+  type: "RollingUpdate"
+
+# Definitions regarding to NATS deployment/configuration
+nats:
+  image:
+    # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
+    imagePullPolicy: "IfNotPresent"
+    # -- Container registry address. This setting has higher precedence than global.registry.
+    registry: "docker.io"
+    repository: "library/nats"
+    tag: "2.10.10@sha256:fa26beda8a3187ccefa47afcfe9ea6d0e2f40a57c8f64d70bd63c792d7973938"
+
+reloader:
+  # -- Enable the config reloader
+  enabled: true
+  image:
+    # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
+    imagePullPolicy: "IfNotPresent"
+    # -- Container registry address. This setting has higher precedence than global.registry.
+    registry: "docker.io"
+    repository: "natsio/nats-server-config-reloader"
+    tag: "0.14.1@sha256:77dd4c60001ffbf442c6b25592e73b4fca06ea9406c677607192788d80453783"
+  resources:
+    limits:
+      memory: "256Mi"
+    requests:
+      cpu: "10m"
+      memory: "32Mi"
+
+natsBox:
+  enabled: true
+  image:
+    # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
+    imagePullPolicy: "IfNotPresent"
+    # -- Container registry address. This setting has higher precedence than global.registry.
+    registry: "docker.io"
+    repository: "natsio/nats-box"
+    tag: "0.14.2@sha256:c9b8ebaabb2ca4c227feb4f6b856dc72d4775ac3d71f80d2c65aa82303079011"
+  resources:
+    limits:
+      memory: "256Mi"
+    requests:
+      cpu: "10m"
+      memory: "32Mi"
+
+config:
+  tls:
+    enabled: false
+    # -- Name of the certificate to mount, must be set if tls is enabled
+    # certificateSecret: ""
+    cert_file: /certificates/tls.crt
+    key_file: /certificates/tls.key
+    ca_file: /certificates/ca.crt
+    verify: true
+    verify_and_map: false
+  # -- JetStream configuration
+  # Ref: https://docs.nats.io/running-a-nats-service/configuration/resource_management
+  jetstream:
+    enabled: true
+    fileStore:
+      dir: /data
+      pvc:
+        size: "1Gi"
+        # -- Name of the storage class to use
+        storageClassName: ""
+    memoryStore:
+      size: "256Mi"
+  # Ref: https://docs.nats.io/running-a-nats-service/configuration/clustering/cluster_config
+  cluster:
+    replicas: 1
+    connect_retries: 600
+    authorization:
+      enabled: false
+      # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro#authorization-map
+      user: ""
+      password: ""
+      timeout: 0.5
+  # Ref: https://docs.nats.io/running-a-nats-service/nats_admin/lame_duck_mode
+  lame_duck_duration: "30s"
+  # Ref: https://docs.nats.io/running-a-nats-service/configuration#runtime-configuration
+  lame_duck_grace_period: "10s"
+  # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro#authorization-map
+  authorization:
+    enabled: false
+    # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tokens
+    # Example:
+    # token: "$NATS_TOKEN"
+    token: ""
+    # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users
+    # Example:
+    # users:
+    # - user: "admin"
+    #   password: "$NATS_PASSWORD"
+    #   permissions:
+    #     publish: ">"
+    #     subscribe: ">"
+    users: []
