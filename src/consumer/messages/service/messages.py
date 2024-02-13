@@ -35,19 +35,15 @@ class MessageService:
         subscriber_name: str,
         pop: bool,
         timeout: float = 5,
-        skip_prefill: Optional[bool] = False,
     ) -> Optional[MQMessage]:
         """Retrieve the first message from the subscriber's stream.
 
         :param str subscriber_name: Name of the subscriber.
         :param bool pop: If the message should be deleted after request.
         :param float timeout: Max duration of the request before it expires.
-        :param bool skip_prefill: List message, even if the pre-filling is not done?
         """
 
-        response = await self.get_messages(
-            subscriber_name, timeout, count=1, pop=pop, skip_prefill=skip_prefill
-        )
+        response = await self.get_messages(subscriber_name, timeout, count=1, pop=pop)
         return response[0] if response else None
 
     async def get_messages(
@@ -56,7 +52,6 @@ class MessageService:
         timeout: float,
         count: int,
         pop: bool,
-        skip_prefill: Optional[bool],
     ) -> List[MQMessage]:
         """Return messages from a given queue.
 
@@ -64,7 +59,6 @@ class MessageService:
         :param float timeout: Max duration of the request before it expires.
         :param int count: How many messages to return at most.
         :param bool pop: If messages should be deleted after request.
-        :param bool skip_prefill: List messages, even if the pre-filling is not done?
         """
 
         # TODO: Timeout of 0 leads to internal server error
@@ -81,7 +75,7 @@ class MessageService:
             messages = await self.get_messages_from_prefill_queue(
                 subscriber_name, timeout, count, pop
             )
-        elif skip_prefill or not prefill_stream:
+        elif not prefill_stream:
             messages.extend(
                 await self.get_messages_from_main_queue(
                     subscriber_name, timeout, count, pop

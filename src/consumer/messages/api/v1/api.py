@@ -63,14 +63,13 @@ async def get_subscription_messages(
     count: int = 1,
     timeout: float = 5,
     pop: bool = False,
-    skip_prefill: bool = False,
 ) -> List[MQMessage]:
     """Return the next pending message(s) for the given subscription."""
 
     # TODO: check authorization
 
     service = MessageService(port)
-    return await service.get_messages(name, timeout, count, pop, skip_prefill)
+    return await service.get_messages(name, timeout, count, pop)
 
 
 @router.delete(
