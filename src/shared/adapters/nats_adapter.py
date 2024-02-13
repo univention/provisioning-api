@@ -118,11 +118,11 @@ class NatsMQAdapter(BaseMQAdapter):
             for msg in msgs:
                 await msg.ack()
 
-        msgs_to_return = [self.construct_provisioning_message(msg) for msg in msgs]
+        msgs_to_return = [self.provisioning_message_from(msg) for msg in msgs]
         return msgs_to_return
 
     @staticmethod
-    def construct_provisioning_message(msg: Msg) -> ProvisioningMessage:
+    def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
         data = json.loads(msg.data)
         sequence_number = msg.reply.split(".")[-4]
         message = ProvisioningMessage(
@@ -135,7 +135,7 @@ class NatsMQAdapter(BaseMQAdapter):
         )
         return message
 
-    def construct_nats_message(self, message: MQMessage) -> Msg:
+    def nats_message_from(self, message: MQMessage) -> Msg:
         data = message.data
         msg = Msg(
             _client=self._nats,
@@ -147,7 +147,7 @@ class NatsMQAdapter(BaseMQAdapter):
         return msg
 
     @staticmethod
-    def construct_mq_message(msg: Msg) -> MQMessage:
+    def mq_message_from(msg: Msg) -> MQMessage:
         data = json.loads(msg.data)
         sequence_number = msg.reply.split(".")[-4]
         message = MQMessage(
@@ -183,7 +183,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def wait_for_event(self) -> MQMessage:
         msg = await self._message_queue.get()
-        message = self.construct_mq_message(msg)
+        message = self.mq_message_from(msg)
         return message
 
     async def stream_exists(self, subject: str) -> bool:
@@ -220,15 +220,15 @@ class NatsMQAdapter(BaseMQAdapter):
             )
 
     async def acknowledge_message(self, message: MQMessage):
-        msg = self.construct_nats_message(message)
+        msg = self.nats_message_from(message)
         await msg.ack()
 
     async def acknowledge_message_negatively(self, message: MQMessage):
-        msg = self.construct_nats_message(message)
+        msg = self.nats_message_from(message)
         await msg.nak()
 
     async def acknowledge_message_in_progress(self, message: MQMessage):
-        msg = self.construct_nats_message(message)
+        msg = self.nats_message_from(message)
         await msg.in_progress()
 
     async def delete_message(self, stream_name: str, seq_num: int):

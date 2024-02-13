@@ -47,5 +47,5 @@ class MessageProcessingStatusReport(BaseModel):
         description="A sequence number representing the processed message."
     )
     publisher_name: PublisherName = Field(
-        description="The type of queue from which messages should be removed"
+        description="The name of the publisher of the message."
     )
