@@ -55,13 +55,11 @@ class AsyncClient:
         count: Optional[int] = None,
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
-        force: Optional[bool] = None,
     ) -> List[shared.models.queue.MQMessage]:
         _params = {
             "count": count,
             "timeout": timeout,
             "pop": pop,
-            "force": force,
         }
         params = {k: v for k, v in _params.items() if v is not None}
 
