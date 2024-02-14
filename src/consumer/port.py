@@ -24,7 +24,9 @@ class ConsumerPort:
     async def port_dependency():
         port = ConsumerPort()
         await port.mq_adapter.connect()
-        await port.kv_adapter.setup_nats_and_kv([Bucket.subscriptions])
+        await port.kv_adapter.setup_nats_and_kv(
+            [Bucket.subscriptions, Bucket.credentials]
+        )
         try:
             yield port
         finally:
@@ -61,8 +63,8 @@ class ConsumerPort:
         result = await self.kv_adapter.get_value(key, bucket)
         return result.value.decode("utf-8").split(",") if result else []
 
-    async def delete_kv_pair(self, key: str):
-        await self.kv_adapter.delete_kv_pair(key)
+    async def delete_kv_pair(self, key: str, bucket: Bucket):
+        await self.kv_adapter.delete_kv_pair(key, bucket)
 
     async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
         await self.kv_adapter.put_value(key, value, bucket)

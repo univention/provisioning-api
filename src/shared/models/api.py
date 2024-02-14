@@ -16,6 +16,7 @@ class NewSubscription(BaseModel):
     request_prefill: bool = Field(
         description="Whether pre-filling of the queue was requested."
     )
+    password: str = Field(description="Password for subscription registration.")
 
 
 class Event(BaseModel):

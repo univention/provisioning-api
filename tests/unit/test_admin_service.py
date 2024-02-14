@@ -59,7 +59,7 @@ class TestAdminService:
         admin_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
 
         with pytest.raises(ValueError) as e:
-            await admin_service.create_subscription(self.new_subscription)
+            await admin_service.register_subscription(self.new_subscription)
 
         admin_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME)
         admin_service._port.put_value.assert_not_called()
@@ -71,7 +71,7 @@ class TestAdminService:
         admin_service._port.create_stream = AsyncMock()
         admin_service._port.create_consumer = AsyncMock()
 
-        await admin_service.create_subscription(self.new_subscription)
+        await admin_service.register_subscription(self.new_subscription)
 
         admin_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME)
         admin_service._port.get_str_value.assert_has_calls(

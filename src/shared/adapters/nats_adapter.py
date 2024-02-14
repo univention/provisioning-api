@@ -10,7 +10,12 @@ from typing import List, Union, Optional
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
-from nats.js.errors import NotFoundError, KeyNotFoundError, BucketNotFoundError
+from nats.js.errors import (
+    NotFoundError,
+    KeyNotFoundError,
+    BucketNotFoundError,
+    NoKeysError,
+)
 from nats.js.kv import KeyValue
 
 from shared.models.queue import BaseMessage
@@ -76,6 +81,13 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         if isinstance(value, dict):
             value = json.dumps(value)
         await kv_store.put(key, value.encode("utf-8"))
+
+    async def get_keys(self, bucket: Bucket) -> List[str]:
+        kv_store = await self._js.key_value(bucket.value)
+        try:
+            return await kv_store.keys()
+        except NoKeysError:
+            return []
 
 
 class NatsMQAdapter(BaseMQAdapter):

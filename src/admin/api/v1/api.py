@@ -49,17 +49,17 @@ async def get_subscriptions(
 @router.post(
     "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["admin"]
 )
-async def create_subscription(
+async def register_subscription(
     subscription: NewSubscription,
     authentication: Annotated[str, Depends(authenticate_user)],
     port: AdminPortDependency,
 ):
-    """Create a new subscription."""
+    """Register a new subscription."""
 
     service = AdminService(port)
 
     try:
-        await service.create_subscription(subscription)
+        await service.register_subscription(subscription)
     except ValueError as err:
         raise fastapi.HTTPException(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)

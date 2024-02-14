@@ -62,5 +62,8 @@ class AdminPort:
     async def add_message(self, subject: str, message: Union[Message, PrefillMessage]):
         await self.mq_adapter.add_message(subject, message)
 
+    async def get_bucket_keys(self, bucket: Bucket):
+        return await self.kv_adapter.get_keys(bucket)
+
 
 AdminPortDependency = Annotated[AdminPort, Depends(AdminPort.port_dependency)]
