@@ -7,11 +7,8 @@ import logging
 import json
 from typing import List, Union, Optional
 
-from fastapi import HTTPException, status
-from fastapi.security import HTTPBasicCredentials
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
-from nats.errors import NoServersError
 from nats.js.api import ConsumerConfig
 from nats.js.errors import NotFoundError, KeyNotFoundError
 from nats.js.kv import KeyValue
@@ -44,21 +41,8 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self._kv_store: Optional[KeyValue] = None
         self.logger = logging.getLogger(__name__)
 
-    async def connect(self, credentials: HTTPBasicCredentials):
-        try:
-            await self._nats.connect(
-                [settings.nats_server],
-                user=credentials.username,
-                password=credentials.password,
-                max_reconnect_attempts=MAX_RECONNECT_ATTEMPTS,
-            )
-        except NoServersError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Basic"},
-            )
-
+    async def connect(self):
+        await self._nats.connect([settings.nats_server])
         await self.create_kv_store()
 
     async def close(self):
@@ -93,21 +77,8 @@ class NatsMQAdapter(BaseMQAdapter):
         self._message_queue = asyncio.Queue()
         self.logger = logging.getLogger(__name__)
 
-    async def connect(self, credentials: HTTPBasicCredentials):
-        try:
-            await self._nats.connect(
-                [settings.nats_server],
-                user=credentials.username,
-                password=credentials.password,
-                max_reconnect_attempts=MAX_RECONNECT_ATTEMPTS,
-            )
-
-        except NoServersError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Basic"},
-            )
+    async def connect(self):
+        await self._nats.connect([settings.nats_server])
 
     async def close(self):
         await self._nats.close()

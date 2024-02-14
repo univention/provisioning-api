@@ -5,11 +5,9 @@ import json
 from typing import List, Annotated, Optional, Union
 
 from fastapi import Depends
-from fastapi.security import HTTPBasicCredentials
 
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
-from shared.config import settings
 from shared.models import Message
 
 from shared.models.queue import MQMessage
@@ -23,14 +21,9 @@ class ConsumerPort:
 
     @staticmethod
     async def port_dependency():
-        # FIXME: create credentials for the consumers
-        credentials = HTTPBasicCredentials(
-            username=settings.admin_username, password=settings.admin_password
-        )
-
         port = ConsumerPort()
-        await port.mq_adapter.connect(credentials)
-        await port.kv_adapter.connect(credentials)
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         try:
             yield port
         finally:

@@ -1,19 +1,43 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
-from typing import List
+import secrets
+from typing import List, Annotated
 
 import fastapi
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
 from admin.port import AdminPortDependency
 from admin.service import AdminService
+from shared.config import settings
 from shared.models import Subscription, NewSubscription
 
 router = fastapi.APIRouter()
+security = HTTPBasic()
+
+
+def authenticate_user(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    current_username_bytes = credentials.username.encode("utf8")
+    correct_username_bytes = settings.admin_username.encode("utf8")
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+    current_password_bytes = credentials.password.encode("utf8")
+    correct_password_bytes = settings.admin_password.encode("utf8")
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, correct_password_bytes
+    )
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
 
 
 @router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
 async def get_subscriptions(
+    authentication: Annotated[str, Depends(authenticate_user)],
     port: AdminPortDependency,
 ) -> List[Subscription]:
     """Return a list of all known subscriptions."""
@@ -27,6 +51,7 @@ async def get_subscriptions(
 )
 async def create_subscription(
     subscription: NewSubscription,
+    authentication: Annotated[str, Depends(authenticate_user)],
     port: AdminPortDependency,
 ):
     """Create a new subscription."""

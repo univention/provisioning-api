@@ -140,7 +140,7 @@ kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
 kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
 
-CREDENTIALS = HTTPBasicCredentials(username="user", password="password")
+CREDENTIALS = HTTPBasicCredentials(username="dev-user", password="dev-password")
 
 
 class FakeMessageQueue(AsyncMock):

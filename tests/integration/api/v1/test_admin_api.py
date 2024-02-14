@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -29,9 +30,19 @@ async def subscriptions_client():
         yield client
 
 
+@pytest.fixture
+def settings_mock() -> AsyncMock:
+    settings = patch("admin.api.v1.api.settings").start()
+    settings.admin_username = CREDENTIALS.username
+    settings.admin_password = CREDENTIALS.password
+    return settings
+
+
 @pytest.mark.anyio
 class TestAdmin:
-    async def test_create_subscription(self, subscriptions_client: httpx.AsyncClient):
+    async def test_create_subscription(
+        self, subscriptions_client: httpx.AsyncClient, settings_mock
+    ):
         name = str(uuid.uuid4())
         response = await subscriptions_client.post(
             f"{api_prefix}/subscriptions",
@@ -44,7 +55,9 @@ class TestAdmin:
         )
         assert response.status_code == 201
 
-    async def test_get_subscriptions(self, subscriptions_client: httpx.AsyncClient):
+    async def test_get_subscriptions(
+        self, subscriptions_client: httpx.AsyncClient, settings_mock
+    ):
         response = await subscriptions_client.get(
             f"{api_prefix}/subscriptions",
             auth=(CREDENTIALS.username, CREDENTIALS.password),

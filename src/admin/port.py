@@ -2,11 +2,10 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-import logging
 from typing import List, Annotated, Optional, Union
 
 from fastapi import Depends
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi.security import HTTPBasic
 
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
@@ -23,12 +22,10 @@ class AdminPort:
         self.kv_adapter = NatsKVAdapter()
 
     @staticmethod
-    async def port_dependency(
-            credentials: Annotated[HTTPBasicCredentials, Depends(security)]
-    ):
+    async def port_dependency():
         port = AdminPort()
-        await port.mq_adapter.connect(credentials)
-        await port.kv_adapter.connect(credentials)
+        await port.mq_adapter.connect()
+        await port.kv_adapter.connect()
         try:
             yield port
         finally:
