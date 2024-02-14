@@ -12,6 +12,7 @@ from shared.models import Message
 
 from shared.models.queue import MQMessage
 from shared.models.queue import PrefillMessage
+from shared.models.subscription import Bucket
 
 
 class ConsumerPort:
@@ -23,7 +24,7 @@ class ConsumerPort:
     async def port_dependency():
         port = ConsumerPort()
         await port.mq_adapter.connect()
-        await port.kv_adapter.connect()
+        await port.kv_adapter.setup_nats_and_kv([Bucket.subscriptions])
         try:
             yield port
         finally:
@@ -52,22 +53,22 @@ class ConsumerPort:
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
 
-    async def get_dict_value(self, name: str) -> Optional[dict]:
-        result = await self.kv_adapter.get_value(name)
+    async def get_dict_value(self, name: str, bucket: Bucket) -> Optional[dict]:
+        result = await self.kv_adapter.get_value(name, bucket)
         return json.loads(result.value.decode("utf-8")) if result else None
 
-    async def get_list_value(self, key: str) -> List[str]:
-        result = await self.kv_adapter.get_value(key)
+    async def get_list_value(self, key: str, bucket: Bucket) -> List[str]:
+        result = await self.kv_adapter.get_value(key, bucket)
         return result.value.decode("utf-8").split(",") if result else []
 
     async def delete_kv_pair(self, key: str):
         await self.kv_adapter.delete_kv_pair(key)
 
-    async def put_value(self, key: str, value: Union[str, dict]):
-        await self.kv_adapter.put_value(key, value)
+    async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
+        await self.kv_adapter.put_value(key, value, bucket)
 
-    async def put_list_value(self, key: str, value: list[str]):
-        await self.kv_adapter.put_value(key, ",".join(value))
+    async def put_list_value(self, key: str, value: list[str], bucket: Bucket):
+        await self.kv_adapter.put_value(key, ",".join(value), bucket)
 
     async def create_stream(self, subject):
         await self.mq_adapter.create_stream(subject)

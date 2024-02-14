@@ -8,7 +8,7 @@ import logging
 
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
-from shared.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
+from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 class DispatcherPort:
     def __init__(self):
         self.mq_adapter = NatsMQAdapter()
-        self.kv_adapter = NatsKVAdapter()
         self._consumer_registration_adapter = ConsumerRegistrationAdapter()
         self._consumer_messages_adapter = ConsumerMessagesAdapter()
 
@@ -26,7 +25,6 @@ class DispatcherPort:
     async def port_context():
         port = DispatcherPort()
         await port.mq_adapter.connect()
-        await port.kv_adapter.connect()
         await port._consumer_registration_adapter.connect()
         await port._consumer_messages_adapter.connect()
 
@@ -37,16 +35,11 @@ class DispatcherPort:
 
     async def close(self):
         await self.mq_adapter.close()
-        await self.kv_adapter.close()
         await self._consumer_registration_adapter.close()
         await self._consumer_messages_adapter.close()
 
     async def send_message_to_subscription(self, name: str, message: Message):
         await self._consumer_messages_adapter.send_message(name, message)
-
-    async def get_list_value(self, key: str) -> List[str]:
-        result = await self.kv_adapter.get_value(key)
-        return result.value.decode("utf-8").split(",") if result else []
 
     async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)

@@ -34,3 +34,9 @@ class Subscription(BaseModel):
     prefill_queue_status: FillQueueStatus = Field(
         description="Pre-filling the queue: status."
     )
+
+
+class Bucket(str, enum.Enum):
+    subscriptions = "SUBSCRIPTIONS"
+    credentials = "CREDENTIALS"
+    cache = "CACHE"

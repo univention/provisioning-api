@@ -8,6 +8,7 @@ from typing import List, Optional
 from admin.port import AdminPort
 
 from shared.models import FillQueueStatus, PrefillMessage, Subscription, NewSubscription
+from shared.models.subscription import Bucket
 
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 SUBSCRIPTIONS = "subscriptions"
@@ -29,7 +30,8 @@ class AdminService:
         return subscriptions
 
     async def get_subscription_names(self, key: str):
-        return await self._port.get_list_value(key)
+        # FIXME: get a list of all known subscriptions using CREDENTIALS bucket
+        return await self._port.get_list_value(key, Bucket.subscriptions)
 
     async def create_subscription(self, new_sub: NewSubscription):
         """
@@ -74,16 +76,16 @@ class AdminService:
             await self.update_subscription_names(realm_topic, name)
 
     async def set_sub_info(self, name, sub_info: Subscription):
-        await self._port.put_value(name, sub_info.model_dump())
+        await self._port.put_value(name, sub_info.model_dump(), Bucket.subscriptions)
 
     async def add_sub_to_subscriptions(self, name: str):
         await self.update_subscription_names(SUBSCRIPTIONS, name)
 
     async def update_subscription_names(self, key: str, value: str) -> None:
-        subs = await self._port.get_str_value(key)
+        subs = await self._port.get_str_value(key, Bucket.subscriptions)
         if subs:
             value = subs + f",{value}"
-        await self._port.put_value(key, value)
+        await self._port.put_value(key, value, Bucket.subscriptions)
 
     async def send_request_to_prefill(self, subscription: NewSubscription):
         self.logger.info("Sending the requests to prefill")
@@ -96,5 +98,5 @@ class AdminService:
         await self._port.add_message("prefill", message)
 
     async def get_subscription_info(self, name: str) -> Optional[Subscription]:
-        result = await self._port.get_dict_value(name)
+        result = await self._port.get_dict_value(name, Bucket.subscriptions)
         return Subscription.model_validate(result) if result else result

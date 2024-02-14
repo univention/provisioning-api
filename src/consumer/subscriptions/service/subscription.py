@@ -9,6 +9,7 @@ from admin.service.admin import SUBSCRIPTIONS
 from consumer.port import ConsumerPort
 from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscription, FillQueueStatus
+from shared.models.subscription import Bucket
 
 manager = SinkManager()
 
@@ -44,7 +45,7 @@ class SubscriptionService:
         return sub
 
     async def get_subscription_info(self, name: str) -> Optional[Subscription]:
-        result = await self._port.get_dict_value(name)
+        result = await self._port.get_dict_value(name, Bucket.subscriptions)
         return Subscription.model_validate(result) if result else result
 
     async def get_subscription_queue_status(self, name: str) -> FillQueueStatus:
@@ -67,7 +68,7 @@ class SubscriptionService:
         await self.set_sub_info(name, sub_info)
 
     async def set_sub_info(self, name, sub_info: Subscription):
-        await self._port.put_value(name, sub_info.model_dump())
+        await self._port.put_value(name, sub_info.model_dump(), Bucket.subscriptions)
 
     async def delete_subscription(self, name: str):
         """
@@ -98,7 +99,7 @@ class SubscriptionService:
     async def delete_subscription_from_values(self, key: str, name: str):
         self.logger.debug("Deleting subscription %s from %s", name, key)
 
-        subs = await self._port.get_list_value(key)
+        subs = await self._port.get_list_value(key, Bucket.subscriptions)
         if not subs:
             raise ValueError("There are no subscriptions")
 
@@ -106,12 +107,9 @@ class SubscriptionService:
             raise ValueError("The subscription with the given name does not exist")
 
         subs.remove(name)
-        await self._port.put_list_value(key, subs)
+        await self._port.put_list_value(key, subs, Bucket.subscriptions)
 
         self.logger.info("Subscription was deleted")
 
     async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
-        return await self.get_subscription_names(realm_topic)
-
-    async def get_subscription_names(self, key: str):
-        return await self._port.get_list_value(key)
+        return await self._port.get_list_value(realm_topic, Bucket.subscriptions)

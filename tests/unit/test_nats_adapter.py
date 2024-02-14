@@ -8,6 +8,7 @@ import pytest
 from nats.js.errors import NotFoundError
 
 from shared.adapters.nats_adapter import NatsKeys
+from shared.models.subscription import Bucket
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     kv_sub_info,
@@ -42,9 +43,9 @@ def mock_fetch(mock_nats_mq_adapter):
 @pytest.mark.anyio
 class TestNatsKVAdapter:
     async def test_connect(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.connect()
+        result = await mock_nats_kv_adapter.setup_nats_and_kv([Bucket.subscriptions])
 
-        mock_nats_kv_adapter._nats.connect.assert_called_once_with(
+        mock_nats_kv_adapter._nats.setup_nats_and_kv.assert_called_once_with(
             ["nats://localhost:4222"]
         )
         mock_nats_kv_adapter._js.create_key_value.assert_called_once()
@@ -104,7 +105,7 @@ class TestNatsMQAdapter:
     async def test_connect(self, mock_nats_mq_adapter):
         result = await mock_nats_mq_adapter.connect()
 
-        mock_nats_mq_adapter._nats.connect.assert_called_once_with(
+        mock_nats_mq_adapter._nats.setup_nats_and_kv.assert_called_once_with(
             ["nats://localhost:4222"]
         )
         assert result is None

@@ -2,20 +2,21 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
 from shared.models import Message
 from shared.models.queue import MQMessage
+from shared.models.subscription import Bucket
 
 
 class BaseKVStoreAdapter(ABC):
     """The base class for key-value store adapters."""
 
     @abstractmethod
-    async def connect(self):
+    async def setup_nats_and_kv(self, buckets: List[str]):
         pass
 
     @abstractmethod
@@ -23,19 +24,19 @@ class BaseKVStoreAdapter(ABC):
         pass
 
     @abstractmethod
-    async def create_kv_store(self, name: str = "Pub_Sub_KV"):
+    async def create_kv_store(self, bucket: Bucket):
         pass
 
     @abstractmethod
-    async def delete_kv_pair(self, key: str):
+    async def delete_kv_pair(self, key: str, bucket: Bucket):
         pass
 
     @abstractmethod
-    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
+    async def get_value(self, key: str, bucket: Bucket) -> Optional[KeyValue.Entry]:
         pass
 
     @abstractmethod
-    async def put_value(self, key: str, value: Union[str, dict]):
+    async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
         pass
 
 

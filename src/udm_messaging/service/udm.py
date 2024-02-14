@@ -7,6 +7,7 @@ from typing import Optional
 
 from shared.config import settings
 from shared.models import Message
+from shared.models.subscription import Bucket
 from udm_messaging.port import UDMMessagingPort
 
 import json
@@ -33,11 +34,13 @@ class UDMMessagingService(univention.admin.uldap.access):
 
     async def retrieve(self, dn: str):
         self.logger.info("Retrieving object from cache")
-        return await self._messaging_port.retrieve(dn)
+        return await self._messaging_port.retrieve(dn, Bucket.cache)
 
     async def store(self, new_obj: dict):
         self.logger.info("Storing object to cache %s", new_obj)
-        await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj))
+        await self._messaging_port.store(
+            new_obj["uuid"], json.dumps(new_obj), Bucket.cache
+        )
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
         if not (new_obj or old_obj):

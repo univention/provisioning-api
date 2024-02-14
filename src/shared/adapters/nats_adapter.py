@@ -10,13 +10,14 @@ from typing import List, Union, Optional
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
-from nats.js.errors import NotFoundError, KeyNotFoundError
+from nats.js.errors import NotFoundError, KeyNotFoundError, BucketNotFoundError
 from nats.js.kv import KeyValue
 
 from shared.models.queue import BaseMessage
 from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
 from shared.models.queue import MQMessage
+from shared.models.subscription import Bucket
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -30,44 +31,51 @@ class NatsKeys:
     def durable_name(subject: str) -> str:
         return f"durable_name:{subject}"
 
-    def bucket_stream(bucket: str) -> str:
-        return f"KV_{bucket}"
-
 
 class NatsKVAdapter(BaseKVStoreAdapter):
     def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
-        self._kv_store: Optional[KeyValue] = None
         self.logger = logging.getLogger(__name__)
 
-    async def connect(self):
+    async def setup_nats_and_kv(self, buckets: List[Bucket]):
         await self._nats.connect([settings.nats_server])
-        await self.create_kv_store()
+        for bucket in buckets:
+            await self.create_kv_store(bucket)
 
     async def close(self):
         await self._nats.close()
 
-    async def create_kv_store(self, name: str = "Pub_Sub_KV"):
-        self._kv_store = await self._js.create_key_value(bucket=name)
-
-    async def delete_kv_pair(self, key: str):
-        await self._kv_store.delete(key)
-
-    async def get_value(self, key: str) -> Optional[KeyValue.Entry]:
+    async def create_kv_store(self, bucket: Bucket):
         try:
-            return await self._kv_store.get(key)
-        except KeyNotFoundError:
-            return None
+            await self._js.key_value(bucket.value)
+        except BucketNotFoundError:
+            self.logger.info("Creating bucket with the name: %s", bucket)
+            await self._js.create_key_value(bucket=bucket.value)
 
-    async def put_value(self, key: str, value: Union[str, dict]):
+    async def delete_kv_pair(self, key: str, bucket: Bucket):
+        kv_store = await self._js.key_value(bucket.value)
+        await kv_store.delete(key)
+
+    async def get_value(self, key: str, bucket: Bucket) -> Optional[KeyValue.Entry]:
+        kv_store = await self._js.key_value(bucket.value)
+        try:
+            return await kv_store.get(key)
+        except KeyNotFoundError:
+            pass
+
+    async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
+        kv_store = await self._js.key_value(bucket.value)
+
         if not value:
-            await self.delete_kv_pair(key)  # Avoid creating a pair with an empty value
+            await self.delete_kv_pair(
+                key, bucket
+            )  # Avoid creating a pair with an empty value
             return
 
         if isinstance(value, dict):
             value = json.dumps(value)
-        await self._kv_store.put(key, value.encode("utf-8"))
+        await kv_store.put(key, value.encode("utf-8"))
 
 
 class NatsMQAdapter(BaseMQAdapter):

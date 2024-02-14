@@ -12,6 +12,7 @@ from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.models import Message
 
 from shared.models.queue import PrefillMessage
+from shared.models.subscription import Bucket
 
 security = HTTPBasic()
 
@@ -25,7 +26,9 @@ class AdminPort:
     async def port_dependency():
         port = AdminPort()
         await port.mq_adapter.connect()
-        await port.kv_adapter.connect()
+        await port.kv_adapter.setup_nats_and_kv(
+            buckets=[Bucket.subscriptions, Bucket.credentials]
+        )
         try:
             yield port
         finally:
@@ -35,20 +38,20 @@ class AdminPort:
         await self.mq_adapter.close()
         await self.kv_adapter.close()
 
-    async def get_dict_value(self, name: str) -> Optional[dict]:
-        result = await self.kv_adapter.get_value(name)
+    async def get_dict_value(self, name: str, bucket: Bucket) -> Optional[dict]:
+        result = await self.kv_adapter.get_value(name, bucket)
         return json.loads(result.value.decode("utf-8")) if result else None
 
-    async def get_list_value(self, key: str) -> List[str]:
-        result = await self.kv_adapter.get_value(key)
+    async def get_list_value(self, key: str, bucket: Bucket) -> List[str]:
+        result = await self.kv_adapter.get_value(key, bucket)
         return result.value.decode("utf-8").split(",") if result else []
 
-    async def get_str_value(self, key: str) -> Optional[str]:
-        result = await self.kv_adapter.get_value(key)
+    async def get_str_value(self, key: str, bucket: Bucket) -> Optional[str]:
+        result = await self.kv_adapter.get_value(key, bucket)
         return result.value.decode("utf-8") if result else None
 
-    async def put_value(self, key: str, value: Union[str, dict]):
-        await self.kv_adapter.put_value(key, value)
+    async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
+        await self.kv_adapter.put_value(key, value, bucket)
 
     async def create_stream(self, subject):
         await self.mq_adapter.create_stream(subject)
