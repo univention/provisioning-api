@@ -97,13 +97,15 @@ poetry run pytest <dir/of/test-subset>
 
 ### E2E tests
 
-Make sure you run
+Run the containers:
 
 ```sh
 docker compose up --detach --remove-orphans
 ```
 
-first, then
+Wait for up to 1 minute for the default LDAP changes to be processed by the dispatcher.
+
+Run the E2E tests:
 
 ```sh
 python tests/e2e/end_2_end.py

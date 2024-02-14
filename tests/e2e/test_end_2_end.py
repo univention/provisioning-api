@@ -154,6 +154,7 @@ async def test_prefill(provisioning_api_base_url):
             assert False
         elif prefill_queue_status == FillQueueStatus.done:
             break
+        await asyncio.sleep(1)
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=1&pop=true"
