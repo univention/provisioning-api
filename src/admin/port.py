@@ -26,9 +26,7 @@ class AdminPort:
     async def port_dependency():
         port = AdminPort()
         await port.mq_adapter.connect()
-        await port.kv_adapter.setup_nats_and_kv(
-            buckets=[Bucket.subscriptions, Bucket.credentials]
-        )
+        await port.kv_adapter.init(buckets=[Bucket.subscriptions, Bucket.credentials])
         try:
             yield port
         finally:

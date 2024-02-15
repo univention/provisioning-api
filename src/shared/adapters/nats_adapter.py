@@ -43,7 +43,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self._js = self._nats.jetstream()
         self.logger = logging.getLogger(__name__)
 
-    async def setup_nats_and_kv(self, buckets: List[Bucket]):
+    async def init(self, buckets: List[Bucket]):
         await self._nats.connect([settings.nats_server])
         for bucket in buckets:
             await self.create_kv_store(bucket)
@@ -73,9 +73,8 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         kv_store = await self._js.key_value(bucket.value)
 
         if not value:
-            await self.delete_kv_pair(
-                key, bucket
-            )  # Avoid creating a pair with an empty value
+            # Avoid creating a pair with an empty value
+            await self.delete_kv_pair(key, bucket)
             return
 
         if isinstance(value, dict):

@@ -24,7 +24,7 @@ class UDMMessagingPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.kv_adapter.setup_nats_and_kv([Bucket.cache])
+        await port.kv_adapter.init([Bucket.cache])
         await port._event_adapter.connect()
         try:
             yield port

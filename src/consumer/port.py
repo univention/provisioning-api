@@ -24,9 +24,7 @@ class ConsumerPort:
     async def port_dependency():
         port = ConsumerPort()
         await port.mq_adapter.connect()
-        await port.kv_adapter.setup_nats_and_kv(
-            [Bucket.subscriptions, Bucket.credentials]
-        )
+        await port.kv_adapter.init([Bucket.subscriptions, Bucket.credentials])
         try:
             yield port
         finally:

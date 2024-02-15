@@ -16,7 +16,7 @@ class BaseKVStoreAdapter(ABC):
     """The base class for key-value store adapters."""
 
     @abstractmethod
-    async def setup_nats_and_kv(self, buckets: List[str]):
+    async def init(self, buckets: List[str]):
         pass
 
     @abstractmethod
