@@ -33,6 +33,7 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient):
             "name": subscriber_name,
             "realms_topics": REALMS_TOPICS,
             "request_prefill": False,
+            "password": "password",
         },
         auth=(settings.admin_username, settings.admin_password),
     )

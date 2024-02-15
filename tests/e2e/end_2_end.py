@@ -7,7 +7,7 @@ import requests
 import uuid
 
 from shared.config import settings
-from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
+from admin.api import v1_prefix as admin_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
 
@@ -37,12 +37,14 @@ async def test_workflow():
     connection = connect_ldap_server()
 
     response = requests.post(
-        f"{BASE_URL}{subscriptions_api_prefix}/subscriptions",
+        f"{BASE_URL}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
             "request_prefill": False,
+            "password": "password",
         },
+        auth=(settings.admin_username, settings.admin_password),
     )
     assert response.status_code == 201
 
