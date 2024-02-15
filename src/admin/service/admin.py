@@ -36,7 +36,7 @@ class AdminService:
         return await self._port.get_bucket_keys(Bucket.credentials)
 
     @staticmethod
-    def get_hashed_password(password: str) -> str:
+    def hash_password(password: str) -> str:
         return password_context.hash(password)
 
     async def register_subscription(self, new_sub: NewSubscription):
@@ -51,7 +51,7 @@ class AdminService:
             self.logger.info(
                 "Registering new subscription with the name: %s", new_sub.name
             )
-            encrypted_password = self.get_hashed_password(new_sub.password)
+            encrypted_password = self.hash_password(new_sub.password)
             await self._port.put_value(
                 new_sub.name, encrypted_password, Bucket.credentials
             )

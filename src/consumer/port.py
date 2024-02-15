@@ -67,6 +67,10 @@ class ConsumerPort:
     async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
         await self.kv_adapter.put_value(key, value, bucket)
 
+    async def get_str_value(self, key: str, bucket: Bucket) -> Optional[str]:
+        result = await self.kv_adapter.get_value(key, bucket)
+        return result.value.decode("utf-8") if result else None
+
     async def put_list_value(self, key: str, value: list[str], bucket: Bucket):
         await self.kv_adapter.put_value(key, ",".join(value), bucket)
 

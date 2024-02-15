@@ -9,6 +9,7 @@ import logging
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
+from shared.config import settings
 from shared.models.queue import MQMessage, Message
 
 logger = logging.getLogger(__name__)
@@ -17,8 +18,12 @@ logger = logging.getLogger(__name__)
 class DispatcherPort:
     def __init__(self):
         self.mq_adapter = NatsMQAdapter()
-        self._consumer_registration_adapter = ConsumerRegistrationAdapter()
-        self._consumer_messages_adapter = ConsumerMessagesAdapter()
+        self._consumer_registration_adapter = ConsumerRegistrationAdapter(
+            settings.dispatcher_username, settings.dispatcher_password
+        )
+        self._consumer_messages_adapter = ConsumerMessagesAdapter(
+            settings.dispatcher_username, settings.dispatcher_password
+        )
 
     @staticmethod
     @contextlib.asynccontextmanager

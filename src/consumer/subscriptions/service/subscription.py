@@ -5,12 +5,17 @@ import logging
 import re
 from typing import List, Optional
 
+from fastapi import HTTPException, status
+from fastapi.security import HTTPBasicCredentials
+from passlib.context import CryptContext
+
 from consumer.port import ConsumerPort
 from consumer.subscriptions.subscription.sink import SinkManager
 from shared.models import Subscription, FillQueueStatus
 from shared.models.subscription import Bucket
 
 manager = SinkManager()
+password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def match_subscription(
@@ -26,6 +31,10 @@ def match_subscription(
         return False
 
     return re.fullmatch(sub_topic, msg_topic) is not None
+
+
+def verify_password(password: str, hashed_pass: str) -> bool:
+    return password_context.verify(password, hashed_pass)
 
 
 class SubscriptionService:
@@ -110,3 +119,24 @@ class SubscriptionService:
 
     async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
         return await self._port.get_list_value(realm_topic, Bucket.subscriptions)
+
+    def handle_authentication_error(self, message: str):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=message,
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    async def authenticate_user(
+        self, credentials: HTTPBasicCredentials, subscription_name: Optional[str] = None
+    ):
+        if subscription_name and subscription_name != credentials.username:
+            self.handle_authentication_error("You do not have access to this data")
+
+        hashed_password = await self._port.get_str_value(
+            credentials.username, Bucket.credentials
+        )
+        if hashed_password is None or not verify_password(
+            credentials.password, hashed_password
+        ):
+            self.handle_authentication_error("Incorrect username or password")

@@ -15,14 +15,12 @@ class ConsumerRegistrationAdapter:
     ```
     """
 
-    def __init__(self):
+    def __init__(self, username: str, password: str):
         self.base_url = settings.consumer_registration_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(
-            settings.consumer_event_username, settings.consumer_event_password
-        )
+        self.auth = aiohttp.BasicAuth(username, password)
         self.headers = [("accept", "application/json")]
         self._session = None
         self.logger = logging.getLogger(__name__)

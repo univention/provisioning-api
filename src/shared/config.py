@@ -82,5 +82,17 @@ class Settings(BaseSettings):
     def ldap_server_uri(self) -> str:
         return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
+    # TODO: define credentials for Dispatcher and Prefill
+
+    # Dispatcher: username
+    dispatcher_username: str = "dispatcher"
+    # Dispatcher: password
+    dispatcher_password: str = "password"
+
+    # Prefill: username
+    prefill_username: str = "prefill"
+    # Prefill: password
+    prefill_password: str = "password"
+
 
 settings = Settings()

@@ -7,6 +7,7 @@ from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
+from shared.config import settings
 from shared.models import FillQueueStatus, Message, PrefillMessage, MQMessage
 
 
@@ -14,8 +15,12 @@ class PrefillPort:
     def __init__(self):
         self._udm_adapter = UDMAdapter()
         self.mq_adapter = NatsMQAdapter()
-        self._consumer_registration_adapter = ConsumerRegistrationAdapter()
-        self._consumer_messages_adapter = ConsumerMessagesAdapter()
+        self._consumer_registration_adapter = ConsumerRegistrationAdapter(
+            settings.prefill_username, settings.prefill_password
+        )
+        self._consumer_messages_adapter = ConsumerMessagesAdapter(
+            settings.prefill_username, settings.prefill_password
+        )
 
     @staticmethod
     @contextlib.asynccontextmanager
