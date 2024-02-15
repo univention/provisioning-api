@@ -4,10 +4,11 @@
 from unittest.mock import AsyncMock, call
 
 import pytest
+from fastapi import HTTPException
 
 from admin.service import AdminService
-from admin.service.admin import SUBSCRIPTIONS
 from shared.models import NewSubscription, Subscription
+from shared.models.subscription import Bucket
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     REALMS_TOPICS,
@@ -27,10 +28,14 @@ class TestAdminService:
         name=SUBSCRIPTION_NAME,
         realms_topics=REALMS_TOPICS,
         request_prefill=True,
+        password="password",
     )
+    hashed_password = "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"
 
     async def test_get_subscriptions(self, admin_service: AdminService):
-        admin_service._port.get_list_value = AsyncMock(return_value=[SUBSCRIPTION_NAME])
+        admin_service._port.get_bucket_keys = AsyncMock(
+            return_value=[SUBSCRIPTION_NAME]
+        )
         admin_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
         subscription = Subscription(
             name=SUBSCRIPTION_NAME,
@@ -41,45 +46,44 @@ class TestAdminService:
 
         result = await admin_service.get_subscriptions()
 
-        admin_service._port.get_list_value.assert_called_once_with(SUBSCRIPTIONS)
-        admin_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME)
+        admin_service._port.get_bucket_keys.assert_called_once_with(Bucket.credentials)
+        admin_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
         assert result == [subscription]
 
     async def test_get_subscriptions_empty_result(self, admin_service: AdminService):
-        admin_service._port.get_list_value = AsyncMock(return_value=[])
+        admin_service._port.get_bucket_keys = AsyncMock(return_value=[])
 
         result = await admin_service.get_subscriptions()
 
-        admin_service._port.get_list_value.assert_called_once_with(SUBSCRIPTIONS)
+        admin_service._port.get_bucket_keys.assert_called_once_with(Bucket.credentials)
         assert result == []
 
     async def test_create_subscription_existing_subscription(
         self, admin_service: AdminService
     ):
-        admin_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
+        admin_service._port.get_str_value = AsyncMock(return_value=self.hashed_password)
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(HTTPException):
             await admin_service.register_subscription(self.new_subscription)
 
-        admin_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME)
+        admin_service._port.get_str_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.credentials
+        )
         admin_service._port.put_value.assert_not_called()
-        assert "Subscription with the given name already exists" == str(e.value)
 
     async def test_add_subscription(self, admin_service: AdminService):
-        admin_service._port.get_dict_value = AsyncMock(return_value=None)
-        admin_service._port.get_str_value = AsyncMock(side_effect=[None, None])
+        admin_service._port.get_str_value = AsyncMock(side_effect=[None, None, None])
         admin_service._port.create_stream = AsyncMock()
         admin_service._port.create_consumer = AsyncMock()
 
         await admin_service.register_subscription(self.new_subscription)
 
-        admin_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME)
         admin_service._port.get_str_value.assert_has_calls(
-            [call(SUBSCRIPTIONS), call("udm:groups/group")]
-        )
-        admin_service._port.put_value.assert_has_calls(
             [
-                call(SUBSCRIPTIONS, SUBSCRIPTION_NAME),
-                call("udm:groups/group", SUBSCRIPTION_NAME),
+                call(SUBSCRIPTION_NAME, Bucket.credentials),
+                call("udm:groups/group", Bucket.subscriptions),
             ]
         )
+        assert admin_service._port.put_value.call_count == 3

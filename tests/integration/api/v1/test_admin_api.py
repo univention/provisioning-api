@@ -50,6 +50,7 @@ class TestAdmin:
                 "name": name,
                 "realms_topics": [["foo", "bar"]],
                 "request_prefill": False,
+                "password": "password",
             },
             auth=(CREDENTIALS.username, CREDENTIALS.password),
         )

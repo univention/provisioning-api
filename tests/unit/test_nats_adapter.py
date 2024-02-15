@@ -2,10 +2,10 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, call
 
 import pytest
-from nats.js.errors import NotFoundError
+from nats.js.errors import NotFoundError, BucketNotFoundError
 
 from shared.adapters.nats_adapter import NatsKeys
 from shared.models.subscription import Bucket
@@ -19,6 +19,7 @@ from tests.conftest import (
     MockNatsMQAdapter,
     MockNatsKVAdapter,
     FLAT_MESSAGE_ENCODED,
+    FakeKvStore,
 )
 
 
@@ -28,8 +29,17 @@ def mock_nats_mq_adapter() -> MockNatsMQAdapter:
 
 
 @pytest.fixture
-def mock_nats_kv_adapter() -> MockNatsKVAdapter:
-    return MockNatsKVAdapter()
+def mock_kv():
+    mock_kv = AsyncMock()
+    mock_kv.get = AsyncMock(side_effect=FakeKvStore.get)
+    return mock_kv
+
+
+@pytest.fixture
+def mock_nats_kv_adapter(mock_kv) -> MockNatsKVAdapter:
+    mock_nats = MockNatsKVAdapter()
+    mock_nats._js.key_value = AsyncMock(return_value=mock_kv)
+    return mock_nats
 
 
 @pytest.fixture
@@ -43,12 +53,16 @@ def mock_fetch(mock_nats_mq_adapter):
 @pytest.mark.anyio
 class TestNatsKVAdapter:
     async def test_connect(self, mock_nats_kv_adapter):
+        mock_nats_kv_adapter._js.key_value = AsyncMock(side_effect=BucketNotFoundError)
+
         result = await mock_nats_kv_adapter.init([Bucket.subscriptions])
 
-        mock_nats_kv_adapter._nats.init.assert_called_once_with(
+        mock_nats_kv_adapter._nats.connect.assert_called_once_with(
             ["nats://localhost:4222"]
         )
-        mock_nats_kv_adapter._js.create_key_value.assert_called_once()
+        mock_nats_kv_adapter._js.create_key_value.assert_called_once_with(
+            bucket=Bucket.subscriptions
+        )
         assert result is None
 
     async def test_close(self, mock_nats_kv_adapter):
@@ -58,45 +72,60 @@ class TestNatsKVAdapter:
         assert result is None
 
     async def test_create_kv_store(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.create_kv_store()
+        mock_nats_kv_adapter._js.key_value = AsyncMock(side_effect=BucketNotFoundError)
+
+        result = await mock_nats_kv_adapter.create_kv_store(Bucket.subscriptions)
 
         mock_nats_kv_adapter._js.create_key_value.assert_called_once_with(
-            bucket="Pub_Sub_KV"
+            bucket=Bucket.subscriptions
         )
         assert result is None
 
-    async def test_delete_kv_pair(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.delete_kv_pair(SUBSCRIPTION_NAME)
+    async def test_delete_kv_pair(self, mock_nats_kv_adapter, mock_kv):
+        result = await mock_nats_kv_adapter.delete_kv_pair(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
 
-        mock_nats_kv_adapter._kv_store.delete.assert_called_once_with(SUBSCRIPTION_NAME)
+        mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
+        mock_kv.delete.assert_called_once_with(SUBSCRIPTION_NAME)
         assert result is None
 
-    async def test_get_value(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.get_value(SUBSCRIPTION_NAME)
+    async def test_get_value(self, mock_nats_kv_adapter, mock_kv):
+        result = await mock_nats_kv_adapter.get_value(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
 
+        mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
+        mock_kv.get.assert_called_once_with(SUBSCRIPTION_NAME)
         assert result == kv_sub_info
 
-    async def test_get_value_by_unknown_key(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.get_value("unknown")
+    async def test_get_value_by_unknown_key(self, mock_nats_kv_adapter, mock_kv):
+        result = await mock_nats_kv_adapter.get_value("unknown", Bucket.subscriptions)
 
+        mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
+        mock_kv.get.assert_called_once_with("unknown")
         assert result is None
 
-    async def test_put_value(self, mock_nats_kv_adapter):
+    async def test_put_value(self, mock_nats_kv_adapter, mock_kv):
         result = await mock_nats_kv_adapter.put_value(
-            SUBSCRIPTION_NAME, SUBSCRIPTION_INFO
+            SUBSCRIPTION_NAME, SUBSCRIPTION_INFO, Bucket.subscriptions
         )
 
-        mock_nats_kv_adapter._kv_store.put.assert_called_once_with(
-            SUBSCRIPTION_NAME, kv_sub_info.value
-        )
-        mock_nats_kv_adapter._kv_store.delete.assert_not_called()
+        mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
+        mock_kv.delete.delete.assert_not_called()
+        mock_kv.put.assert_called_once_with(SUBSCRIPTION_NAME, kv_sub_info.value)
         assert result is None
 
-    async def test_put_empty_value(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.put_value(SUBSCRIPTION_NAME, "")
+    async def test_put_empty_value(self, mock_nats_kv_adapter, mock_kv):
+        result = await mock_nats_kv_adapter.put_value(
+            SUBSCRIPTION_NAME, "", Bucket.subscriptions
+        )
 
-        mock_nats_kv_adapter._kv_store.delete.assert_called_once_with(SUBSCRIPTION_NAME)
-        mock_nats_kv_adapter._kv_store.put.assert_not_called()
+        mock_nats_kv_adapter._js.key_value.assert_has_calls(
+            [call(Bucket.subscriptions), call(Bucket.subscriptions)]
+        )
+        mock_kv.delete.assert_called_once_with(SUBSCRIPTION_NAME)
+        mock_kv.put.assert_not_called()
         assert result is None
 
 
@@ -105,7 +134,7 @@ class TestNatsMQAdapter:
     async def test_connect(self, mock_nats_mq_adapter):
         result = await mock_nats_mq_adapter.connect()
 
-        mock_nats_mq_adapter._nats.init.assert_called_once_with(
+        mock_nats_mq_adapter._nats.connect.assert_called_once_with(
             ["nats://localhost:4222"]
         )
         assert result is None

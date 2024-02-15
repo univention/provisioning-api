@@ -15,7 +15,6 @@ from nats.js.kv import KeyValue
 from admin.port import AdminPort
 from consumer.port import ConsumerPort
 from consumer.main import app
-from consumer.subscriptions.service.subscription import SUBSCRIPTIONS
 from events.port import EventsPort
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import Message
@@ -149,6 +148,24 @@ class FakeMessageQueue(AsyncMock):
         return MSG
 
 
+class FakeKvStore(AsyncMock):
+    @classmethod
+    async def get(cls, key: str):
+        values = {
+            "abc:def": kv_subs,
+            "foo:bar": kv_subs,
+            SUBSCRIPTION_NAME: kv_sub_info,
+            "udm:groups/group": kv_subs,
+        }
+        if values.get(key):
+            return values.get(key)
+        raise KeyNotFoundError
+
+    @classmethod
+    async def keys(cls):
+        return [SUBSCRIPTION_NAME]
+
+
 class FakeJs(AsyncMock):
     sub = AsyncMock()
     sub.fetch = AsyncMock(return_value=[MSG])
@@ -158,20 +175,9 @@ class FakeJs(AsyncMock):
     async def pull_subscribe(cls, subject: str, durable: str, stream: str):
         return cls.sub
 
-
-class FakeKvStore(AsyncMock):
     @classmethod
-    async def get(cls, key: str):
-        values = {
-            "abc:def": kv_subs,
-            "foo:bar": kv_subs,
-            SUBSCRIPTION_NAME: kv_sub_info,
-            "udm:groups/group": kv_subs,
-            SUBSCRIPTIONS: kv_subs,
-        }
-        if values.get(key):
-            return values.get(key)
-        raise KeyNotFoundError
+    async def key_value(cls, bucket: str):
+        return FakeKvStore()
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
@@ -207,7 +213,6 @@ class MockNatsKVAdapter(NatsKVAdapter):
         super().__init__()
         self._nats = AsyncMock()
         self._js = FakeJs()
-        self._kv_store = FakeKvStore()
 
 
 @pytest.fixture(scope="session", autouse=True)
