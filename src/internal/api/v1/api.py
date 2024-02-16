@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import secrets
 from typing import List, Annotated
 
 import fastapi
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
 from consumer.messages.service import MessageService
@@ -13,24 +12,10 @@ from consumer.port import ConsumerPortDependency
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.config import settings
 from shared.models import Message, FillQueueStatus
+from shared.utils import authenticate_user
 
 router = fastapi.APIRouter(tags=["internal"], include_in_schema=settings.debug)
 security = HTTPBasic()
-
-
-def authenticate_user(credentials: HTTPBasicCredentials, username: str, password: str):
-    is_correct_username = secrets.compare_digest(
-        credentials.username.encode("utf8"), username.encode("utf8")
-    )
-    is_correct_password = secrets.compare_digest(
-        credentials.password.encode("utf8"), password.encode("utf8")
-    )
-    if not (is_correct_username and is_correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
 
 
 def authenticate_dispatcher(

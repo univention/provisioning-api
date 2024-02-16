@@ -44,7 +44,11 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def init(self, buckets: List[Bucket]):
-        await self._nats.connect([settings.nats_server])
+        await self._nats.connect(
+            [settings.nats_server],
+            user=settings.nats_username,
+            password=settings.nats_password,
+        )
         for bucket in buckets:
             await self.create_kv_store(bucket)
 
@@ -97,7 +101,11 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self._nats.connect([settings.nats_server])
+        await self._nats.connect(
+            [settings.nats_server],
+            user=settings.nats_username,
+            password=settings.nats_password,
+        )
 
     async def close(self):
         await self._nats.close()

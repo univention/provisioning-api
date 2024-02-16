@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
+from typing import List
 
 import aiohttp
 
@@ -34,7 +35,7 @@ class InternalAPIAdapter:
         if self._session:
             await self._session.close()
 
-    async def get_realm_topic_subscriptions(self, realm_topic: str) -> list[str]:
+    async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
         async with self._session.get(
             f"{self.base_url}subscriptions/filter?realm_topic={realm_topic}"
         ) as request:

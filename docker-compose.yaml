@@ -14,8 +14,6 @@ services:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
       UDM_HOST: "udm-rest-api"
-      ADMIN_USERNAME: "admin"
-      ADMIN_PASSWORD: "provisioning"
     depends_on:
       - "nats"
     ports:
@@ -29,7 +27,9 @@ services:
       - "4222:4222" # Client connections
       - "6222:6222" # Route connections
       - "8222:8222" # HTTP monitoring port
-    command: --jetstream -m 8222 -p 4222
+    command: --jetstream -m 8222 -p 4222 -c /etc/nats/nats.conf
+    volumes:
+      - ./config/:/etc/nats
 
 
   dispatcher:
@@ -43,7 +43,7 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
-      CONSUMER_EVENT_HOST: "app"
+      INTERNAL_API_HOST: "app"
     depends_on:
       - "nats"
       - "app"
@@ -59,7 +59,7 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
-      CONSUMER_EVENT_HOST: "app"
+      INTERNAL_API_HOST: "app"
       UDM_HOST: "udm-rest-api"
     depends_on:
       - "nats"

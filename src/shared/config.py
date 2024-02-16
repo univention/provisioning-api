@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     nats_host: str = "localhost"
     # Nats: port
     nats_port: int = 4222
+    # Nats: username
+    nats_username: str = "nats"
+    # Nats: password
+    nats_password: str = "password"
 
     @property
     def nats_server(self) -> str:
@@ -53,7 +57,7 @@ class Settings(BaseSettings):
     # Admin API: username
     admin_username: str = "admin"
     # Admin API: password
-    admin_password: str = "provisioning"
+    admin_password: str = "password"
 
     # LDAP : port
     ldap_port: int = 389
