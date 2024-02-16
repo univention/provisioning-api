@@ -12,8 +12,8 @@ from fastapi.responses import JSONResponse
 
 from .messages.api import router as messages_api_router
 from .subscriptions.api import router as subscriptions_api_router
-from events.api import router as events_api_router
 from admin.api import router as admin_api_router
+from internal.api import router as internal_api_router
 from shared.config import settings
 
 # TODO split up logging
@@ -24,17 +24,9 @@ from shared.config import settings
 
 openapi_tags = [
     {
-        "name": "admin",
-        "description": "Administrative actions",
-    },
-    {
         "name": "sink",
         "description": "Subscriber to LDAP changes",
-    },
-    {
-        "name": "source",
-        "description": "Source of LDAP changes",
-    },
+    }
 ]
 
 app = FastAPI(
@@ -57,8 +49,8 @@ if settings.cors_all:
 
 app.include_router(messages_api_router)
 app.include_router(subscriptions_api_router)
-app.include_router(events_api_router)
 app.include_router(admin_api_router)
+app.include_router(internal_api_router)
 
 
 @app.exception_handler(RequestValidationError)

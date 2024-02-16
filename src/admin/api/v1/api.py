@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import secrets
 from typing import List, Annotated
 
@@ -12,7 +13,6 @@ from admin.service import AdminService
 from shared.config import settings
 from shared.models import Subscription, NewSubscription
 
-router = fastapi.APIRouter()
 security = HTTPBasic()
 
 
@@ -31,23 +31,24 @@ def authenticate_user(credentials: Annotated[HTTPBasicCredentials, Depends(secur
         )
 
 
-@router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK, tags=["admin"])
-async def get_subscriptions(
-    authentication: Annotated[str, Depends(authenticate_user)],
-    port: AdminPortDependency,
-) -> List[Subscription]:
+router = fastapi.APIRouter(
+    tags=["admin"],
+    dependencies=[Depends(authenticate_user)],
+    include_in_schema=settings.debug,
+)
+
+
+@router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK)
+async def get_subscriptions(port: AdminPortDependency) -> List[Subscription]:
     """Return a list of all known subscriptions."""
 
     service = AdminService(port)
     return await service.get_subscriptions()
 
 
-@router.post(
-    "/subscriptions", status_code=fastapi.status.HTTP_201_CREATED, tags=["admin"]
-)
+@router.post("/subscriptions", status_code=fastapi.status.HTTP_201_CREATED)
 async def register_subscription(
     subscription: NewSubscription,
-    authentication: Annotated[str, Depends(authenticate_user)],
     port: AdminPortDependency,
 ):
     """Register a new subscription."""

@@ -5,9 +5,7 @@ from typing import List
 import contextlib
 import logging
 
-
-from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
-from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
+from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.config import settings
 from shared.models.queue import MQMessage, Message
@@ -18,10 +16,7 @@ logger = logging.getLogger(__name__)
 class DispatcherPort:
     def __init__(self):
         self.mq_adapter = NatsMQAdapter()
-        self._consumer_registration_adapter = ConsumerRegistrationAdapter(
-            settings.dispatcher_username, settings.dispatcher_password
-        )
-        self._consumer_messages_adapter = ConsumerMessagesAdapter(
+        self._internal_api_adapter = InternalAPIAdapter(
             settings.dispatcher_username, settings.dispatcher_password
         )
 
@@ -30,8 +25,7 @@ class DispatcherPort:
     async def port_context():
         port = DispatcherPort()
         await port.mq_adapter.connect()
-        await port._consumer_registration_adapter.connect()
-        await port._consumer_messages_adapter.connect()
+        await port._internal_api_adapter.connect()
 
         try:
             yield port
@@ -40,11 +34,10 @@ class DispatcherPort:
 
     async def close(self):
         await self.mq_adapter.close()
-        await self._consumer_registration_adapter.close()
-        await self._consumer_messages_adapter.close()
+        await self._internal_api_adapter.close()
 
     async def send_message_to_subscription(self, name: str, message: Message):
-        await self._consumer_messages_adapter.send_message(name, message)
+        await self._internal_api_adapter.send_message(name, message)
 
     async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)
@@ -53,7 +46,7 @@ class DispatcherPort:
         return await self.mq_adapter.wait_for_event()
 
     async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
-        return await self._consumer_registration_adapter.get_realm_topic_subscriptions(
+        return await self._internal_api_adapter.get_realm_topic_subscriptions(
             realm_topic
         )
 

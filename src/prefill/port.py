@@ -3,8 +3,7 @@
 
 import contextlib
 
-from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
-from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
+from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
 from shared.config import settings
@@ -15,10 +14,7 @@ class PrefillPort:
     def __init__(self):
         self._udm_adapter = UDMAdapter()
         self.mq_adapter = NatsMQAdapter()
-        self._consumer_registration_adapter = ConsumerRegistrationAdapter(
-            settings.prefill_username, settings.prefill_password
-        )
-        self._consumer_messages_adapter = ConsumerMessagesAdapter(
+        self._internal_api_adapter = InternalAPIAdapter(
             settings.prefill_username, settings.prefill_password
         )
 
@@ -28,8 +24,7 @@ class PrefillPort:
         port = PrefillPort()
         await port._udm_adapter.connect()
         await port.mq_adapter.connect()
-        await port._consumer_registration_adapter.connect()
-        await port._consumer_messages_adapter.connect()
+        await port._internal_api_adapter.connect()
 
         try:
             yield port
@@ -39,8 +34,7 @@ class PrefillPort:
     async def close(self):
         await self._udm_adapter.close()
         await self.mq_adapter.close()
-        await self._consumer_registration_adapter.close()
-        await self._consumer_messages_adapter.close()
+        await self._internal_api_adapter.close()
 
     async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)
@@ -60,15 +54,15 @@ class PrefillPort:
     async def update_subscription_queue_status(
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
-        await self._consumer_registration_adapter.update_subscription_queue_status(
+        await self._internal_api_adapter.update_subscription_queue_status(
             name, queue_status
         )
 
     async def create_prefill_message(self, name: str, message: Message):
-        await self._consumer_messages_adapter.create_prefill_message(name, message)
+        await self._internal_api_adapter.create_prefill_message(name, message)
 
     async def create_prefill_stream(self, subscription_name: str):
-        await self._consumer_messages_adapter.create_prefill_stream(subscription_name)
+        await self._internal_api_adapter.create_prefill_stream(subscription_name)
 
     async def add_request_to_prefill_failures(
         self, queue_name: str, message: PrefillMessage

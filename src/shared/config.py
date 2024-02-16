@@ -37,28 +37,18 @@ class Settings(BaseSettings):
     def udm_url(self) -> str:
         return f"http://{self.udm_host}:{self.udm_port}/udm"
 
-    # Consumer and Event REST API: host
-    consumer_event_host: str = "localhost"
-    # Consumer and Event REST API: port
-    consumer_event_port: int = 7777
-    # Consumer and Event REST API: username
-    consumer_event_username: str = ""
-    # Consumer and Event REST API: password
-    consumer_event_password: str = ""
+    # Internal REST API: host
+    internal_api_host: str = "localhost"
+    # Internal REST API: port
+    internal_api_port: int = 7777
+    # Internal REST API: username
+    internal_api_username: str = ""
+    # Internal REST API: password
+    internal_api_password: str = ""
 
     @property
-    def event_url(self) -> str:
-        return f"http://{self.consumer_event_host}:{self.consumer_event_port}/events/v1"
-
-    @property
-    def consumer_registration_url(self) -> str:
-        return f"http://{self.consumer_event_host}:{self.consumer_event_port}/subscriptions/v1"
-
-    @property
-    def consumer_messages_url(self) -> str:
-        return (
-            f"http://{self.consumer_event_host}:{self.consumer_event_port}/messages/v1"
-        )
+    def internal_api_url(self) -> str:
+        return f"http://{self.internal_api_host}:{self.internal_api_port}/internal/v1"
 
     # Admin API: username
     admin_username: str = "admin"
@@ -93,6 +83,11 @@ class Settings(BaseSettings):
     prefill_username: str = "prefill"
     # Prefill: password
     prefill_password: str = "password"
+
+    # UDM Producer: username
+    udm_producer_username: str = "udm_producer"
+    # UDM Producer: password
+    udm_producer_password: str = "password"
 
 
 settings = Settings()

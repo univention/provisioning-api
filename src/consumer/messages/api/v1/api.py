@@ -59,26 +59,6 @@ async def post_message_status(
         pass
 
 
-@router.post(
-    "/subscriptions/{name}/messages",
-    status_code=fastapi.status.HTTP_200_OK,
-    tags=["sink"],
-)
-async def post_message_to_subscription_queue(
-    name: str,
-    msg: Message,
-    port: ConsumerPortDependency,
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-):
-    """Post the message to the subscription's queue."""
-
-    sub_service = SubscriptionService(port)
-    await sub_service.authenticate_user(credentials, name)
-
-    msg_service = MessageService(port)
-    await msg_service.add_message(name, msg)
-
-
 @router.get(
     "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
@@ -120,45 +100,6 @@ async def remove_message(
 
     msg_service = MessageService(port)
     return await msg_service.remove_message(msg)
-
-
-@router.post(
-    "/subscriptions/{name}/prefill-messages",
-    status_code=fastapi.status.HTTP_201_CREATED,
-    tags=["sink"],
-)
-async def post_message_to_subscription_prefill_queue(
-    name: str,
-    data: Message,
-    port: ConsumerPortDependency,
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-):
-    """Post the prefill message to the subscription's prefill queue."""
-
-    sub_service = SubscriptionService(port)
-    await sub_service.authenticate_user(credentials, name)
-
-    msg_service = MessageService(port)
-    await msg_service.add_prefill_message(name, data)
-
-
-@router.post(
-    "/subscriptions/{name}/prefill-stream",
-    status_code=fastapi.status.HTTP_201_CREATED,
-    tags=["sink"],
-)
-async def create_prefill_stream(
-    name: str,
-    port: ConsumerPortDependency,
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-):
-    """Create the prefill stream for the subscription."""
-
-    sub_service = SubscriptionService(port)
-    await sub_service.authenticate_user(credentials, name)
-
-    msg_service = MessageService(port)
-    await msg_service.create_prefill_stream(name)
 
 
 @router.websocket("/subscriptions/{name}/ws")

@@ -5,10 +5,10 @@ import contextlib
 import json
 from typing import Optional
 
-
+from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
-from shared.adapters.event_adapter import EventAdapter
 from shared.adapters.udm_adapter import UDMAdapter
+from shared.config import settings
 
 from shared.models import Message
 from shared.models.subscription import Bucket
@@ -18,14 +18,16 @@ class UDMMessagingPort:
     def __init__(self):
         self.kv_adapter = NatsKVAdapter()
         self._udm_adapter: Optional[UDMAdapter] = None
-        self._event_adapter = EventAdapter()
+        self._internal_api_adapter = InternalAPIAdapter(
+            settings.udm_producer_username, settings.udm_producer_password
+        )
 
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
         await port.kv_adapter.init([Bucket.cache])
-        await port._event_adapter.connect()
+        await port._internal_api_adapter.connect()
         try:
             yield port
         finally:
@@ -33,7 +35,7 @@ class UDMMessagingPort:
 
     async def close(self):
         await self.kv_adapter.close()
-        await self._event_adapter.close()
+        await self._internal_api_adapter.close()
 
     async def retrieve(self, url: str, bucket: Bucket):
         result = await self.kv_adapter.get_value(url, bucket)
@@ -43,4 +45,4 @@ class UDMMessagingPort:
         await self.kv_adapter.put_value(url, new_obj, bucket)
 
     async def send_event(self, message: Message):
-        await self._event_adapter.send_event(message)
+        await self._internal_api_adapter.send_event(message)

@@ -136,3 +136,8 @@ class MessageService:
 
     async def add_message(self, name: str, msg: Message):
         await self._port.add_message(name, msg)
+
+    async def add_live_event(self, event: Message):
+        # TODO: define the name "incoming" globally or handle it differently alltogether
+
+        await self._port.add_message("incoming", event)

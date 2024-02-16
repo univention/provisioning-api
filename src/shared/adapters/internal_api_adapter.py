@@ -6,17 +6,16 @@ import logging
 import aiohttp
 
 from shared.config import settings
-from shared.models import Message
+from shared.models import FillQueueStatus, Message
 
 
-class ConsumerMessagesAdapter:
+class InternalAPIAdapter:
     """
-    Client for the Consumer Messages REST API`.
-    ```
+    Client for the Internal REST API.
     """
 
     def __init__(self, username: str, password: str):
-        self.base_url = settings.consumer_messages_url
+        self.base_url = settings.internal_api_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
@@ -35,6 +34,20 @@ class ConsumerMessagesAdapter:
         if self._session:
             await self._session.close()
 
+    async def get_realm_topic_subscriptions(self, realm_topic: str) -> list[str]:
+        async with self._session.get(
+            f"{self.base_url}subscriptions/filter?realm_topic={realm_topic}"
+        ) as request:
+            return await request.json()
+
+    async def update_subscription_queue_status(
+        self, name: str, queue_status: FillQueueStatus
+    ) -> None:
+        async with self._session.patch(
+            f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
+        ):
+            pass
+
     async def create_prefill_message(self, name: str, message: Message):
         async with self._session.post(
             f"{self.base_url}subscriptions/{name}/prefill-messages",
@@ -52,5 +65,11 @@ class ConsumerMessagesAdapter:
         async with self._session.post(
             f"{self.base_url}subscriptions/{name}/messages",
             json=message.model_dump(),
+        ):
+            pass
+
+    async def send_event(self, message: Message):
+        async with self._session.post(
+            f"{self.base_url}events", json=message.model_dump()
         ):
             pass
