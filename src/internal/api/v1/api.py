@@ -12,7 +12,7 @@ from consumer.port import ConsumerPortDependency
 from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.config import settings
 from shared.models import Message, FillQueueStatus
-from shared.utils import authenticate_user
+from shared.auth import authenticate_user
 
 router = fastapi.APIRouter(tags=["internal"], include_in_schema=settings.debug)
 security = HTTPBasic()

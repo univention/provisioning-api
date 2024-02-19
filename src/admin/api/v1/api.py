@@ -11,7 +11,7 @@ from admin.port import AdminPortDependency
 from admin.service import AdminService
 from shared.config import settings
 from shared.models import Subscription, NewSubscription
-from shared.utils import authenticate_user
+from shared.auth import authenticate_user
 
 
 security = HTTPBasic()
