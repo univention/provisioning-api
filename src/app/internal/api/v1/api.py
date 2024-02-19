@@ -7,12 +7,12 @@ import fastapi
 from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from consumer.messages.service import MessageService
-from consumer.port import ConsumerPortDependency
-from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.config import settings
 from shared.models import Message, FillQueueStatus
 from shared.auth import authenticate_user
+from shared.services.messages import MessageService
+from shared.services.port import PortDependency
+from shared.services.subscription import SubscriptionService
 
 router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()
@@ -43,7 +43,7 @@ def authenticate_udm_producer(
 @router.get("/subscriptions/filter", status_code=fastapi.status.HTTP_200_OK)
 async def get_realm_topic_subscriptions(
     realm_topic: str,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     authentication: Annotated[str, Depends(authenticate_dispatcher)],
 ) -> List[str]:
     """Returns a list of subscriptions names with the given realm_topic."""
@@ -60,7 +60,7 @@ async def get_realm_topic_subscriptions(
 async def post_message_to_subscription_queue(
     name: str,
     msg: Message,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     authentication: Annotated[str, Depends(authenticate_dispatcher)],
 ):
     """Post the message to the subscription's queue."""
@@ -76,7 +76,7 @@ async def post_message_to_subscription_queue(
 async def post_message_to_subscription_prefill_queue(
     name: str,
     data: Message,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     authentication: Annotated[str, Depends(authenticate_prefill)],
 ):
     """Post the prefill message to the subscription's prefill queue."""
@@ -91,7 +91,7 @@ async def post_message_to_subscription_prefill_queue(
 )
 async def create_prefill_stream(
     name: str,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     authentication: Annotated[str, Depends(authenticate_prefill)],
 ):
     """Create the prefill stream for the subscription."""
@@ -104,7 +104,7 @@ async def create_prefill_stream(
 async def update_subscription_queue_status(
     name: str,
     prefill_queue_status: FillQueueStatus,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     authentication: Annotated[str, Depends(authenticate_prefill)],
 ):
     """Update subscription's prefill queue status"""
@@ -119,7 +119,7 @@ async def update_subscription_queue_status(
 @router.post("/events", status_code=fastapi.status.HTTP_202_ACCEPTED)
 async def create_new_message(
     msg: Message,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     authentication: Annotated[str, Depends(authenticate_udm_producer)],
 ):
     """Publish a new message to the incoming queue."""

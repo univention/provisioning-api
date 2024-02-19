@@ -10,17 +10,16 @@ import logging
 from fastapi import Query, Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from consumer.messages.service.messages import MessageService
-from consumer.port import ConsumerPortDependency
-from consumer.subscriptions.service.subscription import SubscriptionService
-
-from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
+from app.consumer.subscriptions.subscription.sink import SinkManager, WebSocketSink
 from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
     MQMessage,
     Message,
 )
+from shared.services.messages import MessageService
+from shared.services.port import PortDependency
+from shared.services.subscription import SubscriptionService
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ async def post_message_status(
     name: str,
     msg: MQMessage,
     report: MessageProcessingStatusReport,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
     """Report on the processing of the given message."""
@@ -66,7 +65,7 @@ async def post_message_status(
 )
 async def get_subscription_messages(
     name: str,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
     count: Annotated[int, Query(ge=1)] = 1,
     timeout: float = 5,
@@ -90,7 +89,7 @@ async def get_subscription_messages(
 async def remove_message(
     name: str,
     msg: MQMessage,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
     """Remove message."""
@@ -106,7 +105,7 @@ async def remove_message(
 async def subscription_websocket(
     name: str,
     websocket: fastapi.WebSocket,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
     """Stream messages for an existing subscription."""

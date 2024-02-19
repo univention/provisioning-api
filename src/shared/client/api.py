@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 
-from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
-from consumer.messages.api import v1_prefix as messages_api_prefix
+from app.consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
+from app.consumer.messages.api import v1_prefix as messages_api_prefix
 from shared.models import (
     MQMessage,
     Subscription,

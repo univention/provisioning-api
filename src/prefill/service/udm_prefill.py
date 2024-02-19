@@ -3,14 +3,26 @@
 
 from datetime import datetime
 import logging
-
+import re
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
-from consumer.subscriptions.service.subscription import match_subscription
 from shared.models import FillQueueStatus
 from shared.models.queue import PrefillMessage, Message, MQMessage
 
-logger = logging.getLogger(__name__)
+
+def match_subscription(
+    sub_realm: str, sub_topic: str, msg_realm: str, msg_topic: str
+) -> bool:
+    """Decides whether a message is sent to a subscriber.
+
+    Compares the subscriber's realm and topic to those of the message and
+    returns `True` if the message should be sent to the subscriber.
+    """
+
+    if sub_realm != msg_realm:
+        return False
+
+    return re.fullmatch(sub_topic, msg_topic) is not None
 
 
 class UDMPreFill(PreFillService):
@@ -50,10 +62,10 @@ class UDMPreFill(PreFillService):
                         await self.start_prefill_process(message)
                     else:
                         # FIXME: unhandled realm
-                        logging.error("Unhandled realm: %s", self._realm)
+                        self._logger.error("Unhandled realm: %s", self._realm)
 
             except Exception as exc:
-                logger.error("Failed to launch pre-fill handler: %s", exc)
+                self._logger.error("Failed to launch pre-fill handler: %s", exc)
                 await self.mark_request_as_failed(message)
             else:
                 await self.mark_request_as_done(message)

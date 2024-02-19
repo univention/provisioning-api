@@ -2,35 +2,18 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-import re
 from typing import List, Optional
 
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 
-from consumer.port import ConsumerPort
-from consumer.subscriptions.subscription.sink import SinkManager
-from shared.models import Subscription, FillQueueStatus
+from .port import Port
+from shared.models import Subscription, FillQueueStatus, NewSubscription
 from shared.models.subscription import Bucket
 
-manager = SinkManager()
+REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def match_subscription(
-    sub_realm: str, sub_topic: str, msg_realm: str, msg_topic: str
-) -> bool:
-    """Decides whether a message is sent to a subscriber.
-
-    Compares the subscriber's realm and topic to those of the message and
-    returns `True` if the message should be sent to the subscriber.
-    """
-
-    if sub_realm != msg_realm:
-        return False
-
-    return re.fullmatch(sub_topic, msg_topic) is not None
 
 
 def verify_password(password: str, hashed_pass: str) -> bool:
@@ -38,9 +21,82 @@ def verify_password(password: str, hashed_pass: str) -> bool:
 
 
 class SubscriptionService:
-    def __init__(self, port: ConsumerPort):
+    def __init__(self, port: Port):
         self._port = port
         self.logger = logging.getLogger(__name__)
+
+    async def get_subscriptions(self) -> List[Subscription]:
+        """
+        Return a list of all known subscriptions.
+        """
+
+        names = await self.get_subscription_names()
+        subscriptions = [await self.get_subscription_info(name) for name in names]
+
+        return subscriptions
+
+    async def get_subscription_names(self):
+        return await self._port.get_bucket_keys(Bucket.credentials)
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        return password_context.hash(password)
+
+    async def register_subscription(self, new_sub: NewSubscription):
+        """Register a new subscription."""
+
+        if await self._port.get_str_value(new_sub.name, Bucket.credentials):
+            raise HTTPException(
+                status_code=400,
+                detail="Subscription with the given name already registered",
+            )
+        else:
+            self.logger.info(
+                "Registering new subscription with the name: %s", new_sub.name
+            )
+            encrypted_password = self.hash_password(new_sub.password)
+            await self._port.put_value(
+                new_sub.name, encrypted_password, Bucket.credentials
+            )
+
+            await self.prepare_and_store_subscription_info(new_sub)
+
+            self.logger.info("New subscription was registered")
+
+    async def prepare_and_store_subscription_info(self, new_sub: NewSubscription):
+        if new_sub.request_prefill:
+            prefill_queue_status = FillQueueStatus.pending
+        else:
+            prefill_queue_status = FillQueueStatus.done
+
+        realms_topics_str = [
+            REALM_TOPIC_TEMPLATE.format(realm=r, topic=t)
+            for r, t in new_sub.realms_topics
+        ]
+        sub_info = Subscription(
+            name=new_sub.name,
+            realms_topics=realms_topics_str,
+            request_prefill=new_sub.request_prefill,
+            prefill_queue_status=prefill_queue_status,
+        )
+        await self.set_sub_info(new_sub.name, sub_info)
+        await self.update_realm_topic_subscriptions(
+            sub_info.realms_topics, new_sub.name
+        )
+        await self._port.create_stream(new_sub.name)
+        await self._port.create_consumer(new_sub.name)
+
+    async def update_realm_topic_subscriptions(
+        self, realms_topics: List[str], name: str
+    ):
+        for realm_topic in realms_topics:
+            await self.update_subscription_names(realm_topic, name)
+
+    async def update_subscription_names(self, key: str, value: str) -> None:
+        subs = await self._port.get_str_value(key, Bucket.subscriptions)
+        if subs:
+            value = subs + f",{value}"
+        await self._port.put_value(key, value, Bucket.subscriptions)
 
     async def get_subscription(self, name: str) -> Subscription:
         """

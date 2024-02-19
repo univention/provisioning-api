@@ -5,7 +5,7 @@ from fastapi import APIRouter
 
 from .v1 import router as router_v1
 
-name = "/internal"
+name = ""
 v1_prefix = f"{name}/v1"
 
 router = APIRouter()

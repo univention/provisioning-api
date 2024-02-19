@@ -15,14 +15,14 @@ from shared.models.queue import PrefillMessage
 from shared.models.subscription import Bucket
 
 
-class ConsumerPort:
+class Port:
     def __init__(self):
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
 
     @staticmethod
     async def port_dependency():
-        port = ConsumerPort()
+        port = Port()
         await port.mq_adapter.connect()
         await port.kv_adapter.init([Bucket.subscriptions, Bucket.credentials])
         try:
@@ -83,5 +83,11 @@ class ConsumerPort:
     async def delete_consumer(self, stream_name: str):
         await self.mq_adapter.delete_consumer(stream_name)
 
+    async def get_bucket_keys(self, bucket: Bucket):
+        return await self.kv_adapter.get_keys(bucket)
 
-ConsumerPortDependency = Annotated[ConsumerPort, Depends(ConsumerPort.port_dependency)]
+    async def create_consumer(self, subject):
+        await self.mq_adapter.create_consumer(subject)
+
+
+PortDependency = Annotated[Port, Depends(Port.port_dependency)]

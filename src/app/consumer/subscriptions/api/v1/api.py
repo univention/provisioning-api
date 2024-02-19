@@ -7,10 +7,9 @@ import fastapi
 from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from consumer.port import ConsumerPortDependency
-
-from consumer.subscriptions.service.subscription import SubscriptionService
 from shared.models import Subscription
+from shared.services.port import PortDependency
+from shared.services.subscription import SubscriptionService
 
 router = fastapi.APIRouter()
 security = HTTPBasic()
@@ -22,7 +21,7 @@ security = HTTPBasic()
 async def get_subscription(
     name: str,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-    port: ConsumerPortDependency,
+    port: PortDependency,
 ) -> Subscription:
     """Return information about a subscription."""
 
@@ -40,7 +39,7 @@ async def get_subscription(
 )
 async def delete_subscription(
     name: str,
-    port: ConsumerPortDependency,
+    port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
     """Delete a subscription."""

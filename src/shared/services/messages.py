@@ -2,19 +2,25 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
+from datetime import datetime
 from typing import List, Optional
 
-from consumer.port import ConsumerPort
+from .port import Port
 
-from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import FillQueueStatus, MQMessage, Message
-
+from .subscription import SubscriptionService
+from shared.models import (
+    FillQueueStatus,
+    MQMessage,
+    Message,
+    NewSubscription,
+    PrefillMessage,
+)
 
 PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"
 
 
 class MessageService:
-    def __init__(self, port: ConsumerPort):
+    def __init__(self, port: Port):
         self._port = port
         self.logger = logging.getLogger(__name__)
 
@@ -141,3 +147,13 @@ class MessageService:
         # TODO: define the name "incoming" globally or handle it differently alltogether
 
         await self._port.add_message("incoming", event)
+
+    async def send_request_to_prefill(self, subscription: NewSubscription):
+        self.logger.info("Sending the requests to prefill")
+        message = PrefillMessage(
+            publisher_name="consumer-registration",
+            ts=datetime.now(),
+            realms_topics=subscription.realms_topics,
+            subscription_name=subscription.name,
+        )
+        await self._port.add_message("prefill", message)
