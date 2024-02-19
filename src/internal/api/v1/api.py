@@ -14,7 +14,7 @@ from shared.config import settings
 from shared.models import Message, FillQueueStatus
 from shared.auth import authenticate_user
 
-router = fastapi.APIRouter(tags=["internal"], include_in_schema=settings.debug)
+router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()
 
 

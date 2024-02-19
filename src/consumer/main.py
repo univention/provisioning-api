@@ -49,8 +49,30 @@ if settings.cors_all:
 
 app.include_router(messages_api_router)
 app.include_router(subscriptions_api_router)
-app.include_router(admin_api_router)
-app.include_router(internal_api_router)
+
+internal_openapi_tags = [
+    {
+        "name": "admin",
+        "description": "Administrative actions",
+    },
+    {
+        "name": "internal",
+        "description": "Internal actions",
+    },
+]
+internal_app = FastAPI(
+    debug=settings.debug,
+    description="Internal endpoints for Provisioning Dispatcher",
+    openapi_tags=internal_openapi_tags,
+    root_path=settings.root_path,
+    title="Internal API",
+    version="v1",
+)
+
+internal_app.include_router(admin_api_router)
+internal_app.include_router(internal_api_router)
+
+app.mount("/internal", internal_app)
 
 
 @app.exception_handler(RequestValidationError)

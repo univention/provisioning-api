@@ -13,7 +13,6 @@ from shared.config import settings
 from shared.models import Subscription, NewSubscription
 from shared.auth import authenticate_user
 
-
 security = HTTPBasic()
 
 
@@ -21,11 +20,7 @@ def authenticate_admin(credentials: Annotated[HTTPBasicCredentials, Depends(secu
     authenticate_user(credentials, settings.admin_username, settings.admin_password)
 
 
-router = fastapi.APIRouter(
-    tags=["admin"],
-    dependencies=[Depends(authenticate_admin)],
-    include_in_schema=settings.debug,
-)
+router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])
 
 
 @router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK)
