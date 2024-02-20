@@ -19,7 +19,7 @@ from shared.models import (
 )
 from shared.services.messages import MessageService
 from shared.services.port import PortDependency
-from shared.services.subscription import SubscriptionService
+from shared.services.subscriptions import SubscriptionService
 
 logger = logging.getLogger(__name__)
 
@@ -106,12 +106,8 @@ async def subscription_websocket(
     name: str,
     websocket: fastapi.WebSocket,
     port: PortDependency,
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
     """Stream messages for an existing subscription."""
-
-    sub_service = SubscriptionService(port)
-    await sub_service.authenticate_user(credentials, name)
 
     msg_service = MessageService(port)
 

@@ -71,8 +71,9 @@ internal_app = FastAPI(
 
 internal_app.include_router(admin_api_router)
 internal_app.include_router(internal_api_router)
+internal_app_path = "/internal"
 
-app.mount("/internal", internal_app)
+app.mount(internal_app_path, internal_app)
 
 
 @app.exception_handler(RequestValidationError)

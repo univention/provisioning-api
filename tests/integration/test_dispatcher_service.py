@@ -34,17 +34,14 @@ async def dispatcher_mock() -> DispatcherPort:
     Msg.in_progress = AsyncMock()
     Msg.ack = AsyncMock()
     async with aiohttp.ClientSession() as session:
-        port._consumer_registration_adapter._session = session
-        port._consumer_messages_adapter._session = session
+        port._internal_api_adapter._session = session
     return port
 
 
 @pytest.mark.anyio
 class TestDispatcher:
-    @patch(
-        "src.shared.adapters.consumer_registration_adapter.aiohttp.ClientSession.get"
-    )
-    @patch("src.shared.adapters.consumer_messages_adapter.aiohttp.ClientSession.post")
+    @patch("src.shared.adapters.internal_api_adapter.aiohttp.ClientSession.get")
+    @patch("src.shared.adapters.internal_api_adapter.aiohttp.ClientSession.post")
     async def test_dispatch_events(
         self,
         mock_post,
@@ -78,10 +75,10 @@ class TestDispatcher:
         dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
         # check getting subscriptions for the realm_topic
         mock_get.assert_called_once_with(
-            "http://localhost:7777/subscriptions/v1/subscriptions/filter?realm_topic=udm:groups/group"
+            "http://localhost:7777/internal/v1/subscriptions/filter?realm_topic=udm:groups/group"
         )
         # check storing event in the consumer queue
         mock_post.assert_called_once_with(
-            f"http://localhost:7777/messages/v1/subscriptions/{SUBSCRIPTION_NAME}/messages",
+            f"http://localhost:7777/internal/v1/subscriptions/{SUBSCRIPTION_NAME}/messages",
             json=FLAT_MESSAGE,
         )

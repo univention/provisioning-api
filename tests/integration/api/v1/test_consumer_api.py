@@ -4,7 +4,7 @@
 import httpx
 import pytest
 
-from consumer.messages.api import v1_prefix as messages_api_prefix
+from app.consumer.messages.api import v1_prefix as messages_api_prefix
 from tests.conftest import (
     REALMS_TOPICS_STR,
     REALM,
@@ -13,11 +13,12 @@ from tests.conftest import (
     BODY,
     FLAT_MESSAGE,
     SUBSCRIPTION_NAME,
+    CONSUMER_PASSWORD,
 )
 from shared.models.subscription import FillQueueStatus
-from consumer.subscriptions.api import v1_prefix as api_prefix
-from consumer.main import app as messages_app
-from consumer.main import app as subscriptions_app
+from app.consumer.subscriptions.api import v1_prefix as api_prefix
+from app.main import app as messages_app
+from app.main import app as subscriptions_app
 
 
 @pytest.fixture(scope="session")
@@ -45,7 +46,8 @@ async def messages_client():
 class TestConsumer:
     async def test_get_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.get(
-            f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}"
+            f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}",
+            auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200
         data = response.json()
@@ -63,6 +65,7 @@ class TestConsumer:
     async def test_delete_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.delete(
             f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}",
+            auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200
 
@@ -71,7 +74,8 @@ class TestConsumer:
         messages_client: httpx.AsyncClient,
     ):
         response = await messages_client.get(
-            f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages"
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages",
+            auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200
         data = response.json()
@@ -81,10 +85,7 @@ class TestConsumer:
         assert data[0]["data"]["body"] == BODY
         assert data[0]["data"]["publisher_name"] == PUBLISHER_NAME
 
-    async def test_post_message_status(
-        self,
-        messages_client: httpx.AsyncClient,
-    ):
+    async def test_post_message_status(self, messages_client: httpx.AsyncClient):
         nats_msg = {
             "subject": SUBSCRIPTION_NAME,
             "reply": (
@@ -96,5 +97,6 @@ class TestConsumer:
         response = await messages_client.post(
             f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages-status",
             json={"msg": nats_msg, "report": {"status": "ok"}},
+            auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200

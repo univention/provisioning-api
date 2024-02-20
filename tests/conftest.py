@@ -4,22 +4,21 @@
 import json
 from copy import copy, deepcopy
 from datetime import datetime
+from typing import Any
 from unittest.mock import AsyncMock
-
 import pytest
 from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from admin.port import AdminPort
-from consumer.port import ConsumerPort
-from consumer.main import app
-from events.port import EventsPort
+from app.main import app, internal_app
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import Message
 from shared.models.queue import MQMessage
 from shared.models.queue import PrefillMessage
+from shared.models.subscription import Bucket
+from shared.services.port import Port
 
 REALM = "udm"
 TOPIC = "groups/group"
@@ -29,6 +28,11 @@ REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS = [[REALM, TOPIC]]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+
+CONSUMER_PASSWORD = "password"
+CONSUMER_HASHED_PASSWORD = (
+    "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"
+)
 
 SUBSCRIPTION_INFO = {
     "name": SUBSCRIPTION_NAME,
@@ -139,6 +143,10 @@ kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
 kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
 
+kv_password = copy(BASE_KV_OBJ)
+kv_password.key = SUBSCRIPTION_NAME
+kv_password.value = CONSUMER_HASHED_PASSWORD.encode()
+
 CREDENTIALS = HTTPBasicCredentials(username="dev-user", password="dev-password")
 
 
@@ -149,14 +157,20 @@ class FakeMessageQueue(AsyncMock):
 
 
 class FakeKvStore(AsyncMock):
-    @classmethod
-    async def get(cls, key: str):
-        values = {
-            "abc:def": kv_subs,
-            "foo:bar": kv_subs,
-            SUBSCRIPTION_NAME: kv_sub_info,
-            "udm:groups/group": kv_subs,
-        }
+    def __init__(self, bucket: Bucket, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.bucket = bucket
+
+    async def get(self, key: str):
+        if self.bucket == Bucket.credentials:
+            values = {SUBSCRIPTION_NAME: kv_password}
+        else:
+            values = {
+                "abc:def": kv_subs,
+                "foo:bar": kv_subs,
+                SUBSCRIPTION_NAME: kv_sub_info,
+                "udm:groups/group": kv_subs,
+            }
         if values.get(key):
             return values.get(key)
         raise KeyNotFoundError
@@ -177,24 +191,11 @@ class FakeJs(AsyncMock):
 
     @classmethod
     async def key_value(cls, bucket: str):
-        return FakeKvStore()
+        return FakeKvStore(bucket)
 
 
-async def consumer_port_fake_dependency() -> ConsumerPort:
-    port = ConsumerPort()
-    port.mq_adapter = MockNatsMQAdapter()
-    port.kv_adapter = MockNatsKVAdapter()
-    return port
-
-
-async def events_port_fake_dependency() -> EventsPort:
-    port = EventsPort()
-    port.mq_adapter = MockNatsMQAdapter()
-    return port
-
-
-async def admin_port_fake_dependency() -> AdminPort:
-    port = AdminPort()
+async def port_fake_dependency() -> Port:
+    port = Port()
     port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     return port
@@ -223,11 +224,9 @@ def anyio_backend():
 @pytest.fixture(autouse=True)
 def override_dependencies():
     # Override original port
-    app.dependency_overrides = {
-        ConsumerPort.port_dependency: consumer_port_fake_dependency,
-        EventsPort.port_dependency: events_port_fake_dependency,
-        AdminPort.port_dependency: admin_port_fake_dependency,
-    }
+    app.dependency_overrides[Port.port_dependency] = port_fake_dependency
+    internal_app.dependency_overrides[Port.port_dependency] = port_fake_dependency
     yield  # This will ensure the setup is done before tests and cleanup after
     # Clear the overrides after the tests
     app.dependency_overrides.clear()
+    internal_app.dependency_overrides.clear()

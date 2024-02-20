@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from .port import Port
 
-from .subscription import SubscriptionService
+from .subscriptions import SubscriptionService
 from shared.models import (
     FillQueueStatus,
     MQMessage,

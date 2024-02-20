@@ -7,14 +7,10 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from tests.conftest import (
-    REALMS_TOPICS_STR,
-    SUBSCRIPTION_NAME,
-    CREDENTIALS,
-)
+from tests.conftest import REALMS_TOPICS_STR, SUBSCRIPTION_NAME, CREDENTIALS
 from shared.models.subscription import FillQueueStatus
-from admin.api import v1_prefix as api_prefix
-from consumer.main import app as subscriptions_app
+from app.admin.api import v1_prefix as api_prefix
+from app.main import app as subscriptions_app, internal_app_path
 
 
 @pytest.fixture(scope="session")
@@ -32,7 +28,7 @@ async def subscriptions_client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("admin.api.v1.api.settings").start()
+    settings = patch("app.admin.api.v1.api.settings").start()
     settings.admin_username = CREDENTIALS.username
     settings.admin_password = CREDENTIALS.password
     return settings
@@ -45,7 +41,7 @@ class TestAdmin:
     ):
         name = str(uuid.uuid4())
         response = await subscriptions_client.post(
-            f"{api_prefix}/subscriptions",
+            f"{internal_app_path}{api_prefix}/subscriptions",
             json={
                 "name": name,
                 "realms_topics": [["foo", "bar"]],
@@ -60,7 +56,7 @@ class TestAdmin:
         self, subscriptions_client: httpx.AsyncClient, settings_mock
     ):
         response = await subscriptions_client.get(
-            f"{api_prefix}/subscriptions",
+            f"{internal_app_path}{api_prefix}/subscriptions",
             auth=(CREDENTIALS.username, CREDENTIALS.password),
         )
         assert response.status_code == 200

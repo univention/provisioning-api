@@ -4,18 +4,16 @@
 from unittest.mock import AsyncMock, patch, call
 import pytest
 
-from consumer.messages.service.messages import PREFILL_SUBJECT_TEMPLATE
+from shared.services.messages import MessageService, PREFILL_SUBJECT_TEMPLATE
 from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIPTION_NAME
-from consumer.messages.service import MessageService
+
 from shared.models import FillQueueStatus
 from shared.models.queue import MQMessage
 
 
 @pytest.fixture
 def sub_service() -> AsyncMock:
-    yield patch(
-        "consumer.messages.service.messages.SubscriptionService"
-    ).start().return_value
+    yield patch("shared.services.messages.SubscriptionService").start().return_value
 
 
 @pytest.fixture
@@ -196,3 +194,8 @@ class TestMessageService:
             self.prefill_subject
         )
         assert result is None
+
+    async def test_add_live_message(self, message_service: MessageService):
+        await message_service.add_live_event(MESSAGE)
+
+        message_service._port.add_message.assert_called_once_with("incoming", MESSAGE)

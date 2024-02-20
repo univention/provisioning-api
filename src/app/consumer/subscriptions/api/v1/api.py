@@ -9,7 +9,7 @@ from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
 from shared.models import Subscription
 from shared.services.port import PortDependency
-from shared.services.subscription import SubscriptionService
+from shared.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter()
 security = HTTPBasic()

@@ -12,7 +12,7 @@ from shared.models import Subscription, NewSubscription
 from shared.auth import authenticate_user
 from shared.services.messages import MessageService
 from shared.services.port import PortDependency
-from shared.services.subscription import SubscriptionService
+from shared.services.subscriptions import SubscriptionService
 
 security = HTTPBasic()
 
