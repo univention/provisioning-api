@@ -7,7 +7,7 @@ import difflib
 import json
 
 from shared.client import AsyncClient, ProvisioningMessage
-from shared.client.config import settings
+from shared.client.config import ClientSettings
 
 
 def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
@@ -107,6 +107,7 @@ def handle_message(message: ProvisioningMessage):
 
 
 async def main():
+    settings = ClientSettings()
     name = settings.consumer_name
     password = settings.provisioning_api_password
 
@@ -119,20 +120,6 @@ async def main():
         response = await client.get_subscription_messages(name=name, timeout=5)
         for message in response:
             handle_message(message=message)
-
-    # FIXME: No stream available any more. Where did it go?
-    # async with client.stream(name) as stream:
-    #     while True:
-    #         # handle incoming message
-    #         message: shared.client.Message = await stream.receive_message()
-    #         if message.realm == "udm":
-    #             handle_udm_message(message)
-    #         else:
-    #             handle_any_message(message)
-
-    #         # confirm message reception
-    #         status = shared.client.MessageProcessingStatus.ok
-    #         await stream.send_report(status)
 
 
 def run():

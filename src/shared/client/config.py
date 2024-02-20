@@ -6,18 +6,18 @@ from pydantic_settings import BaseSettings
 import uuid
 
 
-class Settings(BaseSettings):
+class ClientSettings(BaseSettings):
     # Consumer Name
     consumer_name: str = str(uuid.uuid4())
 
     # Provisioning API: host
-    provisioning_api_host: str = "localhost"
+    provisioning_api_host: str
     # Provisioning API: port
-    provisioning_api_port: int = 7777
+    provisioning_api_port: int
     # Provisioning API: username
-    provisioning_api_username: str = ""
+    provisioning_api_username: str
     # Provisioning REST API: password
-    provisioning_api_password: str = ""
+    provisioning_api_password: str
 
     realms_topics: List[Tuple[str, str]] = []
     request_prefill: bool = False
@@ -33,6 +33,3 @@ class Settings(BaseSettings):
     @property
     def consumer_messages_url(self) -> str:
         return f"{self.base_url}/messages/v1"
-
-
-settings = Settings()
