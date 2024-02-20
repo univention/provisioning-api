@@ -19,13 +19,13 @@ from shared.models import (
 class AsyncClient:
     def __init__(self, base_url, username: str, password: str):
         self.base_url = base_url
-        self.auth = aiohttp.BasicAuth(username, password)
+        self._auth = aiohttp.BasicAuth(username, password)
 
     async def cancel_subscription(self, name: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.delete(
                 f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}",
-                auth=self.auth,
+                auth=self._auth,
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -34,7 +34,7 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}",
-                auth=self.auth,
+                auth=self._auth,
             ) as response:
                 data = await response.json()
                 return Subscription.model_validate(data)
@@ -59,7 +59,7 @@ class AsyncClient:
             async with session.get(
                 f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages",
                 params=params,
-                auth=self.auth,
+                auth=self._auth,
             ) as response:
                 msgs = await response.json()
                 return [MQMessage.model_validate(msg) for msg in msgs]
@@ -76,7 +76,7 @@ class AsyncClient:
             async with session.post(
                 f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages/",
                 json={"msg": message.model_dump(), "report": report.model_dump()},
-                auth=self.auth,
+                auth=self._auth,
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -90,7 +90,7 @@ class AsyncClient:
             async with session.post(
                 f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/messages-status",
                 json=message.model_dump(),
-                auth=self.auth,
+                auth=self._auth,
             ):
                 # either return nothing or let `.post` throw
                 pass
