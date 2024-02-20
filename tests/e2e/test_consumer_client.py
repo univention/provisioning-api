@@ -14,34 +14,37 @@ from tests.conftest import (
     REALM,
     TOPIC,
     REALMS_TOPICS,
+    CONSUMER_PASSWORD,
 )
 from univention.admin.rest.client import UDM
+
+SUBSCRIBER_NAME = str(uuid.uuid4())
 
 
 @pytest.fixture
 def provisioning_client() -> shared.client.AsyncClient:
-    return shared.client.AsyncClient("http://localhost:7777")
+    return shared.client.AsyncClient(
+        "http://localhost:7777", SUBSCRIBER_NAME, CONSUMER_PASSWORD
+    )
 
 
 @pytest.fixture
 async def simple_subscription(provisioning_client: shared.client.AsyncClient):
-    subscriber_name = str(uuid.uuid4())
-
     response = requests.post(
-        "http://localhost:7777/admin/v1/subscriptions",
+        "http://localhost:7777/internal/admin/v1/subscriptions",
         json={
-            "name": subscriber_name,
+            "name": SUBSCRIBER_NAME,
             "realms_topics": REALMS_TOPICS,
             "request_prefill": False,
-            "password": "password",
+            "password": CONSUMER_PASSWORD,
         },
         auth=(settings.admin_username, settings.admin_password),
     )
     assert response.status_code == 201
 
-    yield subscriber_name
+    yield SUBSCRIBER_NAME
 
-    await provisioning_client.cancel_subscription(subscriber_name)
+    await provisioning_client.cancel_subscription(SUBSCRIBER_NAME)
 
 
 async def test_create_subscription(
@@ -66,8 +69,8 @@ async def test_get_empty_messages(
 async def test_send_message(
     provisioning_client: shared.client.AsyncClient, simple_subscription: str
 ):
-    requests.post(
-        "http://localhost:7777/events/v1/events",
+    response = requests.post(
+        "http://localhost:7777/internal/v1/events",
         json={
             "publisher_name": "consumer_client_tests",
             "ts": "2024-02-07T09:01:33.835Z",
@@ -75,7 +78,9 @@ async def test_send_message(
             "topic": TOPIC,
             "body": {"foo": "bar"},
         },
+        auth=(settings.udm_producer_username, settings.udm_producer_password),
     )
+    assert response.status_code == 202
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
