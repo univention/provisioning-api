@@ -6,9 +6,10 @@ import pytest
 import requests
 import uuid
 
+from app.main import internal_app_path
 from shared.config import settings
-from admin.api import v1_prefix as admin_api_prefix
-from consumer.messages.api import v1_prefix as messages_api_prefix
+from app.admin.api import v1_prefix as admin_api_prefix
+from app.consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
 
 REALM = "udm"
@@ -35,14 +36,15 @@ async def test_workflow():
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
     connection = connect_ldap_server()
+    password = "password"
 
     response = requests.post(
-        f"{BASE_URL}{admin_api_prefix}/subscriptions",
+        f"{BASE_URL}{internal_app_path}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
             "request_prefill": False,
-            "password": "password",
+            "password": password,
         },
         auth=(settings.admin_username, settings.admin_password),
     )
@@ -56,7 +58,8 @@ async def test_workflow():
     )
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
+        auth=(name, password),
     )
     assert response.status_code == 200
 
@@ -74,7 +77,8 @@ async def test_workflow():
     connection.modify(dn, changes)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
+        auth=(name, password),
     )
     assert response.status_code == 200
 
@@ -92,7 +96,8 @@ async def test_workflow():
     connection.delete(dn)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
+        auth=(name, password),
     )
     assert response.status_code == 200
 
