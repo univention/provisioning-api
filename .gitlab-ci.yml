@@ -47,6 +47,8 @@ lint-pre-commit:
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
   - IMAGE_NAME: "test"
     DOCKERFILE_PATH: "docker/test/Dockerfile"
+  - IMAGE_NAME: "example-client"
+    DOCKERFILE_PATH: "docker/example-client/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
@@ -55,6 +57,8 @@ lint-pre-commit:
     - "udm-listener"
   - IMAGE_NAME:
     - "dispatcher"
+  - IMAGE_NAME:
+    - "example-client"
 
 container-build:
   parallel:

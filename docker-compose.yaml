@@ -102,6 +102,7 @@ services:
       - ldap-shared-run:/var/run/slapd/:ro
 
   example-client:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/example-client:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/example-client/Dockerfile
