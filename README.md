@@ -97,18 +97,86 @@ poetry run pytest <dir/of/test-subset>
 
 ### E2E tests
 
-Run the containers:
+
+#### Using docker compose
+
+First, start the provisioning-components:
 
 ```sh
 docker compose up --detach --remove-orphans
 ```
 
-Wait for up to 1 minute for the default LDAP changes to be processed by the dispatcher.
-
-Run the E2E tests:
+optimized command:
 
 ```sh
-python tests/e2e/end_2_end.py
+docker compose up --pull always --build events-and-consumer-api nats dispatcher prefill udm-listener ldap-notifier udm-rest-api ldap-server
+```
+
+Wait for up to 1 minute for the default LDAP changes to be processed by the dispatcher.
+
+Then run the e2e tests.
+
+```sh
+poetry run pytest tests/e2e/
+```
+
+optimized command:
+
+```sh
+poetry shell
+pytest -v -p no:cacheprovider tests/e2e/
+```
+
+There is a test container designed to run the e2e tests in docker-compose
+in a gitlab pipeline. But this can also be executed locally
+to debug pipeline problems and you can't or don't want to install the test dependencies locally,
+
+`docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --udm-rest-api-base-url "http://udm-rest-api:9979/udm/" --provisioning-api-base-url "http://events-and-consumer-api:7777/"`
+
+
+#### using the Tilt dev-env
+
+
+Start the necessary services via tilt:
+```sh
+tilt up keycloak ldap-server ldap-notifier udm-rest-api stack-data-ums stack-data-swp provisioning provisioning-udm-listener
+```
+Limiting the tilt-resources instead of plainly running `tilt up` will save time and machine resources.
+
+The provisioning-api and ldap-server are not accessible from the outside.
+We can work around that by starting a kubernetes `port-forward`:
+`kubectl port-forward provisioning-api-{pod-hash} 7777`
+`kubectl port-forward ldap-server-0 3890:389`
+
+The unit- and integration-tests are configured via ENV values.
+The End to End tests are designed to also run in other environments.
+(outside the provisioning repository)
+That's why they are configured using pytest arguments:
+
+```sh
+Custom options:
+  --provisioning-api-base-url=PROVISIONING_API_BASE_URL
+                        Base URL of the UDM REST API
+  --provisioning-admin-username=PROVISIONING_ADMIN_USERNAME
+                        UDM admin login password
+  --provisioning-admin-password=PROVISIONING_ADMIN_PASSWORD
+                        UDM admin login password
+  --udm-rest-api-base-url=UDM_REST_API_BASE_URL
+                        Base URL of the UDM REST API
+  --udm-admin-username=UDM_ADMIN_USERNAME
+                        UDM admin login password
+  --udm-admin-password=UDM_ADMIN_PASSWORD
+                        UDM admin login password
+  --ldap-server-uri=LDAP_SERVER_URI
+  --ldap-host-dn=LDAP_HOST_DN
+  --ldap-password=LDAP_PASSWORD
+```
+
+E.g.:
+
+```sh
+poetry shell
+pytest -v -p no:cacheprovider tests/e2e/ --ldap-server-uri ldap://localhost:3890 --provisioning-admin-username admin --provisioning-admin-password provisioning
 ```
 
 ### Pre-commit
