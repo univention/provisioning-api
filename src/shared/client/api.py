@@ -128,66 +128,100 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def on_message(
+
+class MessageHandler:
+    def __init__(
         self,
-        name: str,
-        callbacks: List[Callable[[Message], Coroutine[None, None, None]]] = [],
+        client: AsyncClient,
+        subscription_name: str,
+        callbacks: List[Callable[[Message], Coroutine[None, None, None]]],
+        pop_after_handling: bool = False,
         message_limit: Optional[int] = None,
-        pop_after_handling: bool = True,
     ):
         """
-        This method is designed for asynchronous execution, either by awaiting it within an async context
-        or using `asyncio.run()`.
-        It continuously listens for messages, either indefinitely or until a specified message limit is reached, and
-        invokes a series of callbacks for each message. Each callback should be an asynchronous function
-        to facilitate downstream asynchronous operations. To prevent race conditions between message processing and
-        callback execution, each message and its callbacks are handled sequentially.
+        Each callback should be an asynchronous function to facilitate downstream asynchronous operations.
+        To prevent race conditions between message processing and callback execution,
+        each message and its callbacks are handled sequentially.
 
         Args:
-            name: The name of the target subscription to listen on.
+            client: AsyncClient
+            subscription_name: The name of the target subscription to listen on.
             callbacks: A list of asynchronous callback functions, each accepting a single message object as a parameter.
             message_limit: An optional integer specifying the maximum number of messages to process,
                 primarily to facilitate testing.
             pop_after_handling: If False, messages are acknowledged immediately upon reception
                 rather than after all callbacks for the message have been successfully executed.
         """
-
         if not callbacks:
-            return
+            raise ValueError("Callback functions can't be empty")
+        self.client = client
+        self.subscription_name = subscription_name
+        self.callbacks = callbacks
+        self.pop_after_handling = pop_after_handling
+        self.message_limit = message_limit
+
+    async def _callback_wrapper(
+        self,
+        message: MQMessage,
+        callback: Callable[[Message], Coroutine[None, None, None]],
+    ):
+        """
+        Wrapper around a clients callback function to encapsulate
+        error handling and message acknowledgement
+        """
+        try:
+            # TODO: Message is not enough, we need a specific ClientMessage, that includes for example num_redelivered
+            await callback(Message.model_validate(message.data))
+            if not self.pop_after_handling:
+                return
+            try:
+                await self.client.set_message_status(
+                    self.subscription_name,
+                    message,
+                    shared.models.api.MessageProcessingStatus.ok,
+                )
+            except (
+                aiohttp.ClientError,
+                aiohttp.ClientConnectionError,
+                aiohttp.ClientResponseError,
+            ) as exc:
+                logger.exception(
+                    "Failed to acknowledge message meaning it will be redilivered at a later point",
+                    exc,
+                )
+        except Exception:
+            logger.exception("Unknown error occurred while executing a callback")
+
+    async def run(
+        self,
+    ):
+        """
+        This method is designed for asynchronous execution, either by awaiting it within an async context
+        or using `asyncio.run()`.
+        It continuously listens for messages, either indefinitely or until a specified message limit is reached, and
+        invokes a series of callbacks for each message.
+        """
         counter = 0
 
         while True:
-            messages = await self.get_subscription_messages(
-                name,
-                count=1,
+            print("Loop number: ", counter)
+            messages = await self.client.get_subscription_messages(
+                self.subscription_name,
+                count=10,
                 timeout=10,
                 # TODO: pop is broken serverside at the moment
-                # pop=True,
+                # pop= not pop_after_handling,
             )
             if not messages:
+                print("Did not recieve any messages")
                 continue
                 # TODO: Remove after debugging stage
-            elif len(messages) > 1:
-                raise ValueError("Somehow recieved multiple messages")
-
             print("recieved message")
 
-            for callback in callbacks:
-                try:
-                    print("executing callback")
-                    await callback(Message.model_validate(messages[0].data))
-                    if pop_after_handling:
-                        await self.set_message_status(
-                            name,
-                            messages[0],
-                            shared.models.api.MessageProcessingStatus.ok,
-                        )
-                except Exception as exc:
-                    # TODO: better error handling
-                    breakpoint()
-                    print(exc)
-
-            if message_limit:
-                counter += 1
-                if counter >= message_limit:
-                    return
+            for message in messages:
+                for callback in self.callbacks:
+                    await self._callback_wrapper(message, callback)
+                if self.message_limit:
+                    counter += 1
+                    if counter >= self.message_limit:
+                        return
