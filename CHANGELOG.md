@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.0...v0.11.1) (2024-02-21)
+
+
+### Bug Fixes
+
+* Start uvicorn app so that no reloader runs ([0d56424](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0d5642423046c82ed04ad33756f14dea31a57f96))
+
 ## [0.11.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.10.1...v0.11.0) (2024-02-12)
 
 
