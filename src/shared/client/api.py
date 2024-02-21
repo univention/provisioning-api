@@ -135,7 +135,7 @@ class MessageHandler:
         client: AsyncClient,
         subscription_name: str,
         callbacks: List[Callable[[Message], Coroutine[None, None, None]]],
-        pop_after_handling: bool = False,
+        pop_after_handling: bool = True,
         message_limit: Optional[int] = None,
     ):
         """
@@ -169,28 +169,28 @@ class MessageHandler:
         Wrapper around a clients callback function to encapsulate
         error handling and message acknowledgement
         """
+        # TODO: Message is not enough, we need a specific ClientMessage, that includes for example num_redelivered
+        await callback(Message.model_validate(message.data))
+        if not self.pop_after_handling:
+            return
         try:
-            # TODO: Message is not enough, we need a specific ClientMessage, that includes for example num_redelivered
-            await callback(Message.model_validate(message.data))
-            if not self.pop_after_handling:
-                return
-            try:
-                await self.client.set_message_status(
-                    self.subscription_name,
-                    message,
-                    shared.models.api.MessageProcessingStatus.ok,
-                )
-            except (
-                aiohttp.ClientError,
-                aiohttp.ClientConnectionError,
-                aiohttp.ClientResponseError,
-            ) as exc:
-                logger.exception(
-                    "Failed to acknowledge message meaning it will be redilivered at a later point",
-                    exc,
-                )
-        except Exception:
-            logger.exception("Unknown error occurred while executing a callback")
+            # TODO: Retry acknowledgement
+            await self.client.set_message_status(
+                self.subscription_name,
+                message,
+                shared.models.api.MessageProcessingStatus.ok,
+            )
+        except (
+            aiohttp.ClientError,
+            aiohttp.ClientConnectionError,
+            aiohttp.ClientResponseError,
+        ) as exc:
+            # TODO: Test this
+            logger.error(
+                "Failed to acknowledge message meaning it will be redilivered at a later point",
+                exc.message,
+            )
+            # logger.debug("Traceback:", exc_info=exc)
 
     async def run(
         self,
@@ -204,19 +204,16 @@ class MessageHandler:
         counter = 0
 
         while True:
-            print("Loop number: ", counter)
             messages = await self.client.get_subscription_messages(
                 self.subscription_name,
-                count=10,
+                count=1,
                 timeout=10,
                 # TODO: pop is broken serverside at the moment
                 # pop= not pop_after_handling,
             )
             if not messages:
-                print("Did not recieve any messages")
                 continue
                 # TODO: Remove after debugging stage
-            print("recieved message")
 
             for message in messages:
                 for callback in self.callbacks:

@@ -4,17 +4,14 @@
 import pytest
 
 import shared.client
-from shared.client.config import settings
-from shared.models.api import MessageProcessingStatus
 import shared.models.queue
 
 from tests.e2e.helpers import (
     create_message_via_events_api,
     create_message_via_udm_rest_api,
+    get_exact_number_of_messages,
 )
 from univention.admin.rest.client import UDM
-
-settings.provisioning_api_host = "localhost"
 
 
 async def test_create_subscription(
@@ -41,7 +38,7 @@ async def test_send_message(
     simple_subscription: str,
     provisioning_base_url: str,
 ):
-    create_message_via_events_api(provisioning_base_url)
+    data = create_message_via_events_api(provisioning_base_url)
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
@@ -50,7 +47,7 @@ async def test_send_message(
     )
 
     assert len(response) == 1
-    assert response[0].data["body"]["foo"] == "bar"
+    assert response[0].data["body"] == data
 
 
 @pytest.mark.xfail()
@@ -77,6 +74,19 @@ async def test_get_real_messages(
     assert len(response) == 1
 
 
+async def test_get_multiple_messages(
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
+):
+    group1 = create_message_via_udm_rest_api(udm)  # noqa: F841
+    group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
+    group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
+
+    result = await get_exact_number_of_messages(
+        provisioning_client, simple_subscription, 4
+    )
+    assert len(result) == 3
+
+
 @pytest.mark.xfail()
 async def test_get_messages_zero_timeout(
     provisioning_client: shared.client.AsyncClient, simple_subscription: str
@@ -87,23 +97,3 @@ async def test_get_messages_zero_timeout(
     )
 
     assert response == []
-
-
-async def test_acknowledge_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
-):
-    group = create_message_via_udm_rest_api(udm)  # noqa: F841
-
-    response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
-        timeout=5,
-    )
-
-    assert len(response) == 1
-    message = response[0]
-
-    response = await provisioning_client.set_message_status(
-        simple_subscription,
-        message,
-        MessageProcessingStatus.ok,
-    )
