@@ -2,13 +2,12 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import argparse
 import asyncio
 import difflib
 import json
-import uuid
 
-import shared.client
+from shared.client import AsyncClient, Message
+from shared.client.config import settings
 
 
 def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
@@ -29,7 +28,7 @@ def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
         print(text, **kwargs)
 
 
-def print_header(msg: shared.client.Message, action=None):
+def print_header(msg: Message, action=None):
     print()
 
     text = ""
@@ -70,7 +69,7 @@ def print_udm_diff(old: dict, new: dict):
             _cprint(line)
 
 
-def handle_udm_message(msg: shared.client.Message):
+def handle_udm_message(msg: Message):
     old_full = msg.body.get("old") or {}
     new_full = msg.body.get("new") or {}
 
@@ -95,39 +94,51 @@ def handle_udm_message(msg: shared.client.Message):
         _cprint("No object data received!", fg="r")
 
 
-def handle_any_message(msg: shared.client.Message):
+def handle_any_message(msg: Message):
     print_header(msg)
     print(msg.model_dump_json(indent=2))
 
 
+def handle_message(message: Message):
+    if message.realm == "udm":
+        handle_udm_message(message)
+    else:
+        handle_any_message(message)
+
+
 async def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("base_url", help="URL of the provisioning dispatcher")
-    parser.add_argument("realm_topic", nargs="+", help="[realm]:[topic]")
-    parser.add_argument(
-        "--name", "-n", default=str(uuid.uuid4()), help="Name of the subscriber"
+    name = settings.consumer_name
+
+    client = AsyncClient()
+    await client.create_subscription(
+        name, settings.realms_topics, settings.request_prefill
     )
-    parser.add_argument("--fill", action="store_true", help="Fill the queue from LDAP")
-    args = parser.parse_args()
 
-    name = args.name
-    realms_topics = [entry.split(":") for entry in args.realm_topic]
+    while True:
+        response = await client.get_subscription_messages(name=name, timeout=5)
+        for mq_message in response:
+            message = Message(
+                publisher_name=mq_message.data["publisher_name"],
+                ts=mq_message.data["ts"],
+                realm=mq_message.data["realm"],
+                topic=mq_message.data["topic"],
+                body=mq_message.data["body"],
+            )
+            handle_message(message=message)
 
-    client = shared.client.AsyncClient(args.base_url)
-    await client.create_subscription(name, realms_topics, args.fill)
+    # FIXME: No stream available any more. Where did it go?
+    # async with client.stream(name) as stream:
+    #     while True:
+    #         # handle incoming message
+    #         message: shared.client.Message = await stream.receive_message()
+    #         if message.realm == "udm":
+    #             handle_udm_message(message)
+    #         else:
+    #             handle_any_message(message)
 
-    async with client.stream(name) as stream:
-        while True:
-            # handle incoming message
-            message: shared.client.Message = await stream.receive_message()
-            if message.realm == "udm":
-                handle_udm_message(message)
-            else:
-                handle_any_message(message)
-
-            # confirm message reception
-            status = shared.client.MessageProcessingStatus.ok
-            await stream.send_report(status)
+    #         # confirm message reception
+    #         status = shared.client.MessageProcessingStatus.ok
+    #         await stream.send_report(status)
 
 
 def run():

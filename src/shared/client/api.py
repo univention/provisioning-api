@@ -1,14 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
 
-from consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
-from consumer.messages.api import v1_prefix as messages_api_prefix
 from shared.models import (
-    MQMessage,
     Subscription,
     NewSubscription,
     MessageProcessingStatus,
@@ -16,27 +13,31 @@ from shared.models import (
     Event,
 )
 
+from shared.models.queue import MQMessage
+from shared.client.config import settings
 
+logger = logging.getLogger(__file__)
+
+
+# TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    def __init__(self, base_url):
-        self.base_url = base_url
-
     async def create_subscription(
         self,
         name: str,
         realms_topics: List[Tuple[str, str]],
         request_prefill: bool = False,
     ):
-        subscriber = NewSubscription(
+        logger.info("creating subscription for %s", str(realms_topics))
+        subscription = NewSubscription(
             name=name, realms_topics=realms_topics, request_prefill=request_prefill
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             # TODO: do this with propper logging
-            print(subscriber.model_dump())
+            print(subscription.model_dump())
             async with session.post(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions",
-                json=subscriber.model_dump(),
+                f"{settings.consumer_registration_url}/subscriptions",
+                json=subscription.model_dump(),
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -44,7 +45,7 @@ class AsyncClient:
     async def cancel_subscription(self, name: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.delete(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+                f"{settings.consumer_registration_url}/subscriptions/{name}",
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -52,7 +53,7 @@ class AsyncClient:
     async def get_subscription(self, name: str) -> Subscription:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}"
+                f"{settings.consumer_registration_url}/subscriptions/{name}"
             ) as response:
                 data = await response.json()
                 return Subscription.model_validate(data)
@@ -75,7 +76,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages",
+                f"{settings.consumer_messages_url}/subscriptions/{name}/messages",
                 params=params,
             ) as response:
                 msgs = await response.json()
@@ -91,7 +92,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}{messages_api_prefix}/subscriptions/{name}/messages/",
+                f"{settings.consumer_messages_url}/subscriptions/{name}/messages-status/",
                 json={"msg": message.model_dump(), "report": report.model_dump()},
             ):
                 # either return nothing or let `.post` throw
@@ -100,12 +101,13 @@ class AsyncClient:
     async def get_subscriptions(self) -> List[Subscription]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions"
+                f"{settings.consumer_registration_url}/subscriptions"
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead
                 return [Subscription.model_validate(data)]
 
+    # FIXME: What is the purpose of this method? It looks like it wants to publish_event via Event API
     async def submit_message(
         self, realm: str, topic: str, body: Dict[str, Any], name: str
     ):
@@ -113,7 +115,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{self.base_url}{subscriptions_api_prefix}/subscriptions/{name}/messages-status",
+                f"{settings.consumer_registration_url}/messages",
                 json=message.model_dump(),
             ):
                 # either return nothing or let `.post` throw
