@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.2...v0.12.0) (2024-02-22)
+
+
+### Features
+
+* Add CI build for example client ([f11ad4b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f11ad4b21c87de5a056cad31d699768c793962a2))
+* **consumer-client:** abstract polling into syncronous callback wrapper ([7f92ad5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7f92ad5fcfbfa5d521c91b133f4be99f4e3926d4))
+
+
+### Bug Fixes
+
+* **consumer-client:** add final MR comments ([5f70adb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5f70adbc531b3f456d69608879bb67a9584bc8c7))
+* **consumer-client:** allign with api changes ([2baa680](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2baa680e0550d7874349f3acf8c3da3b6237bd3a))
+* **consumer-client:** improve callback wrapper and extract it into a separate class ([d4d02ec](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d4d02ecab5776612743803b47eb4a5d9f4394472))
+
 ## [0.11.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.1...v0.11.2) (2024-02-22)
 
 
