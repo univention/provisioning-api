@@ -7,7 +7,8 @@ import uuid
 
 
 class Settings(BaseSettings):
-    subscription_name: str = str(uuid.uuid4())
+    subscription_name: str
+    subscription_password: str
 
     provisioning_api_base_url: str
     provisioning_api_username: str

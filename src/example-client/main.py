@@ -2,15 +2,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import uuid
+from typing import Optional
+
 import asyncio
 import difflib
 import json
 
-from shared.client import AsyncClient, ProvisioningMessage
-from shared.client.config import settings
+from shared.client import AsyncClient, ProvisioningMessage, Settings, MessageHandler
 
 
-def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
+def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):
     colors = ["k", "r", "g", "y", "b", "v", "c", "w"]
 
     def fg_color(color):
@@ -99,7 +101,7 @@ def handle_any_message(msg: ProvisioningMessage):
     print(msg.model_dump_json(indent=2))
 
 
-def handle_message(message: ProvisioningMessage):
+async def handle_message(message: ProvisioningMessage):
     if message.realm == "udm":
         handle_udm_message(message)
     else:
@@ -107,37 +109,17 @@ def handle_message(message: ProvisioningMessage):
 
 
 async def main():
-    name = settings.consumer_name
-    password = settings.provisioning_api_password
+    # TODO: Make this configurable via env values
+    settings = Settings(subsctiption_name=uuid.uuid4(), subscription_password=uuid.uuid4())
 
+    # TODO: Check first if the subscription was already created.
     client = AsyncClient()
+    # TODO: Do this with admin credentials
     await client.create_subscription(
-        name, settings.realms_topics, password, settings.request_prefill
+        settings.subscription_name, settings.subscription_password, settings.realms_topics, settings.request_prefill
     )
-
-    while True:
-        response = await client.get_subscription_messages(name=name, timeout=5)
-        for message in response:
-            handle_message(message=message)
-
-    # FIXME: No stream available any more. Where did it go?
-    # async with client.stream(name) as stream:
-    #     while True:
-    #         # handle incoming message
-    #         message: shared.client.Message = await stream.receive_message()
-    #         if message.realm == "udm":
-    #             handle_udm_message(message)
-    #         else:
-    #             handle_any_message(message)
-
-    #         # confirm message reception
-    #         status = shared.client.MessageProcessingStatus.ok
-    #         await stream.send_report(status)
-
-
-def run():
-    asyncio.run(main())
+    await MessageHandler(client, settings.subscription_name, [handle_message]).run()
 
 
 if __name__ == "__main__":
-    run()
+    asyncio.run(main())

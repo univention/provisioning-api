@@ -30,8 +30,8 @@ class AsyncClient:
     async def create_subscription(
         self,
         name: str,
-        realms_topics: List[Tuple[str, str]],
         password: str,
+        realms_topics: List[Tuple[str, str]],
         request_prefill: bool = False,
     ):
         logger.info("creating subscription for %s", str(realms_topics))
