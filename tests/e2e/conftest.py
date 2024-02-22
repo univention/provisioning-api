@@ -64,8 +64,15 @@ def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
 
 
 @pytest.fixture
-def provisioning_client(provisioning_base_url) -> shared.client.AsyncClient:
-    return shared.client.AsyncClient()
+def settings() -> shared.client.Settings:
+    return shared.client.Settings(
+        subscription_name="", realms_topics=[], request_prefill=False
+    )
+
+
+@pytest.fixture
+def provisioning_client(settings) -> shared.client.AsyncClient:
+    return shared.client.AsyncClient(settings)
 
 
 @pytest.fixture

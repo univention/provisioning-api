@@ -22,12 +22,12 @@ def test_consumer_name():
     _clear_env_vars([env_consumer_name])
     settings = Settings()
 
-    assert len(settings.consumer_name.split("-")) == 5
+    assert len(settings.subscription_name.split("-")) == 5
 
     os.environ[env_consumer_name] = "test-consumer"
     settings = Settings()
 
-    assert settings.consumer_name == "test-consumer"
+    assert settings.subscription_name == "test-consumer"
     _clear_env_vars([env_consumer_name])
 
 
@@ -35,17 +35,17 @@ def test_property_base_url():
     _clear_env_vars([env_api_host, env_api_port])
     settings = Settings()
 
-    assert settings.base_url == "http://localhost:7777"
+    assert settings.provisioning_api_base_url == "http://localhost:7777"
 
     os.environ[env_api_host] = "testhost"
     settings = Settings()
 
-    assert settings.base_url == "http://testhost:7777"
+    assert settings.provisioning_api_base_url == "http://testhost:7777"
 
     os.environ[env_api_port] = "1234"
     settings = Settings()
 
-    assert settings.base_url == "http://testhost:1234"
+    assert settings.provisioning_api_base_url == "http://testhost:1234"
     _clear_env_vars([env_api_host, env_api_port])
 
 

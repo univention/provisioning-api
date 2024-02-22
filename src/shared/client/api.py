@@ -17,14 +17,16 @@ from shared.models import (
 
 from shared.models.queue import Message
 
-from shared.client.config import settings
+from shared.client.config import Settings
 
 logger = logging.getLogger(__file__)
 
 
 # TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    # TODO: move this method to the AdminClient
+    def __init__(self, settings: Optional[Settings] = None):
+        self.settings = settings or Settings()
+
     async def create_subscription(
         self,
         name: str,
@@ -43,7 +45,7 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             logger.debug(subscription.model_dump())
             async with session.post(
-                f"{settings.base_url}/admin/v1/subscriptions",
+                f"{self.settings.base_url}/admin/v1/subscriptions",
                 json=subscription.model_dump(),
                 auth=aiohttp.BasicAuth(
                     admin_settings.admin_username, admin_settings.admin_password
@@ -55,7 +57,7 @@ class AsyncClient:
     async def cancel_subscription(self, name: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.delete(
-                f"{settings.consumer_registration_url}/subscriptions/{name}",
+                f"{self.settings.consumer_registration_url}/subscriptions/{name}",
             ):
                 # either return nothing or let `.post` throw
                 pass
@@ -63,7 +65,7 @@ class AsyncClient:
     async def get_subscription(self, name: str) -> Subscription:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_registration_url}/subscriptions/{name}"
+                f"{self.settings.consumer_registration_url}/subscriptions/{name}"
             ) as response:
                 data = await response.json()
                 return Subscription.model_validate(data)
@@ -86,7 +88,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_messages_url}/subscriptions/{name}/messages",
+                f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages",
                 params=params,
             ) as response:
                 msgs = await response.json()
@@ -97,7 +99,7 @@ class AsyncClient:
     ):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{settings.consumer_messages_url}/subscriptions/{name}/messages-status/",
+                f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages-status/",
                 json=[report.model_dump() for report in reports],
             ):
                 # either return nothing or let `.post` throw
@@ -106,7 +108,7 @@ class AsyncClient:
     async def get_subscriptions(self) -> List[Subscription]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_registration_url}/subscriptions"
+                f"{self.settings.consumer_registration_url}/subscriptions"
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead
@@ -120,7 +122,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{settings.consumer_registration_url}/messages",
+                f"{self.settings.consumer_registration_url}/messages",
                 json=message.model_dump(),
             ):
                 # either return nothing or let `.post` throw
