@@ -21,7 +21,7 @@ def create_message_via_events_api(provisioning_base_url: str):
         "body": body,
     }
 
-    response = requests.post(f"{provisioning_base_url}events/v1/events", json=payload)
+    response = requests.post(f"{provisioning_base_url}/events/v1/events", json=payload)
 
     print(response.json())
     assert response.status_code == 202, "Failed to post message to queue"
@@ -39,7 +39,7 @@ def create_message_via_udm_rest_api(udm: UDM):
     return group
 
 
-async def get_exact_number_of_messages(
+async def pop_all_messages(
     provisioning_client: shared.client.AsyncClient,
     subscription_name: str,
     loop_number: int,

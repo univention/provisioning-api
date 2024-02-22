@@ -25,8 +25,6 @@ async def test_get_one_message(
     create_message_via_events_api(provisioning_base_url)
 
     result = []
-    # import asyncio
-    # await asyncio.sleep(5)
 
     async def test_callback(message: Message):
         result.append(message)
@@ -47,7 +45,6 @@ async def test_timeout_while_waiting_for_messages(
 
     response = await provisioning_client.get_subscription_messages(
         simple_subscription,
-        # count=10,
         timeout=10,
     )
 

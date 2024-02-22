@@ -9,7 +9,7 @@ import shared.models.queue
 
 from tests.e2e.helpers import (
     create_message_via_events_api,
-    get_exact_number_of_messages,
+    pop_all_messages,
 )
 
 
@@ -40,14 +40,14 @@ async def test_acknowledge_messages(
     simple_subscription: str,
     provisioning_base_url,
 ):
-    create_message_via_events_api(provisioning_base_url)
+    body = create_message_via_events_api(provisioning_base_url)
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
         timeout=5,
     )
 
-    assert len(response) == 1
+    assert response[0].data["body"] == body
     message = response[0]
 
     response = await provisioning_client.set_message_status(
@@ -61,7 +61,11 @@ async def test_acknowledge_messages(
         timeout=1,
     )
 
-    assert len(response2) == 0
+    # Sometimes other messages like the "DC Backup Hosts" group can sneak into the queue
+    # The test is considered successful if the response is empty or if the response is not a redelivery
+    # of the previous message
+    if response2:
+        assert response2[0].data["body"] != body
 
 
 @pytest.mark.xfail()
@@ -80,9 +84,7 @@ async def test_do_not_acknowledge_messages(
     assert response[0].data["body"] == body
 
     # test eventual redelivery of a message
-    result = await get_exact_number_of_messages(
-        provisioning_client, simple_subscription, 4
-    )
+    result = await pop_all_messages(provisioning_client, simple_subscription, 4)
     assert len(result) == 1
     assert result[0].data["body"] == body
 
@@ -100,8 +102,9 @@ async def test_acknowledge_some_messages(
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription, timeout=5, count=10
     )
+
+    assert len(response) == 2
     assert response[0].data["body"] == body
-    # assert len(response) == 2
 
     # test immediate redelivery of a message
     response = await provisioning_client.get_subscription_messages(
@@ -113,15 +116,11 @@ async def test_acknowledge_some_messages(
     assert len(response) == 2
 
     # test redelivery only until message is acknowledged
-    result = await get_exact_number_of_messages(
-        provisioning_client, simple_subscription, 3
-    )
+    result = await pop_all_messages(provisioning_client, simple_subscription, 3)
     assert len(result) == 2
 
     create_message_via_events_api(provisioning_base_url)
 
     # test that only the new message gets delivered
-    result = await get_exact_number_of_messages(
-        provisioning_client, simple_subscription, 2
-    )
+    result = await pop_all_messages(provisioning_client, simple_subscription, 2)
     assert len(result) == 1

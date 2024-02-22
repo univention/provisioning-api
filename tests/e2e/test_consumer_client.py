@@ -9,7 +9,7 @@ import shared.models.queue
 from tests.e2e.helpers import (
     create_message_via_events_api,
     create_message_via_udm_rest_api,
-    get_exact_number_of_messages,
+    pop_all_messages,
 )
 from univention.admin.rest.client import UDM
 
@@ -81,9 +81,7 @@ async def test_get_multiple_messages(
     group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
 
-    result = await get_exact_number_of_messages(
-        provisioning_client, simple_subscription, 4
-    )
+    result = await pop_all_messages(provisioning_client, simple_subscription, 4)
     assert len(result) == 3
 
 

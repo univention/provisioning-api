@@ -161,7 +161,7 @@ class MessageHandler:
         callback: Callable[[Message], Coroutine[None, None, None]],
     ):
         """
-        Wrapper around a clients callback function to encapsulate
+        Wrapper around a client's callback function to encapsulate
         error handling and message acknowledgement
         """
         # TODO: Message is not enough, we need a specific ClientMessage, that includes for example num_redelivered
@@ -182,10 +182,9 @@ class MessageHandler:
         ) as exc:
             # TODO: Test this
             logger.error(
-                "Failed to acknowledge message meaning it will be redilivered at a later point",
+                "Failed to acknowledge message. It will be redelivered later...",
                 exc.message,
             )
-            # logger.debug("Traceback:", exc_info=exc)
 
     async def run(
         self,
@@ -206,9 +205,6 @@ class MessageHandler:
                 # TODO: pop is broken serverside at the moment
                 # pop= not pop_after_handling,
             )
-            if not messages:
-                continue
-                # TODO: Remove after debugging stage
 
             for message in messages:
                 for callback in self.callbacks:

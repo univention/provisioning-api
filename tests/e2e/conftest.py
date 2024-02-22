@@ -13,7 +13,7 @@ from tests.conftest import REALMS_TOPICS
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
-        "--provisioning-api-base-url",
+        "--provisioning-base-url",
         default="http://localhost:7777/",
         help="Base URL of the UDM REST API",
     )
@@ -32,7 +32,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def provisioning_base_url(pytestconfig) -> str:
-    return pytestconfig.option.provisioning_api_base_url
+    return pytestconfig.option.provisioning_base_url.rstrip("/")
 
 
 @pytest.fixture(scope="session")
@@ -48,7 +48,7 @@ def udm_admin_password(pytestconfig) -> str:
 @pytest.fixture(scope="session")
 def udm_rest_api_base_url(pytestconfig) -> str:
     """Base URL to reach the UDM Rest API."""
-    return pytestconfig.getoption("--udm-rest-api-base-url")
+    return pytestconfig.option.udm_rest_api_base_url.rstrip("/") + "/"
 
 
 @pytest.fixture
