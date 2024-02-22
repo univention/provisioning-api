@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-from typing import List
+from .config import DispatcherSettings
+
+from typing import List, Optional
 
 import contextlib
 import logging
@@ -14,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class DispatcherPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[DispatcherSettings] = None):
+        self.settings = settings or DispatcherSettings()
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
         self._consumer_registration_adapter = ConsumerRegistrationAdapter()
@@ -24,8 +27,12 @@ class DispatcherPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = DispatcherPort()
-        await port.mq_adapter.connect()
-        await port.kv_adapter.connect()
+        await port.mq_adapter.connect(
+            user=port.settings.nats_user, password=port.settings.nats_password
+        )
+        await port.kv_adapter.connect(
+            user=port.settings.nats_user, password=port.settings.nats_password
+        )
         await port._consumer_registration_adapter.connect()
         await port._consumer_messages_adapter.connect()
 

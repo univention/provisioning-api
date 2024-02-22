@@ -28,7 +28,10 @@ services:
       - "4222:4222" # Client connections
       - "6222:6222" # Route connections
       - "8222:8222" # HTTP monitoring port
-    command: --jetstream -m 8222 -p 4222
+    volumes:
+      - ~/tmp/nats.conf:/etc/nats-config/nats.conf
+      - ~/tmp:/var/run
+    command: --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf
 
   dispatcher:
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}"

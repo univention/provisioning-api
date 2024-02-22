@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import contextlib
+from typing import Optional
 
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
@@ -9,9 +10,12 @@ from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
 from shared.models import FillQueueStatus, Message, PrefillMessage, MQMessage
 
+from .config import PrefillSettings
+
 
 class PrefillPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[PrefillSettings] = None):
+        self.settings = settings or PrefillSettings()
         self._udm_adapter = UDMAdapter()
         self.mq_adapter = NatsMQAdapter()
         self._consumer_registration_adapter = ConsumerRegistrationAdapter()
@@ -22,7 +26,9 @@ class PrefillPort:
     async def port_context():
         port = PrefillPort()
         await port._udm_adapter.connect()
-        await port.mq_adapter.connect()
+        await port.mq_adapter.connect(
+            user=port.settings.nats_user, password=port.settings.nats_password
+        )
         await port._consumer_registration_adapter.connect()
         await port._consumer_messages_adapter.connect()
 

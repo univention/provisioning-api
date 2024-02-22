@@ -31,15 +31,30 @@ class NatsKeys:
         return f"KV_{bucket}"
 
 
+# class NatsAdapter():
+#     def __init__(self, user: str, password: str):
+#         self._nats = NATS()
+#         self._js = self._nats.jetstream()
+#         self._user = user
+#         self._password = password
+#         self.logger = logging.getLogger(__name__)
+
+#     async def connect(self):
+#         await self._nats.connect(
+#             [settings.nats_server],
+#             user=self._user,
+#             password=self._password)
+
+
 class NatsKVAdapter(BaseKVStoreAdapter):
     def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
-        self._kv_store: Optional[KeyValue] = None
         self.logger = logging.getLogger(__name__)
+        self._kv_store: Optional[KeyValue] = None
 
-    async def connect(self):
-        await self._nats.connect([settings.nats_server])
+    async def connect(self, user: str, password: str):
+        await self._nats.connect([settings.nats_server], user=user, password=password)
         await self.create_kv_store()
 
     async def close(self):
@@ -71,11 +86,11 @@ class NatsMQAdapter(BaseMQAdapter):
     def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
-        self._message_queue = asyncio.Queue()
         self.logger = logging.getLogger(__name__)
+        self._message_queue = asyncio.Queue()
 
-    async def connect(self):
-        await self._nats.connect([settings.nats_server])
+    async def connect(self, user: str, password: str):
+        await self._nats.connect([settings.nats_server], user=user, password=password)
 
     async def close(self):
         await self._nats.close()

@@ -43,10 +43,12 @@ def mock_fetch(mock_nats_mq_adapter):
 @pytest.mark.anyio
 class TestNatsKVAdapter:
     async def test_connect(self, mock_nats_kv_adapter):
-        result = await mock_nats_kv_adapter.connect()
+        result = await mock_nats_kv_adapter.connect(
+            user="test_user", password="test_password"
+        )
 
         mock_nats_kv_adapter._nats.connect.assert_called_once_with(
-            ["nats://localhost:4222"]
+            ["nats://localhost:4222"], user="test_user", password="test_password"
         )
         mock_nats_kv_adapter._js.create_key_value.assert_called_once()
         assert result is None
@@ -103,10 +105,12 @@ class TestNatsKVAdapter:
 @pytest.mark.anyio
 class TestNatsMQAdapter:
     async def test_connect(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.connect()
+        result = await mock_nats_mq_adapter.connect(
+            user="test_user", password="test_password"
+        )
 
         mock_nats_mq_adapter._nats.connect.assert_called_once_with(
-            ["nats://localhost:4222"]
+            ["nats://localhost:4222"], user="test_user", password="test_password"
         )
         assert result is None
 
