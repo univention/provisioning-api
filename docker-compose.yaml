@@ -130,7 +130,11 @@ services:
       - test
     platform: "linux/amd64"
     environment:
-      nats_host: nats
+      NATS_HOST: nats
+      PROVISIONING_API_HOST: events-and-consumer-api
+      PROVISIONING_API_USERNAME: ""
+      PROVISIONING_API_PASSWORD: ""
+      LDAP_HOST: "ldap-server"
 
   # Environment of the pre-commit linter.
   pre-commit:
