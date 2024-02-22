@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import asyncio
 import pytest
 import requests
 import uuid
@@ -16,7 +15,6 @@ from shared.models import PublisherName
 REALM = "udm"
 TOPIC = "groups/group"
 PUBLISHER_NAME = PublisherName.udm_listener
-BASE_URL = "http://localhost:7777"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -31,7 +29,7 @@ def connect_ldap_server():
     return connection
 
 
-async def test_workflow():
+async def test_workflow(provisioning_base_url):
     name = str(uuid.uuid4())
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
@@ -39,7 +37,7 @@ async def test_workflow():
     connection = connect_ldap_server()
 
     response = requests.post(
-        f"{BASE_URL}{subscriptions_api_prefix}/subscriptions",
+        f"{provisioning_base_url}{subscriptions_api_prefix}/subscriptions",
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
@@ -56,7 +54,7 @@ async def test_workflow():
     )
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
@@ -74,7 +72,7 @@ async def test_workflow():
     connection.modify(dn, changes)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
@@ -92,7 +90,7 @@ async def test_workflow():
     connection.delete(dn)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
@@ -105,7 +103,3 @@ async def test_workflow():
     assert message["publisher_name"] == PUBLISHER_NAME
     assert message["body"]["new"] is None
     assert message["body"]["old"]["dn"] == dn
-
-
-if __name__ == "__main__":
-    asyncio.run(test_workflow())

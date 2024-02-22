@@ -4,4 +4,4 @@
 from shared.models.api import MessageProcessingStatus  # noqa: F401
 from shared.models.queue import Message  # noqa: F401
 
-from .api import AsyncClient  # noqa: F401
+from .api import AsyncClient, MessageHandler  # noqa: F401

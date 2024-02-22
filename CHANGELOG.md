@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.12.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.2...v0.12.0) (2024-02-22)
+
+
+### Features
+
+* Add CI build for example client ([f11ad4b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f11ad4b21c87de5a056cad31d699768c793962a2))
+* **consumer-client:** abstract polling into syncronous callback wrapper ([7f92ad5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7f92ad5fcfbfa5d521c91b133f4be99f4e3926d4))
+
+
+### Bug Fixes
+
+* **consumer-client:** add final MR comments ([5f70adb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5f70adbc531b3f456d69608879bb67a9584bc8c7))
+* **consumer-client:** allign with api changes ([2baa680](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2baa680e0550d7874349f3acf8c3da3b6237bd3a))
+* **consumer-client:** improve callback wrapper and extract it into a separate class ([d4d02ec](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d4d02ecab5776612743803b47eb4a5d9f4394472))
+
+## [0.11.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.1...v0.11.2) (2024-02-22)
+
+
+### Bug Fixes
+
+* change consumer endpoints to use subscription istead of sibscriber, fix creating prefill queue ([d7a1dee](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7a1deeffcfa7283685ac540f4afd277c236769a))
+* create subscriptions once, delete the whole subscriber instead of a subscription, fix endpoints, use consumer's API endpoints, request prefill for all topics altogether ([7d1581b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7d1581bf9e6a606492c5b2b1ee6932f9228481f2))
+* merge main ([d9949c8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d9949c8e01cca125e17d3d3ea6c4c0ab9acb8f0b))
+* merge main ([c6e74dc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c6e74dcc625810b1eeb02c582a738202c00734f2))
+* Update packages ([7074d56](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7074d56547d0e00b89c2ee0acac2962831b56601))
+* use tuple for realm_topic instead of list ([a346c6d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a346c6dd0ea7670700180e7e69fdf3689e5b7dfa))
+
 ## [0.11.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.0...v0.11.1) (2024-02-21)
 
 

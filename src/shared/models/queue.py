@@ -74,7 +74,7 @@ class UDMMessage(BaseMessage):
         return cls(
             publisher_name=msg.publisher_name,
             ts=msg.ts,
-            realm=msg.ts,
+            realm=msg.realm,
             topic=msg.topic,
             new=msg.body.get("new", {}),
             old=msg.body.get("old", {}),
