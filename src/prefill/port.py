@@ -7,8 +7,7 @@ from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
-from shared.models import FillQueueStatus, Message
-from shared.models.queue import PrefillMessage, MQMessage
+from shared.models import FillQueueStatus, Message, PrefillMessage, MQMessage
 
 
 class PrefillPort:
@@ -53,18 +52,18 @@ class PrefillPort:
     async def get_object(self, url):
         return await self._udm_adapter.get_object(url)
 
-    async def update_subscriber_queue_status(
+    async def update_subscription_queue_status(
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
-        await self._consumer_registration_adapter.update_subscriber_queue_status(
+        await self._consumer_registration_adapter.update_subscription_queue_status(
             name, queue_status
         )
 
     async def create_prefill_message(self, name: str, message: Message):
         await self._consumer_messages_adapter.create_prefill_message(name, message)
 
-    async def create_prefill_stream(self, subscriber_name: str):
-        await self._consumer_messages_adapter.create_prefill_stream(subscriber_name)
+    async def create_prefill_stream(self, subscription_name: str):
+        await self._consumer_messages_adapter.create_prefill_stream(subscription_name)
 
     async def add_request_to_prefill_failures(
         self, queue_name: str, message: PrefillMessage

@@ -2,18 +2,18 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from pydantic import BaseModel, Field
 
-from shared.models.queue import PublisherName
+from shared.models import PublisherName
 
 
-class NewSubscriber(BaseModel):
-    """Request to register a subscriber."""
+class NewSubscription(BaseModel):
+    """Request to register a subscription."""
 
-    name: str = Field(description="The identifier of the subscriber.")
-    realm_topic: List[str] = Field(
-        description="Realm and topic that this subscriber subscribes to."
+    name: str = Field(description="The identifier of the subscription.")
+    realms_topics: List[Tuple[str, str]] = Field(
+        description="A list of `(realm, topic)` lists that this subscriber subscribes to, e.g. [('udm', 'users/user')]."
     )
     request_prefill: bool = Field(
         description="Whether pre-filling of the queue was requested."

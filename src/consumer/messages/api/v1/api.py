@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import List
+from typing import List, Annotated
 
 import fastapi
 import json
 import logging
+
+from fastapi import Query
 
 from consumer.messages.service.messages import MessageService
 from consumer.port import ConsumerPortDependency
@@ -14,9 +16,9 @@ from consumer.subscriptions.subscription.sink import WebSocketSink, SinkManager
 from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
+    Message,
+    ProvisioningMessage,
 )
-
-from shared.models.queue import Message, ProvisioningMessage
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,7 @@ manager = SinkManager()
 
 
 @router.post(
-    "/subscriptions/{subscription_name}/messages",
+    "/subscriptions/{name}/messages-status",
     status_code=fastapi.status.HTTP_200_OK,
     tags=["sink"],
 )
@@ -43,6 +45,24 @@ async def post_messages_status(
     await service.post_message_status(subscription_name, reports)
 
 
+@router.post(
+    "/subscriptions/{name}/messages",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["sink"],
+)
+async def post_message_to_subscription_queue(
+    name: str,
+    msg: Message,
+    port: ConsumerPortDependency,
+):
+    """Post the message to the subscription's queue."""
+
+    # TODO: check authorization
+
+    service = MessageService(port)
+    await service.add_message(name, msg)
+
+
 @router.get(
     "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
@@ -51,7 +71,7 @@ async def post_messages_status(
 async def get_subscription_messages(
     name: str,
     port: ConsumerPortDependency,
-    count: int = 1,
+    count: Annotated[int, Query(ge=1)] = 1,
     timeout: float = 5,
     pop: bool = False,
     skip_prefill: bool = False,
@@ -69,12 +89,12 @@ async def get_subscription_messages(
     status_code=fastapi.status.HTTP_201_CREATED,
     tags=["sink"],
 )
-async def post_message_to_prefill_queue(
+async def post_message_to_subscription_prefill_queue(
     name: str,
     data: Message,
     port: ConsumerPortDependency,
 ):
-    """Create the prefill message for the subscriber."""
+    """Post the prefill message to the subscription's prefill queue."""
 
     # TODO: check authorization
 
@@ -91,7 +111,7 @@ async def create_prefill_stream(
     name: str,
     port: ConsumerPortDependency,
 ):
-    """Create the prefill stream for the subscriber."""
+    """Create the prefill stream for the subscription."""
 
     # TODO: check authorization
 

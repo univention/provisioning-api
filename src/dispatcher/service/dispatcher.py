@@ -4,7 +4,7 @@
 import logging
 
 from src.dispatcher.port import DispatcherPort
-from shared.models.queue import Message
+from shared.models import Message
 
 
 class DispatcherService:
@@ -25,15 +25,14 @@ class DispatcherService:
                 self._logger.info("Received message with content: %s", message.data)
                 validated_msg = Message.model_validate(message.data)
 
-                subscribers = await self._port.get_realm_topic_subscribers(
+                subscriptions = await self._port.get_realm_topic_subscriptions(
                     f"{validated_msg.realm}:{validated_msg.topic}"
                 )
 
-                for sub in subscribers:
-                    self._logger.info("Sending message to '%s'", sub["name"])
-                    await self._port.send_event_to_consumer_queue(
-                        sub["name"], validated_msg
-                    )
+                for sub in subscriptions:
+                    self._logger.info("Sending message to '%s'", sub)
+                    await self._port.send_message_to_subscription(sub, validated_msg)
+
             except Exception as exc:
                 self._logger.error("Failed to dispatch the event: %s", exc)
 

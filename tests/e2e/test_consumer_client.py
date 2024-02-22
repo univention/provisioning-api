@@ -6,20 +6,23 @@ import pytest
 import requests
 
 import shared.client
+from shared.client.config import settings
 from shared.models.api import MessageProcessingStatus
 import shared.models.queue
 
 from tests.conftest import (
-    REALM_TOPIC,
     REALM,
     TOPIC,
+    REALMS_TOPICS,
 )
 from univention.admin.rest.client import UDM
+
+settings.provisioning_api_host = "localhost"
 
 
 @pytest.fixture
 def provisioning_client() -> shared.client.AsyncClient:
-    return shared.client.AsyncClient("http://localhost:7777")
+    return shared.client.AsyncClient()
 
 
 @pytest.fixture
@@ -27,13 +30,13 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient):
     subscriber_name = str(uuid.uuid4())
     await provisioning_client.create_subscription(
         name=subscriber_name,
-        realm_topic=REALM_TOPIC,
+        realms_topics=REALMS_TOPICS,
         request_prefill=False,
     )
 
     yield subscriber_name
 
-    await provisioning_client.cancel_subscription(subscriber_name, REALM, TOPIC)
+    await provisioning_client.cancel_subscription(subscriber_name)
 
 
 async def test_create_subscription(

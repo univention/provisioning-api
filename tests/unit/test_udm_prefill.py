@@ -9,7 +9,7 @@ import pytest
 from prefill.service.udm_prefill import UDMPreFill
 from shared.models import Message, PublisherName
 from tests.conftest import (
-    SUBSCRIBER_NAME,
+    SUBSCRIPTION_NAME,
     PREFILL_MESSAGE,
     MQMESSAGE_PREFILL,
     MQMESSAGE_PREFILL_REDELIVERED,
@@ -77,7 +77,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
         udm_prefill._port.create_prefill_message.assert_called_once_with(
-            SUBSCRIBER_NAME, self.msg
+            SUBSCRIPTION_NAME, self.msg
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 

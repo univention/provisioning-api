@@ -12,24 +12,28 @@ from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 from consumer.port import ConsumerPort
 from consumer.main import app
+from consumer.subscriptions.service.subscription import SUBSCRIPTIONS
 from events.port import EventsPort
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import (
     Message,
     MessageProcessingStatusReport,
     MessageProcessingStatus,
+    MQMessage,
+    PublisherName,
+    ProvisioningMessage,
+    PrefillMessage,
 )
-from shared.models.queue import MQMessage, PublisherName, ProvisioningMessage
-from shared.models.queue import PrefillMessage
 
 REALM = "udm"
 TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
 PUBLISHER_NAME = PublisherName.udm_listener
 REALM_TOPIC = [REALM, TOPIC]
+REALMS_TOPICS = [(REALM, TOPIC)]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
-SUBSCRIBER_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
-REPLY = f"$JS.ACK.stream:{SUBSCRIBER_NAME}.durable_name:{SUBSCRIBER_NAME}.1.1.1.1699615014739091916.0"
+SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
 
 REPORT = MessageProcessingStatusReport(
     status=MessageProcessingStatus.ok,
@@ -37,8 +41,8 @@ REPORT = MessageProcessingStatusReport(
     publisher_name=PublisherName.udm_listener,
 )
 
-SUBSCRIBER_INFO = {
-    "name": SUBSCRIBER_NAME,
+SUBSCRIPTION_INFO = {
+    "name": SUBSCRIPTION_NAME,
     "realms_topics": [REALMS_TOPICS_STR],
     "request_prefill": True,
     "prefill_queue_status": "done",
@@ -53,9 +57,8 @@ MESSAGE = Message(
 PREFILL_MESSAGE = PrefillMessage(
     publisher_name=PUBLISHER_NAME,
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
-    realm=REALM,
-    topic=TOPIC,
-    subscriber_name=SUBSCRIBER_NAME,
+    realms_topics=REALMS_TOPICS,
+    subscription_name=SUBSCRIPTION_NAME,
 )
 PROVISIONING_MESSAGE = ProvisioningMessage(
     publisher_name=PUBLISHER_NAME,
@@ -69,14 +72,15 @@ PROVISIONING_MESSAGE = ProvisioningMessage(
 FLAT_BASE_MESSAGE = {
     "publisher_name": PUBLISHER_NAME,
     "ts": "2023-11-09T11:15:52.616061",
-    "realm": REALM,
-    "topic": TOPIC,
 }
 FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_MESSAGE["body"] = BODY
+FLAT_MESSAGE["realm"] = REALM
+FLAT_MESSAGE["topic"] = TOPIC
 
 FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
-FLAT_PREFILL_MESSAGE["subscriber_name"] = SUBSCRIBER_NAME
+FLAT_PREFILL_MESSAGE["subscription_name"] = SUBSCRIPTION_NAME
+FLAT_PREFILL_MESSAGE["realms_topics"] = REALMS_TOPICS
 
 MSG = Msg(
     _client="nats",
@@ -87,8 +91,8 @@ MSG = Msg(
         num_pending=0,
         num_delivered=1,
         timestamp=datetime(2023, 11, 9, 11, 15, 52, 616061),
-        stream=f"stream:{SUBSCRIBER_NAME}",
-        consumer=SUBSCRIBER_NAME,
+        stream=f"stream:{SUBSCRIPTION_NAME}",
+        consumer=SUBSCRIPTION_NAME,
         domain=None,
     ),
 )
@@ -152,7 +156,7 @@ BASE_KV_OBJ = KeyValue.Entry(
 )
 
 kv_sub_info = copy(BASE_KV_OBJ)
-kv_sub_info.key = f"subscriber:{SUBSCRIBER_NAME}"
+kv_sub_info.key = SUBSCRIPTION_NAME
 kv_sub_info.value = (
     b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:groups/group"], "request_prefill": true, '
     b'"prefill_queue_status": "done"}'
@@ -185,8 +189,9 @@ class FakeKvStore(AsyncMock):
         values = {
             "abc:def": kv_subs,
             "foo:bar": kv_subs,
-            f"subscriber:{SUBSCRIBER_NAME}": kv_sub_info,
+            SUBSCRIPTION_NAME: kv_sub_info,
             "udm:groups/group": kv_subs,
+            SUBSCRIPTIONS: kv_subs,
         }
         if values.get(key):
             return values.get(key)

@@ -93,6 +93,22 @@ services:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
       - ldap-shared-run:/var/run/slapd/:ro
 
+  example-client:
+    build:
+      context: .
+      dockerfile: docker/example-client/Dockerfile
+      args:
+        - UCS_BASE_IMAGE_TAG=latest
+    container_name: example-client
+    environment:
+      CONSUMER_NAME: example-client
+      PROVISIONING_API_HOST: "app"
+      PROVISIONING_API_PORT: 7777
+      REALMS_TOPICS: '[["udm", "groups/group"]]'
+      REQUEST_PREFILL: "false"
+    restart: "on-failure"
+
+
   test:
     profiles:
       - test
