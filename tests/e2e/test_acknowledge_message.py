@@ -4,7 +4,7 @@
 import pytest
 
 import shared.client
-from shared.models.api import MessageProcessingStatus
+from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 import shared.models.queue
 
 from tests.e2e.helpers import (
@@ -47,13 +47,16 @@ async def test_acknowledge_messages(
         timeout=5,
     )
 
-    assert response[0].data["body"] == body
+    assert response[0].body == body
     message = response[0]
 
+    report = MessageProcessingStatusReport(
+        status=MessageProcessingStatus.ok,
+        message_seq_num=message.sequence_number,
+        publisher_name=message.publisher_name,
+    )
     response = await provisioning_client.set_message_status(
-        simple_subscription,
-        message,
-        MessageProcessingStatus.ok,
+        simple_subscription, [report]
     )
 
     response2 = await provisioning_client.get_subscription_messages(
@@ -65,7 +68,7 @@ async def test_acknowledge_messages(
     # The test is considered successful if the response is empty or if the response is not a redelivery
     # of the previous message
     if response2:
-        assert response2[0].data["body"] != body
+        assert response2[0].body != body
 
 
 @pytest.mark.xfail()
@@ -86,7 +89,7 @@ async def test_do_not_acknowledge_messages(
     # test eventual redelivery of a message
     result = await pop_all_messages(provisioning_client, simple_subscription, 4)
     assert len(result) == 1
-    assert result[0].data["body"] == body
+    assert result[0].body == body
 
 
 @pytest.mark.xfail()

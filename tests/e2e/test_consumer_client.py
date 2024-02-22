@@ -47,7 +47,7 @@ async def test_send_message(
     )
 
     assert len(response) == 1
-    assert response[0].data["body"] == data
+    assert response[0].body == data
 
 
 @pytest.mark.xfail()

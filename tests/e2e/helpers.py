@@ -4,17 +4,18 @@
 import uuid
 import requests
 
+from shared.models import PublisherName
 from tests.conftest import REALM, TOPIC
 from univention.admin.rest.client import UDM
 
 import shared.client
-from shared.models.api import MessageProcessingStatus
+from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 
 
 def create_message_via_events_api(provisioning_base_url: str):
     body = {str(uuid.uuid1()): str(uuid.uuid1())}
     payload = {
-        "publisher_name": "consumer_client_tests",
+        "publisher_name": PublisherName.consumer_client_test,
         "ts": "2024-02-07T09:01:33.835Z",
         "realm": REALM,
         "topic": TOPIC,
@@ -53,11 +54,12 @@ async def pop_all_messages(
         )
         if not response:
             continue
-        await provisioning_client.set_message_status(
-            subscription_name,
-            response[0],
-            MessageProcessingStatus.ok,
+        report = MessageProcessingStatusReport(
+            status=MessageProcessingStatus.ok,
+            message_seq_num=response[0].sequence_number,
+            publisher_name=response[0].publisher_name,
         )
+        await provisioning_client.set_message_status(subscription_name, [report])
         result.append(response[0])
 
     return result

@@ -159,7 +159,14 @@ class MessageHandler:
         error handling and message acknowledgement
         """
         # TODO: Message is not enough, we need a specific ClientMessage, that includes for example num_redelivered
-        await callback(Message.model_validate(message.data))
+        msg = Message(
+            publisher_name=message.publisher_name,
+            ts=message.ts,
+            realm=message.realm,
+            topic=message.topic,
+            body=message.body,
+        )
+        await callback(msg)
         if not self.pop_after_handling:
             return
         try:

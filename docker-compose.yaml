@@ -111,7 +111,7 @@ services:
     container_name: example-client
     environment:
       CONSUMER_NAME: example-client
-      PROVISIONING_API_HOST: "app"
+      PROVISIONING_API_HOST: "events-and-consumer-api"
       PROVISIONING_API_PORT: 7777
       REALMS_TOPICS: '[["udm", "groups/group"]]'
       REQUEST_PREFILL: "false"
