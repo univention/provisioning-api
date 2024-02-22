@@ -101,7 +101,7 @@ class TestConsumer:
         messages_client: httpx.AsyncClient,
     ):
         response = await messages_client.post(
-            f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages",
+            f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages-status",
             json=[REPORT.model_dump()],
         )
         assert response.status_code == 200

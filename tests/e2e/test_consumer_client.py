@@ -15,6 +15,7 @@ from tests.conftest import (
     TOPIC,
     REALMS_TOPICS,
 )
+from shared.models import PublisherName
 from univention.admin.rest.client import UDM
 
 settings.provisioning_api_host = "localhost"
@@ -64,7 +65,7 @@ async def test_send_message(
     requests.post(
         "http://localhost:7777/events/v1/events",
         json={
-            "publisher_name": "consumer_client_tests",
+            "publisher_name": PublisherName.consumer_client,
             "ts": "2024-02-07T09:01:33.835Z",
             "realm": REALM,
             "topic": TOPIC,
@@ -79,7 +80,7 @@ async def test_send_message(
     )
 
     assert len(response) == 1
-    assert response[0].data["body"]["foo"] == "bar"
+    assert response[0].body["foo"] == "bar"
 
 
 @pytest.mark.xfail()

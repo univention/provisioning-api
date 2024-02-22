@@ -9,10 +9,11 @@ from shared.models import (
     Subscription,
     NewSubscription,
     Event,
+    ProvisioningMessage,
+    MessageProcessingStatusReport,
 )
 
 from shared.client.config import settings
-import shared.models.api
 
 logger = logging.getLogger(__file__)
 
@@ -63,7 +64,7 @@ class AsyncClient:
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
         force: Optional[bool] = None,
-    ) -> List[shared.models.queue.ProvisioningMessage]:
+    ) -> List[ProvisioningMessage]:
         _params = {
             "count": count,
             "timeout": timeout,
@@ -78,16 +79,15 @@ class AsyncClient:
                 params=params,
             ) as response:
                 msgs = await response.json()
-                return [
-                    shared.models.queue.ProvisioningMessage.model_validate(msg)
-                    for msg in msgs
-                ]
+                return [ProvisioningMessage.model_validate(msg) for msg in msgs]
 
-    async def set_message_status(self, name: str, reports: List[dict]):
+    async def set_message_status(
+        self, name: str, reports: List[MessageProcessingStatusReport]
+    ):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
                 f"{settings.consumer_messages_url}/subscriptions/{name}/messages-status/",
-                json=reports,
+                json=[report.model_dump() for report in reports],
             ):
                 # either return nothing or let `.post` throw
                 pass

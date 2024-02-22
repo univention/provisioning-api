@@ -116,13 +116,13 @@ async def main():
 
     while True:
         response = await client.get_subscription_messages(name=name, timeout=5)
-        for mq_message in response:
+        for msg in response:
             message = Message(
-                publisher_name=mq_message.data["publisher_name"],
-                ts=mq_message.data["ts"],
-                realm=mq_message.data["realm"],
-                topic=mq_message.data["topic"],
-                body=mq_message.data["body"],
+                publisher_name=msg.publisher_name,
+                ts=msg.ts,
+                realm=msg.realm,
+                topic=msg.topic,
+                body=msg.body,
             )
             handle_message(message=message)
 

@@ -13,6 +13,7 @@ class PublisherName(str, Enum):
     udm_listener = "udm-listener"
     udm_pre_fill = "udm-pre-fill"
     consumer_registration = "consumer-registration"
+    consumer_client = "consumer_client"
 
 
 class BaseMessage(BaseModel):

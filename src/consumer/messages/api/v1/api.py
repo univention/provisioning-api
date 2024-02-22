@@ -32,7 +32,7 @@ manager = SinkManager()
     tags=["sink"],
 )
 async def post_messages_status(
-    subscription_name: str,
+    name: str,
     reports: List[MessageProcessingStatusReport],
     port: ConsumerPortDependency,
 ):
@@ -42,7 +42,7 @@ async def post_messages_status(
 
     service = MessageService(port)
 
-    await service.post_message_status(subscription_name, reports)
+    await service.post_message_status(name, reports)
 
 
 @router.post(

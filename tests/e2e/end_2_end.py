@@ -61,7 +61,7 @@ async def test_workflow():
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
@@ -79,7 +79,7 @@ async def test_workflow():
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
@@ -97,7 +97,7 @@ async def test_workflow():
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
