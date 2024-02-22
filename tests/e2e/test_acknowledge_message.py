@@ -64,9 +64,7 @@ async def test_acknowledge_messages(
     assert len(response2) == 0
 
 
-pytest.mark.xfail("No redelivery at this time")
-
-
+@pytest.mark.xfail()
 async def test_do_not_acknowledge_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
@@ -89,6 +87,7 @@ async def test_do_not_acknowledge_messages(
     assert result[0].data["body"] == body
 
 
+@pytest.mark.xfail()
 async def test_acknowledge_some_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import logging
-from typing import Any, Callable, Coroutine, Dict, List, Optional
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
 import aiohttp
 
@@ -13,10 +13,6 @@ from shared.models import (
     Event,
 )
 
-import shared.models.api
-from shared.models.queue import MQMessage
-
-import shared.models.api
 from shared.models.queue import MQMessage, Message
 
 from shared.client.config import settings
@@ -38,8 +34,7 @@ class AsyncClient:
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            # TODO: do this with propper logging
-            print(subscription.model_dump())
+            logger.debug(subscription.model_dump())
             async with session.post(
                 f"{settings.consumer_registration_url}/subscriptions",
                 json=subscription.model_dump(),
@@ -178,7 +173,7 @@ class MessageHandler:
             await self.client.set_message_status(
                 self.subscription_name,
                 message,
-                shared.models.api.MessageProcessingStatus.ok,
+                MessageProcessingStatus.ok,
             )
         except (
             aiohttp.ClientError,
