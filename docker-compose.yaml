@@ -14,6 +14,8 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      NATS_USER: "api"
+      NATS_PASSWORD: "apipass"
       UDM_HOST: "udm-rest-api"
     depends_on:
       - "nats"
@@ -28,7 +30,11 @@ services:
       - "4222:4222" # Client connections
       - "6222:6222" # Route connections
       - "8222:8222" # HTTP monitoring port
-    command: --jetstream -m 8222 -p 4222
+    volumes:
+      - ./nats.dev.conf:/etc/nats-config/nats.conf
+      - type: tmpfs
+        target: /var/run
+    command: --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf
 
   dispatcher:
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/dispatcher:${IMAGE_TAG:-latest}"
@@ -42,6 +48,8 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      NATS_USER: "dispatcher"
+      NATS_PASSWORD: "dispatcherpass"
       CONSUMER_EVENT_HOST: "events-and-consumer-api"
     depends_on:
       - "nats"
@@ -59,6 +67,8 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      NATS_USER: "prefill"
+      NATS_PASSWORD: "prefillpass"
       CONSUMER_EVENT_HOST: "events-and-consumer-api"
       UDM_HOST: "udm-rest-api"
     depends_on:
@@ -75,6 +85,8 @@ services:
         - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
     environment:
+      NATS_USER: "udmlistener"
+      NATS_PASSWORD: "udmlistenerpass"
       LDAP_HOST: "localhost"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
@@ -131,6 +143,8 @@ services:
     platform: "linux/amd64"
     environment:
       NATS_HOST: nats
+      NATS_USER: "user"
+      NATS_PASSWORD: "pass"
       PROVISIONING_API_HOST: events-and-consumer-api
       PROVISIONING_API_USERNAME: ""
       PROVISIONING_API_PASSWORD: ""

@@ -7,6 +7,8 @@ import logging
 import json
 from typing import List, Union, Optional
 
+import os
+
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
@@ -40,7 +42,11 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self._nats.connect([settings.nats_server])
+        await self._nats.connect(
+            [settings.nats_server],
+            user=os.environ["NATS_USER"],
+            password=os.environ["NATS_PASSWORD"],
+        )
         await self.create_kv_store()
 
     async def close(self):
@@ -76,7 +82,11 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def connect(self):
-        await self._nats.connect([settings.nats_server])
+        await self._nats.connect(
+            [settings.nats_server],
+            user=os.environ["NATS_USER"],
+            password=os.environ["NATS_PASSWORD"],
+        )
 
     async def close(self):
         await self._nats.close()
