@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.12.0...v0.13.0) (2024-02-23)
+
+
+### Features
+
+* new BSI compliant helm chart for use with umbrella chart ([cfad306](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cfad306467212a93e5b365877cd723ea5349ee96))
+* new BSI compliant helm chart for use with umbrella chart ([6edd096](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6edd0962002444cc6f73f65de8b244aaec417b94))
+
 ## [0.12.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.2...v0.12.0) (2024-02-22)
 
 
