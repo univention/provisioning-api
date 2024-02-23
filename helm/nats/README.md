@@ -1150,15 +1150,6 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>startupProbe.enabled</td>
-			<td>bool</td>
-			<td><pre lang="json">
-true
-</pre>
-</td>
-			<td>Enables kubernetes StartupProbe.</td>
-		</tr>
-		<tr>
 			<td>startupProbe.failureThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
