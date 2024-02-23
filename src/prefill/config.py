@@ -6,9 +6,6 @@ from pydantic_settings import BaseSettings
 
 class PrefillSettings(BaseSettings):
     # Nats user name specific to Prefill Daemon
-    nats_user: str = "prefill"
+    nats_user: str
     # Nats password specific to Prefill Daemon
-    nats_password: str = "prefillpass"
-
-
-settings = PrefillSettings()
+    nats_password: str

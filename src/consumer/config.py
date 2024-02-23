@@ -6,9 +6,6 @@ from pydantic_settings import BaseSettings
 
 class ConsumerSettings(BaseSettings):
     # Nats user name specific to Consumer API
-    nats_user: str = "api"
+    nats_user: str
     # Nats password specific to Consumer API
-    nats_password: str = "apipass"
-
-
-settings = ConsumerSettings()
+    nats_password: str

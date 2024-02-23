@@ -6,9 +6,6 @@ from pydantic_settings import BaseSettings
 
 class EventsSettings(BaseSettings):
     # Nats user name specific to Events API
-    nats_user: str = "api"
+    nats_user: str
     # Nats password specific to Events API
-    nats_password: str = "apipass"
-
-
-settings = EventsSettings()
+    nats_password: str

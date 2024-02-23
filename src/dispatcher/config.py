@@ -6,9 +6,6 @@ from pydantic_settings import BaseSettings
 
 class DispatcherSettings(BaseSettings):
     # Nats user name specific to Dispatcher
-    nats_user: str = "dispatcher"
+    nats_user: str
     # Nats password specific to Dispatcher
-    nats_password: str = "dispatcherpass"
-
-
-settings = DispatcherSettings()
+    nats_password: str

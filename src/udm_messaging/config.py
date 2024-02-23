@@ -6,9 +6,6 @@ from pydantic_settings import BaseSettings
 
 class UdmMessagingSettings(BaseSettings):
     # Nats user name specific to UdmMessaging
-    nats_user: str = "udmmessaging"
+    nats_user: str
     # Nats password specific to UdmMessaging
-    nats_password: str = "udmmessagingpass"
-
-
-settings = UdmMessagingSettings()
+    nats_password: str
