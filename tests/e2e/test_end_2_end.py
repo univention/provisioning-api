@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import uuid
+
+import ldap3
 import pytest
 import requests
-import uuid
 
 from admin.api import v1_prefix as admin_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
-import ldap3
 
 from udm_messaging.config import udm_messaging_settings
 from admin.config import admin_settings
@@ -36,7 +37,7 @@ def connect_ldap_server():
     return connection
 
 
-async def test_workflow(provisioning_base_url):
+async def test_workflow(provisioning_api_base_url):
     name = str(uuid.uuid4())
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
@@ -44,7 +45,7 @@ async def test_workflow(provisioning_base_url):
     connection = connect_ldap_server()
 
     response = requests.post(
-        f"{provisioning_base_url}{admin_api_prefix}/subscriptions",
+        f"{provisioning_api_base_url}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
@@ -63,7 +64,7 @@ async def test_workflow(provisioning_base_url):
     )
 
     response = requests.get(
-        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
@@ -81,7 +82,7 @@ async def test_workflow(provisioning_base_url):
     connection.modify(dn, changes)
 
     response = requests.get(
-        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
@@ -99,7 +100,7 @@ async def test_workflow(provisioning_base_url):
     connection.delete(dn)
 
     response = requests.get(
-        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 

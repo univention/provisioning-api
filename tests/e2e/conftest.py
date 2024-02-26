@@ -17,7 +17,7 @@ import shared.client  # noqa: E402
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
-        "--provisioning-base-url",
+        "--provisioning-api-base-url",
         default="http://localhost:7777/",
         help="Base URL of the UDM REST API",
     )
@@ -35,8 +35,8 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="session")
-def provisioning_base_url(pytestconfig) -> str:
-    return pytestconfig.option.provisioning_base_url.rstrip("/")
+def provisioning_api_base_url(pytestconfig) -> str:
+    return pytestconfig.option.provisioning_api_base_url.rstrip("/")
 
 
 @pytest.fixture(scope="session")
@@ -64,9 +64,16 @@ def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
 
 
 @pytest.fixture
-def settings() -> shared.client.Settings:
+def settings(provisioning_api_base_url) -> shared.client.Settings:
     return shared.client.Settings(
-        subscription_name="", realms_topics=[], request_prefill=False
+        subscription_name="",
+        provisioning_api_base_url=provisioning_api_base_url,
+        # FIXME: Not yet used
+        provisioning_api_username="",
+        provisioning_api_password="",
+        # FIXME: should be dropped
+        realms_topics=[],
+        request_prefill=False,
     )
 
 

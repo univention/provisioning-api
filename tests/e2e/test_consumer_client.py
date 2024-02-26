@@ -4,7 +4,6 @@
 import uuid
 import pytest
 
-
 import shared.client
 import shared.models.queue
 from tests.conftest import (
@@ -28,7 +27,7 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient):
     subscriber_name = str(uuid.uuid4())
 
     await provisioning_client.create_subscription(
-        subscriber_name, REALMS_TOPICS, "password", False
+        subscriber_name, "password", REALMS_TOPICS, False
     )
 
     yield subscriber_name
@@ -58,9 +57,9 @@ async def test_get_empty_messages(
 async def test_send_message(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_base_url: str,
+    provisioning_api_base_url: str,
 ):
-    data = create_message_via_events_api(provisioning_base_url)
+    data = create_message_via_events_api(provisioning_api_base_url)
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
