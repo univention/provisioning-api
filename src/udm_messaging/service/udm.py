@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
         super().__init__(
+            host=udm_messaging_settings.ldap_host,
             port=udm_messaging_settings.ldap_port,
             start_tls=2 if udm_messaging_settings.tls_mode.lower() == "on" else 0,
             base=udm_messaging_settings.ldap_base_dn,
