@@ -6,18 +6,18 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 import aiohttp
 
 from admin.config import admin_settings
+from shared.client.config import Settings
 from shared.models import (
     Subscription,
-    ProvisioningMessage,
-    MessageProcessingStatusReport,
-    Event,
     NewSubscription,
     MessageProcessingStatus,
+    Event,
+    ProvisioningMessage,
+    MessageProcessingStatusReport,
 )
 
 from shared.models.queue import Message
 
-from shared.client.config import Settings
 
 logger = logging.getLogger(__file__)
 
@@ -193,9 +193,8 @@ class MessageHandler:
             aiohttp.ClientConnectionError,
             aiohttp.ClientResponseError,
         ) as exc:
-            # TODO: Test this
             logger.error(
-                "Failed to acknowledge message. It will be redelivered later...",
+                "Failed to acknowledge message. It will be redelivered later. - %s",
                 exc.message,
             )
 

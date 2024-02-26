@@ -1,38 +1,16 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import uuid
 import pytest
 
 import shared.client
 import shared.models.queue
-from tests.conftest import (
-    REALMS_TOPICS,
-)
 from tests.e2e.helpers import (
     create_message_via_events_api,
     create_message_via_udm_rest_api,
     pop_all_messages,
 )
 from univention.admin.rest.client import UDM
-
-
-@pytest.fixture
-def provisioning_client() -> shared.client.AsyncClient:
-    return shared.client.AsyncClient()
-
-
-@pytest.fixture
-async def simple_subscription(provisioning_client: shared.client.AsyncClient):
-    subscriber_name = str(uuid.uuid4())
-
-    await provisioning_client.create_subscription(
-        subscriber_name, "password", REALMS_TOPICS, False
-    )
-
-    yield subscriber_name
-
-    await provisioning_client.cancel_subscription(subscriber_name)
 
 
 async def test_create_subscription(
