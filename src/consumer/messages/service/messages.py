@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import asyncio
 import logging
 from typing import List, Optional
 
@@ -127,18 +127,16 @@ class MessageService:
                 await self._port.delete_stream(prefill_subject)
         return messages
 
-    async def post_message_status(
+    async def post_messages_status(
         self, subscription_name: str, reports: List[MessageProcessingStatusReport]
     ):
-        for report in reports:
-            if report.status == MessageProcessingStatus.ok:
-                # Modifying the queue interferes with connected WebSocket clients,
-                # so disconnect them first.
-
-                await self.delete_message(subscription_name, report)
-            else:
-                # message was not processed, nothing to do...
-                continue
+        tasks = [
+            self.delete_message(subscription_name, report)
+            for report in reports
+            if report.status == MessageProcessingStatus.ok
+        ]
+        # Gather all tasks and run them concurrently
+        await asyncio.gather(*tasks)
 
     async def delete_message(
         self, subscription_name: str, report: MessageProcessingStatusReport

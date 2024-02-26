@@ -42,7 +42,7 @@ async def post_messages_status(
 
     service = MessageService(port)
 
-    await service.post_message_status(name, reports)
+    await service.post_messages_status(name, reports)
 
 
 @router.post(

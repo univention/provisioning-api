@@ -6,7 +6,7 @@ import asyncio
 import difflib
 import json
 
-from shared.client import AsyncClient, Message
+from shared.client import AsyncClient, ProvisioningMessage
 from shared.client.config import settings
 
 
@@ -28,7 +28,7 @@ def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
         print(text, **kwargs)
 
 
-def print_header(msg: Message, action=None):
+def print_header(msg: ProvisioningMessage, action=None):
     print()
 
     text = ""
@@ -69,7 +69,7 @@ def print_udm_diff(old: dict, new: dict):
             _cprint(line)
 
 
-def handle_udm_message(msg: Message):
+def handle_udm_message(msg: ProvisioningMessage):
     old_full = msg.body.get("old") or {}
     new_full = msg.body.get("new") or {}
 
@@ -94,12 +94,12 @@ def handle_udm_message(msg: Message):
         _cprint("No object data received!", fg="r")
 
 
-def handle_any_message(msg: Message):
+def handle_any_message(msg: ProvisioningMessage):
     print_header(msg)
     print(msg.model_dump_json(indent=2))
 
 
-def handle_message(message: Message):
+def handle_message(message: ProvisioningMessage):
     if message.realm == "udm":
         handle_udm_message(message)
     else:
@@ -116,14 +116,7 @@ async def main():
 
     while True:
         response = await client.get_subscription_messages(name=name, timeout=5)
-        for msg in response:
-            message = Message(
-                publisher_name=msg.publisher_name,
-                ts=msg.ts,
-                realm=msg.realm,
-                topic=msg.topic,
-                body=msg.body,
-            )
+        for message in response:
             handle_message(message=message)
 
     # FIXME: No stream available any more. Where did it go?

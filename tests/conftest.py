@@ -67,6 +67,7 @@ PROVISIONING_MESSAGE = ProvisioningMessage(
     topic=TOPIC,
     body=BODY,
     sequence_number=1,
+    num_delivered=1,
 )
 
 FLAT_BASE_MESSAGE = {

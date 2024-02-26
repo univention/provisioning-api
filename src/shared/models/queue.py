@@ -94,3 +94,6 @@ class ProvisioningMessage(Message):
     sequence_number: int = Field(
         description="The sequence number associated with the message."
     )
+    num_delivered: int = Field(
+        description="The number of times that this message has been delivered."
+    )

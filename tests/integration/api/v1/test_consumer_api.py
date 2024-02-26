@@ -96,7 +96,7 @@ class TestConsumer:
         assert data[0]["publisher_name"] == PUBLISHER_NAME
         assert data[0]["sequence_number"] == 1
 
-    async def test_post_message_status(
+    async def test_post_messages_status(
         self,
         messages_client: httpx.AsyncClient,
     ):

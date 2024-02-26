@@ -126,6 +126,7 @@ class NatsMQAdapter(BaseMQAdapter):
         sequence_number = msg.reply.split(".")[-4]
         message = ProvisioningMessage(
             sequence_number=sequence_number,
+            num_delivered=msg.metadata.num_delivered,
             publisher_name=data["publisher_name"],
             ts=data["ts"],
             realm=data["realm"],
