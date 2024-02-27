@@ -31,21 +31,6 @@ class NatsKeys:
         return f"KV_{bucket}"
 
 
-# class NatsAdapter():
-#     def __init__(self, user: str, password: str):
-#         self._nats = NATS()
-#         self._js = self._nats.jetstream()
-#         self._user = user
-#         self._password = password
-#         self.logger = logging.getLogger(__name__)
-
-#     async def connect(self):
-#         await self._nats.connect(
-#             [settings.nats_server],
-#             user=self._user,
-#             password=self._password)
-
-
 class NatsKVAdapter(BaseKVStoreAdapter):
     def __init__(self):
         self._nats = NATS()

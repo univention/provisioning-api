@@ -6,15 +6,16 @@ from unittest.mock import AsyncMock, patch, call
 import aiohttp
 import pytest
 from nats.aio.msg import Msg
+
+from tests.conftest import (
+    FLAT_MESSAGE,
+    SUBSCRIPTION_NAME,
+    MSG,
+    MockNatsMQAdapter,
+    MockNatsKVAdapter,
+)
+
 from dispatcher.config import DispatcherSettings
-
-from tests.conftest import FLAT_MESSAGE
-
-from tests.conftest import MockNatsMQAdapter, MockNatsKVAdapter
-
-from tests.conftest import SUBSCRIPTION_NAME
-
-from tests.conftest import MSG
 from dispatcher.port import DispatcherPort
 from dispatcher.service.dispatcher import DispatcherService
 
