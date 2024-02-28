@@ -29,8 +29,8 @@ A Helm Chart that deploys the provisioning services
 | api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | api.image.registry | string | `""` |  |
-| api.image.repository | string | `"univention/customers/dataport/upx/provisioning/events-and-consumer-api"` |  |
-| api.image.tag | string | `"0.13.0"` |  |
+| api.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"` |  |
+| api.image.tag | string | `"0.14.0"` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
 | containerSecurityContext.enabled | bool | `true` | Enable security context. |
@@ -46,8 +46,8 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `""` |  |
-| dispatcher.image.repository | string | `"univention/customers/dataport/upx/provisioning/dispatcher"` |  |
-| dispatcher.image.tag | string | `"0.13.0"` |  |
+| dispatcher.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatcher"` |  |
+| dispatcher.image.tag | string | `"0.14.0"` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
@@ -123,8 +123,8 @@ A Helm Chart that deploys the provisioning services
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `""` |  |
-| prefill.image.repository | string | `"univention/customers/dataport/upx/provisioning/prefill"` |  |
-| prefill.image.tag | string | `"0.13.0"` |  |
+| prefill.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-prefill"` |  |
+| prefill.image.tag | string | `"0.14.0"` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |

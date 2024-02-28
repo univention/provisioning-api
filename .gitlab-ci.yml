@@ -30,37 +30,37 @@ lint-pre-commit:
     - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 
 .build-matrix: &build-matrix
-  - IMAGE_NAME: "events-and-consumer-api"
+  - IMAGE_NAME: "provisioning-events-and-consumer-api"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
-  - IMAGE_NAME: "events-and-consumer-api-test"
+  - IMAGE_NAME: "provisioning-events-and-consumer-api-test"
     KANIKO_ARGS: "--target test"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
-  - IMAGE_NAME: "udm-listener"
+  - IMAGE_NAME: "provisioning-udm-listener"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
-  - IMAGE_NAME: "dispatcher"
+  - IMAGE_NAME: "provisioning-dispatcher"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
   - IMAGE_NAME: "test"
     DOCKERFILE_PATH: "docker/test/Dockerfile"
-  - IMAGE_NAME: "example-client"
+  - IMAGE_NAME: "provisioning-example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
-  - IMAGE_NAME: "prefill"
+  - IMAGE_NAME: "provisioning-prefill"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/prefill/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "events-and-consumer-api"
+    - "provisioning-events-and-consumer-api"
   - IMAGE_NAME:
-    - "udm-listener"
+    - "provisioning-udm-listener"
   - IMAGE_NAME:
-    - "dispatcher"
+    - "provisioning-dispatcher"
   - IMAGE_NAME:
-    - "example-client"
+    - "provisioning-example-client"
   - IMAGE_NAME:
-    - "prefill"
+    - "provisioning-prefill"
 
 container-build:
   parallel:
@@ -135,7 +135,7 @@ test-end-to-end:
 # TODO: docker compose run nats ... somehow
 test-events-and-consumer-api:
   stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/events-and-consumer-api-test:${RELEASE_VERSION}"
+  image: "${CI_REGISTRY_IMAGE}/provisioning-events-and-consumer-api-test:${RELEASE_VERSION}"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: "never"

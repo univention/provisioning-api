@@ -453,8 +453,8 @@ api:
   image:
     registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/events-and-consumer-api"
-    tag: "0.13.0"
+    repository: "univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"
+    tag: "0.14.0"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -472,8 +472,8 @@ dispatcher:
   image:
     registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/dispatcher"
-    tag: "0.13.0"
+    repository: "univention/customers/dataport/upx/provisioning/provisioning-dispatcher"
+    tag: "0.14.0"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -491,8 +491,8 @@ prefill:
   image:
     registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/prefill"
-    tag: "0.13.0"
+    repository: "univention/customers/dataport/upx/provisioning/provisioning-prefill"
+    tag: "0.14.0"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
