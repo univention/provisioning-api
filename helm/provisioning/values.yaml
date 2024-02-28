@@ -5,7 +5,7 @@
 # The global properties are used to configure multiple charts at once.
 global:
   # -- Container registry address.
-  imageRegistry: "gitregistry.knut.univention.de"
+  imageRegistry: ""
 
   # -- Credentials to fetch images from private registry.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -91,9 +91,6 @@ fullnameOverride: ""
 # imagePullSecrets:
 #   - "docker-registry"
 imagePullSecrets: []
-
-# -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-imagePullPolicy: "IfNotPresent"
 
 # Define and create Kubernetes Ingress.
 #
