@@ -81,11 +81,10 @@ class SubscriptionService:
         for realm_topic in sub_info.realms_topics:
             await self.delete_sub_from_realm_topic(realm_topic, name)
 
-        # FIXME: who is responsible for deleting subscription's credentials from the store?
-        await self._port.delete_kv_pair(name, Bucket.credentials)
         await self.delete_sub_info(name)
         await self._port.delete_stream(name)
         await self._port.delete_consumer(name)
+        await self._port.delete_kv_pair(name, Bucket.credentials)
 
     async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
         await self.delete_subscription_from_values(realm_topic_str, name)
