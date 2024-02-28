@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.13.0...v0.13.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **helm:** unset imageRegistry, drop unused non-global imagePullPolicy ([88e71d6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/88e71d6f90fdfc21eee07b1b2b3c9cb679e424c8))
+
 ## [0.13.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.12.0...v0.13.0) (2024-02-23)
 
 
