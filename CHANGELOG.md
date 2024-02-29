@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.14.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.13.1...v0.14.0) (2024-02-28)
+
+
+### Features
+
+* **docker:** prepend provisioning to images ([bd3e2c3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd3e2c3c496c40242bf4418165bb4a91b2a4e7fd))
+
+## [0.13.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.13.0...v0.13.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **helm:** unset imageRegistry, drop unused non-global imagePullPolicy ([88e71d6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/88e71d6f90fdfc21eee07b1b2b3c9cb679e424c8))
+
+## [0.13.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.12.0...v0.13.0) (2024-02-23)
+
+
+### Features
+
+* new BSI compliant helm chart for use with umbrella chart ([cfad306](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cfad306467212a93e5b365877cd723ea5349ee96))
+* new BSI compliant helm chart for use with umbrella chart ([6edd096](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6edd0962002444cc6f73f65de8b244aaec417b94))
+
 ## [0.12.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.2...v0.12.0) (2024-02-22)
 
 

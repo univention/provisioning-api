@@ -3,7 +3,7 @@
 
 services:
   events-and-consumer-api:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/events-and-consumer-api:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
@@ -31,7 +31,7 @@ services:
     command: --jetstream -m 8222 -p 4222
 
   dispatcher:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/dispatcher:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
@@ -48,7 +48,7 @@ services:
       - "events-and-consumer-api"
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/prefill:1.0.0-pre-feat-bsi-compliance"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
@@ -66,7 +66,7 @@ services:
       - "events-and-consumer-api"
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/udm-listener:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
@@ -102,7 +102,7 @@ services:
       - ldap-shared-run:/var/run/slapd/:ro
 
   example-client:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/example-client:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/example-client/Dockerfile
