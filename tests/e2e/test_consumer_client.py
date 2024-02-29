@@ -22,7 +22,7 @@ from univention.admin.rest.client import UDM
 
 @pytest.fixture
 def provisioning_client() -> shared.client.AsyncClient:
-    return shared.client.AsyncClient("http://localhost:7777")
+    return shared.client.AsyncClient()
 
 
 @pytest.fixture

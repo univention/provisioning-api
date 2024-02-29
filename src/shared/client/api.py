@@ -5,6 +5,7 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
 import aiohttp
 
+from admin.config import admin_settings
 from shared.models import (
     Subscription,
     ProvisioningMessage,
@@ -28,18 +29,25 @@ class AsyncClient:
         self,
         name: str,
         realms_topics: List[Tuple[str, str]],
+        password: str,
         request_prefill: bool = False,
     ):
         logger.info("creating subscription for %s", str(realms_topics))
         subscription = NewSubscription(
-            name=name, realms_topics=realms_topics, request_prefill=request_prefill
+            name=name,
+            realms_topics=realms_topics,
+            request_prefill=request_prefill,
+            password=password,
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             logger.debug(subscription.model_dump())
             async with session.post(
-                f"{settings.consumer_registration_url}/subscriptions",
+                f"{settings.base_url}/admin/v1/subscriptions",
                 json=subscription.model_dump(),
+                auth=aiohttp.BasicAuth(
+                    admin_settings.admin_username, admin_settings.admin_password
+                ),
             ):
                 # either return nothing or let `.post` throw
                 pass

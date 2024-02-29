@@ -108,10 +108,11 @@ def handle_message(message: ProvisioningMessage):
 
 async def main():
     name = settings.consumer_name
+    password = settings.provisioning_api_password
 
     client = AsyncClient()
     await client.create_subscription(
-        name, settings.realms_topics, settings.request_prefill
+        name, settings.realms_topics, password, settings.request_prefill
     )
 
     while True:

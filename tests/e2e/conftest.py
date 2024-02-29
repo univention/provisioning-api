@@ -70,6 +70,7 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient) ->
     await provisioning_client.create_subscription(
         name=subscriber_name,
         realms_topics=REALMS_TOPICS,
+        password="",
         request_prefill=False,
     )
 
