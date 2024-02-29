@@ -14,7 +14,6 @@ from nats.js.kv import KeyValue
 
 from admin.port import AdminPort
 from consumer.port import ConsumerPort
-from consumer.main import app
 from events.port import EventsPort
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import (
@@ -26,6 +25,12 @@ from shared.models import (
     ProvisioningMessage,
     PrefillMessage,
 )
+
+from tests import set_test_env_vars
+
+set_test_env_vars()
+
+from consumer.main import app  # noqa: E402
 
 REALM = "udm"
 TOPIC = "groups/group"

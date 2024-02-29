@@ -4,10 +4,14 @@
 import uuid
 
 import pytest
-from univention.admin.rest.client import UDM
 
-import shared.client
+from univention.admin.rest.client import UDM
 from tests.conftest import REALMS_TOPICS
+from tests import set_test_env_vars
+
+set_test_env_vars()
+
+import shared.client  # noqa: E402
 
 
 def pytest_addoption(parser):

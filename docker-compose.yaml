@@ -64,6 +64,8 @@ services:
       NATS_HOST: "nats"
       CONSUMER_EVENT_HOST: "events-and-consumer-api"
       UDM_HOST: "udm-rest-api"
+      UDM_USERNAME: "cn=admin"
+      UDM_PASSWORD: "univention"
     depends_on:
       - "nats"
       - "events-and-consumer-api"
@@ -86,6 +88,9 @@ services:
       TLS_MODE: "off"
       LDAP_PASSWORD: "univention"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
+      LDAP_PORT: 389
+      UDM_USERNAME: "cn=admin"
+      UDM_PASSWORD: "univention"
     network_mode: "host"
     depends_on:
       - "nats"
@@ -118,6 +123,8 @@ services:
       PROVISIONING_API_PORT: 7777
       REALMS_TOPICS: '[["udm", "groups/group"]]'
       REQUEST_PREFILL: "false"
+      ADMIN_USERNAME: "admin"
+      ADMIN_PASSWORD: "provisioning"
     restart: "on-failure"
 
 

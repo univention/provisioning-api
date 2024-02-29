@@ -3,12 +3,10 @@
 
 import contextlib
 import json
-from typing import Optional
 
 
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.adapters.event_adapter import EventAdapter
-from shared.adapters.udm_adapter import UDMAdapter
 
 from shared.models import Message
 from shared.models.subscription import Bucket
@@ -17,7 +15,6 @@ from shared.models.subscription import Bucket
 class UDMMessagingPort:
     def __init__(self):
         self.kv_adapter = NatsKVAdapter()
-        self._udm_adapter: Optional[UDMAdapter] = None
         self._event_adapter = EventAdapter()
 
     @staticmethod

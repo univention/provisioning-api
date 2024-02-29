@@ -6,9 +6,9 @@ from pydantic_settings import BaseSettings
 
 class AdminSettings(BaseSettings):
     # Admin API: username
-    admin_username: str = "admin"
+    admin_username: str
     # Admin API: password
-    admin_password: str = "provisioning"
+    admin_password: str
 
 
 admin_settings = AdminSettings()
