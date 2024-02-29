@@ -15,7 +15,6 @@ from tests.e2e.helpers import (
 
 async def test_get_multiple_messages(
     provisioning_client: shared.client.AsyncClient,
-    simple_subscription: str,
     provisioning_base_url,
 ):
     create_message_via_events_api(provisioning_base_url)
@@ -26,7 +25,6 @@ async def test_get_multiple_messages(
 
     for _ in range(3):
         response = await provisioning_client.get_subscription_messages(
-            name=simple_subscription,
             timeout=5,
             count=1,
         )
@@ -37,13 +35,11 @@ async def test_get_multiple_messages(
 
 async def test_acknowledge_messages(
     provisioning_client: shared.client.AsyncClient,
-    simple_subscription: str,
     provisioning_base_url,
 ):
     body = create_message_via_events_api(provisioning_base_url)
 
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         timeout=5,
     )
 
@@ -55,12 +51,9 @@ async def test_acknowledge_messages(
         message_seq_num=message.sequence_number,
         publisher_name=message.publisher_name,
     )
-    response = await provisioning_client.set_message_status(
-        simple_subscription, [report]
-    )
+    response = await provisioning_client.set_message_status([report])
 
     response2 = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         timeout=1,
     )
 
@@ -74,20 +67,17 @@ async def test_acknowledge_messages(
 @pytest.mark.xfail()
 async def test_do_not_acknowledge_messages(
     provisioning_client: shared.client.AsyncClient,
-    simple_subscription: str,
     provisioning_base_url,
 ):
     body = create_message_via_events_api(provisioning_base_url)
 
     # test first delivery of a message
-    response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription, timeout=5, count=10
-    )
+    response = await provisioning_client.get_subscription_messages(timeout=5, count=10)
     assert len(response) == 1
     assert response[0].data["body"] == body
 
     # test eventual redelivery of a message
-    result = await pop_all_messages(provisioning_client, simple_subscription, 4)
+    result = await pop_all_messages(provisioning_client, 4)
     assert len(result) == 1
     assert result[0].body == body
 
@@ -95,23 +85,19 @@ async def test_do_not_acknowledge_messages(
 @pytest.mark.xfail()
 async def test_acknowledge_some_messages(
     provisioning_client: shared.client.AsyncClient,
-    simple_subscription: str,
     provisioning_base_url,
 ):
     body = create_message_via_events_api(provisioning_base_url)
     create_message_via_events_api(provisioning_base_url)
 
     # test first delivery of a message
-    response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription, timeout=5, count=10
-    )
+    response = await provisioning_client.get_subscription_messages(timeout=5, count=10)
 
     assert len(response) == 2
     assert response[0].data["body"] == body
 
     # test immediate redelivery of a message
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         timeout=5,
         count=10,
     )
@@ -119,11 +105,11 @@ async def test_acknowledge_some_messages(
     assert len(response) == 2
 
     # test redelivery only until message is acknowledged
-    result = await pop_all_messages(provisioning_client, simple_subscription, 3)
+    result = await pop_all_messages(provisioning_client, 3)
     assert len(result) == 2
 
     create_message_via_events_api(provisioning_base_url)
 
     # test that only the new message gets delivered
-    result = await pop_all_messages(provisioning_client, simple_subscription, 2)
+    result = await pop_all_messages(provisioning_client, 2)
     assert len(result) == 1

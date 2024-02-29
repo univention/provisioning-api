@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+from typing import AsyncGenerator
 import uuid
 
 import pytest
 
 from univention.admin.rest.client import UDM
+import shared.client
+from shared.client.config import ClientSettings
 from tests.conftest import REALMS_TOPICS
 from tests import set_test_env_vars
 
@@ -69,15 +72,21 @@ def provisioning_client(provisioning_base_url) -> shared.client.AsyncClient:
 
 
 @pytest.fixture
-async def simple_subscription(provisioning_client: shared.client.AsyncClient) -> str:
-    subscriber_name = str(uuid.uuid4())
-    await provisioning_client.create_subscription(
-        name=subscriber_name,
-        realms_topics=REALMS_TOPICS,
-        password="",
-        request_prefill=False,
+async def provisioning_client() -> AsyncGenerator[shared.client.AsyncClient, None]:
+    provisioning_client = shared.client.AsyncClient(
+        ClientSettings(
+            consumer_name=str(uuid.uuid4()),
+            realms_topics=REALMS_TOPICS,
+            request_prefill=False,
+            provisioning_api_host="localhost",
+            provisioning_api_port=7777,
+            provisioning_api_password="",
+            provisioning_api_username="",
+        )
     )
 
-    yield subscriber_name
+    await provisioning_client.create_subscription()
 
-    await provisioning_client.cancel_subscription(subscriber_name)
+    yield provisioning_client
+
+    await provisioning_client.cancel_subscription()

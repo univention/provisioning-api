@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import logging
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
+from typing import Any, Callable, Coroutine, Dict, List, Optional
 
 import aiohttp
 
@@ -17,33 +17,28 @@ from shared.models import (
 
 from shared.models.queue import Message
 
-from shared.client.config import settings
+from shared.client.config import ClientSettings
 
 logger = logging.getLogger(__file__)
 
 
-# TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    # TODO: move this method to the AdminClient
-    async def create_subscription(
-        self,
-        name: str,
-        realms_topics: List[Tuple[str, str]],
-        password: str,
-        request_prefill: bool = False,
-    ):
-        logger.info("creating subscription for %s", str(realms_topics))
+    
+    def __init__(self, settings: Optional[ClientSettings] = None) -> None:
+        self.settings = settings or ClientSettings()
+
+    async def create_subscription(self):
+        logger.info("creating subscription for %s", str(self.settings.realms_topics))
         subscription = NewSubscription(
-            name=name,
-            realms_topics=realms_topics,
-            request_prefill=request_prefill,
-            password=password,
+            name=self.settings.consumer_name,
+            realms_topics=self.settings.realms_topics,
+            request_prefill=self.settings.request_prefill,
         )
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             logger.debug(subscription.model_dump())
             async with session.post(
-                f"{settings.base_url}/admin/v1/subscriptions",
+                f"{self.settings.base_url}/admin/v1/subscriptions",
                 json=subscription.model_dump(),
                 auth=aiohttp.BasicAuth(
                     admin_settings.admin_username, admin_settings.admin_password
@@ -52,25 +47,24 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
-    async def cancel_subscription(self, name: str):
+    async def cancel_subscription(self):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.delete(
-                f"{settings.consumer_registration_url}/subscriptions/{name}",
+                f"{self.settings.consumer_registration_url}/subscriptions/{self.settings.consumer_name}",
             ):
                 # either return nothing or let `.post` throw
                 pass
 
-    async def get_subscription(self, name: str) -> Subscription:
+    async def get_subscription(self) -> Subscription:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_registration_url}/subscriptions/{name}"
+                f"{self.settings.consumer_registration_url}/subscriptions/{self.settings.consumer_name}"
             ) as response:
                 data = await response.json()
                 return Subscription.model_validate(data)
 
     async def get_subscription_messages(
         self,
-        name: str,
         count: Optional[int] = None,
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
@@ -86,18 +80,18 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_messages_url}/subscriptions/{name}/messages",
+                f"{self.settings.consumer_messages_url}/subscriptions/{self.settings.consumer_name}/messages",
                 params=params,
             ) as response:
                 msgs = await response.json()
                 return [ProvisioningMessage.model_validate(msg) for msg in msgs]
 
     async def set_message_status(
-        self, name: str, reports: List[MessageProcessingStatusReport]
+        self, reports: List[MessageProcessingStatusReport]
     ):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{settings.consumer_messages_url}/subscriptions/{name}/messages-status/",
+                f"{self.settings.consumer_messages_url}/subscriptions/{self.settings.consumer_name}/messages-status/",
                 json=[report.model_dump() for report in reports],
             ):
                 # either return nothing or let `.post` throw
@@ -106,7 +100,7 @@ class AsyncClient:
     async def get_subscriptions(self) -> List[Subscription]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_registration_url}/subscriptions"
+                f"{self.settings.consumer_registration_url}/subscriptions"
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead
@@ -120,7 +114,7 @@ class AsyncClient:
 
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"{settings.consumer_registration_url}/messages",
+                f"{self.settings.consumer_registration_url}/messages",
                 json=message.model_dump(),
             ):
                 # either return nothing or let `.post` throw
@@ -131,7 +125,6 @@ class MessageHandler:
     def __init__(
         self,
         client: AsyncClient,
-        subscription_name: str,
         callbacks: List[Callable[[Message], Coroutine[None, None, None]]],
         pop_after_handling: bool = True,
         message_limit: Optional[int] = None,
@@ -153,7 +146,6 @@ class MessageHandler:
         if not callbacks:
             raise ValueError("Callback functions can't be empty")
         self.client = client
-        self.subscription_name = subscription_name
         self.callbacks = callbacks
         self.pop_after_handling = pop_after_handling
         self.message_limit = message_limit
@@ -180,12 +172,10 @@ class MessageHandler:
             return
         try:
             # TODO: Retry acknowledgement
-            report = MessageProcessingStatusReport(
-                status=MessageProcessingStatus.ok,
-                message_seq_num=message.sequence_number,
-                publisher_name=message.publisher_name,
+            await self.client.set_message_status(
+                message,
+                MessageProcessingStatus.ok,
             )
-            await self.client.set_message_status(self.subscription_name, [report])
         except (
             aiohttp.ClientError,
             aiohttp.ClientConnectionError,
@@ -210,7 +200,6 @@ class MessageHandler:
 
         while True:
             messages = await self.client.get_subscription_messages(
-                self.subscription_name,
                 count=1,
                 timeout=10,
                 # TODO: pop is broken serverside at the moment

@@ -42,13 +42,11 @@ def create_message_via_udm_rest_api(udm: UDM):
 
 async def pop_all_messages(
     provisioning_client: shared.client.AsyncClient,
-    subscription_name: str,
     loop_number: int,
 ):
     result = []
     for _ in range(loop_number):
         response = await provisioning_client.get_subscription_messages(
-            name=subscription_name,
             timeout=1,
             count=1,
         )
@@ -59,7 +57,7 @@ async def pop_all_messages(
             message_seq_num=response[0].sequence_number,
             publisher_name=response[0].publisher_name,
         )
-        await provisioning_client.set_message_status(subscription_name, [report])
+        await provisioning_client.set_message_status([report])
         result.append(response[0])
 
     return result

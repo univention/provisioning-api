@@ -7,7 +7,6 @@ import difflib
 import json
 
 from shared.client import AsyncClient, ProvisioningMessage
-from shared.client.config import ClientSettings
 
 
 def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
@@ -107,17 +106,12 @@ def handle_message(message: ProvisioningMessage):
 
 
 async def main():
-    settings = ClientSettings()
-    name = settings.consumer_name
-    password = settings.provisioning_api_password
 
     client = AsyncClient()
-    await client.create_subscription(
-        name, settings.realms_topics, password, settings.request_prefill
-    )
+    await client.create_subscription()
 
     while True:
-        response = await client.get_subscription_messages(name=name, timeout=5)
+        response = await client.get_subscription_messages(timeout=5)
         for message in response:
             handle_message(message=message)
 

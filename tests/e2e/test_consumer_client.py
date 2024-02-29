@@ -37,17 +37,14 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient):
 
 
 async def test_create_subscription(
-    provisioning_client: shared.client.AsyncClient, simple_subscription
+    provisioning_client: shared.client.AsyncClient,
 ):
-    response = await provisioning_client.get_subscription(simple_subscription)
+    response = await provisioning_client.get_subscription()
     assert response
 
 
-async def test_get_empty_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
-):
+async def test_get_empty_messages(provisioning_client: shared.client.AsyncClient):
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         count=1,
         timeout=1,
     )
@@ -57,13 +54,11 @@ async def test_get_empty_messages(
 
 async def test_send_message(
     provisioning_client: shared.client.AsyncClient,
-    simple_subscription: str,
     provisioning_base_url: str,
 ):
     data = create_message_via_events_api(provisioning_base_url)
 
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         count=1,
         timeout=10,
     )
@@ -73,23 +68,20 @@ async def test_send_message(
 
 
 @pytest.mark.xfail()
-async def test_pop_message(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
-):
+async def test_pop_message(provisioning_client: shared.client.AsyncClient):
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription, count=1, timeout=1, pop=True
+        count=1, timeout=1, pop=True
     )
 
     assert response == []
 
 
 async def test_get_real_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
+    provisioning_client: shared.client.AsyncClient, udm: UDM
 ):
     group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         timeout=5,
     )
 
@@ -97,22 +89,21 @@ async def test_get_real_messages(
 
 
 async def test_get_multiple_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
+    provisioning_client: shared.client.AsyncClient, udm: UDM
 ):
     group1 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
 
-    result = await pop_all_messages(provisioning_client, simple_subscription, 4)
+    result = await pop_all_messages(provisioning_client, 4)
     assert len(result) == 3
 
 
 @pytest.mark.xfail()
 async def test_get_messages_zero_timeout(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: shared.client.AsyncClient,
 ):
     response = await provisioning_client.get_subscription_messages(
-        name=simple_subscription,
         timeout=0,
     )
 
