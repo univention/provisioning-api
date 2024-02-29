@@ -7,8 +7,11 @@ from typing import List, Optional
 
 from consumer.port import ConsumerPort
 from consumer.subscriptions.subscription.sink import SinkManager
-from shared.models import Subscription, FillQueueStatus
 from shared.models.subscription import Bucket
+from shared.models import (
+    Subscription,
+    FillQueueStatus,
+)
 
 manager = SinkManager()
 

@@ -22,7 +22,7 @@ tolerations: []
 
 image:
   registry: "gitregistry.knut.univention.de"
-  repository: "univention/customers/dataport/upx/provisioning/udm-listener"
+  repository: "univention/customers/dataport/upx/provisioning/provisioning-udm-listener"
   imagePullPolicy: "Always"
   tag: "latest"
 

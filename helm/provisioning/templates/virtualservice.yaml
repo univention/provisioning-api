@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+{{- if and .Values.istio.enabled .Values.istio.virtualService.enabled }}
+---
+apiVersion: "networking.istio.io/v1beta1"
+kind: "VirtualService"
+metadata:
+  name: {{ include "common.names.fullname" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+  {{- with .Values.istio.virtualService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  hosts:
+    - {{ required "The hostname has to be set in \"istio.host\"." .Values.istio.host | quote }}
+  gateways:
+    - {{ .Values.istio.gateway.externalGatewayName | default (printf "%s-%s" (include "common.names.fullname" .) "-gateway") }}
+  http:
+    {{- $parent := . -}}
+    {{- range .Values.istio.virtualService.pathOverrides }}
+    - match:
+        - uri:
+            {{ .match }}: {{ .path | quote }}
+      {{- if .rewrite }}
+      rewrite:
+        uri: {{ .rewrite | quote }}
+      {{- end }}
+      route:
+        {{ toYaml .route | nindent 6 }}
+      headers:
+        request:
+          set:
+            x-forwarded-host: "{{ $parent.Values.istio.host }}"
+    {{- end }}
+    {{- range .Values.istio.virtualService.paths }}
+    - match:
+        - uri:
+            {{ .match }}: {{ .path | quote }}
+      rewrite:
+        uri: {{ .rewrite | quote }}
+      route:
+        - destination:
+            port:
+              number: {{ $parent.Values.service.ports.http.port }}
+            host: {{ include "common.names.fullname" $parent | quote }}
+      headers:
+        request:
+          set:
+            x-forwarded-host: "{{ $parent.Values.istio.host }}"
+    {{- end }}
+...
+{{- end }}

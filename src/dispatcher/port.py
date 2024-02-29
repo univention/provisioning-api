@@ -8,8 +8,9 @@ import logging
 
 from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
+
 from shared.adapters.nats_adapter import NatsMQAdapter
-from shared.models.queue import MQMessage, Message
+from shared.models import MQMessage, Message
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import asyncio
 import pytest
 import requests
 import uuid
@@ -14,10 +13,11 @@ from shared.config import settings
 from admin.config import admin_settings
 
 
+from shared.models import PublisherName
+
 REALM = "udm"
 TOPIC = "groups/group"
-PUBLISHER_NAME = "udm-listener"
-BASE_URL = "http://localhost:7777"
+PUBLISHER_NAME = PublisherName.udm_listener
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -32,7 +32,7 @@ def connect_ldap_server():
     return connection
 
 
-async def test_workflow():
+async def test_workflow(provisioning_base_url):
     name = str(uuid.uuid4())
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
@@ -40,7 +40,7 @@ async def test_workflow():
     connection = connect_ldap_server()
 
     response = requests.post(
-        f"{BASE_URL}{admin_api_prefix}/subscriptions",
+        f"{provisioning_base_url}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
@@ -59,12 +59,12 @@ async def test_workflow():
     )
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
@@ -77,12 +77,12 @@ async def test_workflow():
     connection.modify(dn, changes)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
@@ -95,12 +95,12 @@ async def test_workflow():
     connection.delete(dn)
 
     response = requests.get(
-        f"{BASE_URL}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
+        f"{provisioning_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
     )
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
@@ -108,7 +108,3 @@ async def test_workflow():
     assert message["publisher_name"] == PUBLISHER_NAME
     assert message["body"]["new"] is None
     assert message["body"]["old"]["dn"] == dn
-
-
-if __name__ == "__main__":
-    asyncio.run(test_workflow())

@@ -8,7 +8,6 @@ from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
 from shared.models import Message
-from shared.models.queue import MQMessage
 from shared.models.subscription import Bucket
 
 
@@ -60,7 +59,7 @@ class BaseMQAdapter(ABC):
         pass
 
     @abstractmethod
-    async def remove_message(self, msg: Union[Msg, MQMessage]):
+    async def delete_message(self, stream_name: str, seq_num: int):
         pass
 
     @abstractmethod

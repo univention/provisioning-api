@@ -49,12 +49,6 @@ RUN \
     poetry install --only main
 
 ###############################################
-# Stage 2: test image
-FROM build as test
-
-RUN poetry install --with dev
-
-###############################################
 # Stage 2: final image
 FROM build as final
 ARG WORKDIR
@@ -62,13 +56,4 @@ WORKDIR ${WORKDIR}
 
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
-EXPOSE 7777
-
-# run
-ENTRYPOINT [ \
-        "./.venv/bin/uvicorn", \
-         "consumer.main:app", \
-        "--log-config", "logging.yaml", \
-        "--host", "0.0.0.0", \
-        "--port", "7777" \
-    ]
+ENTRYPOINT ["poetry", "run", "client"]

@@ -15,13 +15,8 @@ data:
   LDAP_HOST: "{{ .Values.config.ldapHost }}"
   LDAP_HOST_DN: "{{ .Values.config.ldapHostDn }}"
   LDAP_PORT: "{{ .Values.config.ldapPort }}"
-  {{- if .Values.nats.bundled }}
-  NATS_HOST: "{{ include "common.names.dependency.fullname" (dict "chartName" "nats" "chartValues" .Values.nats "context" $.top) }}"
-  NATS_PORT: "4222"
-  {{- else }}
   NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .Values.config.natsHost | quote }}
   NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
-  {{- end }}
   NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
   TLS_MODE: "{{ .Values.config.tlsMode }}"
 {{ end }}

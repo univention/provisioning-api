@@ -10,9 +10,8 @@ from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.models import Message
 
-from shared.models.queue import MQMessage
-from shared.models.queue import PrefillMessage
 from shared.models.subscription import Bucket
+from shared.models import ProvisioningMessage, PrefillMessage
 
 
 class ConsumerPort:
@@ -42,13 +41,13 @@ class ConsumerPort:
 
     async def get_messages(
         self, subscription_name: str, timeout: float, count: int, pop: bool
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         return await self.mq_adapter.get_messages(
             subscription_name, timeout, count, pop
         )
 
-    async def remove_message(self, msg: MQMessage):
-        await self.mq_adapter.remove_message(msg)
+    async def delete_message(self, stream_name: str, seq_num: int):
+        await self.mq_adapter.delete_message(stream_name, seq_num)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
