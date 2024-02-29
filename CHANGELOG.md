@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.14.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.14.0...v0.14.1) (2024-02-29)
+
+
+### Bug Fixes
+
+* change publisher_name description, rename methods ([7439ab4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7439ab4e07af5dd7681626f457db6869f842a216))
+* delete the messages by sequence number ([d0068d0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d0068d0cfe93446408be3197e632adff1ed401a3))
+* fix example-client and tests ([fefd70c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fefd70ca6a53afbbe00f7456e9325db1467922ac))
+* fix PROVISIONING_API_HOST and tests ([4d28b3c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4d28b3c1d7c07be5da8ba58a4e117965f4d6020c))
+* introduce ProvisioningMessage for client-facing API responses ([88a0c22](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/88a0c2254f24404ac7c946fd8b28a471233549a7))
+* merge main ([20e35ae](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/20e35ae625ff2d5229b2de9226dd205982208cc1))
+* merge main ([d12f531](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d12f5313f5b164f14f291f2fda6374eb1a887e69))
+* merge main ([e8f844a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e8f844a7320751b67ee61176ed4a23e58a7feda6))
+* parallelize deleting messages, add num_delivered field to the ProvisioingMessage and use this class in the exmple-client, rename methods ([cd2470b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cd2470bd4f167c0c32c521da467761de434b4415))
+* pass queue type to delete message, fix tests ([278fef3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/278fef32ab970a049a17d1e54a6af120d00b956a))
+* remove python3-venv from udm-listener Dockerfile ([50238cf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/50238cf7bc5be45bbbb4c73475ecaca84b0c69d2))
+* use MessageProcessingStatusReport for a single message, fix no module error with udm-listener ([990ca94](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/990ca94b1b8f0c9acb0efeb5a29fe6b04c5056f9))
+
 ## [0.14.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.13.1...v0.14.0) (2024-02-28)
 
 
