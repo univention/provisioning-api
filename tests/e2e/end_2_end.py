@@ -6,10 +6,13 @@ import pytest
 import requests
 import uuid
 
-from shared.config import settings
 from admin.api import v1_prefix as admin_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
+
+from shared.config import settings
+from admin.config import admin_settings
+
 
 REALM = "udm"
 TOPIC = "groups/group"
@@ -44,7 +47,7 @@ async def test_workflow():
             "request_prefill": False,
             "password": "password",
         },
-        auth=(settings.admin_username, settings.admin_password),
+        auth=(admin_settings.admin_username, admin_settings.admin_password),
     )
     assert response.status_code == 201
 

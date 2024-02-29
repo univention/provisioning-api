@@ -13,12 +13,31 @@ from shared.models import (
     MessageProcessingStatus,
     MessageProcessingStatusReport,
     Event,
+    NewSubscription,
 )
 
 
 class AsyncClient:
     def __init__(self, base_url):
         self.base_url = base_url
+
+    # TODO: move this method to the AdminClient
+    async def create_subscription(
+        self, name: str, realms_topics: List[List[str]], request_prefill: bool = False
+    ):
+        subscriber = NewSubscription(
+            name=name, realms_topics=realms_topics, request_prefill=request_prefill
+        )
+
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            # TODO: do this with propper logging
+            print(subscriber.model_dump())
+            async with session.post(
+                f"{self.base_url}{subscriptions_api_prefix}/subscriptions",
+                json=subscriber.model_dump(),
+            ):
+                # either return nothing or let `.post` throw
+                pass
 
     async def cancel_subscription(self, name: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:

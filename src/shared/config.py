@@ -60,11 +60,6 @@ class Settings(BaseSettings):
             f"http://{self.consumer_event_host}:{self.consumer_event_port}/messages/v1"
         )
 
-    # Admin API: username
-    admin_username: str = "admin"
-    # Admin API: password
-    admin_password: str = "provisioning"
-
     # LDAP : port
     ldap_port: int = 389
     # LDAP : host

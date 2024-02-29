@@ -7,9 +7,9 @@ import fastapi
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
+from admin.config import admin_settings
 from admin.port import AdminPortDependency
 from admin.service import AdminService
-from shared.config import settings
 from shared.models import Subscription, NewSubscription
 
 router = fastapi.APIRouter()
@@ -18,12 +18,12 @@ security = HTTPBasic()
 
 def authenticate_user(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
     current_username_bytes = credentials.username.encode("utf8")
-    expected_username_bytes = settings.admin_username.encode("utf8")
+    expected_username_bytes = admin_settings.admin_username.encode("utf8")
     is_correct_username = secrets.compare_digest(
         current_username_bytes, expected_username_bytes
     )
     current_password_bytes = credentials.password.encode("utf8")
-    expected_password_bytes = settings.admin_password.encode("utf8")
+    expected_password_bytes = admin_settings.admin_password.encode("utf8")
     is_correct_password = secrets.compare_digest(
         current_password_bytes, expected_password_bytes
     )

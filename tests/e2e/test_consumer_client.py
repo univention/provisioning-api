@@ -6,7 +6,7 @@ import pytest
 import requests
 
 import shared.client
-from shared.config import settings
+from admin.config import admin_settings
 from shared.models.api import MessageProcessingStatus
 import shared.models.queue
 
@@ -35,7 +35,7 @@ async def simple_subscription(provisioning_client: shared.client.AsyncClient):
             "request_prefill": False,
             "password": "password",
         },
-        auth=(settings.admin_username, settings.admin_password),
+        auth=(admin_settings.admin_username, admin_settings.admin_password),
     )
     assert response.status_code == 201
 
