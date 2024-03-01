@@ -24,7 +24,9 @@ class ClientSettings(BaseSettings):
 
     @property
     def base_url(self) -> str:
-        return f"http://{self.provisioning_api_host}:{self.provisioning_api_port}"
+        if not self.provisioning_api_host.startswith("http"):
+            self.provisioning_api_host = f"http://{self.provisioning_api_host}"
+        return f"{self.provisioning_api_host}:{self.provisioning_api_port}"
 
     @property
     def consumer_registration_url(self) -> str:

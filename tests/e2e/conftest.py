@@ -67,19 +67,16 @@ def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
 
 
 @pytest.fixture
-def provisioning_client(provisioning_base_url) -> shared.client.AsyncClient:
-    return shared.client.AsyncClient()
-
-
-@pytest.fixture
-async def provisioning_client() -> AsyncGenerator[shared.client.AsyncClient, None]:
+async def provisioning_client(provisioning_base_url) -> AsyncGenerator[shared.client.AsyncClient, None]:
+    url_params = provisioning_base_url.split(":")
     provisioning_client = shared.client.AsyncClient(
         ClientSettings(
             consumer_name=str(uuid.uuid4()),
             realms_topics=REALMS_TOPICS,
             request_prefill=False,
-            provisioning_api_host="localhost",
-            provisioning_api_port=7777,
+            # Absense of error handling is on purpose in order to fail early on misconfiguration
+            provisioning_api_host=":".join(url_params[0], url_params[1]),
+            provisioning_api_port=url_params[2],
             provisioning_api_password="",
             provisioning_api_username="",
         )
