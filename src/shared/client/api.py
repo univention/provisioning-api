@@ -86,9 +86,7 @@ class AsyncClient:
                 msgs = await response.json()
                 return [ProvisioningMessage.model_validate(msg) for msg in msgs]
 
-    async def set_message_status(
-        self, reports: List[MessageProcessingStatusReport]
-    ):
+    async def set_message_status(self, reports: List[MessageProcessingStatusReport]):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
                 f"{self.settings.consumer_messages_url}/subscriptions/{self.settings.consumer_name}/messages-status/",
@@ -172,10 +170,12 @@ class MessageHandler:
             return
         try:
             # TODO: Retry acknowledgement
-            await self.client.set_message_status(
-                message,
-                MessageProcessingStatus.ok,
+            report = MessageProcessingStatusReport(
+                status=MessageProcessingStatus.ok,
+                message_seq_num=message.sequence_number,
+                publisher_name=message.publisher_name,
             )
+            await self.client.set_message_status([report])
         except (
             aiohttp.ClientError,
             aiohttp.ClientConnectionError,
