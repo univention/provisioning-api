@@ -16,6 +16,8 @@ services:
       NATS_HOST: "nats"
       NATS_USER: "api"
       NATS_PASSWORD: "apipass"
+      ADMIN_NATS_USER: "admin"
+      ADMIN_NATS_PASSWORD: "nimda"
       UDM_HOST: "udm-rest-api"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "provisioning"
@@ -137,6 +139,8 @@ services:
       REQUEST_PREFILL: "false"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "provisioning"
+      ADMIN_NATS_USER: "admin"
+      ADMIN_NATS_PASSWORD: "nimda"
     restart: "on-failure"
 
 

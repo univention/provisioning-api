@@ -7,6 +7,7 @@ from typing import List, Annotated, Optional, Union
 from fastapi import Depends
 from fastapi.security import HTTPBasic
 
+from admin.config import AdminSettings
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.models import Message
@@ -18,15 +19,23 @@ security = HTTPBasic()
 
 
 class AdminPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[AdminSettings] = None):
+        self.settings = settings or AdminSettings()
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
 
     @staticmethod
     async def port_dependency():
         port = AdminPort()
-        await port.mq_adapter.connect()
-        await port.kv_adapter.init(buckets=[Bucket.subscriptions, Bucket.credentials])
+        await port.mq_adapter.connect(
+            user=port.settings.admin_nats_user,
+            password=port.settings.admin_nats_password,
+        )
+        await port.kv_adapter.init(
+            buckets=[Bucket.subscriptions, Bucket.credentials],
+            user=port.settings.admin_nats_user,
+            password=port.settings.admin_nats_password,
+        )
         try:
             yield port
         finally:

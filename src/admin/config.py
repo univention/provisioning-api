@@ -10,5 +10,10 @@ class AdminSettings(BaseSettings):
     # Admin API: password
     admin_password: str
 
+    # Nats user name specific to Consumer API
+    admin_nats_user: str
+    # Nats password specific to Consumer API
+    admin_nats_password: str
+
 
 admin_settings = AdminSettings()
