@@ -7,13 +7,15 @@ import aiohttp
 import pytest
 from nats.aio.msg import Msg
 
-from tests.conftest import FLAT_MESSAGE
+from tests.conftest import (
+    FLAT_MESSAGE,
+    SUBSCRIPTION_NAME,
+    MSG,
+    MockNatsMQAdapter,
+    MockNatsKVAdapter,
+)
 
-from tests.conftest import MockNatsMQAdapter, MockNatsKVAdapter
-
-from tests.conftest import SUBSCRIPTION_NAME
-
-from tests.conftest import MSG
+from dispatcher.config import DispatcherSettings
 from dispatcher.port import DispatcherPort
 from dispatcher.service.dispatcher import DispatcherService
 
@@ -25,7 +27,9 @@ def anyio_backend():
 
 @pytest.fixture
 async def dispatcher_mock() -> DispatcherPort:
-    port = DispatcherPort()
+    port = DispatcherPort(
+        DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass")
+    )
     port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     port.mq_adapter._message_queue.get = AsyncMock(

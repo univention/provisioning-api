@@ -4,20 +4,16 @@
 import contextlib
 import json
 from typing import Optional
-
 from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
-from shared.adapters.udm_adapter import UDMAdapter
-from shared.config import settings
-
-from shared.models import Message
-from shared.models.subscription import Bucket
+from shared.models import Bucket, Message
+from .config import UdmMessagingSettings
 
 
 class UDMMessagingPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[UdmMessagingSettings] = None):
+        self.settings = settings or UdmMessagingSettings()
         self.kv_adapter = NatsKVAdapter()
-        self._udm_adapter: Optional[UDMAdapter] = None
         self._internal_api_adapter = InternalAPIAdapter(
             settings.udm_producer_username, settings.udm_producer_password
         )
@@ -26,7 +22,11 @@ class UDMMessagingPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.kv_adapter.init([Bucket.cache])
+        await port.kv_adapter.init(
+            [Bucket.cache],
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+        )
         await port._internal_api_adapter.connect()
         try:
             yield port

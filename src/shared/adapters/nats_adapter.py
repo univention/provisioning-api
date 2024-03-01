@@ -18,7 +18,7 @@ from nats.js.errors import (
 )
 from nats.js.kv import KeyValue
 
-from shared.models.queue import BaseMessage
+from shared.models import BaseMessage, ProvisioningMessage
 from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
 from shared.models.queue import MQMessage
@@ -43,12 +43,8 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self._js = self._nats.jetstream()
         self.logger = logging.getLogger(__name__)
 
-    async def init(self, buckets: List[Bucket]):
-        await self._nats.connect(
-            [settings.nats_server],
-            user=settings.nats_username,
-            password=settings.nats_password,
-        )
+    async def init(self, buckets: List[Bucket], user: str, password: str):
+        await self._nats.connect([settings.nats_server], user=user, password=password)
         for bucket in buckets:
             await self.create_kv_store(bucket)
 
@@ -97,15 +93,11 @@ class NatsMQAdapter(BaseMQAdapter):
     def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
-        self._message_queue = asyncio.Queue()
         self.logger = logging.getLogger(__name__)
+        self._message_queue = asyncio.Queue()
 
-    async def connect(self):
-        await self._nats.connect(
-            [settings.nats_server],
-            user=settings.nats_username,
-            password=settings.nats_password,
-        )
+    async def connect(self, user: str, password: str):
+        await self._nats.connect([settings.nats_server], user=user, password=password)
 
     async def close(self):
         await self._nats.close()
@@ -124,7 +116,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def get_messages(
         self, subject: str, timeout: float, count: int, pop: bool
-    ) -> List[MQMessage]:
+    ) -> List[ProvisioningMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         try:
@@ -145,12 +137,27 @@ class NatsMQAdapter(BaseMQAdapter):
 
         if pop:
             for msg in msgs:
-                await self.remove_message(msg)
+                await msg.ack()
 
-        msgs_to_return = [self.construct_mq_message(msg) for msg in msgs]
+        msgs_to_return = [self.provisioning_message_from(msg) for msg in msgs]
         return msgs_to_return
 
-    def construct_nats_message(self, message: MQMessage) -> Msg:
+    @staticmethod
+    def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
+        data = json.loads(msg.data)
+        sequence_number = msg.reply.split(".")[-4]
+        message = ProvisioningMessage(
+            sequence_number=sequence_number,
+            num_delivered=msg.metadata.num_delivered,
+            publisher_name=data["publisher_name"],
+            ts=data["ts"],
+            realm=data["realm"],
+            topic=data["topic"],
+            body=data["body"],
+        )
+        return message
+
+    def nats_message_from(self, message: MQMessage) -> Msg:
         data = message.data
         msg = Msg(
             _client=self._nats,
@@ -162,22 +169,18 @@ class NatsMQAdapter(BaseMQAdapter):
         return msg
 
     @staticmethod
-    def construct_mq_message(msg: Msg) -> MQMessage:
+    def mq_message_from(msg: Msg) -> MQMessage:
         data = json.loads(msg.data)
+        sequence_number = msg.reply.split(".")[-4]
         message = MQMessage(
             subject=msg.subject,
             reply=msg.reply,
             data=data,
             headers=msg.headers,
             num_delivered=msg.metadata.num_delivered,
+            sequence_number=sequence_number,
         )
         return message
-
-    async def remove_message(self, msg: Union[Msg, MQMessage]):
-        """Delete a message from a NATS JetStream."""
-        if isinstance(msg, MQMessage):
-            msg = self.construct_nats_message(msg)
-        await msg.ack()
 
     async def delete_stream(self, stream_name: str):
         """Delete the entire stream for a given name in NATS JetStream."""
@@ -210,7 +213,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def wait_for_event(self) -> MQMessage:
         msg = await self._message_queue.get()
-        message = self.construct_mq_message(msg)
+        message = self.mq_message_from(msg)
         return message
 
     async def stream_exists(self, subject: str) -> bool:
@@ -250,13 +253,22 @@ class NatsMQAdapter(BaseMQAdapter):
             )
 
     async def acknowledge_message(self, message: MQMessage):
-        msg = self.construct_nats_message(message)
+        msg = self.nats_message_from(message)
         await msg.ack()
 
     async def acknowledge_message_negatively(self, message: MQMessage):
-        msg = self.construct_nats_message(message)
+        msg = self.nats_message_from(message)
         await msg.nak()
 
     async def acknowledge_message_in_progress(self, message: MQMessage):
-        msg = self.construct_nats_message(message)
+        msg = self.nats_message_from(message)
         await msg.in_progress()
+
+    async def delete_message(self, stream_name: str, seq_num: int):
+        self.logger.info("Deleting message from the stream: %s", stream_name)
+        try:
+            await self._js.get_msg(NatsKeys.stream(stream_name), seq_num)
+            await self._js.delete_msg(NatsKeys.stream(stream_name), seq_num)
+            self.logger.info("Message was deleted")
+        except NotFoundError as exc:
+            self.logger.error("Failed to delete the message: %s", exc.description)

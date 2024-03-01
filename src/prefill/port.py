@@ -2,16 +2,17 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import contextlib
-
+from typing import Optional
 from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
-from shared.config import settings
 from shared.models import FillQueueStatus, Message, PrefillMessage, MQMessage
+from .config import PrefillSettings
 
 
 class PrefillPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[PrefillSettings] = None):
+        self.settings = settings or PrefillSettings()
         self._udm_adapter = UDMAdapter()
         self.mq_adapter = NatsMQAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
@@ -23,7 +24,9 @@ class PrefillPort:
     async def port_context():
         port = PrefillPort()
         await port._udm_adapter.connect()
-        await port.mq_adapter.connect()
+        await port.mq_adapter.connect(
+            user=port.settings.nats_user, password=port.settings.nats_password
+        )
         await port._internal_api_adapter.connect()
 
         try:

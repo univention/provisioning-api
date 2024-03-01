@@ -193,7 +193,7 @@ class TestSubscriptionService:
         )
         sub_service._port.delete_kv_pair.assert_has_calls(
             [
-                call(SUBSCRIPTION_NAME, Bucket.credentials),
                 call(SUBSCRIPTION_NAME, Bucket.subscriptions),
+                call(SUBSCRIPTION_NAME, Bucket.credentials),
             ]
         )

@@ -3,12 +3,9 @@
 
 from unittest.mock import AsyncMock, patch, call
 import pytest
-
 from shared.services.messages import MessageService, PREFILL_SUBJECT_TEMPLATE
-from tests.conftest import FLAT_MESSAGE, MESSAGE, SUBSCRIPTION_NAME
-
+from tests.conftest import MESSAGE, REPORT, SUBSCRIPTION_NAME
 from shared.models import FillQueueStatus
-from shared.models.queue import MQMessage
 
 
 @pytest.fixture
@@ -179,12 +176,13 @@ class TestMessageService:
         assert result == [MESSAGE, MESSAGE]
 
     async def test_remove_message(self, message_service: MessageService):
-        message_service._port.remove_message = AsyncMock()
-        msg = MQMessage(data=FLAT_MESSAGE)
+        message_service._port.delete_message = AsyncMock()
 
-        result = await message_service.remove_message(msg)
+        result = await message_service.delete_message(SUBSCRIPTION_NAME, REPORT)
 
-        message_service._port.remove_message.assert_called_once_with(msg)
+        message_service._port.delete_message.assert_called_once_with(
+            SUBSCRIPTION_NAME, 1
+        )
         assert result is None
 
     async def test_create_prefill_stream(self, message_service: MessageService):

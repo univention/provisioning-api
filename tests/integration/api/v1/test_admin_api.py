@@ -8,7 +8,7 @@ import httpx
 import pytest
 
 from tests.conftest import REALMS_TOPICS_STR, SUBSCRIPTION_NAME, CREDENTIALS
-from shared.models.subscription import FillQueueStatus
+from shared.models import FillQueueStatus
 from app.admin.api import v1_prefix as api_prefix
 from app.main import app as subscriptions_app, internal_app_path
 
@@ -28,7 +28,7 @@ async def subscriptions_client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("app.admin.api.v1.api.settings").start()
+    settings = patch("admin.api.v1.api.admin_settings").start()
     settings.admin_username = CREDENTIALS.username
     settings.admin_password = CREDENTIALS.password
     return settings

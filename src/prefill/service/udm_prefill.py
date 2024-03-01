@@ -1,13 +1,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import re
 from datetime import datetime
 import logging
-import re
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
-from shared.models import FillQueueStatus
-from shared.models.queue import PrefillMessage, Message, MQMessage
+from shared.models import (
+    FillQueueStatus,
+    PrefillMessage,
+    Message,
+    MQMessage,
+    PublisherName,
+)
 
 
 def match_subscription(
@@ -123,7 +127,7 @@ class UDMPreFill(PreFillService):
         obj = await self._port.get_object(url)
 
         message = Message(
-            publisher_name="udm-pre-fill",
+            publisher_name=PublisherName.udm_pre_fill,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,

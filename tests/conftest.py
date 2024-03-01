@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+
 import json
 from copy import copy, deepcopy
 from datetime import datetime
@@ -12,22 +13,40 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from app.main import app, internal_app
+from tests import set_test_env_vars
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from shared.models import Message
-from shared.models.queue import MQMessage
-from shared.models.queue import PrefillMessage
 from shared.models.subscription import Bucket
-from shared.services.port import Port
+from shared.models import (
+    Message,
+    MessageProcessingStatusReport,
+    MessageProcessingStatus,
+    MQMessage,
+    PublisherName,
+    ProvisioningMessage,
+    PrefillMessage,
+)
+
+set_test_env_vars()
+
+from app.config import AppSettings  # noqa: E402
+from shared.services.port import Port  # noqa: E402
+from app.main import app, internal_app  # noqa: E402
 
 REALM = "udm"
 TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
-PUBLISHER_NAME = "udm-listener"
+PUBLISHER_NAME = PublisherName.udm_listener
 REALM_TOPIC = [REALM, TOPIC]
-REALMS_TOPICS = [[REALM, TOPIC]]
+REALMS_TOPICS = [(REALM, TOPIC)]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
+REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
+
+REPORT = MessageProcessingStatusReport(
+    status=MessageProcessingStatus.ok,
+    message_seq_num=1,
+    publisher_name=PublisherName.udm_listener,
+)
 
 CONSUMER_PASSWORD = "password"
 CONSUMER_HASHED_PASSWORD = (
@@ -53,6 +72,15 @@ PREFILL_MESSAGE = PrefillMessage(
     realms_topics=REALMS_TOPICS,
     subscription_name=SUBSCRIPTION_NAME,
 )
+PROVISIONING_MESSAGE = ProvisioningMessage(
+    publisher_name=PUBLISHER_NAME,
+    ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
+    realm=REALM,
+    topic=TOPIC,
+    body=BODY,
+    sequence_number=1,
+    num_delivered=1,
+)
 
 FLAT_BASE_MESSAGE = {
     "publisher_name": PUBLISHER_NAME,
@@ -69,6 +97,7 @@ FLAT_PREFILL_MESSAGE["realms_topics"] = REALMS_TOPICS
 
 MSG = Msg(
     _client="nats",
+    reply=REPLY,
     data=json.dumps(FLAT_MESSAGE).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
@@ -82,6 +111,7 @@ MSG = Msg(
 )
 MSG_PREFILL = Msg(
     _client="nats",
+    reply=REPLY,
     data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
@@ -95,6 +125,7 @@ MSG_PREFILL = Msg(
 )
 MSG_PREFILL_REDELIVERED = Msg(
     _client="nats",
+    reply=REPLY,
     data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
@@ -108,7 +139,12 @@ MSG_PREFILL_REDELIVERED = Msg(
 )
 
 MQMESSAGE = MQMessage(
-    subject="", reply="", data=FLAT_MESSAGE, headers=None, num_delivered=1
+    subject="",
+    reply=REPLY,
+    data=FLAT_MESSAGE,
+    headers=None,
+    num_delivered=1,
+    sequence_number=1,
 )
 
 MQMESSAGE_PREFILL = deepcopy(MQMESSAGE)
@@ -195,7 +231,7 @@ class FakeJs(AsyncMock):
 
 
 async def port_fake_dependency() -> Port:
-    port = Port()
+    port = Port(AppSettings(nats_user="api", nats_password="apipass"))
     port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     return port

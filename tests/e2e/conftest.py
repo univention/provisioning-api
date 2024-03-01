@@ -1,17 +1,23 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-# from _pytest.fixtures import pytestconfig
+import uuid
 
 import pytest
 
 from univention.admin.rest.client import UDM
+from tests.conftest import REALMS_TOPICS
+from tests import set_test_env_vars
+
+set_test_env_vars()
+
+import shared.client  # noqa: E402
 
 
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
-        "--provisioning-api-base-url",
+        "--provisioning-base-url",
         default="http://localhost:7777/",
         help="Base URL of the UDM REST API",
     )
@@ -29,19 +35,24 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="session")
-def udm_admin_username(pytestconfig):
+def provisioning_base_url(pytestconfig) -> str:
+    return pytestconfig.option.provisioning_base_url.rstrip("/")
+
+
+@pytest.fixture(scope="session")
+def udm_admin_username(pytestconfig) -> str:
     return pytestconfig.option.udm_admin_username
 
 
 @pytest.fixture(scope="session")
-def udm_admin_password(pytestconfig):
+def udm_admin_password(pytestconfig) -> str:
     return pytestconfig.option.udm_admin_password
 
 
 @pytest.fixture(scope="session")
-def udm_rest_api_base_url(pytestconfig):
+def udm_rest_api_base_url(pytestconfig) -> str:
     """Base URL to reach the UDM Rest API."""
-    return pytestconfig.getoption("--udm-rest-api-base-url")
+    return pytestconfig.option.udm_rest_api_base_url.rstrip("/") + "/"
 
 
 @pytest.fixture
@@ -50,3 +61,23 @@ def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
     # test the connection
     udm.get_ldap_base()
     return udm
+
+
+@pytest.fixture
+def provisioning_client(provisioning_base_url) -> shared.client.AsyncClient:
+    return shared.client.AsyncClient()
+
+
+@pytest.fixture
+async def simple_subscription(provisioning_client: shared.client.AsyncClient) -> str:
+    subscriber_name = str(uuid.uuid4())
+    await provisioning_client.create_subscription(
+        name=subscriber_name,
+        realms_topics=REALMS_TOPICS,
+        password="",
+        request_prefill=False,
+    )
+
+    yield subscriber_name
+
+    await provisioning_client.cancel_subscription(subscriber_name)

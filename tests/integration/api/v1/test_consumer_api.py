@@ -11,9 +11,9 @@ from tests.conftest import (
     TOPIC,
     PUBLISHER_NAME,
     BODY,
-    FLAT_MESSAGE,
     SUBSCRIPTION_NAME,
     CONSUMER_PASSWORD,
+    REPORT,
 )
 from shared.models.subscription import FillQueueStatus
 from app.consumer.subscriptions.api import v1_prefix as api_prefix
@@ -80,23 +80,19 @@ class TestConsumer:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert data[0]["data"]["realm"] == REALM
-        assert data[0]["data"]["topic"] == TOPIC
-        assert data[0]["data"]["body"] == BODY
-        assert data[0]["data"]["publisher_name"] == PUBLISHER_NAME
+        assert data[0]["realm"] == REALM
+        assert data[0]["topic"] == TOPIC
+        assert data[0]["body"] == BODY
+        assert data[0]["publisher_name"] == PUBLISHER_NAME
+        assert data[0]["sequence_number"] == 1
 
-    async def test_post_message_status(self, messages_client: httpx.AsyncClient):
-        nats_msg = {
-            "subject": SUBSCRIPTION_NAME,
-            "reply": (
-                f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.4.8.19.1699615014739091916.0"
-            ),
-            "data": FLAT_MESSAGE,
-            "headers": {"Nats-Expected-Stream": f"stream:{SUBSCRIPTION_NAME}"},
-        }
+    async def test_post_messages_status(
+        self,
+        messages_client: httpx.AsyncClient,
+    ):
         response = await messages_client.post(
             f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages-status",
-            json={"msg": nats_msg, "report": {"status": "ok"}},
+            json=[REPORT.model_dump()],
             auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200

@@ -1,20 +1,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-from typing import List
 
+from .config import DispatcherSettings
+from typing import List, Optional
 import contextlib
-import logging
-
 from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
-from shared.config import settings
 from shared.models.queue import MQMessage, Message
-
-logger = logging.getLogger(__name__)
 
 
 class DispatcherPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[DispatcherSettings] = None):
+        self.settings = settings or DispatcherSettings()
         self.mq_adapter = NatsMQAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
             settings.dispatcher_username, settings.dispatcher_password
@@ -24,7 +21,9 @@ class DispatcherPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = DispatcherPort()
-        await port.mq_adapter.connect()
+        await port.mq_adapter.connect(
+            user=port.settings.nats_user, password=port.settings.nats_password
+        )
         await port._internal_api_adapter.connect()
 
         try:

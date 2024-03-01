@@ -4,7 +4,7 @@
 import logging
 
 from src.dispatcher.port import DispatcherPort
-from shared.models.queue import Message
+from shared.models import Message
 
 
 class DispatcherService:

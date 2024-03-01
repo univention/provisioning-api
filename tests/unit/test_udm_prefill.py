@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch, call
 import pytest
 
 from prefill.service.udm_prefill import UDMPreFill
-from shared.models import Message
+from shared.models import Message, PublisherName
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     PREFILL_MESSAGE,
@@ -40,7 +40,7 @@ class TestUDMPreFill:
         "uuid": "",
     }
     msg = Message(
-        publisher_name="udm-pre-fill",
+        publisher_name=PublisherName.udm_pre_fill,
         ts=mocked_date,
         realm="udm",
         topic=object_type,

@@ -1,5 +1,127 @@
 # Changelog
 
+## [0.16.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.15.0...v0.16.0) (2024-03-01)
+
+
+### Features
+
+* add admin api ([deeb276](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/deeb2766ef561c8d00e496a91245f6b4a1549f99))
+* add Basic Auth for admin endpoints, add config file to nats ([8de5cac](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8de5cac13a44e675d6ab53087c774638352ba57d))
+* add bcrypt and passlib ([6d244e3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6d244e362064776ae240d9452742883149da61c9))
+* implement registering subsciptions, fix getting all subscriptions and deleting subscriptions ([d08649a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d08649a01302b93bd6bf9a98aeef7549fac74972))
+
+
+### Bug Fixes
+
+* add authentication for creating subscriptions in the AsyncClient ([36f30c0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/36f30c0f1425b9e85ca8bb40dba9e45cbc729046))
+* add needed env vars for connecting to the nats ([2d16809](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2d168099614fd40e435fc83a3a1b6ce670987e66))
+* authorize admin through FastApi not NATS, fix tests ([d7cdee9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7cdee98f7df865147e3aa26990e69d5c8c95483))
+* catch more specific exception during connecting to the nats ([9e7fa54](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9e7fa548013bc9b734aeeb301024676cb8cb27c6))
+* disable running end to end tests in pipeline ([604e1a3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/604e1a3090ce0e26b430de1af1d9623dcd45d994))
+* enable e2e tests in the pipeline ([f01694f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f01694f4537767892cfb86a18b00be108afca383))
+* merge main ([8f4f6bd](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8f4f6bdc0fc90e29a44f6fbdd561d0e5552bb114))
+* merge main ([905089a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/905089a3ed406b6cf4f5f54117f1686c49dd9ee5))
+* remove methods to create and get subscriptions from AsyncClient, extract admin creds to the settings ([ac39bbe](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ac39bbea602ac66b6a826191d5e07faed390ea89))
+* remove resolved comment ([e733e78](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e733e78f00ae42c12e59043e8d1c59219abc8fba))
+* return back creating subscriptions to the AsyncClient, create AdminSettings, fix tests ([2489ed4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2489ed4b690d22c0c6a970c994abe222c37582ad))
+* split NATS Key/Value Bucket into Multiple Buckets ([3972e23](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3972e236762e36a554c1e200542ee9d646961f44))
+* split settings and remove default values for credentials ([02a8269](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/02a82693b983a2f3c8f391a49abffdfd524b27c8))
+* update dependencies ([ee856f3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ee856f32f4b5497098ad2f9849e6b7bb17677c13))
+
+## [0.15.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.14.1...v0.15.0) (2024-03-01)
+
+
+### Features
+
+* Add nats credentials ([c5b7769](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c5b77692c3bf2f376e313244e403a0614fa6fce7))
+
+
+### Bug Fixes
+
+* add nats credentials to configmap in udmlistener ([18e85e7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/18e85e7fef0fbb81c22439e6d4e3357b44d47f23))
+* Fix tests, except a few ([6999891](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6999891cc9ac5cba86e1c54fabbcaeb45b6ec7be))
+
+## [0.14.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.14.0...v0.14.1) (2024-02-29)
+
+
+### Bug Fixes
+
+* change publisher_name description, rename methods ([7439ab4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7439ab4e07af5dd7681626f457db6869f842a216))
+* delete the messages by sequence number ([d0068d0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d0068d0cfe93446408be3197e632adff1ed401a3))
+* fix example-client and tests ([fefd70c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fefd70ca6a53afbbe00f7456e9325db1467922ac))
+* fix PROVISIONING_API_HOST and tests ([4d28b3c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4d28b3c1d7c07be5da8ba58a4e117965f4d6020c))
+* introduce ProvisioningMessage for client-facing API responses ([88a0c22](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/88a0c2254f24404ac7c946fd8b28a471233549a7))
+* merge main ([20e35ae](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/20e35ae625ff2d5229b2de9226dd205982208cc1))
+* merge main ([d12f531](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d12f5313f5b164f14f291f2fda6374eb1a887e69))
+* merge main ([e8f844a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e8f844a7320751b67ee61176ed4a23e58a7feda6))
+* parallelize deleting messages, add num_delivered field to the ProvisioingMessage and use this class in the exmple-client, rename methods ([cd2470b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cd2470bd4f167c0c32c521da467761de434b4415))
+* pass queue type to delete message, fix tests ([278fef3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/278fef32ab970a049a17d1e54a6af120d00b956a))
+* remove python3-venv from udm-listener Dockerfile ([50238cf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/50238cf7bc5be45bbbb4c73475ecaca84b0c69d2))
+* use MessageProcessingStatusReport for a single message, fix no module error with udm-listener ([990ca94](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/990ca94b1b8f0c9acb0efeb5a29fe6b04c5056f9))
+
+## [0.14.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.13.1...v0.14.0) (2024-02-28)
+
+
+### Features
+
+* **docker:** prepend provisioning to images ([bd3e2c3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd3e2c3c496c40242bf4418165bb4a91b2a4e7fd))
+
+## [0.13.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.13.0...v0.13.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **helm:** unset imageRegistry, drop unused non-global imagePullPolicy ([88e71d6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/88e71d6f90fdfc21eee07b1b2b3c9cb679e424c8))
+
+## [0.13.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.12.0...v0.13.0) (2024-02-23)
+
+
+### Features
+
+* new BSI compliant helm chart for use with umbrella chart ([cfad306](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cfad306467212a93e5b365877cd723ea5349ee96))
+* new BSI compliant helm chart for use with umbrella chart ([6edd096](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6edd0962002444cc6f73f65de8b244aaec417b94))
+
+## [0.12.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.2...v0.12.0) (2024-02-22)
+
+
+### Features
+
+* Add CI build for example client ([f11ad4b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f11ad4b21c87de5a056cad31d699768c793962a2))
+* **consumer-client:** abstract polling into syncronous callback wrapper ([7f92ad5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7f92ad5fcfbfa5d521c91b133f4be99f4e3926d4))
+
+
+### Bug Fixes
+
+* **consumer-client:** add final MR comments ([5f70adb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5f70adbc531b3f456d69608879bb67a9584bc8c7))
+* **consumer-client:** allign with api changes ([2baa680](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2baa680e0550d7874349f3acf8c3da3b6237bd3a))
+* **consumer-client:** improve callback wrapper and extract it into a separate class ([d4d02ec](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d4d02ecab5776612743803b47eb4a5d9f4394472))
+
+## [0.11.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.1...v0.11.2) (2024-02-22)
+
+
+### Bug Fixes
+
+* change consumer endpoints to use subscription istead of sibscriber, fix creating prefill queue ([d7a1dee](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7a1deeffcfa7283685ac540f4afd277c236769a))
+* create subscriptions once, delete the whole subscriber instead of a subscription, fix endpoints, use consumer's API endpoints, request prefill for all topics altogether ([7d1581b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7d1581bf9e6a606492c5b2b1ee6932f9228481f2))
+* merge main ([d9949c8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d9949c8e01cca125e17d3d3ea6c4c0ab9acb8f0b))
+* merge main ([c6e74dc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c6e74dcc625810b1eeb02c582a738202c00734f2))
+* Update packages ([7074d56](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7074d56547d0e00b89c2ee0acac2962831b56601))
+* use tuple for realm_topic instead of list ([a346c6d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a346c6dd0ea7670700180e7e69fdf3689e5b7dfa))
+
+## [0.11.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.11.0...v0.11.1) (2024-02-21)
+
+
+### Bug Fixes
+
+* Start uvicorn app so that no reloader runs ([0d56424](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0d5642423046c82ed04ad33756f14dea31a57f96))
+
+## [0.11.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.10.1...v0.11.0) (2024-02-12)
+
+
+### Features
+
+* **client:** Containerize example client ([c9f8f86](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c9f8f86acd663741e9807485fe45390aa253d503))
+
 ## [0.10.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.10.0...v0.10.1) (2024-02-07)
 
 
