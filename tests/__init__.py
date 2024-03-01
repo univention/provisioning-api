@@ -9,7 +9,7 @@ def set_test_env_vars():
     os.environ["udm_username"] = "cn=admin"
     os.environ["udm_password"] = "univention"
     os.environ["ldap_port"] = "389"
-    os.environ["ldap_host"] = "localhost"
+    os.environ["ldap_host"] = "ldap-server"
     os.environ["tls_mode"] = "off"
     os.environ["ldap_base_dn"] = "dc=univention-organization,dc=intranet"
     os.environ["ldap_host_dn"] = "cn=admin,dc=univention-organization,dc=intranet"

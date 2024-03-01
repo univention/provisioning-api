@@ -3,11 +3,9 @@
 
 import uuid
 import pytest
-import requests
 
 
 import shared.client
-from admin.config import admin_settings
 import shared.models.queue
 from tests.conftest import (
     REALMS_TOPICS,
@@ -29,17 +27,9 @@ def provisioning_client() -> shared.client.AsyncClient:
 async def simple_subscription(provisioning_client: shared.client.AsyncClient):
     subscriber_name = str(uuid.uuid4())
 
-    response = requests.post(
-        "http://localhost:7777/admin/v1/subscriptions",
-        json={
-            "name": subscriber_name,
-            "realms_topics": REALMS_TOPICS,
-            "request_prefill": False,
-            "password": "password",
-        },
-        auth=(admin_settings.admin_username, admin_settings.admin_password),
+    await provisioning_client.create_subscription(
+        subscriber_name, REALMS_TOPICS, "password", False
     )
-    assert response.status_code == 201
 
     yield subscriber_name
 
