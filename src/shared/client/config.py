@@ -34,5 +34,11 @@ class Settings(BaseSettings):
     def consumer_messages_url(self) -> str:
         return f"{self.base_url}/messages/v1"
 
+    # TODO: delete these credentials after creating AdminClient
+    # Admin API: username
+    admin_username: str
+    # Admin API: password
+    admin_password: str
+
 
 settings = Settings()

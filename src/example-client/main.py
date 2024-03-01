@@ -109,9 +109,7 @@ def handle_message(message: ProvisioningMessage):
 async def main():
     name = settings.consumer_name
 
-    client = AsyncClient(
-        settings.provisioning_api_username, settings.provisioning_api_password
-    )
+    client = AsyncClient()
 
     # TODO: move this call to the AdminClient
     await client.create_subscription(

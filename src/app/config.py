@@ -11,9 +11,29 @@ class AppSettings(BaseSettings):
     admin_password: str
 
     # Nats user name specific to Consumer and Internal API
-    admin_nats_user: str
+    nats_user: str
     # Nats password specific to Consumer and Internal API
+    nats_password: str
+
+    # Admin Nats user name
+    admin_nats_user: str
+    # Admin Nats password
     admin_nats_password: str
+
+    # Dispatcher: username
+    dispatcher_username: str
+    # Dispatcher: password
+    dispatcher_password: str
+
+    # Prefill: username
+    prefill_username: str
+    # Prefill: password
+    prefill_password: str
+
+    # UDM Producer: username
+    udm_listener_username: str
+    # UDM Producer: password
+    udm_listener_password: str
 
 
 app_settings = AppSettings()

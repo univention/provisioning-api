@@ -28,10 +28,6 @@ class Settings(BaseSettings):
     internal_api_host: str = "localhost"
     # Internal REST API: port
     internal_api_port: int = 7777
-    # Internal REST API: username
-    internal_api_username: str = ""
-    # Internal REST API: password
-    internal_api_password: str = ""
 
     @property
     def internal_api_url(self) -> str:

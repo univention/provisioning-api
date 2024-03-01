@@ -6,7 +6,6 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
 import aiohttp
 
-from app.config import app_settings
 from shared.models import (
     Subscription,
     ProvisioningMessage,
@@ -25,8 +24,8 @@ logger = logging.getLogger(__file__)
 
 # TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    def __init__(self, username: str, password: str):
-        self._auth = aiohttp.BasicAuth(username, password)
+    def __init__(self):
+        self._auth = None
 
     # TODO: move this method to the AdminClient
     async def create_subscription(
@@ -47,14 +46,14 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             logger.debug(subscription.model_dump())
             async with session.post(
-                f"{settings.base_url}/admin/v1/subscriptions",
+                f"{settings.base_url}/internal/admin/v1/subscriptions",
                 json=subscription.model_dump(),
                 auth=aiohttp.BasicAuth(
-                    app_settings.admin_username, app_settings.admin_password
+                    settings.admin_username, settings.admin_password
                 ),
             ):
                 # either return nothing or let `.post` throw
-                pass
+                self._auth = aiohttp.BasicAuth(name, password)
 
     async def cancel_subscription(self, name: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
@@ -111,10 +110,14 @@ class AsyncClient:
                 # either return nothing or let `.post` throw
                 pass
 
+    # TODO: move this method to the AdminClient
     async def get_subscriptions(self) -> List[Subscription]:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"{settings.consumer_registration_url}/subscriptions"
+                f"{settings.base_url}/internal/admin/v1/subscriptions",
+                auth=aiohttp.BasicAuth(
+                    settings.admin_username, settings.admin_password
+                ),
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead

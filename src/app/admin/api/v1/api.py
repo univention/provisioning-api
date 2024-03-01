@@ -7,7 +7,7 @@ import fastapi
 from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from shared.config import settings
+from app.config import app_settings
 from shared.models import Subscription, NewSubscription
 from shared.auth import authenticate_user
 from shared.services.messages import MessageService
@@ -18,7 +18,9 @@ security = HTTPBasic()
 
 
 def authenticate_admin(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
-    authenticate_user(credentials, settings.admin_username, settings.admin_password)
+    authenticate_user(
+        credentials, app_settings.admin_username, app_settings.admin_password
+    )
 
 
 router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])

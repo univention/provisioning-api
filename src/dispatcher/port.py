@@ -14,7 +14,7 @@ class DispatcherPort:
         self.settings = settings or DispatcherSettings()
         self.mq_adapter = NatsMQAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
-            settings.dispatcher_username, settings.dispatcher_password
+            self.settings.username, self.settings.password
         )
 
     @staticmethod

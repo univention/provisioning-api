@@ -9,16 +9,22 @@ class UdmMessagingSettings(BaseSettings):
     nats_user: str
     # Nats password specific to UdmMessaging
     nats_password: str
+
+    # UDM Producer: username
+    username: str
+    # UDM Producer: password
+    password: str
+
     # LDAP : port
-    ldap_port: int
+    ldap_port: int = 389
     # LDAP : host
-    ldap_host: str
+    ldap_host: str = "localhost"
     # LDAP : tls_mode
-    tls_mode: str
+    tls_mode: str = "off"
     # LDAP : base_dn
-    ldap_base_dn: str
+    ldap_base_dn: str = "dc=univention-organization,dc=intranet"
     # LDAP : host_dn
-    ldap_host_dn: str
+    ldap_host_dn: str = "cn=admin,dc=univention-organization,dc=intranet"
     # LDAP : password
     ldap_password: str
 

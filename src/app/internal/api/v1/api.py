@@ -7,7 +7,7 @@ import fastapi
 from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from shared.config import settings
+from app.config import app_settings
 from shared.models import Message, FillQueueStatus
 from shared.auth import authenticate_user
 from shared.services.messages import MessageService
@@ -22,21 +22,25 @@ def authenticate_dispatcher(
     credentials: Annotated[HTTPBasicCredentials, Depends(security)]
 ):
     authenticate_user(
-        credentials, settings.dispatcher_username, settings.dispatcher_password
+        credentials, app_settings.dispatcher_username, app_settings.dispatcher_password
     )
 
 
 def authenticate_prefill(
     credentials: Annotated[HTTPBasicCredentials, Depends(security)]
 ):
-    authenticate_user(credentials, settings.prefill_username, settings.prefill_password)
+    authenticate_user(
+        credentials, app_settings.prefill_username, app_settings.prefill_password
+    )
 
 
-def authenticate_udm_producer(
+def authenticate_udm_listener(
     credentials: Annotated[HTTPBasicCredentials, Depends(security)]
 ):
     authenticate_user(
-        credentials, settings.udm_producer_username, settings.udm_producer_password
+        credentials,
+        app_settings.udm_listener_username,
+        app_settings.udm_listener_password,
     )
 
 
@@ -120,7 +124,7 @@ async def update_subscription_queue_status(
 async def create_new_message(
     msg: Message,
     port: PortDependency,
-    authentication: Annotated[str, Depends(authenticate_udm_producer)],
+    authentication: Annotated[str, Depends(authenticate_udm_listener)],
 ):
     """Publish a new message to the incoming queue."""
 

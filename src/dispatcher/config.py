@@ -9,3 +9,11 @@ class DispatcherSettings(BaseSettings):
     nats_user: str
     # Nats password specific to Dispatcher
     nats_password: str
+
+    # Dispatcher: username
+    username: str
+    # Dispatcher: password
+    password: str
+
+
+dispatcher_settings = DispatcherSettings()

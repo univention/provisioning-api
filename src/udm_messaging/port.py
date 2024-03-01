@@ -15,7 +15,7 @@ class UDMMessagingPort:
         self.settings = settings or UdmMessagingSettings()
         self.kv_adapter = NatsKVAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
-            settings.udm_producer_username, settings.udm_producer_password
+            self.settings.username, self.settings.password
         )
 
     @staticmethod
