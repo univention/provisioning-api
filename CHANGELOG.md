@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.16.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.15.0...v0.16.0) (2024-03-01)
+
+
+### Features
+
+* add admin api ([deeb276](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/deeb2766ef561c8d00e496a91245f6b4a1549f99))
+* add Basic Auth for admin endpoints, add config file to nats ([8de5cac](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8de5cac13a44e675d6ab53087c774638352ba57d))
+* add bcrypt and passlib ([6d244e3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6d244e362064776ae240d9452742883149da61c9))
+* implement registering subsciptions, fix getting all subscriptions and deleting subscriptions ([d08649a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d08649a01302b93bd6bf9a98aeef7549fac74972))
+
+
+### Bug Fixes
+
+* add authentication for creating subscriptions in the AsyncClient ([36f30c0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/36f30c0f1425b9e85ca8bb40dba9e45cbc729046))
+* add needed env vars for connecting to the nats ([2d16809](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2d168099614fd40e435fc83a3a1b6ce670987e66))
+* authorize admin through FastApi not NATS, fix tests ([d7cdee9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7cdee98f7df865147e3aa26990e69d5c8c95483))
+* catch more specific exception during connecting to the nats ([9e7fa54](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9e7fa548013bc9b734aeeb301024676cb8cb27c6))
+* disable running end to end tests in pipeline ([604e1a3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/604e1a3090ce0e26b430de1af1d9623dcd45d994))
+* enable e2e tests in the pipeline ([f01694f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f01694f4537767892cfb86a18b00be108afca383))
+* merge main ([8f4f6bd](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8f4f6bdc0fc90e29a44f6fbdd561d0e5552bb114))
+* merge main ([905089a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/905089a3ed406b6cf4f5f54117f1686c49dd9ee5))
+* remove methods to create and get subscriptions from AsyncClient, extract admin creds to the settings ([ac39bbe](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ac39bbea602ac66b6a826191d5e07faed390ea89))
+* remove resolved comment ([e733e78](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e733e78f00ae42c12e59043e8d1c59219abc8fba))
+* return back creating subscriptions to the AsyncClient, create AdminSettings, fix tests ([2489ed4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2489ed4b690d22c0c6a970c994abe222c37582ad))
+* split NATS Key/Value Bucket into Multiple Buckets ([3972e23](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3972e236762e36a554c1e200542ee9d646961f44))
+* split settings and remove default values for credentials ([02a8269](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/02a82693b983a2f3c8f391a49abffdfd524b27c8))
+* update dependencies ([ee856f3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ee856f32f4b5497098ad2f9849e6b7bb17677c13))
+
 ## [0.15.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.14.1...v0.15.0) (2024-03-01)
 
 
