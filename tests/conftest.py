@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+
 import json
 from copy import copy, deepcopy
 from datetime import datetime
@@ -12,11 +13,7 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from admin.port import AdminPort
-from consumer.config import ConsumerSettings
-from consumer.port import ConsumerPort
-from events.config import EventsSettings
-from events.port import EventsPort
+from tests import set_test_env_vars
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import (
     Message,
@@ -28,10 +25,13 @@ from shared.models import (
     PrefillMessage,
 )
 
-from tests import set_test_env_vars
-
 set_test_env_vars()
 
+from admin.port import AdminPort  # noqa: E402
+from consumer.config import ConsumerSettings  # noqa: E402
+from consumer.port import ConsumerPort  # noqa: E402
+from events.config import EventsSettings  # noqa: E402
+from events.port import EventsPort  # noqa: E402
 from consumer.main import app  # noqa: E402
 
 REALM = "udm"
