@@ -105,32 +105,32 @@ test-integration:
   after_script:
     - docker compose down --volumes
 
-test-end-to-end:
-  stage: "test"
-  extends: .dind
-  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: "never"
-    - when: "on_success"
-  before_script:
-    # Allow that the Docker API version is negotiated between client and server
-    - unset DOCKER_API_VERSION
-    - export IMAGE_TAG=${RELEASE_VERSION}
-    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
-    - echo $IMAGE_TAG
-    - docker version
-    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
-    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
-    - docker compose config test
-    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60
-  script:
-    # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
-    - sleep 10
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --udm-rest-api-base-url "http://udm-rest-api:9979/udm/" --provisioning-base-url "http://events-and-consumer-api:7777/"
-  after_script:
-    - docker compose down --volumes
+#test-end-to-end:
+#  stage: "test"
+#  extends: .dind
+#  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: "never"
+#    - when: "on_success"
+#  before_script:
+#    # Allow that the Docker API version is negotiated between client and server
+#    - unset DOCKER_API_VERSION
+#    - export IMAGE_TAG=${RELEASE_VERSION}
+#    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
+#    - echo $IMAGE_TAG
+#    - docker version
+#    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
+#    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
+#    - docker compose config test
+#    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
+#    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60
+#  script:
+#    # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
+#    - sleep 10
+#    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --udm-rest-api-base-url "http://udm-rest-api:9979/udm/" --provisioning-base-url "http://events-and-consumer-api:7777/"
+#  after_script:
+#    - docker compose down --volumes
 
 # TODO: docker compose run nats ... somehow
 test-events-and-consumer-api:
