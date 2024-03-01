@@ -13,7 +13,9 @@ from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
 from admin.port import AdminPort
+from consumer.config import ConsumerSettings
 from consumer.port import ConsumerPort
+from events.config import EventsSettings
 from events.port import EventsPort
 from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import (
@@ -216,14 +218,14 @@ class FakeJs(AsyncMock):
 
 
 async def consumer_port_fake_dependency() -> ConsumerPort:
-    port = ConsumerPort()
+    port = ConsumerPort(ConsumerSettings(nats_user="api", nats_password="apipass"))
     port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     return port
 
 
 async def events_port_fake_dependency() -> EventsPort:
-    port = EventsPort()
+    port = EventsPort(EventsSettings(nats_user="api", nats_password="apipass"))
     port.mq_adapter = MockNatsMQAdapter()
     return port
 

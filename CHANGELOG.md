@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.14.1...v0.15.0) (2024-03-01)
+
+
+### Features
+
+* Add nats credentials ([c5b7769](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c5b77692c3bf2f376e313244e403a0614fa6fce7))
+
+
+### Bug Fixes
+
+* add nats credentials to configmap in udmlistener ([18e85e7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/18e85e7fef0fbb81c22439e6d4e3357b44d47f23))
+* Fix tests, except a few ([6999891](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6999891cc9ac5cba86e1c54fabbcaeb45b6ec7be))
+
 ## [0.14.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.14.0...v0.14.1) (2024-02-29)
 
 

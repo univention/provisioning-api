@@ -4,7 +4,11 @@
 from pydantic_settings import BaseSettings
 
 
-class UDMSettings(BaseSettings):
+class PrefillSettings(BaseSettings):
+    # Nats user name specific to Prefill Daemon
+    nats_user: str
+    # Nats password specific to Prefill Daemon
+    nats_password: str
     # UDM REST API: host
     udm_host: str = "localhost"
     # UDM REST API: port
@@ -19,4 +23,4 @@ class UDMSettings(BaseSettings):
         return f"http://{self.udm_host}:{self.udm_port}/udm"
 
 
-udm_settings = UDMSettings()
+prefill_settings = PrefillSettings()

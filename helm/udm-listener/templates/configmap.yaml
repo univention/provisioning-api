@@ -17,6 +17,8 @@ data:
   LDAP_PORT: "{{ .Values.config.ldapPort }}"
   NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .Values.config.natsHost | quote }}
   NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
+  NATS_USER: "{{ .Values.config.natsUser }}"
+  NATS_PASSWORD: "{{ .Values.config.natsPassword }}"
   NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
   TLS_MODE: "{{ .Values.config.tlsMode }}"
 {{ end }}

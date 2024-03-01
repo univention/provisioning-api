@@ -3,6 +3,7 @@
 
 import contextlib
 import json
+from typing import Optional
 
 
 from shared.adapters.nats_adapter import NatsKVAdapter
@@ -11,9 +12,12 @@ from shared.adapters.event_adapter import EventAdapter
 from shared.models import Message
 from shared.models.subscription import Bucket
 
+from .config import UdmMessagingSettings
+
 
 class UDMMessagingPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[UdmMessagingSettings] = None):
+        self.settings = settings or UdmMessagingSettings()
         self.kv_adapter = NatsKVAdapter()
         self._event_adapter = EventAdapter()
 
@@ -21,7 +25,11 @@ class UDMMessagingPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.kv_adapter.init([Bucket.cache])
+        await port.kv_adapter.init(
+            [Bucket.cache],
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+        )
         await port._event_adapter.connect()
         try:
             yield port

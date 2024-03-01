@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from udm_messaging.config import ldap_settings
+from udm_messaging.config import udm_messaging_settings
 from shared.models.subscription import Bucket
 from shared.models import Message, PublisherName
 from udm_messaging.port import UDMMessagingPort
@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
         super().__init__(
-            port=ldap_settings.ldap_port,
-            start_tls=2 if ldap_settings.tls_mode.lower() == "on" else 0,
-            base=ldap_settings.ldap_base_dn,
-            binddn=ldap_settings.ldap_host_dn,
-            bindpw=ldap_settings.ldap_password,
+            port=udm_messaging_settings.ldap_port,
+            start_tls=2 if udm_messaging_settings.tls_mode.lower() == "on" else 0,
+            base=udm_messaging_settings.ldap_base_dn,
+            binddn=udm_messaging_settings.ldap_host_dn,
+            bindpw=udm_messaging_settings.ldap_password,
         )
         self._messaging_port = port
         logging.basicConfig(level=logging.INFO)

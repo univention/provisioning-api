@@ -49,6 +49,10 @@ config:
   natsHost: null
   # -- NATS: port (required if nats.bundled == false)
   natsPort: "4222"
+  # -- NATS: user name
+  natsUser: "udmlistener"
+  # -- NATS: password
+  natsPassword: "password"
   # -- Defaults to "ldapHost" if not set.
   notifierServer: "ldap-notifier"
   # -- Whether to start encryption and validate certificates.

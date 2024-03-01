@@ -9,7 +9,7 @@ from admin.api import v1_prefix as admin_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
 
-from udm_messaging.config import ldap_settings
+from udm_messaging.config import udm_messaging_settings
 from admin.config import admin_settings
 
 
@@ -26,9 +26,11 @@ def anyio_backend():
 
 
 def connect_ldap_server():
-    server = ldap3.Server(ldap_settings.ldap_server_uri)
+    server = ldap3.Server(udm_messaging_settings.ldap_server_uri)
     connection = ldap3.Connection(
-        server, ldap_settings.ldap_host_dn, ldap_settings.ldap_password
+        server,
+        udm_messaging_settings.ldap_host_dn,
+        udm_messaging_settings.ldap_password,
     )
     connection.bind()
     return connection

@@ -13,17 +13,26 @@ from shared.models import Message
 from shared.models.subscription import Bucket
 from shared.models import ProvisioningMessage, PrefillMessage
 
+from .config import ConsumerSettings
+
 
 class ConsumerPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[ConsumerSettings] = None):
+        self.settings = settings or ConsumerSettings()
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
 
     @staticmethod
     async def port_dependency():
         port = ConsumerPort()
-        await port.mq_adapter.connect()
-        await port.kv_adapter.init([Bucket.subscriptions, Bucket.credentials])
+        await port.mq_adapter.connect(
+            user=port.settings.nats_user, password=port.settings.nats_password
+        )
+        await port.kv_adapter.init(
+            [Bucket.subscriptions, Bucket.credentials],
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+        )
         try:
             yield port
         finally:
