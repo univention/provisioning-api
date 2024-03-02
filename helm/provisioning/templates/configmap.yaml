@@ -86,5 +86,9 @@ metadata:
   {{- end }}
 data:
   LOG_LEVEL: {{ required ".Values.prefill.config.LOG_LEVEL is required." .Values.prefill.config.LOG_LEVEL | quote  }}
+  UDM_HOST: {{ .Values.prefill.config.UDM_HOST | default ( printf "%s-udm-rest-api" .Release.Name ) | quote  }}
+  UDM_PORT: {{ required ".Values.prefill.config.UDM_PORT is required." .Values.prefill.config.UDM_PORT | quote  }}
+  UDM_USERNAME: {{ required ".Values.prefill.config.UDM_USERNAME is required." .Values.prefill.config.UDM_USERNAME | quote  }}
+  UDM_PASSWORD: {{ required ".Values.prefill.config.UDM_PASSWORD is required." .Values.prefill.config.UDM_PASSWORD | quote  }}
 ...
 

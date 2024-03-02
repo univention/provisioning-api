@@ -486,6 +486,8 @@ dispatcher:
     UDM_PORT: 9979
     # UDM REST API: username
     UDM_USERNAME: "cn=admin"
+    # UDM REST API: password
+    UDM_PASSWORD: null
 
 prefill:
   image:
@@ -498,6 +500,14 @@ prefill:
   config:
     # Python log level
     LOG_LEVEL: "INFO"
+    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    UDM_HOST: ""
+    # UDM REST API: port
+    UDM_PORT: 9979
+    # UDM REST API: username
+    UDM_USERNAME: "cn=admin"
+    # UDM REST API: password
+    UDM_PASSWORD: null
 
 # -- NATS server settings.
 nats:
