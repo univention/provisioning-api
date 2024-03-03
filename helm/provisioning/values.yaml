@@ -467,6 +467,12 @@ api:
     ROOT_PATH: "/univention/provisioning-api"
     # FastAPI: disable CORS checks
     CORS_ALL: "false"
+    NATS_USER: null
+    NATS_PASSWORD: null
+    ADMIN_USERNAME: null
+    ADMIN_PASSWORD: null
+    ADMIN_NATS_USER: null
+    ADMIN_NATS_PASSWORD: null
 
 dispatcher:
   image:
@@ -488,6 +494,8 @@ dispatcher:
     UDM_USERNAME: "cn=admin"
     # UDM REST API: password
     UDM_PASSWORD: null
+    NATS_USER: null
+    NATS_PASSWORD: null
 
 prefill:
   image:
@@ -508,6 +516,8 @@ prefill:
     UDM_USERNAME: "cn=admin"
     # UDM REST API: password
     UDM_PASSWORD: null
+    NATS_USER: null
+    NATS_PASSWORD: null
 
 # -- NATS server settings.
 nats:

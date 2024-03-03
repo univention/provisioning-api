@@ -50,6 +50,13 @@ data:
   DEBUG: {{ required ".Values.api.config.DEBUG is required." .Values.api.config.DEBUG | quote  }}
   ROOT_PATH: {{ required ".Values.api.config.ROOT_PATH is required." .Values.api.config.ROOT_PATH | quote  }}
   CORS_ALL: {{ required ".Values.api.config.CORS_ALL is required." .Values.api.config.CORS_ALL | quote  }}
+  NATS_USER: {{ required ".Values.api.config.NATS_USER is required." .Values.api.config.NATS_USER | quote  }}
+  NATS_PASSWORD: {{ required ".Values.api.config.NATS_PASSWORD is required." .Values.api.config.NATS_PASSWORD | quote  }}
+  ADMIN_USERNAME: {{ required ".Values.api.config.ADMIN_USERNAME is required." .Values.api.config.ADMIN_USERNAME | quote  }}
+  ADMIN_PASSWORD: {{ required ".Values.api.config.ADMIN_PASSWORD is required." .Values.api.config.ADMIN_PASSWORD | quote  }}
+  ADMIN_NATS_USER: {{ required ".Values.api.config.ADMIN_NATS_USER is required." .Values.api.config.ADMIN_NATS_USER | quote  }}
+  ADMIN_NATS_PASSWORD: {{ required ".Values.api.config.ADMIN_NATS_PASSWORD is required." .Values.api.config.ADMIN_NATS_PASSWORD | quote  }}
+
 ...
 ---
 kind: "ConfigMap"
@@ -69,6 +76,8 @@ data:
   LOG_LEVEL: {{ required ".Values.dispatcher.config.LOG_LEVEL is required." .Values.dispatcher.config.LOG_LEVEL | quote  }}
   UDM_HOST: {{ .Values.dispatcher.config.UDM_HOST | default ( printf "%s-udm-rest-api" .Release.Name ) | quote  }}
   UDM_PORT: {{ required ".Values.dispatcher.config.UDM_PORT is required." .Values.dispatcher.config.UDM_PORT | quote  }}
+  NATS_USER: {{ required ".Values.dispatcher.config.NATS_USER is required." .Values.dispatcher.config.NATS_USER | quote  }}
+  NATS_PASSWORD: {{ required ".Values.dispatcher.config.NATS_PASSWORD is required." .Values.dispatcher.config.NATS_PASSWORD | quote  }}
 ...
 ---
 kind: "ConfigMap"
@@ -90,5 +99,7 @@ data:
   UDM_PORT: {{ required ".Values.prefill.config.UDM_PORT is required." .Values.prefill.config.UDM_PORT | quote  }}
   UDM_USERNAME: {{ required ".Values.prefill.config.UDM_USERNAME is required." .Values.prefill.config.UDM_USERNAME | quote  }}
   UDM_PASSWORD: {{ required ".Values.prefill.config.UDM_PASSWORD is required." .Values.prefill.config.UDM_PASSWORD | quote  }}
+  NATS_USER: {{ required ".Values.prefill.config.NATS_USER is required." .Values.prefill.config.NATS_USER | quote  }}
+  NATS_PASSWORD: {{ required ".Values.prefill.config.NATS_PASSWORD is required." .Values.prefill.config.NATS_PASSWORD | quote  }}
 ...
 
