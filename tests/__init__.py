@@ -2,19 +2,30 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import os
 
+ENV_DEFAULTS = {
+    "admin_username": "admin",
+    "admin_password": "provisioning",
+    "udm_username": "cn=admin",
+    "udm_password": "univention",
+    "ldap_port": "389",
+    "ldap_host": "ldap-server",
+    "tls_mode": "off",
+    "ldap_base_dn": "dc=univention-organization,dc=intranet",
+    "ldap_host_dn": "cn=admin,dc=univention-organization,dc=intranet",
+    "ldap_password": "univention",
+    "nats_user": "api",
+    "nats_password": "apipass",
+    "admin_nats_user": "admin",
+    "admin_nats_password": "nimda",
+    "provisioning_api_base_url": "http://localhost:7777",
+    "provisioning_api_username": "foo",
+    "provisioning_api_password": "bar",
+}
+
 
 def set_test_env_vars():
-    os.environ["admin_username"] = "admin"
-    os.environ["admin_password"] = "provisioning"
-    os.environ["udm_username"] = "cn=admin"
-    os.environ["udm_password"] = "univention"
-    os.environ["ldap_port"] = "389"
-    os.environ["ldap_host"] = "ldap-server"
-    os.environ["tls_mode"] = "off"
-    os.environ["ldap_base_dn"] = "dc=univention-organization,dc=intranet"
-    os.environ["ldap_host_dn"] = "cn=admin,dc=univention-organization,dc=intranet"
-    os.environ["ldap_password"] = "univention"
-    os.environ["nats_user"] = "api"
-    os.environ["nats_password"] = "apipass"
-    os.environ["admin_nats_user"] = "admin"
-    os.environ["admin_nats_password"] = "nimda"
+    for var, default in ENV_DEFAULTS.items():
+        if var in os.environ:
+            continue
+        os.environ[var] = default
+        print(f"{var} was not explicitly set, setting the following default: {default}")

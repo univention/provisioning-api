@@ -10,9 +10,7 @@ import requests
 from admin.api import v1_prefix as admin_api_prefix
 from consumer.messages.api import v1_prefix as messages_api_prefix
 
-from udm_messaging.config import udm_messaging_settings
-from admin.config import admin_settings
-
+from shared.client.config import Settings
 
 from shared.models import PublisherName
 
@@ -26,23 +24,26 @@ def anyio_backend():
     return "asyncio"
 
 
-def connect_ldap_server():
-    server = ldap3.Server(udm_messaging_settings.ldap_server_uri)
+@pytest.fixture(scope="session")
+def ldap_connection(pytestconfig):
+    server = ldap3.Server(pytestconfig.option.ldap_server_uri)
     connection = ldap3.Connection(
         server,
-        udm_messaging_settings.ldap_host_dn,
-        udm_messaging_settings.ldap_password,
+        pytestconfig.option.ldap_host_dn,
+        pytestconfig.option.ldap_password,
     )
     connection.bind()
     return connection
 
 
-async def test_workflow(provisioning_api_base_url):
+async def test_workflow(
+    provisioning_api_base_url, ldap_connection, admin_settings: Settings
+):
     name = str(uuid.uuid4())
+    # TODO: randomize the group name
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
-    connection = connect_ldap_server()
 
     response = requests.post(
         f"{provisioning_api_base_url}{admin_api_prefix}/subscriptions",
@@ -52,16 +53,22 @@ async def test_workflow(provisioning_api_base_url):
             "request_prefill": False,
             "password": "password",
         },
-        auth=(admin_settings.admin_username, admin_settings.admin_password),
+        auth=(
+            admin_settings.provisioning_api_username,
+            admin_settings.provisioning_api_password,
+        ),
     )
     assert response.status_code == 201
 
     # Test creating object
-    connection.add(
+    result = ldap_connection.add(
         dn=dn,
         object_class=("posixGroup", "univentionObject", "univentionGroup"),
         attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
     )
+    assert (
+        result is True
+    ), "No ldap change triggered, possibly due to test data colision"
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
@@ -79,7 +86,7 @@ async def test_workflow(provisioning_api_base_url):
     assert message["body"]["new"]["dn"] == dn
 
     # Test modifying object
-    connection.modify(dn, changes)
+    ldap_connection.modify(dn, changes)
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
@@ -97,7 +104,7 @@ async def test_workflow(provisioning_api_base_url):
     assert message["body"]["new"]["properties"]["description"] == new_description
 
     # Test deleting object
-    connection.delete(dn)
+    ldap_connection.delete(dn)
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true"
