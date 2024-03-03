@@ -5,7 +5,6 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
 import aiohttp
 
-from admin.config import admin_settings
 from shared.client.config import Settings
 from shared.models import (
     Subscription,
@@ -24,8 +23,27 @@ logger = logging.getLogger(__file__)
 
 # TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(
+        self, settings: Optional[Settings] = None, concurrency_limit: int = 10
+    ):
         self.settings = settings or Settings()
+        auth = aiohttp.BasicAuth(
+            self.settings.provisioning_api_username,
+            self.settings.provisioning_api_password,
+        )
+        connector = aiohttp.TCPConnector(limit=concurrency_limit)
+        self.session = aiohttp.ClientSession(
+            auth=auth, connector=connector, raise_for_status=True
+        )
+
+    async def close(self):
+        await self.session.close()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self):
+        await self.close()
 
     async def create_subscription(
         self,
@@ -42,33 +60,23 @@ class AsyncClient:
             password=password,
         )
 
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            logger.debug(subscription.model_dump())
-            async with session.post(
-                f"{self.settings.base_url}/admin/v1/subscriptions",
-                json=subscription.model_dump(),
-                auth=aiohttp.BasicAuth(
-                    admin_settings.admin_username, admin_settings.admin_password
-                ),
-            ):
-                # either return nothing or let `.post` throw
-                pass
+        logger.debug(subscription.model_dump())
+        return await self.session.post(
+            f"{self.settings.provisioning_api_base_url}/admin/v1/subscriptions",
+            json=subscription.model_dump(),
+        )
 
     async def cancel_subscription(self, name: str):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.delete(
-                f"{self.settings.consumer_registration_url}/subscriptions/{name}",
-            ):
-                # either return nothing or let `.post` throw
-                pass
+        return await self.session.delete(
+            f"{self.settings.consumer_registration_url}/subscriptions/{name}",
+        )
 
     async def get_subscription(self, name: str) -> Subscription:
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.get(
-                f"{self.settings.consumer_registration_url}/subscriptions/{name}"
-            ) as response:
-                data = await response.json()
-                return Subscription.model_validate(data)
+        response = await self.session.get(
+            f"{self.settings.consumer_registration_url}/subscriptions/{name}"
+        )
+        data = await response.json()
+        return Subscription.model_validate(data)
 
     async def get_subscription_messages(
         self,
@@ -86,33 +94,28 @@ class AsyncClient:
         }
         params = {k: v for k, v in _params.items() if v is not None}
 
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.get(
-                f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages",
-                params=params,
-            ) as response:
-                msgs = await response.json()
-                return [ProvisioningMessage.model_validate(msg) for msg in msgs]
+        response = await self.session.get(
+            f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages",
+            params=params,
+        )
+        msgs = await response.json()
+        return [ProvisioningMessage.model_validate(msg) for msg in msgs]
 
     async def set_message_status(
         self, name: str, reports: List[MessageProcessingStatusReport]
     ):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.post(
-                f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages-status/",
-                json=[report.model_dump() for report in reports],
-            ):
-                # either return nothing or let `.post` throw
-                pass
+        return await self.session.post(
+            f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages-status",
+            json=[report.model_dump() for report in reports],
+        )
 
     async def get_subscriptions(self) -> List[Subscription]:
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.get(
-                f"{self.settings.consumer_registration_url}/subscriptions"
-            ) as response:
-                data = await response.json()
-                # TODO: parse a list of subscriptions instead
-                return [Subscription.model_validate(data)]
+        response = await self.session.get(
+            f"{self.settings.consumer_registration_url}/subscriptions"
+        )
+        data = await response.json()
+        # TODO: parse a list of subscriptions instead
+        return [Subscription.model_validate(data)]
 
     # FIXME: What is the purpose of this method? It looks like it wants to publish_event via Event API
     async def submit_message(
@@ -120,13 +123,10 @@ class AsyncClient:
     ):
         message = Event(realm=realm, topic=topic, body=body)
 
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with session.post(
-                f"{self.settings.consumer_registration_url}/messages",
-                json=message.model_dump(),
-            ):
-                # either return nothing or let `.post` throw
-                pass
+        return await self.session.post(
+            f"{self.settings.consumer_registration_url}/messages",
+            json=message.model_dump(),
+        )
 
 
 class MessageHandler:
