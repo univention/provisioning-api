@@ -124,7 +124,7 @@ test-end-to-end:
     - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
     - docker compose config test
     - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats dispatcher prefill udm-listener ldap-notifier udm-rest-api ldap-server
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
