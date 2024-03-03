@@ -128,7 +128,7 @@ test-end-to-end:
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --udm-rest-api-base-url "http://udm-rest-api:9979/udm/" --provisioning-base-url "http://events-and-consumer-api:7777/"
+    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --udm-rest-api-base-url "http://udm-rest-api:9979/udm/" --provisioning-api-base-url "http://events-and-consumer-api:7777/" --ldap-server-uri ldap://ldap-server:389
   after_script:
     - docker compose down --volumes
 
