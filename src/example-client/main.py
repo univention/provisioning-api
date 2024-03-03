@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import uuid
-from typing import Optional
+import argparse
+
+from typing import Optional, Sequence
 
 import asyncio
 import difflib
@@ -108,17 +109,51 @@ async def handle_message(message: ProvisioningMessage):
         handle_any_message(message)
 
 
-async def main():
-    # TODO: Make this configurable via env values
-    settings = Settings(subsctiption_name=uuid.uuid4(), subscription_password=uuid.uuid4())
+def parse_args(argv: Sequence[str]) -> argparse.Namespace:
+    """
+    Parse command line arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--realm_topic",
+        action="append",
+        help="{RELM:TOPIC} that the example client should stream, example udm:users/user",
+    )
+    parser.add_argument(
+        "--prefill",
+        action="store_true",
+        help="request prefill for the example clent subscription",
+    )
+    parser.add_argument("--admin_username")
+    parser.add_argument("--admin_password")
+    arguments = parser.parse_args(argv)
+    return arguments
+
+
+async def main(argv: Sequence[str] | None = None) -> None:
+    arguments = parse_args(argv)
+    settings = Settings()
 
     # TODO: Check first if the subscription was already created.
     client = AsyncClient()
-    # TODO: Do this with admin credentials
-    await client.create_subscription(
-        settings.subscription_name, settings.subscription_password, settings.realms_topics, settings.request_prefill
+
+    admin_settings = Settings(
+        provisioning_api_username=arguments.admin_username,
+        provisioning_api_password=arguments.admin_password,
     )
-    await MessageHandler(client, settings.subscription_name, [handle_message]).run()
+    admin_client = AsyncClient(admin_settings)
+    realms_topics = [
+        tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic
+    ]
+    await admin_client.create_subscription(
+        settings.provisioning_api_username,
+        settings.provisioning_api_password,
+        realms_topics,
+        arguments.prefill,
+    )
+    await MessageHandler(
+        client, settings.provisioning_api_username, [handle_message]
+    ).run()
 
 
 if __name__ == "__main__":

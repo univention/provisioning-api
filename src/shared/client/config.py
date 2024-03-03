@@ -1,21 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import List, Tuple
 from pydantic_settings import BaseSettings
-import uuid
 
 
 class Settings(BaseSettings):
-    subscription_name: str
-    subscription_password: str
-
     provisioning_api_base_url: str
     provisioning_api_username: str
     provisioning_api_password: str
-
-    realms_topics: List[Tuple[str, str]]
-    request_prefill: bool
 
     @property
     def consumer_registration_url(self) -> str:
