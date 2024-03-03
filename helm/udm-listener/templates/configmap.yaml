@@ -19,6 +19,8 @@ data:
   NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
   NATS_USER: "{{ .Values.config.natsUser }}"
   NATS_PASSWORD: "{{ .Values.config.natsPassword }}"
+  CONSUMER_EVENT_HOST: {{ .Values.config.consumerEventHost | quote }}
+  CONSUMER_EVENT_PORT: {{ .Values.config.consumerEventPort | quote }}
   NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
   TLS_MODE: "{{ .Values.config.tlsMode }}"
 {{ end }}

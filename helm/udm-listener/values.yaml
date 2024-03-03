@@ -53,6 +53,10 @@ config:
   natsUser: "udmlistener"
   # -- NATS: password
   natsPassword: "password"
+  # -- Messages-API Hostname
+  consumerEventHost: "provisioning-api"
+  # -- Messages-API Port
+  consumerEventPort: "80"
   # -- Defaults to "ldapHost" if not set.
   notifierServer: "ldap-notifier"
   # -- Whether to start encryption and validate certificates.
