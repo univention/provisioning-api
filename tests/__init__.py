@@ -19,5 +19,4 @@ def set_test_env_vars():
     os.environ["admin_nats_user"] = "admin"
     os.environ["admin_nats_password"] = "nimda"
     os.environ["provisioning_api_url"] = "http://localhost:7777"
-    os.environ["provisioning_api_username"] = ""
     os.environ["provisioning_api_password"] = ""

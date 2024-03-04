@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import logging
 import pytest
 
 
@@ -19,7 +18,6 @@ from univention.admin.rest.client import UDM
 async def test_create_subscription(
     provisioning_client: shared.client.AsyncClient,
 ):
-    logging.info("Hello from logging!")
     response = await provisioning_client.get_subscription()
     assert response
 

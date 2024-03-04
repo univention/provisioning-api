@@ -69,11 +69,6 @@ spec:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
           env:
-            - name: provisioning_api_username
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-secret" (include "common.names.fullname" .) }}
-                  key: username
             - name: provisioning_api_password
               valueFrom:
                 secretKeyRef:

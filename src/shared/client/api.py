@@ -30,7 +30,7 @@ class AsyncClient:
         logger.info("creating subscription for %s", str(self.settings.realms_topics))
         subscription = NewSubscription(
             name=self.settings.consumer_name,
-            password="empty",
+            password=self.settings.provisioning_api_password,
             realms_topics=self.settings.realms_topics,
             request_prefill=self.settings.request_prefill,
         )

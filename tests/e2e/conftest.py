@@ -85,7 +85,6 @@ async def provisioning_client(
             request_prefill=False,
             provisioning_api_url=provisioning_base_url,
             provisioning_api_password="",
-            provisioning_api_username="",
         )
     )
 

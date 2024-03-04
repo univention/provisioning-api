@@ -9,11 +9,8 @@ import uuid
 class ClientSettings(BaseSettings):
     # Consumer Name
     consumer_name: str = str(uuid.uuid4())
-
     # Provisioning API URL
     provisioning_api_url: str
-    # Provisioning API: username
-    provisioning_api_username: str
     # Provisioning REST API: password
     provisioning_api_password: str
 
