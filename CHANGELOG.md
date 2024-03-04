@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.16.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.16.0...v0.16.1) (2024-03-04)
+
+
+### Bug Fixes
+
+* **admin-api:** add env values for admin-api and prefill to helm chart ([1d13ce1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1d13ce1630ea8f635a5e6fd81508e5ae5a48b4f5))
+* **helm:** make sure old pods terminate before new pods start to avoid bug ([c013bf3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c013bf3603496567d98b2d0a458fc2ef8326d019))
+* **helm:** workaround for missing nats credentials from kubernetes secrets ([5761725](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/57617257b9ffe4825e87934fb689ccf835f496a8))
+
 ## [0.16.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.15.0...v0.16.0) (2024-03-01)
 
 
