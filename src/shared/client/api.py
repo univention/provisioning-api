@@ -24,8 +24,11 @@ logger = logging.getLogger(__file__)
 
 # TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    def __init__(self):
-        self._auth = None
+    def __init__(self, username: str, password: str):
+        self._auth = aiohttp.BasicAuth(username, password)
+        self._admin_auth = aiohttp.BasicAuth(
+            settings.admin_username, settings.admin_password
+        )
 
     # TODO: move this method to the AdminClient
     async def create_subscription(
@@ -48,12 +51,10 @@ class AsyncClient:
             async with session.post(
                 f"{settings.base_url}/internal/admin/v1/subscriptions",
                 json=subscription.model_dump(),
-                auth=aiohttp.BasicAuth(
-                    settings.admin_username, settings.admin_password
-                ),
+                auth=self._admin_auth,
             ):
                 # either return nothing or let `.post` throw
-                self._auth = aiohttp.BasicAuth(name, password)
+                pass
 
     async def cancel_subscription(self, name: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
@@ -115,9 +116,7 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
                 f"{settings.base_url}/internal/admin/v1/subscriptions",
-                auth=aiohttp.BasicAuth(
-                    settings.admin_username, settings.admin_password
-                ),
+                auth=self._admin_auth,
             ) as response:
                 data = await response.json()
                 # TODO: parse a list of subscriptions instead
