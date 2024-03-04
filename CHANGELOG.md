@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.17.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.16.1...v0.17.0) (2024-03-04)
+
+
+### Features
+
+* **example-client:** fix example-client and migrate it to the callback api ([c3045cb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c3045cb1bd9a58a3f546eacf36ce4bc639d9d4e2))
+
+
+### Bug Fixes
+
+* **consumer-client:** Fail early if required settings are missing and make Settings composable ([582c0a3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/582c0a3dc503b4bf43fe41cddfde0df471191ba0))
+* **consumer-client:** migrate to a shared aiohttp session on the class-level to simplify authentication ([25ddffc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/25ddffc6cf3c1cbef4401b9f92a9a56289c1cfba))
+* **e2e-tests:** don't override existing env values during test runs ([3c06327](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3c063272d5d591d8902ec74fb4f5ee786067ab9c))
+* **e2e:** missing arguments on settings instance ([8848c3c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8848c3cade8e7be8a4b9dc8fb980628c8e785d4f))
+* **example-client:** acknowledge messages by migrating the example client to the MessageHandler ([7f3046d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7f3046d73f77438bf4066bb7c7760a4e342a6496))
+* **helm:** workaround for missing nats credentials from kubernetes secrets ([705f81f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/705f81fe15d74f57e9db7794e6dd77aca082dcf9))
+* **listener:** Disregard temporary LDAP objects ([9c6f1be](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9c6f1be7530f395cce07e49638d54b01bbeddfe4))
+* **listener:** missing ldap configuration ([acc5467](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/acc5467cfe3ad2a38998ec8029c915d4bf10b1a4))
+* **provisioning:** udm-listener needs access to the consumer events api ([c5178ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c5178ca473da770342cb941980c1cb70dd308d40))
+* **shared:** logging formatting error ([43d151c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/43d151c564e5083cbd408062c573035af426d6ac))
+
 ## [0.16.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.16.0...v0.16.1) (2024-03-04)
 
 
