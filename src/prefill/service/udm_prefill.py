@@ -14,19 +14,10 @@ from shared.models import (
 )
 
 
-def match_subscription(
-    sub_realm: str, sub_topic: str, msg_realm: str, msg_topic: str
-) -> bool:
-    """Decides whether a message is sent to a subscriber.
+def match_topic(sub_topic: str, module_name: str) -> bool:
+    """Determines if a UDM module name matches the specified subscription topic."""
 
-    Compares the subscriber's realm and topic to those of the message and
-    returns `True` if the message should be sent to the subscriber.
-    """
-
-    if sub_realm != msg_realm:
-        return False
-
-    return re.fullmatch(sub_topic, msg_topic) is not None
+    return re.fullmatch(sub_topic, module_name) is not None
 
 
 class UDMPreFill(PreFillService):
@@ -91,9 +82,7 @@ class UDMPreFill(PreFillService):
 
         udm_modules = await self._port.get_object_types()
         udm_match = [
-            module
-            for module in udm_modules
-            if match_subscription("udm", self._topic, "udm", module["name"])
+            module for module in udm_modules if match_topic(self._topic, module["name"])
         ]
 
         if len(udm_match) == 0:

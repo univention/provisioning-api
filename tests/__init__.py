@@ -22,5 +22,5 @@ def set_test_env_vars():
     os.environ["dispatcher_password"] = "dispatcherpass"
     os.environ["prefill_username"] = "prefill"
     os.environ["prefill_password"] = "prefillpass"
-    os.environ["udm_listener_username"] = "udmlistener"
-    os.environ["udm_listener_password"] = "udmlistenerpass"
+    os.environ["udm_producer_username"] = "udmproducer"
+    os.environ["udm_producer_password"] = "udmproducerpass"

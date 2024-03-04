@@ -4,16 +4,16 @@
 from pydantic_settings import BaseSettings
 
 
-class UdmMessagingSettings(BaseSettings):
-    # Nats user name specific to UdmMessaging
+class UdmProducerSettings(BaseSettings):
+    # Nats user name specific to UdmProducerSettings
     nats_user: str
-    # Nats password specific to UdmMessaging
+    # Nats password specific to UdmProducerSettings
     nats_password: str
 
     # UDM Listener: username
-    udm_listener_username: str
+    udm_producer_username: str
     # UDM Listener: password
-    udm_listener_password: str
+    udm_producer_password: str
 
     # LDAP : port
     ldap_port: int = 389
@@ -33,4 +33,4 @@ class UdmMessagingSettings(BaseSettings):
         return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
 
-udm_listener_settings = UdmMessagingSettings()
+udm_producer_settings = UdmProducerSettings()

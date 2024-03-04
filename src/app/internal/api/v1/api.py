@@ -39,8 +39,8 @@ def authenticate_udm_listener(
 ):
     authenticate_user(
         credentials,
-        app_settings.udm_listener_username,
-        app_settings.udm_listener_password,
+        app_settings.udm_producer_username,
+        app_settings.udm_producer_password,
     )
 
 

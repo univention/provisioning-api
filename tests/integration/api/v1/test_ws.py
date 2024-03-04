@@ -21,8 +21,8 @@ def anyio_backend():
 @pytest.fixture
 def settings_mock() -> AsyncMock:
     settings = patch("app.internal.api.v1.api.app_settings").start()
-    settings.udm_listener_username = CREDENTIALS.username
-    settings.udm_listener_password = CREDENTIALS.password
+    settings.udm_producer_username = CREDENTIALS.username
+    settings.udm_producer_password = CREDENTIALS.password
     return settings
 
 

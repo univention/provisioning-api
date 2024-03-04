@@ -31,9 +31,9 @@ class AppSettings(BaseSettings):
     prefill_password: str
 
     # UDM Producer: username
-    udm_listener_username: str
+    udm_producer_username: str
     # UDM Producer: password
-    udm_listener_password: str
+    udm_producer_password: str
 
 
 app_settings = AppSettings()

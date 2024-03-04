@@ -10,7 +10,7 @@ from univention.admin.rest.client import UDM
 
 import shared.client
 from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
-from udm_messaging.config import udm_listener_settings
+from udm_messaging.config import udm_producer_settings
 
 
 def create_message_via_events_api(provisioning_base_url: str):
@@ -26,8 +26,8 @@ def create_message_via_events_api(provisioning_base_url: str):
         f"{provisioning_base_url}/internal/v1/events",
         json=payload,
         auth=(
-            udm_listener_settings.udm_listener_username,
-            udm_listener_settings.udm_listener_password,
+            udm_producer_settings.udm_producer_username,
+            udm_producer_settings.udm_producer_password,
         ),
     )
 

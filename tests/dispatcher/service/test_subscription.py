@@ -1,23 +1,19 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-from prefill.service.udm_prefill import match_subscription
+from prefill.service.udm_prefill import match_topic
 
 
 def test_subscription_match():
     test_cases = [
         # list of test cases:
-        # subscription realm, sub. topic, message realm, msg. topic, expected result
-        ("udm", "users/user", "udm", "users/user", True),
-        ("udm", "users/user", "udm", "groups/group", False),
-        ("udm", "users/user", "mdu", "users/user", False),
-        ("udm", "users/.*", "udm", "users/user", True),
-        ("udm", "users/.*", "udm", "groups/group", False),
-        ("udm", ".*", "udm", "users/user", True),
-        ("udm", ".*", "udm", "groups/group", True),
+        # subscription sub.topic, target.topic, expected result
+        ("users/user", "users/user", True),
+        ("users/user", "groups/group", False),
+        ("users/.*", "users/user", True),
+        ("users/.*", "groups/group", False),
+        (".*", "users/user", True),
+        (".*", "groups/group", True),
     ]
 
-    for sub_realm, sub_topic, msg_realm, msg_topic, expectation in test_cases:
-        assert (
-            match_subscription(sub_realm, sub_topic, msg_realm, msg_topic)
-            == expectation
-        )
+    for sub_topic, target_topic, expectation in test_cases:
+        assert match_topic(sub_topic, target_topic) == expectation

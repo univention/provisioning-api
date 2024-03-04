@@ -7,15 +7,15 @@ from typing import Optional
 from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
 from shared.models import Bucket, Message
-from .config import UdmMessagingSettings
+from .config import UdmProducerSettings
 
 
 class UDMMessagingPort:
-    def __init__(self, settings: Optional[UdmMessagingSettings] = None):
-        self.settings = settings or UdmMessagingSettings()
+    def __init__(self, settings: Optional[UdmProducerSettings] = None):
+        self.settings = settings or UdmProducerSettings()
         self.kv_adapter = NatsKVAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
-            self.settings.udm_listener_username, self.settings.udm_listener_password
+            self.settings.udm_producer_username, self.settings.udm_producer_password
         )
 
     @staticmethod
