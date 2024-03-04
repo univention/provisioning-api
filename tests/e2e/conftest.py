@@ -13,6 +13,9 @@ set_test_env_vars()
 
 import shared.client  # noqa: E402
 
+SUBSCRIBER_NAME = str(uuid.uuid4())
+SUBSCRIBER_PASSWORD = "subscriberpassword"
+
 
 def pytest_addoption(parser):
     # Portal tests options
@@ -65,19 +68,18 @@ def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
 
 @pytest.fixture
 def provisioning_client(provisioning_base_url) -> shared.client.AsyncClient:
-    return shared.client.AsyncClient()
+    return shared.client.AsyncClient(SUBSCRIBER_NAME, SUBSCRIBER_PASSWORD)
 
 
 @pytest.fixture
 async def simple_subscription(provisioning_client: shared.client.AsyncClient) -> str:
-    subscriber_name = str(uuid.uuid4())
     await provisioning_client.create_subscription(
-        name=subscriber_name,
+        name=SUBSCRIBER_NAME,
         realms_topics=REALMS_TOPICS,
-        password="",
+        password=SUBSCRIBER_PASSWORD,
         request_prefill=False,
     )
 
-    yield subscriber_name
+    yield SUBSCRIBER_NAME
 
-    await provisioning_client.cancel_subscription(subscriber_name)
+    await provisioning_client.cancel_subscription(SUBSCRIBER_NAME)

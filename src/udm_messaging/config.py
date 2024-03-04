@@ -10,10 +10,10 @@ class UdmMessagingSettings(BaseSettings):
     # Nats password specific to UdmMessaging
     nats_password: str
 
-    # UDM Producer: username
-    username: str
-    # UDM Producer: password
-    password: str
+    # UDM Listener: username
+    udm_listener_username: str
+    # UDM Listener: password
+    udm_listener_password: str
 
     # LDAP : port
     ldap_port: int = 389
@@ -33,4 +33,4 @@ class UdmMessagingSettings(BaseSettings):
         return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
 
-udm_messaging_settings = UdmMessagingSettings()
+udm_listener_settings = UdmMessagingSettings()

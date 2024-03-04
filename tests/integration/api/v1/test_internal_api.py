@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
+
 from tests.conftest import FLAT_MESSAGE, CREDENTIALS
 
 from app.internal.api import v1_prefix as api_prefix
@@ -23,9 +24,9 @@ async def client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("app.internal.api.v1.api.settings").start()
-    settings.udm_producer_username = CREDENTIALS.username
-    settings.udm_producer_password = CREDENTIALS.password
+    settings = patch("app.internal.api.v1.api.app_settings").start()
+    settings.udm_listener_username = CREDENTIALS.username
+    settings.udm_listener_password = CREDENTIALS.password
     return settings
 
 

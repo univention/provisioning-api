@@ -10,6 +10,7 @@ from univention.admin.rest.client import UDM
 
 import shared.client
 from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
+from udm_messaging.config import udm_listener_settings
 
 
 def create_message_via_events_api(provisioning_base_url: str):
@@ -21,8 +22,14 @@ def create_message_via_events_api(provisioning_base_url: str):
         "topic": TOPIC,
         "body": body,
     }
-
-    response = requests.post(f"{provisioning_base_url}/events/v1/events", json=payload)
+    response = requests.post(
+        f"{provisioning_base_url}/internal/v1/events",
+        json=payload,
+        auth=(
+            udm_listener_settings.udm_listener_username,
+            udm_listener_settings.udm_listener_password,
+        ),
+    )
 
     print(response.json())
     assert response.status_code == 202, "Failed to post message to queue"

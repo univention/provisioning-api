@@ -9,7 +9,7 @@ from app.main import internal_app_path
 from app.admin.api import v1_prefix as admin_api_prefix
 from app.consumer.messages.api import v1_prefix as messages_api_prefix
 import ldap3
-from udm_messaging.config import udm_messaging_settings
+from udm_messaging.config import udm_listener_settings
 from shared.models import PublisherName
 
 REALM = "udm"
@@ -23,11 +23,11 @@ def anyio_backend():
 
 
 def connect_ldap_server():
-    server = ldap3.Server(udm_messaging_settings.ldap_server_uri)
+    server = ldap3.Server(udm_listener_settings.ldap_server_uri)
     connection = ldap3.Connection(
         server,
-        udm_messaging_settings.ldap_host_dn,
-        udm_messaging_settings.ldap_password,
+        udm_listener_settings.ldap_host_dn,
+        udm_listener_settings.ldap_password,
     )
     connection.bind()
     return connection

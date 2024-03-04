@@ -62,8 +62,8 @@ services:
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
       INTERNAL_API_HOST: "events-and-consumer-api"
-      USERNAME: "dispatcher"
-      PASSWORD: "dispatcherpass"
+      DISPATCHER_USERNAME: "dispatcher"
+      DISPATCHER_PASSWORD: "dispatcherpass"
     depends_on:
       - "nats"
       - "events-and-consumer-api"
@@ -86,8 +86,8 @@ services:
       UDM_HOST: "udm-rest-api"
       UDM_USERNAME: "cn=admin"
       UDM_PASSWORD: "univention"
-      USERNAME: "prefill"
-      PASSWORD: "prefillpass"
+      PREFILL_USERNAME: "prefill"
+      PREFILL_PASSWORD: "prefillpass"
     depends_on:
       - "nats"
       - "events-and-consumer-api"
@@ -113,10 +113,8 @@ services:
       LDAP_PASSWORD: "univention"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
       LDAP_PORT: 389
-      UDM_USERNAME: "cn=admin"
-      UDM_PASSWORD: "univention"
-      USERNAME: "udmlistener"
-      PASSWORD: "udmlistenerpass"
+      UDM_LISTENER_USERNAME: "udmlistener"
+      UDM_LISTENER_PASSWORD: "udmlistenerpass"
     network_mode: "host"
     depends_on:
       - "nats"

@@ -11,9 +11,9 @@ class PrefillSettings(BaseSettings):
     nats_password: str
 
     # Prefill: username
-    username: str
+    prefill_username: str
     # Prefill: password
-    password: str
+    prefill_password: str
 
     # UDM REST API: host
     udm_host: str = "localhost"

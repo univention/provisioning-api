@@ -11,9 +11,9 @@ class DispatcherSettings(BaseSettings):
     nats_password: str
 
     # Dispatcher: username
-    username: str
+    dispatcher_username: str
     # Dispatcher: password
-    password: str
+    dispatcher_password: str
 
 
 dispatcher_settings = DispatcherSettings()
