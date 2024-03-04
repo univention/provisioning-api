@@ -7,8 +7,6 @@ from shared.client.config import ClientSettings
 
 
 env_consumer_name = "CONSUMER_NAME"
-env_api_host = "PROVISIONING_API_HOST"
-env_api_port = "PROVISIONING_API_PORT"
 env_realms_topics = "REALMS_TOPICS"
 
 
@@ -29,24 +27,6 @@ def test_consumer_name():
 
     assert settings.consumer_name == "test-consumer"
     _clear_env_vars([env_consumer_name])
-
-
-def test_property_base_url():
-    _clear_env_vars([env_api_host, env_api_port])
-    settings = ClientSettings()
-
-    assert settings.base_url == "http://localhost:7777"
-
-    os.environ[env_api_host] = "testhost"
-    settings = ClientSettings()
-
-    assert settings.base_url == "http://testhost:7777"
-
-    os.environ[env_api_port] = "1234"
-    settings = ClientSettings()
-
-    assert settings.base_url == "http://testhost:1234"
-    _clear_env_vars([env_api_host, env_api_port])
 
 
 def test_realms_topics():

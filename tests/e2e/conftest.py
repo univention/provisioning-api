@@ -7,14 +7,12 @@ import uuid
 import pytest
 
 from univention.admin.rest.client import UDM
-import shared.client
+import shared.client  # noqa: E402
 from shared.client.config import ClientSettings
 from tests.conftest import REALMS_TOPICS
 from tests import set_test_env_vars
 
 set_test_env_vars()
-
-import shared.client  # noqa: E402
 
 
 def pytest_addoption(parser):
@@ -22,12 +20,17 @@ def pytest_addoption(parser):
     parser.addoption(
         "--provisioning-base-url",
         default="http://localhost:7777/",
-        help="Base URL of the UDM REST API",
+        help="Base URL of the provisioning API",
     )
     parser.addoption(
         "--udm-rest-api-base-url",
         default="http://localhost:9979/udm/",
         help="Base URL of the UDM REST API",
+    )
+    parser.addoption(
+        "--ldap-server-base-url",
+        default="ldap://localhost:389",
+        help="Base URL of the LDAP server/",
     )
     parser.addoption(
         "--udm-admin-username", default="cn=admin", help="UDM admin login password"
@@ -40,6 +43,11 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="session")
 def provisioning_base_url(pytestconfig) -> str:
     return pytestconfig.option.provisioning_base_url.rstrip("/")
+
+
+@pytest.fixture(scope="session")
+def ldap_server_base_url(pytestconfig) -> str:
+    return pytestconfig.option.ldap_server_base_url.rstrip("/")
 
 
 @pytest.fixture(scope="session")
@@ -67,16 +75,15 @@ def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
 
 
 @pytest.fixture
-async def provisioning_client(provisioning_base_url) -> AsyncGenerator[shared.client.AsyncClient, None]:
-    url_params = provisioning_base_url.split(":")
+async def provisioning_client(
+    provisioning_base_url,
+) -> AsyncGenerator[shared.client.AsyncClient, None]:
     provisioning_client = shared.client.AsyncClient(
         ClientSettings(
             consumer_name=str(uuid.uuid4()),
             realms_topics=REALMS_TOPICS,
             request_prefill=False,
-            # Absense of error handling is on purpose in order to fail early on misconfiguration
-            provisioning_api_host=":".join(url_params[0], url_params[1]),
-            provisioning_api_port=url_params[2],
+            provisioning_api_url=provisioning_base_url,
             provisioning_api_password="",
             provisioning_api_username="",
         )

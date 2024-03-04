@@ -23,7 +23,6 @@ logger = logging.getLogger(__file__)
 
 
 class AsyncClient:
-    
     def __init__(self, settings: Optional[ClientSettings] = None) -> None:
         self.settings = settings or ClientSettings()
 
@@ -31,6 +30,7 @@ class AsyncClient:
         logger.info("creating subscription for %s", str(self.settings.realms_topics))
         subscription = NewSubscription(
             name=self.settings.consumer_name,
+            password="empty",
             realms_topics=self.settings.realms_topics,
             request_prefill=self.settings.request_prefill,
         )
@@ -38,7 +38,7 @@ class AsyncClient:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             logger.debug(subscription.model_dump())
             async with session.post(
-                f"{self.settings.base_url}/admin/v1/subscriptions",
+                f"{self.settings.provisioning_api_url}/admin/v1/subscriptions",
                 json=subscription.model_dump(),
                 auth=aiohttp.BasicAuth(
                     admin_settings.admin_username, admin_settings.admin_password

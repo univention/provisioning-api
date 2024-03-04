@@ -25,8 +25,8 @@ def anyio_backend():
     return "asyncio"
 
 
-def connect_ldap_server():
-    server = ldap3.Server(udm_messaging_settings.ldap_server_uri)
+def connect_ldap_server(ldap_server_url: str):
+    server = ldap3.Server(ldap_server_url)
     connection = ldap3.Connection(
         server,
         udm_messaging_settings.ldap_host_dn,
@@ -36,12 +36,12 @@ def connect_ldap_server():
     return connection
 
 
-async def test_workflow(provisioning_base_url):
+async def test_workflow(provisioning_base_url, ldap_server_base_url):
     name = str(uuid.uuid4())
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
-    connection = connect_ldap_server()
+    connection = connect_ldap_server(ldap_server_url=ldap_server_base_url)
 
     response = requests.post(
         f"{provisioning_base_url}{admin_api_prefix}/subscriptions",

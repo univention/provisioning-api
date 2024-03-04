@@ -106,7 +106,6 @@ def handle_message(message: ProvisioningMessage):
 
 
 async def main():
-
     client = AsyncClient()
     await client.create_subscription()
 
