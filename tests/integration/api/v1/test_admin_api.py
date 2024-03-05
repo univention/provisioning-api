@@ -28,7 +28,7 @@ async def subscriptions_client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("app.admin.api.v1.api.app_settings").start()
+    settings = patch("app.auth.app_settings").start()
     settings.admin_username = CREDENTIALS.username
     settings.admin_password = CREDENTIALS.password
     return settings
@@ -71,3 +71,12 @@ class TestAdmin:
                 for realm_topic in [REALMS_TOPICS_STR]
             )
         )
+
+    async def test_delete_subscription(
+        self, subscriptions_client: httpx.AsyncClient, settings_mock
+    ):
+        response = await subscriptions_client.delete(
+            f"{internal_app_path}{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}",
+            auth=(CREDENTIALS.username, CREDENTIALS.password),
+        )
+        assert response.status_code == 200
