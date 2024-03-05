@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.0...v0.17.1) (2024-03-05)
+
+
+### Bug Fixes
+
+* **helm:** revert workaround for missing nats credentials from kubernetes secrets ([c752e8a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c752e8a31af3d3f7893c1783630f2d906a627de1))
+
 ## [0.17.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.16.1...v0.17.0) (2024-03-04)
 
 
