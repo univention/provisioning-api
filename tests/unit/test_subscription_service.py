@@ -77,17 +77,18 @@ class TestSubscriptionService:
         sub_service._port.put_value.assert_not_called()
 
     async def test_add_subscription(self, sub_service: SubscriptionService):
-        sub_service._port.get_str_value = AsyncMock(side_effect=[None, None, None])
+        sub_service._port.get_str_value = AsyncMock(side_effect=[None, None])
+        sub_service._port.get_list_value = AsyncMock(return_value=[])
         sub_service._port.create_stream = AsyncMock()
         sub_service._port.create_consumer = AsyncMock()
 
         await sub_service.register_subscription(self.new_subscription)
 
-        sub_service._port.get_str_value.assert_has_calls(
-            [
-                call(SUBSCRIPTION_NAME, Bucket.credentials),
-                call("udm:groups/group", Bucket.subscriptions),
-            ]
+        sub_service._port.get_str_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.credentials
+        )
+        sub_service._port.get_list_value.assert_called_once_with(
+            "udm:groups/group", Bucket.subscriptions
         )
         assert sub_service._port.put_value.call_count == 3
 
@@ -188,7 +189,7 @@ class TestSubscriptionService:
         sub_service._port.get_list_value.assert_called_once_with(
             REALMS_TOPICS_STR, Bucket.subscriptions
         )
-        sub_service._port.put_list_value.assert_called_once_with(
+        sub_service._port.put_value.assert_called_once_with(
             REALMS_TOPICS_STR, [], Bucket.subscriptions
         )
         sub_service._port.delete_kv_pair.assert_has_calls(

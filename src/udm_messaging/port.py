@@ -39,7 +39,7 @@ class UDMMessagingPort:
 
     async def retrieve(self, url: str, bucket: Bucket):
         result = await self.kv_adapter.get_value(url, bucket)
-        return json.loads(result.value.decode("utf-8")) if result else None
+        return json.loads(result) if result else None
 
     async def store(self, url: str, new_obj: str, bucket: Bucket):
         await self.kv_adapter.put_value(url, new_obj, bucket)

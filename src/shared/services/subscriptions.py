@@ -89,10 +89,9 @@ class SubscriptionService:
             await self.update_subscription_names(realm_topic, name)
 
     async def update_subscription_names(self, key: str, value: str) -> None:
-        subs = await self._port.get_str_value(key, Bucket.subscriptions)
-        if subs:
-            value = subs + f",{value}"
-        await self._port.put_value(key, value, Bucket.subscriptions)
+        subs = await self._port.get_list_value(key, Bucket.subscriptions)
+        subs.append(value)
+        await self._port.put_value(key, subs, Bucket.subscriptions)
 
     async def get_subscription(self, name: str) -> Subscription:
         """
@@ -165,7 +164,7 @@ class SubscriptionService:
             raise ValueError("The subscription with the given name does not exist")
 
         subs.remove(name)
-        await self._port.put_list_value(key, subs, Bucket.subscriptions)
+        await self._port.put_value(key, subs, Bucket.subscriptions)
 
         self.logger.info("Subscription was deleted")
 

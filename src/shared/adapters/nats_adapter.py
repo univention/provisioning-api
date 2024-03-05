@@ -15,7 +15,6 @@ from nats.js.errors import (
     NoKeysError,
     NotFoundError,
 )
-from nats.js.kv import KeyValue
 
 from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
@@ -66,14 +65,15 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         kv_store = await self._js.key_value(bucket.value)
         await kv_store.delete(key)
 
-    async def get_value(self, key: str, bucket: Bucket) -> Optional[KeyValue.Entry]:
+    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
         kv_store = await self._js.key_value(bucket.value)
         try:
-            return await kv_store.get(key)
+            result = await kv_store.get(key)
+            return result.value.decode("utf-8") if result else None
         except KeyNotFoundError:
             pass
 
-    async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
+    async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
         kv_store = await self._js.key_value(bucket.value)
 
         if not value:
@@ -81,7 +81,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
             await self.delete_kv_pair(key, bucket)
             return
 
-        if isinstance(value, dict):
+        if not isinstance(value, str):
             value = json.dumps(value)
         await kv_store.put(key, value.encode("utf-8"))
 
