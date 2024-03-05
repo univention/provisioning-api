@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+
+apiVersion: "v2"
+type: "application"
+name: "example-client"
+description: "A Helm chart for the example client of the UDM provisioning API"
+home: "https://www.univention.de/"
+
+# Chart version
+# Apply Semantic Versioning (https://semver.org/)
+version: "0.1.0"
+
+dependencies:
+  - name: "common"
+    alias: "ums-common"
+    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
+    version: "^0.2.0"
+
+...
