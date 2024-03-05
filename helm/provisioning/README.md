@@ -22,15 +22,9 @@ A Helm Chart that deploys the provisioning services
 | additionalAnnotations | object | `{}` | Additional custom annotations to add to all deployed objects. |
 | additionalLabels | object | `{}` | Additional custom labels to add to all deployed objects. |
 | affinity | object | `{}` | Affinity for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set. |
-| api.config.ADMIN_NATS_PASSWORD | string | `nil` |  |
-| api.config.ADMIN_NATS_USER | string | `nil` |  |
-| api.config.ADMIN_PASSWORD | string | `nil` |  |
-| api.config.ADMIN_USERNAME | string | `nil` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"true"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
-| api.config.NATS_PASSWORD | string | `nil` |  |
-| api.config.NATS_USER | string | `nil` |  |
 | api.config.ROOT_PATH | string | `"/univention/provisioning-api"` |  |
 | api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -46,12 +40,8 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.runAsUser | int | `1000` | Process user id. |
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
-| dispatcher.config.NATS_PASSWORD | string | `nil` |  |
-| dispatcher.config.NATS_USER | string | `nil` |  |
 | dispatcher.config.UDM_HOST | string | `""` |  |
-| dispatcher.config.UDM_PASSWORD | string | `nil` |  |
 | dispatcher.config.UDM_PORT | int | `9979` |  |
-| dispatcher.config.UDM_USERNAME | string | `"cn=admin"` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `""` |  |
@@ -129,12 +119,8 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
 | prefill.config.LOG_LEVEL | string | `"INFO"` |  |
-| prefill.config.NATS_PASSWORD | string | `nil` |  |
-| prefill.config.NATS_USER | string | `nil` |  |
 | prefill.config.UDM_HOST | string | `""` |  |
-| prefill.config.UDM_PASSWORD | string | `nil` |  |
 | prefill.config.UDM_PORT | int | `9979` |  |
-| prefill.config.UDM_USERNAME | string | `"cn=admin"` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `""` |  |
