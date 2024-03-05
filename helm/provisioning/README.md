@@ -13,7 +13,7 @@ A Helm Chart that deploys the provisioning services
 | Repository | Name | Version |
 |------------|------|---------|
 | oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts | common | ^2.x.x |
-| oci://registry.souvap-univention.de/souvap/tooling/charts/univention | nats | 0.0.1 |
+| oci://registry.souvap-univention.de/souvap/tooling/charts/univention | nats | ^0.x.x |
 
 ## Values
 
