@@ -16,10 +16,6 @@ REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def verify_password(password: str, hashed_pass: str) -> bool:
-    return password_context.verify_and_update(password, hashed_pass)
-
-
 class SubscriptionService:
     def __init__(self, port: Port):
         self._port = port
@@ -192,7 +188,14 @@ class SubscriptionService:
         hashed_password = await self._port.get_str_value(
             credentials.username, Bucket.credentials
         )
-        if hashed_password is None or not verify_password(
+
+        valid, new_hash = password_context.verify_and_update(
             credentials.password, hashed_password
-        ):
+        )
+        if valid:
+            if new_hash:
+                await self._port.put_value(
+                    credentials.username, new_hash, Bucket.credentials
+                )
+        else:
             self.handle_authentication_error("Incorrect username or password")
