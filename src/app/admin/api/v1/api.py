@@ -1,27 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import List, Annotated
-
+from typing import List
 import fastapi
 from fastapi import Depends
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
-
-from app.config import app_settings
 from shared.models import Subscription, NewSubscription
-from app.auth import authenticate_user
+from app.auth import authenticate_admin
 from shared.services.messages import MessageService
 from shared.services.port import PortDependency
 from shared.services.subscriptions import SubscriptionService
-
-security = HTTPBasic()
-
-
-def authenticate_admin(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
-    authenticate_user(
-        credentials, app_settings.admin_username, app_settings.admin_password
-    )
-
 
 router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])
 
