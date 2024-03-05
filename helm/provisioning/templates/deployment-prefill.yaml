@@ -3,9 +3,7 @@
 
 ---
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
-# TODO: Change back to `kind: Deployment` after fixing the following error in the application code:
-# nats.js.errors.Error: nats: JetStream.Error consumer is already bound to a subscription
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
@@ -22,6 +20,10 @@ spec:
   selector:
     matchLabels:
       {{- include "common.labels.matchLabels" . | nindent 6 }}
+  {{- if .Values.updateStrategy.type }}
+  strategy:
+    type: {{ .Values.updateStrategy.type }}
+  {{- end }}
   template:
     metadata:
       annotations:
