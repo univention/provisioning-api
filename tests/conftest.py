@@ -177,7 +177,7 @@ kv_sub_info.value = (
 
 kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
-kv_subs.value = b"0f084f8c-1093-4024-b215-55fe8631ddf6"
+kv_subs.value = b'["0f084f8c-1093-4024-b215-55fe8631ddf6"]'
 
 kv_password = copy(BASE_KV_OBJ)
 kv_password.key = SUBSCRIPTION_NAME
