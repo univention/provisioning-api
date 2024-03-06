@@ -3,11 +3,10 @@
 
 from fastapi import APIRouter
 
-from .v1 import router as router_v1, shared_route as shared_route_v1
+from .v1 import router as router_v1
 
 name = "/subscriptions"
 v1_prefix = f"{name}/v1"
 
 router = APIRouter()
 router.include_router(router_v1, prefix=v1_prefix)
-router.include_router(shared_route_v1, prefix=v1_prefix, tags=["sink"])

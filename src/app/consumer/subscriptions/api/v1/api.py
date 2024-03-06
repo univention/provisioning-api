@@ -13,12 +13,13 @@ from shared.services.port import PortDependency
 from shared.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter()
-shared_route = fastapi.APIRouter()
 security = HTTPBasic()
 
 
 @router.get(
-    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["subscriptions"],
 )
 async def get_subscription(
     name: str,
@@ -36,7 +37,11 @@ async def get_subscription(
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
 
-@shared_route.delete("/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK)
+@router.delete(
+    "/subscriptions/{name}",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["subscriptions"],
+)
 async def delete_subscription(
     name: str,
     port: PortDependency,

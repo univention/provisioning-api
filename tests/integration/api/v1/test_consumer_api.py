@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -14,6 +15,7 @@ from tests.conftest import (
     SUBSCRIPTION_NAME,
     CONSUMER_PASSWORD,
     REPORT,
+    CREDENTIALS,
 )
 from shared.models.subscription import FillQueueStatus
 from app.consumer.subscriptions.api import v1_prefix as api_prefix
@@ -42,6 +44,14 @@ async def messages_client():
         yield client
 
 
+@pytest.fixture
+def settings_mock() -> AsyncMock:
+    settings = patch("app.auth.app_settings").start()
+    settings.admin_username = CREDENTIALS.username
+    settings.admin_password = CREDENTIALS.password
+    return settings
+
+
 @pytest.mark.anyio
 class TestConsumer:
     async def test_get_subscription(self, subscriptions_client: httpx.AsyncClient):
@@ -66,6 +76,15 @@ class TestConsumer:
         response = await subscriptions_client.delete(
             f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}",
             auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
+        )
+        assert response.status_code == 200
+
+    async def test_delete_subscription_as_admin(
+        self, subscriptions_client: httpx.AsyncClient, settings_mock
+    ):
+        response = await subscriptions_client.delete(
+            f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}",
+            auth=(CREDENTIALS.username, CREDENTIALS.password),
         )
         assert response.status_code == 200
 
