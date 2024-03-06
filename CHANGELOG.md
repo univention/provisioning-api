@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.1...v0.17.2) (2024-03-06)
+
+
+### Bug Fixes
+
+* **helm:** rollback to deployment ([c64434f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c64434f7719a627b3a5d2147878ab12210890222))
+
 ## [0.17.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.0...v0.17.1) (2024-03-05)
 
 
