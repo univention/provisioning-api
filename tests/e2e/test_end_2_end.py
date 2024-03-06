@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import asyncio
 
 import pytest
 import requests
@@ -19,7 +20,6 @@ from shared.models import FillQueueStatus
 
 REALM = "udm"
 TOPIC = "groups/group"
-PUBLISHER_NAME = PublisherName.udm_listener
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -86,7 +86,7 @@ async def test_workflow(
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == publisher_name
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["old"] is None
     assert message["body"]["new"]["dn"] == dn
 
@@ -105,7 +105,7 @@ async def test_workflow(
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == publisher_name
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["old"]["dn"] == dn
     assert message["body"]["new"]["properties"]["description"] == new_description
 
@@ -124,22 +124,26 @@ async def test_workflow(
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == publisher_name
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["new"] is None
     assert message["body"]["old"]["dn"] == dn
 
 
-async def test_prefill(provisioning_api_base_url):
+async def test_prefill(admin_settings, provisioning_api_base_url):
     name = str(uuid.uuid4())
-    publisher_name = "udm-pre-fill"
 
     response = requests.post(
         f"{provisioning_api_base_url}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
-            "realm_topic": [REALM, TOPIC],
+            "realms_topics": [[REALM, TOPIC]],
             "request_prefill": True,
+            "password": "password",
         },
+        auth=(
+            admin_settings.provisioning_api_username,
+            admin_settings.provisioning_api_password,
+        ),
     )
     assert response.status_code == 201
 
@@ -162,11 +166,9 @@ async def test_prefill(provisioning_api_base_url):
     assert response.status_code == 200
 
     data = response.json()
-    message = data[0]["data"]
+    message = data[0]
 
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == publisher_name
-
-
+    assert message["publisher_name"] == PublisherName.udm_pre_fill
