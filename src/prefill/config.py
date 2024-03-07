@@ -17,6 +17,8 @@ class PrefillSettings(BaseSettings):
     udm_username: str
     # UDM REST API: password
     udm_password: str
+    # Maximum number of reconnect attempts to the NATS server
+    max_reconnect_attempts: int = 5
 
     @property
     def udm_url(self) -> str:

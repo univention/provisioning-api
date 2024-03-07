@@ -2,25 +2,24 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-import logging
-
 import json
-from typing import List, Union, Optional
+import logging
+from typing import List, Optional, Union
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
 from nats.js.errors import (
-    NotFoundError,
-    KeyNotFoundError,
     BucketNotFoundError,
+    KeyNotFoundError,
     NoKeysError,
+    NotFoundError,
 )
 from nats.js.kv import KeyValue
 
-from shared.models import BaseMessage, ProvisioningMessage
 from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
+from shared.models import BaseMessage, ProvisioningMessage
 from shared.models.queue import MQMessage
 from shared.models.subscription import Bucket
 
@@ -44,7 +43,12 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self.logger = logging.getLogger(__name__)
 
     async def init(self, buckets: List[Bucket], user: str, password: str):
-        await self._nats.connect([settings.nats_server], user=user, password=password)
+        await self._nats.connect(
+            [settings.nats_server],
+            user=user,
+            password=password,
+            max_reconnect_attempts=1,
+        )
         for bucket in buckets:
             await self.create_kv_store(bucket)
 
@@ -96,8 +100,15 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
         self._message_queue = asyncio.Queue()
 
-    async def connect(self, user: str, password: str):
-        await self._nats.connect([settings.nats_server], user=user, password=password)
+    async def connect(self, user: str, password: str, **kwargs):
+        """Connect to the NATS server.
+
+        Arguments are passed directly to the NATS client.
+        https://nats-io.github.io/nats.py/modules.html#asyncio-client
+        """
+        await self._nats.connect(
+            [settings.nats_server], user=user, password=password, **kwargs
+        )
 
     async def close(self):
         await self._nats.close()

@@ -8,7 +8,7 @@ from shared.adapters.consumer_messages_adapter import ConsumerMessagesAdapter
 from shared.adapters.consumer_registration_adapter import ConsumerRegistrationAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
-from shared.models import FillQueueStatus, Message, PrefillMessage, MQMessage
+from shared.models import FillQueueStatus, Message, MQMessage, PrefillMessage
 
 from .config import PrefillSettings
 
@@ -27,7 +27,9 @@ class PrefillPort:
         port = PrefillPort()
         await port._udm_adapter.connect()
         await port.mq_adapter.connect(
-            user=port.settings.nats_user, password=port.settings.nats_password
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+            max_reconnect_attempts=port.settings.max_reconnect_attempts,
         )
         await port._consumer_registration_adapter.connect()
         await port._consumer_messages_adapter.connect()
