@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.17.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.2...v0.17.3) (2024-03-07)
+
+
+### Bug Fixes
+
+* **dispatcher:** terminate if nats connection error ([d52a1e1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d52a1e133969acc528182e5b011e052040f7b7e7))
+* **prefill:** terminate if nats connection error ([1cbab33](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1cbab33c346532d48d028b32dd117b3ad6062acf))
+
 ## [0.17.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.1...v0.17.2) (2024-03-06)
 
 
