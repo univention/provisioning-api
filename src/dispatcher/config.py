@@ -9,3 +9,5 @@ class DispatcherSettings(BaseSettings):
     nats_user: str
     # Nats password specific to Dispatcher
     nats_password: str
+    # Maximum number of reconnect attempts to the NATS server
+    max_reconnect_attempts: int = 5
