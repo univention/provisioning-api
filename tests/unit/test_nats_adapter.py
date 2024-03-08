@@ -4,22 +4,23 @@
 import asyncio
 from unittest.mock import AsyncMock, call, patch
 import pytest
-from nats.js.errors import NotFoundError, BucketNotFoundError
+from nats.js.errors import BucketNotFoundError, NotFoundError
+
 from shared.adapters.nats_adapter import NatsKeys
 from shared.models import Bucket
 from tests.conftest import (
-    SUBSCRIPTION_NAME,
-    kv_sub_info,
-    SUBSCRIPTION_INFO,
-    MSG,
     MESSAGE,
     MQMESSAGE,
-    MockNatsMQAdapter,
-    MockNatsKVAdapter,
     FLAT_MESSAGE_ENCODED,
-    FakeKvStore,
     CREDENTIALS,
+    MSG,
     PROVISIONING_MESSAGE,
+    SUBSCRIPTION_INFO,
+    SUBSCRIPTION_NAME,
+    FakeKvStore,
+    MockNatsKVAdapter,
+    MockNatsMQAdapter,
+    kv_sub_info,
 )
 
 
@@ -74,6 +75,7 @@ class TestNatsKVAdapter:
             ["nats://localhost:4222"],
             user=CREDENTIALS.username,
             password=CREDENTIALS.password,
+            max_reconnect_attempts=1,
         )
         mock_nats_kv_adapter._js.create_key_value.assert_called_once_with(
             bucket=Bucket.subscriptions

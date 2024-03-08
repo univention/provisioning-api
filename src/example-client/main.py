@@ -2,15 +2,20 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import argparse
 import asyncio
 import difflib
 import json
+import logging
+import sys
+from typing import Optional, Sequence
 
-from shared.client import AsyncClient, ProvisioningMessage
-from shared.client.config import settings
+from aiohttp import ClientResponseError
+
+from shared.client import AsyncClient, ProvisioningMessage, Settings, MessageHandler
 
 
-def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
+def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):
     colors = ["k", "r", "g", "y", "b", "v", "c", "w"]
 
     def fg_color(color):
@@ -99,47 +104,68 @@ def handle_any_message(msg: ProvisioningMessage):
     print(msg.model_dump_json(indent=2))
 
 
-def handle_message(message: ProvisioningMessage):
+async def handle_message(message: ProvisioningMessage):
     if message.realm == "udm":
         handle_udm_message(message)
     else:
         handle_any_message(message)
 
 
-async def main():
-    name = settings.consumer_name
-
-    client = AsyncClient(name, settings.provisioning_api_password)
-
-    # TODO: move this call to the AdminClient
-    await client.create_subscription(
-        name,
-        settings.realms_topics,
-        settings.provisioning_api_password,
-        settings.request_prefill,
+def parse_args(argv: Sequence[str]) -> argparse.Namespace:
+    """
+    Parse command line arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--realm_topic",
+        action="append",
+        help="{REALM:TOPIC} that the example client should stream, example udm:users/user",
     )
+    parser.add_argument(
+        "--prefill",
+        action="store_true",
+        help="request prefill for the example clent subscription",
+    )
+    parser.add_argument("--admin_username")
+    parser.add_argument("--admin_password")
+    arguments = parser.parse_args(argv)
+    return arguments
 
-    while True:
-        response = await client.get_subscription_messages(name=name, timeout=5)
-        for message in response:
-            handle_message(message=message)
 
-    # FIXME: No stream available any more. Where did it go?
-    # async with client.stream(name) as stream:
-    #     while True:
-    #         # handle incoming message
-    #         message: shared.client.Message = await stream.receive_message()
-    #         if message.realm == "udm":
-    #             handle_udm_message(message)
-    #         else:
-    #             handle_any_message(message)
+async def main() -> None:
+    arguments = parse_args(sys.argv[1:])
+    settings = Settings()
 
-    #         # confirm message reception
-    #         status = shared.client.MessageProcessingStatus.ok
-    #         await stream.send_report(status)
+    if len(sys.argv) > 1:
+        admin_settings = Settings(
+            provisioning_api_username=arguments.admin_username,
+            provisioning_api_password=arguments.admin_password,
+            provisioning_api_base_url=settings.provisioning_api_base_url,
+        )
+        realms_topics = [
+            tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic
+        ]
+        prefill = arguments.prefill
+        async with AsyncClient(admin_settings) as admin_client:
+            try:
+                await admin_client.create_subscription(
+                    settings.provisioning_api_username,
+                    settings.provisioning_api_password,
+                    realms_topics,
+                    prefill,
+                )
+            except ClientResponseError as e:
+                logging.warn("%s, Client already exists", e)
+
+    logging.info("Listening for messages")
+    async with AsyncClient(settings) as client:
+        await MessageHandler(
+            client, settings.provisioning_api_username, [handle_message]
+        ).run()
 
 
 def run():
+    logging.info("args: %s", " ".join(sys.argv))
     asyncio.run(main())
 
 

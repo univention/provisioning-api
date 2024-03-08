@@ -46,7 +46,15 @@ class UDMMessagingService(univention.admin.uldap.access):
         if not (new_obj or old_obj):
             return
 
-        object_type = new_obj["objectType"] if new_obj else old_obj["objectType"]
+        object_type = (
+            new_obj.get("objectType") if new_obj else old_obj.get("objectType")
+        )
+
+        if not object_type:
+            self.logger.error(
+                "could not identify objectType", {"old": old_obj, "new": new_obj}
+            )
+            return
 
         message = Message(
             publisher_name=PublisherName.udm_listener,

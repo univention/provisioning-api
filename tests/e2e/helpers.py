@@ -2,14 +2,15 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
+
 import requests
 
-from shared.models import PublisherName
-from tests.conftest import REALM, TOPIC
-from univention.admin.rest.client import UDM
-
 import shared.client
+
+from shared.models import PublisherName
 from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
+from univention.admin.rest.client import UDM
+from tests.conftest import REALM, TOPIC
 from udm_messaging.config import udm_producer_settings
 
 

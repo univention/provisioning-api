@@ -3,61 +3,55 @@
 
 import os
 
+from typing import List
+
 from shared.client.config import Settings
 
 
-env_consumer_name = "CONSUMER_NAME"
-env_api_host = "PROVISIONING_API_HOST"
-env_api_port = "PROVISIONING_API_PORT"
-env_realms_topics = "REALMS_TOPICS"
+env_api_url = "PROVISIONING_API_BASE_URL"
+env_username = "PROVISIONING_API_USERNAME"
+env_password = "PROVISIONING_API_PASSWORD"
 
 
-def _clear_env_vars(env_vars: [str]):
+def _clear_env_vars(env_vars: List[str]):
     for env_var in env_vars:
         if env_var in os.environ:
             os.environ.pop(env_var)
 
 
 def test_consumer_name():
-    _clear_env_vars([env_consumer_name])
+    _clear_env_vars([env_username])
     settings = Settings()
 
-    assert len(settings.consumer_name.split("-")) == 5
-
-    os.environ[env_consumer_name] = "test-consumer"
+    os.environ[env_username] = "test-consumer"
     settings = Settings()
 
-    assert settings.consumer_name == "test-consumer"
-    _clear_env_vars([env_consumer_name])
+    assert settings.provisioning_api_username == "test-consumer"
+    _clear_env_vars([env_username])
 
 
-def test_property_base_url():
-    _clear_env_vars([env_api_host, env_api_port])
+def test_consumer_password():
+    _clear_env_vars([env_password])
     settings = Settings()
 
-    assert settings.base_url == "http://localhost:7777"
-
-    os.environ[env_api_host] = "testhost"
+    os.environ[env_password] = "test-consumer"
     settings = Settings()
 
-    assert settings.base_url == "http://testhost:7777"
+    assert settings.provisioning_api_password == "test-consumer"
+    _clear_env_vars([env_password])
 
-    os.environ[env_api_port] = "1234"
+
+def test_base_url():
+    _clear_env_vars([env_api_url])
     settings = Settings()
 
-    assert settings.base_url == "http://testhost:1234"
-    _clear_env_vars([env_api_host, env_api_port])
+    assert settings.provisioning_api_base_url == "http://localhost:7777"
 
-
-def test_realms_topics():
-    _clear_env_vars([env_realms_topics])
+    os.environ[env_api_url] = "http://testhost:1234"
     settings = Settings()
-    assert settings.realms_topics == []
 
-    os.environ[env_realms_topics] = '[["udm", "users/user"]]'
-    settings = Settings()
-    assert settings.realms_topics == [("udm", "users/user")]
-    _clear_env_vars([env_realms_topics])
+    assert settings.provisioning_api_base_url == "http://testhost:1234"
+    _clear_env_vars([env_api_url])
 
 
 def test_property_consumer_registration_url():
@@ -68,5 +62,6 @@ def test_property_consumer_registration_url():
 
 
 def test_property_consumer_messages_url():
+    os.environ[env_api_url] = "http://foobar:5678"
     settings = Settings()
-    assert settings.consumer_messages_url == "http://localhost:7777/messages/v1"
+    assert settings.consumer_messages_url == "http://foobar:5678/messages/v1"

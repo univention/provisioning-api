@@ -6,7 +6,8 @@ from typing import Optional
 from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsMQAdapter
 from shared.adapters.udm_adapter import UDMAdapter
-from shared.models import FillQueueStatus, Message, PrefillMessage, MQMessage
+from shared.models import FillQueueStatus, Message, MQMessage, PrefillMessage
+
 from .config import PrefillSettings
 
 
@@ -25,7 +26,9 @@ class PrefillPort:
         port = PrefillPort()
         await port._udm_adapter.connect()
         await port.mq_adapter.connect(
-            user=port.settings.nats_user, password=port.settings.nats_password
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+            max_reconnect_attempts=port.settings.max_reconnect_attempts,
         )
         await port._internal_api_adapter.connect()
 

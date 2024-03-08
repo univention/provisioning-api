@@ -4,23 +4,19 @@
 import pytest
 
 import shared.client
-from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 import shared.models.queue
-
-from tests.e2e.helpers import (
-    create_message_via_events_api,
-    pop_all_messages,
-)
+from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
+from tests.e2e.helpers import create_message_via_events_api, pop_all_messages
 
 
 async def test_get_multiple_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_base_url,
+    provisioning_api_base_url,
 ):
-    create_message_via_events_api(provisioning_base_url)
-    create_message_via_events_api(provisioning_base_url)
-    create_message_via_events_api(provisioning_base_url)
+    create_message_via_events_api(provisioning_api_base_url)
+    create_message_via_events_api(provisioning_api_base_url)
+    create_message_via_events_api(provisioning_api_base_url)
 
     result = []
 
@@ -38,9 +34,9 @@ async def test_get_multiple_messages(
 async def test_acknowledge_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_base_url,
+    provisioning_api_base_url,
 ):
-    body = create_message_via_events_api(provisioning_base_url)
+    body = create_message_via_events_api(provisioning_api_base_url)
 
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
@@ -75,9 +71,9 @@ async def test_acknowledge_messages(
 async def test_do_not_acknowledge_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_base_url,
+    provisioning_api_base_url,
 ):
-    body = create_message_via_events_api(provisioning_base_url)
+    body = create_message_via_events_api(provisioning_api_base_url)
 
     # test first delivery of a message
     response = await provisioning_client.get_subscription_messages(
@@ -96,10 +92,10 @@ async def test_do_not_acknowledge_messages(
 async def test_acknowledge_some_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_base_url,
+    provisioning_api_base_url,
 ):
-    body = create_message_via_events_api(provisioning_base_url)
-    create_message_via_events_api(provisioning_base_url)
+    body = create_message_via_events_api(provisioning_api_base_url)
+    create_message_via_events_api(provisioning_api_base_url)
 
     # test first delivery of a message
     response = await provisioning_client.get_subscription_messages(
@@ -122,7 +118,7 @@ async def test_acknowledge_some_messages(
     result = await pop_all_messages(provisioning_client, simple_subscription, 3)
     assert len(result) == 2
 
-    create_message_via_events_api(provisioning_base_url)
+    create_message_via_events_api(provisioning_api_base_url)
 
     # test that only the new message gets delivered
     result = await pop_all_messages(provisioning_client, simple_subscription, 2)

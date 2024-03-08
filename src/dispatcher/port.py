@@ -1,12 +1,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from .config import DispatcherSettings
-from typing import List, Optional
 import contextlib
 from shared.adapters.internal_api_adapter import InternalAPIAdapter
+import logging
+from typing import List, Optional
+
 from shared.adapters.nats_adapter import NatsMQAdapter
-from shared.models.queue import MQMessage, Message
+from shared.models import Message, MQMessage
+
+from .config import DispatcherSettings
+
+logger = logging.getLogger(__name__)
 
 
 class DispatcherPort:
@@ -22,7 +27,9 @@ class DispatcherPort:
     async def port_context():
         port = DispatcherPort()
         await port.mq_adapter.connect(
-            user=port.settings.nats_user, password=port.settings.nats_password
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+            max_reconnect_attempts=port.settings.max_reconnect_attempts,
         )
         await port._internal_api_adapter.connect()
 

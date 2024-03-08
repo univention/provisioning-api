@@ -7,22 +7,26 @@ import pytest
 
 from univention.admin.rest.client import UDM
 from tests.conftest import REALMS_TOPICS
-from tests import set_test_env_vars
-
-set_test_env_vars()
 
 import shared.client  # noqa: E402
-
-SUBSCRIBER_NAME = str(uuid.uuid4())
-SUBSCRIBER_PASSWORD = "subscriberpassword"
 
 
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
-        "--provisioning-base-url",
+        "--provisioning-api-base-url",
         default="http://localhost:7777/",
         help="Base URL of the UDM REST API",
+    )
+    parser.addoption(
+        "--provisioning-admin-username",
+        default="admin",
+        help="UDM admin login password",
+    )
+    parser.addoption(
+        "--provisioning-admin-password",
+        default="provisioning",
+        help="UDM admin login password",
     )
     parser.addoption(
         "--udm-rest-api-base-url",
@@ -35,11 +39,16 @@ def pytest_addoption(parser):
     parser.addoption(
         "--udm-admin-password", default="univention", help="UDM admin login password"
     )
+    parser.addoption("--ldap-server-uri", default="ldap://localhost:389")
+    parser.addoption(
+        "--ldap-host-dn", default="cn=admin,dc=univention-organization,dc=intranet"
+    )
+    parser.addoption("--ldap-password", default="univention")
 
 
 @pytest.fixture(scope="session")
-def provisioning_base_url(pytestconfig) -> str:
-    return pytestconfig.option.provisioning_base_url.rstrip("/")
+def provisioning_api_base_url(pytestconfig) -> str:
+    return pytestconfig.option.provisioning_api_base_url.rstrip("/")
 
 
 @pytest.fixture(scope="session")
@@ -52,34 +61,76 @@ def udm_admin_password(pytestconfig) -> str:
     return pytestconfig.option.udm_admin_password
 
 
-@pytest.fixture(scope="session")
-def udm_rest_api_base_url(pytestconfig) -> str:
-    """Base URL to reach the UDM Rest API."""
-    return pytestconfig.option.udm_rest_api_base_url.rstrip("/") + "/"
-
-
 @pytest.fixture
-def udm(udm_rest_api_base_url, udm_admin_username, udm_admin_password) -> UDM:
-    udm = UDM(udm_rest_api_base_url, udm_admin_username, udm_admin_password)
+def udm(pytestconfig) -> UDM:
+    udm = UDM(
+        pytestconfig.option.udm_rest_api_base_url.rstrip("/") + "/",
+        pytestconfig.option.udm_admin_username,
+        pytestconfig.option.udm_admin_password,
+    )
     # test the connection
     udm.get_ldap_base()
     return udm
 
 
 @pytest.fixture
-def provisioning_client(provisioning_base_url) -> shared.client.AsyncClient:
-    return shared.client.AsyncClient(SUBSCRIBER_NAME, SUBSCRIBER_PASSWORD)
+def subscription_name() -> str:
+    return str(uuid.uuid4())
 
 
 @pytest.fixture
-async def simple_subscription(provisioning_client: shared.client.AsyncClient) -> str:
-    await provisioning_client.create_subscription(
-        name=SUBSCRIBER_NAME,
+def subscription_password() -> str:
+    return str(uuid.uuid4())
+
+
+@pytest.fixture
+def settings(
+    provisioning_api_base_url, subscription_name, subscription_password
+) -> shared.client.Settings:
+    return shared.client.Settings(
+        provisioning_api_base_url=provisioning_api_base_url,
+        provisioning_api_username=subscription_name,
+        provisioning_api_password=subscription_password,
+    )
+
+
+@pytest.fixture
+def admin_settings(pytestconfig, provisioning_api_base_url) -> shared.client.Settings:
+    return shared.client.Settings(
+        provisioning_api_base_url=provisioning_api_base_url,
+        provisioning_api_username=pytestconfig.option.provisioning_admin_username,
+        provisioning_api_password=pytestconfig.option.provisioning_admin_password,
+    )
+
+
+@pytest.fixture
+async def provisioning_client(settings) -> shared.client.AsyncClient:
+    return shared.client.AsyncClient(settings)
+    # client = shared.client.AsyncClient(settings)
+    # yield client
+    # await client.close()
+
+
+@pytest.fixture
+async def provisioning_admin_client(admin_settings) -> shared.client.AsyncClient:
+    return shared.client.AsyncClient(admin_settings)
+    # admin_client = shared.client.AsyncClient(admin_settings)
+    # yield admin_client
+    # await admin_client.close()
+
+
+@pytest.fixture
+async def simple_subscription(
+    provisioning_admin_client: shared.client.AsyncClient,
+) -> str:
+    subscriber_name = str(uuid.uuid4())
+    await provisioning_admin_client.create_subscription(
+        name=subscriber_name,
         realms_topics=REALMS_TOPICS,
-        password=SUBSCRIBER_PASSWORD,
+        password="",
         request_prefill=False,
     )
 
-    yield SUBSCRIBER_NAME
+    yield subscriber_name
 
-    await provisioning_client.cancel_subscription(SUBSCRIBER_NAME)
+    await provisioning_admin_client.cancel_subscription(subscriber_name)
