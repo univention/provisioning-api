@@ -3,12 +3,14 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import argparse
-
-from typing import Optional, Sequence
-
 import asyncio
 import difflib
 import json
+import logging
+import sys
+from typing import Optional, Sequence
+
+from aiohttp import ClientResponseError
 
 from shared.client import AsyncClient, ProvisioningMessage, Settings, MessageHandler
 
@@ -117,7 +119,7 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument(
         "--realm_topic",
         action="append",
-        help="{RELM:TOPIC} that the example client should stream, example udm:users/user",
+        help="{REALM:TOPIC} that the example client should stream, example udm:users/user",
     )
     parser.add_argument(
         "--prefill",
@@ -130,31 +132,42 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     return arguments
 
 
-async def main(argv: Sequence[str] | None = None) -> None:
-    arguments = parse_args(argv)
+async def main() -> None:
+    arguments = parse_args(sys.argv[1:])
     settings = Settings()
 
-    # TODO: Check first if the subscription was already created.
-    client = AsyncClient()
+    if len(sys.argv) > 1:
+        admin_settings = Settings(
+            provisioning_api_username=arguments.admin_username,
+            provisioning_api_password=arguments.admin_password,
+            provisioning_api_base_url=settings.provisioning_api_base_url,
+        )
+        realms_topics = [
+            tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic
+        ]
+        prefill = arguments.prefill
+        async with AsyncClient(admin_settings) as admin_client:
+            try:
+                await admin_client.create_subscription(
+                    settings.provisioning_api_username,
+                    settings.provisioning_api_password,
+                    realms_topics,
+                    prefill,
+                )
+            except ClientResponseError as e:
+                logging.warn("%s, Client already exists", e)
 
-    admin_settings = Settings(
-        provisioning_api_username=arguments.admin_username,
-        provisioning_api_password=arguments.admin_password,
-    )
-    admin_client = AsyncClient(admin_settings)
-    realms_topics = [
-        tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic
-    ]
-    await admin_client.create_subscription(
-        settings.provisioning_api_username,
-        settings.provisioning_api_password,
-        realms_topics,
-        arguments.prefill,
-    )
-    await MessageHandler(
-        client, settings.provisioning_api_username, [handle_message]
-    ).run()
+    logging.info("Listening for messages")
+    async with AsyncClient(settings) as client:
+        await MessageHandler(
+            client, settings.provisioning_api_username, [handle_message]
+        ).run()
+
+
+def run():
+    logging.info("args: %s", " ".join(sys.argv))
+    asyncio.run(main())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run()
