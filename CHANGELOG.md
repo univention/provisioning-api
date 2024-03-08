@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.3...v0.18.0) (2024-03-08)
+
+
+### Features
+
+* add helm chart for provisioning example client ([ae2f301](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ae2f301771e97fd9dbecabebaf5d6d49a5c5bf22))
+
+
+### Bug Fixes
+
+* fix async context manager, use it and make subscription optional ([7513a45](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7513a45f41765d2130d4c35391a97a4a39f18dea))
+
 ## [0.17.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.2...v0.17.3) (2024-03-07)
 
 
