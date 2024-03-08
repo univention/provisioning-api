@@ -63,7 +63,7 @@ class AsyncClient:
 
         logger.debug(subscription.model_dump())
         return await self.session.post(
-            f"{self.settings.provisioning_api_base_url}/admin/v1/subscriptions",
+            f"{self.settings.provisioning_api_base_url}/internal/admin/v1/subscriptions",
             json=subscription.model_dump(),
         )
 

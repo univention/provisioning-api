@@ -142,15 +142,9 @@ services:
         - UCS_BASE_IMAGE_TAG=latest
     container_name: example-client
     environment:
-      CONSUMER_NAME: example-client
-      PROVISIONING_API_HOST: "events-and-consumer-api"
-      PROVISIONING_API_PORT: 7777
-      REALMS_TOPICS: '[["udm", "groups/group"]]'
-      REQUEST_PREFILL: "false"
-      ADMIN_USERNAME: "admin"
-      ADMIN_PASSWORD: "provisioning"
-      ADMIN_NATS_USER: "admin"
-      ADMIN_NATS_PASSWORD: "nimda"
+      PROVISIONING_API_USERNAME: "example-client"
+      PROVISIONING_API_PASSWORD: "password"
+      PROVISIONING_API_BASE_URL: "http://events-and-consumer-api:7777"
     restart: "on-failure"
 
 
