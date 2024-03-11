@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.19.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.18.0...v0.19.0) (2024-03-11)
+
+
+### Features
+
+* add authentication for AsyncClient and fix tests ([7fdfc01](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7fdfc01b5989aa747a937e62c6c16ae269e475c7))
+* add nats user ([e936fbb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e936fbb19acbd042474869dfd11c0a862b384db3))
+* implement consumer authentication ([3a57774](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3a57774bb90213b6e4b209cae0895def0882a657))
+* move internal endpoints to the sub app ([8f64bb1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8f64bb1f479586a8414fb1830610ab4c440e2deb))
+
+
+### Bug Fixes
+
+* configure settings ([4d384b0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4d384b0c2aa73e9bda4e6fc0b0ccf59709eb6f40))
+* do not expose the auth attribute to users of the AsyncClient class ([fa39d55](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fa39d559e9b71955aac14938674ac81112626d39))
+* **example-client:** fix env vars for example-client and url for creating subscriptions ([03429c7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/03429c77ecead9e2eccb21193f0da21360720c2d))
+* fix method import ([bf184cb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bf184cbada1d36b12eb2e7af16908624806b0162))
+* merge main ([8090a3c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8090a3cd4978d481e69f00836b892a903f7545e8))
+* merge main ([d22bef7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d22bef7b13e4342ad983008ac5f2008e59cd259e))
+* merge release commit from the main ([187e0ec](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/187e0ec8b3c66038d03ddf5c9c1b4855177d5d05))
+* move internal api to the separate route and hide from consumer OpenApi ([6f36ed8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6f36ed86eeeb6535f086342809c7e062d352b430))
+* update class constructor to initialize _auth with user credentials, extract _admin_auth ([d63e14a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d63e14a9b9b2103c1592d2e04162e4f3d2f94f55))
+
 ## [0.18.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.17.3...v0.18.0) (2024-03-08)
 
 
