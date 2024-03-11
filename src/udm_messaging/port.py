@@ -4,26 +4,30 @@
 import contextlib
 import json
 from typing import Optional
-
+from shared.adapters.internal_api_adapter import InternalAPIAdapter
 from shared.adapters.nats_adapter import NatsKVAdapter
-from shared.adapters.event_adapter import EventAdapter
-from shared.adapters.udm_adapter import UDMAdapter
-
-from shared.models import Message
+from shared.models import Bucket, Message
+from .config import UdmProducerSettings
 
 
 class UDMMessagingPort:
-    def __init__(self):
+    def __init__(self, settings: Optional[UdmProducerSettings] = None):
+        self.settings = settings or UdmProducerSettings()
         self.kv_adapter = NatsKVAdapter()
-        self._udm_adapter: Optional[UDMAdapter] = None
-        self._event_adapter = EventAdapter()
+        self._internal_api_adapter = InternalAPIAdapter(
+            self.settings.udm_producer_username, self.settings.udm_producer_password
+        )
 
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMMessagingPort()
-        await port.kv_adapter.connect()
-        await port._event_adapter.connect()
+        await port.kv_adapter.init(
+            [Bucket.cache],
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
+        )
+        await port._internal_api_adapter.connect()
         try:
             yield port
         finally:
@@ -31,14 +35,14 @@ class UDMMessagingPort:
 
     async def close(self):
         await self.kv_adapter.close()
-        await self._event_adapter.close()
+        await self._internal_api_adapter.close()
 
-    async def retrieve(self, url: str):
-        result = await self.kv_adapter.get_value(url)
+    async def retrieve(self, url: str, bucket: Bucket):
+        result = await self.kv_adapter.get_value(url, bucket)
         return json.loads(result.value.decode("utf-8")) if result else None
 
-    async def store(self, url: str, new_obj: str):
-        await self.kv_adapter.put_value(url, new_obj)
+    async def store(self, url: str, new_obj: str, bucket: Bucket):
+        await self.kv_adapter.put_value(url, new_obj, bucket)
 
     async def send_event(self, message: Message):
-        await self._event_adapter.send_event(message)
+        await self._internal_api_adapter.send_event(message)

@@ -6,7 +6,7 @@ import logging
 import aiohttp
 from typing import Dict, List, Optional
 
-from shared.config import settings
+from prefill.config import prefill_settings
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +23,13 @@ class UDMAdapter:
     """
 
     def __init__(self):
-        self.base_url = settings.udm_url
+        self.base_url = prefill_settings.udm_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(settings.udm_username, settings.udm_password)
+        self.auth = aiohttp.BasicAuth(
+            prefill_settings.udm_username, prefill_settings.udm_password
+        )
         self.headers = [("accept", "application/json")]
         self._session = None
 

@@ -9,7 +9,7 @@ class PreFillService(abc.ABC):
     max_prefill_attempts = 3
 
     def __init__(self):
-        self._subscriber_name: Optional[str] = None
+        self._subscription_name: Optional[str] = None
         self._topic: Optional[str] = None
         self._realm: Optional[str] = None
 

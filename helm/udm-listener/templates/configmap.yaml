@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+{{ include "common.configMap" (dict "top" . "overrides" "udm-listener.configMap") }}
+{{- define "udm-listener.configMap" }}
+{{- with .top }}
+data:
+  CA_CERT: "{{ .Values.config.caCert }}"
+  CA_CERT_FILE: "{{ .Values.config.caCertFile }}"
+  DEBUG_LEVEL: "{{ .Values.config.debugLevel }}"
+  LDAP_BASE_DN: "{{ .Values.config.ldapBaseDn }}"
+  LDAP_PASSWORD: "{{ .Values.config.ldapPassword }}"
+  LDAP_PASSWORD_FILE: "{{ .Values.config.ldapPasswordFile }}"
+  LDAP_HOST: "{{ .Values.config.ldapHost }}"
+  LDAP_HOST_DN: "{{ .Values.config.ldapHostDn }}"
+  LDAP_PORT: "{{ .Values.config.ldapPort }}"
+  NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .Values.config.natsHost | quote }}
+  NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
+  NATS_USER: "{{ .Values.config.natsUser }}"
+  NATS_PASSWORD: "{{ .Values.config.natsPassword }}"
+  CONSUMER_EVENT_HOST: {{ .Values.config.consumerEventHost | quote }}
+  CONSUMER_EVENT_PORT: {{ .Values.config.consumerEventPort | quote }}
+  NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
+  TLS_MODE: "{{ .Values.config.tlsMode }}"
+{{ end }}
+{{ end }}
+...

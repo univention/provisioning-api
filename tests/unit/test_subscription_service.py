@@ -4,15 +4,19 @@
 from copy import deepcopy
 from unittest.mock import AsyncMock, call
 import pytest
+from fastapi import HTTPException
 
+from shared.models.subscription import Bucket, Subscription
+from shared.services.subscriptions import SubscriptionService
 from tests.conftest import (
-    SUBSCRIBER_INFO,
-    REALM_TOPIC,
-    SUBSCRIBER_NAME,
+    SUBSCRIPTION_INFO,
+    SUBSCRIPTION_NAME,
     REALMS_TOPICS_STR,
+    REALMS_TOPICS,
+    CONSUMER_HASHED_PASSWORD,
 )
-from consumer.subscriptions.service.subscription import SubscriptionService
-from shared.models import Subscriber, NewSubscriber, FillQueueStatus
+
+from shared.models import FillQueueStatus, NewSubscription
 
 
 @pytest.fixture
@@ -22,185 +26,174 @@ def sub_service() -> SubscriptionService:
 
 @pytest.mark.anyio
 class TestSubscriptionService:
-    new_subscriber = NewSubscriber(
-        name=SUBSCRIBER_NAME,
-        realm_topic=REALM_TOPIC,
+    new_subscription = NewSubscription(
+        name=SUBSCRIPTION_NAME,
+        realms_topics=REALMS_TOPICS,
         request_prefill=True,
+        password="password",
     )
-    subscriber = f"subscriber:{SUBSCRIBER_NAME}"
 
-    async def test_get_subscribers(self, sub_service):
-        sub_service._port.get_list_value = AsyncMock(return_value=[SUBSCRIBER_NAME])
-        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
-        subscriber = Subscriber(
-            name=SUBSCRIBER_NAME,
+    async def test_get_subscriptions(self, sub_service: SubscriptionService):
+        sub_service._port.get_bucket_keys = AsyncMock(return_value=[SUBSCRIPTION_NAME])
+        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
+        subscription = Subscription(
+            name=SUBSCRIPTION_NAME,
             realms_topics=[REALMS_TOPICS_STR],
             request_prefill=True,
             prefill_queue_status="done",
         )
 
-        result = await sub_service.get_subscribers(None)
+        result = await sub_service.get_subscriptions()
 
-        sub_service._port.get_list_value.assert_called_once_with("subscribers")
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        assert result == [subscriber]
+        sub_service._port.get_bucket_keys.assert_called_once_with(Bucket.credentials)
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
+        assert result == [subscription]
 
-    async def test_get_subscribers_empty_result(self, sub_service):
-        sub_service._port.get_list_value = AsyncMock(return_value=[])
-
-        result = await sub_service.get_subscribers(None)
-
-        sub_service._port.get_list_value.assert_called_once_with("subscribers")
-        assert result == []
-
-    async def test_get_subscriber_not_found(self, sub_service):
-        sub_service._port.get_dict_value = AsyncMock(return_value=None)
-
-        with pytest.raises(ValueError) as e:
-            await sub_service.get_subscriber(SUBSCRIBER_NAME)
-
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        assert "Subscriber not found." == str(e.value)
-
-    async def test_create_subscription_existing_subscriber(
+    async def test_get_subscriptions_empty_result(
         self, sub_service: SubscriptionService
     ):
-        new_sub = deepcopy(self.new_subscriber)
-        new_sub.realm_topic = ["abc", "def"]
-        sub_info = deepcopy(SUBSCRIBER_INFO)
-        sub_service._port.get_dict_value = AsyncMock(return_value=sub_info)
-        sub_service._port.get_str_value = AsyncMock(return_value=None)
+        sub_service._port.get_bucket_keys = AsyncMock(return_value=[])
 
-        await sub_service.create_subscription(new_sub)
+        result = await sub_service.get_subscriptions()
 
-        sub_info["realms_topics"].append("abc:def")
-
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        sub_service._port.get_str_value.assert_called_once_with("abc:def")
-        sub_service._port.put_value.assert_has_calls(
-            [
-                call(self.subscriber, sub_info),
-                call("abc:def", SUBSCRIBER_NAME),
-            ]
-        )
+        sub_service._port.get_bucket_keys.assert_called_once_with(Bucket.credentials)
+        assert result == []
 
     async def test_create_subscription_existing_subscription(
         self, sub_service: SubscriptionService
     ):
-        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
+        sub_service._port.get_str_value = AsyncMock(
+            return_value=CONSUMER_HASHED_PASSWORD
+        )
 
-        with pytest.raises(ValueError) as e:
-            await sub_service.create_subscription(self.new_subscriber)
+        with pytest.raises(HTTPException):
+            await sub_service.register_subscription(self.new_subscription)
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
+        sub_service._port.get_str_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.credentials
+        )
         sub_service._port.put_value.assert_not_called()
-        assert "Subscription for the given realm_topic already exists" == str(e.value)
 
-    async def test_add_subscriber(self, sub_service: SubscriptionService):
-        sub_service._port.get_dict_value = AsyncMock(return_value=None)
-        sub_service._port.get_str_value = AsyncMock(side_effect=[None, None])
+    async def test_add_subscription(self, sub_service: SubscriptionService):
+        sub_service._port.get_str_value = AsyncMock(side_effect=[None, None, None])
         sub_service._port.create_stream = AsyncMock()
         sub_service._port.create_consumer = AsyncMock()
 
-        await sub_service.create_subscription(self.new_subscriber)
+        await sub_service.register_subscription(self.new_subscription)
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
         sub_service._port.get_str_value.assert_has_calls(
-            [call("subscribers"), call("udm:groups/group")]
-        )
-        sub_service._port.put_value.assert_has_calls(
             [
-                call("subscribers", SUBSCRIBER_NAME),
-                call("udm:groups/group", SUBSCRIBER_NAME),
+                call(SUBSCRIPTION_NAME, Bucket.credentials),
+                call("udm:groups/group", Bucket.subscriptions),
             ]
         )
+        assert sub_service._port.put_value.call_count == 3
 
-    async def test_get_subscriber_queue_status_with_no_subscriber(
+    async def test_get_subscription_not_found(self, sub_service):
+        sub_service._port.get_dict_value = AsyncMock(return_value=None)
+
+        with pytest.raises(ValueError) as e:
+            await sub_service.get_subscription(SUBSCRIPTION_NAME)
+
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
+        assert "Subscription was not found." == str(e.value)
+
+    async def test_get_subscription_queue_status_with_no_subscription(
         self, sub_service: SubscriptionService
     ):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
 
         with pytest.raises(ValueError) as e:
-            await sub_service.get_subscriber_queue_status(SUBSCRIBER_NAME)
+            await sub_service.get_subscription_queue_status(SUBSCRIPTION_NAME)
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        assert "Subscriber not found." == str(e.value)
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
+        assert "Subscription was not found." == str(e.value)
 
-    async def test_get_subscriber_queue_status_with_subscribers(
+    async def test_get_subscription_queue_status_with_subscriptions(
         self, sub_service: SubscriptionService
     ):
-        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
+        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
 
-        result = await sub_service.get_subscriber_queue_status(SUBSCRIBER_NAME)
+        result = await sub_service.get_subscription_queue_status(SUBSCRIPTION_NAME)
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
         assert result == FillQueueStatus.done
 
-    async def test_set_subscriber_queue_status_with_no_subscriber(
+    async def test_set_subscription_queue_status_with_no_subscription(
         self, sub_service: SubscriptionService
     ):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
 
         with pytest.raises(ValueError) as e:
-            await sub_service.set_subscriber_queue_status(
-                SUBSCRIBER_NAME, FillQueueStatus.pending
+            await sub_service.set_subscription_queue_status(
+                SUBSCRIPTION_NAME, FillQueueStatus.pending
             )
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
         sub_service._port.put_value.assert_not_called()
-        assert "Subscriber not found." == str(e.value)
+        assert "Subscription was not found." == str(e.value)
 
-    async def test_set_subscriber_queue_status_with_subscribers(
+    async def test_set_subscription_queue_status_with_subscriptions(
         self, sub_service: SubscriptionService
     ):
-        sub_info = deepcopy(SUBSCRIBER_INFO)
-        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
+        sub_info = deepcopy(SUBSCRIPTION_INFO)
+        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
 
-        result = await sub_service.set_subscriber_queue_status(
-            SUBSCRIBER_NAME, FillQueueStatus.pending
+        result = await sub_service.set_subscription_queue_status(
+            SUBSCRIPTION_NAME, FillQueueStatus.pending
         )
         sub_info["prefill_queue_status"] = "pending"
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        sub_service._port.put_value.assert_called_once_with(self.subscriber, sub_info)
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
+        sub_service._port.put_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, sub_info, Bucket.subscriptions
+        )
         assert result is None
 
-    async def test_cancel_subscription_with_no_existing_realm_topic(
-        self, sub_service: SubscriptionService
-    ):
-        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIBER_INFO)
-
-        with pytest.raises(ValueError) as e:
-            await sub_service.cancel_subscription(SUBSCRIBER_NAME, "abc:def")
-
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        sub_service._port.put_value.assert_not_called()
-        assert "Subscription for the given realm_topic doesn't exist" == str(e.value)
-
-    async def test_cancel_subscription_with_no_existing_subscriber(
+    async def test_delete_subscription_with_no_existing_subscription(
         self, sub_service: SubscriptionService
     ):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
 
         with pytest.raises(ValueError) as e:
-            await sub_service.cancel_subscription(SUBSCRIBER_NAME, "abc:def")
+            await sub_service.delete_subscription(SUBSCRIPTION_NAME)
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
         sub_service._port.put_value.assert_not_called()
-        assert "Subscriber not found." == str(e.value)
+        assert "Subscription was not found." == str(e.value)
 
-    async def test_cancel_subscription(self, sub_service: SubscriptionService):
-        sub_info = deepcopy(SUBSCRIBER_INFO)
-        res_sub_info = deepcopy(SUBSCRIBER_INFO)
-        res_sub_info["realms_topics"] = []
-        sub_service._port.get_dict_value = AsyncMock(return_value=sub_info)
-        sub_service._port.get_list_value = AsyncMock(return_value=[SUBSCRIBER_NAME])
+    async def test_delete_subscription(self, sub_service: SubscriptionService):
+        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
+        sub_service._port.get_list_value = AsyncMock(return_value=[SUBSCRIPTION_NAME])
 
-        await sub_service.cancel_subscription(SUBSCRIBER_NAME, "udm:groups/group")
+        await sub_service.delete_subscription(SUBSCRIPTION_NAME)
 
-        sub_service._port.get_dict_value.assert_called_once_with(self.subscriber)
-        sub_service._port.get_list_value.assert_called_once_with(REALMS_TOPICS_STR)
-        sub_service._port.put_list_value.assert_called_once_with(REALMS_TOPICS_STR, [])
-        sub_service._port.put_value.assert_called_once_with(
-            self.subscriber, res_sub_info
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
+        sub_service._port.get_list_value.assert_called_once_with(
+            REALMS_TOPICS_STR, Bucket.subscriptions
+        )
+        sub_service._port.put_list_value.assert_called_once_with(
+            REALMS_TOPICS_STR, [], Bucket.subscriptions
+        )
+        sub_service._port.delete_kv_pair.assert_has_calls(
+            [
+                call(SUBSCRIPTION_NAME, Bucket.credentials),
+                call(SUBSCRIPTION_NAME, Bucket.subscriptions),
+            ]
         )

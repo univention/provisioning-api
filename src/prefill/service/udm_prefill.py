@@ -1,16 +1,23 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import re
 from datetime import datetime
 import logging
-
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
-from consumer.subscriptions.service.subscription import match_subscription
-from shared.models import FillQueueStatus
-from shared.models.queue import PrefillMessage, Message, MQMessage
+from shared.models import (
+    FillQueueStatus,
+    PrefillMessage,
+    Message,
+    MQMessage,
+    PublisherName,
+)
 
-logger = logging.getLogger(__name__)
+
+def match_topic(sub_topic: str, module_name: str) -> bool:
+    """Determines if a UDM module name matches the specified subscription topic."""
+
+    return re.fullmatch(sub_topic, module_name) is not None
 
 
 class UDMPreFill(PreFillService):
@@ -30,33 +37,42 @@ class UDMPreFill(PreFillService):
 
         while True:
             self._logger.info("Waiting for the request...")
-            msg = await self._port.wait_for_event()
+            message = await self._port.wait_for_event()
             try:
-                validated_msg = self.parse_request_data(msg)
-
-                if msg.num_delivered > self.max_prefill_attempts:
-                    await self.add_request_to_prefill_failures(validated_msg, msg)
+                validated_msg = PrefillMessage.model_validate(message.data)
+                if message.num_delivered > self.max_prefill_attempts:
+                    await self.add_request_to_prefill_failures(validated_msg, message)
                     continue
 
-                if self._realm == "udm":
-                    self._logger.info(
-                        "Started the prefill for '%s'", self._subscriber_name
-                    )
-                    await self._port.acknowledge_message_in_progress(msg)
-                    await self._port.update_subscriber_queue_status(
-                        self._subscriber_name, FillQueueStatus.running
-                    )
-                    await self._port.create_prefill_stream(self._subscriber_name)
-                    await self.fetch()
-                else:
-                    # FIXME: unhandled realm
-                    logging.error("Unhandled realm: %s", self._realm)
+                self._logger.info("Received request with content: %s", validated_msg)
+                self._subscription_name = validated_msg.subscription_name
+
+                await self._port.create_prefill_stream(self._subscription_name)
+
+                for realm, topic in validated_msg.realms_topics:
+                    self._realm = realm
+                    self._topic = topic
+
+                    if self._realm == "udm":
+                        await self.start_prefill_process(message)
+                    else:
+                        # FIXME: unhandled realm
+                        self._logger.error("Unhandled realm: %s", self._realm)
 
             except Exception as exc:
-                logger.error("Failed to launch pre-fill handler: %s", exc)
-                await self.mark_request_as_failed(msg)
+                self._logger.error("Failed to launch pre-fill handler: %s", exc)
+                await self.mark_request_as_failed(message)
             else:
-                await self.mark_request_as_done(msg)
+                await self.mark_request_as_done(message)
+
+    async def start_prefill_process(self, message: MQMessage):
+        self._logger.info(
+            "Started the prefill for the subscriber %s with the topic %s",
+            self._subscription_name,
+            self._topic,
+        )
+        await self.mark_request_as_running(message)
+        await self.fetch()
 
     async def fetch(self):
         """
@@ -66,9 +82,7 @@ class UDMPreFill(PreFillService):
 
         udm_modules = await self._port.get_object_types()
         udm_match = [
-            module
-            for module in udm_modules
-            if match_subscription("udm", self._topic, "udm", module["name"])
+            module for module in udm_modules if match_topic(self._topic, module["name"])
         ]
 
         if len(udm_match) == 0:
@@ -102,7 +116,7 @@ class UDMPreFill(PreFillService):
         obj = await self._port.get_object(url)
 
         message = Message(
-            publisher_name="udm-pre-fill",
+            publisher_name=PublisherName.udm_pre_fill,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,
@@ -113,7 +127,7 @@ class UDMPreFill(PreFillService):
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
-        await self._port.create_prefill_message(self._subscriber_name, message)
+        await self._port.create_prefill_message(self._subscription_name, message)
 
     async def add_request_to_prefill_failures(
         self, validated_msg: PrefillMessage, message: MQMessage
@@ -126,23 +140,21 @@ class UDMPreFill(PreFillService):
 
     async def mark_request_as_done(self, msg: MQMessage):
         await self._port.acknowledge_message(msg)
-        await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.done
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.done
         )
 
     async def mark_request_as_failed(self, message: MQMessage):
         await self._port.acknowledge_message_negatively(message)
-        await self._port.update_subscriber_queue_status(
-            self._subscriber_name, FillQueueStatus.failed
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.failed
         )
 
-    def parse_request_data(self, message: MQMessage) -> PrefillMessage:
-        validated_msg = PrefillMessage.model_validate(message.data)
-        self._logger.info("Received request with content: %s", message.data)
-        self._subscriber_name = validated_msg.subscriber_name
-        self._topic = validated_msg.topic
-        self._realm = validated_msg.realm
-        return validated_msg
+    async def mark_request_as_running(self, message: MQMessage):
+        await self._port.acknowledge_message_in_progress(message)
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.running
+        )
 
     async def prepare_prefill_failures_queue(self):
         await self._port.create_stream(self.prefill_failures_queue)

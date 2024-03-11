@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ printf "%s-common" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  CONSUMER_EVENT_HOST: {{ printf "%s-api" (include "common.names.fullname" .) }}
+  CONSUMER_EVENT_PORT: "80"
+  {{- if .Values.nats.bundled }}
+  NATS_HOST: {{ printf "%s-nats" (include "common.names.fullname" .) }}
+  NATS_PORT: "4222"
+  {{- else }}
+  NATS_HOST: {{ required ".Values.nats.connection.host is required." .Values.nats.connection.host | quote }}
+  NATS_PORT: {{ required ".Values.nats.connection.port is required." .Values.nats.connection.port | quote }}
+  {{- end }}
+  {{- if .Values.nats.connection.token }}
+  NATS_CLIENTAUTH_TOKEN: {{ .Values.nats.connection.token | quote }}
+  {{- end }}
+  {{- if .Values.nats.connection.tls.enabled }}
+  NATS_TLS_KEY_FILE: {{ required ".Values.nats.connection.tls.keyFile is required." .Values.nats.connection.tls.keyFile | quote }}
+  NATS_TLS_CERT_FILE: {{ required ".Values.nats.connection.tls.certFile is required." .Values.nats.connection.tls.certFile | quote }}
+  NATS_TLS_CA_FILE: {{ required ".Values.nats.connection.tls.caFile is required." .Values.nats.tls.caFile | quote }}
+  {{- end }}
+...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ printf "%s-api" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  LOG_LEVEL: {{ required ".Values.api.config.LOG_LEVEL is required." .Values.api.config.LOG_LEVEL | quote  }}
+  DEBUG: {{ required ".Values.api.config.DEBUG is required." .Values.api.config.DEBUG | quote  }}
+  ROOT_PATH: {{ required ".Values.api.config.ROOT_PATH is required." .Values.api.config.ROOT_PATH | quote  }}
+  CORS_ALL: {{ required ".Values.api.config.CORS_ALL is required." .Values.api.config.CORS_ALL | quote  }}
+...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ printf "%s-dispatcher" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  LOG_LEVEL: {{ required ".Values.dispatcher.config.LOG_LEVEL is required." .Values.dispatcher.config.LOG_LEVEL | quote  }}
+  UDM_HOST: {{ .Values.dispatcher.config.UDM_HOST | default ( printf "%s-udm-rest-api" .Release.Name ) | quote  }}
+  UDM_PORT: {{ required ".Values.dispatcher.config.UDM_PORT is required." .Values.dispatcher.config.UDM_PORT | quote  }}
+...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  LOG_LEVEL: {{ required ".Values.prefill.config.LOG_LEVEL is required." .Values.prefill.config.LOG_LEVEL | quote  }}
+  UDM_HOST: {{ .Values.prefill.config.UDM_HOST | default ( printf "%s-udm-rest-api" .Release.Name ) | quote  }}
+  UDM_PORT: {{ required ".Values.prefill.config.UDM_PORT is required." .Values.prefill.config.UDM_PORT | quote  }}
+...
+

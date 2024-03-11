@@ -6,12 +6,16 @@ import argparse
 import asyncio
 import difflib
 import json
-import uuid
+import logging
+import sys
+from typing import Optional, Sequence
 
-import shared.client
+from aiohttp import ClientResponseError
+
+from shared.client import AsyncClient, ProvisioningMessage, Settings, MessageHandler
 
 
-def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
+def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):
     colors = ["k", "r", "g", "y", "b", "v", "c", "w"]
 
     def fg_color(color):
@@ -29,7 +33,7 @@ def _cprint(text: str, fg: str = None, bg: str = None, **kwargs):
         print(text, **kwargs)
 
 
-def print_header(msg: shared.client.Message, action=None):
+def print_header(msg: ProvisioningMessage, action=None):
     print()
 
     text = ""
@@ -70,7 +74,7 @@ def print_udm_diff(old: dict, new: dict):
             _cprint(line)
 
 
-def handle_udm_message(msg: shared.client.Message):
+def handle_udm_message(msg: ProvisioningMessage):
     old_full = msg.body.get("old") or {}
     new_full = msg.body.get("new") or {}
 
@@ -95,42 +99,73 @@ def handle_udm_message(msg: shared.client.Message):
         _cprint("No object data received!", fg="r")
 
 
-def handle_any_message(msg: shared.client.Message):
+def handle_any_message(msg: ProvisioningMessage):
     print_header(msg)
     print(msg.model_dump_json(indent=2))
 
 
-async def main():
+async def handle_message(message: ProvisioningMessage):
+    if message.realm == "udm":
+        handle_udm_message(message)
+    else:
+        handle_any_message(message)
+
+
+def parse_args(argv: Sequence[str]) -> argparse.Namespace:
+    """
+    Parse command line arguments.
+    """
     parser = argparse.ArgumentParser()
-    parser.add_argument("base_url", help="URL of the provisioning dispatcher")
-    parser.add_argument("realm_topic", nargs="+", help="[realm]:[topic]")
     parser.add_argument(
-        "--name", "-n", default=str(uuid.uuid4()), help="Name of the subscriber"
+        "--realm_topic",
+        action="append",
+        help="{REALM:TOPIC} that the example client should stream, example udm:users/user",
     )
-    parser.add_argument("--fill", action="store_true", help="Fill the queue from LDAP")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--prefill",
+        action="store_true",
+        help="request prefill for the example clent subscription",
+    )
+    parser.add_argument("--admin_username")
+    parser.add_argument("--admin_password")
+    arguments = parser.parse_args(argv)
+    return arguments
 
-    name = args.name
-    realms_topics = [entry.split(":") for entry in args.realm_topic]
 
-    client = shared.client.AsyncClient(args.base_url)
-    await client.create_subscription(name, realms_topics, args.fill)
+async def main() -> None:
+    arguments = parse_args(sys.argv[1:])
+    settings = Settings()
 
-    async with client.stream(name) as stream:
-        while True:
-            # handle incoming message
-            message: shared.client.Message = await stream.receive_message()
-            if message.realm == "udm":
-                handle_udm_message(message)
-            else:
-                handle_any_message(message)
+    if len(sys.argv) > 1:
+        admin_settings = Settings(
+            provisioning_api_username=arguments.admin_username,
+            provisioning_api_password=arguments.admin_password,
+            provisioning_api_base_url=settings.provisioning_api_base_url,
+        )
+        realms_topics = [
+            tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic
+        ]
+        prefill = arguments.prefill
+        async with AsyncClient(admin_settings) as admin_client:
+            try:
+                await admin_client.create_subscription(
+                    settings.provisioning_api_username,
+                    settings.provisioning_api_password,
+                    realms_topics,
+                    prefill,
+                )
+            except ClientResponseError as e:
+                logging.warn("%s, Client already exists", e)
 
-            # confirm message reception
-            status = shared.client.MessageProcessingStatus.ok
-            await stream.send_report(status)
+    logging.info("Listening for messages")
+    async with AsyncClient(settings) as client:
+        await MessageHandler(
+            client, settings.provisioning_api_username, [handle_message]
+        ).run()
 
 
 def run():
+    logging.info("args: %s", " ".join(sys.argv))
     asyncio.run(main())
 
 

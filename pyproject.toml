@@ -10,7 +10,7 @@ readme = "README.md"
 packages = [
     { include = "example-client", from = "src" },
     { include = "shared", from = "src" },
-    { include = "consumer", from = "src" },
+    { include = "app", from = "src" },
     { include = "prefill", from = "src" },
 ]
 
@@ -23,11 +23,13 @@ pyyaml = "^6.0.1"
 uvicorn = "^0.21.1"
 aiohttp = "^3.8.5"
 websockets = "^11.0.3"
-nats-py = "^2.6.0"
 trio = "^0.22.2"
 daemoniker = "^0.2.3"
 requests = "^2.31.0"
 ldap3 = "^2.9.1"
+passlib = "^1.7.4"
+bcrypt = "4.0.1"
+nats-py = "^2.7.0"
 
 [tool.poetry.scripts]
 dev = "consumer:start_dev"

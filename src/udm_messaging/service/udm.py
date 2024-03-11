@@ -5,8 +5,9 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from shared.config import settings
-from shared.models import Message
+from udm_messaging.config import udm_producer_settings
+from shared.models.subscription import Bucket
+from shared.models import Message, PublisherName
 from udm_messaging.port import UDMMessagingPort
 
 import json
@@ -21,11 +22,11 @@ logger = logging.getLogger(__name__)
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
         super().__init__(
-            port=settings.ldap_port,
-            start_tls=2 if settings.tls_mode.lower() == "on" else 0,
-            base=settings.ldap_base_dn,
-            binddn=settings.ldap_host_dn,
-            bindpw=settings.ldap_password,
+            port=udm_producer_settings.ldap_port,
+            start_tls=2 if udm_producer_settings.tls_mode.lower() == "on" else 0,
+            base=udm_producer_settings.ldap_base_dn,
+            binddn=udm_producer_settings.ldap_host_dn,
+            bindpw=udm_producer_settings.ldap_password,
         )
         self._messaging_port = port
         logging.basicConfig(level=logging.INFO)
@@ -33,20 +34,30 @@ class UDMMessagingService(univention.admin.uldap.access):
 
     async def retrieve(self, dn: str):
         self.logger.info("Retrieving object from cache")
-        return await self._messaging_port.retrieve(dn)
+        return await self._messaging_port.retrieve(dn, Bucket.cache)
 
     async def store(self, new_obj: dict):
         self.logger.info("Storing object to cache %s", new_obj)
-        await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj))
+        await self._messaging_port.store(
+            new_obj["uuid"], json.dumps(new_obj), Bucket.cache
+        )
 
     async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
         if not (new_obj or old_obj):
             return
 
-        object_type = new_obj["objectType"] if new_obj else old_obj["objectType"]
+        object_type = (
+            new_obj.get("objectType") if new_obj else old_obj.get("objectType")
+        )
+
+        if not object_type:
+            self.logger.error(
+                "could not identify objectType", {"old": old_obj, "new": new_obj}
+            )
+            return
 
         message = Message(
-            publisher_name="udm-listener",
+            publisher_name=PublisherName.udm_listener,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,

@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+{{- if .Values.ingress.enabled }}
+---
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: "{{ .Values.ingress.tls.secretName }}"
+  {{- end }}
+  rules:
+    - host: {{ required "The hostname has to be set in \"ingress.host\"." .Values.ingress.host | quote }}
+      http:
+        paths:
+          {{- range .Values.ingress.paths }}
+          - pathType: {{ .pathType }}
+            path: {{ .path }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+          {{- end }}
+
+...
+{{- end }}
