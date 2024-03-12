@@ -11,6 +11,7 @@ import ldap3
 
 from app.admin.api import v1_prefix as admin_api_prefix
 from app.consumer.messages.api import v1_prefix as messages_api_prefix
+from app.consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 
 from shared.client.config import Settings
 
@@ -20,6 +21,7 @@ from shared.models import FillQueueStatus
 
 REALM = "udm"
 TOPIC = "groups/group"
+PASSWORD = "password"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -47,7 +49,6 @@ async def test_workflow(
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
-    password = "password"
 
     response = requests.post(
         f"{provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
@@ -55,7 +56,7 @@ async def test_workflow(
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
             "request_prefill": False,
-            "password": password,
+            "password": PASSWORD,
         },
         auth=(
             admin_settings.provisioning_api_username,
@@ -76,7 +77,7 @@ async def test_workflow(
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, password),
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -95,7 +96,7 @@ async def test_workflow(
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, password),
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -114,7 +115,7 @@ async def test_workflow(
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, password),
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -133,12 +134,12 @@ async def test_prefill(admin_settings, provisioning_api_base_url):
     name = str(uuid.uuid4())
 
     response = requests.post(
-        f"{provisioning_api_base_url}{admin_api_prefix}/subscriptions",
+        f"{provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
             "request_prefill": True,
-            "password": "password",
+            "password": PASSWORD,
         },
         auth=(
             admin_settings.provisioning_api_username,
@@ -150,7 +151,8 @@ async def test_prefill(admin_settings, provisioning_api_base_url):
     # ensure that the pre-fill process is finished successfully
     while True:
         response = requests.get(
-            f"{provisioning_api_base_url}{internal_app_path}/subscriptions/{name}"
+            f"{provisioning_api_base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+            auth=(name, PASSWORD),
         )
         assert response.status_code == 200
         prefill_queue_status = response.json()["prefill_queue_status"]
@@ -161,7 +163,8 @@ async def test_prefill(admin_settings, provisioning_api_base_url):
         await asyncio.sleep(1)
 
     response = requests.get(
-        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=1&pop=true"
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=1&pop=true",
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
