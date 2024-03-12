@@ -6,12 +6,19 @@ version: 1
 formatters:
   simple:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  default:
+    format: "%(asctime)s - uvicorn - %(levelname)s - %(message)s"
 
 handlers:
   console:
     class: logging.StreamHandler
     level: DEBUG
     formatter: simple
+    stream: ext://sys.stdout
+  default:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: default
     stream: ext://sys.stdout
 
 loggers:
@@ -23,6 +30,11 @@ loggers:
   uvicorn:
     level: INFO
     handlers: [console]
+    propagate: no
+
+  uvicorn.error:
+    level: INFO
+    handlers: [default]
     propagate: no
 
 root:
