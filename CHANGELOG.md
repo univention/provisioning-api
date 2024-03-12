@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.1...v0.19.2) (2024-03-12)
+
+
+### Bug Fixes
+
+* **dispatcher:** add missing env value to configmap ([34afe1f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/34afe1fcf322679bde9145a7a136821ed018abda))
+
 ## [0.19.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.0...v0.19.1) (2024-03-12)
 
 
