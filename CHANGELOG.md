@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.0...v0.19.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* remove error word from uvicorn logger ([2c75a32](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2c75a328edee686aa59b5e994c04cf7372e58af6))
+
 ## [0.19.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.18.0...v0.19.0) (2024-03-11)
 
 
