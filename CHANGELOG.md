@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.3...v0.19.4) (2024-03-13)
+
+
+### Bug Fixes
+
+* get rid of unclosed client connections after e2e tests ([0d38af8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0d38af8c2e7aafabf7b5e0a661c532c906bd362d))
+
 ## [0.19.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.2...v0.19.3) (2024-03-13)
 
 
