@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.2...v0.19.3) (2024-03-13)
+
+
+### Bug Fixes
+
+* **udm-listener:** fix regressions from migrating to internal api ([dc8aebf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/dc8aebf3904181734d6403ccc923bfdd1e1f981b))
+
 ## [0.19.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.1...v0.19.2) (2024-03-12)
 
 
