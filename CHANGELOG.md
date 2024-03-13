@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.4...v0.19.5) (2024-03-13)
+
+
+### Bug Fixes
+
+* **helm:** fix Chart.yaml version match for nats-helm dep ([d6e2410](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d6e24106ac159f46a65983c3373729588994d267))
+
 ## [0.19.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.3...v0.19.4) (2024-03-13)
 
 
