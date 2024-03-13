@@ -41,7 +41,7 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.UDM_HOST | string | `""` |  |
-| dispatcher.config.UDM_PORT | int | `9979` |  |
+| dispatcher.config.UDM_PORT | int | `80` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `""` |  |
@@ -120,7 +120,7 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
 | prefill.config.LOG_LEVEL | string | `"INFO"` |  |
 | prefill.config.UDM_HOST | string | `""` |  |
-| prefill.config.UDM_PORT | int | `9979` |  |
+| prefill.config.UDM_PORT | int | `80` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `""` |  |
