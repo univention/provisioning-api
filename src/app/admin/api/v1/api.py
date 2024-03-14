@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import logging
 from typing import List
 import fastapi
 from fastapi import Depends
@@ -11,6 +11,7 @@ from shared.services.port import PortDependency
 from shared.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK)
@@ -33,6 +34,7 @@ async def register_subscription(
     try:
         await sub_service.register_subscription(subscription)
     except ValueError as err:
+        logger.debug("Failed to register subscription: %s", err)
         raise fastapi.HTTPException(
             fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
         )

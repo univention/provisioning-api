@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import logging
 from typing import List, Annotated
 
 import fastapi
@@ -16,6 +16,7 @@ from shared.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()
+logger = logging.getLogger(__name__)
 
 
 def authenticate_dispatcher(
@@ -117,6 +118,7 @@ async def update_subscription_queue_status(
     try:
         await service.set_subscription_queue_status(name, prefill_queue_status)
     except ValueError as err:
+        logger.debug("Failed to update subscription queue status: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
 

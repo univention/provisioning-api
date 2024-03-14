@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import logging
 from typing import Annotated
 
 import fastapi
@@ -14,6 +14,7 @@ from shared.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter()
 security = HTTPBasic()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -34,6 +35,7 @@ async def get_subscription(
     try:
         return await service.get_subscription(name)
     except ValueError as err:
+        logger.debug("Failed to get subscription: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
 
@@ -59,4 +61,5 @@ async def delete_subscription(
     try:
         await service.delete_subscription(name)
     except ValueError as err:
+        logger.debug("Failed to delete subscription: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
