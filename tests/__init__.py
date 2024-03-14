@@ -26,6 +26,8 @@ ENV_DEFAULTS = {
     "prefill_password": "prefillpass",
     "udm_producer_username": "udmproducer",
     "udm_producer_password": "udmproducerpass",
+    "udm_host": "localhost",
+    "udm_port": "9979",
 }
 
 
