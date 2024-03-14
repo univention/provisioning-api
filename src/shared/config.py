@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     cors_all: bool = False
 
     # Nats: host
-    nats_host: str = "localhost"
+    nats_host: str = "foobar"
     # Nats: port
     nats_port: int = 4222
 

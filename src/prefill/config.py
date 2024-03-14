@@ -16,7 +16,7 @@ class PrefillSettings(BaseSettings):
     prefill_password: str
 
     # UDM REST API: host
-    udm_host: str = "localhost"
+    udm_host: str = "foobar"
     # UDM REST API: port
     udm_port: int = 9979
     # UDM REST API: username

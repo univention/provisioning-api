@@ -18,7 +18,7 @@ class UdmProducerSettings(BaseSettings):
     # LDAP : port
     ldap_port: int = 389
     # LDAP : host
-    ldap_host: str = "localhost"
+    ldap_host: str = "foobar"
     # LDAP : tls_mode
     tls_mode: str = "off"
     # LDAP : base_dn
