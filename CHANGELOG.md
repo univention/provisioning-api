@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.5...v0.19.6) (2024-03-14)
+
+
+### Bug Fixes
+
+* **helm:** udm-rest-api service port is 80, not 9979 ([d89cbc9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d89cbc9eebe89fec4b4cfb5f0e2e823578bead7b))
+
 ## [0.19.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.4...v0.19.5) (2024-03-13)
 
 
