@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.20.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.6...v0.20.0) (2024-03-14)
+
+
+### Features
+
+* allow admin to delete subscriptions ([2655165](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2655165cda75b48b01ef2b889a97fc426f7f24d4))
+
+
+### Bug Fixes
+
+* fix rehashing password ([2a2c139](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2a2c1394e58c71e5cbfcb07159b3e7be48e1625c))
+* rehash the consumer's password if needed ([99f3390](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/99f339098e75895c92aab24f5641b41c4e5748c3))
+* remove DELETE route from the  internal app and rename 'sink' tag ([269ba10](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/269ba10c07348dde7ed524c966f7ed0164494773))
+* save subscription list as a list, not string ([1fa7793](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1fa77930d5a8bffb189fc6072d86a447f7260feb))
+
 ## [0.19.6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.5...v0.19.6) (2024-03-14)
 
 
