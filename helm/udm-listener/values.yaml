@@ -56,8 +56,8 @@ config:
   # -- Messages-API Hostname
   internalApiHost: "provisioning-api"
   # -- Messages-API Port
-  udmProducerUsername: "udmproducer"
-  udmProducerPassword: "udmproducerpass"
+  eventsUsernameUdm: "udm"
+  eventsPasswordUdm: "udmpass"
   internalApiPort: "80"
   # -- Defaults to "ldapHost" if not set.
   notifierServer: "ldap-notifier"

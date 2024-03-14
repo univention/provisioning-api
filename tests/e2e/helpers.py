@@ -27,8 +27,8 @@ def create_message_via_events_api(provisioning_base_url: str):
         f"{provisioning_base_url}/internal/v1/events",
         json=payload,
         auth=(
-            udm_producer_settings.udm_producer_username,
-            udm_producer_settings.udm_producer_password,
+            udm_producer_settings.events_username_udm,
+            udm_producer_settings.events_password_udm,
         ),
     )
 

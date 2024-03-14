@@ -17,9 +17,10 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"4","internalApiHost":"provisioning-api","internalApiPort":"80","ldapBaseDn":null,"ldapHost":"ldap-server","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"password","natsPort":"4222","natsUser":"udmlistener","notifierServer":"ldap-notifier","tlsMode":"off","udmProducerPassword":"udmproducerpass","udmProducerUsername":"udmproducer"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"4","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","internalApiHost":"provisioning-api","internalApiPort":"80","ldapBaseDn":null,"ldapHost":"ldap-server","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"password","natsPort":"4222","natsUser":"udmlistener","notifierServer":"ldap-notifier","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
+| config.eventsUsernameUdm | string | `"udm"` | Messages-API Port |
 | config.internalApiHost | string | `"provisioning-api"` | Messages-API Hostname |
 | config.ldapHostIp | string | `nil` | Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set |
 | config.ldapPassword | string | `""` | LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set. |
@@ -30,7 +31,6 @@ A Helm chart for the Univention Portal Provisioning API
 | config.natsUser | string | `"udmlistener"` | NATS: user name |
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
-| config.udmProducerUsername | string | `"udmproducer"` | Messages-API Port |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
 | image.imagePullPolicy | string | `"Always"` |  |

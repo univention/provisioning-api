@@ -24,8 +24,8 @@ ENV_DEFAULTS = {
     "dispatcher_password": "dispatcherpass",
     "prefill_username": "prefill",
     "prefill_password": "prefillpass",
-    "udm_producer_username": "udmproducer",
-    "udm_producer_password": "udmproducerpass",
+    "events_username_udm": "udm",
+    "events_password_udm": "udmpass",
 }
 
 

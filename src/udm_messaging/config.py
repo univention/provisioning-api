@@ -10,10 +10,10 @@ class UdmProducerSettings(BaseSettings):
     # Nats password specific to UdmProducerSettings
     nats_password: str
 
-    # UDM Listener: username
-    udm_producer_username: str
-    # UDM Listener: password
-    udm_producer_password: str
+    # Events API: username
+    events_username_udm: str
+    # Events API: password
+    events_password_udm: str
 
     # LDAP : port
     ldap_port: int = 389

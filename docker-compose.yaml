@@ -25,8 +25,8 @@ services:
       DISPATCHER_PASSWORD: "dispatcherpass"
       PREFILL_USERNAME: "prefill"
       PREFILL_PASSWORD: "prefillpass"
-      UDM_PRODUCER_USERNAME: "udmproducer"
-      UDM_PRODUCER_PASSWORD: "udmproducerpass"
+      EVENTS_USERNAME_UDM: "udm"
+      EVENTS_PASSWORD_UDM: "udmpass"
     depends_on:
       - "nats"
     ports:
@@ -113,8 +113,8 @@ services:
       LDAP_PASSWORD: "univention"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
       LDAP_PORT: 389
-      UDM_PRODUCER_USERNAME: "udmproducer"
-      UDM_PRODUCER_PASSWORD: "udmproducerpass"
+      EVENTS_USERNAME_UDM: "udm"
+      EVENTS_PASSWORD_UDM: "udmpass"
     network_mode: "host"
     depends_on:
       - "nats"

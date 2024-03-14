@@ -30,10 +30,10 @@ class AppSettings(BaseSettings):
     # Prefill: password
     prefill_password: str
 
-    # UDM Producer: username
-    udm_producer_username: str
-    # UDM Producer: password
-    udm_producer_password: str
+    # Events API: username
+    events_username_udm: str
+    # Events API: password
+    events_password_udm: str
 
 
 app_settings = AppSettings()

@@ -34,13 +34,13 @@ def authenticate_prefill(
     )
 
 
-def authenticate_udm_listener(
+def authenticate_events_endpoint(
     credentials: Annotated[HTTPBasicCredentials, Depends(security)]
 ):
     authenticate_user(
         credentials,
-        app_settings.udm_producer_username,
-        app_settings.udm_producer_password,
+        app_settings.events_username_udm,
+        app_settings.events_password_udm,
     )
 
 
@@ -124,7 +124,7 @@ async def update_subscription_queue_status(
 async def create_new_message(
     msg: Message,
     port: PortDependency,
-    authentication: Annotated[str, Depends(authenticate_udm_listener)],
+    authentication: Annotated[str, Depends(authenticate_events_endpoint)],
 ):
     """Publish a new message to the incoming queue."""
 

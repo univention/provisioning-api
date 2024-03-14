@@ -23,8 +23,8 @@ data:
   INTERNAL_API_PORT: {{ .Values.config.internalApiPort | quote }}
   NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
   TLS_MODE: "{{ .Values.config.tlsMode }}"
-  UDM_PRODUCER_USERNAME: {{ .Values.config.udmProducerUsername | quote }}
-  UDM_PRODUCER_PASSWORD: {{ .Values.config.udmProducerPassword | quote }}
+  EVENTS_USERNAME_UDM: {{ .Values.config.eventsUsernameUdm | quote }}
+  EVENTS_PASSWORD_UDM: {{ .Values.config.eventsPasswordUdm | quote }}
 {{ end }}
 {{ end }}
 ...
