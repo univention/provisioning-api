@@ -14,9 +14,12 @@ from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
 from tests import set_test_env_vars
-from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from shared.models.subscription import Bucket
-from shared.models import (
+
+set_test_env_vars()
+
+from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter  # noqa: E402
+from shared.models.subscription import Bucket  # noqa: E402
+from shared.models import (  # noqa: E402
     Message,
     MessageProcessingStatusReport,
     MessageProcessingStatus,
@@ -25,8 +28,6 @@ from shared.models import (
     ProvisioningMessage,
     PrefillMessage,
 )
-
-set_test_env_vars()
 
 from app.config import AppSettings  # noqa: E402
 from shared.services.port import Port  # noqa: E402

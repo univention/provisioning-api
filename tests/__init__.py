@@ -28,6 +28,8 @@ ENV_DEFAULTS = {
     "udm_producer_password": "udmproducerpass",
     "udm_host": "localhost",
     "udm_port": "9979",
+    "internal_api_host": "localhost",
+    "internal_api_port": "7777",
 }
 
 

@@ -16,18 +16,18 @@ class Settings(BaseSettings):
     cors_all: bool = False
 
     # Nats: host
-    nats_host: str = "foobar"
+    nats_host: str
     # Nats: port
-    nats_port: int = 4222
+    nats_port: int
 
     @property
     def nats_server(self) -> str:
         return f"nats://{self.nats_host}:{self.nats_port}"
 
     # Internal REST API: host
-    internal_api_host: str = "localhost"
+    internal_api_host: str
     # Internal REST API: port
-    internal_api_port: int = 7777
+    internal_api_port: int
 
     @property
     def internal_api_url(self) -> str:
