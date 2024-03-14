@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import aiohttp
 import pytest
 
 import shared.client
@@ -97,3 +97,15 @@ async def test_get_multiple_messages(
 #     )
 #
 #     assert response == []
+
+
+async def test_get_messages_from_the_wrong_queue(
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+):
+    with pytest.raises(aiohttp.ClientResponseError) as er:
+        await provisioning_client.get_subscription_messages(
+            name="wrong_subscription_name",
+            count=1,
+            timeout=5,
+        )
+        assert "Unauthorized" == str(er.value)

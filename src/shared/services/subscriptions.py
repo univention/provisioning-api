@@ -16,10 +16,6 @@ REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def verify_password(password: str, hashed_pass: str) -> bool:
-    return password_context.verify(password, hashed_pass)
-
-
 class SubscriptionService:
     def __init__(self, port: Port):
         self._port = port
@@ -93,10 +89,9 @@ class SubscriptionService:
             await self.update_subscription_names(realm_topic, name)
 
     async def update_subscription_names(self, key: str, value: str) -> None:
-        subs = await self._port.get_str_value(key, Bucket.subscriptions)
-        if subs:
-            value = subs + f",{value}"
-        await self._port.put_value(key, value, Bucket.subscriptions)
+        subs = await self._port.get_list_value(key, Bucket.subscriptions)
+        subs.append(value)
+        await self._port.put_value(key, subs, Bucket.subscriptions)
 
     async def get_subscription(self, name: str) -> Subscription:
         """
@@ -169,7 +164,7 @@ class SubscriptionService:
             raise ValueError("The subscription with the given name does not exist")
 
         subs.remove(name)
-        await self._port.put_list_value(key, subs, Bucket.subscriptions)
+        await self._port.put_value(key, subs, Bucket.subscriptions)
 
         self.logger.info("Subscription was deleted")
 
@@ -192,7 +187,14 @@ class SubscriptionService:
         hashed_password = await self._port.get_str_value(
             credentials.username, Bucket.credentials
         )
-        if hashed_password is None or not verify_password(
+
+        valid, new_hash = password_context.verify_and_update(
             credentials.password, hashed_password
-        ):
+        )
+        if valid:
+            if new_hash:
+                await self._port.put_value(
+                    credentials.username, new_hash, Bucket.credentials
+                )
+        else:
             self.handle_authentication_error("Incorrect username or password")

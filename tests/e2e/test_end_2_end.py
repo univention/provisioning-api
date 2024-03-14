@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import asyncio
 
 import pytest
 import requests
@@ -10,14 +11,17 @@ import ldap3
 
 from app.admin.api import v1_prefix as admin_api_prefix
 from app.consumer.messages.api import v1_prefix as messages_api_prefix
+from app.consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
 
 from shared.client.config import Settings
 
 from shared.models import PublisherName
 
+from shared.models import FillQueueStatus
+
 REALM = "udm"
 TOPIC = "groups/group"
-PUBLISHER_NAME = PublisherName.udm_listener
+PASSWORD = "password"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -45,7 +49,6 @@ async def test_workflow(
     dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
     new_description = "New description"
     changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
-    password = "password"
 
     response = requests.post(
         f"{provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
@@ -53,7 +56,7 @@ async def test_workflow(
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
             "request_prefill": False,
-            "password": password,
+            "password": PASSWORD,
         },
         auth=(
             admin_settings.provisioning_api_username,
@@ -74,7 +77,7 @@ async def test_workflow(
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, password),
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -84,7 +87,7 @@ async def test_workflow(
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PUBLISHER_NAME
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["old"] is None
     assert message["body"]["new"]["dn"] == dn
 
@@ -93,7 +96,7 @@ async def test_workflow(
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, password),
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -103,7 +106,7 @@ async def test_workflow(
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PUBLISHER_NAME
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["old"]["dn"] == dn
     assert message["body"]["new"]["properties"]["description"] == new_description
 
@@ -112,7 +115,7 @@ async def test_workflow(
 
     response = requests.get(
         f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, password),
+        auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -122,6 +125,53 @@ async def test_workflow(
     assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PUBLISHER_NAME
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["new"] is None
     assert message["body"]["old"]["dn"] == dn
+
+
+async def test_prefill(admin_settings, provisioning_api_base_url):
+    name = str(uuid.uuid4())
+
+    response = requests.post(
+        f"{provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
+        json={
+            "name": name,
+            "realms_topics": [[REALM, TOPIC]],
+            "request_prefill": True,
+            "password": PASSWORD,
+        },
+        auth=(
+            admin_settings.provisioning_api_username,
+            admin_settings.provisioning_api_password,
+        ),
+    )
+    assert response.status_code == 201
+
+    # ensure that the pre-fill process is finished successfully
+    while True:
+        response = requests.get(
+            f"{provisioning_api_base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+            auth=(name, PASSWORD),
+        )
+        assert response.status_code == 200
+        prefill_queue_status = response.json()["prefill_queue_status"]
+        if prefill_queue_status == FillQueueStatus.failed:
+            assert False
+        elif prefill_queue_status == FillQueueStatus.done:
+            break
+        await asyncio.sleep(1)
+
+    response = requests.get(
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=1&pop=true",
+        auth=(name, PASSWORD),
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    message = data[0]
+
+    assert len(data) == 1
+    assert message["realm"] == REALM
+    assert message["topic"] == TOPIC
+    assert message["publisher_name"] == PublisherName.udm_pre_fill

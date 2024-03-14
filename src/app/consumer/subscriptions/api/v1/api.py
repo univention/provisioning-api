@@ -4,9 +4,10 @@
 from typing import Annotated
 
 import fastapi
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
+from app.auth import authenticate_admin
 from shared.models import Subscription
 from shared.services.port import PortDependency
 from shared.services.subscriptions import SubscriptionService
@@ -16,7 +17,9 @@ security = HTTPBasic()
 
 
 @router.get(
-    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["subscriptions"],
 )
 async def get_subscription(
     name: str,
@@ -35,7 +38,9 @@ async def get_subscription(
 
 
 @router.delete(
-    "/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK, tags=["sink"]
+    "/subscriptions/{name}",
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=["subscriptions"],
 )
 async def delete_subscription(
     name: str,
@@ -45,7 +50,11 @@ async def delete_subscription(
     """Delete a subscription."""
 
     service = SubscriptionService(port)
-    await service.authenticate_user(credentials, name)
+
+    try:
+        authenticate_admin(credentials)
+    except HTTPException:
+        await service.authenticate_user(credentials, name)
 
     try:
         await service.delete_subscription(name)

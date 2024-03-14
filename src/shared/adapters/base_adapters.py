@@ -15,7 +15,7 @@ class BaseKVStoreAdapter(ABC):
     """The base class for key-value store adapters."""
 
     @abstractmethod
-    async def init(self, buckets: List[str]):
+    async def init(self, buckets: List[Bucket], user: str, password: str):
         pass
 
     @abstractmethod
@@ -43,7 +43,7 @@ class BaseMQAdapter(ABC):
     """The base class for message queue adapters."""
 
     @abstractmethod
-    async def connect(self):
+    async def connect(self, user: str, password: str):
         pass
 
     @abstractmethod

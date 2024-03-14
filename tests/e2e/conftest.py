@@ -96,18 +96,14 @@ def admin_settings(pytestconfig, provisioning_api_base_url) -> shared.client.Set
 
 @pytest.fixture
 async def provisioning_client(settings) -> shared.client.AsyncClient:
-    return shared.client.AsyncClient(settings)
-    # client = shared.client.AsyncClient(settings)
-    # yield client
-    # await client.close()
+    async with shared.client.AsyncClient(settings) as client:
+        yield client
 
 
 @pytest.fixture
 async def provisioning_admin_client(admin_settings) -> shared.client.AsyncClient:
-    return shared.client.AsyncClient(admin_settings)
-    # admin_client = shared.client.AsyncClient(admin_settings)
-    # yield admin_client
-    # await admin_client.close()
+    async with shared.client.AsyncClient(admin_settings) as client:
+        yield client
 
 
 @pytest.fixture

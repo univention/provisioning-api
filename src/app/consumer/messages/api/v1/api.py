@@ -31,7 +31,7 @@ security = HTTPBasic()
 @router.post(
     "/subscriptions/{name}/messages-status",
     status_code=fastapi.status.HTTP_200_OK,
-    tags=["sink"],
+    tags=["subscriptions"],
 )
 async def post_messages_status(
     name: str,
@@ -52,7 +52,7 @@ async def post_messages_status(
 @router.get(
     "/subscriptions/{name}/messages",
     status_code=fastapi.status.HTTP_200_OK,
-    tags=["sink"],
+    tags=["subscriptions"],
 )
 async def get_subscription_messages(
     name: str,

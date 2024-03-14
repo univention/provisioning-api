@@ -24,8 +24,8 @@ from shared.config import settings
 
 openapi_tags = [
     {
-        "name": "sink",
-        "description": "Subscriber to LDAP changes",
+        "name": "subscriptions",
+        "description": "Subscription management actions",
     }
 ]
 

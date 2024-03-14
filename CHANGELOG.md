@@ -1,5 +1,62 @@
 # Changelog
 
+## [0.20.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.6...v0.20.0) (2024-03-14)
+
+
+### Features
+
+* allow admin to delete subscriptions ([2655165](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2655165cda75b48b01ef2b889a97fc426f7f24d4))
+
+
+### Bug Fixes
+
+* fix rehashing password ([2a2c139](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2a2c1394e58c71e5cbfcb07159b3e7be48e1625c))
+* rehash the consumer's password if needed ([99f3390](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/99f339098e75895c92aab24f5641b41c4e5748c3))
+* remove DELETE route from the  internal app and rename 'sink' tag ([269ba10](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/269ba10c07348dde7ed524c966f7ed0164494773))
+* save subscription list as a list, not string ([1fa7793](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1fa77930d5a8bffb189fc6072d86a447f7260feb))
+
+## [0.19.6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.5...v0.19.6) (2024-03-14)
+
+
+### Bug Fixes
+
+* **helm:** udm-rest-api service port is 80, not 9979 ([d89cbc9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d89cbc9eebe89fec4b4cfb5f0e2e823578bead7b))
+
+## [0.19.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.4...v0.19.5) (2024-03-13)
+
+
+### Bug Fixes
+
+* **helm:** fix Chart.yaml version match for nats-helm dep ([d6e2410](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d6e24106ac159f46a65983c3373729588994d267))
+
+## [0.19.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.3...v0.19.4) (2024-03-13)
+
+
+### Bug Fixes
+
+* get rid of unclosed client connections after e2e tests ([0d38af8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0d38af8c2e7aafabf7b5e0a661c532c906bd362d))
+
+## [0.19.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.2...v0.19.3) (2024-03-13)
+
+
+### Bug Fixes
+
+* **udm-listener:** fix regressions from migrating to internal api ([dc8aebf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/dc8aebf3904181734d6403ccc923bfdd1e1f981b))
+
+## [0.19.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.1...v0.19.2) (2024-03-12)
+
+
+### Bug Fixes
+
+* **dispatcher:** add missing env value to configmap ([34afe1f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/34afe1fcf322679bde9145a7a136821ed018abda))
+
+## [0.19.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.19.0...v0.19.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* remove error word from uvicorn logger ([2c75a32](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2c75a328edee686aa59b5e994c04cf7372e58af6))
+
 ## [0.19.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.18.0...v0.19.0) (2024-03-11)
 
 

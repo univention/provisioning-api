@@ -2,9 +2,12 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import secrets
+from typing import Annotated
+from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from app.config import app_settings
 
-from fastapi import HTTPException, status
-from fastapi.security import HTTPBasicCredentials
+security = HTTPBasic()
 
 
 def authenticate_user(credentials: HTTPBasicCredentials, username: str, password: str):
@@ -20,3 +23,9 @@ def authenticate_user(credentials: HTTPBasicCredentials, username: str, password
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Basic"},
         )
+
+
+def authenticate_admin(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    authenticate_user(
+        credentials, app_settings.admin_username, app_settings.admin_password
+    )

@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
+import json
 from unittest.mock import AsyncMock, call, patch
 import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
@@ -114,7 +115,7 @@ class TestNatsKVAdapter:
 
         mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
         mock_kv.get.assert_called_once_with(SUBSCRIPTION_NAME)
-        assert result == kv_sub_info
+        assert result == json.dumps(SUBSCRIPTION_INFO)
 
     async def test_get_value_by_unknown_key(self, mock_nats_kv_adapter, mock_kv):
         result = await mock_nats_kv_adapter.get_value("unknown", Bucket.subscriptions)
