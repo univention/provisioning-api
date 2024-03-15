@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.1...v0.20.2) (2024-03-15)
+
+
+### Bug Fixes
+
+* change credentials for authentication for Events endpoint ([06ae777](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/06ae777e4f6aa140d09d5f8ad17cd271e41ead16))
+
 ## [0.20.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.0...v0.20.1) (2024-03-14)
 
 
