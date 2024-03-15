@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-import asyncio
 import re
 from datetime import datetime
 import logging
@@ -14,6 +13,7 @@ from shared.models import (
     MQMessage,
     PublisherName,
 )
+from shared.utils.message_ack_manager import MessageAckManager
 
 
 def match_topic(sub_topic: str, module_name: str) -> bool:
@@ -29,6 +29,7 @@ class UDMPreFill(PreFillService):
     def __init__(self, port: PrefillPort):
         super().__init__()
         self._port = port
+        self.ack_manager = MessageAckManager()
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(__name__)
 
@@ -40,28 +41,19 @@ class UDMPreFill(PreFillService):
         while True:
             self._logger.info("Waiting for the request...")
             message = await self._port.wait_for_event()
-            await self.process_message_with_ack_wait_extension(message)
-
-    async def process_message_with_ack_wait_extension(self, message):
-        """
-        Combines message processing and automatic AckWait extension.
-        """
-        message_handler = asyncio.create_task(self.handle_message(message))
-        ack_extender = asyncio.create_task(self.extend_ack_wait(message))
-
-        await message_handler
-
-        ack_extender.cancel()
+            await self.ack_manager.process_message_with_ack_wait_extension(
+                message, self.handle_message, self._port.acknowledge_message_in_progress
+            )
 
     async def handle_message(self, message: MQMessage):
         try:
+            self._logger.info("Received message with content: %s", message.data)
             validated_msg = PrefillMessage.model_validate(message.data)
 
             if message.num_delivered > self.max_prefill_attempts:
                 await self.add_request_to_prefill_failures(validated_msg, message)
                 return
 
-            self._logger.info("Received request with content: %s", validated_msg)
             self._subscription_name = validated_msg.subscription_name
 
             await self._port.create_prefill_stream(self._subscription_name)
@@ -81,11 +73,6 @@ class UDMPreFill(PreFillService):
             await self.mark_request_as_failed(message)
         else:
             await self.mark_request_as_done(message)
-
-    async def extend_ack_wait(self, message: MQMessage):
-        await asyncio.sleep(self.ack_wait - self.ack_threshold)
-        await self._port.acknowledge_message_in_progress(message)
-        self._logger.debug("AckWait was extended")
 
     async def start_prefill_process(self):
         self._logger.info(
