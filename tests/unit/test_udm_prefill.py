@@ -72,9 +72,6 @@ class TestUDMPreFill:
         udm_prefill._port.get_object_types.assert_called_once_with()
         udm_prefill._port.list_objects.assert_called_once_with(self.object_type)
         udm_prefill._port.get_object.assert_called_once_with(self.url)
-        udm_prefill._port.acknowledge_message_in_progress.assert_called_once_with(
-            MQMESSAGE_PREFILL
-        )
         udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
         udm_prefill._port.create_prefill_message.assert_called_once_with(
             SUBSCRIPTION_NAME, self.msg
