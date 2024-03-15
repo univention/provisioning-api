@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+import asyncio
 import re
 from datetime import datetime
 import logging
+
 from prefill.base import PreFillService
 from prefill.port import PrefillPort
 from shared.models import (
@@ -38,41 +40,64 @@ class UDMPreFill(PreFillService):
         while True:
             self._logger.info("Waiting for the request...")
             message = await self._port.wait_for_event()
-            try:
-                validated_msg = PrefillMessage.model_validate(message.data)
-                if message.num_delivered > self.max_prefill_attempts:
-                    await self.add_request_to_prefill_failures(validated_msg, message)
-                    continue
+            await self.process_message_with_ack_wait_extension(message)
 
-                self._logger.info("Received request with content: %s", validated_msg)
-                self._subscription_name = validated_msg.subscription_name
+    async def process_message_with_ack_wait_extension(self, message):
+        """
+        Combines message processing and automatic AckWait extension.
+        """
+        message_handler = asyncio.create_task(self.handle_message(message))
+        ack_extender = asyncio.create_task(self.extend_ack_wait(message))
 
-                await self._port.create_prefill_stream(self._subscription_name)
+        await message_handler
 
-                for realm, topic in validated_msg.realms_topics:
-                    self._realm = realm
-                    self._topic = topic
+        ack_extender.cancel()
 
-                    if self._realm == "udm":
-                        await self.start_prefill_process(message)
-                    else:
-                        # FIXME: unhandled realm
-                        self._logger.error("Unhandled realm: %s", self._realm)
+    async def handle_message(self, message: MQMessage):
+        try:
+            validated_msg = PrefillMessage.model_validate(message.data)
 
-            except Exception as exc:
-                self._logger.error("Failed to launch pre-fill handler: %s", exc)
-                await self.mark_request_as_failed(message)
-            else:
-                await self.mark_request_as_done(message)
+            if message.num_delivered > self.max_prefill_attempts:
+                await self.add_request_to_prefill_failures(validated_msg, message)
+                return
 
-    async def start_prefill_process(self, message: MQMessage):
+            self._logger.info("Received request with content: %s", validated_msg)
+            self._subscription_name = validated_msg.subscription_name
+
+            await self._port.create_prefill_stream(self._subscription_name)
+
+            for realm, topic in validated_msg.realms_topics:
+                self._realm = realm
+                self._topic = topic
+
+                if self._realm == "udm":
+                    await self.start_prefill_process()
+                else:
+                    # FIXME: unhandled realm
+                    self._logger.error("Unhandled realm: %s", self._realm)
+
+        except Exception as exc:
+            self._logger.error("Failed to launch pre-fill handler: %s", exc)
+            await self.mark_request_as_failed(message)
+        else:
+            await self.mark_request_as_done(message)
+
+    async def extend_ack_wait(self, message: MQMessage):
+        await asyncio.sleep(self.ack_wait - self.ack_threshold)
+        await self._port.acknowledge_message_in_progress(message)
+        self._logger.debug("AckWait was extended")
+
+    async def start_prefill_process(self):
         self._logger.info(
             "Started the prefill for the subscriber %s with the topic %s",
             self._subscription_name,
             self._topic,
         )
-        await self.mark_request_as_running(message)
+        await self._port.update_subscription_queue_status(
+            self._subscription_name, FillQueueStatus.running
+        )
         await self.fetch()
+        self._logger.info("Prefill request was processed")
 
     async def fetch(self):
         """
@@ -148,12 +173,6 @@ class UDMPreFill(PreFillService):
         await self._port.acknowledge_message_negatively(message)
         await self._port.update_subscription_queue_status(
             self._subscription_name, FillQueueStatus.failed
-        )
-
-    async def mark_request_as_running(self, message: MQMessage):
-        await self._port.acknowledge_message_in_progress(message)
-        await self._port.update_subscription_queue_status(
-            self._subscription_name, FillQueueStatus.running
         )
 
     async def prepare_prefill_failures_queue(self):
