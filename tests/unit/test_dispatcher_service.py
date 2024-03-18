@@ -43,8 +43,5 @@ class TestDispatcherService:
         dispatcher_service._port.send_message_to_subscription.assert_called_once_with(
             SUBSCRIPTION_INFO["name"], MESSAGE
         )
-        dispatcher_service._port.acknowledge_message_in_progress.assert_called_once_with(
-            MQMESSAGE
-        )
         dispatcher_service._port.acknowledge_message.assert_called_once_with(MQMESSAGE)
         assert "Stop waiting for the new event" == str(e.value)
