@@ -46,33 +46,36 @@ class UDMPreFill(PreFillService):
             )
 
     async def handle_message(self, message: MQMessage):
-        try:
-            self._logger.info("Received message with content: %s", message.data)
-            validated_msg = PrefillMessage.model_validate(message.data)
+        self._logger.info("Received message with content: %s", message.data)
+        while True:
+            try:
+                validated_msg = PrefillMessage.model_validate(message.data)
 
-            if message.num_delivered > self.max_prefill_attempts:
-                await self.add_request_to_prefill_failures(validated_msg, message)
+                if message.num_delivered > self.max_prefill_attempts:
+                    await self.add_request_to_prefill_failures(validated_msg, message)
+                    return
+
+                self._subscription_name = validated_msg.subscription_name
+
+                await self._port.create_prefill_stream(self._subscription_name)
+
+                for realm, topic in validated_msg.realms_topics:
+                    self._realm = realm
+                    self._topic = topic
+
+                    if self._realm == "udm":
+                        await self.start_prefill_process()
+                    else:
+                        # FIXME: unhandled realm
+                        self._logger.error("Unhandled realm: %s", self._realm)
+
+            except Exception as exc:
+                self._logger.error("Failed to launch pre-fill handler: %s", exc)
+                await self.mark_request_as_failed(message)
+                message.num_delivered += 1
+            else:
+                await self.mark_request_as_done(message)
                 return
-
-            self._subscription_name = validated_msg.subscription_name
-
-            await self._port.create_prefill_stream(self._subscription_name)
-
-            for realm, topic in validated_msg.realms_topics:
-                self._realm = realm
-                self._topic = topic
-
-                if self._realm == "udm":
-                    await self.start_prefill_process()
-                else:
-                    # FIXME: unhandled realm
-                    self._logger.error("Unhandled realm: %s", self._realm)
-
-        except Exception as exc:
-            self._logger.error("Failed to launch pre-fill handler: %s", exc)
-            await self.mark_request_as_failed(message)
-        else:
-            await self.mark_request_as_done(message)
 
     async def start_prefill_process(self):
         self._logger.info(
@@ -157,7 +160,7 @@ class UDMPreFill(PreFillService):
         )
 
     async def mark_request_as_failed(self, message: MQMessage):
-        await self._port.acknowledge_message_negatively(message)
+        # await self._port.acknowledge_message_negatively(message) # FIXME: don't do nak() for the messages
         await self._port.update_subscription_queue_status(
             self._subscription_name, FillQueueStatus.failed
         )
