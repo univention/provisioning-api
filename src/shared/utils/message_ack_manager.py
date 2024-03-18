@@ -2,20 +2,26 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import asyncio
 import logging
+from typing import Callable, Coroutine
 
 from shared.models import MQMessage
 
 
 class MessageAckManager:
-    ack_wait = 30
-    ack_threshold = 5
+    ack_wait: int = 30
+    ack_threshold: int = 5
 
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(__name__)
 
     async def process_message_with_ack_wait_extension(
-        self, message, handle_message, acknowledge_message_in_progress
+        self,
+        message: MQMessage,
+        handle_message: Callable[[MQMessage], Coroutine[None, None, None]],
+        acknowledge_message_in_progress: Callable[
+            [MQMessage], Coroutine[None, None, None]
+        ],
     ):
         """
         Combines message processing and automatic AckWait extension.
@@ -31,7 +37,11 @@ class MessageAckManager:
         ack_extender.cancel()
 
     async def extend_ack_wait(
-        self, message: MQMessage, acknowledge_message_in_progress
+        self,
+        message: MQMessage,
+        acknowledge_message_in_progress: Callable[
+            [MQMessage], Coroutine[None, None, None]
+        ],
     ):
         while True:
             await asyncio.sleep(self.ack_wait - self.ack_threshold)
