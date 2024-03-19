@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import logging
-from typing import List, Annotated
+from typing import Annotated
 
 import fastapi
 from fastapi import Depends
@@ -17,14 +17,6 @@ from shared.services.subscriptions import SubscriptionService
 router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()
 logger = logging.getLogger(__name__)
-
-
-def authenticate_dispatcher(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)]
-):
-    authenticate_user(
-        credentials, app_settings.dispatcher_username, app_settings.dispatcher_password
-    )
 
 
 def authenticate_prefill(
@@ -43,66 +35,6 @@ def authenticate_events_endpoint(
         app_settings.events_username_udm,
         app_settings.events_password_udm,
     )
-
-
-@router.get("/subscriptions/filter", status_code=fastapi.status.HTTP_200_OK)
-async def get_realm_topic_subscriptions(
-    realm_topic: str,
-    port: PortDependency,
-    authentication: Annotated[str, Depends(authenticate_dispatcher)],
-) -> List[str]:
-    """Returns a list of subscriptions names with the given realm_topic."""
-
-    service = SubscriptionService(port)
-
-    return await service.get_realm_topic_subscriptions(realm_topic)
-
-
-@router.post(
-    "/subscriptions/{name}/messages",
-    status_code=fastapi.status.HTTP_200_OK,
-)
-async def post_message_to_subscription_queue(
-    name: str,
-    msg: Message,
-    port: PortDependency,
-    authentication: Annotated[str, Depends(authenticate_dispatcher)],
-):
-    """Post the message to the subscription's queue."""
-
-    msg_service = MessageService(port)
-    await msg_service.add_message(name, msg)
-
-
-@router.post(
-    "/subscriptions/{name}/prefill-messages",
-    status_code=fastapi.status.HTTP_201_CREATED,
-)
-async def post_message_to_subscription_prefill_queue(
-    name: str,
-    data: Message,
-    port: PortDependency,
-    authentication: Annotated[str, Depends(authenticate_prefill)],
-):
-    """Post the prefill message to the subscription's prefill queue."""
-
-    msg_service = MessageService(port)
-    await msg_service.add_prefill_message(name, data)
-
-
-@router.post(
-    "/subscriptions/{name}/prefill-stream",
-    status_code=fastapi.status.HTTP_201_CREATED,
-)
-async def create_prefill_stream(
-    name: str,
-    port: PortDependency,
-    authentication: Annotated[str, Depends(authenticate_prefill)],
-):
-    """Create the prefill stream for the subscription."""
-
-    msg_service = MessageService(port)
-    await msg_service.create_prefill_stream(name)
 
 
 @router.patch("/subscriptions/{name}", status_code=fastapi.status.HTTP_200_OK)

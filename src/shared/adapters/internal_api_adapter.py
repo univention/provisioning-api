@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-from typing import List
 
 import aiohttp
 
@@ -35,37 +34,11 @@ class InternalAPIAdapter:
         if self._session:
             await self._session.close()
 
-    async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
-        async with self._session.get(
-            f"{self.base_url}subscriptions/filter?realm_topic={realm_topic}"
-        ) as request:
-            return await request.json()
-
     async def update_subscription_queue_status(
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
         async with self._session.patch(
             f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
-        ):
-            pass
-
-    async def create_prefill_message(self, name: str, message: Message):
-        async with self._session.post(
-            f"{self.base_url}subscriptions/{name}/prefill-messages",
-            json=message.model_dump(),
-        ):
-            pass
-
-    async def create_prefill_stream(self, subscription_name: str):
-        async with self._session.post(
-            f"{self.base_url}subscriptions/{subscription_name}/prefill-stream",
-        ):
-            pass
-
-    async def send_message(self, name: str, message: Message):
-        async with self._session.post(
-            f"{self.base_url}subscriptions/{name}/messages",
-            json=message.model_dump(),
         ):
             pass
 
