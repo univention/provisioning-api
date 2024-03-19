@@ -71,7 +71,7 @@ class UDMPreFill(PreFillService):
 
             except Exception as exc:
                 self._logger.error("Failed to launch pre-fill handler: %s", exc)
-                await self.mark_request_as_failed(message)
+                await self.mark_request_as_failed()
                 message.num_delivered += 1
             else:
                 await self.mark_request_as_done(message)
@@ -159,8 +159,7 @@ class UDMPreFill(PreFillService):
             self._subscription_name, FillQueueStatus.done
         )
 
-    async def mark_request_as_failed(self, message: MQMessage):
-        # await self._port.acknowledge_message_negatively(message) # FIXME: don't do nak() for the messages
+    async def mark_request_as_failed(self):
         await self._port.update_subscription_queue_status(
             self._subscription_name, FillQueueStatus.failed
         )

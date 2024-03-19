@@ -8,6 +8,10 @@ from shared.models import Message, MQMessage
 
 
 class DispatcherService:
+    dispatcher_queue = "incoming"
+    dispatcher_failures_queue = "dispatcher-failures"
+    max_prefill_attempts = 3
+
     def __init__(self, port: DispatcherPort):
         self._port = port
         self.ack_manager = MessageAckManager()
@@ -16,7 +20,9 @@ class DispatcherService:
 
     async def dispatch_events(self):
         self._logger.info("Storing event in consumer queues")
-        await self._port.subscribe_to_queue("incoming", "dispatcher-service")
+        await self._port.subscribe_to_queue(self.dispatcher_queue, "dispatcher-service")
+        await self.prepare_dispatcher_failures_queue()
+
         while True:
             self._logger.info("Waiting for the event...")
             message = await self._port.wait_for_event()
@@ -25,23 +31,39 @@ class DispatcherService:
             )
 
     async def handle_message(self, message: MQMessage):
-        try:
-            self._logger.info("Received message with content: %s", message.data)
-            validated_msg = Message.model_validate(message.data)
+        self._logger.info("Received message with content: %s", message.data)
+        while True:
+            try:
+                validated_msg = Message.model_validate(message.data)
 
-            subscriptions = await self._port.get_realm_topic_subscriptions(
-                f"{validated_msg.realm}:{validated_msg.topic}"
-            )
+                if message.num_delivered > self.max_prefill_attempts:
+                    await self.add_event_to_dispatcher_failures(validated_msg, message)
+                    return
 
-            for sub in subscriptions:
-                self._logger.info("Sending message to '%s'", sub)
-                await self._port.send_message_to_subscription(sub, validated_msg)
+                subscriptions = await self._port.get_realm_topic_subscriptions(
+                    f"{validated_msg.realm}:{validated_msg.topic}"
+                )
 
-        except Exception as exc:
-            self._logger.error("Failed to dispatch the event: %s", exc)
+                for sub in subscriptions:
+                    self._logger.info("Sending message to '%s'", sub)
+                    await self._port.send_message_to_subscription(sub, validated_msg)
 
-            # TODO: handle failed events
-            await self._port.acknowledge_message_negatively(message)
+            except Exception as exc:
+                self._logger.error("Failed to dispatch the event: %s", exc)
+                message.num_delivered += 1
+            else:
+                await self._port.acknowledge_message(message)
+                return
 
-        else:
-            await self._port.acknowledge_message(message)
+    async def prepare_dispatcher_failures_queue(self):
+        await self._port.create_stream(self.dispatcher_failures_queue)
+        await self._port.create_consumer(self.dispatcher_failures_queue)
+
+    async def add_event_to_dispatcher_failures(
+        self, validated_msg: Message, message: MQMessage
+    ):
+        self._logger.info("Adding event to the dispatcher failures queue")
+        await self._port.add_event_to_dispatcher_failures(
+            self.dispatcher_failures_queue, validated_msg
+        )
+        await self._port.acknowledge_message(message)
