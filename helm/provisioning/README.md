@@ -28,7 +28,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.ROOT_PATH | string | `"/univention/provisioning-api"` |  |
 | api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| api.image.registry | string | `""` |  |
+| api.image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | api.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"0.14.0"` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
@@ -44,7 +44,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.config.UDM_PORT | int | `80` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| dispatcher.image.registry | string | `""` |  |
+| dispatcher.image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | dispatcher.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"0.14.0"` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
@@ -123,7 +123,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `80` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| prefill.image.registry | string | `""` |  |
+| prefill.image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | prefill.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.14.0"` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
