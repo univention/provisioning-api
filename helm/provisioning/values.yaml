@@ -5,7 +5,7 @@
 # The global properties are used to configure multiple charts at once.
 global:
   # -- Container registry address.
-  imageRegistry: ""
+  imageRegistry: "gitregistry.knut.univention.de"
 
   # -- Credentials to fetch images from private registry.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
