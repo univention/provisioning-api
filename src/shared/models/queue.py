@@ -8,6 +8,8 @@ from typing import Any, ClassVar, Dict, Optional, List, Tuple
 
 from pydantic import BaseModel, Field, field_serializer
 
+PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"
+
 
 class PublisherName(str, Enum):
     udm_listener = "udm-listener"

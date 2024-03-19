@@ -86,12 +86,13 @@ class SubscriptionService:
         self, realms_topics: List[str], name: str
     ):
         for realm_topic in realms_topics:
-            await self.update_subscription_names(realm_topic, name)
-
-    async def update_subscription_names(self, key: str, value: str) -> None:
-        subs = await self._port.get_list_value(key, Bucket.subscriptions)
-        subs.append(value)
-        await self._port.put_value(key, subs, Bucket.subscriptions)
+            subs = await self._port.get_list_value(
+                "realm:topic." + realm_topic, Bucket.subscriptions
+            )
+            subs.append(name)
+            await self._port.put_value(
+                "realm:topic." + realm_topic, subs, Bucket.subscriptions
+            )
 
     async def get_subscription(self, name: str) -> Subscription:
         """
@@ -141,22 +142,17 @@ class SubscriptionService:
         for realm_topic in sub_info.realms_topics:
             await self.delete_sub_from_realm_topic(realm_topic, name)
 
-        # FIXME: who is responsible for deleting subscription's credentials from the store?
         await self._port.delete_kv_pair(name, Bucket.credentials)
         await self.delete_sub_info(name)
         await self._port.delete_stream(name)
         await self._port.delete_consumer(name)
 
     async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
-        await self.delete_subscription_from_values(realm_topic_str, name)
+        self.logger.debug("Deleting subscription %s from %s", name, realm_topic_str)
 
-    async def delete_sub_info(self, name: str):
-        await self._port.delete_kv_pair(name, Bucket.subscriptions)
-
-    async def delete_subscription_from_values(self, key: str, name: str):
-        self.logger.debug("Deleting subscription %s from %s", name, key)
-
-        subs = await self._port.get_list_value(key, Bucket.subscriptions)
+        subs = await self._port.get_list_value(
+            "realm:topic." + realm_topic_str, Bucket.subscriptions
+        )
         if not subs:
             raise ValueError("There are no subscriptions")
 
@@ -164,12 +160,14 @@ class SubscriptionService:
             raise ValueError("The subscription with the given name does not exist")
 
         subs.remove(name)
-        await self._port.put_value(key, subs, Bucket.subscriptions)
+        await self._port.put_value(
+            "realm:topic." + realm_topic_str, subs, Bucket.subscriptions
+        )
 
         self.logger.info("Subscription was deleted")
 
-    async def get_realm_topic_subscriptions(self, realm_topic: str) -> List[str]:
-        return await self._port.get_list_value(realm_topic, Bucket.subscriptions)
+    async def delete_sub_info(self, name: str):
+        await self._port.delete_kv_pair(name, Bucket.subscriptions)
 
     def handle_authentication_error(self, message: str):
         raise HTTPException(

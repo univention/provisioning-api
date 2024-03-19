@@ -12,6 +12,7 @@ from shared.models import (
     MQMessage,
     PublisherName,
 )
+from shared.models.queue import PREFILL_SUBJECT_TEMPLATE
 
 
 def match_topic(sub_topic: str, module_name: str) -> bool:
@@ -47,7 +48,7 @@ class UDMPreFill(PreFillService):
                 self._logger.info("Received request with content: %s", validated_msg)
                 self._subscription_name = validated_msg.subscription_name
 
-                await self._port.create_prefill_stream(self._subscription_name)
+                await self.create_prefill_stream(self._subscription_name)
 
                 for realm, topic in validated_msg.realms_topics:
                     self._realm = realm
@@ -127,7 +128,9 @@ class UDMPreFill(PreFillService):
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
-        await self._port.create_prefill_message(self._subscription_name, message)
+        await self._port.create_prefill_message(
+            PREFILL_SUBJECT_TEMPLATE.format(subject=self._subscription_name), message
+        )
 
     async def add_request_to_prefill_failures(
         self, validated_msg: PrefillMessage, message: MQMessage
@@ -159,3 +162,9 @@ class UDMPreFill(PreFillService):
     async def prepare_prefill_failures_queue(self):
         await self._port.create_stream(self.prefill_failures_queue)
         await self._port.create_consumer(self.prefill_failures_queue)
+
+    async def create_prefill_stream(self, subscription_name: str):
+        # delete the previously created stream if it exists
+        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
+        await self._port.delete_stream(prefill_subject)
+        await self._port.create_stream(prefill_subject)

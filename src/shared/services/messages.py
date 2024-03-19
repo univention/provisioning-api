@@ -18,27 +18,13 @@ from shared.models import (
     NewSubscription,
     PrefillMessage,
 )
-
-PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"
+from ..models.queue import PREFILL_SUBJECT_TEMPLATE
 
 
 class MessageService:
     def __init__(self, port: Port):
         self._port = port
         self.logger = logging.getLogger(__name__)
-
-    async def add_prefill_message(self, subscription_name: str, message: Message):
-        """Add the given message to the subscription's prefill queue."""
-        await self._port.add_message(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name), message
-        )
-
-    async def delete_prefill_messages(self, subscription_name: str):
-        """Delete the pre-fill message from the subscription's queue."""
-
-        await self._port.delete_prefill_messages(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
-        )
 
     async def get_next_message(
         self,
@@ -145,15 +131,6 @@ class MessageService:
             stream_name = subscription_name
 
         await self._port.delete_message(stream_name, report.message_seq_num)
-
-    async def create_prefill_stream(self, subscription_name: str):
-        # delete the previously created stream if it exists
-        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
-        await self._port.delete_stream(prefill_subject)
-        await self._port.create_stream(prefill_subject)
-
-    async def add_message(self, name: str, msg: Message):
-        await self._port.add_message(name, msg)
 
     async def add_live_event(self, event: Message):
         # TODO: define the name "incoming" globally or handle it differently alltogether
