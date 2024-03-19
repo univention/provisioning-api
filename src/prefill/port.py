@@ -64,11 +64,8 @@ class PrefillPort:
             name, queue_status
         )
 
-    async def create_prefill_message(self, name: str, message: Message):
-        await self._internal_api_adapter.create_prefill_message(name, message)
-
-    async def create_prefill_stream(self, subscription_name: str):
-        await self._internal_api_adapter.create_prefill_stream(subscription_name)
+    async def create_prefill_message(self, subject: str, message: Message):
+        await self.mq_adapter.add_message(subject, message)
 
     async def add_request_to_prefill_failures(
         self, queue_name: str, message: PrefillMessage
@@ -77,6 +74,9 @@ class PrefillPort:
 
     async def create_stream(self, subject: str):
         await self.mq_adapter.create_stream(subject)
+
+    async def delete_stream(self, stream_name: str):
+        await self.mq_adapter.delete_stream(stream_name)
 
     async def create_consumer(self, subject: str):
         await self.mq_adapter.create_consumer(subject)

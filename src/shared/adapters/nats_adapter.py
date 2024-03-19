@@ -4,7 +4,7 @@
 import asyncio
 import json
 import logging
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
@@ -91,6 +91,18 @@ class NatsKVAdapter(BaseKVStoreAdapter):
             return await kv_store.keys()
         except NoKeysError:
             return []
+
+    async def watch_for_changes(self, subscriptions: Dict[str, list], bucket: Bucket):
+        kv_store = await self._js.key_value(bucket.value)
+        watcher = await kv_store.watch("realm:topic.*", include_history=True)
+
+        while True:
+            async for update in watcher:
+                if update:
+                    subscriptions[update.key.split(".")[1]] = json.loads(
+                        update.value.decode("utf-8")
+                    )
+                    self.logger.info("Subscriptions were updated: %s", subscriptions)
 
 
 class NatsMQAdapter(BaseMQAdapter):
