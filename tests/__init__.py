@@ -31,7 +31,7 @@ ENV_DEFAULTS = {
 
 def set_test_env_vars():
     for var, default in ENV_DEFAULTS.items():
-        if var in os.environ:
+        if var.lower() in (key.lower() for key in os.environ):
             continue
         os.environ[var] = default
         print(f"{var} was not explicitly set, setting the following default: {default}")
