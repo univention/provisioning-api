@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.2...v0.20.3) (2024-03-20)
+
+
+### Bug Fixes
+
+* add missing values to tests/base.conf ([76453bb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/76453bbe919cf80612caa6d10f561889dfd4b013))
+
 ## [0.20.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.1...v0.20.2) (2024-03-15)
 
 
