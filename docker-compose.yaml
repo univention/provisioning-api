@@ -21,8 +21,6 @@ services:
       UDM_HOST: "udm-rest-api"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "provisioning"
-      DISPATCHER_USERNAME: "dispatcher"
-      DISPATCHER_PASSWORD: "dispatcherpass"
       PREFILL_USERNAME: "prefill"
       PREFILL_PASSWORD: "prefillpass"
       EVENTS_USERNAME_UDM: "udm"
@@ -62,8 +60,6 @@ services:
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
       INTERNAL_API_HOST: "events-and-consumer-api"
-      DISPATCHER_USERNAME: "dispatcher"
-      DISPATCHER_PASSWORD: "dispatcherpass"
     depends_on:
       - "nats"
       - "events-and-consumer-api"

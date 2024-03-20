@@ -12,11 +12,5 @@ class DispatcherSettings(BaseSettings):
     # Maximum number of reconnect attempts to the NATS server
     max_reconnect_attempts: int = 5
 
-    # FIXME: should we get rid of these fields?
-    # Dispatcher: username
-    dispatcher_username: str
-    # Dispatcher: password
-    dispatcher_password: str
-
 
 dispatcher_settings = DispatcherSettings()
