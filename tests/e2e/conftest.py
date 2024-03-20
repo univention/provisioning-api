@@ -10,6 +10,72 @@ from tests.conftest import REALMS_TOPICS
 
 import shared.client  # noqa: E402
 
+from typing import AsyncGenerator, Any, NamedTuple
+
+
+class E2ETestSettings(NamedTuple):
+    provisioning_api_base_url: str
+    provisioning_admin_username: str
+    provisioning_admin_password: str
+
+    provisioning_events_username: str
+    provisioning_events_password: str
+
+    ldap_server_uri: str
+    ldap_bind_dn: str
+    ldap_bind_password: str
+
+    udm_rest_api_base_url: str
+    udm_rest_api_username: str
+    udm_rest_api_password: str
+
+
+def get_default_settings() -> E2ETestSettings:
+    return E2ETestSettings(
+        provisioning_api_base_url="http://localhost:7777",
+        provisioning_admin_username="admin",
+        provisioning_admin_password="provisioning",
+        provisioning_events_username="udm",
+        provisioning_events_password="udmpass",
+        ldap_server_uri="ldap://localhost:3890",
+        ldap_bind_dn="cn=admin,dc=univention-organization,dc=intranet",
+        ldap_bind_password="univention",
+        udm_rest_api_base_url="http://localhost:8000/univention/udm/",
+        udm_rest_api_username="cn=admin",
+        udm_rest_api_password="univention",
+    )
+
+
+def get_pipeline_settings() -> E2ETestSettings:
+    return get_default_settings()._replace(
+        provisioning_api_base_url="http://events-and-consumer-api:7777/",
+        ldap_server_uri="ldap://ldap-server:389",
+        udm_rest_api_base_url="http://udm-rest-api:9979/udm/",
+    )
+
+
+def get_gaia_settings() -> E2ETestSettings:
+    return get_default_settings()._replace(
+        provisioning_admin_username="admin",
+        provisioning_admin_password="9f42908c164a41d2771b4451397f68ae3c13a220",
+        provisioning_events_username="udmproducer",
+        provisioning_events_password="05c19490698eb7294776565f70e88abcca183499",
+        ldap_bind_dn="cn=admin,dc=swp-ldap,dc=internal",
+        ldap_bind_password="e958ec347ebf4cd1959f4e8536dcedfc3fcea023",
+        # Test if it also works with external url instead of port-forward
+        udm_rest_api_base_url="http://localhost:9979/udm/",
+        udm_rest_api_username="cn=admin",
+        udm_rest_api_password="e958ec347ebf4cd1959f4e8536dcedfc3fcea023",
+    )
+
+
+TEST_SETTINGS = {
+    "local": get_default_settings,
+    "pipeline": get_pipeline_settings,
+    "gaia": get_gaia_settings,
+}
+
+
 SUBSCRIBER_NAME = str(uuid.uuid4())
 SUBSCRIBER_PASSWORD = "subscriberpassword"
 
@@ -17,59 +83,28 @@ SUBSCRIBER_PASSWORD = "subscriberpassword"
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
-        "--provisioning-api-base-url",
-        default="http://localhost:7777/",
-        help="Base URL of the UDM REST API",
+        "--environment",
+        default="local",
+        help=(
+            "set the environment you are running the tests in."
+            "accepted values are: 'local', 'dev-env', 'pipeline' and 'gaia'"
+        ),
     )
-    parser.addoption(
-        "--provisioning-admin-username",
-        default="admin",
-        help="UDM admin login password",
-    )
-    parser.addoption(
-        "--provisioning-admin-password",
-        default="provisioning",
-        help="UDM admin login password",
-    )
-    parser.addoption(
-        "--udm-rest-api-base-url",
-        default="http://localhost:9979/udm/",
-        help="Base URL of the UDM REST API",
-    )
-    parser.addoption(
-        "--udm-admin-username", default="cn=admin", help="UDM admin login password"
-    )
-    parser.addoption(
-        "--udm-admin-password", default="univention", help="UDM admin login password"
-    )
-    parser.addoption("--ldap-server-uri", default="ldap://localhost:389")
-    parser.addoption(
-        "--ldap-host-dn", default="cn=admin,dc=univention-organization,dc=intranet"
-    )
-    parser.addoption("--ldap-password", default="univention")
 
 
 @pytest.fixture(scope="session")
-def provisioning_api_base_url(pytestconfig) -> str:
-    return pytestconfig.option.provisioning_api_base_url.rstrip("/")
-
-
-@pytest.fixture(scope="session")
-def udm_admin_username(pytestconfig) -> str:
-    return pytestconfig.option.udm_admin_username
-
-
-@pytest.fixture(scope="session")
-def udm_admin_password(pytestconfig) -> str:
-    return pytestconfig.option.udm_admin_password
+def test_settings(pytestconfig) -> E2ETestSettings:
+    test_settings = TEST_SETTINGS.get(pytestconfig.option.environment)
+    assert test_settings, "invalid value for --environment"
+    return test_settings()
 
 
 @pytest.fixture
-def udm(pytestconfig) -> UDM:
+def udm(test_settings: E2ETestSettings) -> UDM:
     udm = UDM(
-        pytestconfig.option.udm_rest_api_base_url.rstrip("/") + "/",
-        pytestconfig.option.udm_admin_username,
-        pytestconfig.option.udm_admin_password,
+        test_settings.udm_rest_api_base_url,
+        test_settings.udm_rest_api_username,
+        test_settings.udm_rest_api_password,
     )
     # test the connection
     udm.get_ldap_base()
@@ -77,32 +112,36 @@ def udm(pytestconfig) -> UDM:
 
 
 @pytest.fixture
-def settings(provisioning_api_base_url) -> shared.client.Settings:
+def client_settings(test_settings: E2ETestSettings) -> shared.client.Settings:
     return shared.client.Settings(
-        provisioning_api_base_url=provisioning_api_base_url,
+        provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=SUBSCRIBER_NAME,
         provisioning_api_password=SUBSCRIBER_PASSWORD,
     )
 
 
 @pytest.fixture
-def admin_settings(pytestconfig, provisioning_api_base_url) -> shared.client.Settings:
+def admin_client_settings(test_settings: E2ETestSettings) -> shared.client.Settings:
     return shared.client.Settings(
-        provisioning_api_base_url=provisioning_api_base_url,
-        provisioning_api_username=pytestconfig.option.provisioning_admin_username,
-        provisioning_api_password=pytestconfig.option.provisioning_admin_password,
+        provisioning_api_base_url=test_settings.provisioning_api_base_url,
+        provisioning_api_username=test_settings.provisioning_admin_username,
+        provisioning_api_password=test_settings.provisioning_admin_password,
     )
 
 
 @pytest.fixture
-async def provisioning_client(settings) -> shared.client.AsyncClient:
-    async with shared.client.AsyncClient(settings) as client:
+async def provisioning_client(
+    client_settings,
+) -> AsyncGenerator[shared.client.AsyncClient, Any]:
+    async with shared.client.AsyncClient(client_settings) as client:
         yield client
 
 
 @pytest.fixture
-async def provisioning_admin_client(admin_settings) -> shared.client.AsyncClient:
-    async with shared.client.AsyncClient(admin_settings) as client:
+async def provisioning_admin_client(
+    admin_client_settings,
+) -> AsyncGenerator[shared.client.AsyncClient, Any]:
+    async with shared.client.AsyncClient(admin_client_settings) as client:
         yield client
 
 
@@ -110,7 +149,7 @@ async def provisioning_admin_client(admin_settings) -> shared.client.AsyncClient
 async def simple_subscription(
     provisioning_admin_client: shared.client.AsyncClient,
     provisioning_client: shared.client.AsyncClient,
-) -> str:
+) -> AsyncGenerator[str, Any]:
     await provisioning_admin_client.create_subscription(
         name=SUBSCRIBER_NAME,
         realms_topics=REALMS_TOPICS,

@@ -11,10 +11,10 @@ from shared.models import PublisherName
 from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 from univention.admin.rest.client import UDM
 from tests.conftest import REALM, TOPIC
-from udm_messaging.config import udm_producer_settings
+from tests.e2e.conftest import E2ETestSettings
 
 
-def create_message_via_events_api(provisioning_base_url: str):
+def create_message_via_events_api(test_settings: E2ETestSettings):
     body = {str(uuid.uuid1()): str(uuid.uuid1())}
     payload = {
         "publisher_name": PublisherName.consumer_client_test,
@@ -24,11 +24,11 @@ def create_message_via_events_api(provisioning_base_url: str):
         "body": body,
     }
     response = requests.post(
-        f"{provisioning_base_url}/internal/v1/events",
+        f"{test_settings.provisioning_api_base_url}/internal/v1/events",
         json=payload,
         auth=(
-            udm_producer_settings.events_username_udm,
-            udm_producer_settings.events_password_udm,
+            test_settings.provisioning_events_username,
+            test_settings.provisioning_events_password,
         ),
     )
 

@@ -19,9 +19,9 @@ async def test_no_callback_function_provided(
 async def test_get_one_message(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_api_base_url,
+    test_settings,
 ):
-    create_message_via_events_api(provisioning_api_base_url)
+    create_message_via_events_api(test_settings)
 
     result = []
 
@@ -38,9 +38,9 @@ async def test_get_one_message(
 async def test_timeout_while_waiting_for_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_api_base_url,
+    test_settings,
 ):
-    create_message_via_events_api(provisioning_api_base_url)
+    create_message_via_events_api(test_settings)
 
     response = await provisioning_client.get_subscription_messages(
         simple_subscription,
@@ -53,11 +53,11 @@ async def test_timeout_while_waiting_for_messages(
 async def test_get_multiple_messages(
     provisioning_client: shared.client.AsyncClient,
     simple_subscription: str,
-    provisioning_api_base_url,
+    test_settings,
 ):
-    create_message_via_events_api(provisioning_api_base_url)
-    create_message_via_events_api(provisioning_api_base_url)
-    create_message_via_events_api(provisioning_api_base_url)
+    create_message_via_events_api(test_settings)
+    create_message_via_events_api(test_settings)
+    create_message_via_events_api(test_settings)
 
     result = []
 
