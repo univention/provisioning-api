@@ -6,7 +6,7 @@ from typing import Dict, List
 
 from shared.utils.message_ack_manager import MessageAckManager
 from src.dispatcher.port import DispatcherPort
-from shared.models import MQMessage, Message, Bucket
+from shared.models import MQMessage, Message
 
 
 class DispatcherService:
@@ -22,9 +22,7 @@ class DispatcherService:
     async def dispatch_events(self):
         self._logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue(self.DISPATCHER_QUEUE, "dispatcher-service")
-        asyncio.create_task(
-            self._port.watch_for_changes(self._subscriptions, Bucket.subscriptions)
-        )
+        asyncio.create_task(self._port.watch_for_changes(self._subscriptions))
 
         while True:
             self._logger.info("Waiting for the event...")

@@ -22,22 +22,6 @@ def message_service() -> MessageService:
 class TestMessageService:
     prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=SUBSCRIPTION_NAME)
 
-    async def test_add_prefill_message(self, message_service: MessageService):
-        result = await message_service.add_prefill_message(SUBSCRIPTION_NAME, MESSAGE)
-
-        message_service._port.add_message.assert_called_once_with(
-            self.prefill_subject, MESSAGE
-        )
-        assert result is None
-
-    async def test_delete_prefill_messages(self, message_service: MessageService):
-        result = await message_service.delete_prefill_messages(SUBSCRIPTION_NAME)
-
-        message_service._port.delete_prefill_messages.assert_called_once_with(
-            self.prefill_subject
-        )
-        assert result is None
-
     async def test_get_next_message(self, message_service: MessageService, sub_service):
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.running
@@ -158,14 +142,6 @@ class TestMessageService:
 
         message_service._port.delete_message.assert_called_once_with(
             SUBSCRIPTION_NAME, 1
-        )
-        assert result is None
-
-    async def test_create_prefill_stream(self, message_service: MessageService):
-        result = await message_service.create_prefill_stream(SUBSCRIPTION_NAME)
-
-        message_service._port.create_stream.assert_called_once_with(
-            self.prefill_subject
         )
         assert result is None
 

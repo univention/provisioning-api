@@ -88,7 +88,7 @@ class TestSubscriptionService:
             SUBSCRIPTION_NAME, Bucket.credentials
         )
         sub_service._port.get_list_value.assert_called_once_with(
-            "udm:groups/group", Bucket.subscriptions
+            "realm:topic.udm:groups/group", Bucket.subscriptions
         )
         assert sub_service._port.put_value.call_count == 3
 
@@ -187,10 +187,10 @@ class TestSubscriptionService:
             SUBSCRIPTION_NAME, Bucket.subscriptions
         )
         sub_service._port.get_list_value.assert_called_once_with(
-            REALMS_TOPICS_STR, Bucket.subscriptions
+            "realm:topic." + REALMS_TOPICS_STR, Bucket.subscriptions
         )
         sub_service._port.put_value.assert_called_once_with(
-            REALMS_TOPICS_STR, [], Bucket.subscriptions
+            "realm:topic." + REALMS_TOPICS_STR, [], Bucket.subscriptions
         )
         sub_service._port.delete_kv_pair.assert_has_calls(
             [

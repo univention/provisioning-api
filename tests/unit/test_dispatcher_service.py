@@ -8,10 +8,9 @@ import pytest
 from dispatcher.service.dispatcher import DispatcherService
 from tests.conftest import (
     SUBSCRIPTION_INFO,
-    REALMS_TOPICS_STR,
     MESSAGE,
     MQMESSAGE,
-    SUBSCRIPTION_NAME,
+    SUBSCRIPTIONS,
 )
 
 
@@ -23,9 +22,7 @@ def dispatcher_service() -> DispatcherService:
 @pytest.mark.anyio
 class TestDispatcherService:
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
-        dispatcher_service._port.get_realm_topic_subscriptions = AsyncMock(
-            return_value=[SUBSCRIPTION_NAME]
-        )
+        dispatcher_service._subscriptions = SUBSCRIPTIONS
         dispatcher_service._port.wait_for_event = AsyncMock(
             side_effect=[MQMESSAGE, Exception("Stop waiting for the new event")]
         )
@@ -36,10 +33,10 @@ class TestDispatcherService:
         dispatcher_service._port.subscribe_to_queue.assert_called_once_with(
             "incoming", "dispatcher-service"
         )
-        dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
-        dispatcher_service._port.get_realm_topic_subscriptions.assert_called_once_with(
-            REALMS_TOPICS_STR
+        dispatcher_service._port.watch_for_changes.assert_called_once_with(
+            SUBSCRIPTIONS
         )
+        dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
         dispatcher_service._port.send_message_to_subscription.assert_called_once_with(
             SUBSCRIPTION_INFO["name"], MESSAGE
         )
