@@ -134,7 +134,7 @@ and in case you can't or don't want to install the test dependencies locally,
 `docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --environment pipeline`
 
 
-#### using the Tilt dev-env
+#### Using the Tilt dev-env
 
 
 Start the necessary services via tilt:
@@ -145,7 +145,7 @@ Limiting the tilt-resources instead of plainly running `tilt up` will save time 
 
 The provisioning-api and ldap-server are not accessible from the outside.
 We can work around that by starting a kubernetes `port-forward`:
-`kubectl port-forward provisioning-api-{pod-hash} 7777`
+`kubectl port-forward deploy/provisioning-api 7777`
 `kubectl port-forward ldap-server-0 3890:389`
 
 The unit- and integration-tests are configured via ENV values.
