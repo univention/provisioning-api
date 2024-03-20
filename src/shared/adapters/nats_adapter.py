@@ -100,12 +100,12 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         while True:
             async for update in watcher:
                 if update:
+                    realm_topic = update.key.split(".")[1]
                     if update.operation == KV_DEL:
-                        del subscriptions[update.key.split(".")[1]]
+                        subscriptions.pop(realm_topic, None)
                     else:
-                        subscriptions[update.key.split(".")[1]] = json.loads(
-                            update.value.decode("utf-8")
-                        )
+                        updated_subscriptions = json.loads(update.value.decode("utf-8"))
+                        subscriptions[realm_topic] = updated_subscriptions
                     self.logger.info("Subscriptions were updated: %s", subscriptions)
 
 
