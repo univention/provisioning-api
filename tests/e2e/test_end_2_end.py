@@ -37,18 +37,14 @@ def ldap_connection(pytestconfig):
         pytestconfig.option.ldap_host_dn,
         pytestconfig.option.ldap_password,
     )
-    connection.bind()
+    assert connection.bind()
     return connection
+    # connection.unbind()
 
 
-async def test_workflow(
-    provisioning_api_base_url, ldap_connection, admin_settings: Settings
-):
+@pytest.fixture(scope="function")
+def subscription_name(provisioning_api_base_url, admin_settings: Settings):
     name = str(uuid.uuid4())
-    # TODO: randomize the group name
-    dn = "cn=test_user,cn=groups,dc=univention-organization,dc=intranet"
-    new_description = "New description"
-    changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
 
     response = requests.post(
         f"{provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
@@ -63,9 +59,23 @@ async def test_workflow(
             admin_settings.provisioning_api_password,
         ),
     )
-    assert response.status_code == 201
+    assert response.status_code == 201, "creating client subscription failed"
 
-    # Test creating object
+    yield name
+
+    response = requests.delete(
+        f"{provisioning_api_base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+        auth=(
+            admin_settings.provisioning_api_username,
+            admin_settings.provisioning_api_password,
+        ),
+    )
+    assert response.status_code == 200, "deleting client subscription failed"
+
+
+@pytest.fixture(scope="function")
+def ldap_user(ldap_connection, subscription_name, request):
+    dn = "cn=test_user,cn=groups,dc=swp-ldap,dc=internal"
     result = ldap_connection.add(
         dn=dn,
         object_class=("posixGroup", "univentionObject", "univentionGroup"),
@@ -75,9 +85,20 @@ async def test_workflow(
         result is True
     ), "No ldap change triggered, possibly due to test data colision"
 
+    def delete_user():
+        ldap_connection.delete(dn)
+
+    request.addfinalizer(delete_user)
+    return ldap_connection, dn
+
+
+async def test_workflow(provisioning_api_base_url, ldap_user, subscription_name):
+    ldap_connection, dn = ldap_user
+
+    # Test object was created
     response = requests.get(
-        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, PASSWORD),
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?count=5&pop=true",
+        auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -92,11 +113,13 @@ async def test_workflow(
     assert message["body"]["new"]["dn"] == dn
 
     # Test modifying object
+    new_description = "New description"
+    changes = {"description": [(ldap3.MODIFY_REPLACE, [new_description])]}
     ldap_connection.modify(dn, changes)
 
     response = requests.get(
-        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, PASSWORD),
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?count=5&pop=true",
+        auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
 
@@ -114,8 +137,8 @@ async def test_workflow(
     ldap_connection.delete(dn)
 
     response = requests.get(
-        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=5&pop=true",
-        auth=(name, PASSWORD),
+        f"{provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?count=5&pop=true",
+        auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
 
