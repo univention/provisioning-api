@@ -20,8 +20,6 @@ ENV_DEFAULTS = {
     "provisioning_api_base_url": "http://localhost:7777",
     "provisioning_api_username": "foo",
     "provisioning_api_password": "bar",
-    "dispatcher_username": "dispatcher",
-    "dispatcher_password": "dispatcherpass",
     "prefill_username": "prefill",
     "prefill_password": "prefillpass",
     "events_username_udm": "udm",

@@ -20,12 +20,6 @@ class AppSettings(BaseSettings):
     # Admin Nats password
     admin_nats_password: str
 
-    # FIXME: should we get rid of these fields?
-    # Dispatcher: username
-    dispatcher_username: str
-    # Dispatcher: password
-    dispatcher_password: str
-
     # Prefill: username
     prefill_username: str
     # Prefill: password

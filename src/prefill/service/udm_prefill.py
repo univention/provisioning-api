@@ -172,7 +172,7 @@ class UDMPreFill(PreFillService):
         await self._port.create_consumer(self.PREFILL_FAILURES_QUEUE)
 
     async def create_prefill_stream(self, subscription_name: str):
-        # delete the previously created stream if it exists
+        # first, delete the previously created stream if it exists
         prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
         await self._port.delete_stream(prefill_subject)
         await self._port.create_stream(prefill_subject)
