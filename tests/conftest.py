@@ -185,6 +185,8 @@ kv_password.value = CONSUMER_HASHED_PASSWORD.encode()
 
 CREDENTIALS = HTTPBasicCredentials(username="dev-user", password="dev-password")
 
+SUBSCRIPTIONS = {REALMS_TOPICS_STR: [SUBSCRIPTION_NAME]}
+
 
 class FakeMessageQueue(AsyncMock):
     @classmethod
@@ -205,7 +207,7 @@ class FakeKvStore(AsyncMock):
                 "abc:def": kv_subs,
                 "foo:bar": kv_subs,
                 SUBSCRIPTION_NAME: kv_sub_info,
-                "udm:groups/group": kv_subs,
+                "realm:topic.udm:groups/group": kv_subs,
             }
         if values.get(key):
             return values.get(key)

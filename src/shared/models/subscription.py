@@ -6,6 +6,8 @@ from typing import List
 
 from pydantic import Field, BaseModel
 
+REALM_TOPIC_PREFIX = "realm:topic"
+
 
 class FillQueueStatus(str, enum.Enum):
     # Pre-filling the queue was not yet started.

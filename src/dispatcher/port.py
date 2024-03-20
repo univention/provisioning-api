@@ -67,5 +67,5 @@ class DispatcherPort:
     async def add_event_to_dispatcher_failures(self, queue_name: str, message: Message):
         await self.mq_adapter.add_message(queue_name, message)
 
-    async def watch_for_changes(self, subscriptions: Dict[str, list], bucket: Bucket):
-        await self.kv_adapter.watch_for_changes(subscriptions, bucket)
+    async def watch_for_changes(self, subscriptions: Dict[str, list]):
+        await self.kv_adapter.watch_for_changes(subscriptions)

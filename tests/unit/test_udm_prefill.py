@@ -66,7 +66,9 @@ class TestUDMPreFill:
         udm_prefill._port.subscribe_to_queue.assert_called_once_with(
             "prefill", "prefill-service"
         )
-        udm_prefill._port.create_stream.assert_called_once_with("prefill-failures")
+        udm_prefill._port.create_stream.assert_has_calls(
+            [call("prefill-failures"), call(f"prefill_{SUBSCRIPTION_NAME}")]
+        )
         udm_prefill._port.create_consumer.assert_called_once_with("prefill-failures")
         udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_called_once_with()
@@ -74,7 +76,7 @@ class TestUDMPreFill:
         udm_prefill._port.get_object.assert_called_once_with(self.url)
         udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
         udm_prefill._port.create_prefill_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, self.msg
+            f"prefill_{SUBSCRIPTION_NAME}", self.msg
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
