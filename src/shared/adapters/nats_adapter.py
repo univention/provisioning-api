@@ -15,12 +15,13 @@ from nats.js.errors import (
     NoKeysError,
     NotFoundError,
 )
+from nats.js.kv import KV_DEL
 
 from shared.adapters.base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from shared.config import settings
 from shared.models import BaseMessage, ProvisioningMessage
 from shared.models.queue import MQMessage
-from shared.models.subscription import Bucket
+from shared.models.subscription import Bucket, REALM_TOPIC_PREFIX
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -92,16 +93,19 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         except NoKeysError:
             return []
 
-    async def watch_for_changes(self, subscriptions: Dict[str, list], bucket: Bucket):
-        kv_store = await self._js.key_value(bucket.value)
-        watcher = await kv_store.watch("realm:topic.*", include_history=True)
+    async def watch_for_changes(self, subscriptions: Dict[str, list]):
+        kv_store = await self._js.key_value(Bucket.subscriptions.value)
+        watcher = await kv_store.watch(f"{REALM_TOPIC_PREFIX}.*", include_history=True)
 
         while True:
             async for update in watcher:
                 if update:
-                    subscriptions[update.key.split(".")[1]] = json.loads(
-                        update.value.decode("utf-8")
-                    )
+                    if update.operation == KV_DEL:
+                        del subscriptions[update.key.split(".")[1]]
+                    else:
+                        subscriptions[update.key.split(".")[1]] = json.loads(
+                            update.value.decode("utf-8")
+                        )
                     self.logger.info("Subscriptions were updated: %s", subscriptions)
 
 

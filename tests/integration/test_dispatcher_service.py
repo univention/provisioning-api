@@ -1,18 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from unittest.mock import AsyncMock, patch, call
+from unittest.mock import AsyncMock, call
 
-import aiohttp
 import pytest
 from nats.aio.msg import Msg
 
 from tests.conftest import (
-    FLAT_MESSAGE,
     SUBSCRIPTION_NAME,
     MSG,
     MockNatsMQAdapter,
     MockNatsKVAdapter,
+    SUBSCRIPTIONS,
+    FLAT_MESSAGE_ENCODED,
 )
 
 from dispatcher.config import DispatcherSettings
@@ -35,33 +35,27 @@ async def dispatcher_mock() -> DispatcherPort:
     port.mq_adapter._message_queue.get = AsyncMock(
         side_effect=[MSG, Exception("Stop waiting for the new event")]
     )
+    port.watch_for_changes = AsyncMock()
     Msg.in_progress = AsyncMock()
     Msg.ack = AsyncMock()
-    async with aiohttp.ClientSession() as session:
-        port._internal_api_adapter._session = session
+
     return port
 
 
 @pytest.mark.anyio
 class TestDispatcher:
-    @patch("src.shared.adapters.internal_api_adapter.aiohttp.ClientSession.get")
-    @patch("src.shared.adapters.internal_api_adapter.aiohttp.ClientSession.post")
     async def test_dispatch_events(
         self,
-        mock_post,
-        mock_get,
         dispatcher_mock: DispatcherPort,
     ):
         """
         This abstract test focuses on checking the interaction between the Dispatcher Service and the Nats,
         specifically verifying the usage of the NATS and jetstream. If the technology changes, the test will fail
         """
-        mock_get.return_value.__aenter__.return_value.json = AsyncMock(
-            return_value=[SUBSCRIPTION_NAME]
-        )
 
         # trigger dispatcher to retrieve event from incoming queue
         service = DispatcherService(dispatcher_mock)
+        service._subscriptions = SUBSCRIPTIONS
 
         try:
             await service.dispatch_events()
@@ -77,12 +71,13 @@ class TestDispatcher:
         )
         # check waiting for the event
         dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
+
         # check getting subscriptions for the realm_topic
-        mock_get.assert_called_once_with(
-            "http://localhost:7777/internal/v1/subscriptions/filter?realm_topic=udm:groups/group"
-        )
+        dispatcher_mock.watch_for_changes.assert_called_once_with(SUBSCRIPTIONS)
+
         # check storing event in the consumer queue
-        mock_post.assert_called_once_with(
-            f"http://localhost:7777/internal/v1/subscriptions/{SUBSCRIPTION_NAME}/messages",
-            json=FLAT_MESSAGE,
+        dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
+            SUBSCRIPTION_NAME,
+            FLAT_MESSAGE_ENCODED,
+            stream=f"stream:{SUBSCRIPTION_NAME}",
         )

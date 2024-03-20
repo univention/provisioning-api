@@ -5,7 +5,7 @@ import logging
 from typing import Dict, List
 
 from src.dispatcher.port import DispatcherPort
-from shared.models import Message, Bucket
+from shared.models import Message
 
 
 class DispatcherService:
@@ -18,9 +18,7 @@ class DispatcherService:
     async def dispatch_events(self):
         self._logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue("incoming", "dispatcher-service")
-        asyncio.create_task(
-            self._port.watch_for_changes(self._subscriptions, Bucket.subscriptions)
-        )
+        asyncio.create_task(self._port.watch_for_changes(self._subscriptions))
 
         while True:
             self._logger.info("Waiting for the event...")

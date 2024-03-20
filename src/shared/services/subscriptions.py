@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 
 from .port import Port
 from shared.models import Subscription, FillQueueStatus, NewSubscription
-from shared.models.subscription import Bucket
+from shared.models.subscription import Bucket, REALM_TOPIC_PREFIX
 
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -86,13 +86,12 @@ class SubscriptionService:
         self, realms_topics: List[str], name: str
     ):
         for realm_topic in realms_topics:
+            realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic}"
             subs = await self._port.get_list_value(
-                "realm:topic." + realm_topic, Bucket.subscriptions
+                realm_topic_key, Bucket.subscriptions
             )
             subs.append(name)
-            await self._port.put_value(
-                "realm:topic." + realm_topic, subs, Bucket.subscriptions
-            )
+            await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
 
     async def get_subscription(self, name: str) -> Subscription:
         """
@@ -149,10 +148,8 @@ class SubscriptionService:
 
     async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
         self.logger.debug("Deleting subscription %s from %s", name, realm_topic_str)
-
-        subs = await self._port.get_list_value(
-            "realm:topic." + realm_topic_str, Bucket.subscriptions
-        )
+        realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"
+        subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
         if not subs:
             raise ValueError("There are no subscriptions")
 
@@ -160,9 +157,7 @@ class SubscriptionService:
             raise ValueError("The subscription with the given name does not exist")
 
         subs.remove(name)
-        await self._port.put_value(
-            "realm:topic." + realm_topic_str, subs, Bucket.subscriptions
-        )
+        await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
 
         self.logger.info("Subscription was deleted")
 

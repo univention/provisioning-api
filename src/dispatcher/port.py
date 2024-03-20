@@ -61,5 +61,5 @@ class DispatcherPort:
     async def acknowledge_message_in_progress(self, message: MQMessage):
         await self.mq_adapter.acknowledge_message_in_progress(message)
 
-    async def watch_for_changes(self, subscriptions: Dict[str, list], bucket: Bucket):
-        await self.kv_adapter.watch_for_changes(subscriptions, bucket)
+    async def watch_for_changes(self, subscriptions: Dict[str, list]):
+        await self.kv_adapter.watch_for_changes(subscriptions)
