@@ -23,8 +23,8 @@ def match_topic(sub_topic: str, module_name: str) -> bool:
 
 
 class UDMPreFill(PreFillService):
-    prefill_queue = "prefill"
-    prefill_failures_queue = "prefill-failures"
+    PREFILL_QUEUE = "prefill"
+    PREFILL_FAILURES_QUEUE = "prefill-failures"
 
     def __init__(self, port: PrefillPort):
         super().__init__()
@@ -35,7 +35,7 @@ class UDMPreFill(PreFillService):
 
     async def handle_requests_to_prefill(self):
         self._logger.info("Handling the requests to prefill")
-        await self._port.subscribe_to_queue(self.prefill_queue, "prefill-service")
+        await self._port.subscribe_to_queue(self.PREFILL_QUEUE, "prefill-service")
         await self.prepare_prefill_failures_queue()
 
         while True:
@@ -51,7 +51,7 @@ class UDMPreFill(PreFillService):
             try:
                 validated_msg = PrefillMessage.model_validate(message.data)
 
-                if message.num_delivered > self.max_prefill_attempts:
+                if message.num_delivered > self.MAX_PREFILL_ATTEMPTS:
                     await self.add_request_to_prefill_failures(validated_msg, message)
                     return
 
@@ -149,7 +149,7 @@ class UDMPreFill(PreFillService):
     ):
         self._logger.info("Adding request to the prefill failures queue")
         await self._port.add_request_to_prefill_failures(
-            self.prefill_failures_queue, validated_msg
+            self.PREFILL_FAILURES_QUEUE, validated_msg
         )
         await self._port.acknowledge_message(message)
 
@@ -165,5 +165,5 @@ class UDMPreFill(PreFillService):
         )
 
     async def prepare_prefill_failures_queue(self):
-        await self._port.create_stream(self.prefill_failures_queue)
-        await self._port.create_consumer(self.prefill_failures_queue)
+        await self._port.create_stream(self.PREFILL_FAILURES_QUEUE)
+        await self._port.create_consumer(self.PREFILL_FAILURES_QUEUE)

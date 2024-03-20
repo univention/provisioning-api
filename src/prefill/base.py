@@ -6,7 +6,7 @@ from typing import Optional
 
 
 class PreFillService(abc.ABC):
-    max_prefill_attempts = 3
+    MAX_PREFILL_ATTEMPTS = 3
 
     def __init__(self):
         self._subscription_name: Optional[str] = None
