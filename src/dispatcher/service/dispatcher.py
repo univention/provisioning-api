@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import asyncio
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from shared.utils.message_ack_manager import MessageAckManager
 from src.dispatcher.port import DispatcherPort
@@ -15,7 +15,7 @@ class DispatcherService:
     def __init__(self, port: DispatcherPort):
         self._port = port
         self.ack_manager = MessageAckManager()
-        self.subscriptions: Dict[str, list] = {}
+        self._subscriptions: Dict[str, List[str]] = {}
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class DispatcherService:
         self._logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue(self.DISPATCHER_QUEUE, "dispatcher-service")
         asyncio.create_task(
-            self._port.watch_for_changes(self.subscriptions, Bucket.subscriptions)
+            self._port.watch_for_changes(self._subscriptions, Bucket.subscriptions)
         )
 
         while True:
@@ -37,8 +37,8 @@ class DispatcherService:
         self._logger.info("Received message with content: %s", message.data)
         validated_msg = Message.model_validate(message.data)
 
-        subscriptions = (
-            self.subscriptions.get(f"{validated_msg.realm}:{validated_msg.topic}") or []
+        subscriptions = self._subscriptions.get(
+            f"{validated_msg.realm}:{validated_msg.topic}", []
         )
 
         for sub in subscriptions:
