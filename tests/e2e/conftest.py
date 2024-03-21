@@ -10,9 +10,6 @@ from tests.conftest import REALMS_TOPICS
 
 import shared.client  # noqa: E402
 
-SUBSCRIBER_NAME = str(uuid.uuid4())
-SUBSCRIBER_PASSWORD = "subscriberpassword"
-
 
 def pytest_addoption(parser):
     # Portal tests options
@@ -77,11 +74,23 @@ def udm(pytestconfig) -> UDM:
 
 
 @pytest.fixture
-def settings(provisioning_api_base_url) -> shared.client.Settings:
+def subscription_name() -> str:
+    return str(uuid.uuid4())
+
+
+@pytest.fixture
+def subscription_password() -> str:
+    return str(uuid.uuid4())
+
+
+@pytest.fixture
+def settings(
+    provisioning_api_base_url, subscription_name, subscription_password
+) -> shared.client.Settings:
     return shared.client.Settings(
         provisioning_api_base_url=provisioning_api_base_url,
-        provisioning_api_username=SUBSCRIBER_NAME,
-        provisioning_api_password=SUBSCRIBER_PASSWORD,
+        provisioning_api_username=subscription_name,
+        provisioning_api_password=subscription_password,
     )
 
 
@@ -110,14 +119,16 @@ async def provisioning_admin_client(admin_settings) -> shared.client.AsyncClient
 async def simple_subscription(
     provisioning_admin_client: shared.client.AsyncClient,
     provisioning_client: shared.client.AsyncClient,
+    subscription_name,
+    subscription_password,
 ) -> str:
     await provisioning_admin_client.create_subscription(
-        name=SUBSCRIBER_NAME,
+        name=subscription_name,
         realms_topics=REALMS_TOPICS,
-        password=SUBSCRIBER_PASSWORD,
+        password=subscription_password,
         request_prefill=False,
     )
 
-    yield SUBSCRIBER_NAME
+    yield subscription_name
 
-    await provisioning_client.cancel_subscription(SUBSCRIBER_NAME)
+    await provisioning_client.cancel_subscription(subscription_name)
