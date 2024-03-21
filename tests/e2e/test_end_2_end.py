@@ -71,22 +71,20 @@ def subscription_name(test_settings: E2ETestSettings):
 
 
 @pytest.fixture(scope="function")
-def ldap_user(ldap_connection, subscription_name, request):
-    dn = "cn=test_user,cn=groups,dc=swp-ldap,dc=internal"
+def ldap_user(ldap_connection, subscription_name, test_settings, request):
+    dn = f"cn=test_group1235,cn=groups,{test_settings.ldap_base}"
     result = ldap_connection.add(
         dn=dn,
         object_class=("posixGroup", "univentionObject", "univentionGroup"),
         attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
     )
     assert (
-        result is True
-    ), "No ldap change triggered, possibly due to test data colision"
+        result
+    ), "No ldap change triggered, possible reasons: invalid request or test-data colision"
 
-    def delete_user():
-        ldap_connection.delete(dn)
+    yield ldap_connection, dn
 
-    request.addfinalizer(delete_user)
-    return ldap_connection, dn
+    ldap_connection.delete(dn)
 
 
 async def test_workflow(test_settings, ldap_user, subscription_name):
