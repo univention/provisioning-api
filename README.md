@@ -127,11 +127,11 @@ poetry shell
 pytest -v -p no:cacheprovider tests/e2e/
 ```
 
-There is a test container designed to run the e2e tests in docker-compose
-in a gitlab pipeline. But this can also be executed locally
-to debug pipeline problems and you can't or don't want to install the test dependencies locally,
+There is a test container designed to run the e2e tests in docker-compose in a gitlab pipeline.
+But this can also be executed locally to debug pipeline problems
+and in case you can't or don't want to install the test dependencies locally,
 
-`docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --udm-rest-api-base-url "http://udm-rest-api:9979/udm/" --provisioning-api-base-url "http://events-and-consumer-api:7777/"`
+`docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --environment pipeline`
 
 
 #### using the Tilt dev-env

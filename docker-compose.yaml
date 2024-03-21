@@ -236,7 +236,7 @@ services:
     environment:
       DOMAINNAME: univention-organization.intranet
       HOSTNAME: localhost:9979
-      LDAP_HOST: localhost
+      LDAP_HOST: ldap-server
       LDAP_PORT: 389
       LDAP_BASE_DN: dc=univention-organization,dc=intranet
       LDAP_HOST_DN: cn=admin,dc=univention-organization,dc=intranet

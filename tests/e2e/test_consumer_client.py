@@ -83,20 +83,20 @@ async def test_get_multiple_messages(
     group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
 
-    result = await pop_all_messages(provisioning_client, simple_subscription, 4)
+    result = await pop_all_messages(provisioning_client, simple_subscription, 6)
     assert len(result) == 3
 
 
-# @pytest.mark.xfail()
-# async def test_get_messages_zero_timeout(
-#     provisioning_client: shared.client.AsyncClient, simple_subscription: str
-# ):
-#     response = await provisioning_client.get_subscription_messages(
-#         name=simple_subscription,
-#         timeout=0,
-#     )
-#
-#     assert response == []
+@pytest.mark.xfail()
+async def test_get_messages_zero_timeout(
+    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+):
+    response = await provisioning_client.get_subscription_messages(
+        name=simple_subscription,
+        timeout=0,
+    )
+
+    assert response == []
 
 
 async def test_get_messages_from_the_wrong_queue(

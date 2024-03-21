@@ -22,6 +22,7 @@ class E2ETestSettings(NamedTuple):
     provisioning_events_password: str
 
     ldap_server_uri: str
+    ldap_base: str
     ldap_bind_dn: str
     ldap_bind_password: str
 
@@ -37,18 +38,25 @@ def get_default_settings() -> E2ETestSettings:
         provisioning_admin_password="provisioning",
         provisioning_events_username="udm",
         provisioning_events_password="udmpass",
-        ldap_server_uri="ldap://localhost:3890",
+        ldap_server_uri="ldap://localhost:389",
+        ldap_base="dc=univention-organization,dc=intranet",
         ldap_bind_dn="cn=admin,dc=univention-organization,dc=intranet",
         ldap_bind_password="univention",
-        udm_rest_api_base_url="http://localhost:8000/univention/udm/",
+        udm_rest_api_base_url="http://localhost:9979/udm/",
         udm_rest_api_username="cn=admin",
         udm_rest_api_password="univention",
     )
 
 
+def get_devenv_settings() -> E2ETestSettings:
+    return get_default_settings()._replace(
+        udm_rest_api_base_url="http://localhost:8000/univention/udm/",
+    )
+
+
 def get_pipeline_settings() -> E2ETestSettings:
     return get_default_settings()._replace(
-        provisioning_api_base_url="http://events-and-consumer-api:7777/",
+        provisioning_api_base_url="http://events-and-consumer-api:7777",
         ldap_server_uri="ldap://ldap-server:389",
         udm_rest_api_base_url="http://udm-rest-api:9979/udm/",
     )
@@ -56,12 +64,9 @@ def get_pipeline_settings() -> E2ETestSettings:
 
 TEST_SETTINGS = {
     "local": get_default_settings,
+    "dev-env": get_devenv_settings,
     "pipeline": get_pipeline_settings,
 }
-
-
-SUBSCRIBER_NAME = str(uuid.uuid4())
-SUBSCRIBER_PASSWORD = "subscriberpassword"
 
 
 def pytest_addoption(parser):
@@ -96,11 +101,23 @@ def udm(test_settings: E2ETestSettings) -> UDM:
 
 
 @pytest.fixture
-def client_settings(test_settings: E2ETestSettings) -> shared.client.Settings:
+def subscriber_name() -> str:
+    return str(uuid.uuid4())
+
+
+@pytest.fixture
+def subscriber_password() -> str:
+    return str(uuid.uuid4())
+
+
+@pytest.fixture
+def client_settings(
+    test_settings: E2ETestSettings, subscriber_name, subscriber_password
+) -> shared.client.Settings:
     return shared.client.Settings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
-        provisioning_api_username=SUBSCRIBER_NAME,
-        provisioning_api_password=SUBSCRIBER_PASSWORD,
+        provisioning_api_username=subscriber_name,
+        provisioning_api_password=subscriber_password,
     )
 
 
@@ -131,16 +148,17 @@ async def provisioning_admin_client(
 
 @pytest.fixture
 async def simple_subscription(
+    subscriber_name,
+    subscriber_password,
     provisioning_admin_client: shared.client.AsyncClient,
-    provisioning_client: shared.client.AsyncClient,
 ) -> AsyncGenerator[str, Any]:
     await provisioning_admin_client.create_subscription(
-        name=SUBSCRIBER_NAME,
+        name=subscriber_name,
+        password=subscriber_password,
         realms_topics=REALMS_TOPICS,
-        password=SUBSCRIBER_PASSWORD,
         request_prefill=False,
     )
 
-    yield SUBSCRIBER_NAME
+    yield subscriber_name
 
-    await provisioning_client.cancel_subscription(SUBSCRIBER_NAME)
+    await provisioning_admin_client.cancel_subscription(subscriber_name)

@@ -80,7 +80,7 @@ async def test_do_not_acknowledge_messages(
         name=simple_subscription, timeout=5, count=10
     )
     assert len(response) == 1
-    assert response[0].data["body"] == body
+    assert response[0].body == body
 
     # test eventual redelivery of a message
     result = await pop_all_messages(provisioning_client, simple_subscription, 4)
@@ -103,7 +103,7 @@ async def test_acknowledge_some_messages(
     )
 
     assert len(response) == 2
-    assert response[0].data["body"] == body
+    assert response[0].body == body
 
     # test immediate redelivery of a message
     response = await provisioning_client.get_subscription_messages(
@@ -111,7 +111,7 @@ async def test_acknowledge_some_messages(
         timeout=5,
         count=10,
     )
-    assert response[0].data["body"] == body
+    assert response[0].body == body
     assert len(response) == 2
 
     # test redelivery only until message is acknowledged
