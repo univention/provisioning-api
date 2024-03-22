@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.21.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.3...v0.21.0) (2024-03-22)
+
+
+### Features
+
+* Set "global.imageRegistry" in the provisioning Helm chart ([684ca89](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/684ca89e0f3cad2679bebac2a8a3e10bd0e0f557))
+
+
+### Bug Fixes
+
+* Add helm-docs templates for "example-client" and "provisioning" ([38e2a66](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/38e2a669b8ec6b4aea3f309ef43539c822b532a4))
+
 ## [0.20.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.2...v0.20.3) (2024-03-20)
 
 
