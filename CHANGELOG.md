@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.21.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.0...v0.21.1) (2024-03-22)
+
+
+### Bug Fixes
+
+* **ci:** update common-ci from v1.20.0 to v1.24.5 ([783ecab](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/783ecabd2dc0a6bfbe0466a4ce8f0097f1b049a7))
+* **helm/provisioning:** add missing registry keys ([3860adb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3860adb670a6dc2864bb1e1fab70e3f86343df28))
+
 ## [0.21.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.20.3...v0.21.0) (2024-03-22)
 
 
