@@ -3,7 +3,7 @@
 
 #dummy comment
 
-ARG UCS_BASE_IMAGE_TAG=0.10.0
+ARG UCS_BASE_IMAGE_TAG=0.11.3
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520
 
 
