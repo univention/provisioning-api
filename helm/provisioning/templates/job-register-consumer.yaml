@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: register-consumers
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        {{- range .Values.register_consumers.consumers }}
+        - name: consumer-{{ .name }}
+          image: curlimages/curl
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+              curl -4 -v -u '{{ $.Values.register_consumers.admin_username }}:{{ $.Values.register_consumers.admin_password }}' \
+              -H 'Content-Type: application/json' \
+              -d @- '{{ $.Values.register_consumers.provisioningApiBaseUrl }}' <<EOF
+              {
+                "name": "{{ .name }}",
+                "realms_topics": {{ toJson .realms_topics }},
+                "request_prefill": {{ .request_prefill }},
+                "password": "{{ .password }}"
+              }
+              EOF
+        {{- end }}

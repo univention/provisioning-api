@@ -536,3 +536,16 @@ nats:
       fileStorage:
         pvc:
           size: 1Gi
+
+register_consumers:
+  admin_username: "admin"
+  admin_password: "provisioning"
+  provisioningApiBaseUrl: "http://provisioning-api/internal/admin/v1/subscriptions"
+  consumers:
+    - name: "new-consumer"
+      realms_topics:
+        -
+          - "udm"
+          - "groups/group"
+      request_prefill: true
+      password: "password"
