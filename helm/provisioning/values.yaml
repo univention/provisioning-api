@@ -538,8 +538,7 @@ nats:
           size: 1Gi
 
 register_consumers:
-  admin_username: "admin"
-  admin_password: "provisioning"
+  credentialSecretName: ""
   provisioningApiBaseUrl: "http://provisioning-api/internal/admin/v1/subscriptions"
   consumers:
     - name: "new-consumer"

@@ -148,13 +148,12 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
-| register_consumers.admin_password | string | `"provisioning"` |  |
-| register_consumers.admin_username | string | `"admin"` |  |
 | register_consumers.consumers[0].name | string | `"new-consumer"` |  |
 | register_consumers.consumers[0].password | string | `"password"` |  |
 | register_consumers.consumers[0].realms_topics[0][0] | string | `"udm"` |  |
 | register_consumers.consumers[0].realms_topics[0][1] | string | `"groups/group"` |  |
 | register_consumers.consumers[0].request_prefill | bool | `true` |  |
+| register_consumers.credentialSecretName | string | `""` |  |
 | register_consumers.provisioningApiBaseUrl | string | `"http://provisioning-api/internal/admin/v1/subscriptions"` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1}` | Set the amount of replicas of deployment. |
 | resources.api | object | `{}` |  |
