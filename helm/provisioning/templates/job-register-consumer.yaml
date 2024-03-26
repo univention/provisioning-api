@@ -1,17 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+
+{{- range .Values.register_consumers.consumers }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: register-consumers
+  name: register-consumers-{{ .name }}
 spec:
   template:
     spec:
       restartPolicy: Never
       containers:
-        {{- range .Values.register_consumers.consumers }}
         - name: consumer-{{ .name }}
           image: curlimages/curl
           command:
@@ -28,4 +29,4 @@ spec:
                 "password": "{{ .password }}"
               }
               EOF
-        {{- end }}
+{{- end }}

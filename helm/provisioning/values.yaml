@@ -457,7 +457,7 @@ api:
     registry: "gitregistry.knut.univention.de"
     imagePullPolicy: "IfNotPresent"
     repository: "univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"
-    tag: "0.14.0"
+    tag: "latest"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:

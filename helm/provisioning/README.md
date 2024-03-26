@@ -30,7 +30,7 @@ A Helm Chart that deploys the provisioning services
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | api.image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | api.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"` |  |
-| api.image.tag | string | `"0.14.0"` |  |
+| api.image.tag | string | `"latest"` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
 | containerSecurityContext.enabled | bool | `true` | Enable security context. |
