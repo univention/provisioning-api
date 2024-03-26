@@ -1,27 +1,36 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-
+{{- $root := . -}}
 {{- range .Values.register_consumers.consumers }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: register-consumers-{{ .name }}
+  name: {{ printf "%s-register-consumers-%s" (include "common.names.fullname" $root) .name }}
 spec:
   template:
     spec:
       restartPolicy: Never
+      initContainers:
+        - name: {{ printf "wait-for-%s-api-to-start" (include "common.names.fullname" $root) }}
+          image: busybox
+          command: [ "sh", "-c", "until nc -z {{ printf "%s-api" (include "common.names.fullname" $root) }} 80 > /dev/null; do echo Waiting for api.; sleep 2; done;" ]
       containers:
         - name: consumer-{{ .name }}
           image: curlimages/curl
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-register-consumers" (include "common.names.fullname" $root) }}
+            - secretRef:
+                name: {{ $.Values.register_consumers.credentialSecretName | quote }}
           command:
             - "/bin/sh"
             - "-c"
             - |
-              curl -4 -v -u '{{ $.Values.register_consumers.admin_username }}:{{ $.Values.register_consumers.admin_password }}' \
+              curl -4 -v -u $ADMIN_USERNAME:$ADMIN_PASSWORD \
               -H 'Content-Type: application/json' \
-              -d @- '{{ $.Values.register_consumers.provisioningApiBaseUrl }}' <<EOF
+              -d @- $PROVISIONING_API_BASE_URL <<EOF
               {
                 "name": "{{ .name }}",
                 "realms_topics": {{ toJson .realms_topics }},
