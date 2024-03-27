@@ -275,7 +275,9 @@ class NatsMQAdapter(BaseMQAdapter):
             await self._js.add_consumer(
                 stream_name,
                 ConsumerConfig(
-                    durable_name=durable_name, deliver_subject=deliver_subject
+                    durable_name=durable_name,
+                    deliver_subject=deliver_subject,
+                    max_ack_pending=1,
                 ),
             )
 
