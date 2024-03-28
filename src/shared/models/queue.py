@@ -2,10 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from datetime import datetime
-
 from enum import Enum
 from typing import Any, ClassVar, Dict, Optional, List, Tuple
-
 from pydantic import BaseModel, Field, field_serializer
 
 PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"

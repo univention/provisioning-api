@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-from unittest.mock import AsyncMock, patch
 
+from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
-
-from app.consumer.messages.api import v1_prefix as messages_api_prefix
+from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
 from tests.conftest import (
     REALMS_TOPICS_STR,
     REALM,
@@ -18,9 +17,9 @@ from tests.conftest import (
     CREDENTIALS,
 )
 from shared.models.subscription import FillQueueStatus
-from app.consumer.subscriptions.api import v1_prefix as api_prefix
-from app.main import app as messages_app
-from app.main import app as subscriptions_app
+from server.core.app.consumer.subscriptions.api import v1_prefix as api_prefix
+from server.core.app.main import app as messages_app
+from server.core.app.main import app as subscriptions_app
 
 
 @pytest.fixture(scope="session")

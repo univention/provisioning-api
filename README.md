@@ -8,15 +8,19 @@ Tooling for provisioning LDAP objects to external services.
 
 ## Components
 
-- [Dispatcher service](./src/dispatcher/)
+- [Dispatcher service](./src/server/dispatcher/)
 
   The central service to receive LDAP changes and forward them to subscribed clients.
 
-- [Core and client library](src/shared/)
+- [Core](./src/server/)
 
-  Everything needed to implement a client.
+  Server side of the provisioning project
 
-- [Example client](./src/example-client/)
+- [Client library](src/client/)
+
+  The provisioning consumer library
+
+- [Example client](./src/client/example-client/)
 
   An example implementation of a client.
 

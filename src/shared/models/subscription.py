@@ -3,7 +3,6 @@
 
 import enum
 from typing import List
-
 from pydantic import Field, BaseModel
 
 REALM_TOPIC_PREFIX = "realm:topic"

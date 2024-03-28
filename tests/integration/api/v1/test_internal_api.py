@@ -1,14 +1,12 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-from unittest.mock import AsyncMock, patch
 
+from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
-
 from tests.conftest import FLAT_MESSAGE, CREDENTIALS
-
-from app.internal.api import v1_prefix as api_prefix
-from app.main import app, internal_app_path
+from server.core.app.internal.api import v1_prefix as api_prefix
+from server.core.app.main import app, internal_app_path
 
 
 @pytest.fixture(scope="session")

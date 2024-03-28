@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import shared.client
-import shared.models.queue
-from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
+from client import AsyncClient
+from shared.models import MessageProcessingStatus, MessageProcessingStatusReport
 from tests.e2e.helpers import create_message_via_events_api
 
 
 async def test_get_multiple_messages(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -32,7 +31,7 @@ async def test_get_multiple_messages(
 
 
 async def test_acknowledge_messages(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -66,7 +65,7 @@ async def test_acknowledge_messages(
 
 
 async def test_do_not_acknowledge_message(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
     test_settings,
 ):

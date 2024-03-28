@@ -8,10 +8,10 @@ authors = [
 license = "GNU Affero General Public License v3"
 readme = "README.md"
 packages = [
-    { include = "example-client", from = "src" },
+    { include = "example-client", from = "src/client" },
     { include = "shared", from = "src" },
-    { include = "app", from = "src" },
-    { include = "prefill", from = "src" },
+    { include = "app", from = "src/server" },
+    { include = "prefill", from = "src/server" },
 ]
 
 [tool.poetry.dependencies]

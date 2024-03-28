@@ -5,9 +5,8 @@ from copy import deepcopy
 from unittest.mock import AsyncMock, call
 import pytest
 from fastapi import HTTPException
-
 from shared.models.subscription import Bucket, Subscription
-from shared.services.subscriptions import SubscriptionService
+from server.services.subscriptions import SubscriptionService
 from tests.conftest import (
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
@@ -15,7 +14,6 @@ from tests.conftest import (
     REALMS_TOPICS,
     CONSUMER_HASHED_PASSWORD,
 )
-
 from shared.models import FillQueueStatus, NewSubscription
 
 
