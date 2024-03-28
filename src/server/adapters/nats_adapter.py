@@ -19,7 +19,7 @@ from nats.js.kv import KV_DEL
 
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from ..config import settings
-from shared.models import (
+from src.shared.models import (
     BaseMessage,
     ProvisioningMessage,
     MQMessage,

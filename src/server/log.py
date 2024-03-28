@@ -3,7 +3,7 @@
 
 import logging
 
-from server.config import settings
+from src.server.config import settings
 
 
 def setup():

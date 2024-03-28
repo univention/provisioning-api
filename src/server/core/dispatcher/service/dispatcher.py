@@ -5,8 +5,8 @@ import logging
 from typing import Dict, List
 
 from shared.utils.message_ack_manager import MessageAckManager
-from core.dispatcher.port import DispatcherPort
-from shared.models import Message, MQMessage
+from src.server.core.dispatcher.port import DispatcherPort
+from src.shared.models import Message, MQMessage
 
 
 class DispatcherService:

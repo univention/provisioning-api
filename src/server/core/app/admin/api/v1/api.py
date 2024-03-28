@@ -5,11 +5,11 @@ from typing import List
 import fastapi
 from fastapi import Depends
 
-from core.app.auth import authenticate_admin
-from shared.models import Subscription, NewSubscription
-from server.services.messages import MessageService
-from server.services.port import PortDependency
-from server.services.subscriptions import SubscriptionService
+from src.server.core.app.auth import authenticate_admin
+from src.shared.models import Subscription, NewSubscription
+from src.server.services.messages import MessageService
+from src.server.services.port import PortDependency
+from src.server.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])
 logger = logging.getLogger(__name__)

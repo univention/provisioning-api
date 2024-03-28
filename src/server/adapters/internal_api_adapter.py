@@ -7,7 +7,7 @@ import aiohttp
 
 from ..config import settings
 
-from shared.models import FillQueueStatus, Message
+from src.shared.models import FillQueueStatus, Message
 
 
 class InternalAPIAdapter:

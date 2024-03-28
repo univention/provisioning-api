@@ -13,9 +13,9 @@ from tests.conftest import (
     SUBSCRIPTIONS,
     FLAT_MESSAGE_ENCODED,
 )
-from server.core.dispatcher.config import DispatcherSettings
-from server.core.dispatcher.port import DispatcherPort
-from server.core.dispatcher.service.dispatcher import DispatcherService
+from src.server.core.dispatcher.config import DispatcherSettings
+from src.server.core.dispatcher.port import DispatcherPort
+from src.server.core.dispatcher.service.dispatcher import DispatcherService
 
 
 @pytest.fixture(scope="session")

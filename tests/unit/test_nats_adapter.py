@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, call, patch
 import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
 
-from server.adapters.nats_adapter import NatsKeys
-from shared.models import Bucket
+from src.server.adapters.nats_adapter import NatsKeys
+from src.shared.models import Bucket
 from tests.conftest import (
     MESSAGE,
     MQMESSAGE,

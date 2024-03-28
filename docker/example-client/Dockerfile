@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-#dummy comment
-
 ARG UCS_BASE_IMAGE_TAG=0.10.0
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520
 
@@ -37,7 +35,8 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src ${WORKDIR}/src
+COPY ./src/client ${WORKDIR}/src/client
+COPY ./src/shared ${WORKDIR}/src/shared
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \

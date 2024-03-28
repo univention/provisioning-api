@@ -2,9 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-
-from core.prefill.port import PrefillPort
-from core.prefill.service.udm_prefill import UDMPreFill
+from src.server.core.prefill.port import PrefillPort
+from src.server.core.prefill.service.udm_prefill import UDMPreFill
 from daemoniker import Daemonizer
 
 

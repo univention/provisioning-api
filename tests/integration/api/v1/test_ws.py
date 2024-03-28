@@ -7,9 +7,9 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.conftest import REALM, TOPIC, BODY, FLAT_MESSAGE, CREDENTIALS
 from tests.conftest import SUBSCRIPTION_NAME
-from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
-from server.core.app.internal.api import v1_prefix as api_prefix
-from server.core.app.main import app, internal_app_path
+from src.server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
+from src.server.core.app.internal.api import v1_prefix as api_prefix
+from src.server.core.app.main import app, internal_app_path
 
 
 @pytest.fixture(scope="session")
