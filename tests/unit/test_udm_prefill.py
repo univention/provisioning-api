@@ -3,10 +3,9 @@
 
 from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
-
 import pytest
-
-from prefill.service.udm_prefill import UDMPreFill
+from core.prefill.service.udm_prefill import UDMPreFill
+from core.prefill.service.udm_prefill import match_topic
 from shared.models import Message, PublisherName
 from tests.conftest import (
     SUBSCRIPTION_NAME,
@@ -130,3 +129,20 @@ class TestUDMPreFill:
         udm_prefill._port.list_objects.assert_not_called()
         udm_prefill._port.get_object.assert_not_called()
         udm_prefill._port.create_prefill_message.assert_not_called()
+
+
+class TestMatchMethod:
+    def test_subscription_match(self):
+        test_cases = [
+            # list of test cases:
+            # subscription sub.topic, target.topic, expected result
+            ("users/user", "users/user", True),
+            ("users/user", "groups/group", False),
+            ("users/.*", "users/user", True),
+            ("users/.*", "groups/group", False),
+            (".*", "users/user", True),
+            (".*", "groups/group", True),
+        ]
+
+        for sub_topic, target_topic, expectation in test_cases:
+            assert match_topic(sub_topic, target_topic) == expectation

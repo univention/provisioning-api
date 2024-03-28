@@ -4,8 +4,7 @@
 import enum
 from typing import Any, Dict, List, Tuple
 from pydantic import BaseModel, Field
-
-from shared.models.queue import PublisherName
+from shared.models import PublisherName
 
 
 class NewSubscription(BaseModel):

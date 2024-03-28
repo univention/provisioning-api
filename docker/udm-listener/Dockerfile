@@ -39,7 +39,7 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src ./src
+COPY ./src/server ./src/server
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
@@ -61,6 +61,6 @@ WORKDIR ${WORKDIR}
 COPY --from=builder ${WORKDIR} .
 COPY --from=udm_rest_image /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
-COPY ./src/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
+COPY ./src/server/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
 
-ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages
+ENV PYTHONPATH=$PYTHONPATH:./src/server:./.venv/lib/python3.7/site-packages

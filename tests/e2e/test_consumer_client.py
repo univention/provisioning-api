@@ -1,30 +1,27 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import aiohttp
 import pytest
-
-import shared.client
-import shared.models.queue
-
+from client import AsyncClient
+from tests.e2e.conftest import E2ETestSettings
 from tests.e2e.helpers import (
     create_message_via_events_api,
     create_message_via_udm_rest_api,
     pop_all_messages,
 )
-
-
 from univention.admin.rest.client import UDM
 
 
 async def test_create_subscription(
-    provisioning_client: shared.client.AsyncClient, simple_subscription
+    provisioning_client: AsyncClient, simple_subscription
 ):
     response = await provisioning_client.get_subscription(simple_subscription)
     assert response
 
 
 async def test_get_empty_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: AsyncClient, simple_subscription: str
 ):
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
@@ -36,9 +33,9 @@ async def test_get_empty_messages(
 
 
 async def test_send_message(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
-    test_settings: str,
+    test_settings: E2ETestSettings,
 ):
     data = create_message_via_events_api(test_settings)
 
@@ -53,9 +50,7 @@ async def test_send_message(
 
 
 @pytest.mark.xfail()
-async def test_pop_message(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
-):
+async def test_pop_message(provisioning_client: AsyncClient, simple_subscription: str):
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription, count=1, timeout=1, pop=True
     )
@@ -64,7 +59,7 @@ async def test_pop_message(
 
 
 async def test_get_real_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
+    provisioning_client: AsyncClient, simple_subscription: str, udm: UDM
 ):
     group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
@@ -77,7 +72,7 @@ async def test_get_real_messages(
 
 
 async def test_get_multiple_messages(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str, udm: UDM
+    provisioning_client: AsyncClient, simple_subscription: str, udm: UDM
 ):
     group1 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
@@ -89,7 +84,7 @@ async def test_get_multiple_messages(
 
 @pytest.mark.xfail()
 async def test_get_messages_zero_timeout(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: AsyncClient, simple_subscription: str
 ):
     response = await provisioning_client.get_subscription_messages(
         name=simple_subscription,
@@ -100,7 +95,7 @@ async def test_get_messages_zero_timeout(
 
 
 async def test_get_messages_from_the_wrong_queue(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: AsyncClient, simple_subscription: str
 ):
     with pytest.raises(aiohttp.ClientResponseError) as er:
         await provisioning_client.get_subscription_messages(

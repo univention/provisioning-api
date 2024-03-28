@@ -12,9 +12,8 @@ from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
-
 from tests import set_test_env_vars
-from shared.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models.subscription import Bucket
 from shared.models import (
     Message,
@@ -28,9 +27,9 @@ from shared.models import (
 
 set_test_env_vars()
 
-from app.config import AppSettings  # noqa: E402
-from shared.services.port import Port  # noqa: E402
-from app.main import app, internal_app  # noqa: E402
+from server.core.app.config import AppSettings  # noqa: E402
+from server.services.port import Port  # noqa: E402
+from server.core.app.main import app, internal_app  # noqa: E402
 
 REALM = "udm"
 TOPIC = "groups/group"

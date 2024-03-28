@@ -15,4 +15,9 @@ from .queue import (  # noqa: F401
     ProvisioningMessage,
     BaseMessage,
 )
-from .subscription import FillQueueStatus, Subscription, Bucket  # noqa: F401
+from .subscription import (  # noqa: F401
+    FillQueueStatus,
+    Subscription,
+    Bucket,
+    REALM_TOPIC_PREFIX,
+)

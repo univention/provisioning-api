@@ -2,15 +2,11 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
-
+from typing import AsyncGenerator, Any, NamedTuple
 import pytest
-
 from univention.admin.rest.client import UDM
 from tests.conftest import REALMS_TOPICS
-
-import shared.client  # noqa: E402
-
-from typing import AsyncGenerator, Any, NamedTuple
+from client import AsyncClient, Settings
 
 
 class E2ETestSettings(NamedTuple):
@@ -129,8 +125,8 @@ def subscriber_password() -> str:
 @pytest.fixture
 def client_settings(
     test_settings: E2ETestSettings, subscriber_name, subscriber_password
-) -> shared.client.Settings:
-    return shared.client.Settings(
+) -> Settings:
+    return Settings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=subscriber_name,
         provisioning_api_password=subscriber_password,
@@ -138,8 +134,8 @@ def client_settings(
 
 
 @pytest.fixture
-def admin_client_settings(test_settings: E2ETestSettings) -> shared.client.Settings:
-    return shared.client.Settings(
+def admin_client_settings(test_settings: E2ETestSettings) -> Settings:
+    return Settings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=test_settings.provisioning_admin_username,
         provisioning_api_password=test_settings.provisioning_admin_password,
@@ -149,16 +145,16 @@ def admin_client_settings(test_settings: E2ETestSettings) -> shared.client.Setti
 @pytest.fixture
 async def provisioning_client(
     client_settings,
-) -> AsyncGenerator[shared.client.AsyncClient, Any]:
-    async with shared.client.AsyncClient(client_settings) as client:
+) -> AsyncGenerator[AsyncClient, Any]:
+    async with AsyncClient(client_settings) as client:
         yield client
 
 
 @pytest.fixture
 async def provisioning_admin_client(
     admin_client_settings,
-) -> AsyncGenerator[shared.client.AsyncClient, Any]:
-    async with shared.client.AsyncClient(admin_client_settings) as client:
+) -> AsyncGenerator[AsyncClient, Any]:
+    async with AsyncClient(admin_client_settings) as client:
         yield client
 
 
@@ -166,7 +162,7 @@ async def provisioning_admin_client(
 async def simple_subscription(
     subscriber_name,
     subscriber_password,
-    provisioning_admin_client: shared.client.AsyncClient,
+    provisioning_admin_client: AsyncClient,
 ) -> AsyncGenerator[str, Any]:
     await provisioning_admin_client.create_subscription(
         name=subscriber_name,

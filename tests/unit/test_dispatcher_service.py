@@ -2,10 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from unittest.mock import AsyncMock, call
-
 import pytest
-
-from dispatcher.service.dispatcher import DispatcherService
+from server.core.dispatcher.service.dispatcher import DispatcherService
 from tests.conftest import (
     SUBSCRIPTION_INFO,
     MESSAGE,

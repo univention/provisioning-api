@@ -35,7 +35,7 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src ${WORKDIR}/src
+COPY ./src/server ${WORKDIR}/src/server
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
@@ -63,4 +63,4 @@ WORKDIR ${WORKDIR}
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # run
-ENTRYPOINT ["./.venv/bin/python3", "-m", "src.dispatcher.main"]
+ENTRYPOINT ["./.venv/bin/python3", "-m", "src.server.dispatcher.main"]

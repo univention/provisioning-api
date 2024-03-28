@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, call, patch
 import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
 
-from shared.adapters.nats_adapter import NatsKeys
+from server.adapters.nats_adapter import NatsKeys
 from shared.models import Bucket
 from tests.conftest import (
     MESSAGE,
@@ -46,7 +46,7 @@ def mock_nats_kv_adapter(mock_kv) -> MockNatsKVAdapter:
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("shared.adapters.nats_adapter.settings").start()
+    settings = patch("server.adapters.nats_adapter.settings").start()
     settings.nats_username = CREDENTIALS.username
     settings.nats_password = CREDENTIALS.password
     settings.nats_server = "nats://localhost:4222"

@@ -2,13 +2,13 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
-
 import requests
-
-import shared.client
-
-from shared.models import PublisherName
-from shared.models.api import MessageProcessingStatus, MessageProcessingStatusReport
+from client import AsyncClient
+from shared.models import (
+    PublisherName,
+    MessageProcessingStatus,
+    MessageProcessingStatusReport,
+)
 from univention.admin.rest.client import UDM
 from tests.conftest import REALM, TOPIC
 from tests.e2e.conftest import E2ETestSettings
@@ -49,7 +49,7 @@ def create_message_via_udm_rest_api(udm: UDM):
 
 
 async def pop_all_messages(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     subscription_name: str,
     loop_number: int,
 ):

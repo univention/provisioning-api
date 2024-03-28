@@ -2,20 +2,17 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-
 import pytest
 import requests
 import uuid
-from app.main import internal_app_path
+from server.core.app.main import internal_app_path
 import ldap3
-
-from app.admin.api import v1_prefix as admin_api_prefix
-from app.consumer.messages.api import v1_prefix as messages_api_prefix
-from app.consumer.subscriptions.api import v1_prefix as subscriptions_api_prefix
-
-from shared.models import PublisherName
-
-from shared.models import FillQueueStatus
+from server.core.app.admin.api import v1_prefix as admin_api_prefix
+from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
+from server.core.app.consumer.subscriptions.api import (
+    v1_prefix as subscriptions_api_prefix,
+)
+from shared.models import PublisherName, FillQueueStatus
 from tests.e2e.conftest import E2ETestSettings
 
 REALM = "udm"

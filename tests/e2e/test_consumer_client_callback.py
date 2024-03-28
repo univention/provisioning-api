@@ -1,23 +1,23 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-import pytest
 
-import shared.client
-from shared.models.queue import Message
+import pytest
+from client import AsyncClient, MessageHandler
+from shared.models import Message
 from tests.e2e.helpers import create_message_via_events_api
 
 
 async def test_no_callback_function_provided(
-    provisioning_client: shared.client.AsyncClient, simple_subscription: str
+    provisioning_client: AsyncClient, simple_subscription: str
 ):
     with pytest.raises(ValueError):
-        await shared.client.MessageHandler(
+        await MessageHandler(
             provisioning_client, simple_subscription, [], message_limit=1
         ).run()
 
 
 async def test_get_one_message(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -28,7 +28,7 @@ async def test_get_one_message(
     async def test_callback(message: Message):
         result.append(message)
 
-    await shared.client.MessageHandler(
+    await MessageHandler(
         provisioning_client, simple_subscription, [test_callback], message_limit=1
     ).run()
 
@@ -36,7 +36,7 @@ async def test_get_one_message(
 
 
 async def test_timeout_while_waiting_for_messages(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -51,7 +51,7 @@ async def test_timeout_while_waiting_for_messages(
 
 
 async def test_get_multiple_messages(
-    provisioning_client: shared.client.AsyncClient,
+    provisioning_client: AsyncClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -64,7 +64,7 @@ async def test_get_multiple_messages(
     async def test_callback(message: Message):
         result.append(message)
 
-    await shared.client.MessageHandler(
+    await MessageHandler(
         provisioning_client, simple_subscription, [test_callback], message_limit=3
     ).run()
 

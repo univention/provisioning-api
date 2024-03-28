@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from nats.aio.msg import Msg
-
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     MSG,
@@ -14,10 +13,9 @@ from tests.conftest import (
     SUBSCRIPTIONS,
     FLAT_MESSAGE_ENCODED,
 )
-
-from dispatcher.config import DispatcherSettings
-from dispatcher.port import DispatcherPort
-from dispatcher.service.dispatcher import DispatcherService
+from server.core.dispatcher.config import DispatcherSettings
+from server.core.dispatcher.port import DispatcherPort
+from server.core.dispatcher.service.dispatcher import DispatcherService
 
 
 @pytest.fixture(scope="session")
