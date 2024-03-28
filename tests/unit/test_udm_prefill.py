@@ -4,9 +4,9 @@
 from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
 import pytest
-from core.prefill.service.udm_prefill import UDMPreFill
-from core.prefill.service.udm_prefill import match_topic
-from shared.models import Message, PublisherName
+from src.server.core.prefill.service.udm_prefill import UDMPreFill
+from src.server.core.prefill.service.udm_prefill import match_topic
+from src.shared.models import Message, PublisherName
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     PREFILL_MESSAGE,

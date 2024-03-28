@@ -4,7 +4,7 @@
 import uuid
 import requests
 from client import AsyncClient
-from shared.models import (
+from src.shared.models import (
     PublisherName,
     MessageProcessingStatus,
     MessageProcessingStatusReport,

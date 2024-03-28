@@ -14,6 +14,7 @@ from .queue import (  # noqa: F401
     PublisherName,
     ProvisioningMessage,
     BaseMessage,
+    PREFILL_SUBJECT_TEMPLATE,
 )
 from .subscription import (  # noqa: F401
     FillQueueStatus,

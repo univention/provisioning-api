@@ -36,6 +36,7 @@ ENV \
 
 # copy source code
 COPY ./src/server ${WORKDIR}/src/server
+COPY ./src/shared ${WORKDIR}/src/shared
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
@@ -63,4 +64,4 @@ WORKDIR ${WORKDIR}
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # run
-ENTRYPOINT ["./.venv/bin/python3", "-m", "src.server.dispatcher.main"]
+ENTRYPOINT ["./.venv/bin/python3", "-m", "src.server.core.dispatcher.main"]

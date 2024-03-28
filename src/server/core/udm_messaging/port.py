@@ -4,9 +4,9 @@
 import contextlib
 import json
 from typing import Optional
-from server.adapters.internal_api_adapter import InternalAPIAdapter
-from server.adapters.nats_adapter import NatsKVAdapter
-from shared.models import Bucket, Message
+from src.server.adapters.internal_api_adapter import InternalAPIAdapter
+from src.server.adapters.nats_adapter import NatsKVAdapter
+from src.shared.models import Bucket, Message
 from .config import UdmProducerSettings
 
 

@@ -35,8 +35,8 @@ import asyncio
 
 from univention.listener.handler import ListenerModuleHandler
 
-from udm_messaging.port import UDMMessagingPort
-from udm_messaging.service.udm import UDMMessagingService
+from src.server.core.udm_messaging.port import UDMMessagingPort
+from src.server.core.udm_messaging.service.udm import UDMMessagingService
 
 name = "provisioning_handler"
 

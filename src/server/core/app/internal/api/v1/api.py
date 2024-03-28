@@ -7,12 +7,12 @@ import fastapi
 from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from core.app.config import app_settings
-from shared.models import Message, FillQueueStatus
-from core.app.auth import authenticate_user
-from server.services.messages import MessageService
-from server.services.port import PortDependency
-from server.services.subscriptions import SubscriptionService
+from src.server.core.app.config import app_settings
+from src.shared.models import Message, FillQueueStatus
+from src.server.core.app.auth import authenticate_user
+from src.server.services.messages import MessageService
+from src.server.services.port import PortDependency
+from src.server.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()

@@ -35,7 +35,8 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src ${WORKDIR}/src
+COPY ./src/server ${WORKDIR}/src/server
+COPY ./src/shared ${WORKDIR}/src/shared
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
@@ -67,7 +68,7 @@ EXPOSE 7777
 # run
 ENTRYPOINT [ \
         "./.venv/bin/uvicorn", \
-         "app.main:app", \
+         "src.server.core.app.main:app", \
         "--log-config", "logging.yaml", \
         "--host", "0.0.0.0", \
         "--port", "7777" \

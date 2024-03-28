@@ -3,7 +3,7 @@
 
 from unittest.mock import AsyncMock, call
 import pytest
-from server.core.dispatcher.service.dispatcher import DispatcherService
+from src.server.core.dispatcher.service.dispatcher import DispatcherService
 from tests.conftest import (
     SUBSCRIPTION_INFO,
     MESSAGE,

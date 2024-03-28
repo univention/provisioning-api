@@ -8,10 +8,9 @@ authors = [
 license = "GNU Affero General Public License v3"
 readme = "README.md"
 packages = [
-    { include = "example-client", from = "src/client" },
     { include = "shared", from = "src" },
-    { include = "app", from = "src/server" },
-    { include = "prefill", from = "src/server" },
+#    { include = "app", from = "src/server/core" },
+#    { include = "prefill", from = "src/server/core" },
 ]
 
 [tool.poetry.dependencies]
@@ -32,8 +31,8 @@ bcrypt = "4.0.1"
 nats-py = "^2.7.0"
 
 [tool.poetry.scripts]
-dev = "consumer:start_dev"
-client = "example-client.main:run"
+dev = "src.server.core.app:start_dev"
+client = "src.client.example-client.main:run"
 
 [tool.poetry.group.dev]
 optional = true

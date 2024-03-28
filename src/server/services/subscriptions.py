@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 from .port import Port
-from shared.models import (
+from src.shared.models import (
     Subscription,
     FillQueueStatus,
     NewSubscription,

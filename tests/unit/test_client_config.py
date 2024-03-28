@@ -5,7 +5,7 @@ import os
 
 from typing import List
 
-from client.config import Settings
+from src.client.config import Settings
 
 
 env_api_url = "PROVISIONING_API_BASE_URL"

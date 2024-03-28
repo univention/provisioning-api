@@ -35,7 +35,8 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src ${WORKDIR}/src
+COPY ./src/server ${WORKDIR}/src/server
+COPY ./src/shared ${WORKDIR}/src/shared
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
@@ -63,4 +64,4 @@ WORKDIR ${WORKDIR}
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # run
-ENTRYPOINT ["./.venv/bin/python3", "-m", "src.prefill.main"]
+ENTRYPOINT ["./.venv/bin/python3", "-m", "src.server.core.prefill.main"]
