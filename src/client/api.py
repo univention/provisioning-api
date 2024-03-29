@@ -7,7 +7,7 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 import aiohttp
 
 from .config import Settings
-from src.shared.models import (
+from shared.models import (
     Subscription,
     NewSubscription,
     MessageProcessingStatus,

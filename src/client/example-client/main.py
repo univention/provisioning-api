@@ -10,8 +10,8 @@ import logging
 import sys
 from typing import Optional, Sequence
 from aiohttp import ClientResponseError
-from src.client import AsyncClient, Settings, MessageHandler
-from src.shared.models import ProvisioningMessage
+from client import AsyncClient, Settings, MessageHandler
+from shared.models import ProvisioningMessage
 
 
 def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):
