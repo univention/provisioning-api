@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "provisioning-client"
+version = "0.1.0"
+description = "Provisioning consumer library"
+authors = [
+    "Univention GmbH <packages@univention.de>",
+]
+license = "GNU Affero General Public License v3"
+packages = [{ include = "shared", from = "src" }]
+
+[tool.poetry.dependencies]
+pydantic = "^2.3.0"
+pydantic-settings = "^2.0.3"
+python = "^3.7"
+aiohttp = "^3.8.5"
+
+[tool.poetry.scripts]
+client = "src.client.example-client.main:run"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[tool.ruff]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
