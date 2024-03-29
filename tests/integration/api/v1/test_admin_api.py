@@ -26,7 +26,7 @@ async def subscriptions_client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("app.auth.app_settings").start()
+    settings = patch("src.server.core.app.auth.app_settings").start()
     settings.admin_username = CREDENTIALS.username
     settings.admin_password = CREDENTIALS.password
     return settings

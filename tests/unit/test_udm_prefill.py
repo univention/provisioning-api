@@ -49,7 +49,7 @@ class TestUDMPreFill:
         },
     )
 
-    @patch("prefill.service.udm_prefill.datetime")
+    @patch("src.server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill):
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._port.wait_for_event = AsyncMock(
@@ -81,7 +81,7 @@ class TestUDMPreFill:
 
         assert "Stop waiting for the new event" == str(e.value)
 
-    @patch("prefill.service.udm_prefill.datetime")
+    @patch("src.server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill_moving_to_failures(
         self, mock_datetime, udm_prefill
     ):
@@ -116,7 +116,7 @@ class TestUDMPreFill:
 
         assert "Stop waiting for the new event" == str(e.value)
 
-    @patch("prefill.service.udm_prefill.datetime")
+    @patch("src.server.core.prefill.service.udm_prefill.datetime")
     async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill):
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._topic = "test-topic"

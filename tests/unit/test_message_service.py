@@ -10,7 +10,7 @@ from src.shared.models import FillQueueStatus
 
 @pytest.fixture
 def sub_service() -> AsyncMock:
-    yield patch("server.services.messages.SubscriptionService").start().return_value
+    yield patch("src.server.services.messages.SubscriptionService").start().return_value
 
 
 @pytest.fixture

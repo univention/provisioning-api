@@ -22,7 +22,7 @@ async def client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("app.internal.api.v1.api.app_settings").start()
+    settings = patch("src.server.core.app.internal.api.v1.api.app_settings").start()
     settings.events_username_udm = CREDENTIALS.username
     settings.events_password_udm = CREDENTIALS.password
     return settings
