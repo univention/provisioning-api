@@ -164,4 +164,52 @@ check-debian-updates:
     matrix: *publish-matrix
   variables:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+
+build_provisioning_lib:
+  stage: build_python
+  rules:
+    - changes:
+        - src/client/**/*
+        - src/shared/**/*
+  artifacts:
+    paths:
+      - src/dist/
+    expire_in: 1 week
+  image: docker-registry.knut.univention.de/python:3.11-slim
+  script:
+    - cd src
+    - pip install poetry=="$POETRY_VERSION"
+    - |-
+      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]; then
+        poetry version "0.0.0.dev0+${CI_COMMIT_REF_SLUG//-/.}.$CI_COMMIT_SHORT_SHA"
+      else
+        true
+      fi
+    - poetry config --local virtualenvs.create false
+    - poetry build
+
+publish_provisioning_lib:
+  stage: publish
+  when: manual
+  rules:
+    - changes:
+        - src/client/**/*
+        - src/shared/**/*
+  dependencies:
+    - build_provisioning_lib
+  needs:
+    - build_provisioning_lib
+  image: docker-registry.knut.univention.de/python:3.11-slim
+  script:
+    - cd src
+    - pip install poetry=="$POETRY_VERSION"
+    - |-
+      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]; then
+        poetry version "0.0.0.dev0+${CI_COMMIT_REF_SLUG//-/.}.$CI_COMMIT_SHORT_SHA"
+      else
+        true
+      fi
+    - poetry config --local virtualenvs.create false
+    - poetry config --local repositories.project_local ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
+    - poetry publish -r project_local --username gitlab-ci-token --password ${CI_JOB_TOKEN}
 ...

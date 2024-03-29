@@ -1,12 +1,15 @@
 [tool.poetry]
-name = "provisioning-client"
+name = "provisioning-lib"
 version = "0.1.0"
 description = "Provisioning consumer library"
 authors = [
     "Univention GmbH <packages@univention.de>",
 ]
 license = "GNU Affero General Public License v3"
-packages = [{ include = "shared", from = "src" }]
+packages = [
+    { include = "client", from = "." },
+    { include = "shared", from = "." }
+]
 
 [tool.poetry.dependencies]
 pydantic = "^2.3.0"
