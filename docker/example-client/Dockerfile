@@ -35,8 +35,8 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # copy source code
-COPY ./src/client ${WORKDIR}/src/client
-COPY ./src/shared ${WORKDIR}/src/shared
+COPY ./src/client ${WORKDIR}/client
+COPY ./src/shared ${WORKDIR}/shared
 COPY logging.yaml \
      ./src/poetry.lock \
      ./src/pyproject.toml \
