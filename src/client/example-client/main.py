@@ -123,7 +123,7 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument(
         "--prefill",
         action="store_true",
-        help="request prefill for the example clent subscription",
+        help="request prefill for the example client subscription",
     )
     parser.add_argument("--admin_username")
     parser.add_argument("--admin_password")
