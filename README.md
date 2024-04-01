@@ -20,7 +20,7 @@ Tooling for provisioning LDAP objects to external services.
 
   The provisioning consumer library
 
-- [Example client](./src/client/example-client/)
+- [Example client](./src/client/example_client/)
 
   An example implementation of a client.
 

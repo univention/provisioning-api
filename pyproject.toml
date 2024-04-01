@@ -34,7 +34,6 @@ nats-py = "^2.7.0"
 
 [tool.poetry.scripts]
 dev = "src.server.core.app:start_dev"
-client = "src.client.example-client.main:run"
 
 [tool.poetry.group.dev]
 optional = true

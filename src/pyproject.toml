@@ -18,7 +18,7 @@ python = "^3.7"
 aiohttp = "^3.8.5"
 
 [tool.poetry.scripts]
-client = "client.example-client.main:run"
+client = "client.example_client.main:run"
 
 [[tool.poetry.source]]
 name = "PyPI"
