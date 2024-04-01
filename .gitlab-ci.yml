@@ -24,6 +24,9 @@ include:
     file:
       - "dind.yml"
 
+variables:
+  POETRY_VERSION: "1.6.1"
+
 # FIXME: add build_python stage to the "defaults/stages.yaml"
 stages:
   - build_python
