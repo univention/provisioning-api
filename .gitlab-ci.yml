@@ -27,17 +27,6 @@ include:
 variables:
   POETRY_VERSION: "1.6.1"
 
-# FIXME: add build_python stage to the "defaults/stages.yaml"
-stages:
-  - build_python
-  - lint
-  - prepare
-  - build
-  - test
-  - trigger
-  - package
-  - publish
-
 lint-pre-commit:
   before_script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -180,7 +169,7 @@ check-debian-updates:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 
 build_provisioning_lib:
-  stage: build_python
+  stage: build
   rules:
     - changes:
         - src/client/**/*

@@ -14,7 +14,7 @@ packages = [
 [tool.poetry.dependencies]
 pydantic = "^2.3.0"
 pydantic-settings = "^2.0.3"
-python = "^3.11"
+python = "^3.7"
 aiohttp = "^3.8.5"
 
 [tool.poetry.scripts]
