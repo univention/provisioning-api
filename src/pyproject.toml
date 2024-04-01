@@ -7,8 +7,8 @@ authors = [
 ]
 license = "GNU Affero General Public License v3"
 packages = [
-    { include = "client", from = "." },
-    { include = "shared", from = "." }
+    { include = "client", from = "src" },
+    { include = "shared", from = "src" }
 ]
 
 [tool.poetry.dependencies]

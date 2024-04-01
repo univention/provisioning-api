@@ -38,8 +38,8 @@ ENV \
 COPY ./src/client ${WORKDIR}/src/client
 COPY ./src/shared ${WORKDIR}/src/shared
 COPY logging.yaml \
-     ./src/client/poetry.lock \
-     ./src/client/pyproject.toml \
+     ./src/poetry.lock \
+     ./src/pyproject.toml \
      ${WORKDIR}/
 
 RUN \
