@@ -168,8 +168,33 @@ check-debian-updates:
   variables:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 
+test_provisioning_lib:
+  stage: test
+  image: docker-registry.knut.univention.de/python:3.11-slim
+  rules:
+    - if: "$CI_COMMIT_MESSAGE =~ /skip-build/ || $pipeline =~ /skip-build/"
+      when: never
+    - if: "$CI_COMMIT_MESSAGE =~ /force-build/ || $pipeline =~ /force-build/"
+    - changes:
+        - src/client/**/*
+        - src/shared/**/*
+        - tests/unit/provisioning_lib/**/*
+  script:
+    - pip install poetry=="$POETRY_VERSION"
+    - poetry config --local virtualenvs.create false
+    - poetry install
+    - poetry run pytest tests/unit/provisioning_lib --cov=src/client --cov-report=term --cov-report=xml:coverage.xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: provisioning_lib/coverage.xml
+
 build_provisioning_lib:
   stage: build
+  needs:
+    - test_provisioning_lib
   rules:
     - changes:
         - src/client/**/*
