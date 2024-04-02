@@ -183,13 +183,13 @@ test_provisioning_lib:
     - pip install poetry=="$POETRY_VERSION"
     - poetry config --local virtualenvs.create false
     - poetry install
-    - poetry run pytest tests/unit/provisioning_lib --cov=src/client --cov-report=term --cov-report=xml:coverage.xml
+    - pytest -vv tests/unit/provisioning_lib --cov=src/client --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: provisioning_lib/coverage.xml
+        path: coverage.xml
 
 build_provisioning_lib:
   stage: build
