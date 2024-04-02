@@ -193,8 +193,6 @@ test_provisioning_lib:
 
 build_provisioning_lib:
   stage: build
-  needs:
-    - test_provisioning_lib
   rules:
     - changes:
         - src/client/**/*
@@ -227,6 +225,7 @@ publish_provisioning_lib:
     - build_provisioning_lib
   needs:
     - build_provisioning_lib
+    - test_provisioning_lib
   image: docker-registry.knut.univention.de/python:3.11-slim
   script:
     - cd src
