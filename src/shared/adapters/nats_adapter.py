@@ -100,7 +100,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         while True:
             async for update in watcher:
                 if update:
-                    _, realm_topic = update.key.split(".")
+                    _, realm_topic = update.key.split(".", maxsplit=1)
                     if update.operation == KV_DEL:
                         subscriptions.pop(realm_topic, None)
                     else:
