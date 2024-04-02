@@ -20,6 +20,10 @@ aiohttp = "^3.8.5"
 [tool.poetry.scripts]
 client = "client.example_client.main:run"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+pytest-cov = "4.1"
+
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
