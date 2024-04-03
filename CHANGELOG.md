@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.21.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.1...v0.21.2) (2024-04-03)
+
+
+### Bug Fixes
+
+* **dispatcher:** handle failed events in the dispatcher ([a901c4e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a901c4ea2bd2c766a40f4ce5093297f13fb34bf9))
+* **dispatcher:** raise an exception in the dispatcher on failure ([c0290d3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c0290d3df91bde0f10a47cad6500b768fcec4269))
+* forward the entire deployment instead of the pod-hash, use upper case for constants ([7a79b73](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7a79b73f6dde9411c885afcf618d047b501af97a))
+* **prefill:** do not return the message to the queue on error ([6361315](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6361315316b6937fc3f8edac855087a859394428))
+* prevent redelivery of messages by extending AckWait for prefill service ([e84c7b7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e84c7b79a2461c26f21659dab4408c2149e7c7f5))
+* prevent redelivery of messages for the dispatcher service ([ac5738c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ac5738c04aa24d47763b359a869b42a07b4435a3))
+* remove unused values from PrefillService, add annotations ([fc01cfb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fc01cfb27ae50bdfe6dee74e2405840f0ddec807))
+
 ## [0.21.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.0...v0.21.1) (2024-03-22)
 
 
