@@ -58,14 +58,5 @@ class DispatcherPort:
     async def acknowledge_message_in_progress(self, message: MQMessage):
         await self.mq_adapter.acknowledge_message_in_progress(message)
 
-    async def create_stream(self, subject: str):
-        await self.mq_adapter.create_stream(subject)
-
-    async def create_consumer(self, subject: str):
-        await self.mq_adapter.create_consumer(subject)
-
-    async def add_event_to_dispatcher_failures(self, queue_name: str, message: Message):
-        await self.mq_adapter.add_message(queue_name, message)
-
     async def watch_for_changes(self, subscriptions: Dict[str, list]):
         await self.kv_adapter.watch_for_changes(subscriptions)
