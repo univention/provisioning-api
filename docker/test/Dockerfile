@@ -44,4 +44,4 @@ COPY logging.yaml \
      ${WORKDIR}/
 
 # install dependencies
-RUN poetry install --only main
+RUN poetry install --with dev
