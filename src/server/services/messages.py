@@ -15,8 +15,8 @@ from src.shared.models import (
     Message,
     NewSubscription,
     PrefillMessage,
+    PREFILL_SUBJECT_TEMPLATE,
 )
-from ..models.queue import PREFILL_SUBJECT_TEMPLATE
 
 
 class MessageService:

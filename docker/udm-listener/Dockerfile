@@ -22,7 +22,6 @@ RUN chown "$USER":"$USER" "$WORKDIR" \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 
-
 ENV \
     PATH="/home/${USER}/.local/bin:${PATH}" \
     PYTHONPATH="." \
@@ -38,6 +37,9 @@ ENV \
     # Cache of poetry
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+# install Poetry
+RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
+
 # copy source code
 COPY ./src/server ./src/server
 COPY ./src/shared ./src/shared
@@ -46,13 +48,11 @@ COPY logging.yaml \
      pyproject.toml \
      README.md \
      ./
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
-RUN poetry install --with dev
 
+# install dependencies
+RUN poetry install --only main
 
 FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as udm_rest_image
-
 
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
 

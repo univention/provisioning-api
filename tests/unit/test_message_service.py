@@ -3,9 +3,9 @@
 
 from unittest.mock import AsyncMock, patch, call
 import pytest
-from src.server.services.messages import MessageService, PREFILL_SUBJECT_TEMPLATE
+from src.server.services.messages import MessageService
 from tests.conftest import MESSAGE, REPORT, SUBSCRIPTION_NAME
-from src.shared.models import FillQueueStatus
+from src.shared.models import FillQueueStatus, PREFILL_SUBJECT_TEMPLATE
 
 
 @pytest.fixture
