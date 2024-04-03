@@ -1,41 +1,41 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-{{- $root := . -}}
-{{- range .Values.register_consumers.consumers }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-register-consumers-%s" (include "common.names.fullname" $root) .name }}
+  name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
 spec:
   template:
     spec:
       restartPolicy: Never
+      volumes:
+        - name: consumer-secrets
+          secret:
+            secretName: {{ $.Values.register_consumers.jsonSecretName }}
       initContainers:
-        - name: {{ printf "wait-for-%s-api-to-start" (include "common.names.fullname" $root) }}
+        - name: {{ printf "wait-for-%s-api-to-start" (include "common.names.fullname" .) }}
           image: busybox
-          command: [ "sh", "-c", "until nc -z {{ printf "%s-api" (include "common.names.fullname" $root) }} 80 > /dev/null; do echo Waiting for api.; sleep 2; done;" ]
+          command: [ "sh", "-c", "until nc -z {{ printf "%s-api" (include "common.names.fullname" .) }} 80 > /dev/null; do echo Waiting for api; sleep 2; done;" ]
       containers:
-        - name: consumer-{{ .name }}
+        - name: consumer-registration
           image: curlimages/curl
+          volumeMounts:
+            - name: consumer-secrets
+              mountPath: "/secrets"
           envFrom:
             - configMapRef:
-                name: {{ printf "%s-register-consumers" (include "common.names.fullname" $root) }}
+                name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
             - secretRef:
                 name: {{ $.Values.register_consumers.credentialSecretName | quote }}
           command:
             - "/bin/sh"
             - "-c"
+          args:
             - |
-              curl -4 -v -u $ADMIN_USERNAME:$ADMIN_PASSWORD \
-              -H 'Content-Type: application/json' \
-              -d @- $PROVISIONING_API_BASE_URL <<EOF
-              {
-                "name": "{{ .name }}",
-                "realms_topics": {{ toJson .realms_topics }},
-                "request_prefill": {{ .request_prefill }},
-                "password": "{{ .password }}"
-              }
-              EOF
-{{- end }}
+              for file in /secrets/*; do
+                curl -4 -v -u $ADMIN_USERNAME:$ADMIN_PASSWORD \
+                -H 'Content-Type: application/json' \
+                -d @$file $PROVISIONING_API_BASE_URL
+              done
