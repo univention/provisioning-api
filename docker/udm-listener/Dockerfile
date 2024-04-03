@@ -38,6 +38,7 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # install Poetry
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
 
 # copy source code
