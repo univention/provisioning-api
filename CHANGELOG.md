@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.21.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.2...v0.21.3) (2024-04-03)
+
+
+### Bug Fixes
+
+* add maxsplit param ([c1d74cc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c1d74cc16472ca355935c2fc216ffbb50c9445e6))
+* implement direct nats access for dispatcher and prefill, use the watch feature to reduce nats calls ([389a000](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/389a00056837b7603fc318a5163cb2af993109cd))
+* refactor and fix the logic for watching for the changes ([cf92d9c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cf92d9c103cb7c6616531ea58d988d289a5e85f8))
+* remove credentials for dispatcher ([0c5c51d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0c5c51d7f1a3deebea5b08eb049cad44b5206c4b))
+
 ## [0.21.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.1...v0.21.2) (2024-04-03)
 
 
