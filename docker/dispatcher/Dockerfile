@@ -34,6 +34,9 @@ ENV \
     # Cache of poetry
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+# install Poetry
+RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
+
 # copy source code
 COPY ./src/server ${WORKDIR}/src/server
 COPY ./src/shared ${WORKDIR}/src/shared
@@ -43,11 +46,8 @@ COPY logging.yaml \
      README.md \
      ${WORKDIR}/
 
-RUN \
-    # install Poetry
-    pip3 install --break-system-packages --no-cache-dir poetry==1.6.1 && \
-    # install dependencies
-    poetry install --only main
+# install dependencies
+RUN poetry install --only main
 
 ###############################################
 # Stage 2: test image
