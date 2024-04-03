@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Dict, List
 
-from shared.utils.message_ack_manager import MessageAckManager
+from src.shared.utils.message_ack_manager import MessageAckManager
 from src.server.core.dispatcher.port import DispatcherPort
 from src.shared.models import Message, MQMessage
 
