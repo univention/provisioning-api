@@ -539,12 +539,5 @@ nats:
 
 register_consumers:
   credentialSecretName: ""
+  jsonSecretName: ""
   provisioningApiBaseUrl: "http://provisioning-api/internal/admin/v1/subscriptions"
-  consumers:
-    - name: "new-consumer"
-      realms_topics:
-        -
-          - "udm"
-          - "groups/group"
-      request_prefill: true
-      password: "password"
