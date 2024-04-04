@@ -18,7 +18,8 @@ RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip=18.1-5 curl=7.64.0-4+deb10u8 \
+      pipx=0.12.1.0-1 \
+      python3-venv=3.7.3-1 \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 
@@ -38,8 +39,7 @@ ENV \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # install Poetry
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.5.1 python3 -
+RUN pipx install poetry==1.5.1
 
 # copy source code
 COPY ./src/server ./src/server
