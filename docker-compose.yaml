@@ -182,9 +182,9 @@ services:
   # Environment to build the documentation
   docs:
     image: docker-registry.knut.univention.de/sphinx:latest
-    working_dir: /src/server/docs
+    working_dir: /src/docs
     volumes:
-      - ".:/src/server"
+      - ".:/src"
     profiles:
       - docs
 
