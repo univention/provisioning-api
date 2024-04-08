@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.3...v0.21.4) (2024-04-08)
+
+
+### Bug Fixes
+
+* preserve the order of the message delivery, add tests ([f73f353](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f73f35342cbcfde8c309e8443a8f8e45666b7772))
+
 ## [0.21.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.2...v0.21.3) (2024-04-03)
 
 
