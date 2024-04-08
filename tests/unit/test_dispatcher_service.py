@@ -25,7 +25,7 @@ class TestDispatcherService:
             side_effect=[MQMESSAGE, Exception("Stop waiting for the new event")]
         )
 
-        with pytest.raises(Exception) as e:
+        with pytest.raises(Exception, match="Stop waiting for the new event"):
             await dispatcher_service.dispatch_events()
 
         dispatcher_service._port.subscribe_to_queue.assert_called_once_with(
@@ -39,4 +39,3 @@ class TestDispatcherService:
             SUBSCRIPTION_INFO["name"], MESSAGE
         )
         dispatcher_service._port.acknowledge_message.assert_called_once_with(MQMESSAGE)
-        assert "Stop waiting for the new event" == str(e.value)

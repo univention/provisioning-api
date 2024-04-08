@@ -194,7 +194,7 @@ class MessageHandler:
         ) as exc:
             logger.error(
                 "Failed to acknowledge message. It will be redelivered later. - %s",
-                str(exc),
+                repr(exc),
             )
 
     async def run(

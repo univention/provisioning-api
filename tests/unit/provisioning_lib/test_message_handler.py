@@ -23,7 +23,7 @@ class TestMessageHandler:
         result.append(message)
 
     async def test_no_callback_function_provided(self, async_client: AsyncClient):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Callback functions can't be empty"):
             await MessageHandler(
                 async_client, SUBSCRIPTION_NAME, [], message_limit=1
             ).run()

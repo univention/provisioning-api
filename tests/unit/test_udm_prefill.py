@@ -59,7 +59,7 @@ class TestUDMPreFill:
         udm_prefill._port.list_objects = AsyncMock(return_value=[self.url])
         udm_prefill._port.get_object = AsyncMock(return_value=self.obj)
 
-        with pytest.raises(Exception) as e:
+        with pytest.raises(Exception, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
         udm_prefill._port.subscribe_to_queue.assert_called_once_with(
@@ -79,8 +79,6 @@ class TestUDMPreFill:
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
-        assert "Stop waiting for the new event" == str(e.value)
-
     @patch("src.server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill_moving_to_failures(
         self, mock_datetime, udm_prefill
@@ -93,7 +91,7 @@ class TestUDMPreFill:
             ]
         )
 
-        with pytest.raises(Exception) as e:
+        with pytest.raises(Exception, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
         udm_prefill._port.subscribe_to_queue.assert_called_once_with(
@@ -113,8 +111,6 @@ class TestUDMPreFill:
         udm_prefill._port.add_request_to_prefill_failures.assert_called_once_with(
             "prefill-failures", PREFILL_MESSAGE
         )
-
-        assert "Stop waiting for the new event" == str(e.value)
 
     @patch("src.server.core.prefill.service.udm_prefill.datetime")
     async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill):
