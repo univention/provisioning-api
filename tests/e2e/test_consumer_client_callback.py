@@ -10,7 +10,7 @@ from tests.e2e.helpers import create_message_via_events_api
 async def test_no_callback_function_provided(
     provisioning_client: AsyncClient, simple_subscription: str
 ):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Callback functions can't be empty"):
         await MessageHandler(
             provisioning_client, simple_subscription, [], message_limit=1
         ).run()

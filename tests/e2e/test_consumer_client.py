@@ -97,10 +97,9 @@ async def test_get_messages_zero_timeout(
 async def test_get_messages_from_the_wrong_queue(
     provisioning_client: AsyncClient, simple_subscription: str
 ):
-    with pytest.raises(aiohttp.ClientResponseError) as er:
+    with pytest.raises(aiohttp.ClientResponseError, match="Unauthorized"):
         await provisioning_client.get_subscription_messages(
             name="wrong_subscription_name",
             count=1,
             timeout=5,
         )
-        assert "Unauthorized" == str(er.value)
