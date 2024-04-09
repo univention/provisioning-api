@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List, Optional
 from .port import Port
 from .subscriptions import SubscriptionService
-from src.shared.models import (
+from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
     PublisherName,

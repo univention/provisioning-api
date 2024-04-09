@@ -64,4 +64,4 @@ WORKDIR ${WORKDIR}
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # run
-ENTRYPOINT ["./.venv/bin/python3", "-m", "src.server.core.dispatcher.main"]
+ENTRYPOINT ["./.venv/bin/python3", "-m", "server.core.dispatcher.main"]

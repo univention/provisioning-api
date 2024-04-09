@@ -4,9 +4,9 @@
 from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
 import pytest
-from src.server.core.prefill.service.udm_prefill import UDMPreFill
-from src.server.core.prefill.service.udm_prefill import match_topic
-from src.shared.models import Message, PublisherName
+from server.core.prefill.service.udm_prefill import UDMPreFill
+from server.core.prefill.service.udm_prefill import match_topic
+from shared.models import Message, PublisherName
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     PREFILL_MESSAGE,
@@ -49,7 +49,7 @@ class TestUDMPreFill:
         },
     )
 
-    @patch("src.server.core.prefill.service.udm_prefill.datetime")
+    @patch("server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill):
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._port.wait_for_event = AsyncMock(
@@ -79,7 +79,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
-    @patch("src.server.core.prefill.service.udm_prefill.datetime")
+    @patch("server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill_moving_to_failures(
         self, mock_datetime, udm_prefill
     ):
@@ -112,7 +112,7 @@ class TestUDMPreFill:
             "prefill-failures", PREFILL_MESSAGE
         )
 
-    @patch("src.server.core.prefill.service.udm_prefill.datetime")
+    @patch("server.core.prefill.service.udm_prefill.datetime")
     async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill):
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._topic = "test-topic"

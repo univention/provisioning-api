@@ -7,10 +7,10 @@ import fastapi
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from src.server.core.app.auth import authenticate_admin
-from src.shared.models import Subscription
-from src.server.services.port import PortDependency
-from src.server.services.subscriptions import SubscriptionService
+from server.core.app.auth import authenticate_admin
+from shared.models import Subscription
+from server.services.port import PortDependency
+from server.services.subscriptions import SubscriptionService
 
 router = fastapi.APIRouter()
 security = HTTPBasic()

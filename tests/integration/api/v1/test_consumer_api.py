@@ -4,7 +4,7 @@
 from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
-from src.server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
+from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
 from tests.conftest import (
     REALMS_TOPICS_STR,
     REALM,
@@ -16,10 +16,10 @@ from tests.conftest import (
     REPORT,
     CREDENTIALS,
 )
-from src.shared.models.subscription import FillQueueStatus
-from src.server.core.app.consumer.subscriptions.api import v1_prefix as api_prefix
-from src.server.core.app.main import app as messages_app
-from src.server.core.app.main import app as subscriptions_app
+from shared.models.subscription import FillQueueStatus
+from server.core.app.consumer.subscriptions.api import v1_prefix as api_prefix
+from server.core.app.main import app as messages_app
+from server.core.app.main import app as subscriptions_app
 
 
 @pytest.fixture(scope="session")
@@ -45,7 +45,7 @@ async def messages_client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("src.server.core.app.auth.app_settings").start()
+    settings = patch("server.core.app.auth.app_settings").start()
     settings.admin_username = CREDENTIALS.username
     settings.admin_password = CREDENTIALS.password
     return settings

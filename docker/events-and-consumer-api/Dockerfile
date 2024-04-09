@@ -68,7 +68,7 @@ EXPOSE 7777
 # run
 ENTRYPOINT [ \
         "./.venv/bin/uvicorn", \
-         "src.server.core.app.main:app", \
+         "server.core.app.main:app", \
         "--log-config", "logging.yaml", \
         "--host", "0.0.0.0", \
         "--port", "7777" \

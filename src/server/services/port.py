@@ -4,9 +4,9 @@
 import json
 from typing import List, Annotated, Optional, Union
 from fastapi import Depends
-from src.server.core.app.config import AppSettings
-from src.server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from src.shared.models import ProvisioningMessage, PrefillMessage, Bucket, Message
+from server.core.app.config import AppSettings
+from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
+from shared.models import ProvisioningMessage, PrefillMessage, Bucket, Message
 
 
 class Port:

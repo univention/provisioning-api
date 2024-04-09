@@ -5,8 +5,8 @@ import contextlib
 import logging
 from typing import Optional, Dict
 
-from src.server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from src.shared.models import Message, MQMessage, Bucket
+from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
+from shared.models import Message, MQMessage, Bucket
 
 from .config import DispatcherSettings
 

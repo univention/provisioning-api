@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 from tests.conftest import FLAT_MESSAGE, CREDENTIALS
-from src.server.core.app.internal.api import v1_prefix as api_prefix
-from src.server.core.app.main import app, internal_app_path
+from server.core.app.internal.api import v1_prefix as api_prefix
+from server.core.app.main import app, internal_app_path
 
 
 @pytest.fixture(scope="session")
@@ -22,7 +22,7 @@ async def client():
 
 @pytest.fixture
 def settings_mock() -> AsyncMock:
-    settings = patch("src.server.core.app.internal.api.v1.api.app_settings").start()
+    settings = patch("server.core.app.internal.api.v1.api.app_settings").start()
     settings.events_username_udm = CREDENTIALS.username
     settings.events_password_udm = CREDENTIALS.password
     return settings

@@ -3,8 +3,8 @@
 
 import asyncio
 
-from src.server.core.dispatcher.port import DispatcherPort
-from src.server.core.dispatcher.service.dispatcher import DispatcherService
+from server.core.dispatcher.port import DispatcherPort
+from server.core.dispatcher.service.dispatcher import DispatcherService
 from daemoniker import Daemonizer
 
 

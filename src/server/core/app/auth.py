@@ -5,7 +5,7 @@ import secrets
 from typing import Annotated
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
-from src.server.core.app.config import app_settings
+from server.core.app.config import app_settings
 
 security = HTTPBasic()
 

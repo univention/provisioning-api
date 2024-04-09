@@ -3,7 +3,7 @@
 
 import pytest
 from client import AsyncClient, MessageHandler
-from src.shared.models import Message
+from shared.models import Message
 from tests.e2e.helpers import create_message_via_events_api
 
 

@@ -3,14 +3,14 @@
 
 from unittest.mock import AsyncMock, patch, call
 import pytest
-from src.server.services.messages import MessageService
+from server.services.messages import MessageService
 from tests.conftest import MESSAGE, REPORT, SUBSCRIPTION_NAME
-from src.shared.models import FillQueueStatus, PREFILL_SUBJECT_TEMPLATE
+from shared.models import FillQueueStatus, PREFILL_SUBJECT_TEMPLATE
 
 
 @pytest.fixture
 def sub_service() -> AsyncMock:
-    yield patch("src.server.services.messages.SubscriptionService").start().return_value
+    yield patch("server.services.messages.SubscriptionService").start().return_value
 
 
 @pytest.fixture
