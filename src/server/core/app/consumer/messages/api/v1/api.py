@@ -10,19 +10,19 @@ import logging
 from fastapi import Query, Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from src.server.core.app.consumer.subscriptions.subscription.sink import (
+from server.core.app.consumer.subscriptions.subscription.sink import (
     SinkManager,
     WebSocketSink,
 )
-from src.shared.models import (
+from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
     Message,
     ProvisioningMessage,
 )
-from src.server.services.messages import MessageService
-from src.server.services.port import PortDependency
-from src.server.services.subscriptions import SubscriptionService
+from server.services.messages import MessageService
+from server.services.port import PortDependency
+from server.services.subscriptions import SubscriptionService
 
 logger = logging.getLogger(__name__)
 

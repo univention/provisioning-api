@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from client import AsyncClient
-from src.shared.models import MessageProcessingStatus, MessageProcessingStatusReport
+from shared.models import MessageProcessingStatus, MessageProcessingStatusReport
 from tests.e2e.helpers import create_message_via_events_api
 
 

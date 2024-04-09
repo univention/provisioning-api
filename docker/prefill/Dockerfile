@@ -64,4 +64,4 @@ WORKDIR ${WORKDIR}
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # run
-ENTRYPOINT ["./.venv/bin/python3", "-m", "src.server.core.prefill.main"]
+ENTRYPOINT ["./.venv/bin/python3", "-m", "server.core.prefill.main"]

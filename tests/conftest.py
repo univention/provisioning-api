@@ -13,9 +13,9 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 from tests import set_test_env_vars
-from src.server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from src.shared.models.subscription import Bucket
-from src.shared.models import (
+from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from shared.models.subscription import Bucket
+from shared.models import (
     Message,
     MessageProcessingStatusReport,
     MessageProcessingStatus,
@@ -27,9 +27,9 @@ from src.shared.models import (
 
 set_test_env_vars()
 
-from src.server.core.app.config import AppSettings  # noqa: E402
-from src.server.services.port import Port  # noqa: E402
-from src.server.core.app.main import app, internal_app  # noqa: E402
+from server.core.app.config import AppSettings  # noqa: E402
+from server.services.port import Port  # noqa: E402
+from server.core.app.main import app, internal_app  # noqa: E402
 
 REALM = "udm"
 TOPIC = "groups/group"

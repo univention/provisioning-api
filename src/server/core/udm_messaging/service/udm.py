@@ -5,9 +5,9 @@ import logging
 from datetime import datetime
 from typing import Optional
 import json
-from src.server.core.udm_messaging.config import udm_producer_settings
-from src.server.core.udm_messaging.port import UDMMessagingPort
-from src.shared.models import Bucket, Message, PublisherName
+from server.core.udm_messaging.config import udm_producer_settings
+from server.core.udm_messaging.port import UDMMessagingPort
+from shared.models import Bucket, Message, PublisherName
 from univention.admin.rest.module import Object
 import univention.admin.uldap
 from univention.management.console.log import MODULE

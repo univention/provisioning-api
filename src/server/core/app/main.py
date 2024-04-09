@@ -10,13 +10,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from src.server.core.app.consumer.messages.api import router as messages_api_router
-from src.server.core.app.consumer.subscriptions.api import (
+from server.core.app.consumer.messages.api import router as messages_api_router
+from server.core.app.consumer.subscriptions.api import (
     router as subscriptions_api_router,
 )
-from src.server.core.app.admin.api import router as admin_api_router
-from src.server.core.app.internal.api import router as internal_api_router
-from src.server.config import settings
+from server.core.app.admin.api import router as admin_api_router
+from server.core.app.internal.api import router as internal_api_router
+from server.config import settings
 
 # TODO split up logging
 # from .log import setup as setup_logging

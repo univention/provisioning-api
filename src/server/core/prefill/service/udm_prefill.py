@@ -4,9 +4,9 @@ import re
 from datetime import datetime
 import logging
 
-from src.server.core.prefill.base import PreFillService
-from src.server.core.prefill.port import PrefillPort
-from src.shared.models import (
+from server.core.prefill.base import PreFillService
+from server.core.prefill.port import PrefillPort
+from shared.models import (
     FillQueueStatus,
     PrefillMessage,
     Message,
@@ -14,7 +14,7 @@ from src.shared.models import (
     PublisherName,
     PREFILL_SUBJECT_TEMPLATE,
 )
-from src.shared.utils.message_ack_manager import MessageAckManager
+from shared.utils.message_ack_manager import MessageAckManager
 
 
 def match_topic(sub_topic: str, module_name: str) -> bool:

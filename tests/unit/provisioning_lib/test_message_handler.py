@@ -13,7 +13,7 @@ from tests.conftest import SUBSCRIPTION_NAME, PROVISIONING_MESSAGE
 
 @pytest.fixture
 def async_client() -> AsyncMock:
-    yield patch("src.client.api.AsyncClient").start().return_value
+    yield patch("client.api.AsyncClient").start().return_value
 
 
 @pytest.mark.anyio
