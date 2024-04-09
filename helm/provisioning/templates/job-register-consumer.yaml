@@ -20,7 +20,7 @@ spec:
           command: [ "sh", "-c", "until nc -z {{ printf "%s-api" (include "common.names.fullname" .) }} 80 > /dev/null; do echo Waiting for api; sleep 2; done;" ]
       containers:
         - name: consumer-registration
-          image: curlimages/curl
+          image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
           volumeMounts:
             - name: consumer-secrets
               mountPath: "/secrets"

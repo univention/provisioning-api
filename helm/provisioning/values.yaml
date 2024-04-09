@@ -538,6 +538,12 @@ nats:
           size: 1Gi
 
 register_consumers:
+  image:
+    # TODO: unset when global.imageRegistry is supported by update-helm-values
+    registry: "gitregistry.knut.univention.de"
+    imagePullPolicy: "IfNotPresent"
+    repository: "univention/components/univention-portal/wait-for-dependency"
+    tag: "latest"
   credentialSecretName: ""
   jsonSecretName: ""
   provisioningApiBaseUrl: "http://provisioning-api/internal/admin/v1/subscriptions"

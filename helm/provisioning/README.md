@@ -149,6 +149,10 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | register_consumers.credentialSecretName | string | `""` |  |
+| register_consumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| register_consumers.image.registry | string | `"gitregistry.knut.univention.de"` |  |
+| register_consumers.image.repository | string | `"univention/components/univention-portal/wait-for-dependency"` |  |
+| register_consumers.image.tag | string | `"latest"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
 | register_consumers.provisioningApiBaseUrl | string | `"http://provisioning-api/internal/admin/v1/subscriptions"` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1}` | Set the amount of replicas of deployment. |
