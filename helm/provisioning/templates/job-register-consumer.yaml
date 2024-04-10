@@ -15,9 +15,10 @@ spec:
           secret:
             secretName: {{ $.Values.register_consumers.jsonSecretName }}
       initContainers:
-        - name: {{ printf "wait-for-%s-api-to-start" (include "common.names.fullname" .) }}
-          image: busybox
-          command: [ "sh", "-c", "until nc -z {{ printf "%s-api" (include "common.names.fullname" .) }} 80 > /dev/null; do echo Waiting for api; sleep 2; done;" ]
+        - name: wait-for-api-to-start
+          image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
+          command: [ "sh", "-c", "until curl -s {{ printf "%s-api:%d" (include "common.names.fullname" .) (.Values.service.ports.http.port | int) }} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
+
       containers:
         - name: consumer-registration
           image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
@@ -35,15 +36,15 @@ spec:
           args:
             - |
               for file in /secrets/*; do
-                filename=$(basename "$file" .json)
-                response=$(curl -s -o response.txt -w "%{http_code}" -u $ADMIN_USERNAME:$ADMIN_PASSWORD \
+                filename=$(basename "${file}" .json)
+                response=$(curl -s -o response.txt -w "%{http_code}" -u "${ADMIN_USERNAME}":"${ADMIN_PASSWORD}" \
                 -H 'Content-Type: application/json' \
-                -d @$file $PROVISIONING_API_BASE_URL)
-                if [ "$response" -eq 201 ]; then
-                  echo "Successful registration of the consumer: $filename"
+                -d @"${file}" "${PROVISIONING_API_BASE_URL}")
+                if [ "${response}" -eq 201 ]; then
+                  echo "Successful registration of the consumer: "${filename}""
                 else
-                  echo "Failed to register the consumer: $filename
-              Response code: $response
+                  echo "Failed to register the consumer: "${filename}"
+              Response code: "${response}"
               Response body: $(cat response.txt)"
                 fi
                 echo ------------------------------------
