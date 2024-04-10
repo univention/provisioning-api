@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.22.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.4...v0.22.0) (2024-04-10)
+
+
+### Features
+
+* add a CI job for publishing provisioning-client lib ([ffc947e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ffc947e5396d984978d4e62b14b3f4259dc65a39))
+* add CI job for testing provisioning lib ([1743c51](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1743c51ad7f09d7d98411a3196d45814ad1add9f))
+* add pyproject.toml for client lib ([7d80563](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7d8056343b85b667f7be6570681ff2064b758bf5))
+
+
+### Bug Fixes
+
+* add 'build_python' stage ([165aced](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/165acedc7ec3602b0f4a515dea23058f474a4bce))
+* add missing import ([d8c2f8e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d8c2f8eb01be892afa681e520c94ef47babee3a9))
+* add POETRY_VERSION to the gitlab-ci, increase python version ([2b6ebc1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2b6ebc129366e96cc28112e66cb29b3a228518c0))
+* add pytest to the pyproject.toml ([6f58731](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6f5873151e1fc7727f83e3c6fc544bc5876f3b47))
+* change command to run the tests and path to the coverage.xml ([4d845c0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4d845c05b8c5b43115307d31ffba590a84c380b2))
+* do not use folder 'src' as the top level package ([681b1ff](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/681b1ff1c850bb052d86e2025b6dead3b2596134))
+* fix code after refactoring ([596e029](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/596e02927d0d9ea51db09a828ba83ae201a11b3d))
+* fix copying the source code for the example-client ([388b3fb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/388b3fb8deab76036f77de34cae1c8ac28002303))
+* fix installing the dependencies for the test container ([1f5ddc4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1f5ddc497257d4aeafd4698c2f420fd8cf0fda24))
+* fix typo ([b6d4c70](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b6d4c709e703eb0a7f717fa4f3bda2e24fed965d))
+* install poetry before COPY src ([4064ce6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4064ce6e89db001a4b053c61f7645e0c5f702020))
+* move test_provisioning_lib to the publish_provisioning_lib needs ([729db4b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/729db4b001fa9cd27c5b54b91184646622abac62))
+* rename 'example-client' to 'example_client' ([fcbcb9e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fcbcb9e6d1309b6c1dcadb429cb73d5ba7bed349))
+* rename 'provisioning-lib' to 'provisioning-consumer-lib' ([baf8464](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/baf8464c3f2fa3b3a4ada173b4e06276c5fb0d4b))
+* return back the SHELL option -o pipefail before RUN ([358f7ba](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/358f7bad08149e27781ae3f2f24bd181b3a9e4a2))
+* use 'build' stage instead of 'build_python', use lower python version ([4798ec9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4798ec91d397f36e09aeac44553f6c99aae60998))
+* use pipx for installing Poetry instead of curl, and deliver docs for all parts of the project ([635242e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/635242ef7bf0f0343839be9fe7e434847414fb8e))
+
 ## [0.21.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.3...v0.21.4) (2024-04-08)
 
 
