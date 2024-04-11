@@ -18,7 +18,13 @@ spec:
         - name: wait-for-api-to-start
           image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
           command: [ "sh", "-c", "until curl -s {{ printf "%s-api:%d" (include "common.names.fullname" .) (.Values.service.ports.http.port | int) }} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
-
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
       containers:
         - name: consumer-registration
           image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
