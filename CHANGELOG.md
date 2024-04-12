@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.22.0...v0.22.1) (2024-04-12)
+
+
+### Bug Fixes
+
+* use repository versioning on pypi released package [force-build] ([28c22f2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/28c22f252e2e57ddb707224cf41faddd071270d0))
+
 ## [0.22.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.21.4...v0.22.0) (2024-04-10)
 
 
