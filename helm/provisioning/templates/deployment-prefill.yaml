@@ -76,9 +76,9 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
-          {{- if .Values.prefill.credentialSecretName }}
+          {{- if (include "provisioning-prefill.credentialSecretName" .) }}
             - secretRef:
-                name: {{ .Values.prefill.credentialSecretName | quote }}
+                name: {{ include "provisioning-prefill.credentialSecretName" . | quote }}
           {{- end }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
