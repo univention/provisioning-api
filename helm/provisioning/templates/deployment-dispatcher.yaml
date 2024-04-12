@@ -76,9 +76,9 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-dispatcher" (include "common.names.fullname" .) }}
-          {{- if .Values.dispatcher.credentialSecretName }}
+          {{- if (include "provisioning-dispatcher.credentialSecretName" .) }}
             - secretRef:
-                name: {{ .Values.dispatcher.credentialSecretName | quote }}
+                name: {{ include "provisioning-dispatcher.credentialSecretName" . | quote }}
           {{- end }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
