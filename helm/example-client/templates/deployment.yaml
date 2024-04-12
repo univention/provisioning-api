@@ -67,9 +67,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
-          {{- if .Values.credentialSecretName }}
+          {{- if (include "provisioning-example-client.credentialSecretName" .) }}
             - secretRef:
-                name: {{ .Values.credentialSecretName | quote }}
+                name: {{ include "provisioning-example-client.credentialSecretName" . | quote }}
           {{- end }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" .) | nindent 12 }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" .) | nindent 12 }}

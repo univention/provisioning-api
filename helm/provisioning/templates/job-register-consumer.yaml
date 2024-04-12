@@ -12,8 +12,10 @@ spec:
       restartPolicy: Never
       volumes:
         - name: consumer-secrets
+        {{- if (include "provisioning-register-consumers.jsonSecretName" .) }}
           secret:
-            secretName: {{ $.Values.register_consumers.jsonSecretName }}
+            secretName: {{ include "provisioning-register-consumers.jsonSecretName" . | quote }}
+        {{- end }}
       initContainers:
         - name: wait-for-api-to-start
           image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
@@ -34,8 +36,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+          {{- if (include "provisioning-register-consumers.credentialSecretName" .) }}
             - secretRef:
-                name: {{ $.Values.register_consumers.credentialSecretName | quote }}
+                name: {{ include "provisioning-register-consumers.credentialSecretName" . | quote }}
+          {{- end }}
           command:
             - "/bin/sh"
             - "-c"
