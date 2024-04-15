@@ -1,9 +1,9 @@
 dependencies:
 - name: common
-  repository: oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts
-  version: 2.13.3
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 2.19.1
 - name: nats
-  repository: oci://registry.souvap-univention.de/souvap/tooling/charts/univention
-  version: 0.0.2
-digest: sha256:3a3026146e92529a422685ba8a9c5af17878c4df89240301bc77cbba8f6b2b3e
-generated: "2024-04-17T11:53:31.460297+02:00"
+  repository: oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm
+  version: 0.1.0
+digest: sha256:47891365163a50e5c7214b221c822d7a56face5c9d8cce0bc03012fd8932d6a7
+generated: "2024-04-23T16:13:52.771504+02:00"

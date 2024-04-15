@@ -17,7 +17,7 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"4","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","internalApiHost":"provisioning-api","internalApiPort":"80","ldapBaseDn":null,"ldapHost":"ldap-server","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"password","natsPort":"4222","natsUser":"udmlistener","notifierServer":"ldap-notifier","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"4","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","internalApiHost":"provisioning-api","internalApiPort":"80","ldapBaseDn":null,"ldapHost":"ldap-server","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"password","natsPort":"4222","natsUser":"udmlistener","notifierServer":"ldap-notifier","provisioningApi":{"auth":{"credentialSecret":{"name":"","passwordKey":"EVENTS_PASSWORD_UDM","userNameKey":"EVENTS_USERNAME_UDM"}}},"secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.eventsUsernameUdm | string | `"udm"` | Messages-API Port |
@@ -30,14 +30,26 @@ A Helm chart for the Univention Portal Provisioning API
 | config.natsPort | string | `"4222"` | NATS: port (required if nats.bundled == false) |
 | config.natsUser | string | `"udmlistener"` | NATS: user name |
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
+| config.secretMountPath | string | `"/var/secrets"` | Path to mount the secrets to. |
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
+| global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-udm-listener"` |  |
 | image.tag | string | `"latest"` |  |
+| ldap.credentialSecret.ldapPasswordKey | string | `"ldap.secret"` |  |
+| ldap.credentialSecret.machinePasswordKey | string | `"machine.secret"` |  |
+| ldap.credentialSecret.name | string | `""` |  |
+| ldap.tlsSecret.caCertKey | string | `"ca.crt"` |  |
+| ldap.tlsSecret.certificateKey | string | `"tls.crt"` |  |
+| ldap.tlsSecret.name | string | `""` |  |
+| ldap.tlsSecret.privateKeyKey | string | `"tls.key"` |  |
+| mountSecrets | bool | `true` |  |
 | nameOverride | string | `""` |  |
+| nats.auth.credentialSecret.key | string | `"NATS_PASSWORD"` |  |
+| nats.auth.credentialSecret.name | string | `""` |  |
 | nats.bundled | bool | `true` |  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |

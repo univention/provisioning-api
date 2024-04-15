@@ -4,6 +4,8 @@
 ---
 # The global properties are used to configure multiple charts at once.
 global:
+  # -- Indicates wether this chart is part of a Nubus deployment.
+  nubusDeployment: false
   # -- Container registry address.
   imageRegistry: "gitregistry.knut.univention.de"
 
@@ -30,6 +32,12 @@ global:
   configMapUcrDefaults: "stack-data-ums-ucr"
   configMapUcr: "stack-data-swp-ucr"
   configMapUcrForced: null
+
+  # -- Define configuration regarding nats connectivity.
+  nats:
+    connection:
+      host: ""
+      port: ""
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}
@@ -495,7 +503,7 @@ dispatcher:
     registry: "gitregistry.knut.univention.de"
     imagePullPolicy: "IfNotPresent"
     repository: "univention/customers/dataport/upx/provisioning/provisioning-dispatcher"
-    tag: "0.14.0"
+    tag: "latest"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -513,7 +521,7 @@ prefill:
     registry: "gitregistry.knut.univention.de"
     imagePullPolicy: "IfNotPresent"
     repository: "univention/customers/dataport/upx/provisioning/provisioning-prefill"
-    tag: "0.14.0"
+    tag: "latest"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -554,6 +562,83 @@ nats:
       fileStorage:
         pvc:
           size: 1Gi
+    authorization:
+      enabled: true
+      users:
+        - user: "$NATS_USER"
+          password: "$NATS_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "$NATS_API_USER"
+          password: "$NATS_API_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "$NATS_DISPATCHER_USER"
+          password: "$NATS_DISPATCHER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "$NATS_PREFILL_USER"
+          password: "$NATS_PREFILL_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "$NATS_UDMLISTENER_USER"
+          password: "$NATS_UDMLISTENER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+  extraEnvVars:
+    - name: NATS_USER
+      value: "admin"
+    - name: NATS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-nats-credentials" .Release.Name }}'
+          key: admin_password
+    - name: NATS_API_USER
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-api-credentials" .Release.Name }}'
+          key: NATS_USER
+    - name: NATS_API_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-api-credentials" .Release.Name }}'
+          key: NATS_PASSWORD
+    - name: NATS_DISPATCHER_USER
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-dispatcher-credentials" .Release.Name }}'
+          key: NATS_USER
+    - name: NATS_DISPATCHER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-dispatcher-credentials" .Release.Name }}'
+          key: NATS_PASSWORD
+    - name: NATS_PREFILL_USER
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-prefill-credentials" .Release.Name }}'
+          key: NATS_USER
+    - name: NATS_PREFILL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-prefill-credentials" .Release.Name }}'
+          key: NATS_PASSWORD
+    - name: NATS_UDMLISTENER_USER
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-udm-listener-credentials" .Release.Name }}'
+          key: NATS_USER
+    - name: NATS_UDMLISTENER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-udm-listener-credentials" .Release.Name }}'
+          key: NATS_PASSWORD
+
 
 register_consumers:
   image:

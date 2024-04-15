@@ -9,22 +9,18 @@ data:
   CA_CERT: "{{ .Values.config.caCert }}"
   CA_CERT_FILE: "{{ .Values.config.caCertFile }}"
   DEBUG_LEVEL: "{{ .Values.config.debugLevel }}"
-  LDAP_BASE_DN: "{{ .Values.config.ldapBaseDn }}"
+  LDAP_BASE_DN: {{ include "udm-listener.ldapBaseDn" . | quote }}
   LDAP_PASSWORD: "{{ .Values.config.ldapPassword }}"
   LDAP_PASSWORD_FILE: "{{ .Values.config.ldapPasswordFile }}"
-  LDAP_HOST: "{{ .Values.config.ldapHost }}"
-  LDAP_HOST_DN: "{{ .Values.config.ldapHostDn }}"
-  LDAP_PORT: "{{ .Values.config.ldapPort }}"
-  NATS_HOST: {{ required "The parameter \"config.natsHost\" is required." .Values.config.natsHost | quote }}
-  NATS_PORT: {{ required "The parameter \"config.natsPort\" is required." .Values.config.natsPort | quote }}
-  NATS_USER: "{{ .Values.config.natsUser }}"
-  NATS_PASSWORD: "{{ .Values.config.natsPassword }}"
-  INTERNAL_API_HOST: {{ .Values.config.internalApiHost | quote }}
-  INTERNAL_API_PORT: {{ .Values.config.internalApiPort | quote }}
-  NOTIFIER_SERVER: "{{ default .Values.config.ldapHost .Values.config.notifierServer }}"
+  LDAP_HOST: {{ include "udm-listener.ldap.connection.host" . | quote }}
+  LDAP_HOST_DN: {{ include "udm-listener.ldapAdminDn" . | quote }}
+  LDAP_PORT: {{ include "udm-listener.ldap.connection.port" . | quote }}
+  NATS_HOST: {{ include "udm-listener.nats.connection.host" . | quote }}
+  NATS_PORT: {{ include "udm-listener.nats.connection.port" . | quote }}
+  INTERNAL_API_HOST: {{ include "udm-listener.provisioningApi.connection.host" . | quote }}
+  INTERNAL_API_PORT: {{ include "udm-listener.provisioningApi.connection.port" . | quote }}
+  NOTIFIER_SERVER: {{ include "udm-listener.ldapNotifier.connection.host" . | quote }}
   TLS_MODE: "{{ .Values.config.tlsMode }}"
-  EVENTS_USERNAME_UDM: {{ .Values.config.eventsUsernameUdm | quote }}
-  EVENTS_PASSWORD_UDM: {{ .Values.config.eventsPasswordUdm | quote }}
 {{ end }}
 {{ end }}
 ...
