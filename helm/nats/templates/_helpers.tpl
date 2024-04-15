@@ -1,3 +1,11 @@
+{{- /*
+SPDX-FileCopyrightText: 2024 Univention GmbH
+SPDX-License-Identifier: AGPL-3.0-only
+*/}}
+
+{{- /*
+These template definitions are only used in this chart.
+*/}}
 {{/*
  Create the name of the service account to use
  */}}

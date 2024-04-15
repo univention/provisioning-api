@@ -54,7 +54,7 @@ extraEnvVars:
   - name: NATS_CLUSTER_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: nats-credentials
+        name: "{{ .Release.Name }}-nats-credentials"
         key: cluster_password
 
 extraSecrets:

@@ -40,6 +40,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
@@ -96,8 +97,30 @@ spec:
               value: $(SERVER_NAME).nats.$(NAMESPACE).svc.cluster.local
             - name: CLUSTER_NAME
               value: {{ include "common.names.fullname" . | quote }}
-          {{- with .Values.extraEnvVars }}
-            {{- . | toYaml | nindent 12 }}
+          {{- range .Values.extraEnvVars }}
+          {{- if .valueFrom }}
+            - name: {{ .name }}
+              valueFrom:
+                {{- if .valueFrom.fieldRef }}
+                fieldRef:
+                  fieldPath: {{ tpl .valueFrom.fieldRef.fieldPath $ }}
+                {{- else if .valueFrom.resourceFieldRef }}
+                resourceFieldRef:
+                  containerName: {{ tpl .valueFrom.resourceFieldRef.containerName $ }}
+                  resource: {{ tpl .valueFrom.resourceFieldRef.resource $ }}
+                {{- else if .valueFrom.configMapKeyRef }}
+                configMapKeyRef:
+                  name: {{ tpl .valueFrom.configMapKeyRef.name $ }}
+                  key: {{ tpl .valueFrom.configMapKeyRef.key $ }}
+                {{- else if .valueFrom.secretKeyRef }}
+                secretKeyRef:
+                  name: {{ tpl .valueFrom.secretKeyRef.name $ }}
+                  key: {{ tpl .valueFrom.secretKeyRef.key $ }}
+                {{- end }}
+          {{- else }}
+            - name: {{ .name }}
+              value: {{ tpl .value $ | quote }}
+          {{- end }}
           {{- end }}
           {{- if gt (.Values.config.cluster.replicas | int) 1 }}
           {{- $auth := "" }}
@@ -190,8 +213,30 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-          {{- with .Values.extraEnvVars }}
-            {{- . | toYaml | nindent 12 }}
+          {{- range .Values.extraEnvVars }}
+          {{- if .valueFrom }}
+            - name: {{ .name }}
+              valueFrom:
+                {{- if .valueFrom.fieldRef }}
+                fieldRef:
+                  fieldPath: {{ tpl .valueFrom.fieldRef.fieldPath $ }}
+                {{- else if .valueFrom.resourceFieldRef }}
+                resourceFieldRef:
+                  containerName: {{ tpl .valueFrom.resourceFieldRef.containerName $ }}
+                  resource: {{ tpl .valueFrom.resourceFieldRef.resource $ }}
+                {{- else if .valueFrom.configMapKeyRef }}
+                configMapKeyRef:
+                  name: {{ tpl .valueFrom.configMapKeyRef.name $ }}
+                  key: {{ tpl .valueFrom.configMapKeyRef.key $ }}
+                {{- else if .valueFrom.secretKeyRef }}
+                secretKeyRef:
+                  name: {{ tpl .valueFrom.secretKeyRef.name $ }}
+                  key: {{ tpl .valueFrom.secretKeyRef.key $ }}
+                {{- end }}
+          {{- else }}
+            - name: {{ .name }}
+              value: {{ tpl .value $ | quote }}
+          {{- end }}
           {{- end }}
             {{- if .Values.config.authorization.enabled }}
             {{- if .Values.config.authorization.token }}

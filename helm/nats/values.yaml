@@ -4,6 +4,8 @@
 ---
 # The global properties are used to configure multiple charts at once.
 global:
+  # -- Indicates wether this chart is part of a Nubus deployment.
+  nubusDeployment: false
   # -- Container registry address.
   imageRegistry: "docker.io"
 
