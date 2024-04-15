@@ -441,6 +441,15 @@ true
 			<td>Container registry address.</td>
 		</tr>
 		<tr>
+			<td>global.nubusDeployment</td>
+			<td>bool</td>
+			<td><pre lang="json">
+false
+</pre>
+</td>
+			<td>Indicates wether this chart is part of a Nubus deployment.</td>
+		</tr>
+		<tr>
 			<td>imagePullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
