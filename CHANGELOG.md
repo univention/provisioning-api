@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.23.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.22.1...v0.23.0) (2024-04-15)
+
+
+### Features
+
+* add configmap for registration, move admin credentials to the Secret, and wait for api to start before running the registration jobs ([1849d7c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1849d7c66bb276f131e8f1ec8cb0b6618545e409))
+* register consumers via k8s ([e01ca5b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e01ca5b212ad055e268dbace6f2c1abb06ceaa8d))
+
+
+### Bug Fixes
+
+* add resource limits and requests to the initContainers ([30a5b8e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/30a5b8e078fa0bf0e38a8ba9b5c74c7e397385f5))
+* create Job for each consumer, change provisioning-api image tag to latest ([b8d0d5f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b8d0d5ff512744424f45fbc7657da386afa21ecc))
+* define resource requests and limits for the job ([12d0120](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/12d0120c67de689857db2f9aa638f37dede39dae))
+* improve logging and error handling during consumer registration ([c4104db](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c4104db4de1bc2354066e9984e4f2e81048adb73))
+* pass already rendered JSON via secrets for consumer registration ([1c8d1ba](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1c8d1ba7ca50f35f60b73d39a841c6a6388d4985))
+* use wait-for-dependency image instead of busybox, use static name for initContainer, do not hard-code port value, add curlys and quotes to the bash script ([ca6bce1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ca6bce1ecc3d4033527d72a9e7ee15495619a650))
+* use waitForDependency  image with already installed curl ([3ee1481](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3ee148156a412d77565d7face4a1e00cc0fb98c4))
+
 ## [0.22.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.22.0...v0.22.1) (2024-04-12)
 
 
