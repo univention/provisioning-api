@@ -41,7 +41,7 @@ spec:
           ip: {{ .Values.config.ldapHostIp | quote }}
       {{- end }}
       containers:
-        - name: '{{ .Chart.Name }}'
+        - name: "udm-listener"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: '{{ if .Values.image.registry }}{{ .Values.image.registry }}/{{ end }}{{ .Values.image.repository }}{{ if .Values.image.sha256 }}@sha256:{{ .Values.image.sha256 }}{{ else }}:{{ .Values.image.tag }}{{ end }}'
@@ -49,21 +49,95 @@ spec:
           envFrom:
             - configMapRef:
                 name: '{{ include "common.names.fullname" . }}'
+          env:
+            - name: NATS_USER
+              value: {{ .Values.config.natsUser | quote }}
+            {{- if .Values.global.nubusDeployment }}
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "udm-listener.nats.auth.credentialSecret.name" . }}
+                  key: {{ .Values.nats.auth.credentialSecret.key | quote}}
+            {{- else if .Values.config.natsPassword }}
+            - name: NATS_PASSWORD
+              value: {{ .Values.config.natsPassword | quote }}
+            {{- end }}
+            {{- if .Values.global.nubusDeployment }}
+            - name: EVENTS_USERNAME_UDM
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "udm-listener.provisioningApi.auth.credentialSecret.name" . }}
+                  key: {{ .Values.config.provisioningApi.auth.credentialSecret.userNameKey | quote}}
+            - name: EVENTS_PASSWORD_UDM
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "udm-listener.provisioningApi.auth.credentialSecret.name" . }}
+                  key: {{ .Values.config.provisioningApi.auth.credentialSecret.passwordKey | quote}}
+            {{- else if .Values.config.eventsPasswordUdm }}
+            - name: EVENTS_USERNAME_UDM
+              value: {{ .Values.config.eventsUsernameUdm | quote }}
+            - name: EVENTS_PASSWORD_UDM
+              value: {{ .Values.config.eventsPasswordUdm | quote }}
+            {{- end }}
           ports:
             - name: "http"
               containerPort: 80
               protocol: "TCP"
           volumeMounts:
+            {{- if and .Values.mountSecrets (not .Values.global.nubusDeployment) }}
             - name: "secrets"
-              mountPath: "/var/secrets"
+              mountPath: "{{ .Values.config.secretMountPath }}"
+            {{- else }}
+            {{- if (include "udm-listener.ldap.credentialSecret.name" . ) }}
+            - name: {{ printf "%s-volume" (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+              mountPath: "{{ .Values.config.secretMountPath }}/ldap_secret"
+              subPath: {{ .Values.ldap.credentialSecret.ldapPasswordKey | quote }}
+              readOnly: true
+            - name: {{ printf "%s-volume" (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+              mountPath: "{{ .Values.config.secretMountPath }}/machine_secret"
+              subPath: {{ .Values.ldap.credentialSecret.machinePasswordKey | quote }}
+              readOnly: true
+            {{- end }}
+            {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
+            - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
+              mountPath: "{{ .Values.config.secretMountPath }}/ca_cert"
+              subPath: {{ .Values.ldap.tlsSecret.caCertKey | quote }}
+              readOnly: true
+            {{- end }}
+            {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
+            - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
+              mountPath: "{{ .Values.config.secretMountPath }}/cert_pem"
+              subPath: {{ .Values.ldap.tlsSecret.certificateKey | quote }}
+              readOnly: true
+            {{- end }}
+            {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
+            - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
+              mountPath: "{{ .Values.config.secretMountPath }}/private_key"
+              subPath: {{ .Values.ldap.tlsSecret.privateKeyKey | quote }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
             - name: "data"
               mountPath: "/var/lib/univention-directory-listener"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-      - name: "secrets"
-        secret:
-          secretName: {{ include "common.names.fullname" . | quote }}
+        {{- if and .Values.mountSecrets (not .Values.global.nubusDeployment) }}
+        - name: "secrets"
+          secret:
+            secretName: {{ include "common.names.fullname" . | quote }}
+        {{- else }}
+        {{- if (include "udm-listener.ldap.credentialSecret.name" . ) }}
+        - name: {{ printf "%s-volume" (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+          secret:
+            secretName: {{ (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+        {{- end }}
+        {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
+        - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
+          secret:
+            secretName: {{ (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
+        {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

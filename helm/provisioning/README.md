@@ -12,8 +12,8 @@ A Helm Chart that deploys the provisioning services
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts | common | ^2.x.x |
-| oci://registry.souvap-univention.de/souvap/tooling/charts/univention | nats | ^0.x.x |
+| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm | nats | 0.1.0 |
+| oci://registry-1.docker.io/bitnamicharts | common | ^2.x.x |
 
 ## Values
 
@@ -46,7 +46,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | dispatcher.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatcher"` |  |
-| dispatcher.image.tag | string | `"0.14.0"` |  |
+| dispatcher.image.tag | string | `"latest"` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
@@ -58,6 +58,8 @@ A Helm Chart that deploys the provisioning services
 | global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
 | global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | global.imageRegistry | string | `"gitregistry.knut.univention.de"` | Container registry address. |
+| global.nats | object | `{"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
+| global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ingress.annotations | object | `{}` | Define custom ingress annotations. annotations:   nginx.ingress.kubernetes.io/rewrite-target: / |
 | ingress.enabled | bool | `false` | Enable creation of Ingress. |
@@ -103,7 +105,7 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | nameOverride | string | `"provisioning"` | String to partially override release name. |
-| nats | object | `{"bundled":true,"config":{"cluster":{"replicas":1},"jetstream":{"enabled":true,"fileStorage":{"pvc":{"size":"1Gi"}}}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"nameOverride":"provisioning-nats"}` | NATS server settings. |
+| nats | object | `{"bundled":true,"config":{"authorization":{"enabled":true,"users":[{"password":"$NATS_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_USER"},{"password":"$NATS_API_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_API_USER"},{"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_DISPATCHER_USER"},{"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_PREFILL_USER"},{"password":"$NATS_UDMLISTENER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDMLISTENER_USER"}]},"cluster":{"replicas":1},"jetstream":{"enabled":true,"fileStorage":{"pvc":{"size":"1Gi"}}}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"extraEnvVars":[{"name":"NATS_USER","value":"admin"},{"name":"NATS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"admin_password","name":"{{ printf \"%s-provisioning-nats-credentials\" .Release.Name }}"}}},{"name":"NATS_API_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_API_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}}],"nameOverride":"provisioning-nats"}` | NATS server settings. |
 | nats.bundled | bool | `true` | Set to `true` if you want NATS to be installed as well. |
 | nats.connection.host | string | `""` | The NATS service to connect to. |
 | nats.connection.port | string | `""` | The port to connect to the NATS service. |
@@ -125,7 +127,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `"gitregistry.knut.univention.de"` |  |
 | prefill.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-prefill"` |  |
-| prefill.image.tag | string | `"0.14.0"` |  |
+| prefill.image.tag | string | `"latest"` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |

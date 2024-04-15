@@ -2,6 +2,12 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ---
+# The global properties are used to configure multiple charts at once.
+global:
+  # -- Indicates wether this chart is part of a Nubus deployment.
+  nubusDeployment: false
+
+
 # Default values for the UMS provisioning udm-listener.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -18,7 +24,7 @@ podSecurityContext: {}
 replicaCount: 1
 securityContext: {}
 tolerations: []
-
+mountSecrets: true
 
 image:
   registry: "gitregistry.knut.univention.de"
@@ -64,7 +70,14 @@ config:
   # -- Whether to start encryption and validate certificates.
   # Chose from "off", "unvalidated" and "secure".
   tlsMode: "off"
-
+  # -- Path to mount the secrets to.
+  secretMountPath: "/var/secrets"
+  provisioningApi:
+    auth:
+      credentialSecret:
+        name: ""
+        userNameKey: "EVENTS_USERNAME_UDM"
+        passwordKey: "EVENTS_PASSWORD_UDM"
 
 ## Container deployment probes
 probes:
@@ -101,7 +114,21 @@ resources: {}
   # limits:
   #   memory: "4Gi"
 
+ldap:
+  tlsSecret:
+    name: ""
+    caCertKey: "ca.crt"
+    privateKeyKey: "tls.key"
+    certificateKey: "tls.crt"
+  credentialSecret:
+    name: ""
+    ldapPasswordKey: "ldap.secret"
+    machinePasswordKey: "machine.secret"
+
 nats:
   bundled: true
-
+  auth:
+    credentialSecret:
+      name: ""
+      key: "NATS_PASSWORD"
 ...

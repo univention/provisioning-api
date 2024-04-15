@@ -9,10 +9,10 @@ apiVersion: "v2"
 dependencies:
   - name: "common"
     version: "^2.x.x"
-    repository: "oci://registry.souvap-univention.de/souvap/tooling/charts/bitnami-charts"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
   - name: "nats"
-    version: "^0.x.x"
-    repository: "oci://registry.souvap-univention.de/souvap/tooling/charts/univention"
+    version: "0.1.0"
+    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm"
     condition: "nats.enabled"
 description: "A Helm Chart that deploys the provisioning services"
 keywords:
