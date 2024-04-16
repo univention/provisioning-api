@@ -1,12 +1,12 @@
 # Unittests
 
-This folder contains a set of unit tests which cover the behavior of the chart
-`common`.
+This folder contains a set of unit tests which cover the behavior of the charts.
 
 
 ## Requirements
 
 - `docker compose` has to be set up and working
+
 
 ## How to run this manually
 
