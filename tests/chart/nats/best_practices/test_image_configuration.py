@@ -48,23 +48,6 @@ def test_image_registry_overrides_global_default_registry(helm, chart_path):
     _assert_all_images_use_registry(containers, expected_registry)
 
 
-def test_global_registry_is_using_knut_registry_per_default(helm, chart_path):
-    """
-    The UMS Charts point to the internal registry in the knut domain.
-
-    This shall change once the public registry for the publication of UMS stack
-    artifacts is in place. Until then the default configuration of all plain
-    UMS charts shall use the knut registry by default.
-    """
-    values = {}
-    result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
-
-    expected_registry = "gitregistry.knut.univention.de"
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert image.startswith(expected_registry + "/")
-
-
 def test_image_pull_secrets_can_be_provided(helm, chart_path):
     values = safe_load(
         """
@@ -75,26 +58,39 @@ def test_image_pull_secrets_can_be_provided(helm, chart_path):
     """
     )
     result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
+    manifest = helm.get_resource(result, kind="StatefulSet")
 
-    expected_secrets = ["stub-secret-a", "stub-secret-b"]
-    image_pull_secrets = findone(deployment, "spec.template.spec.imagePullSecrets")
+    expected_secrets = [
+        {"name": "stub-secret-a"},
+        {"name": "stub-secret-b"},
+    ]
+    image_pull_secrets = findone(manifest, "spec.template.spec.imagePullSecrets")
     assert image_pull_secrets == expected_secrets
 
 
 def test_image_repository_can_be_configured(helm, chart_path):
     values = safe_load(
         """
-        image:
-          repository: "stub-fragment/stub-image"
+        nats:
+          image:
+            repository: "stub-fragment/stub-image"
+        reloader:
+          image:
+            repository: "stub-fragment/stub-image"
+        natsBox:
+          image:
+            repository: "stub-fragment/stub-image"
     """
     )
     result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
 
     expected_repository = "stub-fragment/stub-image"
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert expected_repository in image
+    containers = _get_containers_of_statefulset(helm, result)
+    for container in containers:
+        name = container["name"]
+        image = container["image"]
+        assert expected_repository in image, \
+            f'Wrong repository in container "{name}"'
 
 
 @pytest.mark.parametrize(
@@ -107,65 +103,57 @@ def test_image_repository_can_be_configured(helm, chart_path):
 def test_image_tag_can_be_configured(image_tag, helm, chart_path):
     values = safe_load(
         f"""
-        image:
-          tag: "{image_tag}"
-    """
+        nats:
+          image:
+            tag: "{image_tag}"
+        reloader:
+          image:
+            tag: "{image_tag}"
+        natsBox:
+          image:
+            tag: "{image_tag}"
+        """
     )
     result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
 
     expected_tag = image_tag
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert f":{expected_tag}" in image
-
-
-def test_image_digest_without_tag_can_be_configured(helm, chart_path):
-    values = safe_load(
-        f"""
-        image:
-          digest: "sha256:stub-digest"
-    """
-    )
-    result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
-
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert f"@sha256:stub-digest" in image
-
-
-def test_image_digest_and_tag_can_be_configured(helm, chart_path):
-    values = safe_load(
-        f"""
-        image:
-          tag: "stub-tag"
-          digest: "sha256:stub-digest"
-    """
-    )
-    result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
-
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert ":stub-tag@sha256:stub-digest" in image
+    containers = _get_containers_of_statefulset(helm, result)
+    for container in containers:
+        name = container["name"]
+        image = container["image"]
+        assert f":{expected_tag}" in image, \
+            f'Wrong tag in container "{name}"'
 
 
 def test_all_image_values_are_configured(helm, chart_path):
     values = safe_load(
         f"""
-        image:
-          registry: "stub-registry.example"
-          repository: "stub-fragment/stub-repository"
-          tag: "stub-tag"
-          digest: "sha256:stub-digest"
-    """
+        nats:
+          image:
+            registry: "stub-registry.example"
+            repository: "stub-fragment/stub-repository"
+            tag: "stub-tag@sha256:stub-digest"
+        reloader:
+          image:
+            registry: "stub-registry.example"
+            repository: "stub-fragment/stub-repository"
+            tag: "stub-tag@sha256:stub-digest"
+        natsBox:
+          image:
+            registry: "stub-registry.example"
+            repository: "stub-fragment/stub-repository"
+            tag: "stub-tag@sha256:stub-digest"
+        """
     )
     result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
 
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert (
-        "stub-registry.example/stub-fragment/stub-repository:stub-tag@sha256:stub-digest"
-        in image
-    )
+    expected_image = "stub-registry.example/stub-fragment/stub-repository:stub-tag@sha256:stub-digest"
+    containers = _get_containers_of_statefulset(helm, result)
+    for container in containers:
+        name = container["name"]
+        image = container["image"]
+        assert expected_image == image, \
+            f'Wrong image in container "{name}"'
 
 
 def _assert_all_images_use_registry(containers, expected_registry):
