@@ -22,11 +22,7 @@ def test_global_registry_is_used_as_default(helm, chart_path):
     result = helm.helm_template(chart_path, values)
     expected_registry = "stub-global-registry"
     containers = _get_containers_of_statefulset(helm, result)
-    for container in containers:
-        image = container["image"]
-        name = container["name"]
-        assert image.startswith(expected_registry + "/"), \
-            f'Wrong registry in container "{name}"'
+    _assert_all_images_use_registry(containers, expected_registry)
 
 
 def test_image_registry_overrides_global_default_registry(helm, chart_path):
@@ -49,11 +45,7 @@ def test_image_registry_overrides_global_default_registry(helm, chart_path):
     result = helm.helm_template(chart_path, values)
     expected_registry = "stub-registry"
     containers = _get_containers_of_statefulset(helm, result)
-    for container in containers:
-        image = container["image"]
-        name = container["name"]
-        assert image.startswith(expected_registry + "/"), \
-            f'Wrong registry in container "{name}"'
+    _assert_all_images_use_registry(containers, expected_registry)
 
 
 def test_global_registry_is_using_knut_registry_per_default(helm, chart_path):
@@ -174,6 +166,14 @@ def test_all_image_values_are_configured(helm, chart_path):
         "stub-registry.example/stub-fragment/stub-repository:stub-tag@sha256:stub-digest"
         in image
     )
+
+
+def _assert_all_images_use_registry(containers, expected_registry):
+    for container in containers:
+        image = container["image"]
+        name = container["name"]
+        assert image.startswith(expected_registry + "/"), \
+            f'Wrong registry in container "{name}"'
 
 
 def _get_containers_of_statefulset(helm, result):
