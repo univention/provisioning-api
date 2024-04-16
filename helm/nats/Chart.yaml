@@ -15,4 +15,4 @@ version: "0.0.1"
 dependencies:
   - name: "common"
     version: "^2.16.x"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
