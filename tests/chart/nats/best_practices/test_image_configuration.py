@@ -5,10 +5,11 @@
 # Ruff has problems with multiline f-strings
 # ruff: noqa: F541
 
+import jsonpath
 import pytest
 from yaml import safe_load
 
-from utils import findone
+from utils import findall, findone
 
 
 def test_global_registry_is_used_as_default(helm, chart_path):
@@ -19,11 +20,13 @@ def test_global_registry_is_used_as_default(helm, chart_path):
     """
     )
     result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
-
     expected_registry = "stub-global-registry"
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert image.startswith(expected_registry + "/")
+    containers = _get_containers_of_statefulset(helm, result)
+    for container in containers:
+        image = container["image"]
+        name = container["name"]
+        assert image.startswith(expected_registry + "/"), \
+            f'Wrong registry in container "{name}"'
 
 
 def test_image_registry_overrides_global_default_registry(helm, chart_path):
@@ -32,16 +35,25 @@ def test_image_registry_overrides_global_default_registry(helm, chart_path):
         global:
           imageRegistry: "stub-global-registry"
 
-        image:
-          registry: "stub-registry"
+        nats:
+          image:
+            registry: "stub-registry"
+        reloader:
+          image:
+            registry: "stub-registry"
+        natsBox:
+          image:
+            registry: "stub-registry"
     """
     )
     result = helm.helm_template(chart_path, values)
-    deployment = helm.get_resource(result, kind="Deployment")
-
     expected_registry = "stub-registry"
-    image = findone(deployment, "spec.template.spec.containers[0].image")
-    assert image.startswith(expected_registry + "/")
+    containers = _get_containers_of_statefulset(helm, result)
+    for container in containers:
+        image = container["image"]
+        name = container["name"]
+        assert image.startswith(expected_registry + "/"), \
+            f'Wrong registry in container "{name}"'
 
 
 def test_global_registry_is_using_knut_registry_per_default(helm, chart_path):
@@ -162,3 +174,9 @@ def test_all_image_values_are_configured(helm, chart_path):
         "stub-registry.example/stub-fragment/stub-repository:stub-tag@sha256:stub-digest"
         in image
     )
+
+
+def _get_containers_of_statefulset(helm, result):
+    manifest = helm.get_resource(result, kind="StatefulSet")
+    containers = findall(manifest, "spec.template.spec.containers")
+    return containers
