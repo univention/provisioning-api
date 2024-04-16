@@ -347,7 +347,7 @@ nats:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
     imagePullPolicy: "IfNotPresent"
     # -- Container registry address. This setting has higher precedence than global.registry.
-    registry: "docker.io"
+    registry: null
     repository: "library/nats"
     tag: "2.10.10@sha256:fa26beda8a3187ccefa47afcfe9ea6d0e2f40a57c8f64d70bd63c792d7973938"
 
@@ -358,7 +358,7 @@ reloader:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
     imagePullPolicy: "IfNotPresent"
     # -- Container registry address. This setting has higher precedence than global.registry.
-    registry: "docker.io"
+    registry: null
     repository: "natsio/nats-server-config-reloader"
     tag: "0.14.1@sha256:77dd4c60001ffbf442c6b25592e73b4fca06ea9406c677607192788d80453783"
   resources:
@@ -374,7 +374,7 @@ natsBox:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
     imagePullPolicy: "IfNotPresent"
     # -- Container registry address. This setting has higher precedence than global.registry.
-    registry: "docker.io"
+    registry: null
     repository: "natsio/nats-box"
     tag: "0.14.2@sha256:c9b8ebaabb2ca4c227feb4f6b856dc72d4775ac3d71f80d2c65aa82303079011"
   resources:

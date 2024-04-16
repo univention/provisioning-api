@@ -60,7 +60,7 @@ nats consumer next teststream testconsumer
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | common | ^2.16.x |
+| oci://registry-1.docker.io/bitnamicharts | common | ^2.16.x |
 
 ## Values
 
@@ -570,7 +570,7 @@ true
 			<td>nats.image.registry</td>
 			<td>string</td>
 			<td><pre lang="json">
-"docker.io"
+null
 </pre>
 </td>
 			<td>Container registry address. This setting has higher precedence than global.registry.</td>
@@ -615,7 +615,7 @@ true
 			<td>natsBox.image.registry</td>
 			<td>string</td>
 			<td><pre lang="json">
-"docker.io"
+null
 </pre>
 </td>
 			<td>Container registry address. This setting has higher precedence than global.registry.</td>
@@ -919,7 +919,7 @@ true
 			<td>reloader.image.registry</td>
 			<td>string</td>
 			<td><pre lang="json">
-"docker.io"
+null
 </pre>
 </td>
 			<td>Container registry address. This setting has higher precedence than global.registry.</td>
