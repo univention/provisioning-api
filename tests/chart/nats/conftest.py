@@ -20,6 +20,6 @@ def chart_path(pytestconfig):
     if not chart_path:
         tests_path = os.path.dirname(os.path.abspath(__file__))
         chart_path = os.path.normpath(
-            os.path.join(tests_path, "../helm/test-deployment")
+            os.path.join(tests_path, "../helm/nats")
         )
     return chart_path
