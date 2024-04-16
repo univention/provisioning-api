@@ -86,11 +86,7 @@ def test_image_repository_can_be_configured(helm, chart_path):
 
     expected_repository = "stub-fragment/stub-image"
     containers = _get_containers_of_statefulset(helm, result)
-    for container in containers:
-        name = container["name"]
-        image = container["image"]
-        assert expected_repository in image, \
-            f'Wrong repository in container "{name}"'
+    _assert_all_images_contain(containers, expected_repository)
 
 
 @pytest.mark.parametrize(
@@ -118,11 +114,7 @@ def test_image_tag_can_be_configured(image_tag, helm, chart_path):
 
     expected_tag = image_tag
     containers = _get_containers_of_statefulset(helm, result)
-    for container in containers:
-        name = container["name"]
-        image = container["image"]
-        assert f":{expected_tag}" in image, \
-            f'Wrong tag in container "{name}"'
+    _assert_all_images_contain(containers, expected_tag)
 
 
 def test_all_image_values_are_configured(helm, chart_path):
@@ -154,6 +146,14 @@ def test_all_image_values_are_configured(helm, chart_path):
         image = container["image"]
         assert expected_image == image, \
             f'Wrong image in container "{name}"'
+
+
+def _assert_all_images_contain(containers, expected_value):
+    for container in containers:
+        name = container["name"]
+        image = container["image"]
+        assert expected_value in image, \
+            f'Wrong image value in container "{name}"'
 
 
 def _assert_all_images_use_registry(containers, expected_registry):
