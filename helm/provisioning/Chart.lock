@@ -4,6 +4,6 @@ dependencies:
   version: 2.13.3
 - name: nats
   repository: oci://registry.souvap-univention.de/souvap/tooling/charts/univention
-  version: 0.0.1
-digest: sha256:9941abc098f00556e6e070ad8a79a4680ad36073fc0a171f7d78c550dac1097f
-generated: "2024-03-05T06:33:36.390517+01:00"
+  version: 0.0.2
+digest: sha256:3a3026146e92529a422685ba8a9c5af17878c4df89240301bc77cbba8f6b2b3e
+generated: "2024-04-17T11:53:31.460297+02:00"
