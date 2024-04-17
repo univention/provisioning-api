@@ -13,6 +13,7 @@ from shared.models import (
     MQMessage,
     PublisherName,
     PREFILL_SUBJECT_TEMPLATE,
+    PREFILL_STREAM,
 )
 from shared.utils.message_ack_manager import MessageAckManager
 
@@ -24,8 +25,7 @@ def match_topic(sub_topic: str, module_name: str) -> bool:
 
 
 class UDMPreFill(PreFillService):
-    PREFILL_QUEUE = "prefill"
-    PREFILL_FAILURES_QUEUE = "prefill-failures"
+    PREFILL_FAILURES_STREAM = "prefill-failures"
 
     def __init__(self, port: PrefillPort):
         super().__init__()
@@ -36,7 +36,7 @@ class UDMPreFill(PreFillService):
 
     async def handle_requests_to_prefill(self):
         self._logger.info("Handling the requests to prefill")
-        await self._port.subscribe_to_queue(self.PREFILL_QUEUE, "prefill-service")
+        await self._port.subscribe_to_queue(PREFILL_STREAM, "prefill-service")
         await self.prepare_prefill_failures_queue()
 
         while True:
@@ -58,7 +58,12 @@ class UDMPreFill(PreFillService):
 
                 self._subscription_name = validated_msg.subscription_name
 
-                await self.create_prefill_stream(self._subscription_name)
+                await self._port.remove_old_messages_from_prefill_subject(
+                    self._subscription_name,
+                    PREFILL_SUBJECT_TEMPLATE.format(
+                        subscription=self._subscription_name
+                    ),
+                )
 
                 for realm, topic in validated_msg.realms_topics:
                     self._realm = realm
@@ -144,7 +149,9 @@ class UDMPreFill(PreFillService):
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 
         await self._port.create_prefill_message(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=self._subscription_name), message
+            self._subscription_name,
+            PREFILL_SUBJECT_TEMPLATE.format(subscription=self._subscription_name),
+            message,
         )
 
     async def add_request_to_prefill_failures(
@@ -152,7 +159,7 @@ class UDMPreFill(PreFillService):
     ):
         self._logger.info("Adding request to the prefill failures queue")
         await self._port.add_request_to_prefill_failures(
-            self.PREFILL_FAILURES_QUEUE, validated_msg
+            self.PREFILL_FAILURES_STREAM, self.PREFILL_FAILURES_STREAM, validated_msg
         )
         await self._port.acknowledge_message(message)
 
@@ -168,11 +175,5 @@ class UDMPreFill(PreFillService):
         )
 
     async def prepare_prefill_failures_queue(self):
-        await self._port.create_stream(self.PREFILL_FAILURES_QUEUE)
-        await self._port.create_consumer(self.PREFILL_FAILURES_QUEUE)
-
-    async def create_prefill_stream(self, subscription_name: str):
-        # first, delete the previously created stream if it exists
-        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
-        await self._port.delete_stream(prefill_subject)
-        await self._port.create_stream(prefill_subject)
+        await self._port.create_stream(self.PREFILL_FAILURES_STREAM)
+        await self._port.create_consumer(self.PREFILL_FAILURES_STREAM)

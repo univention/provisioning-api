@@ -42,8 +42,8 @@ class PrefillPort:
         await self.mq_adapter.close()
         await self._internal_api_adapter.close()
 
-    async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
-        await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)
+    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
+        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
 
     async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()
@@ -64,13 +64,13 @@ class PrefillPort:
             name, queue_status
         )
 
-    async def create_prefill_message(self, subject: str, message: Message):
-        await self.mq_adapter.add_message(subject, message)
+    async def create_prefill_message(self, stream: str, subject: str, message: Message):
+        await self.mq_adapter.add_message(stream, subject, message)
 
     async def add_request_to_prefill_failures(
-        self, queue_name: str, message: PrefillMessage
+        self, stream: str, subject: str, message: PrefillMessage
     ):
-        await self.mq_adapter.add_message(queue_name, message)
+        await self.mq_adapter.add_message(stream, subject, message)
 
     async def create_stream(self, subject: str):
         await self.mq_adapter.create_stream(subject)
@@ -86,3 +86,6 @@ class PrefillPort:
 
     async def acknowledge_message_in_progress(self, message: MQMessage):
         await self.mq_adapter.acknowledge_message_in_progress(message)
+
+    async def remove_old_messages_from_prefill_subject(self, stream: str, subject: str):
+        await self.mq_adapter.purge_subject_from_messages(stream, subject)

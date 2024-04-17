@@ -6,12 +6,15 @@ from typing import Dict, List
 
 from shared.utils.message_ack_manager import MessageAckManager
 from server.core.dispatcher.port import DispatcherPort
-from shared.models import Message, MQMessage
+from shared.models import (
+    Message,
+    MQMessage,
+    DISPATCHER_STREAM,
+    DISPATCHER_SUBJECT_TEMPLATE,
+)
 
 
 class DispatcherService:
-    DISPATCHER_QUEUE = "incoming"
-
     def __init__(self, port: DispatcherPort):
         self._port = port
         self.ack_manager = MessageAckManager()
@@ -21,7 +24,7 @@ class DispatcherService:
 
     async def dispatch_events(self):
         self._logger.info("Storing event in consumer queues")
-        await self._port.subscribe_to_queue(self.DISPATCHER_QUEUE, "dispatcher-service")
+        await self._port.subscribe_to_queue(DISPATCHER_STREAM, "dispatcher-service")
         asyncio.create_task(self._port.watch_for_changes(self._subscriptions))
 
         while True:
@@ -41,6 +44,8 @@ class DispatcherService:
 
         for sub in subscriptions:
             self._logger.info("Sending message to '%s'", sub)
-            await self._port.send_message_to_subscription(sub, validated_msg)
+            await self._port.send_message_to_subscription(
+                sub, DISPATCHER_SUBJECT_TEMPLATE.format(subscription=sub), validated_msg
+            )
 
         await self._port.acknowledge_message(message)

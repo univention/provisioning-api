@@ -7,7 +7,7 @@ from typing import Union, Optional, List
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
-from shared.models import Message
+from shared.models import BaseMessage
 from shared.models.subscription import Bucket
 
 
@@ -51,15 +51,17 @@ class BaseMQAdapter(ABC):
         pass
 
     @abstractmethod
-    async def add_message(self, subject: str, message: Message):
+    async def add_message(self, stream: str, subject: str, message: BaseMessage):
         pass
 
     @abstractmethod
-    async def get_messages(self, subject: str, timeout: float, count: int, pop: bool):
+    async def get_messages(
+        self, subject: str, consumer_name: str, timeout: float, count: int, pop: bool
+    ):
         pass
 
     @abstractmethod
-    async def delete_message(self, stream_name: str, seq_num: int):
+    async def delete_message(self, stream: str, subject: str, seq_num: int):
         pass
 
     @abstractmethod

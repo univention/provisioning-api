@@ -43,11 +43,13 @@ class DispatcherPort:
         await self.mq_adapter.close()
         await self.kv_adapter.close()
 
-    async def send_message_to_subscription(self, name: str, message: Message):
-        await self.mq_adapter.add_message(name, message)
+    async def send_message_to_subscription(
+        self, stream: str, subject: str, message: Message
+    ):
+        await self.mq_adapter.add_message(stream, subject, message)
 
-    async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
-        await self.mq_adapter.subscribe_to_queue(stream_subject, deliver_subject)
+    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
+        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
 
     async def wait_for_event(self) -> MQMessage:
         return await self.mq_adapter.wait_for_event()
