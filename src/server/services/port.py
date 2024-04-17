@@ -40,10 +40,10 @@ class Port:
     ):
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def get_messages(
-        self, stream: str, subject: str, timeout: float, count: int, pop: bool
-    ) -> List[ProvisioningMessage]:
-        return await self.mq_adapter.get_messages(stream, subject, timeout, count, pop)
+    async def get_message(
+        self, stream: str, subject: str, timeout: float, pop: bool
+    ) -> Optional[ProvisioningMessage]:
+        return await self.mq_adapter.get_message(stream, subject, timeout, pop)
 
     async def delete_message(self, stream: str, subject: str, seq_num: int):
         await self.mq_adapter.delete_message(stream, subject, seq_num)

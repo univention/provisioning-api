@@ -23,7 +23,7 @@ async def test_create_subscription(
 async def test_get_empty_messages(
     provisioning_client: AsyncClient, simple_subscription: str
 ):
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         count=1,
         timeout=1,
@@ -39,7 +39,7 @@ async def test_send_message(
 ):
     data = create_message_via_events_api(test_settings)
 
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         count=1,
         timeout=10,
@@ -51,7 +51,7 @@ async def test_send_message(
 
 @pytest.mark.xfail()
 async def test_pop_message(provisioning_client: AsyncClient, simple_subscription: str):
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription, count=1, timeout=1, pop=True
     )
 
@@ -63,7 +63,7 @@ async def test_get_real_messages(
 ):
     group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         timeout=5,
     )
@@ -86,7 +86,7 @@ async def test_get_multiple_messages(
 async def test_get_messages_zero_timeout(
     provisioning_client: AsyncClient, simple_subscription: str
 ):
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         timeout=0,
     )
@@ -98,7 +98,7 @@ async def test_get_messages_from_the_wrong_queue(
     provisioning_client: AsyncClient, simple_subscription: str
 ):
     with pytest.raises(aiohttp.ClientResponseError, match="Unauthorized"):
-        await provisioning_client.get_subscription_messages(
+        await provisioning_client.get_subscription_message(
             name="wrong_subscription_name",
             count=1,
             timeout=5,

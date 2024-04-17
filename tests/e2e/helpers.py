@@ -55,7 +55,7 @@ async def pop_all_messages(
 ):
     result = []
     for _ in range(loop_number):
-        response = await provisioning_client.get_subscription_messages(
+        response = await provisioning_client.get_subscription_message(
             name=subscription_name,
             timeout=1,
             count=1,

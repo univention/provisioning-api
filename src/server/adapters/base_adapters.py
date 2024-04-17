@@ -54,10 +54,7 @@ class BaseMQAdapter(ABC):
     async def add_message(self, stream: str, subject: str, message: BaseMessage):
         pass
 
-    @abstractmethod
-    async def get_messages(
-        self, subject: str, consumer_name: str, timeout: float, count: int, pop: bool
-    ):
+    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool):
         pass
 
     @abstractmethod

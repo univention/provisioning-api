@@ -78,15 +78,13 @@ class AsyncClient:
         data = await response.json()
         return Subscription.model_validate(data)
 
-    async def get_subscription_messages(
+    async def get_subscription_message(
         self,
         name: str,
-        count: Optional[int] = None,
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
-    ) -> List[ProvisioningMessage]:
+    ) -> ProvisioningMessage:
         _params = {
-            "count": count,
             "timeout": timeout,
             "pop": pop,
         }
@@ -96,8 +94,8 @@ class AsyncClient:
             f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages",
             params=params,
         )
-        msgs = await response.json()
-        return [ProvisioningMessage.model_validate(msg) for msg in msgs]
+        msg = await response.json()
+        return ProvisioningMessage.model_validate(msg) if msg else msg
 
     async def set_message_status(
         self, name: str, reports: List[MessageProcessingStatusReport]
@@ -209,15 +207,13 @@ class MessageHandler:
         counter = 0
 
         while True:
-            messages = await self.client.get_subscription_messages(
+            message = await self.client.get_subscription_message(
                 self.subscription_name,
-                count=1,
                 timeout=10,
                 # TODO: pop is broken serverside at the moment
                 # pop= not pop_after_handling,
             )
-
-            for message in messages:
+            if message:
                 for callback in self.callbacks:
                     await self._callback_wrapper(message, callback)
                 if self.message_limit:

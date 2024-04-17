@@ -42,7 +42,7 @@ async def test_timeout_while_waiting_for_messages(
 ):
     create_message_via_events_api(test_settings)
 
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         simple_subscription,
         timeout=10,
     )

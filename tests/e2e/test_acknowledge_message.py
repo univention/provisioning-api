@@ -15,7 +15,7 @@ async def test_get_multiple_messages(
     body_2 = create_message_via_events_api(test_settings)
 
     for body in [body_1, body_2]:
-        response = await provisioning_client.get_subscription_messages(
+        response = await provisioning_client.get_subscription_message(
             name=simple_subscription,
             timeout=5,
             count=1,
@@ -37,7 +37,7 @@ async def test_acknowledge_messages(
 ):
     body = create_message_via_events_api(test_settings)
 
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         timeout=5,
     )
@@ -52,7 +52,7 @@ async def test_acknowledge_messages(
     )
     await provisioning_client.set_message_status(simple_subscription, [report])
 
-    response2 = await provisioning_client.get_subscription_messages(
+    response2 = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         timeout=35,
     )
@@ -74,14 +74,14 @@ async def test_do_not_acknowledge_message(
     create_message_via_events_api(test_settings)
 
     # test first delivery of a message
-    response = await provisioning_client.get_subscription_messages(
+    response = await provisioning_client.get_subscription_message(
         name=simple_subscription, timeout=5, count=1
     )
     assert len(response) == 1
     assert response[0].body == body
 
     # test that the same unacknowledged message is delivered
-    response2 = await provisioning_client.get_subscription_messages(
+    response2 = await provisioning_client.get_subscription_message(
         name=simple_subscription, timeout=35, count=1
     )
     assert len(response2) == 1
