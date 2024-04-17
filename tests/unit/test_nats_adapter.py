@@ -180,7 +180,7 @@ class TestNatsMQAdapter:
     async def test_get_messages(self, mock_nats_mq_adapter, mock_fetch):
         mock_nats_mq_adapter.delete_message = AsyncMock()
 
-        result = await mock_nats_mq_adapter.get_messages(
+        result = await mock_nats_mq_adapter.get_message(
             SUBSCRIPTION_NAME, timeout=5, count=1, pop=False
         )
 
@@ -199,7 +199,7 @@ class TestNatsMQAdapter:
     async def test_get_messages_with_removing(self, mock_nats_mq_adapter, mock_fetch):
         mock_nats_mq_adapter.delete_message = AsyncMock()
 
-        result = await mock_nats_mq_adapter.get_messages(
+        result = await mock_nats_mq_adapter.get_message(
             SUBSCRIPTION_NAME, timeout=5, count=1, pop=True
         )
 
@@ -219,7 +219,7 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter._js.stream_info = AsyncMock(side_effect=NotFoundError)
         mock_nats_mq_adapter.delete_message = AsyncMock()
 
-        result = await mock_nats_mq_adapter.get_messages(
+        result = await mock_nats_mq_adapter.get_message(
             SUBSCRIPTION_NAME, timeout=5, count=1, pop=False
         )
 
@@ -237,7 +237,7 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter._js.pull_subscribe = AsyncMock(return_value=sub)
         mock_nats_mq_adapter.delete_message = AsyncMock()
 
-        result = await mock_nats_mq_adapter.get_messages(
+        result = await mock_nats_mq_adapter.get_message(
             SUBSCRIPTION_NAME, timeout=5, count=1, pop=False
         )
 

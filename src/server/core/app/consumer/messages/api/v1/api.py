@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 
 import fastapi
 import json
 import logging
 
-from fastapi import Query, Depends
+from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
 from server.core.app.consumer.subscriptions.subscription.sink import (
@@ -57,21 +57,20 @@ async def post_messages_status(
     status_code=fastapi.status.HTTP_200_OK,
     tags=["subscriptions"],
 )
-async def get_subscription_messages(
+async def get_next_message(
     name: str,
     port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-    count: Annotated[int, Query(ge=1)] = 1,
     timeout: float = 5,
     pop: bool = False,
-) -> List[ProvisioningMessage]:
-    """Return the next pending message(s) for the given subscription."""
+) -> Optional[ProvisioningMessage]:
+    """Return the next pending message for the given subscription."""
 
     sub_service = SubscriptionService(port)
     await sub_service.authenticate_user(credentials, name)
 
     msg_service = MessageService(port)
-    return await msg_service.get_messages(name, timeout, count, pop)
+    return await msg_service.get_next_message(name, timeout, pop)
 
 
 @router.websocket("/subscriptions/{name}/ws")
@@ -88,7 +87,7 @@ async def subscription_websocket(
 
     try:
         while True:
-            message = await msg_service.get_next_message(name, False, 250)
+            message = await msg_service.get_next_message(name, 250, False)
             if not message:
                 continue
 

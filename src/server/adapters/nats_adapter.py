@@ -149,9 +149,9 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def get_messages(
-        self, stream: str, subject: str, timeout: float, count: int, pop: bool
-    ) -> List[ProvisioningMessage]:
+    async def get_message(
+        self, stream: str, subject: str, timeout: float, pop: bool
+    ) -> Optional[ProvisioningMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         stream_name = NatsKeys.stream(stream)
@@ -161,7 +161,7 @@ class NatsMQAdapter(BaseMQAdapter):
             await self._js.stream_info(stream_name)
         except NotFoundError:
             self.logger.error("The stream was not found")
-            return []
+            return None
 
         consumer = await self._js.consumer_info(stream_name, durable_name)
 
@@ -169,16 +169,14 @@ class NatsMQAdapter(BaseMQAdapter):
             subject, durable=durable_name, stream=stream_name, config=consumer
         )
         try:
-            msgs = await sub.fetch(count, timeout)
+            msgs = await sub.fetch(1, timeout)
         except asyncio.TimeoutError:
-            return []
+            return None
 
         if pop:
-            for msg in msgs:
-                await msg.ack()
+            await msgs[0].ack()
 
-        msgs_to_return = [self.provisioning_message_from(msg) for msg in msgs]
-        return msgs_to_return
+        return self.provisioning_message_from(msgs[0])
 
     @staticmethod
     def provisioning_message_from(msg: Msg) -> ProvisioningMessage:

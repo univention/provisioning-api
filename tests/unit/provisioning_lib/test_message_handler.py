@@ -29,7 +29,7 @@ class TestMessageHandler:
             ).run()
 
     async def test_get_one_message(self, async_client: AsyncClient):
-        async_client.get_subscription_messages = AsyncMock(
+        async_client.get_subscription_message = AsyncMock(
             return_value=[PROVISIONING_MESSAGE]
         )
         async_client.set_message_status = AsyncMock()
@@ -42,14 +42,14 @@ class TestMessageHandler:
             message_limit=1,
         ).run()
 
-        async_client.get_subscription_messages.assert_called_once_with(
+        async_client.get_subscription_message.assert_called_once_with(
             SUBSCRIPTION_NAME, count=1, timeout=10
         )
         async_client.set_message_status.assert_called_once()
         assert len(result) == 1
 
     async def test_get_multiple_messages(self, async_client: AsyncClient):
-        async_client.get_subscription_messages = AsyncMock(
+        async_client.get_subscription_message = AsyncMock(
             side_effect=[
                 [PROVISIONING_MESSAGE],
                 [PROVISIONING_MESSAGE],
@@ -66,7 +66,7 @@ class TestMessageHandler:
             message_limit=3,
         ).run()
 
-        async_client.get_subscription_messages.assert_has_calls(
+        async_client.get_subscription_message.assert_has_calls(
             [
                 call(SUBSCRIPTION_NAME, count=1, timeout=10),
                 call(SUBSCRIPTION_NAME, count=1, timeout=10),
@@ -78,7 +78,7 @@ class TestMessageHandler:
         assert len(result) == 3
 
     async def test_failed_to_acknowledge_message(self, async_client: AsyncClient):
-        async_client.get_subscription_messages = AsyncMock(
+        async_client.get_subscription_message = AsyncMock(
             return_value=[PROVISIONING_MESSAGE]
         )
         async_client.set_message_status = AsyncMock(side_effect=aiohttp.ClientError)
@@ -91,7 +91,7 @@ class TestMessageHandler:
             message_limit=1,
         ).run()
 
-        async_client.get_subscription_messages.assert_called_once_with(
+        async_client.get_subscription_message.assert_called_once_with(
             SUBSCRIPTION_NAME, count=1, timeout=10
         )
         async_client.set_message_status.assert_called_once()

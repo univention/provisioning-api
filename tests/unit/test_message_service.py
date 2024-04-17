@@ -26,14 +26,14 @@ class TestMessageService:
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.running
         )
-        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE])
+        message_service._port.get_message = AsyncMock(return_value=[MESSAGE])
         message_service._port.stream_exists = AsyncMock(return_value=False)
 
         result = await message_service.get_next_message(
             SUBSCRIPTION_NAME, pop=True, timeout=5
         )
 
-        message_service._port.get_messages.assert_called_once_with(
+        message_service._port.get_message.assert_called_once_with(
             SUBSCRIPTION_NAME, 5, 1, True
         )
         assert result == MESSAGE
@@ -56,7 +56,7 @@ class TestMessageService:
         message_service._port.stream_exists.assert_called_once_with(
             self.prefill_subject
         )
-        message_service._port.get_messages.assert_not_called()
+        message_service._port.get_message.assert_not_called()
         message_service._port.delete_stream.assert_not_called()
         assert result == []
 
@@ -67,7 +67,7 @@ class TestMessageService:
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
+        message_service._port.get_message = AsyncMock(return_value=[MESSAGE, MESSAGE])
 
         result = await message_service.get_messages(
             SUBSCRIPTION_NAME, timeout=5, count=2, pop=True
@@ -76,7 +76,7 @@ class TestMessageService:
         sub_service.get_subscription_queue_status.assert_called_once_with(
             SUBSCRIPTION_NAME
         )
-        message_service._port.get_messages.assert_called_once_with(
+        message_service._port.get_message.assert_called_once_with(
             self.prefill_subject, 5, 2, True
         )
         message_service._port.delete_stream.assert_not_called()
@@ -89,7 +89,7 @@ class TestMessageService:
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_messages = AsyncMock(
+        message_service._port.get_message = AsyncMock(
             side_effect=[[MESSAGE], [MESSAGE]]
         )
 
@@ -100,7 +100,7 @@ class TestMessageService:
         sub_service.get_subscription_queue_status.assert_called_once_with(
             SUBSCRIPTION_NAME
         )
-        message_service._port.get_messages.assert_has_calls(
+        message_service._port.get_message.assert_has_calls(
             [
                 call(self.prefill_subject, 5, 2, True),
                 call(SUBSCRIPTION_NAME, 5, 1, True),
@@ -119,7 +119,7 @@ class TestMessageService:
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_messages = AsyncMock(return_value=[MESSAGE, MESSAGE])
+        message_service._port.get_message = AsyncMock(return_value=[MESSAGE, MESSAGE])
 
         result = await message_service.get_messages(
             SUBSCRIPTION_NAME, timeout=5, count=2, pop=True
@@ -128,7 +128,7 @@ class TestMessageService:
         sub_service.get_subscription_queue_status.assert_called_once_with(
             SUBSCRIPTION_NAME
         )
-        message_service._port.get_messages.assert_called_once_with(
+        message_service._port.get_message.assert_called_once_with(
             SUBSCRIPTION_NAME, 5, 2, True
         )
 
