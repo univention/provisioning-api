@@ -14,6 +14,7 @@ from nats.js.errors import (
     KeyNotFoundError,
     NoKeysError,
     NotFoundError,
+    ServerError,
 )
 from nats.js.kv import KV_DEL
 
@@ -133,33 +134,39 @@ class NatsMQAdapter(BaseMQAdapter):
     async def close(self):
         await self._nats.close()
 
-    async def add_message(self, subject: str, message: BaseMessage):
+    async def add_message(self, stream: str, subject: str, message: BaseMessage):
         """Publish a message to a NATS subject."""
-
-        stream_name = NatsKeys.stream(subject)
+        stream_name = NatsKeys.stream(stream)
 
         await self._js.publish(
             subject,
             json.dumps(message.model_dump()).encode("utf-8"),
             stream=stream_name,
         )
-        self.logger.info("Message was published to the stream: %s", stream_name)
+        self.logger.info(
+            "Message was published to the stream: %s with the subject: %s",
+            stream_name,
+            subject,
+        )
 
     async def get_messages(
-        self, subject: str, timeout: float, count: int, pop: bool
+        self, stream: str, subject: str, timeout: float, count: int, pop: bool
     ) -> List[ProvisioningMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
+        stream_name = NatsKeys.stream(stream)
+        durable_name = NatsKeys.durable_name(stream)
+
         try:
-            await self._js.stream_info(NatsKeys.stream(subject))
+            await self._js.stream_info(stream_name)
         except NotFoundError:
             self.logger.error("The stream was not found")
             return []
 
+        consumer = await self._js.consumer_info(stream_name, durable_name)
+
         sub = await self._js.pull_subscribe(
-            subject,
-            durable=NatsKeys.durable_name(subject),
-            stream=NatsKeys.stream(subject),
+            subject, durable=durable_name, stream=stream_name, config=consumer
         )
         try:
             msgs = await sub.fetch(count, timeout)
@@ -231,14 +238,15 @@ class NatsMQAdapter(BaseMQAdapter):
     async def cb(self, msg):
         await self._message_queue.put(msg)
 
-    async def subscribe_to_queue(self, stream_subject: str, deliver_subject: str):
-        await self.create_stream(stream_subject)
-        await self.create_consumer(stream_subject, deliver_subject)
+    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
+        await self.create_stream(subject)
+        await self.create_consumer(subject, deliver_subject)
 
         await self._js.subscribe(
-            stream_subject,
+            subject,
             cb=self.cb,
-            durable=NatsKeys.durable_name(stream_subject),
+            durable=NatsKeys.durable_name(subject),
+            stream=NatsKeys.stream(subject),
             manual_ack=True,
         )
 
@@ -254,14 +262,14 @@ class NatsMQAdapter(BaseMQAdapter):
             return False
         return True
 
-    async def create_stream(self, subject: str):
-        stream_name = NatsKeys.stream(subject)
+    async def create_stream(self, stream: str, subjects: List[str] = None):
+        stream_name = NatsKeys.stream(stream)
         try:
             await self._js.stream_info(stream_name)
             self.logger.info("A stream with the name '%s' already exists", stream_name)
         except NotFoundError:
-            self.logger.info("Creating new stream with the name %s", stream_name)
-            await self._js.add_stream(name=stream_name, subjects=[subject])
+            await self._js.add_stream(name=stream_name, subjects=subjects or [stream])
+            self.logger.info("A stream with the name '%s' was created", stream_name)
 
     async def create_consumer(
         self, subject: str, deliver_subject: Optional[str] = None
@@ -275,7 +283,6 @@ class NatsMQAdapter(BaseMQAdapter):
                 "A consumer with the name '%s' already exists", durable_name
             )
         except NotFoundError:
-            self.logger.info("Creating new consumer with the name %s", durable_name)
             await self._js.add_consumer(
                 stream_name,
                 ConsumerConfig(
@@ -284,6 +291,7 @@ class NatsMQAdapter(BaseMQAdapter):
                     max_ack_pending=1,
                 ),
             )
+            self.logger.info("A consumer with the name '%s' was created", durable_name)
 
     async def acknowledge_message(self, message: MQMessage):
         msg = self.nats_message_from(message)
@@ -297,11 +305,14 @@ class NatsMQAdapter(BaseMQAdapter):
         msg = self.nats_message_from(message)
         await msg.in_progress()
 
-    async def delete_message(self, stream_name: str, seq_num: int):
-        self.logger.info("Deleting message from the stream: %s", stream_name)
+    async def delete_message(self, stream: str, subject: str, seq_num: int):
+        self.logger.info("Deleting message from the stream: %s", stream)
         try:
-            await self._js.get_msg(NatsKeys.stream(stream_name), seq_num)
-            await self._js.delete_msg(NatsKeys.stream(stream_name), seq_num)
+            await self._js.get_msg(NatsKeys.stream(stream), seq_num, subject=subject)
+            await self._js.delete_msg(NatsKeys.stream(stream), seq_num)
             self.logger.info("Message was deleted")
-        except NotFoundError as exc:
+        except ServerError as exc:
             self.logger.error("Failed to delete the message: %s", exc.description)
+
+    async def purge_subject_from_messages(self, stream: str, subject: str):
+        await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)

@@ -6,7 +6,10 @@ from enum import Enum
 from typing import Any, ClassVar, Dict, Optional, List, Tuple
 from pydantic import BaseModel, Field, field_serializer
 
-PREFILL_SUBJECT_TEMPLATE = "prefill_{subject}"
+PREFILL_SUBJECT_TEMPLATE = "{subscription}.prefill"
+PREFILL_STREAM = "prefill"
+DISPATCHER_SUBJECT_TEMPLATE = "{subscription}.main"
+DISPATCHER_STREAM = "incoming"
 
 
 class PublisherName(str, Enum):

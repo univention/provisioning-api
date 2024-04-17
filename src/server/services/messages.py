@@ -4,6 +4,7 @@ import asyncio
 import logging
 from datetime import datetime
 from typing import List, Optional
+
 from .port import Port
 from .subscriptions import SubscriptionService
 from shared.models import (
@@ -16,6 +17,9 @@ from shared.models import (
     NewSubscription,
     PrefillMessage,
     PREFILL_SUBJECT_TEMPLATE,
+    DISPATCHER_SUBJECT_TEMPLATE,
+    DISPATCHER_STREAM,
+    PREFILL_STREAM,
 )
 
 
@@ -64,7 +68,7 @@ class MessageService:
 
         messages = []
         prefill_stream = await self._port.stream_exists(
-            PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
+            PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription_name)
         )
 
         if queue_status == FillQueueStatus.done and prefill_stream:
@@ -81,26 +85,32 @@ class MessageService:
         return messages
 
     async def get_messages_from_main_queue(
-        self, subject: str, timeout: float, count: int, pop: bool
+        self, subscription: str, timeout: float, count: int, pop: bool
     ) -> List[ProvisioningMessage]:
+        main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=subscription)
         self.logger.info(
-            "Getting the messages for the '%s' from the main queue", subject
+            "Getting the messages for the '%s' from the main subject", main_subject
         )
-        return await self._port.get_messages(subject, timeout, count, pop)
+        return await self._port.get_messages(
+            subscription, main_subject, timeout, count, pop
+        )
 
     async def get_messages_from_prefill_queue(
-        self, subject: str, timeout: float, count: int, pop: bool
+        self, subscription: str, timeout: float, count: int, pop: bool
     ) -> List[ProvisioningMessage]:
+        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription)
         self.logger.info(
-            "Getting the messages for the '%s' from the prefill queue", subject
+            "Getting the messages for the '%s' from the prefill subject",
+            prefill_subject,
         )
-        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=subject)
-        messages = await self._port.get_messages(prefill_subject, timeout, count, pop)
+        messages = await self._port.get_messages(
+            subscription, prefill_subject, timeout, count, pop
+        )
         if len(messages) < count:
             self.logger.info("All messages from the prefill queue have been delivered")
             messages.extend(
                 await self.get_messages_from_main_queue(
-                    subject, timeout, count - len(messages), pop
+                    subscription, timeout, count - len(messages), pop
                 )
             )
             if pop:
@@ -124,16 +134,16 @@ class MessageService:
         """Delete the messages from the subscriber's queue."""
 
         if report.publisher_name == PublisherName.udm_pre_fill:
-            stream_name = PREFILL_SUBJECT_TEMPLATE.format(subject=subscription_name)
+            subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription_name)
         else:
-            stream_name = subscription_name
+            subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=subscription_name)
 
-        await self._port.delete_message(stream_name, report.message_seq_num)
+        await self._port.delete_message(
+            subscription_name, subject, report.message_seq_num
+        )
 
     async def add_live_event(self, event: Message):
-        # TODO: define the name "incoming" globally or handle it differently alltogether
-
-        await self._port.add_message("incoming", event)
+        await self._port.add_message(DISPATCHER_STREAM, DISPATCHER_STREAM, event)
 
     async def send_request_to_prefill(self, subscription: NewSubscription):
         self.logger.info("Sending the requests to prefill")
@@ -143,4 +153,4 @@ class MessageService:
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,
         )
-        await self._port.add_message("prefill", message)
+        await self._port.add_message(PREFILL_STREAM, PREFILL_STREAM, message)

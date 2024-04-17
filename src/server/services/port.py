@@ -35,18 +35,18 @@ class Port:
         await self.mq_adapter.close()
         await self.kv_adapter.close()
 
-    async def add_message(self, subject: str, message: Union[Message, PrefillMessage]):
-        await self.mq_adapter.add_message(subject, message)
+    async def add_message(
+        self, stream: str, subject: str, message: Union[Message, PrefillMessage]
+    ):
+        await self.mq_adapter.add_message(stream, subject, message)
 
     async def get_messages(
-        self, subscription_name: str, timeout: float, count: int, pop: bool
+        self, stream: str, subject: str, timeout: float, count: int, pop: bool
     ) -> List[ProvisioningMessage]:
-        return await self.mq_adapter.get_messages(
-            subscription_name, timeout, count, pop
-        )
+        return await self.mq_adapter.get_messages(stream, subject, timeout, count, pop)
 
-    async def delete_message(self, stream_name: str, seq_num: int):
-        await self.mq_adapter.delete_message(stream_name, seq_num)
+    async def delete_message(self, stream: str, subject: str, seq_num: int):
+        await self.mq_adapter.delete_message(stream, subject, seq_num)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
@@ -68,8 +68,8 @@ class Port:
     async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
         await self.kv_adapter.put_value(key, value, bucket)
 
-    async def create_stream(self, subject):
-        await self.mq_adapter.create_stream(subject)
+    async def create_stream(self, stream: str, subjects: List[str]):
+        await self.mq_adapter.create_stream(stream, subjects)
 
     async def stream_exists(self, prefill_queue_name: str) -> bool:
         return await self.mq_adapter.stream_exists(prefill_queue_name)

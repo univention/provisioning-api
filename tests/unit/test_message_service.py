@@ -20,7 +20,7 @@ def message_service() -> MessageService:
 
 @pytest.mark.anyio
 class TestMessageService:
-    prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subject=SUBSCRIPTION_NAME)
+    prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
 
     async def test_get_next_message(self, message_service: MessageService, sub_service):
         sub_service.get_subscription_queue_status = AsyncMock(
