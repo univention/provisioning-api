@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.0...v0.23.1) (2024-04-17)
+
+
+### Bug Fixes
+
+* **helm:** Update chart "nats" to version 0.2.0 ([7739fd8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7739fd89332d796d5a3543f47107ff63e3ab5ada))
+
 ## [0.23.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.22.1...v0.23.0) (2024-04-15)
 
 
