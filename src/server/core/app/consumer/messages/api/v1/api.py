@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import List, Annotated, Optional
+from typing import Annotated, Optional
 
 import fastapi
 import json
@@ -36,20 +36,20 @@ security = HTTPBasic()
     status_code=fastapi.status.HTTP_200_OK,
     tags=["subscriptions"],
 )
-async def post_messages_status(
+async def post_message_status(
     name: str,
-    reports: List[MessageProcessingStatusReport],
+    report: MessageProcessingStatusReport,
     port: PortDependency,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
-    """Report on the processing of the given messages."""
+    """Report on the processing of the given message."""
 
     sub_service = SubscriptionService(port)
     await sub_service.authenticate_user(credentials, name)
 
     msg_service = MessageService(port)
 
-    await msg_service.post_messages_status(name, reports)
+    await msg_service.post_message_status(name, report)
 
 
 @router.get(

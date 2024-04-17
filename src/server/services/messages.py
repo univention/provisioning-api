@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-import asyncio
+
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from .port import Port
 from .subscriptions import SubscriptionService
@@ -83,16 +83,11 @@ class MessageService:
         )
         return await self._port.get_message(subscription, prefill_subject, timeout, pop)
 
-    async def post_messages_status(
-        self, subscription_name: str, reports: List[MessageProcessingStatusReport]
+    async def post_message_status(
+        self, subscription_name: str, report: MessageProcessingStatusReport
     ):
-        tasks = [
-            self.delete_message(subscription_name, report)
-            for report in reports
-            if report.status == MessageProcessingStatus.ok
-        ]
-        # Gather all tasks and run them concurrently
-        await asyncio.gather(*tasks)
+        if report.status == MessageProcessingStatus.ok:
+            await self.delete_message(subscription_name, report)
 
     async def delete_message(
         self, subscription_name: str, report: MessageProcessingStatusReport
