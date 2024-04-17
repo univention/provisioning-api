@@ -98,11 +98,11 @@ class AsyncClient:
         return ProvisioningMessage.model_validate(msg) if msg else msg
 
     async def set_message_status(
-        self, name: str, reports: List[MessageProcessingStatusReport]
+        self, name: str, report: MessageProcessingStatusReport
     ):
         return await self.session.post(
             f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages-status",
-            json=[report.model_dump() for report in reports],
+            json=report.model_dump(),
         )
 
     # TODO: move this method to the AdminClient
@@ -184,7 +184,7 @@ class MessageHandler:
                 message_seq_num=message.sequence_number,
                 publisher_name=message.publisher_name,
             )
-            await self.client.set_message_status(self.subscription_name, [report])
+            await self.client.set_message_status(self.subscription_name, report)
         except (
             aiohttp.ClientError,
             aiohttp.ClientConnectionError,
