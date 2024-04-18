@@ -5,6 +5,8 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from nats.aio.msg import Msg
+
+from shared.models import DISPATCHER_SUBJECT_TEMPLATE
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     MSG,
@@ -42,6 +44,8 @@ async def dispatcher_mock() -> DispatcherPort:
 
 @pytest.mark.anyio
 class TestDispatcher:
+    main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
+
     async def test_dispatch_events(
         self,
         dispatcher_mock: DispatcherPort,
@@ -65,6 +69,7 @@ class TestDispatcher:
             "incoming",
             cb=dispatcher_mock.mq_adapter.cb,
             durable="durable_name:incoming",
+            stream="stream:incoming",
             manual_ack=True,
         )
         # check waiting for the event
@@ -75,7 +80,7 @@ class TestDispatcher:
 
         # check storing event in the consumer queue
         dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
-            SUBSCRIPTION_NAME,
+            self.main_subject,
             FLAT_MESSAGE_ENCODED,
             stream=f"stream:{SUBSCRIPTION_NAME}",
         )

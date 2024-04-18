@@ -25,11 +25,10 @@ async def test_get_empty_messages(
 ):
     response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
-        count=1,
         timeout=1,
     )
 
-    assert response == []
+    assert response is None
 
 
 async def test_send_message(
@@ -41,21 +40,19 @@ async def test_send_message(
 
     response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
-        count=1,
         timeout=10,
     )
 
-    assert len(response) == 1
-    assert response[0].body == data
+    assert response.body == data
 
 
 @pytest.mark.xfail()
 async def test_pop_message(provisioning_client: AsyncClient, simple_subscription: str):
     response = await provisioning_client.get_subscription_message(
-        name=simple_subscription, count=1, timeout=1, pop=True
+        name=simple_subscription, timeout=1, pop=True
     )
 
-    assert response == []
+    assert response is None
 
 
 async def test_get_real_messages(
@@ -68,7 +65,7 @@ async def test_get_real_messages(
         timeout=5,
     )
 
-    assert len(response) == 1
+    assert response is not None
 
 
 async def test_get_multiple_messages(
@@ -91,7 +88,7 @@ async def test_get_messages_zero_timeout(
         timeout=0,
     )
 
-    assert response == []
+    assert response is None
 
 
 async def test_get_messages_from_the_wrong_queue(
@@ -100,6 +97,5 @@ async def test_get_messages_from_the_wrong_queue(
     with pytest.raises(aiohttp.ClientResponseError, match="Unauthorized"):
         await provisioning_client.get_subscription_message(
             name="wrong_subscription_name",
-            count=1,
             timeout=5,
         )

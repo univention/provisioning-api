@@ -222,7 +222,7 @@ class FakeJs(AsyncMock):
     Msg.ack = AsyncMock()
 
     @classmethod
-    async def pull_subscribe(cls, subject: str, durable: str, stream: str):
+    async def pull_subscribe(cls, subject: str, durable: str, stream: str, config):
         return cls.sub
 
     @classmethod
