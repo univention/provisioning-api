@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from typing import List, Annotated, Optional, Union
+from typing import List, Optional, Union, Annotated
 from fastapi import Depends
 from server.core.app.config import AppSettings
 from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
@@ -45,8 +45,8 @@ class Port:
     ) -> Optional[ProvisioningMessage]:
         return await self.mq_adapter.get_message(stream, subject, timeout, pop)
 
-    async def delete_message(self, stream: str, subject: str, seq_num: int):
-        await self.mq_adapter.delete_message(stream, subject, seq_num)
+    async def delete_message(self, stream: str, seq_num: int):
+        await self.mq_adapter.delete_message(stream, seq_num)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)

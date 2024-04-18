@@ -30,7 +30,7 @@ class TestMessageHandler:
 
     async def test_get_one_message(self, async_client: AsyncClient):
         async_client.get_subscription_message = AsyncMock(
-            return_value=[PROVISIONING_MESSAGE]
+            return_value=PROVISIONING_MESSAGE
         )
         async_client.set_message_status = AsyncMock()
         result = []
@@ -43,17 +43,17 @@ class TestMessageHandler:
         ).run()
 
         async_client.get_subscription_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, count=1, timeout=10
+            SUBSCRIPTION_NAME, timeout=10
         )
         async_client.set_message_status.assert_called_once()
         assert len(result) == 1
 
-    async def test_get_multiple_messages(self, async_client: AsyncClient):
+    async def test_get_multiple_message(self, async_client: AsyncClient):
         async_client.get_subscription_message = AsyncMock(
             side_effect=[
-                [PROVISIONING_MESSAGE],
-                [PROVISIONING_MESSAGE],
-                [PROVISIONING_MESSAGE],
+                PROVISIONING_MESSAGE,
+                PROVISIONING_MESSAGE,
+                PROVISIONING_MESSAGE,
             ]
         )
         async_client.set_message_status = AsyncMock()
@@ -68,9 +68,9 @@ class TestMessageHandler:
 
         async_client.get_subscription_message.assert_has_calls(
             [
-                call(SUBSCRIPTION_NAME, count=1, timeout=10),
-                call(SUBSCRIPTION_NAME, count=1, timeout=10),
-                call(SUBSCRIPTION_NAME, count=1, timeout=10),
+                call(SUBSCRIPTION_NAME, timeout=10),
+                call(SUBSCRIPTION_NAME, timeout=10),
+                call(SUBSCRIPTION_NAME, timeout=10),
             ]
         )
         assert async_client.set_message_status.call_count == 3
@@ -79,7 +79,7 @@ class TestMessageHandler:
 
     async def test_failed_to_acknowledge_message(self, async_client: AsyncClient):
         async_client.get_subscription_message = AsyncMock(
-            return_value=[PROVISIONING_MESSAGE]
+            return_value=PROVISIONING_MESSAGE
         )
         async_client.set_message_status = AsyncMock(side_effect=aiohttp.ClientError)
         result = []
@@ -92,7 +92,7 @@ class TestMessageHandler:
         ).run()
 
         async_client.get_subscription_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, count=1, timeout=10
+            SUBSCRIPTION_NAME, timeout=10
         )
         async_client.set_message_status.assert_called_once()
         assert len(result) == 1

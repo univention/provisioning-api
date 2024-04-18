@@ -303,14 +303,14 @@ class NatsMQAdapter(BaseMQAdapter):
         msg = self.nats_message_from(message)
         await msg.in_progress()
 
-    async def delete_message(self, stream: str, subject: str, seq_num: int):
+    async def delete_message(self, stream: str, seq_num: int):
         self.logger.info("Deleting message from the stream: %s", stream)
         try:
-            await self._js.get_msg(NatsKeys.stream(stream), seq_num, subject=subject)
+            await self._js.get_msg(NatsKeys.stream(stream), seq_num)
             await self._js.delete_msg(NatsKeys.stream(stream), seq_num)
             self.logger.info("Message was deleted")
-        except ServerError as exc:
-            self.logger.error("Failed to delete the message: %s", exc.description)
+        except (ServerError, NotFoundError) as exc:
+            raise ValueError(exc.description)
 
     async def purge_subject_from_messages(self, stream: str, subject: str):
         await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)

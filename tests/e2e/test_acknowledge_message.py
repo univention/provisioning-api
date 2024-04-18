@@ -25,7 +25,6 @@ async def test_get_multiple_messages(
         report = MessageProcessingStatusReport(
             status=MessageProcessingStatus.ok,
             message_seq_num=message.sequence_number,
-            publisher_name=message.publisher_name,
         )
         await provisioning_client.set_message_status(simple_subscription, [report])
 
@@ -48,7 +47,6 @@ async def test_acknowledge_messages(
     report = MessageProcessingStatusReport(
         status=MessageProcessingStatus.ok,
         message_seq_num=message.sequence_number,
-        publisher_name=message.publisher_name,
     )
     await provisioning_client.set_message_status(simple_subscription, [report])
 

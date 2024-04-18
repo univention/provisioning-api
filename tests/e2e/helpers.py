@@ -65,7 +65,6 @@ async def pop_all_messages(
         report = MessageProcessingStatusReport(
             status=MessageProcessingStatus.ok,
             message_seq_num=response[0].sequence_number,
-            publisher_name=response[0].publisher_name,
         )
         await provisioning_client.set_message_status(subscription_name, [report])
         result.append(response[0])

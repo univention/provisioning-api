@@ -49,7 +49,11 @@ async def post_message_status(
 
     msg_service = MessageService(port)
 
-    await msg_service.post_message_status(name, report)
+    try:
+        await msg_service.post_message_status(name, report)
+    except ValueError as err:
+        logger.debug("Failed to post message status: %s", err)
+        raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
 
 
 @router.get(
