@@ -89,15 +89,13 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     # Test object was created
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?count=5&pop=true",
+        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?pop=true",
         auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
 
-    data = response.json()
-    message = data[0]
+    message = response.json()
 
-    assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
     assert message["publisher_name"] == PublisherName.udm_listener
@@ -110,15 +108,13 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
     ldap_connection.modify(dn, changes)
 
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?count=5&pop=true",
+        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?pop=true",
         auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
 
-    data = response.json()
-    message = data[0]
+    message = response.json()
 
-    assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
     assert message["publisher_name"] == PublisherName.udm_listener
@@ -129,15 +125,13 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
     ldap_connection.delete(dn)
 
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?count=5&pop=true",
+        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?pop=true",
         auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
 
-    data = response.json()
-    message = data[0]
+    message = response.json()
 
-    assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
     assert message["publisher_name"] == PublisherName.udm_listener
@@ -178,15 +172,13 @@ async def test_prefill(test_settings):
         await asyncio.sleep(1)
 
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?count=1&pop=true",
+        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?pop=true",
         auth=(name, PASSWORD),
     )
     assert response.status_code == 200
 
-    data = response.json()
-    message = data[0]
+    message = response.json()
 
-    assert len(data) == 1
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
     assert message["publisher_name"] == PublisherName.udm_pre_fill

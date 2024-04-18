@@ -97,12 +97,11 @@ class TestConsumer:
         )
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["realm"] == REALM
-        assert data[0]["topic"] == TOPIC
-        assert data[0]["body"] == BODY
-        assert data[0]["publisher_name"] == PUBLISHER_NAME
-        assert data[0]["sequence_number"] == 1
+        assert data["realm"] == REALM
+        assert data["topic"] == TOPIC
+        assert data["body"] == BODY
+        assert data["publisher_name"] == PUBLISHER_NAME
+        assert data["sequence_number"] == 1
 
     async def test_post_messages_status(
         self,
@@ -110,7 +109,7 @@ class TestConsumer:
     ):
         response = await messages_client.post(
             f"{messages_api_prefix}/subscriptions/{SUBSCRIPTION_NAME}/messages-status",
-            json=[REPORT.model_dump()],
+            json=REPORT.model_dump(),
             auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200

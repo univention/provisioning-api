@@ -55,18 +55,17 @@ async def pop_all_messages(
 ):
     result = []
     for _ in range(loop_number):
-        response = await provisioning_client.get_subscription_message(
+        message = await provisioning_client.get_subscription_message(
             name=subscription_name,
             timeout=1,
-            count=1,
         )
-        if not response:
+        if message is None:
             continue
         report = MessageProcessingStatusReport(
             status=MessageProcessingStatus.ok,
-            message_seq_num=response[0].sequence_number,
+            message_seq_num=message.sequence_number,
         )
-        await provisioning_client.set_message_status(subscription_name, [report])
-        result.append(response[0])
+        await provisioning_client.set_message_status(subscription_name, report)
+        result.append(message)
 
     return result
