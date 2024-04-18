@@ -156,9 +156,18 @@ A Helm Chart that deploys the provisioning services
 | register_consumers.jsonSecretName | string | `""` |  |
 | register_consumers.provisioningApiBaseUrl | string | `"http://provisioning-api/internal/admin/v1/subscriptions"` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1}` | Set the amount of replicas of deployment. |
-| resources.api | object | `{}` |  |
-| resources.dispatcher | object | `{}` |  |
-| resources.prefill | object | `{}` |  |
+| resources.api.limits.cpu | int | `1` |  |
+| resources.api.limits.memory | string | `"1Gi"` |  |
+| resources.api.requests.cpu | float | `0.1` |  |
+| resources.api.requests.memory | string | `"100Mi"` |  |
+| resources.dispatcher.limits.cpu | int | `1` |  |
+| resources.dispatcher.limits.memory | string | `"1Gi"` |  |
+| resources.dispatcher.requests.cpu | float | `0.1` |  |
+| resources.dispatcher.requests.memory | string | `"64Mi"` |  |
+| resources.prefill.limits.cpu | int | `1` |  |
+| resources.prefill.limits.memory | string | `"1Gi"` |  |
+| resources.prefill.requests.cpu | float | `0.1` |  |
+| resources.prefill.requests.memory | string | `"64Mi"` |  |
 | service.annotations | object | `{}` | Additional custom annotations. |
 | service.enabled | bool | `true` | Enable kubernetes service creation. |
 | service.ports.http.containerPort | int | `7777` | Internal port. |
