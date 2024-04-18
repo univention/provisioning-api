@@ -44,7 +44,6 @@ REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.
 REPORT = MessageProcessingStatusReport(
     status=MessageProcessingStatus.ok,
     message_seq_num=1,
-    publisher_name=PublisherName.udm_listener,
 )
 
 CONSUMER_PASSWORD = "password"

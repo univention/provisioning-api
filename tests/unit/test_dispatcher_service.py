@@ -4,6 +4,7 @@
 from unittest.mock import AsyncMock, call
 import pytest
 from server.core.dispatcher.service.dispatcher import DispatcherService
+from shared.models import DISPATCHER_SUBJECT_TEMPLATE
 from tests.conftest import (
     SUBSCRIPTION_INFO,
     MESSAGE,
@@ -19,6 +20,10 @@ def dispatcher_service() -> DispatcherService:
 
 @pytest.mark.anyio
 class TestDispatcherService:
+    main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(
+        subscription=SUBSCRIPTION_INFO["name"]
+    )
+
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
         dispatcher_service._subscriptions = SUBSCRIPTIONS
         dispatcher_service._port.wait_for_event = AsyncMock(
@@ -36,6 +41,6 @@ class TestDispatcherService:
         )
         dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
         dispatcher_service._port.send_message_to_subscription.assert_called_once_with(
-            SUBSCRIPTION_INFO["name"], MESSAGE
+            SUBSCRIPTION_INFO["name"], self.main_subject, MESSAGE
         )
         dispatcher_service._port.acknowledge_message.assert_called_once_with(MQMESSAGE)

@@ -58,7 +58,7 @@ class BaseMQAdapter(ABC):
         pass
 
     @abstractmethod
-    async def delete_message(self, stream: str, subject: str, seq_num: int):
+    async def delete_message(self, stream: str, seq_num: int):
         pass
 
     @abstractmethod

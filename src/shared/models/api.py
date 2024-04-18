@@ -4,7 +4,6 @@
 import enum
 from typing import Any, Dict, List, Tuple
 from pydantic import BaseModel, Field
-from .queue import PublisherName
 
 
 class NewSubscription(BaseModel):
@@ -45,7 +44,4 @@ class MessageProcessingStatusReport(BaseModel):
     )
     message_seq_num: int = Field(
         description="A sequence number representing the processed message."
-    )
-    publisher_name: PublisherName = Field(
-        description="The name of the publisher of the message."
     )

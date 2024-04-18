@@ -182,7 +182,6 @@ class MessageHandler:
             report = MessageProcessingStatusReport(
                 status=MessageProcessingStatus.ok,
                 message_seq_num=message.sequence_number,
-                publisher_name=message.publisher_name,
             )
             await self.client.set_message_status(self.subscription_name, report)
         except (

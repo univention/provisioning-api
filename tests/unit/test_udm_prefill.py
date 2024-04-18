@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch, call
 import pytest
 from server.core.prefill.service.udm_prefill import UDMPreFill
 from server.core.prefill.service.udm_prefill import match_topic
-from shared.models import Message, PublisherName
+from shared.models import Message, PublisherName, PREFILL_SUBJECT_TEMPLATE
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     PREFILL_MESSAGE,
@@ -22,6 +22,7 @@ def udm_prefill() -> UDMPreFill:
 
 @pytest.mark.anyio
 class TestUDMPreFill:
+    prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
     mocked_date = datetime(2023, 11, 9, 11, 15, 52, 616061)
     object_type = "groups/group"
     url = f"http://udm-rest-api:9979/udm/{object_type}/..."
@@ -65,17 +66,18 @@ class TestUDMPreFill:
         udm_prefill._port.subscribe_to_queue.assert_called_once_with(
             "prefill", "prefill-service"
         )
-        udm_prefill._port.create_stream.assert_has_calls(
-            [call("prefill-failures"), call(f"prefill_{SUBSCRIPTION_NAME}")]
-        )
+        udm_prefill._port.create_stream.assert_called_once_with("prefill-failures")
         udm_prefill._port.create_consumer.assert_called_once_with("prefill-failures")
+        udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
+            SUBSCRIPTION_NAME, self.prefill_subject
+        )
         udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_called_once_with()
         udm_prefill._port.list_objects.assert_called_once_with(self.object_type)
         udm_prefill._port.get_object.assert_called_once_with(self.url)
         udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
         udm_prefill._port.create_prefill_message.assert_called_once_with(
-            f"prefill_{SUBSCRIPTION_NAME}", self.msg
+            SUBSCRIPTION_NAME, self.prefill_subject, self.msg
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
@@ -109,7 +111,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.create_prefill_message.assert_not_called()
         udm_prefill._port.add_request_to_prefill_failures.assert_called_once_with(
-            "prefill-failures", PREFILL_MESSAGE
+            "prefill-failures", "prefill-failures", PREFILL_MESSAGE
         )
 
     @patch("server.core.prefill.service.udm_prefill.datetime")

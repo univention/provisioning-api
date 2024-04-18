@@ -5,7 +5,12 @@ from unittest.mock import AsyncMock, patch, call
 import pytest
 from server.services.messages import MessageService
 from tests.conftest import MESSAGE, REPORT, SUBSCRIPTION_NAME
-from shared.models import FillQueueStatus, PREFILL_SUBJECT_TEMPLATE
+from shared.models import (
+    FillQueueStatus,
+    PREFILL_SUBJECT_TEMPLATE,
+    DISPATCHER_SUBJECT_TEMPLATE,
+    DISPATCHER_STREAM,
+)
 
 
 @pytest.fixture
@@ -21,80 +26,55 @@ def message_service() -> MessageService:
 @pytest.mark.anyio
 class TestMessageService:
     prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
+    main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
 
-    async def test_get_next_message(self, message_service: MessageService, sub_service):
+    async def test_get_next_message_prefill_running(
+        self, message_service: MessageService, sub_service
+    ):
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.running
         )
-        message_service._port.get_message = AsyncMock(return_value=[MESSAGE])
-        message_service._port.stream_exists = AsyncMock(return_value=False)
 
         result = await message_service.get_next_message(
-            SUBSCRIPTION_NAME, pop=True, timeout=5
+            SUBSCRIPTION_NAME, timeout=5, pop=True
         )
 
+        sub_service.get_subscription_queue_status.assert_called_once_with(
+            SUBSCRIPTION_NAME
+        )
+        message_service._port.get_message.assert_not_called()
+        assert result is None
+
+    async def test_get_next_message_from_prefill_subject(
+        self, message_service: MessageService, sub_service
+    ):
+        sub_service.get_subscription_queue_status = AsyncMock(
+            return_value=FillQueueStatus.done
+        )
+        message_service._port.get_message = AsyncMock(return_value=MESSAGE)
+
+        result = await message_service.get_next_message(
+            SUBSCRIPTION_NAME, timeout=5, pop=True
+        )
+
+        sub_service.get_subscription_queue_status.assert_called_once_with(
+            SUBSCRIPTION_NAME
+        )
         message_service._port.get_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, 5, 1, True
+            SUBSCRIPTION_NAME, self.prefill_subject, 5, True
         )
         assert result == MESSAGE
 
-    async def test_get_messages_prefill_running(
+    async def test_get_next_message_from_main_subject(
         self, message_service: MessageService, sub_service
     ):
-        sub_service.get_subscription_queue_status = AsyncMock(
-            return_value=FillQueueStatus.running
-        )
-        message_service._port.stream_exists = AsyncMock(return_value=True)
-
-        result = await message_service.get_messages(
-            SUBSCRIPTION_NAME, timeout=5, count=2, pop=True
-        )
-
-        sub_service.get_subscription_queue_status.assert_called_once_with(
-            SUBSCRIPTION_NAME
-        )
-        message_service._port.stream_exists.assert_called_once_with(
-            self.prefill_subject
-        )
-        message_service._port.get_message.assert_not_called()
-        message_service._port.delete_stream.assert_not_called()
-        assert result == []
-
-    async def test_get_messages_from_prefill_queue(
-        self, message_service: MessageService, sub_service
-    ):
-        message_service._port.stream_exists = AsyncMock(return_value=True)
         sub_service.get_subscription_queue_status = AsyncMock(
             return_value=FillQueueStatus.done
         )
-        message_service._port.get_message = AsyncMock(return_value=[MESSAGE, MESSAGE])
+        message_service._port.get_message = AsyncMock(side_effect=[None, MESSAGE])
 
-        result = await message_service.get_messages(
-            SUBSCRIPTION_NAME, timeout=5, count=2, pop=True
-        )
-
-        sub_service.get_subscription_queue_status.assert_called_once_with(
-            SUBSCRIPTION_NAME
-        )
-        message_service._port.get_message.assert_called_once_with(
-            self.prefill_subject, 5, 2, True
-        )
-        message_service._port.delete_stream.assert_not_called()
-        assert result == [MESSAGE, MESSAGE]
-
-    async def test_get_messages_from_prefill_and_main_queues(
-        self, message_service: MessageService, sub_service
-    ):
-        message_service._port.stream_exists = AsyncMock(return_value=True)
-        sub_service.get_subscription_queue_status = AsyncMock(
-            return_value=FillQueueStatus.done
-        )
-        message_service._port.get_message = AsyncMock(
-            side_effect=[[MESSAGE], [MESSAGE]]
-        )
-
-        result = await message_service.get_messages(
-            SUBSCRIPTION_NAME, timeout=5, count=2, pop=True
+        result = await message_service.get_next_message(
+            SUBSCRIPTION_NAME, timeout=5, pop=True
         )
 
         sub_service.get_subscription_queue_status.assert_called_once_with(
@@ -102,43 +82,17 @@ class TestMessageService:
         )
         message_service._port.get_message.assert_has_calls(
             [
-                call(self.prefill_subject, 5, 2, True),
-                call(SUBSCRIPTION_NAME, 5, 1, True),
+                call(SUBSCRIPTION_NAME, self.prefill_subject, 5, True),
+                call(SUBSCRIPTION_NAME, self.main_subject, 5, True),
             ]
         )
 
-        message_service._port.delete_stream.assert_called_once_with(
-            self.prefill_subject
-        )
-        assert result == [MESSAGE, MESSAGE]
+        assert result == MESSAGE
 
-    async def test_get_messages_from_main_queue(
-        self, message_service: MessageService, sub_service
-    ):
-        message_service._port.stream_exists = AsyncMock(return_value=False)
-        sub_service.get_subscription_queue_status = AsyncMock(
-            return_value=FillQueueStatus.done
-        )
-        message_service._port.get_message = AsyncMock(return_value=[MESSAGE, MESSAGE])
-
-        result = await message_service.get_messages(
-            SUBSCRIPTION_NAME, timeout=5, count=2, pop=True
-        )
-
-        sub_service.get_subscription_queue_status.assert_called_once_with(
-            SUBSCRIPTION_NAME
-        )
-        message_service._port.get_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, 5, 2, True
-        )
-
-        message_service._port.delete_stream.assert_not_called()
-        assert result == [MESSAGE, MESSAGE]
-
-    async def test_remove_message(self, message_service: MessageService):
+    async def test_post_message_status(self, message_service: MessageService):
         message_service._port.delete_message = AsyncMock()
 
-        result = await message_service.delete_message(SUBSCRIPTION_NAME, REPORT)
+        result = await message_service.post_message_status(SUBSCRIPTION_NAME, REPORT)
 
         message_service._port.delete_message.assert_called_once_with(
             SUBSCRIPTION_NAME, 1
@@ -148,4 +102,6 @@ class TestMessageService:
     async def test_add_live_message(self, message_service: MessageService):
         await message_service.add_live_event(MESSAGE)
 
-        message_service._port.add_message.assert_called_once_with("incoming", MESSAGE)
+        message_service._port.add_message.assert_called_once_with(
+            DISPATCHER_STREAM, DISPATCHER_STREAM, MESSAGE
+        )

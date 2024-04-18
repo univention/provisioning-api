@@ -10,7 +10,6 @@ from .subscriptions import SubscriptionService
 from shared.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
-    PublisherName,
     ProvisioningMessage,
     FillQueueStatus,
     Message,
@@ -87,21 +86,7 @@ class MessageService:
         self, subscription_name: str, report: MessageProcessingStatusReport
     ):
         if report.status == MessageProcessingStatus.ok:
-            await self.delete_message(subscription_name, report)
-
-    async def delete_message(
-        self, subscription_name: str, report: MessageProcessingStatusReport
-    ):
-        """Delete the messages from the subscriber's queue."""
-
-        if report.publisher_name == PublisherName.udm_pre_fill:
-            subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription_name)
-        else:
-            subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=subscription_name)
-
-        await self._port.delete_message(
-            subscription_name, subject, report.message_seq_num
-        )
+            await self._port.delete_message(subscription_name, report.message_seq_num)
 
     async def add_live_event(self, event: Message):
         await self._port.add_message(DISPATCHER_STREAM, DISPATCHER_STREAM, event)
