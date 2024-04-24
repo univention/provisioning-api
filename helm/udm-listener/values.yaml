@@ -46,7 +46,7 @@ config:
   ldapPassword: ""
   # -- The path to the "ldapPasswordFile" docker secret or a plain file
   ldapPasswordFile: "/var/secrets/ldap_secret"
-  ldapHost: "ldap-server"
+  ldapHost: ""
   ldapHostDn: null
   # -- Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set
   ldapHostIp: null

@@ -29,10 +29,10 @@ cn=admin,dc=univention-organization,dc=intranet
 {{- end -}}
 
 {{- define "udm-listener.ldap.connection.host" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.connection.host" . -}}
-{{- else if .Values.config.ldapHost -}}
+{{- if .Values.config.ldapHost -}}
 {{- .Values.config.ldapHost -}}
+{{- else if .Values.global.nubusDeployment -}}
+{{- include "nubusTemplates.ldapServer.ldap.connection.host" . -}}
 {{- end -}}
 {{- end -}}
 
