@@ -14,6 +14,7 @@ WORKDIR ${WORKDIR}
 RUN apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       python3-pip=23.* \
+      python3-univention-directory-manager-rest-client=12.* \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 ENV \
