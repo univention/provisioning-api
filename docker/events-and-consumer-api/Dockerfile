@@ -17,7 +17,7 @@ RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       python3-pip=23.* \
-      python3-univention-directory-manager \
+      python3-univention-directory-manager=10.* \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 ENV \
