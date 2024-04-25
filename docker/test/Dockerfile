@@ -14,6 +14,7 @@ WORKDIR ${WORKDIR}
 RUN apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       python3-pip=23.* \
+      python3-univention-directory-manager-rest-client=12.* \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 ENV \
@@ -29,7 +30,9 @@ ENV \
     # Put .venv inside source folder
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
     # Cache of poetry
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_CACHE_DIR=/tmp/poetry_cache \
+    # Include system site packages
+    PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages/
 
 # install Poetry
 RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
