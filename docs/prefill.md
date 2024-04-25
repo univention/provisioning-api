@@ -1,15 +1,13 @@
-Prefilling
-==========
+# Prefilling
 
 When a new subscriber registers with the provisioning service,
 it can request to be informed about the current state of objects
 in the LDAP.
 
-This is accomplished by setting `"request_prefill": true` in the
+This is accomplished by setting `request_prefill: true` in the
 subscription request.
 
-Requirements
-------------
+## Requirements
 
 The initial state should be served first,
 before the "live" changes are served to the subscriber.
@@ -22,14 +20,13 @@ The initialization may take quite some time in large installations.
 If it fails, it should be possible to restart it safely
 without confusing the consumers.
 
-Process
--------
+## Process
 
 Upon registering a new subscriber,
 the queue status is set to "pending".
 
 (If no pre-filling is requested,
-the queue status is set to `"ok"` and the process ends here.)
+the queue status is set to `ok` and the process ends here.)
 
 A background task is started.
 It looks at the list of requested topics.
@@ -51,11 +48,11 @@ with an auto-incrementing sequence number `X` assigned by Redis
 (such that the full message id is `0-X`).
 
 Once the all objects for all object types have been placed in the queue,
-the queue status is set to `"ok"`.
+the queue status is set to `ok`.
 Should the pre-filling process terminate prematurely due to an error condition,
 the queue status is set to "failed".
 
-Only once the queue status is `"ok"`,
+Only once the queue status is `ok`,
 the subscriber will start to receive messages.
 This ensures that in case of failures
 the queue can be safely cleaned and reinitialized.
