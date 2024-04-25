@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.1...v0.23.2) (2024-04-25)
+
+
+### Bug Fixes
+
+* add missing resource limits ([a9c71a9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a9c71a9aea02d3d80bd693267dcb2b850ca1b887))
+
 ## [0.23.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.0...v0.23.1) (2024-04-17)
 
 
