@@ -42,7 +42,6 @@ optional = true
 httpx = "^0.24.0"
 pytest = "^7.4.2"
 pytest-cov = "4.1"
-univention-admin-rest-client = "^0.1.0"
 
 [[tool.poetry.source]]
 name = "ucs"

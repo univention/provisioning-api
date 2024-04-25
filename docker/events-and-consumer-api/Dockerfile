@@ -17,6 +17,7 @@ RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       python3-pip=23.* \
+      python3-univention-directory-manager-rest-client=12.* \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 ENV \
@@ -52,6 +53,7 @@ RUN poetry install --only main
 ###############################################
 # Stage 2: test image
 FROM build as test
+
 
 RUN poetry install --with dev
 
