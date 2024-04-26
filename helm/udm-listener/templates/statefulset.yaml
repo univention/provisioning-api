@@ -104,18 +104,6 @@ spec:
               subPath: {{ .Values.ldap.tlsSecret.caCertKey | quote }}
               readOnly: true
             {{- end }}
-            {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
-            - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
-              mountPath: "{{ .Values.config.secretMountPath }}/cert_pem"
-              subPath: {{ .Values.ldap.tlsSecret.certificateKey | quote }}
-              readOnly: true
-            {{- end }}
-            {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
-            - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
-              mountPath: "{{ .Values.config.secretMountPath }}/private_key"
-              subPath: {{ .Values.ldap.tlsSecret.privateKeyKey | quote }}
-              readOnly: true
-            {{- end }}
             {{- end }}
             - name: "data"
               mountPath: "/var/lib/univention-directory-listener"

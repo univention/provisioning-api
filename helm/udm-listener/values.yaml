@@ -58,7 +58,7 @@ config:
   # -- NATS: user name
   natsUser: "udmlistener"
   # -- NATS: password
-  natsPassword: "password"
+  natsPassword: "udmlistenerpass"
   # -- Messages-API Hostname
   internalApiHost: "provisioning-api"
   # -- Messages-API Port
@@ -118,8 +118,6 @@ ldap:
   tlsSecret:
     name: ""
     caCertKey: "ca.crt"
-    privateKeyKey: "tls.key"
-    certificateKey: "tls.crt"
   credentialSecret:
     name: ""
     ldapPasswordKey: "ldap.secret"
