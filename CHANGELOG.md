@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.23.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.2...v0.23.3) (2024-04-26)
+
+
+### Bug Fixes
+
+* delete one message at a time ([0916476](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/091647678ac903b58b5b2e4003c3ecf21bc4db4b))
+* fix deleting messages, fix unit tests ([ce45040](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ce45040171a7aba2f4e021a8d9d108836c173786))
+* remove the logic of receiving multiple messages at once since it does not work with max_ack_pending parameter ([119b793](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/119b7934df96534af53e8f41454d50586bf41d39))
+* use a consumer to get messages, and combine prefill and main streams into one, split by different subjects ([e5aaeba](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e5aaeba9fae3116355642cf70a71eec6d2769aa5))
+
 ## [0.23.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.1...v0.23.2) (2024-04-25)
 
 
