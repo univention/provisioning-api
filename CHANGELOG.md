@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.24.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.3...v0.24.0) (2024-04-29)
+
+
+### Features
+
+* changes to support the refactored umbrella values in a nubus deployment ([b81076f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b81076fc948f328ba79772fca2523135cb44f954))
+
+
+### Bug Fixes
+
+* adding package python3-univention-directory-manager-rest-client ([9530d02](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9530d02a1980ee89c6cc33ba7fd5f016fa103b9c))
+* removing unneeded certifcate/private key mounts ([b4d2241](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b4d224194cd9820afca296baa04e0160e1cbb0dd))
+* set no default for ldapHost, use variable if set, even in Nubus umbrella deployments ([b369030](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b3690306432d005b4795dc9409b6d8aaaa554476))
+
 ## [0.23.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.23.2...v0.23.3) (2024-04-26)
 
 
