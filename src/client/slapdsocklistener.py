@@ -180,7 +180,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         return CONTINUE_RESPONSE
 
 
-if __name__ == "__main__":
+def main():
     stdout_handler = logging.StreamHandler(sys.stdout)
     logger = logging.getLogger()
     logger.addHandler(stdout_handler)
@@ -203,3 +203,7 @@ if __name__ == "__main__":
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
         server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

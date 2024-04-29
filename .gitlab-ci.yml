@@ -52,6 +52,8 @@ lint-pre-commit:
   - IMAGE_NAME: "provisioning-prefill"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+  - IMAGE_NAME: "provisioning-slapdsocklistener"
+    DOCKERFILE_PATH: "docker/slapdsocklistener/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
@@ -64,6 +66,8 @@ lint-pre-commit:
     - "provisioning-example-client"
   - IMAGE_NAME:
     - "provisioning-prefill"
+  - IMAGE_NAME:
+    - "provisioning-slapdsocklistener"
 
 container-build:
   parallel:
