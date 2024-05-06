@@ -155,32 +155,24 @@ We can work around that by starting a kubernetes `port-forward`:
 The unit- and integration-tests are configured via ENV values.
 The End to End tests are designed to also run in other environments.
 (outside the provisioning repository)
-That's why they are configured using pytest arguments:
+
+the well-known configuration-values for the e2e tests are configured in
+`tests/e2e/conftest.py`
+
+you can specify the environment via a pytest argument:
 
 ```sh
-Custom options:
-  --provisioning-api-base-url=PROVISIONING_API_BASE_URL
-                        Base URL of the UDM REST API
-  --provisioning-admin-username=PROVISIONING_ADMIN_USERNAME
-                        UDM admin login password
-  --provisioning-admin-password=PROVISIONING_ADMIN_PASSWORD
-                        UDM admin login password
-  --udm-rest-api-base-url=UDM_REST_API_BASE_URL
-                        Base URL of the UDM REST API
-  --udm-admin-username=UDM_ADMIN_USERNAME
-                        UDM admin login password
-  --udm-admin-password=UDM_ADMIN_PASSWORD
-                        UDM admin login password
-  --ldap-server-uri=LDAP_SERVER_URI
-  --ldap-host-dn=LDAP_HOST_DN
-  --ldap-password=LDAP_PASSWORD
+--environment=ENVIRONMENT
+                      set the environment you are running the tests
+                      in.accepted values are: 'local', 'dev-env', 'pipeline'
+                      and 'gaia'
 ```
 
 E.g.:
 
 ```sh
 poetry shell
-pytest -v -p no:cacheprovider tests/e2e/ --ldap-server-uri ldap://localhost:3890 --provisioning-admin-username admin --provisioning-admin-password provisioning
+pytest -v -p no:cacheprovider tests/e2e/ --environment dev-env
 ```
 
 ### Pre-commit

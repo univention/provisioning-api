@@ -46,6 +46,7 @@ def get_default_settings() -> E2ETestSettings:
 
 def get_devenv_settings() -> E2ETestSettings:
     return get_default_settings()._replace(
+        ldap_server_uri="ldap://localhost:3890",
         udm_rest_api_base_url="http://localhost:8000/univention/udm/",
     )
 
