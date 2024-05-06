@@ -30,26 +30,19 @@
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
-#
+
 import asyncio
 
 from univention.listener.handler import ListenerModuleHandler
-
-from server.core.udm_messaging.port import UDMMessagingPort
-from server.core.udm_messaging.service.udm import UDMMessagingService
+from provisioning_listener.service import ensure_stream, handle_changes
 
 name = "provisioning_handler"
-
-
-async def handle_changes(new, old):
-    async with UDMMessagingPort.port_context() as port:
-        service = UDMMessagingService(port)
-        await service.handle_changes(new, old)
 
 
 class LdapListener(ListenerModuleHandler):
     def initialize(self):
         self.logger.info("handler stub initialize")
+        asyncio.run(ensure_stream())
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)

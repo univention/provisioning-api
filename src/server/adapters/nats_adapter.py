@@ -34,9 +34,11 @@ MAX_RECONNECT_ATTEMPTS = 5
 class NatsKeys:
     """A list of keys used in Nats for queueing messages."""
 
+    @staticmethod
     def stream(subject: str) -> str:
         return f"stream:{subject}"
 
+    @staticmethod
     def durable_name(subject: str) -> str:
         return f"durable_name:{subject}"
 
