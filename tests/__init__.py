@@ -13,6 +13,8 @@ ENV_DEFAULTS = {
     "ldap_base_dn": "dc=univention-organization,dc=intranet",
     "ldap_host_dn": "cn=admin,dc=univention-organization,dc=intranet",
     "ldap_password": "univention",
+    "nats_host": "foo",
+    "nats_port": "1234",
     "nats_user": "api",
     "nats_password": "apipass",
     "admin_nats_user": "admin",

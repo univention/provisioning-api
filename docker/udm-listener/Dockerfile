@@ -44,6 +44,7 @@ RUN pipx install poetry==1.5.1
 # copy source code
 COPY ./src/server ./src/server
 COPY ./src/shared ./src/shared
+COPY ./src/provisioning_listener ./src/provisioning_listener
 COPY logging.yaml \
      poetry.lock \
      pyproject.toml \
@@ -63,6 +64,6 @@ WORKDIR ${WORKDIR}
 COPY --from=builder ${WORKDIR} .
 COPY --from=udm_rest_image /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
-COPY ./src/server/core/udm_messaging/listener/*.py /usr/lib/univention-directory-listener/system/
+COPY ./src/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
 
 ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages
