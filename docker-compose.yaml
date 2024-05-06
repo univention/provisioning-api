@@ -100,7 +100,7 @@ services:
     environment:
       NATS_USER: "udmlistener"
       NATS_PASSWORD: "udmlistenerpass"
-      LDAP_HOST: "localhost"
+      LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
       NOTIFIER_SERVER: "localhost"
