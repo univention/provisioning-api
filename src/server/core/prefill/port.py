@@ -26,6 +26,7 @@ class PrefillPort:
         port = PrefillPort()
         await port._udm_adapter.connect()
         await port.mq_adapter.connect(
+            server=port.settings.nats_server,
             user=port.settings.nats_user,
             password=port.settings.nats_password,
             max_reconnect_attempts=port.settings.max_reconnect_attempts,
@@ -73,13 +74,13 @@ class PrefillPort:
         await self.mq_adapter.add_message(stream, subject, message)
 
     async def create_stream(self, subject: str):
-        await self.mq_adapter.create_stream(subject)
+        await self.mq_adapter.ensure_stream(subject)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
 
     async def create_consumer(self, subject: str):
-        await self.mq_adapter.create_consumer(subject)
+        await self.mq_adapter.ensure_consumer(subject)
 
     async def acknowledge_message(self, message: MQMessage):
         await self.mq_adapter.acknowledge_message(message)

@@ -9,6 +9,10 @@ class PrefillSettings(BaseSettings):
     nats_user: str
     # Nats password specific to Prefill Daemon
     nats_password: str
+    # Nats: host
+    nats_host: str
+    # Nats: port
+    nats_port: int
 
     # Prefill: username
     prefill_username: str
@@ -25,6 +29,10 @@ class PrefillSettings(BaseSettings):
     udm_password: str
     # Maximum number of reconnect attempts to the NATS server
     max_reconnect_attempts: int = 5
+
+    @property
+    def nats_server(self) -> str:
+        return f"nats://{self.nats_host}:{self.nats_port}"
 
     @property
     def udm_url(self) -> str:

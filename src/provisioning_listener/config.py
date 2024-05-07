@@ -11,7 +11,6 @@ class LdapProducerSettings(BaseSettings):
     nats_user: str
     # Nats password specific to UdmProducerSettings
     nats_password: str
-
     # Nats: host
     nats_host: str
     # Nats: port

@@ -19,7 +19,9 @@ class Port:
     async def port_dependency():
         port = Port()
         await port.mq_adapter.connect(
-            user=port.settings.nats_user, password=port.settings.nats_password
+            server=port.settings.nats_server,
+            user=port.settings.nats_user,
+            password=port.settings.nats_password,
         )
         await port.kv_adapter.init(
             [Bucket.subscriptions, Bucket.credentials],
@@ -69,7 +71,7 @@ class Port:
         await self.kv_adapter.put_value(key, value, bucket)
 
     async def create_stream(self, stream: str, subjects: List[str]):
-        await self.mq_adapter.create_stream(stream, subjects)
+        await self.mq_adapter.ensure_stream(stream, subjects)
 
     async def stream_exists(self, prefill_queue_name: str) -> bool:
         return await self.mq_adapter.stream_exists(prefill_queue_name)
@@ -81,7 +83,7 @@ class Port:
         return await self.kv_adapter.get_keys(bucket)
 
     async def create_consumer(self, subject):
-        await self.mq_adapter.create_consumer(subject)
+        await self.mq_adapter.ensure_consumer(subject)
 
 
 PortDependency = Annotated[Port, Depends(Port.port_dependency)]

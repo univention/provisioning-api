@@ -43,7 +43,7 @@ class BaseMQAdapter(ABC):
     """The base class for message queue adapters."""
 
     @abstractmethod
-    async def connect(self, user: str, password: str):
+    async def connect(self, server: str, user: str, password: str):
         pass
 
     @abstractmethod
@@ -82,11 +82,11 @@ class BaseMQAdapter(ABC):
         pass
 
     @abstractmethod
-    async def create_stream(self, subject: str):
+    async def ensure_stream(self, subject: str):
         pass
 
     @abstractmethod
-    async def create_consumer(
+    async def ensure_consumer(
         self, subject: str, deliver_subject: Optional[str] = None
     ):
         pass

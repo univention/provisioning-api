@@ -4,8 +4,9 @@
 import asyncio
 import json
 import logging
-from typing import List, Optional, Union, Dict
+from typing import Any, Coroutine, List, Optional, Tuple, Union, Dict
 
+import msgpack
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig
@@ -18,6 +19,8 @@ from nats.js.errors import (
 )
 from nats.js.kv import KV_DEL
 
+from shared.models.queue import Message
+
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from ..config import settings
 from shared.models import (
@@ -29,6 +32,8 @@ from shared.models import (
 )
 
 MAX_RECONNECT_ATTEMPTS = 5
+
+logger = logging.getLogger(__name__)
 
 
 class NatsKeys:
@@ -123,7 +128,7 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
         self._message_queue = asyncio.Queue()
 
-    async def connect(self, user: str, password: str, **kwargs):
+    async def connect(self, server: str, user: str, password: str, **kwargs):
         """Connect to the NATS server.
 
         Arguments are passed directly to the NATS client.
@@ -151,12 +156,43 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
+    async def add_msgpack_message(self, stream: str, subject: str, message: Message):
+        """Publish a messagepack encoded message to a NATS subject."""
+        stream_name = NatsKeys.stream(stream)
+
+        await self._js.publish(
+            subject,
+            msgpack.packb(message.model_dump()),
+            stream=stream_name,
+        )
+        logger.info(
+            "Message was published to the stream: %s with the subject: %s",
+            stream_name,
+            subject,
+        )
+
+    async def initialize_subscription(
+        self, stream: str, subject: str, consumer_name: str
+    ):
+        """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
+        await self.ensure_stream(stream, [subject])
+        await self.ensure_consumer(subject, None)
+
+        durable_name = NatsKeys.durable_name(consumer_name)
+        stream_name = NatsKeys.stream(stream)
+        self.pull_subscription = await self._js.pull_subscribe(
+            subject=subject,
+            durable=durable_name,
+            stream=stream_name,
+        )
+
     async def get_message(
         self, stream: str, subject: str, timeout: float, pop: bool
     ) -> Optional[ProvisioningMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         stream_name = NatsKeys.stream(stream)
+        # TODO: Why the stream and not the subject?
         durable_name = NatsKeys.durable_name(stream)
 
         try:
@@ -167,6 +203,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
         consumer = await self._js.consumer_info(stream_name, durable_name)
 
+        # TODO: Why is ConsumerInfo passed in as ConsumerConfig?
         sub = await self._js.pull_subscribe(
             subject, durable=durable_name, stream=stream_name, config=consumer
         )
@@ -179,6 +216,23 @@ class NatsMQAdapter(BaseMQAdapter):
             await msgs[0].ack()
 
         return self.provisioning_message_from(msgs[0])
+
+    async def get_msgpack_message(
+        self, timeout: float = 10
+    ) -> Tuple[Optional[Message], Optional[Coroutine[Any, Any, None]]]:
+        """Returns Optionals of Mesage and a Coroutine that acknowledges the message."""
+        if not self.pull_subscription:
+            raise ValueError(
+                "Subscription attribute is empty, ensure that initialize_subscription() has been called."
+            )
+
+        try:
+            messages = await self.pull_subscription.fetch(1, timeout=timeout)
+        except asyncio.TimeoutError:
+            return None, None
+
+        message = msgpack.unpackb(messages[0].data)
+        return Message(**message), messages[0].ack()
 
     @staticmethod
     def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
@@ -239,8 +293,8 @@ class NatsMQAdapter(BaseMQAdapter):
         await self._message_queue.put(msg)
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.create_stream(subject)
-        await self.create_consumer(subject, deliver_subject)
+        await self.ensure_stream(subject)
+        await self.ensure_consumer(subject, deliver_subject)
 
         await self._js.subscribe(
             subject,
@@ -262,7 +316,7 @@ class NatsMQAdapter(BaseMQAdapter):
             return False
         return True
 
-    async def create_stream(self, stream: str, subjects: List[str] = None):
+    async def ensure_stream(self, stream: str, subjects: Optional[List[str]] = None):
         stream_name = NatsKeys.stream(stream)
         try:
             await self._js.stream_info(stream_name)
@@ -271,7 +325,7 @@ class NatsMQAdapter(BaseMQAdapter):
             await self._js.add_stream(name=stream_name, subjects=subjects or [stream])
             self.logger.info("A stream with the name '%s' was created", stream_name)
 
-    async def create_consumer(
+    async def ensure_consumer(
         self, subject: str, deliver_subject: Optional[str] = None
     ):
         stream_name = NatsKeys.stream(subject)

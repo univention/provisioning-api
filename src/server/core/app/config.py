@@ -14,7 +14,10 @@ class AppSettings(BaseSettings):
     nats_user: str
     # Nats password specific to Consumer and Internal API
     nats_password: str
-
+    # Nats: host
+    nats_host: str
+    # Nats: port
+    nats_port: int
     # Admin Nats user name
     admin_nats_user: str
     # Admin Nats password
@@ -29,6 +32,10 @@ class AppSettings(BaseSettings):
     events_username_udm: str
     # Events API: password
     events_password_udm: str
+
+    @property
+    def nats_server(self) -> str:
+        return f"nats://{self.nats_host}:{self.nats_port}"
 
 
 app_settings = AppSettings()

@@ -24,6 +24,7 @@ class DispatcherPort:
     async def port_context():
         port = DispatcherPort()
         await port.mq_adapter.connect(
+            server=port.settings.nats_server,
             user=port.settings.nats_user,
             password=port.settings.nats_password,
             max_reconnect_attempts=port.settings.max_reconnect_attempts,

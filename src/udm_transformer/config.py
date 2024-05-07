@@ -1,36 +1,47 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+from functools import lru_cache
 
 from pydantic_settings import BaseSettings
 
 
-class UdmProducerSettings(BaseSettings):
+class UDMTransformerSettings(BaseSettings):
     # Nats user name specific to UdmProducerSettings
     nats_user: str
     # Nats password specific to UdmProducerSettings
     nats_password: str
+    # Nats: host
+    nats_host: str
+    # Nats: port
+    nats_port: int
 
     # Events API: username
     events_username_udm: str
     # Events API: password
     events_password_udm: str
 
-    # LDAP : port
-    ldap_port: int = 389
     # LDAP : host
-    ldap_host: str = "localhost"
+    ldap_host: str
+    # LDAP : port
+    ldap_port: int
     # LDAP : tls_mode
-    tls_mode: str = "off"
+    ldap_tls_mode: str
     # LDAP : base_dn
-    ldap_base_dn: str = "dc=univention-organization,dc=intranet"
+    ldap_base_dn: str
     # LDAP : host_dn
-    ldap_host_dn: str = "cn=admin,dc=univention-organization,dc=intranet"
+    ldap_bind_dn: str
     # LDAP : password
-    ldap_password: str
+    ldap_bind_pw: str
+
+    @property
+    def nats_server(self) -> str:
+        return f"nats://{self.nats_host}:{self.nats_port}"
 
     @property
     def ldap_server_uri(self) -> str:
         return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
 
-udm_producer_settings = UdmProducerSettings()
+@lru_cache
+def get_udm_transformer_settings() -> UDMTransformerSettings:
+    return UDMTransformerSettings()

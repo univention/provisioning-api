@@ -5,10 +5,9 @@ import logging
 from datetime import datetime
 from typing import Optional
 import json
-from server.core.udm_messaging.config import udm_producer_settings
-from server.core.udm_messaging.port import UDMMessagingPort
 from shared.models import Bucket, Message, PublisherName
 from univention.admin.rest.module import Object
+from udm_transformer.port import UDMMessagingPort
 import univention.admin.uldap
 from univention.management.console.log import MODULE
 from univention.management.console.modules.udm.udm_ldap import UDM_Module
@@ -19,28 +18,28 @@ logger = logging.getLogger(__name__)
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMMessagingPort):
         super().__init__(
-            host=udm_producer_settings.ldap_host,
-            port=udm_producer_settings.ldap_port,
-            start_tls=2 if udm_producer_settings.tls_mode.lower() == "on" else 0,
-            base=udm_producer_settings.ldap_base_dn,
-            binddn=udm_producer_settings.ldap_host_dn,
-            bindpw=udm_producer_settings.ldap_password,
+            host=port.settings.ldap_host,
+            port=port.settings.ldap_port,
+            start_tls=2 if port.settings.ldap_tls_mode.lower() == "on" else 0,
+            base=port.settings.ldap_base_dn,
+            binddn=port.settings.ldap_bind_dn,
+            bindpw=port.settings.ldap_bind_pw,
         )
         self._messaging_port = port
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
 
     async def retrieve(self, dn: str):
-        self.logger.info("Retrieving object from cache")
+        logger.info("Retrieving object from cache")
         return await self._messaging_port.retrieve(dn, Bucket.cache)
 
     async def store(self, new_obj: dict):
-        self.logger.info("Storing object to cache %s", new_obj)
+        logger.info("Storing object to cache %s", new_obj)
         await self._messaging_port.store(
             new_obj["uuid"], json.dumps(new_obj), Bucket.cache
         )
 
-    async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict]):
+    async def send_event(
+        self, new_obj: Optional[dict], old_obj: Optional[dict], ts: datetime
+    ):
         if not (new_obj or old_obj):
             return
 
@@ -49,7 +48,7 @@ class UDMMessagingService(univention.admin.uldap.access):
         )
 
         if not object_type:
-            self.logger.error(
+            logger.error(
                 "could not identify objectType", {"old": old_obj, "new": new_obj}
             )
             return
@@ -61,7 +60,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             topic=object_type,
             body={"new": new_obj, "old": old_obj},
         )
-        self.logger.info("Sending event with body: %s", message.body)
+        logger.info("Sending event with body: %s", message.body)
         await self._messaging_port.send_event(message)
 
     def _get_module(self, object_type):
@@ -96,7 +95,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             )
             return None
 
-    async def handle_changes(self, new_obj, old_obj):
+    async def handle_changes(self, new_obj, old_obj, ts: datetime):
         old = None
         if old_obj:
             old = await self.retrieve(old_obj["entryUUID"][0].decode())
@@ -105,7 +104,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             new = self.ldap_to_udm(new_obj)
             if new:
                 await self.store(new)
-        await self.send_event(new, old or old_obj)
+        await self.send_event(new, old, ts)
 
 
 class ModuleNotFound(Exception):
