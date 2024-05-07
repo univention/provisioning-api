@@ -7,7 +7,8 @@ import msgpack
 import pytest
 
 from provisioning_listener.config import get_ldap_producer_settings
-from provisioning_listener.service import NatsMQMessagePackAdapter, handle_changes
+from provisioning_listener.service import handle_changes
+from server.adapters.nats_adapter import NatsMQAdapter
 from shared.models.queue import Message, PublisherName
 
 user_entry = {
@@ -116,17 +117,28 @@ def ldap_message():
     )
 
 
+@pytest.fixture
+def serialized_ldap_message(ldap_message):
+    return msgpack.packb(ldap_message.model_dump())
+
+
 def test_settings():
     assert get_ldap_producer_settings()
 
 
-def test_messagepack(ldap_message: Message):
-    result = msgpack.packb(ldap_message.model_dump())
-    assert result
+def test_messagepack(serialized_ldap_message):
+    assert serialized_ldap_message
+
+
+def test_unpack_messagepack(serialized_ldap_message):
+    result = msgpack.unpackb(serialized_ldap_message)
+    message = Message(**result)
+
+    assert message
 
 
 async def test_add_msgpack_message(ldap_message):
-    nats = NatsMQMessagePackAdapter(AsyncMock())
+    nats = NatsMQAdapter()
 
     await nats.add_message("foo", "bar", ldap_message)
 
