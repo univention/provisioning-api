@@ -12,6 +12,7 @@ class MessageAckManager:
     ack_threshold: int = 5
 
     def __init__(self):
+        # TODO: Don't hard-code log level!
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(__name__)
 

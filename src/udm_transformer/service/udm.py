@@ -97,11 +97,9 @@ class UDMMessagingService(univention.admin.uldap.access):
             return None
 
     async def handle_changes(self, new_obj, old_obj):
-        old = (
-            await self.retrieve(old_obj["entryUUID"][0].decode())
-            if old_obj
-            else old_obj
-        )
+        old = None
+        if old_obj:
+            old = await self.retrieve(old_obj["entryUUID"][0].decode())
         new = None
         if new_obj:
             new = self.ldap_to_udm(new_obj)
