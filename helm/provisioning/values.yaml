@@ -196,6 +196,23 @@ livenessProbe:
         - -c
         - |
           exit 0
+  udmTransformer:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 10
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 15
+    # -- Time between probe executions.
+    periodSeconds: 20
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
   prefill:
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
@@ -279,6 +296,23 @@ readinessProbe:
         - -c
         - |
           exit 0
+  udmTransformer:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 10
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 15
+    # -- Time between probe executions.
+    periodSeconds: 20
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
   prefill:
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
@@ -313,7 +347,10 @@ readinessProbe:
 
 # -- Set the amount of replicas of deployment.
 replicaCount:
+  # TODO: Discuss that this may never be higher than 1
   dispatcher: 1
+  # TODO: Discuss that this may never be higher than 1
+  udmTransformer: 1
   prefill: 1
   api: 1
 
@@ -322,6 +359,13 @@ replicaCount:
 # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
 resources:
  dispatcher:
+   limits:
+     cpu: 1
+     memory: "1Gi"
+   requests:
+     cpu: 0.1
+     memory: "64Mi"
+ udmTransformer:
    limits:
      cpu: 1
      memory: "1Gi"
@@ -395,6 +439,23 @@ serviceAccount:
 #  Configure extra options for containers probes.
 startupProbe:
   dispatcher:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 15
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 10
+    # -- Time between probe executions.
+    periodSeconds: 20
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  udmTransformer:
     # -- Delay after container start until StartupProbe is executed.
     initialDelaySeconds: 15
     # -- Number of failed executions until container is terminated.
@@ -509,11 +570,56 @@ dispatcher:
   config:
     # Python log level
     LOG_LEVEL: "INFO"
-    ## dispatcher
+    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    # TODO: Should not be necessary
+    UDM_HOST: ""
+    # UDM REST API: port
+    # TODO: Should not be necessary
+    UDM_PORT: 80
+
+udmTransformer:
+  image:
+    # TODO: unset when global.imageRegistry is supported by update-helm-values
+    registry: "gitregistry.knut.univention.de"
+    imagePullPolicy: "IfNotPresent"
+    repository: "univention/customers/dataport/upx/provisioning/provisioning-udm-transformer"
+    tag: "latest"
+  # If specified environment variables will be set on the container
+  api:
+    auth:
+      credentialSecretName: ""
+  nats:
+    auth:
+      credentialSecretName: ""
+  ldap:
+    baseDn: ""
+    auth:
+      bindDn: ""
+      credentialSecretName: ""
+    connection:
+      host: ""
+      port: ""
+  config:
+    # Python log level
+    LOG_LEVEL: "INFO"
+    # TODO: Make this an automatic secret
+    EVENTS_USERNAME_UDM: "udm"
+    EVENTS_PASSWORD_UDM: "udmpass"
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
     UDM_HOST: ""
     # UDM REST API: port
-    UDM_PORT: 80
+    UDM_PORT: ""
+    # Hostname of an LDAP server
+    LDAP_HOST:
+    # LDAP server port
+    LDAP_PORT: "389"
+    # TODO: Does this do anything?
+    # -- Whether to start ldap encryption and validate certificates.
+    # Chose from "off", "unvalidated" and "secure".
+    LDAP_TLS_MODE: "off"
+    # LDAP BASE DN of the LDAP domain.
+    LDAP_BASE_DN: null
+    # -- LDAP username with global read access
 
 prefill:
   image:
@@ -589,6 +695,11 @@ nats:
           permissions:
             publish: ">"
             subscribe: ">"
+        - user: "$NATS_UDM_TRANSFORMER_USER"
+          password: "$NATS_UDM_TRANSFORMER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
         - user: "$NATS_PREFILL_USER"
           password: "$NATS_PREFILL_PASSWORD"
           permissions:
@@ -626,6 +737,16 @@ nats:
       valueFrom:
         secretKeyRef:
           name: '{{ printf "%s-provisioning-dispatcher-credentials" .Release.Name }}'
+          key: NATS_PASSWORD
+    - name: NATS_UDM_TRANSFORMER_USER
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-udm-transformer-credentials" .Release.Name }}'
+          key: NATS_USER
+    - name: NATS_UDM_TRANSFORMER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-provisioning-udm-transformer-credentials" .Release.Name }}'
           key: NATS_PASSWORD
     - name: NATS_PREFILL_USER
       valueFrom:
