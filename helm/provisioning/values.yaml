@@ -534,6 +534,8 @@ prefill:
 
 # -- NATS server settings.
 nats:
+  image:
+    registry: "docker.io"
   # -- Set to `true` if you want NATS to be installed as well.
   bundled: true
   nameOverride: "provisioning-nats"
