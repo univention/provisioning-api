@@ -39,12 +39,57 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- end -}}
 {{- end -}}
 
+{{- define "provisioning.udmTransformer.ldap.baseDn" -}}
+{{- if .Values.global.nubusDeployment -}}
+{{- include "nubusTemplates.ldapServer.ldap.baseDn" . -}}
+{{- else -}}
+{{- required ".Values.udmTransformer.ldap.baseDn must be defined." .Values.udmTransformer.ldap.baseDn -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "provisioning.udmTransformer.ldap.auth.bindDn" -}}
+{{- if .Values.global.nubusDeployment -}}
+{{- include "nubusTemplates.ldapServer.ldap.adminDn" . -}}
+{{- else -}}
+{{- required ".Values.udmTransformer.ldap.auth.bindDn must be defined." .Values.udmTransformer.ldap.auth.bindDn -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "provisioning.udmTransformer.ldap.connection.host" -}}
+{{- if .Values.global.nubusDeployment -}}
+{{- include "nubusTemplates.ldapServer.ldap.connection.host" . -}}
+{{- else -}}
+{{- required ".Values.udmTransformer.ldap.connection.host must be defined." .Values.udmTransformer.ldap.connection.host -}}
+{{- end -}}
+{{- end -}}
+
+
+{{- define "provisioning.udmTransformer.ldap.connection.port" -}}
+{{- if .Values.global.nubusDeployment -}}
+{{- include "nubusTemplates.ldapServer.ldap.connection.port" . -}}
+{{- else -}}
+{{- required ".Values.udmTransformer.ldap.connection.port must be defined." .Values.udmTransformer.ldap.connection.port -}}
+{{- end -}}
+{{- end -}}
+
 {{- /*
 These template definitions are only used in this chart and do not relate to templates defined elsewhere.
 */}}
 
 {{- define "provisioning-dispatcher.credentialSecretName" -}}
 {{- coalesce .Values.dispatcher.credentialSecretName (printf "%s-provisioning-dispatcher-credentials" .Release.Name) -}}
+{{- end -}}
+
+{{- define "provisioning-udm-transformer.api.auth.credentialSecretName" -}}
+{{- coalesce .Values.udmTransformer.api.auth.credentialSecretName (printf "%s-provisioning-udm-transformer-api-credentials" .Release.Name) -}}
+{{- end -}}
+
+{{- define "provisioning-udm-transformer.nats.auth.credentialSecretName" -}}
+{{- coalesce .Values.udmTransformer.nats.auth.credentialSecretName (printf "%s-provisioning-udm-transformer-nats-credentials" .Release.Name) -}}
+{{- end -}}
+
+{{- define "provisioning-udm-transformer.ldap.auth.credentialSecretName" -}}
+{{- coalesce .Values.udmTransformer.ldap.auth.credentialSecretName (printf "%s-provisioning-udm-transformer-ldap-credentials" .Release.Name) -}}
 {{- end -}}
 
 {{- define "provisioning-api.credentialSecretName" -}}

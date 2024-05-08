@@ -95,6 +95,32 @@ data:
 kind: "ConfigMap"
 apiVersion: "v1"
 metadata:
+  name: {{ printf "%s-udm-transformer" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  LOG_LEVEL: {{ required ".Values.udmTransformer.config.LOG_LEVEL is required." .Values.udmTransformer.config.LOG_LEVEL | quote  }}
+  UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
+  UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
+  LDAP_HOST: {{ include "provisioning.udmTransformer.ldap.connection.host" . | quote }}
+  LDAP_PORT: {{ include "provisioning.udmTransformer.ldap.connection.port" . | quote }}
+  LDAP_TLS_MODE: {{ required ".Values.udmTransformer.config.LDAP_TLS_MODE is required." .Values.udmTransformer.config.LDAP_TLS_MODE | quote }}
+
+  LDAP_BASE_DN: {{ include "provisioning.udmTransformer.ldap.baseDn" . | quote }}
+  LDAP_BIND_DN: {{ include "provisioning.udmTransformer.ldap.auth.bindDn" . | quote }}
+
+...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
   name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:

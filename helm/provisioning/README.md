@@ -104,8 +104,16 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | livenessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
+| livenessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| livenessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
+| livenessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
+| livenessProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
+| livenessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
+| livenessProbe.udmTransformer.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
+| livenessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | nameOverride | string | `"provisioning"` | String to partially override release name. |
-| nats | object | `{"bundled":true,"config":{"authorization":{"enabled":true,"users":[{"password":"$NATS_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_USER"},{"password":"$NATS_API_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_API_USER"},{"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_DISPATCHER_USER"},{"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_PREFILL_USER"},{"password":"$NATS_UDMLISTENER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDMLISTENER_USER"}]},"cluster":{"replicas":1},"jetstream":{"enabled":true,"fileStorage":{"pvc":{"size":"1Gi"}}}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"extraEnvVars":[{"name":"NATS_USER","value":"admin"},{"name":"NATS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"admin_password","name":"{{ printf \"%s-provisioning-nats-credentials\" .Release.Name }}"}}},{"name":"NATS_API_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_API_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}}],"nameOverride":"provisioning-nats","nats":{"image":{"registry":"docker.io"}},"natsBox":{"image":{"registry":"docker.io"}},"reloader":{"image":{"registry":"docker.io"}}}` | NATS server settings. |
+| nats | object | `{"bundled":true,"config":{"authorization":{"enabled":true,"users":[{"password":"$NATS_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_USER"},{"password":"$NATS_API_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_API_USER"},{"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_DISPATCHER_USER"},{"password":"$NATS_UDM_TRANSFORMER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDM_TRANSFORMER_USER"},{"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_PREFILL_USER"},{"password":"$NATS_UDMLISTENER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDMLISTENER_USER"}]},"cluster":{"replicas":1},"jetstream":{"enabled":true,"fileStorage":{"pvc":{"size":"1Gi"}}}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"extraEnvVars":[{"name":"NATS_USER","value":"admin"},{"name":"NATS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"admin_password","name":"{{ printf \"%s-provisioning-nats-credentials\" .Release.Name }}"}}},{"name":"NATS_API_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_API_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_UDM_TRANSFORMER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-transformer-credentials\" .Release.Name }}"}}},{"name":"NATS_UDM_TRANSFORMER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-transformer-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}}],"nameOverride":"provisioning-nats","nats":{"image":{"registry":"docker.io"}},"natsBox":{"image":{"registry":"docker.io"}},"reloader":{"image":{"registry":"docker.io"}}}` | NATS server settings. |
 | nats.bundled | bool | `true` | Set to `true` if you want NATS to be installed as well. |
 | nats.connection.host | string | `""` | The NATS service to connect to. |
 | nats.connection.port | string | `""` | The port to connect to the NATS service. |
@@ -150,6 +158,14 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
+| readinessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| readinessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
+| readinessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| readinessProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
+| readinessProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
+| readinessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
+| readinessProbe.udmTransformer.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
+| readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | register_consumers.credentialSecretName | string | `""` |  |
 | register_consumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | register_consumers.image.registry | string | `"gitregistry.knut.univention.de"` |  |
@@ -157,7 +173,7 @@ A Helm Chart that deploys the provisioning services
 | register_consumers.image.tag | string | `"latest"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
 | register_consumers.provisioningApiBaseUrl | string | `"http://provisioning-api/internal/admin/v1/subscriptions"` |  |
-| replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1}` | Set the amount of replicas of deployment. |
+| replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
 | resources.api.limits.cpu | int | `1` |  |
 | resources.api.limits.memory | string | `"1Gi"` |  |
 | resources.api.requests.cpu | float | `0.1` |  |
@@ -170,6 +186,10 @@ A Helm Chart that deploys the provisioning services
 | resources.prefill.limits.memory | string | `"1Gi"` |  |
 | resources.prefill.requests.cpu | float | `0.1` |  |
 | resources.prefill.requests.memory | string | `"64Mi"` |  |
+| resources.udmTransformer.limits.cpu | int | `1` |  |
+| resources.udmTransformer.limits.memory | string | `"1Gi"` |  |
+| resources.udmTransformer.requests.cpu | float | `0.1` |  |
+| resources.udmTransformer.requests.memory | string | `"64Mi"` |  |
 | service.annotations | object | `{}` | Additional custom annotations. |
 | service.enabled | bool | `true` | Enable kubernetes service creation. |
 | service.ports.http.containerPort | int | `7777` | Internal port. |
@@ -203,7 +223,35 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | startupProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
+| startupProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| startupProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
+| startupProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| startupProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
+| startupProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
+| startupProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
+| startupProbe.udmTransformer.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
+| startupProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | terminationGracePeriodSeconds | string | `""` | In seconds, time the given to the pod needs to terminate gracefully. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods |
 | tolerations | list | `[]` | Tolerations for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
+| udmTransformer.api.auth.credentialSecretName | string | `""` |  |
+| udmTransformer.config.EVENTS_PASSWORD_UDM | string | `"udmpass"` |  |
+| udmTransformer.config.EVENTS_USERNAME_UDM | string | `"udm"` |  |
+| udmTransformer.config.LDAP_BASE_DN | string | `nil` |  |
+| udmTransformer.config.LDAP_HOST | string | `nil` |  |
+| udmTransformer.config.LDAP_PORT | string | `"389"` |  |
+| udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
+| udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
+| udmTransformer.config.UDM_HOST | string | `""` |  |
+| udmTransformer.config.UDM_PORT | string | `""` |  |
+| udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| udmTransformer.image.registry | string | `"gitregistry.knut.univention.de"` |  |
+| udmTransformer.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-udm-transformer"` |  |
+| udmTransformer.image.tag | string | `"latest"` |  |
+| udmTransformer.ldap.auth.bindDn | string | `""` |  |
+| udmTransformer.ldap.auth.credentialSecretName | string | `""` |  |
+| udmTransformer.ldap.baseDn | string | `""` |  |
+| udmTransformer.ldap.connection.host | string | `""` |  |
+| udmTransformer.ldap.connection.port | string | `""` |  |
+| udmTransformer.nats.auth.credentialSecretName | string | `""` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |
