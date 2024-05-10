@@ -710,6 +710,11 @@ nats:
           permissions:
             publish: ">"
             subscribe: ">"
+        - user: "$NATS_SELFSERVICE_LISTENER_USER"
+          password: "$NATS_SELFSERVICE_LISTENER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
   extraEnvVars:
     - name: NATS_USER
       value: "admin"
@@ -767,6 +772,16 @@ nats:
       valueFrom:
         secretKeyRef:
           name: '{{ printf "%s-provisioning-udm-listener-credentials" .Release.Name }}'
+          key: NATS_PASSWORD
+    - name: NATS_SELFSERVICE_LISTENER_USER
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-selfservice-listener-credentials" .Release.Name }}'
+          key: NATS_USER
+    - name: NATS_SELFSERVICE_LISTENER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ printf "%s-selfservice-listener-credentials" .Release.Name }}'
           key: NATS_PASSWORD
 
 
