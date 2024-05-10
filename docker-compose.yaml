@@ -14,6 +14,7 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      NATS_PORT: "4222"
       NATS_USER: "api"
       NATS_PASSWORD: "apipass"
       ADMIN_NATS_USER: "admin"
@@ -57,9 +58,40 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      NATS_PORT: "4222"
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
       INTERNAL_API_HOST: "events-and-consumer-api"
+    depends_on:
+      - "nats"
+      - "events-and-consumer-api"
+
+  udm-transformer:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
+    build:
+      context: .
+      dockerfile: docker/udm-transformer/Dockerfile
+      args:
+        - UCS_BASE_IMAGE_TAG=latest
+    container_name: "provisioning-udm-transformer"
+    restart: "on-failure"
+    environment:
+      LOG_LEVEL: "DEBUG"
+      NATS_HOST: "nats"
+      NATS_PORT: "4222"
+      NATS_USER: "udm-transformer"
+      NATS_PASSWORD: "udm-transformerpass"
+
+      INTERNAL_API_HOST: "events-and-consumer-api"
+      EVENTS_USERNAME_UDM: "udm"
+      EVENTS_PASSWORD_UDM: "udmpass"
+
+      LDAP_HOST: "ldap-server"
+      LDAP_PORT: 389
+      LDAP_TLS_MODE: "off"
+      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
+      LDAP_BIND_DN: "cn=admin,dc=univention-organization,dc=intranet"
+      LDAP_BIND_PW: "univention"
     depends_on:
       - "nats"
       - "events-and-consumer-api"
@@ -76,6 +108,7 @@ services:
     environment:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats"
+      NATS_PORT: "4222"
       INTERNAL_API_HOST: "events-and-consumer-api"
       NATS_USER: "prefill"
       NATS_PASSWORD: "prefillpass"
@@ -98,9 +131,11 @@ services:
         - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
     environment:
+      NATS_HOST: "localhost"
+      NATS_PORT: "4222"
       NATS_USER: "udmlistener"
       NATS_PASSWORD: "udmlistenerpass"
-      LDAP_HOST: "ldap-server"
+      LDAP_HOST: "localhost"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
       NOTIFIER_SERVER: "localhost"
@@ -109,8 +144,6 @@ services:
       LDAP_PASSWORD: "univention"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
       LDAP_PORT: 389
-      EVENTS_USERNAME_UDM: "udm"
-      EVENTS_PASSWORD_UDM: "udmpass"
     network_mode: "host"
     depends_on:
       - "nats"
@@ -157,6 +190,7 @@ services:
     platform: "linux/amd64"
     environment:
       NATS_HOST: nats
+      NATS_PORT: "4222"
       NATS_USER: "user"
       NATS_PASSWORD: "pass"
       PROVISIONING_API_HOST: events-and-consumer-api
