@@ -113,7 +113,7 @@ docker compose up --detach --remove-orphans
 optimized command:
 
 ```sh
-docker compose up --pull always --build events-and-consumer-api nats dispatcher prefill udm-listener ldap-notifier udm-rest-api ldap-server
+docker compose up --pull always --build events-and-consumer-api nats dispatcher prefill udm-listener udm-transformer ldap-notifier udm-rest-api ldap-server
 ```
 
 Wait for up to 1 minute for the default LDAP changes to be processed by the dispatcher.
