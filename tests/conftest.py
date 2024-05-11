@@ -31,6 +31,8 @@ from server.core.app.config import AppSettings  # noqa: E402
 from server.services.port import Port  # noqa: E402
 from server.core.app.main import app, internal_app  # noqa: E402
 
+NATS_SERVER = "nats://localhost:4222"
+
 REALM = "udm"
 TOPIC = "groups/group"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}

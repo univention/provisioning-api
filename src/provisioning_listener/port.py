@@ -3,7 +3,7 @@
 
 from typing import List, Optional
 from provisioning_listener.config import LdapProducerSettings
-from server.adapters.nats_adapter import NatsMQAdapter
+from server.adapters.nats_adapter import NatsMQAdapter, messagepack_encoder
 from shared.models.queue import Message
 
 
@@ -23,8 +23,10 @@ class LDAPProducerPort:
     async def __aexit__(self, *args):
         await self.mq_adapter.close()
 
-    async def add_msgpack_message(self, stream: str, subject: str, message: Message):
-        await self.mq_adapter.add_msgpack_message(stream, subject, message)
+    async def add_message(self, stream: str, subject: str, message: Message):
+        await self.mq_adapter.add_message(
+            stream, subject, message, binary_encoder=messagepack_encoder
+        )
 
     async def ensure_stream(self, stream: str, subjects: Optional[List[str]] = None):
         await self.mq_adapter.ensure_stream(stream, subjects)

@@ -4,7 +4,7 @@
 import asyncio
 import json
 import logging
-from typing import Any, Coroutine, List, Optional, Tuple, Union, Dict
+from typing import Any, Callable, List, Optional, Tuple, Union, Dict
 
 import msgpack
 from nats.aio.client import Client as NATS
@@ -121,6 +121,14 @@ class NatsKVAdapter(BaseKVStoreAdapter):
                     self.logger.info("Subscriptions were updated: %s", subscriptions)
 
 
+def json_encoder(data: Any) -> bytes:
+    return json.dumps(data).encode("utf-8")
+
+
+def messagepack_encoder(data: Any) -> bytes:
+    return msgpack.packb(data)
+
+
 class NatsMQAdapter(BaseMQAdapter):
     def __init__(self):
         self._nats = NATS()
@@ -134,38 +142,27 @@ class NatsMQAdapter(BaseMQAdapter):
         Arguments are passed directly to the NATS client.
         https://nats-io.github.io/nats.py/modules.html#asyncio-client
         """
-        await self._nats.connect(
-            [settings.nats_server], user=user, password=password, **kwargs
-        )
+        await self._nats.connect(servers=server, user=user, password=password, **kwargs)
 
     async def close(self):
         await self._nats.close()
 
-    async def add_message(self, stream: str, subject: str, message: BaseMessage):
+    async def add_message(
+        self,
+        stream: str,
+        subject: str,
+        message: BaseMessage,
+        binary_encoder: Callable[[Any], bytes] = json_encoder,
+    ):
         """Publish a message to a NATS subject."""
         stream_name = NatsKeys.stream(stream)
 
         await self._js.publish(
             subject,
-            json.dumps(message.model_dump()).encode("utf-8"),
+            binary_encoder(message.model_dump()),
             stream=stream_name,
         )
         self.logger.info(
-            "Message was published to the stream: %s with the subject: %s",
-            stream_name,
-            subject,
-        )
-
-    async def add_msgpack_message(self, stream: str, subject: str, message: Message):
-        """Publish a messagepack encoded message to a NATS subject."""
-        stream_name = NatsKeys.stream(stream)
-
-        await self._js.publish(
-            subject,
-            msgpack.packb(message.model_dump()),
-            stream=stream_name,
-        )
-        logger.info(
             "Message was published to the stream: %s with the subject: %s",
             stream_name,
             subject,
@@ -219,11 +216,11 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def get_msgpack_message(
         self, timeout: float = 10
-    ) -> Tuple[Optional[Message], Optional[Coroutine[Any, Any, None]]]:
-        """Returns Optionals of Mesage and a Coroutine that acknowledges the message."""
+    ) -> Tuple[Optional[Message], Optional[Callable]]:
+        """Returns Optionals of Message and a Callable that acknowledges the message."""
         if not self.pull_subscription:
             raise ValueError(
-                "Subscription attribute is empty, ensure that initialize_subscription() has been called."
+                "Subscription class attribute is empty, ensure that initialize_subscription() has been called."
             )
 
         try:
@@ -232,7 +229,7 @@ class NatsMQAdapter(BaseMQAdapter):
             return None, None
 
         message = msgpack.unpackb(messages[0].data)
-        return Message(**message), messages[0].ack()
+        return Message(**message), messages[0].ack
 
     @staticmethod
     def provisioning_message_from(msg: Msg) -> ProvisioningMessage:

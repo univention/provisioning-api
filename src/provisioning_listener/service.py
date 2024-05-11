@@ -25,4 +25,4 @@ async def handle_changes(new, old):
     )
 
     async with LDAPProducerPort() as ldap_port:
-        await ldap_port.add_msgpack_message(LDAP_STREAM, LDAP_SUBJECT, message)
+        await ldap_port.add_message(LDAP_STREAM, LDAP_SUBJECT, message)
