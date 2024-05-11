@@ -2,7 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
-from typing import Union, Optional, List
+from collections.abc import Callable
+from typing import Any, Union, Optional, List
 
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
@@ -51,7 +52,13 @@ class BaseMQAdapter(ABC):
         pass
 
     @abstractmethod
-    async def add_message(self, stream: str, subject: str, message: BaseMessage):
+    async def add_message(
+        self,
+        stream: str,
+        subject: str,
+        message: BaseMessage,
+        binary_encoder: Callable[[Any], bytes],
+    ):
         pass
 
     async def get_message(self, stream: str, subject: str, timeout: float, pop: bool):

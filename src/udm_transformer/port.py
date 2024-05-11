@@ -3,7 +3,7 @@
 
 import contextlib
 import json
-from typing import Any, Coroutine, Optional
+from typing import Callable, Optional
 from server.adapters.internal_api_adapter import InternalAPIAdapter
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from shared.models import Bucket, Message
@@ -56,7 +56,7 @@ class UDMMessagingPort:
 
     async def get_msgpack_message(
         self, timeout: float
-    ) -> tuple[Message | None, Coroutine[Any, Any, None] | None]:
+    ) -> tuple[Message | None, Callable | None]:
         return await self.mq_adapter.get_msgpack_message(timeout)
 
     async def retrieve(self, url: str, bucket: Bucket):

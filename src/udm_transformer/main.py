@@ -42,7 +42,7 @@ async def run_udm_transformer():
             except Exception:
                 logger.exception("Failed to transform message")
                 raise
-            await acknowledge
+            await acknowledge()
 
 
 async def main():

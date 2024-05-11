@@ -15,6 +15,7 @@ from tests.conftest import (
     FLAT_MESSAGE_ENCODED,
     CREDENTIALS,
     MSG,
+    NATS_SERVER,
     PROVISIONING_MESSAGE,
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
@@ -153,11 +154,11 @@ class TestNatsMQAdapter:
 
     async def test_connect(self, mock_nats_mq_adapter):
         result = await mock_nats_mq_adapter.connect(
-            user=CREDENTIALS.username, password=CREDENTIALS.password
+            server=NATS_SERVER, user=CREDENTIALS.username, password=CREDENTIALS.password
         )
 
         mock_nats_mq_adapter._nats.connect.assert_called_once_with(
-            ["nats://localhost:4222"],
+            servers=NATS_SERVER,
             user=CREDENTIALS.username,
             password=CREDENTIALS.password,
         )

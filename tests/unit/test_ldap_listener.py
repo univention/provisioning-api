@@ -2,14 +2,14 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, patch
 import msgpack
 import pytest
 
 from provisioning_listener.config import get_ldap_producer_settings
-from provisioning_listener.service import handle_changes
-from server.adapters.nats_adapter import NatsMQAdapter
-from shared.models.queue import Message, PublisherName
+from provisioning_listener.service import ensure_stream, handle_changes
+from server.adapters.nats_adapter import messagepack_encoder
+from shared.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message, PublisherName
 
 user_entry = {
     "krb5MaxLife": [b"86400"],
@@ -119,7 +119,19 @@ def ldap_message():
 
 @pytest.fixture
 def serialized_ldap_message(ldap_message):
-    return msgpack.packb(ldap_message.model_dump())
+    return messagepack_encoder(ldap_message.model_dump())
+
+
+@pytest.fixture
+def mock_nats_adapter():
+    with patch("provisioning_listener.port.NatsMQAdapter", autospec=True) as mock:
+        adapter = mock.return_value
+        adapter.connect = AsyncMock()
+        adapter.close = AsyncMock()
+        adapter.add_message = AsyncMock()
+        adapter.ensure_stream = AsyncMock()
+
+        yield adapter
 
 
 def test_settings():
@@ -137,15 +149,21 @@ def test_unpack_messagepack(serialized_ldap_message):
     assert message
 
 
-async def test_add_msgpack_message(ldap_message):
-    nats = NatsMQAdapter()
+async def test_ensure_stream(mock_nats_adapter):
+    await ensure_stream()
 
-    await nats.add_message("foo", "bar", ldap_message)
+    mock_nats_adapter.connect.assert_awaited_once()
+    mock_nats_adapter.close.assert_awaited_once()
+    mock_nats_adapter.ensure_stream.assert_awaited_once_with(
+        LDAP_STREAM, [LDAP_SUBJECT]
+    )
 
 
-async def test_handle_changes():
-    with patch("provisioning_listener.service.JetstreamAdapter") as mock_jetstream:
-        mock_jetstream.return_value = AsyncMock()
-        mock_jetstream.js.return_value = AsyncMock()
+async def test_handle_changes(mock_nats_adapter):
+    await handle_changes(None, user_entry)
 
-        await handle_changes(None, user_entry)
+    mock_nats_adapter.connect.assert_awaited_once()
+    mock_nats_adapter.close.assert_awaited_once()
+    mock_nats_adapter.add_message.assert_awaited_once_with(
+        LDAP_STREAM, LDAP_SUBJECT, ANY, binary_encoder=messagepack_encoder
+    )
