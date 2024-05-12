@@ -3,14 +3,19 @@
 
 import contextlib
 import json
-from typing import Callable, Optional
+from typing import Optional
 from server.adapters.internal_api_adapter import InternalAPIAdapter
-from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from server.adapters.nats_adapter import (
+    Acknowledgements,
+    NatsKVAdapter,
+    NatsMQAdapter,
+    messagepack_decoder,
+)
 from shared.models import Bucket, Message
 from .config import UDMTransformerSettings, get_udm_transformer_settings
 
 
-class UDMMessagingPort:
+class UDMTransformerPort:
     def __init__(self, settings: Optional[UDMTransformerSettings] = None):
         self.settings = settings or get_udm_transformer_settings()
 
@@ -23,7 +28,7 @@ class UDMMessagingPort:
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
-        port = UDMMessagingPort()
+        port = UDMTransformerPort()
         await port.kv_adapter.init(
             [Bucket.cache],
             user=port.settings.nats_user,
@@ -45,19 +50,16 @@ class UDMMessagingPort:
         await self._internal_api_adapter.close()
         await self.mq_adapter.close()
 
-    async def initialize_subscription(
-        self, stream: str, subject: str, consumer_name: str
-    ):
+    async def initialize_subscription(self, stream: str, subject: str):
         return await self.mq_adapter.initialize_subscription(
             stream,
             subject,
-            consumer_name,
         )
 
-    async def get_msgpack_message(
+    async def get_message(
         self, timeout: float
-    ) -> tuple[Message | None, Callable | None]:
-        return await self.mq_adapter.get_msgpack_message(timeout)
+    ) -> tuple[Message | None, Acknowledgements | None]:
+        return await self.mq_adapter.get_one_message(timeout, messagepack_decoder)
 
     async def retrieve(self, url: str, bucket: Bucket):
         result = await self.kv_adapter.get_value(url, bucket)

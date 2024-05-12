@@ -2,8 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable
-from typing import Any, Union, Optional, List
+from typing import Any, Callable, Union, Optional, List
 
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue

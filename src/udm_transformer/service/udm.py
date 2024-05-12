@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-only
+# Callable | NoneSPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
@@ -7,7 +7,7 @@ from typing import Optional
 import json
 from shared.models import Bucket, Message, PublisherName
 from univention.admin.rest.module import Object
-from udm_transformer.port import UDMMessagingPort
+from udm_transformer.port import UDMTransformerPort
 import univention.admin.uldap
 from univention.management.console.log import MODULE
 from univention.management.console.modules.udm.udm_ldap import UDM_Module
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class UDMMessagingService(univention.admin.uldap.access):
-    def __init__(self, port: UDMMessagingPort):
+    def __init__(self, port: UDMTransformerPort):
         super().__init__(
             host=port.settings.ldap_host,
             port=port.settings.ldap_port,

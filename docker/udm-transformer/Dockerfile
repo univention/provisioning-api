@@ -6,8 +6,6 @@ ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base
 
 ARG WORKDIR="/app"
 
-FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as udm_rest_image
-
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as build
 ARG WORKDIR
 WORKDIR ${WORKDIR}
@@ -20,6 +18,7 @@ RUN chown "$USER":"$USER" "$WORKDIR" \
       python3-pip=23.* \
       python3-univention-directory-manager-rest=12.0* \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
+
 USER "$USER"
 ENV \
     PATH="/home/${USER}/.local/bin:${PATH}" \
