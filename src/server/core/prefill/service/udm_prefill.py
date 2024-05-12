@@ -15,7 +15,7 @@ from shared.models import (
     PREFILL_SUBJECT_TEMPLATE,
     PREFILL_STREAM,
 )
-from shared.utils.message_ack_manager import MessageAckManager
+from shared.utils.old_message_ack_manager import MessageAckManager
 
 
 def match_topic(sub_topic: str, module_name: str) -> bool:

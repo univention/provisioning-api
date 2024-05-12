@@ -4,7 +4,8 @@
 import asyncio
 import json
 import logging
-from typing import Any, Callable, List, Optional, Tuple, Union, Dict
+from typing import Any, Callable, Coroutine, List, Optional, Tuple, Union, Dict
+import typing
 
 import msgpack
 from nats.aio.client import Client as NATS
@@ -125,8 +126,22 @@ def json_encoder(data: Any) -> bytes:
     return json.dumps(data).encode("utf-8")
 
 
+def json_decoder(data: Any) -> bytes:
+    return json.loads(data)
+
+
 def messagepack_encoder(data: Any) -> bytes:
     return msgpack.packb(data)
+
+
+def messagepack_decoder(data: bytes) -> Any:
+    return msgpack.unpackb(data)
+
+
+class Acknowledgements(typing.NamedTuple):
+    acknowledge_message: Callable[[], Coroutine[Any, Any, None]]
+    acknowledge_message_negatively: Callable[[], Coroutine[Any, Any, None]]
+    acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]]
 
 
 class NatsMQAdapter(BaseMQAdapter):
@@ -168,14 +183,12 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(
-        self, stream: str, subject: str, consumer_name: str
-    ):
+    async def initialize_subscription(self, stream: str, subject: str) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
         await self.ensure_stream(stream, [subject])
         await self.ensure_consumer(subject, None)
 
-        durable_name = NatsKeys.durable_name(consumer_name)
+        durable_name = NatsKeys.durable_name(subject)
         stream_name = NatsKeys.stream(stream)
         self.pull_subscription = await self._js.pull_subscribe(
             subject=subject,
@@ -214,9 +227,11 @@ class NatsMQAdapter(BaseMQAdapter):
 
         return self.provisioning_message_from(msgs[0])
 
-    async def get_msgpack_message(
-        self, timeout: float = 10
-    ) -> Tuple[Optional[Message], Optional[Callable]]:
+    async def get_one_message(
+        self,
+        timeout: float = 10,
+        binary_decoder: Callable[[bytes], Any] = json_decoder,
+    ) -> Tuple[Optional[Message], Optional[Acknowledgements]]:
         """Returns Optionals of Message and a Callable that acknowledges the message."""
         if not self.pull_subscription:
             raise ValueError(
@@ -228,8 +243,10 @@ class NatsMQAdapter(BaseMQAdapter):
         except asyncio.TimeoutError:
             return None, None
 
-        message = msgpack.unpackb(messages[0].data)
-        return Message(**message), messages[0].ack
+        message = binary_decoder(messages[0].data)
+        acknowledgements = self.build_acknowledgements(messages[0])
+
+        return Message(**message), acknowledgements
 
     @staticmethod
     def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
@@ -343,6 +360,13 @@ class NatsMQAdapter(BaseMQAdapter):
                 ),
             )
             self.logger.info("A consumer with the name '%s' was created", durable_name)
+
+    def build_acknowledgements(self, message: Msg) -> Acknowledgements:
+        return Acknowledgements(
+            message.ack,
+            message.nak,
+            message.in_progress,
+        )
 
     async def acknowledge_message(self, message: MQMessage):
         msg = self.nats_message_from(message)
