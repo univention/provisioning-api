@@ -17,6 +17,7 @@ class LDAPProducerPort:
             self.settings.nats_server,
             self.settings.nats_user,
             self.settings.nats_password,
+            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
         )
         return self
 

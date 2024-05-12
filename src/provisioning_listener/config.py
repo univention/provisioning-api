@@ -15,6 +15,8 @@ class LdapProducerSettings(BaseSettings):
     nats_host: str
     # Nats: port
     nats_port: int
+    # Maximum number of reconnect attempts to the NATS server
+    nats_max_reconnect_attempts: int = 5
 
     @property
     def nats_server(self) -> str:
