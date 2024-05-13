@@ -4,7 +4,7 @@
 import logging
 
 from server.adapters.nats_adapter import Acknowledgements
-from shared.models.queue import LDAP_STREAM, Message
+from shared.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message
 from shared.utils.message_ack_manager import MessageAckManager
 from udm_transformer.port import UDMTransformerPort
 from udm_transformer.service.udm import UDMMessagingService
@@ -40,7 +40,9 @@ class UDMTransformerController:
 
     async def transform_events(self) -> None:
         await self._port.initialize_subscription(
-            LDAP_STREAM, UDM_TRANSFORMER_CONSUMER_NAME
+            LDAP_STREAM,
+            LDAP_SUBJECT,
+            UDM_TRANSFORMER_CONSUMER_NAME,
         )
 
         while True:

@@ -11,7 +11,7 @@ PREFILL_STREAM = "prefill"
 DISPATCHER_SUBJECT_TEMPLATE = "{subscription}.main"
 DISPATCHER_STREAM = "incoming"
 LDAP_STREAM = "ldap-producer"
-LDAP_SUBJECT = "ldap-producer"
+LDAP_SUBJECT = "ldap-producer-subject"
 
 
 class PublisherName(str, Enum):

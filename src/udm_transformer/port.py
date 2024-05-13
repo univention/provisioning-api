@@ -50,10 +50,9 @@ class UDMTransformerPort:
         await self._internal_api_adapter.close()
         await self.mq_adapter.close()
 
-    async def initialize_subscription(self, stream: str, subject: str):
+    async def initialize_subscription(self, stream: str, subject: str, durable_name):
         return await self.mq_adapter.initialize_subscription(
-            stream,
-            subject,
+            stream, subject, durable_name
         )
 
     async def get_message(
