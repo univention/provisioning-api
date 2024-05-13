@@ -130,7 +130,7 @@ test-end-to-end:
     - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats dispatcher prefill udm-listener ldap-notifier udm-rest-api ldap-server
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
-    - sleep 10
+    - sleep 30
     - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --environment pipeline
   after_script:
     - docker compose down --volumes
