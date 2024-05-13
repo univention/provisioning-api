@@ -34,6 +34,7 @@
 # <https://www.gnu.org/licenses/>.
 #
 
+from binascii import a2b_base64
 import logging
 import os
 import sys
@@ -41,6 +42,7 @@ import sys
 from slapdsock.service import SlapdSockServer
 from slapdsock.handler import SlapdSockHandler
 from slapdsock.message import CONTINUE_RESPONSE
+from ldap0.res import decode_response_ctrls
 
 PARALLEL_REQUESTS_MAX = 4
 
@@ -150,13 +152,30 @@ class LDAPHandler(ReasonableSlapdSockHandler):
             original_request = self.req_queue.pop((request.connid, request.msgid))
         except KeyError:
             return ""
-        self._log(logging.DEBUG, "do_result = %s", request)
         self._log(logging.INFO, "dn = %s", original_request.dn)
         self._log(logging.INFO, "reqtype = %s", original_request.reqtype)
+        self._log(logging.DEBUG, "do_result = %s", request)
+        if request.parsed_ldif:
+            self._log(logging.DEBUG, "parsed_ldif = %s", request.parsed_ldif)
+        self._log(logging.DEBUG, "ctrls = %s", request.ctrls)
+        ctrls = [(control_type, criticality, a2b_base64(control_value)) for (control_type, criticality, control_value) in request.ctrls]
+        ctrls = decode_response_ctrls(ctrls)
+        for ctrl in ctrls:
+            self._log(logging.INFO, "entry_as = %s", ctrl.res.entry_as)
+
         if original_request.reqtype == "ADD":
             self._log(logging.INFO, "entry = %s", original_request.entry)
         elif original_request.reqtype == "MODIFY":
             self._log(logging.INFO, "modops = %s", original_request.modops)
+        elif original_request.reqtype == "MODRDN":
+            self._log(logging.INFO, "newrdn = %s", original_request.newrdn)
+            self._log(logging.INFO, "newSuperior = %s", original_request.newSuperior)
+            self._log(logging.INFO, "deleteoldrdn = %s", original_request.deleteoldrdn)
+            self._log(logging.INFO, "RESULT newrdn = %s", request.parsed_ldif[b"newrdn"])
+            self._log(logging.INFO, "RESULT newsuperior = %s", request.parsed_ldif[b"newsuperior"])
+            self._log(logging.INFO, "RESULT deleteoldrdn = %s", request.parsed_ldif[b"deleteoldrdn"])
+        elif original_request.reqtype == "DELETE":
+            pass
         if request.code == 0:
             self._log(logging.INFO, "binddn = %s", original_request.binddn)
             self._log(logging.INFO, "Call NATS for dn = %s", original_request.dn)
@@ -190,7 +209,7 @@ def main():
 
     ldaphandler = LDAPHandler(ldap_base)
     with SlapdSockServer(
-        server_address="/sockoverlay-listener",
+        server_address="/var/lib/univention-ldap/slapd-sock",
         handler_class=ldaphandler,
         logger=logger,
         average_count=10,
