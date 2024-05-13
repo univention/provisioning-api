@@ -183,12 +183,14 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(self, stream: str, subject: str) -> None:
+    async def initialize_subscription(
+        self, stream: str, subject: str, durable_name: str
+    ) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
         await self.ensure_stream(stream, [subject])
-        await self.ensure_consumer(subject, None)
+        await self.ensure_consumer(stream)
 
-        durable_name = NatsKeys.durable_name(subject)
+        durable_name = NatsKeys.durable_name(durable_name)
         stream_name = NatsKeys.stream(stream)
         self.pull_subscription = await self._js.pull_subscribe(
             subject=subject,
@@ -339,11 +341,9 @@ class NatsMQAdapter(BaseMQAdapter):
             await self._js.add_stream(name=stream_name, subjects=subjects or [stream])
             self.logger.info("A stream with the name '%s' was created", stream_name)
 
-    async def ensure_consumer(
-        self, subject: str, deliver_subject: Optional[str] = None
-    ):
-        stream_name = NatsKeys.stream(subject)
-        durable_name = NatsKeys.durable_name(subject)
+    async def ensure_consumer(self, stream: str, deliver_subject: Optional[str] = None):
+        stream_name = NatsKeys.stream(stream)
+        durable_name = NatsKeys.durable_name(stream)
 
         try:
             await self._js.consumer_info(stream_name, durable_name)
