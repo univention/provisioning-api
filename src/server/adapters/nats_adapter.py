@@ -151,13 +151,23 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
         self._message_queue = asyncio.Queue()
 
-    async def connect(self, server: str, user: str, password: str, **kwargs):
+    async def connect(
+        self, server: str, user: str, password: str, max_reconnect_attempts=5, **kwargs
+    ):
         """Connect to the NATS server.
 
         Arguments are passed directly to the NATS client.
         https://nats-io.github.io/nats.py/modules.html#asyncio-client
+
+        by default it fails after a maximum of 10 seconds because of a 2 second connect timout * 5 reconnect attempts.
         """
-        await self._nats.connect(servers=server, user=user, password=password, **kwargs)
+        await self._nats.connect(
+            servers=server,
+            user=user,
+            password=password,
+            max_reconnect_attempts=max_reconnect_attempts,
+            **kwargs,
+        )
 
     async def close(self):
         await self._nats.close()
