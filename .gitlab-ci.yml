@@ -222,7 +222,7 @@ build_provisioning_lib:
       # Check if the suffix exists
       if [[ -n "$suffix" ]]; then
           modified_suffix="dev0+${suffix// /-}"
-          export package_version="$version_number.$modified_suffix"
+          export package_version="$version_number.$modified_suffix.${CI_COMMIT_SHORT_SHA}"
       else
           export package_version="$version_number"
       fi
