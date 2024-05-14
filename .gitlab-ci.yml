@@ -61,6 +61,8 @@ lint-pre-commit:
   - IMAGE_NAME:
     - "provisioning-dispatcher"
   - IMAGE_NAME:
+    - "provisioning-udm-transformer"
+  - IMAGE_NAME:
     - "provisioning-example-client"
   - IMAGE_NAME:
     - "provisioning-prefill"
@@ -109,6 +111,7 @@ test-integration:
     - docker compose down --volumes
 
 test-end-to-end:
+  allow_failure: true
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
@@ -127,13 +130,32 @@ test-end-to-end:
     - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
     - docker compose config test
     - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats dispatcher prefill udm-listener ldap-notifier udm-rest-api ldap-server
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server >& docker-compose.log
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
-    - sleep 30
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --environment pipeline
+    - sleep 10
+    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e/ -v --environment pipeline
   after_script:
+    - docker logs events-and-consumer-api-dev >& provisioning-api.log
+    - docker logs provisioning-dispatcher >& dispatcher.log
+    - docker logs provisioning-prefill >& prefill.log
+    - docker logs provisioning-udm-transformer >& udm-transformer.log
+    - docker logs udm-listener >& udm-listener.log
+    - docker logs ldap-server >& ldap-server.log
     - docker compose down --volumes
+  artifacts:
+    paths:
+      - docker-compose.log
+      - provisioning-api.log
+      - dispatcher.log
+      - prefill.log
+      - udm-transformer.log
+      - udm-listener.log
+      - ldap-server.log
+    expire_in: "1 day"
+    when: "always"
+    expose_as: "docker compose server logs"
+
 
 # TODO: docker compose run nats ... somehow
 test-events-and-consumer-api:

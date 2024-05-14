@@ -62,9 +62,9 @@ def get_pipeline_settings() -> E2ETestSettings:
 def get_gaia_settings() -> E2ETestSettings:
     return get_default_settings()._replace(
         provisioning_admin_username="admin",
-        provisioning_admin_password="9f42908c164a41d2771b4451397f68ae3c13a220",
-        provisioning_events_username="udmproducer",
-        provisioning_events_password="05c19490698eb7294776565f70e88abcca183499",
+        provisioning_admin_password="0d702e15cf95c218695ccd7dbc4ec7e2f86eeae1",
+        provisioning_events_username="udmListener",
+        provisioning_events_password="e1a5d2cddc1e4423c9a8b4d4da9c5a9393b31b48",
         ldap_server_uri="ldap://localhost:3890",
         ldap_base="dc=swp-ldap,dc=internal",
         ldap_bind_dn="cn=admin,dc=swp-ldap,dc=internal",

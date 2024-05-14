@@ -161,6 +161,7 @@ class TestNatsMQAdapter:
             servers=NATS_SERVER,
             user=CREDENTIALS.username,
             password=CREDENTIALS.password,
+            max_reconnect_attempts=5,
         )
         assert result is None
 

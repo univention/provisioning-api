@@ -87,6 +87,7 @@ services:
       EVENTS_PASSWORD_UDM: "udmpass"
 
       LDAP_HOST: "ldap-server"
+      # LDAP_HOST: "localhost"
       LDAP_PORT: 389
       LDAP_TLS_MODE: "off"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
@@ -95,6 +96,7 @@ services:
     depends_on:
       - "nats"
       - "events-and-consumer-api"
+    # network_mode: "host"
 
   prefill:
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
