@@ -37,12 +37,14 @@
 from binascii import a2b_base64
 import logging
 import os
+from queue import Queue
 import sys
 
 from slapdsock.service import SlapdSockServer
 from slapdsock.handler import SlapdSockHandler
 from slapdsock.message import CONTINUE_RESPONSE
 from ldap0.res import decode_response_ctrls
+from ldap0.controls.readentry import PostReadControl, PreReadControl
 
 PARALLEL_REQUESTS_MAX = 4
 
@@ -68,7 +70,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
     """
 
     def __init__(self, ldap_base):
-        self.req_queue = {}
+        self.req_queue = Queue(maxsize=PARALLEL_REQUESTS_MAX)
         temporary_dn_string = ",cn=temporary,cn=univention,"
         self.len_temporary_dn_suffix = len(temporary_dn_string) + len(ldap_base)
 
@@ -82,7 +84,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_add = %s", request)
-        self.req_queue[(request.connid, request.msgid)] = request
+        self.req_queue.put((request.connid, request.msgid), block=True)
         return CONTINUE_RESPONSE
 
     def do_bind(self, request):
@@ -106,7 +108,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_delete = %s", request)
-        self.req_queue[(request.connid, request.msgid)] = request
+        self.req_queue.put((request.connid, request.msgid), block=True)
         return CONTINUE_RESPONSE
 
     def do_modify(self, request):
@@ -116,7 +118,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_modify = %s", request)
-        self.req_queue[(request.connid, request.msgid)] = request
+        self.req_queue.put((request.connid, request.msgid), block=True)
         return CONTINUE_RESPONSE
 
     def do_modrdn(self, request):
@@ -126,7 +128,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_modrdn = %s", request)
-        self.req_queue[(request.connid, request.msgid)] = request
+        self.req_queue.put((request.connid, request.msgid), block=True)
         return CONTINUE_RESPONSE
 
     def do_search(self, request):
@@ -148,39 +150,41 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         RESULT
         """
         _ = (self, request)  # pylint dummy
-        try:
-            original_request = self.req_queue.pop((request.connid, request.msgid))
-        except KeyError:
+        if getattr(request, 'dn', None) == None:
+            # A search result or anything where RESULTRequest._parse_ldif didn't find anything.
             return ""
-        self._log(logging.INFO, "dn = %s", original_request.dn)
-        self._log(logging.INFO, "reqtype = %s", original_request.reqtype)
         self._log(logging.DEBUG, "do_result = %s", request)
+        if self.is_temporary_dn(request):
+            self._log(logging.INFO, "ignoring dn = %s", request.dn)
+            return ""
+        self._log(logging.INFO, "dn = %s", request.dn)
         if request.parsed_ldif:
             self._log(logging.DEBUG, "parsed_ldif = %s", request.parsed_ldif)
-        self._log(logging.DEBUG, "ctrls = %s", request.ctrls)
-        ctrls = [(control_type, criticality, a2b_base64(control_value)) for (control_type, criticality, control_value) in request.ctrls]
-        ctrls = decode_response_ctrls(ctrls)
-        for ctrl in ctrls:
-            self._log(logging.INFO, "entry_as = %s", ctrl.res.entry_as)
+            if isinstance(request.parsed_ldif, list):
+                reqtype = "MODIFY"
+            elif b"newrdn" in request.parsed_ldif:
+                reqtype = "MODRDN"
+            else:
+                reqtype = "ADD"
+        elif request.parsed_ldif == None:
+            reqtype = "DELETE"
 
-        if original_request.reqtype == "ADD":
-            self._log(logging.INFO, "entry = %s", original_request.entry)
-        elif original_request.reqtype == "MODIFY":
-            self._log(logging.INFO, "modops = %s", original_request.modops)
-        elif original_request.reqtype == "MODRDN":
-            self._log(logging.INFO, "newrdn = %s", original_request.newrdn)
-            self._log(logging.INFO, "newSuperior = %s", original_request.newSuperior)
-            self._log(logging.INFO, "deleteoldrdn = %s", original_request.deleteoldrdn)
-            self._log(logging.INFO, "RESULT newrdn = %s", request.parsed_ldif[b"newrdn"])
-            self._log(logging.INFO, "RESULT newsuperior = %s", request.parsed_ldif[b"newsuperior"])
-            self._log(logging.INFO, "RESULT deleteoldrdn = %s", request.parsed_ldif[b"deleteoldrdn"])
-        elif original_request.reqtype == "DELETE":
-            pass
+        self._log(logging.DEBUG, "reqtype = %s", reqtype)
+        self._log(logging.DEBUG, "parsed_ldif = %s", request.parsed_ldif)
         if request.code == 0:
-            self._log(logging.INFO, "binddn = %s", original_request.binddn)
-            self._log(logging.INFO, "Call NATS for dn = %s", original_request.dn)
+            self._log(logging.INFO, "binddn = %s", request.binddn)
+            self._log(logging.DEBUG, "ctrls = %s", request.ctrls)
+            ctrls = [(control_type, criticality, a2b_base64(control_value)) for (control_type, criticality, control_value) in request.ctrls]
+            ctrls = decode_response_ctrls(ctrls)
+            for ctrl in ctrls:
+                if isinstance(ctrl, PostReadControl):
+                    self._log(logging.INFO, "PostRead entry_as = %s", ctrl.res.entry_as)
+                elif isinstance(ctrl, PreReadControl):
+                    self._log(logging.INFO, "PreRead entry_as = %s", ctrl.res.entry_as)
+            self._log(logging.INFO, "Call NATS for %s operation on dn = %s" % (reqtype, request.dn))
         else:
-            self._log(logging.INFO, "code = %s", request.code)
+            self._log(logging.INFO, "ignoring op with RESULT code = %s", request.code)
+        self.req_queue.get()  # signal one seat is free
         return ""
 
     def do_entry(self, request):
