@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.25.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.25.0...v0.25.1) (2024-05-14)
+
+
+### Bug Fixes
+
+* override global registry for all NATS components to docker.io ([123c617](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/123c617420ad2396310fd3b62477894ed78a0d58))
+* override NATS global registry ([25a0139](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/25a01397b0c8e91b0bac3a16f301f57f5e5312dd))
+
 ## [0.25.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.24.0...v0.25.0) (2024-05-07)
 
 
