@@ -46,9 +46,6 @@ from slapdsock.message import CONTINUE_RESPONSE
 from ldap0.res import decode_response_ctrls
 from ldap0.controls.readentry import PostReadControl, PreReadControl
 
-PARALLEL_REQUESTS_MAX = 4
-
-
 class ReasonableSlapdSockHandler(SlapdSockHandler):
     def __call__(self, *args, **kwargs):
         """
@@ -69,8 +66,8 @@ class LDAPHandler(ReasonableSlapdSockHandler):
     case of misconfigured "overlay sock" section.
     """
 
-    def __init__(self, ldap_base):
-        self.req_queue = Queue(maxsize=PARALLEL_REQUESTS_MAX)
+    def __init__(self, ldap_base, ldap_threads):
+        self.req_queue = Queue(maxsize=ldap_threads)
         temporary_dn_string = ",cn=temporary,cn=univention,"
         self.len_temporary_dn_suffix = len(temporary_dn_string) + len(ldap_base)
 
@@ -213,8 +210,9 @@ def main():
     logger.setLevel(logging.INFO)
 
     ldap_base = os.environ["ldap_base"]
+    ldap_threads = os.environ["ldap_threads"]
 
-    ldaphandler = LDAPHandler(ldap_base)
+    ldaphandler = LDAPHandler(ldap_base, ldap_threads)
     with SlapdSockServer(
         server_address="/var/lib/univention-ldap/slapd-sock",
         handler_class=ldaphandler,
@@ -224,7 +222,7 @@ def main():
         socket_permissions="600",
         allowed_uids=(0,),
         allowed_gids=(0,),
-        thread_pool_size=PARALLEL_REQUESTS_MAX,
+        thread_pool_size=ldap_threads,
     ) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
