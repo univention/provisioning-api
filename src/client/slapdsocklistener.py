@@ -150,7 +150,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         RESULT
         """
         _ = (self, request)  # pylint dummy
-        if getattr(request, 'dn', None) == None:
+        if getattr(request, "dn", None) is None:
             # A search result or anything where RESULTRequest._parse_ldif didn't find anything.
             return ""
         self._log(logging.DEBUG, "do_result = %s", request)
@@ -166,7 +166,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
                 reqtype = "MODRDN"
             else:
                 reqtype = "ADD"
-        elif request.parsed_ldif == None:
+        elif request.parsed_ldif is None:
             reqtype = "DELETE"
 
         self._log(logging.DEBUG, "reqtype = %s", reqtype)
@@ -174,7 +174,10 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if request.code == 0:
             self._log(logging.INFO, "binddn = %s", request.binddn)
             self._log(logging.DEBUG, "ctrls = %s", request.ctrls)
-            ctrls = [(control_type, criticality, a2b_base64(control_value)) for (control_type, criticality, control_value) in request.ctrls]
+            ctrls = [
+                (control_type, criticality, a2b_base64(control_value))
+                for (control_type, criticality, control_value) in request.ctrls
+            ]
             ctrls = decode_response_ctrls(ctrls)
             for ctrl in ctrls:
                 if isinstance(ctrl, PostReadControl):
