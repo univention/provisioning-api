@@ -43,7 +43,7 @@ RUN pipx install poetry==1.5.1
 
 # copy source code
 COPY ./src/server ./src/server
-COPY ./src/shared ./src/shared
+COPY ./src/univention/provisioning/models ./src/univention/provisioning/models
 COPY ./src/provisioning_listener ./src/provisioning_listener
 COPY logging.yaml \
      poetry.lock \

@@ -9,7 +9,12 @@ import pytest
 from provisioning_listener.config import get_ldap_producer_settings
 from provisioning_listener.service import ensure_stream, handle_changes
 from server.adapters.nats_adapter import messagepack_encoder
-from shared.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message, PublisherName
+from univention.provisioning.models.queue import (
+    LDAP_STREAM,
+    LDAP_SUBJECT,
+    Message,
+    PublisherName,
+)
 
 user_entry = {
     "krb5MaxLife": [b"86400"],

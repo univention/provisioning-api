@@ -7,12 +7,7 @@ authors = [
 ]
 license = "GNU Affero General Public License v3"
 readme = "README.md"
-packages = [
-    { include = "shared", from = "src" },
-    { include = "app", from = "src/server/core" },
-    { include = "prefill", from = "src/server/core" },
-    { include = "dispatcher", from = "src/server/core" },
-]
+packages = [{ include = "server", from = "src" }, ]
 
 [tool.poetry.dependencies]
 fastapi = "^0.103.1"

@@ -40,7 +40,7 @@ RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
 
 # copy source code
 COPY ./src/server ${WORKDIR}/src/server
-COPY ./src/shared ${WORKDIR}/src/shared
+COPY ./src/univention/provisioning/models ${WORKDIR}/src/univention/provisioning/models
 COPY ./src/udm_transformer ${WORKDIR}/src/udm_transformer
 COPY logging.yaml \
      poetry.lock \

@@ -198,14 +198,13 @@ test_provisioning_lib:
       when: never
     - if: "$CI_COMMIT_MESSAGE =~ /force-build/ || $pipeline =~ /force-build/"
     - changes:
-        - src/client/**/*
-        - src/shared/**/*
+        - src/univention/provisioning/**/*
         - tests/unit/provisioning_lib/**/*
   script:
     - pip install poetry=="$POETRY_VERSION"
     - poetry config --local virtualenvs.create false
     - poetry install --with dev
-    - pytest -vv tests/unit/provisioning_lib --cov=src/client --cov-report=term --cov-report=xml:coverage.xml
+    - pytest -vv tests/unit/provisioning_lib --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
@@ -220,8 +219,7 @@ build_provisioning_lib:
       when: never
     - if: "$CI_COMMIT_MESSAGE =~ /force-build/ || $pipeline =~ /force-build/"
     - changes:
-        - src/client/**/*
-        - src/shared/**/*
+        - src/univention/provisioning/**/*
   dependencies:
     - pre-semantic-release
   needs:

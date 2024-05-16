@@ -4,7 +4,7 @@
 from typing import List, Optional
 from provisioning_listener.config import LdapProducerSettings
 from server.adapters.nats_adapter import NatsMQAdapter, messagepack_encoder
-from shared.models.queue import Message
+from univention.provisioning.models.queue import Message
 
 
 class LDAPProducerPort:

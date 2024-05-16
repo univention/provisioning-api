@@ -4,8 +4,8 @@
 import logging
 
 from server.adapters.nats_adapter import Acknowledgements
-from shared.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message
-from shared.utils.message_ack_manager import MessageAckManager
+from univention.provisioning.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message
+from server.utils.message_ack_manager import MessageAckManager
 from udm_transformer.port import UDMTransformerPort
 from udm_transformer.service.udm import UDMMessagingService
 

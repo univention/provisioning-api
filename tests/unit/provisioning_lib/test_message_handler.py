@@ -6,14 +6,14 @@ from unittest.mock import AsyncMock, patch, call
 import aiohttp
 import pytest
 
-from client import MessageHandler, AsyncClient
-from shared.models import Message
+from univention.provisioning.consumer import MessageHandler, AsyncClient
+from univention.provisioning.models import Message
 from tests.conftest import SUBSCRIPTION_NAME, PROVISIONING_MESSAGE
 
 
 @pytest.fixture
 def async_client() -> AsyncMock:
-    yield patch("client.api.AsyncClient").start().return_value
+    yield patch("univention.provisioning.consumer.api.AsyncClient").start().return_value
 
 
 @pytest.mark.anyio

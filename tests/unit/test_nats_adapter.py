@@ -8,7 +8,7 @@ import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
 
 from server.adapters.nats_adapter import NatsKeys
-from shared.models import Bucket
+from univention.provisioning.models import Bucket
 from tests.conftest import (
     MESSAGE,
     MQMESSAGE,

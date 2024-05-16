@@ -12,7 +12,7 @@ from server.core.app.consumer.messages.api import v1_prefix as messages_api_pref
 from server.core.app.consumer.subscriptions.api import (
     v1_prefix as subscriptions_api_prefix,
 )
-from shared.models import PublisherName, FillQueueStatus
+from univention.provisioning.models import PublisherName, FillQueueStatus
 from tests.e2e.conftest import E2ETestSettings
 
 REALM = "udm"

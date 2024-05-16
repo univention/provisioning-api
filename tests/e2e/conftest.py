@@ -6,7 +6,7 @@ from typing import AsyncGenerator, Any, NamedTuple
 import pytest
 from univention.admin.rest.client import UDM
 from tests.conftest import REALMS_TOPICS
-from client import AsyncClient, Settings
+from univention.provisioning.consumer import AsyncClient, Settings
 
 
 class E2ETestSettings(NamedTuple):

@@ -6,7 +6,12 @@ from typing import List, Optional, Union, Annotated
 from fastapi import Depends
 from server.core.app.config import AppSettings
 from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from shared.models import ProvisioningMessage, PrefillMessage, Bucket, Message
+from univention.provisioning.models import (
+    ProvisioningMessage,
+    PrefillMessage,
+    Bucket,
+    Message,
+)
 
 
 class Port:

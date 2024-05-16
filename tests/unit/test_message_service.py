@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch, call
 import pytest
 from server.services.messages import MessageService
 from tests.conftest import MESSAGE, REPORT, SUBSCRIPTION_NAME
-from shared.models import (
+from univention.provisioning.models import (
     FillQueueStatus,
     PREFILL_SUBJECT_TEMPLATE,
     DISPATCHER_SUBJECT_TEMPLATE,

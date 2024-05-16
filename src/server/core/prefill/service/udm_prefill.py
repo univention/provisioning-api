@@ -6,7 +6,7 @@ import logging
 
 from server.core.prefill.base import PreFillService
 from server.core.prefill.port import PrefillPort
-from shared.models import (
+from univention.provisioning.models import (
     FillQueueStatus,
     PrefillMessage,
     Message,
@@ -15,7 +15,7 @@ from shared.models import (
     PREFILL_SUBJECT_TEMPLATE,
     PREFILL_STREAM,
 )
-from shared.utils.old_message_ack_manager import MessageAckManager
+from server.utils.old_message_ack_manager import MessageAckManager
 
 
 def match_topic(sub_topic: str, module_name: str) -> bool:

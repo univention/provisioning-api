@@ -3,7 +3,7 @@
 
 import aiohttp
 import pytest
-from client import AsyncClient
+from univention.provisioning.consumer import AsyncClient
 from tests.e2e.conftest import E2ETestSettings
 from tests.e2e.helpers import (
     create_message_via_events_api,

@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, patch, call
 import pytest
 from server.core.prefill.service.udm_prefill import UDMPreFill
 from server.core.prefill.service.udm_prefill import match_topic
-from shared.models import Message, PublisherName, PREFILL_SUBJECT_TEMPLATE
+from univention.provisioning.models import (
+    Message,
+    PublisherName,
+    PREFILL_SUBJECT_TEMPLATE,
+)
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     PREFILL_MESSAGE,

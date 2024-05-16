@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import pytest
-from client import AsyncClient, MessageHandler
-from shared.models import Message
+from univention.provisioning.consumer import AsyncClient, MessageHandler
+from univention.provisioning.models import Message
 from tests.e2e.helpers import create_message_via_events_api
 
 

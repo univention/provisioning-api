@@ -11,7 +11,7 @@ from server.adapters.nats_adapter import (
     NatsMQAdapter,
     messagepack_decoder,
 )
-from shared.models import Bucket, Message
+from univention.provisioning.models import Bucket, Message
 from .config import UDMTransformerSettings, get_udm_transformer_settings
 
 

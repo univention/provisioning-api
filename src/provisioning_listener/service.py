@@ -5,7 +5,12 @@ from datetime import datetime
 import logging
 
 from provisioning_listener.port import LDAPProducerPort
-from shared.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message, PublisherName
+from univention.provisioning.models.queue import (
+    LDAP_STREAM,
+    LDAP_SUBJECT,
+    Message,
+    PublisherName,
+)
 
 logger = logging.getLogger(__name__)
 

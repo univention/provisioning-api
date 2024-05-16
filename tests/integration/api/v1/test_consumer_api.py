@@ -16,7 +16,7 @@ from tests.conftest import (
     REPORT,
     CREDENTIALS,
 )
-from shared.models.subscription import FillQueueStatus
+from univention.provisioning.models.subscription import FillQueueStatus
 from server.core.app.consumer.subscriptions.api import v1_prefix as api_prefix
 from server.core.app.main import app as messages_app
 from server.core.app.main import app as subscriptions_app

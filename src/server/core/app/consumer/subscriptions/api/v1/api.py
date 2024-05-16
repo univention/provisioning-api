@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
 from server.core.app.auth import authenticate_admin
-from shared.models import Subscription
+from univention.provisioning.models import Subscription
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService
 

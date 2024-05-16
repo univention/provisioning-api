@@ -6,7 +6,12 @@ from typing import Optional
 from server.adapters.internal_api_adapter import InternalAPIAdapter
 from server.adapters.nats_adapter import NatsMQAdapter
 from server.adapters.udm_adapter import UDMAdapter
-from shared.models import FillQueueStatus, Message, MQMessage, PrefillMessage
+from univention.provisioning.models import (
+    FillQueueStatus,
+    Message,
+    MQMessage,
+    PrefillMessage,
+)
 
 from .config import PrefillSettings
 

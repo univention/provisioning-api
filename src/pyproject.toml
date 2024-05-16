@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "provisioning-consumer-lib"
+name = "nubus-provisioning-consumer"
 version = "0.1.0"
 description = "Provisioning consumer library"
 authors = [
@@ -7,8 +7,8 @@ authors = [
 ]
 license = "GNU Affero General Public License v3"
 packages = [
-    { include = "client", from = "." },
-    { include = "shared", from = "." }
+    { include = "univention/provisioning/consumer", from = "." },
+    { include = "univention/provisioning/models", from = "." }
 ]
 
 [tool.poetry.dependencies]
@@ -18,7 +18,7 @@ python = "^3.7"
 aiohttp = "^3.8.5"
 
 [tool.poetry.scripts]
-client = "client.example_client.main:run"
+consumer = "univention.provisioning.consumer.example_client.main:run"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"

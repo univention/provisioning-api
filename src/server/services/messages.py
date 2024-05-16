@@ -7,7 +7,7 @@ from typing import Optional
 
 from .port import Port
 from .subscriptions import SubscriptionService
-from shared.models import (
+from univention.provisioning.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
     ProvisioningMessage,
