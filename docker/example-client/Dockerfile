@@ -38,8 +38,7 @@ ENV \
 RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
 
 # copy source code
-COPY ./src/client ${WORKDIR}/client
-COPY ./src/shared ${WORKDIR}/shared
+COPY ./src/univention/provisioning ${WORKDIR}/univention/provisioning
 COPY logging.yaml \
      ./src/poetry.lock \
      ./src/pyproject.toml \
@@ -56,4 +55,4 @@ WORKDIR ${WORKDIR}
 
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
-ENTRYPOINT ["poetry", "run", "client", "--"]
+ENTRYPOINT ["poetry", "run", "consumer", "--"]

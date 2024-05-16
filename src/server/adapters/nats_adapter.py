@@ -20,11 +20,11 @@ from nats.js.errors import (
 )
 from nats.js.kv import KV_DEL
 
-from shared.models.queue import Message
+from univention.provisioning.models.queue import Message
 
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from ..config import settings
-from shared.models import (
+from univention.provisioning.models import (
     BaseMessage,
     ProvisioningMessage,
     MQMessage,

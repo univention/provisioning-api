@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, call
 import pytest
 from nats.aio.msg import Msg
 
-from shared.models import DISPATCHER_SUBJECT_TEMPLATE
+from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
 from tests.conftest import (
     SUBSCRIPTION_NAME,
     MSG,

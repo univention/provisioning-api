@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 import json
-from shared.models import Bucket, Message, PublisherName
+from univention.provisioning.models import Bucket, Message, PublisherName
 from univention.admin.rest.module import Object
 from udm_transformer.port import UDMTransformerPort
 import univention.admin.uldap

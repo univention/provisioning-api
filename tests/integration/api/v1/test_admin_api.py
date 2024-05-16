@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 from tests.conftest import REALMS_TOPICS_STR, SUBSCRIPTION_NAME, CREDENTIALS
-from shared.models import FillQueueStatus
+from univention.provisioning.models import FillQueueStatus
 from server.core.app.admin.api import v1_prefix as api_prefix
 from server.core.app.main import app as subscriptions_app, internal_app_path
 

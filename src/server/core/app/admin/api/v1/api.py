@@ -6,7 +6,7 @@ import fastapi
 from fastapi import Depends
 
 from server.core.app.auth import authenticate_admin
-from shared.models import Subscription, NewSubscription
+from univention.provisioning.models import Subscription, NewSubscription
 from server.services.messages import MessageService
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService

@@ -3,8 +3,8 @@
 
 import uuid
 import requests
-from client import AsyncClient
-from shared.models import (
+from univention.provisioning.consumer import AsyncClient
+from univention.provisioning.models import (
     PublisherName,
     MessageProcessingStatus,
     MessageProcessingStatusReport,

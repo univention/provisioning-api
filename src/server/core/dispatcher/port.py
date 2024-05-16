@@ -6,7 +6,7 @@ import logging
 from typing import Optional, Dict
 
 from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from shared.models import Message, MQMessage, Bucket
+from univention.provisioning.models import Message, MQMessage, Bucket
 
 from .config import DispatcherSettings
 

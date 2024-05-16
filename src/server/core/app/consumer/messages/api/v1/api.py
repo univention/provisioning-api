@@ -14,7 +14,7 @@ from server.core.app.consumer.subscriptions.subscription.sink import (
     SinkManager,
     WebSocketSink,
 )
-from shared.models import (
+from univention.provisioning.models import (
     MessageProcessingStatusReport,
     MessageProcessingStatus,
     Message,

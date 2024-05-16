@@ -16,11 +16,11 @@ Tooling for provisioning LDAP objects to external services.
 
   Server side of the provisioning project
 
-- [Client library](src/client/)
+- [Client library](src/univention/provisioning/consumer)
 
   The provisioning consumer library
 
-- [Example client](./src/client/example_client/)
+- [Example client](./src/univention/provisioning/consumer/example_client/)
 
   An example implementation of a client.
 

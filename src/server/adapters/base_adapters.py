@@ -7,8 +7,8 @@ from typing import Any, Callable, Union, Optional, List
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
-from shared.models import BaseMessage
-from shared.models.subscription import Bucket
+from univention.provisioning.models import BaseMessage
+from univention.provisioning.models.subscription import Bucket
 
 
 class BaseKVStoreAdapter(ABC):

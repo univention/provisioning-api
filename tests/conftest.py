@@ -14,8 +14,8 @@ from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 from tests import set_test_env_vars
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from shared.models.subscription import Bucket
-from shared.models import (
+from univention.provisioning.models.subscription import Bucket
+from univention.provisioning.models import (
     Message,
     MessageProcessingStatusReport,
     MessageProcessingStatus,

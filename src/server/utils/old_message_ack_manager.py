@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Callable, Coroutine
 
-from shared.models import MQMessage
+from univention.provisioning.models import MQMessage
 
 
 class MessageAckManager:

@@ -8,7 +8,7 @@ from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
 from server.core.app.config import app_settings
-from shared.models import Message, FillQueueStatus
+from univention.provisioning.models import Message, FillQueueStatus
 from server.core.app.auth import authenticate_user
 from server.services.messages import MessageService
 from server.services.port import PortDependency
