@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.26.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.25.1...v0.26.0) (2024-05-16)
+
+
+### Features
+
+* **ldap-producer:** push ldap objects into nats queue ([10dd83e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/10dd83e3a5bf21477aab61e2e218e156101dd93e))
+* **udm-transformer:** add the udm-transformer to the provisioning helm chart ([b82b83f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b82b83f32fccdab51ad5b70e677e6eed5f73aa8b))
+
+
+### Bug Fixes
+
+* fix e2e testing pipeline ([fea82f3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/fea82f3a13bfcf297b4d4eab5a4ab57262a6b6d6))
+* improve e2e test docs and config ([bd5e5f1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd5e5f1089a74755d2a821306e7f12032de6cba2))
+* **udm-transformer:** add in progress acknowledgements to message transforming ([8ea4922](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8ea492265404efca62fb682cd7c8529cdbdb7a58))
+* **udm-transformer:** clean up Stream vs Subject vs Deliver Subject ([d84270c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d84270c2a34a4feef64e3bd0221569be044eb1b8))
+* **udm-transformer:** fix docker-compose setup ([38e55ee](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/38e55eed15caca1d63789368b30001f5a41e81fd))
+* **udm-transformer:** fixed unittests ([f8cceff](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f8cceff5270c33552270dacad300331f3c8a7286))
+* **udm-transformer:** working udm transformer service ([82375b9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/82375b9b94d33f42c3998f57e91138da147b8a05))
+
 ## [0.25.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.25.0...v0.25.1) (2024-05-14)
 
 
