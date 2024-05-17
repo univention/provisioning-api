@@ -39,6 +39,7 @@ import logging
 import os
 from queue import Queue
 import sys
+import time
 
 from slapdsock.service import SlapdSockServer
 from slapdsock.handler import SlapdSockHandler
@@ -67,6 +68,13 @@ class LDAPHandler(ReasonableSlapdSockHandler):
     """
 
     def __init__(self, ldap_base, ldap_threads, ignore_temporary=False):
+        # NOTE: Be careful when extending the Queue maxsize!
+        # It's not clear that RESULT responses come in the same order as the
+        # requests, so in do_result the timestamps need to be matched with (msgid, connid).
+        # Also then several paralel threads may run do_result, so that may need
+        # to be somehow serialized to maintain order of ops towards NATS.
+        # NOTE: (msgid, connid) are recycled after slapd restart (connid seems
+        # to start at 1000 again).
         self.req_queue = Queue(maxsize=1)
         self.ignore_temporary = ignore_temporary
         if ignore_temporary:
@@ -83,7 +91,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_add = %s", request)
-        self.req_queue.put((request.connid, request.msgid), block=True)
+        self.req_queue.put((request.connid, request.msgid, time.time()), block=True)
         return CONTINUE_RESPONSE
 
     def do_bind(self, request):
@@ -107,7 +115,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_delete = %s", request)
-        self.req_queue.put((request.connid, request.msgid), block=True)
+        self.req_queue.put((request.connid, request.msgid, time.time()), block=True)
         return CONTINUE_RESPONSE
 
     def do_modify(self, request):
@@ -117,7 +125,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_modify = %s", request)
-        self.req_queue.put((request.connid, request.msgid), block=True)
+        self.req_queue.put((request.connid, request.msgid, time.time()), block=True)
         return CONTINUE_RESPONSE
 
     def do_modrdn(self, request):
@@ -127,7 +135,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
         if self.is_temporary_dn(request):
             return CONTINUE_RESPONSE
         self._log(logging.DEBUG, "do_modrdn = %s", request)
-        self.req_queue.put((request.connid, request.msgid), block=True)
+        self.req_queue.put((request.connid, request.msgid, time.time()), block=True)
         return CONTINUE_RESPONSE
 
     def do_search(self, request):
@@ -186,7 +194,9 @@ class LDAPHandler(ReasonableSlapdSockHandler):
             self._log(logging.INFO, "Call NATS for %s operation on dn = %s" % (reqtype, request.dn))
         else:
             self._log(logging.INFO, "ignoring op with RESULT code = %s", request.code)
-        self.req_queue.get()  # signal one seat is free
+        resptime = time.time()
+        (connid, msgid, reqtime) = self.req_queue.get()  # signal one seat is free
+        self._log(logging.INFO, "processing time  = %s", round(resptime - reqtime, 3))
         return ""
 
     def do_entry(self, request):
