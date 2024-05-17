@@ -66,13 +66,15 @@ class LDAPHandler(ReasonableSlapdSockHandler):
     case of misconfigured "overlay sock" section.
     """
 
-    def __init__(self, ldap_base, ldap_threads):
+    def __init__(self, ldap_base, ldap_threads, ignore_temporary=False):
         self.req_queue = Queue(maxsize=ldap_threads)
-        temporary_dn_string = ",cn=temporary,cn=univention,"
-        self.len_temporary_dn_suffix = len(temporary_dn_string) + len(ldap_base)
+        self.ignore_temporary = ignore_temporary
+        if ignore_temporary:
+            temporary_dn_string = ",cn=temporary,cn=univention,"
+            self.len_temporary_dn_suffix = len(temporary_dn_string) + len(ldap_base)
 
     def is_temporary_dn(self, request):
-        return "," in request.dn[self.len_temporary_dn_suffix :]
+        return "," in request.dn[self.len_temporary_dn_suffix :] if self.ignore_temporary else False
 
     def do_add(self, request):
         """
@@ -211,8 +213,9 @@ def main():
 
     ldap_base = os.environ["ldap_base"]
     ldap_threads = os.environ["ldap_threads"]
+    ignore_temporary = os.environ["slapdsocklistener_ignore_temporary"]
 
-    ldaphandler = LDAPHandler(ldap_base, ldap_threads)
+    ldaphandler = LDAPHandler(ldap_base, ldap_threads, ignore_temporary)
     with SlapdSockServer(
         server_address="/var/lib/univention-ldap/slapd-sock",
         handler_class=ldaphandler,
