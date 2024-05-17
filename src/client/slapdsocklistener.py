@@ -67,7 +67,7 @@ class LDAPHandler(ReasonableSlapdSockHandler):
     """
 
     def __init__(self, ldap_base, ldap_threads, ignore_temporary=False):
-        self.req_queue = Queue(maxsize=ldap_threads)
+        self.req_queue = Queue(maxsize=1)
         self.ignore_temporary = ignore_temporary
         if ignore_temporary:
             temporary_dn_string = ",cn=temporary,cn=univention,"
