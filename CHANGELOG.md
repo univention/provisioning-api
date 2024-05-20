@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.0...v0.26.1) (2024-05-20)
+
+
+### Bug Fixes
+
+* **helm:** add additional templating support ([b3728e7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b3728e735d7b40636ab401ac5e5b24c3bd98764d))
+
 ## [0.26.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.25.1...v0.26.0) (2024-05-16)
 
 
