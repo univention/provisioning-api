@@ -132,6 +132,6 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 data:
-  PROVISIONING_API_BASE_URL: {{ required ".Values.register_consumers.provisioningApiBaseUrl is required." .Values.register_consumers.provisioningApiBaseUrl | quote  }}
+  PROVISIONING_API_BASE_URL: {{ printf "%s/internal/admin/v1/subscriptions" (include "provisioning-register-consumers.provisioningApiBaseUrl" .) | quote  }}
 ...
 

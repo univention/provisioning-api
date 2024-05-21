@@ -8,7 +8,10 @@ metadata:
   name: {{ printf "%s-api" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
-    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
+    {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-api" (include "common.names.fullname" .)) }}
+    {{- $mergedLabels := merge $uiLabels $commonLabels}}
+    {{- toYaml $mergedLabels | nindent 4 }}
     {{- if .Values.additionalLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
     {{- end }}
@@ -32,6 +35,8 @@ spec:
       {{- end }}
     {{- end }}
   selector:
-    {{- include "common.labels.matchLabels" . | nindent 4 }}
+    {{- $commonLabels := include "common.labels.matchLabels" . | fromYaml }}
+    {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-api" (include "common.names.fullname" .)) }}
+    {{- merge $uiLabels $commonLabels | toYaml | nindent 4}}
 ...
 {{- end }}
