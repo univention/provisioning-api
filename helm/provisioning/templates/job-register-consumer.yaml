@@ -57,9 +57,9 @@ spec:
                   echo "Successful registration of the consumer: "${filename}""
                 else
                   echo "Failed to register the consumer: "${filename}"
-                  exit 1
               Response code: "${response}"
               Response body: $(cat response.txt)"
+                  exit 1
                 fi
                 echo ------------------------------------
               done
