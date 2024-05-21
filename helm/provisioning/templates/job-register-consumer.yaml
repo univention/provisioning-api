@@ -19,7 +19,10 @@ spec:
       initContainers:
         - name: wait-for-api-to-start
           image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
-          command: [ "sh", "-c", "until curl -s {{ printf "%s-api:%d" (include "common.names.fullname" .) (.Values.service.ports.http.port | int) }} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+          command: [ "sh", "-c", "until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
           resources:
             requests:
               memory: "64Mi"

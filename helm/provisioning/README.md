@@ -172,7 +172,7 @@ A Helm Chart that deploys the provisioning services
 | register_consumers.image.repository | string | `"univention/components/univention-portal/wait-for-dependency"` |  |
 | register_consumers.image.tag | string | `"latest"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
-| register_consumers.provisioningApiBaseUrl | string | `"http://provisioning-api/internal/admin/v1/subscriptions"` |  |
+| register_consumers.provisioningApiBaseUrl | string | `""` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
 | resources.api.limits.cpu | int | `1` |  |
 | resources.api.limits.memory | string | `"1Gi"` |  |

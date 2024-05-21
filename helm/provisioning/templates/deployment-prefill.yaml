@@ -8,10 +8,10 @@ metadata:
   name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
-    {{- include "common.labels.standard" . | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
-    {{- end }}
+      {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
+      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-prefill" (include "common.names.fullname" .)) }}
+      {{- $mergedLabels := merge $uiLabels $commonLabels}}
+      {{- toYaml $mergedLabels | nindent 4 }}
   {{- if .Values.additionalAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
@@ -19,7 +19,9 @@ spec:
   replicas: {{ .Values.replicaCount.prefill }}
   selector:
     matchLabels:
-      {{- include "common.labels.matchLabels" . | nindent 6 }}
+      {{- $commonLabels := include "common.labels.matchLabels" . | fromYaml }}
+      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-prefill" (include "common.names.fullname" .)) }}
+      {{- merge $uiLabels $commonLabels | toYaml | nindent 6 }}
   {{- if .Values.updateStrategy.type }}
   strategy:
     type: {{ .Values.updateStrategy.type }}
@@ -32,7 +34,10 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
       labels:
-        {{- include "common.labels.standard" . | nindent 8 }}
+        {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
+        {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-prefill" (include "common.names.fullname" .)) }}
+        {{- $mergedLabels := merge $uiLabels $commonLabels}}
+        {{- toYaml $mergedLabels | nindent 8 }}
     spec:
       {{- if or .Values.imagePullSecrets .Values.global.imagePullSecrets  }}
       imagePullSecrets:

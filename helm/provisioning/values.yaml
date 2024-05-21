@@ -794,4 +794,4 @@ register_consumers:
     tag: "latest"
   credentialSecretName: ""
   jsonSecretName: ""
-  provisioningApiBaseUrl: "http://provisioning-api/internal/admin/v1/subscriptions"
+  provisioningApiBaseUrl: ""
