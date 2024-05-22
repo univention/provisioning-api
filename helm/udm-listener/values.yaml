@@ -27,8 +27,8 @@ tolerations: []
 mountSecrets: true
 
 image:
-  registry: "gitregistry.knut.univention.de"
-  repository: "univention/customers/dataport/upx/provisioning/provisioning-udm-listener"
+  registry: "artifacts.software-univention.de"
+  repository: "nubus-dev/images/provisioning-udm-listener"
   imagePullPolicy: "Always"
   tag: "latest"
 

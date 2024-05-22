@@ -36,8 +36,8 @@ A Helm chart for the Univention Portal Provisioning API
 | fullnameOverride | string | `""` |  |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | image.imagePullPolicy | string | `"Always"` |  |
-| image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-udm-listener"` |  |
+| image.registry | string | `"artifacts.software-univention.de"` |  |
+| image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
 | image.tag | string | `"latest"` |  |
 | ldap.credentialSecret.ldapPasswordKey | string | `"ldap.secret"` |  |
 | ldap.credentialSecret.machinePasswordKey | string | `"machine.secret"` |  |

@@ -31,8 +31,8 @@ A Helm chart for the example client of the UDM provisioning API
 | fullnameOverride | string | `""` |  |
 | image.extraArgs | string | `""` |  |
 | image.imagePullPolicy | string | `"Always"` |  |
-| image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-example-client"` |  |
+| image.registry | string | `"artifacts.software-univention.de"` |  |
+| image.repository | string | `"nubus-dev/images/provisioning-example-client"` |  |
 | image.tag | string | `"latest"` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
