@@ -8,12 +8,12 @@ include:
     ref: "v1.24.5"
     file:
       - "defaults/stages.yaml"
-      - "defaults/souvap-workflow.yaml"
+      - "defaults/nubus-workflow.yaml"
       - "jobs/lint-pre-commit.yaml"
       - "jobs/lint-commit-messages.yaml"
       - "jobs/semantic-release-env.yaml"
-      - "jobs/container-build-souvap.yaml"
-      - "jobs/package-and-publish-helm-charts-souvap.yaml"
+      - "jobs/container-build-external.yaml"
+      - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
 
   - project: "univention/dist/docker-services"
@@ -176,11 +176,11 @@ test-events-and-consumer-api:
         coverage_format: cobertura
         path: coverage.xml
 
-push-image-souvap:
+push-image-external:
   parallel:
     matrix: *publish-matrix
 
-container-sign-souvap:
+container-sign-external:
   parallel:
     matrix: *publish-matrix
 
