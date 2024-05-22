@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.26.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.1...v0.26.2) (2024-05-22)
+
+
+### Bug Fixes
+
+* **helm:** add configuration for selfservice-listener ([5ad5a18](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5ad5a188ad157aab20b0ccecd6334c739472f70b))
+* **helm:** adjust label definitions for all services, provisioningApiBaseUrl templating ([4fec3f2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4fec3f2fe0bd4c65e397d895e450c9a303edf732))
+* **helm:** consumer-registration exit on error ([51cfbf4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/51cfbf42466bcbc4b330eeb79309bf0250bb1cc9))
+
 ## [0.26.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.0...v0.26.1) (2024-05-20)
 
 
