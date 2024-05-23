@@ -265,8 +265,4 @@ publish_provisioning_lib:
     - poetry config --local repositories.project_local ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
     - poetry publish -r project_local --username gitlab-ci-token --password ${CI_JOB_TOKEN}
 
-package-helm-charts:
-  variables:
-    SKIP_UPDATE_HELM_VALUES: "true"
-
 ...
