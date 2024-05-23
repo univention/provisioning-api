@@ -28,7 +28,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.ROOT_PATH | string | `"/univention/provisioning-api"` |  |
 | api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| api.image.registry | string | `"artifacts.software-univention.de"` |  |
+| api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"latest"` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
@@ -44,7 +44,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.config.UDM_PORT | int | `80` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| dispatcher.image.registry | string | `"artifacts.software-univention.de"` |  |
+| dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"latest"` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
@@ -133,7 +133,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `80` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| prefill.image.registry | string | `"artifacts.software-univention.de"` |  |
+| prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"latest"` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -168,7 +168,7 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | register_consumers.credentialSecretName | string | `""` |  |
 | register_consumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| register_consumers.image.registry | string | `"artifacts.software-univention.de"` |  |
+| register_consumers.image.registry | string | `""` |  |
 | register_consumers.image.repository | string | `"nubus-dev/images/wait-for-dependency"` |  |
 | register_consumers.image.tag | string | `"latest"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
@@ -245,7 +245,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.config.UDM_HOST | string | `""` |  |
 | udmTransformer.config.UDM_PORT | string | `""` |  |
 | udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| udmTransformer.image.registry | string | `"artifacts.software-univention.de"` |  |
+| udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"latest"` |  |
 | udmTransformer.ldap.auth.bindDn | string | `""` |  |

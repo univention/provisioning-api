@@ -541,7 +541,7 @@ updateStrategy:
 api:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "artifacts.software-univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-events-and-consumer-api"
     tag: "latest"
@@ -561,7 +561,7 @@ api:
 dispatcher:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "artifacts.software-univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-dispatcher"
     tag: "latest"
@@ -580,7 +580,7 @@ dispatcher:
 udmTransformer:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "artifacts.software-univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-udm-transformer"
     tag: "latest"
@@ -624,7 +624,7 @@ udmTransformer:
 prefill:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "artifacts.software-univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-prefill"
     tag: "latest"
@@ -788,7 +788,7 @@ nats:
 register_consumers:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "artifacts.software-univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/wait-for-dependency"
     tag: "latest"

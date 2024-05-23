@@ -27,7 +27,7 @@ tolerations: []
 mountSecrets: true
 
 image:
-  registry: "artifacts.software-univention.de"
+  registry: ""
   repository: "nubus-dev/images/provisioning-udm-listener"
   imagePullPolicy: "Always"
   tag: "latest"
