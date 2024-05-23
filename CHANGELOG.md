@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.3...v0.27.0) (2024-05-23)
+
+
+### Features
+
+* push to harbor ([57b622e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/57b622e35d8b6d948d8d3564c2db2821bd11f8ad))
+
 ## [0.26.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.2...v0.26.3) (2024-05-23)
 
 
