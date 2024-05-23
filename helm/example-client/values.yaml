@@ -19,6 +19,9 @@ replicaCount: 1
 securityContext: {}
 tolerations: []
 
+global:
+  imageRegistry: "artifacts.software-univention.de"
+
 
 image:
   registry: ""
