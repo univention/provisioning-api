@@ -7,7 +7,7 @@ global:
   # -- Indicates wether this chart is part of a Nubus deployment.
   nubusDeployment: false
   # -- Container registry address.
-  imageRegistry: "gitregistry.knut.univention.de"
+  imageRegistry: "artifacts.software-univention.de"
 
   # -- Credentials to fetch images from private registry.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -541,9 +541,9 @@ updateStrategy:
 api:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "gitregistry.knut.univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"
+    repository: "nubus-dev/images/provisioning-events-and-consumer-api"
     tag: "latest"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
@@ -561,9 +561,9 @@ api:
 dispatcher:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "gitregistry.knut.univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/provisioning-dispatcher"
+    repository: "nubus-dev/images/provisioning-dispatcher"
     tag: "latest"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
@@ -579,10 +579,9 @@ dispatcher:
 
 udmTransformer:
   image:
-    # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "gitregistry.knut.univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/provisioning-udm-transformer"
+    repository: "nubus-dev/images/provisioning-udm-transformer"
     tag: "latest"
   # If specified environment variables will be set on the container
   api:
@@ -623,10 +622,9 @@ udmTransformer:
 
 prefill:
   image:
-    # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "gitregistry.knut.univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/customers/dataport/upx/provisioning/provisioning-prefill"
+    repository: "nubus-dev/images/provisioning-prefill"
     tag: "latest"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
@@ -788,9 +786,9 @@ nats:
 register_consumers:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: "gitregistry.knut.univention.de"
+    registry: ""
     imagePullPolicy: "IfNotPresent"
-    repository: "univention/components/univention-portal/wait-for-dependency"
+    repository: "nubus-dev/images/wait-for-dependency"
     tag: "latest"
   credentialSecretName: ""
   jsonSecretName: ""

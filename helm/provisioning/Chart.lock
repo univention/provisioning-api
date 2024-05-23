@@ -1,9 +1,9 @@
 dependencies:
 - name: common
   repository: oci://registry-1.docker.io/bitnamicharts
-  version: 2.19.1
+  version: 2.19.3
 - name: nats
   repository: oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm
   version: 0.1.0
-digest: sha256:47891365163a50e5c7214b221c822d7a56face5c9d8cce0bc03012fd8932d6a7
-generated: "2024-04-23T16:13:52.771504+02:00"
+digest: sha256:de474ccd31763665f3ef6d75db76c8579929d714bb07c62522b4760795fe3113
+generated: "2024-05-22T13:48:57.020329467+02:00"
