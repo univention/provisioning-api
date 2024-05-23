@@ -622,7 +622,6 @@ udmTransformer:
 
 prefill:
   image:
-    # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-prefill"
