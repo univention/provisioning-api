@@ -34,10 +34,11 @@ A Helm chart for the Univention Portal Provisioning API
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
+| global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | image.imagePullPolicy | string | `"Always"` |  |
-| image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-udm-listener"` |  |
+| image.registry | string | `""` |  |
+| image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
 | image.tag | string | `"latest"` |  |
 | ldap.credentialSecret.ldapPasswordKey | string | `"ldap.secret"` |  |
 | ldap.credentialSecret.machinePasswordKey | string | `"machine.secret"` |  |

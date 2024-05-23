@@ -19,10 +19,13 @@ replicaCount: 1
 securityContext: {}
 tolerations: []
 
+global:
+  imageRegistry: "artifacts.software-univention.de"
+
 
 image:
-  registry: "gitregistry.knut.univention.de"
-  repository: "univention/customers/dataport/upx/provisioning/provisioning-example-client"
+  registry: ""
+  repository: "nubus-dev/images/provisioning-example-client"
   imagePullPolicy: "Always"
   tag: "latest"
   extraArgs: ""

@@ -28,8 +28,8 @@ A Helm Chart that deploys the provisioning services
 | api.config.ROOT_PATH | string | `"/univention/provisioning-api"` |  |
 | api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| api.image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| api.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api"` |  |
+| api.image.registry | string | `""` |  |
+| api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"latest"` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
@@ -44,8 +44,8 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.config.UDM_PORT | int | `80` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| dispatcher.image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| dispatcher.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-dispatcher"` |  |
+| dispatcher.image.registry | string | `""` |  |
+| dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"latest"` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
@@ -57,7 +57,7 @@ A Helm Chart that deploys the provisioning services
 | global.configMapUcrForced | string | `nil` |  |
 | global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
 | global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
-| global.imageRegistry | string | `"gitregistry.knut.univention.de"` | Container registry address. |
+| global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
 | global.nats | object | `{"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
@@ -133,8 +133,8 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `80` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| prefill.image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| prefill.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-prefill"` |  |
+| prefill.image.registry | string | `""` |  |
+| prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"latest"` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
@@ -168,8 +168,8 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | register_consumers.credentialSecretName | string | `""` |  |
 | register_consumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| register_consumers.image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| register_consumers.image.repository | string | `"univention/components/univention-portal/wait-for-dependency"` |  |
+| register_consumers.image.registry | string | `""` |  |
+| register_consumers.image.repository | string | `"nubus-dev/images/wait-for-dependency"` |  |
 | register_consumers.image.tag | string | `"latest"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
 | register_consumers.provisioningApiBaseUrl | string | `""` |  |
@@ -245,8 +245,8 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.config.UDM_HOST | string | `""` |  |
 | udmTransformer.config.UDM_PORT | string | `""` |  |
 | udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
-| udmTransformer.image.registry | string | `"gitregistry.knut.univention.de"` |  |
-| udmTransformer.image.repository | string | `"univention/customers/dataport/upx/provisioning/provisioning-udm-transformer"` |  |
+| udmTransformer.image.registry | string | `""` |  |
+| udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"latest"` |  |
 | udmTransformer.ldap.auth.bindDn | string | `""` |  |
 | udmTransformer.ldap.auth.credentialSecretName | string | `""` |  |

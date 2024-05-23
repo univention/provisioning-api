@@ -44,7 +44,7 @@ spec:
         - name: "udm-listener"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: '{{ if .Values.image.registry }}{{ .Values.image.registry }}/{{ end }}{{ .Values.image.repository }}{{ if .Values.image.sha256 }}@sha256:{{ .Values.image.sha256 }}{{ else }}:{{ .Values.image.tag }}{{ end }}'
+          image: "{{ coalesce .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: '{{ .Values.image.pullPolicy }}'
           envFrom:
             - configMapRef:
