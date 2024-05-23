@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.2...v0.26.3) (2024-05-23)
+
+
+### Bug Fixes
+
+* **provisioning-client:** trigger pipeline force-build ([3108efe](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3108efeebef8ee22182dd81f7835e766c93ed0da))
+
 ## [0.26.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.1...v0.26.2) (2024-05-22)
 
 
