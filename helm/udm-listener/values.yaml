@@ -6,6 +6,8 @@
 global:
   # -- Indicates wether this chart is part of a Nubus deployment.
   nubusDeployment: false
+  # -- Container registry address.
+  imageRegistry: "artifacts.software-univention.de"
 
 
 # Default values for the UMS provisioning udm-listener.

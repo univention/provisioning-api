@@ -34,6 +34,7 @@ A Helm chart for the Univention Portal Provisioning API
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | environment | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
+| global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `""` |  |
