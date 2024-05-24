@@ -169,8 +169,8 @@ A Helm Chart that deploys the provisioning services
 | register_consumers.credentialSecretName | string | `""` |  |
 | register_consumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | register_consumers.image.registry | string | `""` |  |
-| register_consumers.image.repository | string | `"nubus-dev/images/wait-for-dependency"` |  |
-| register_consumers.image.tag | string | `"latest"` |  |
+| register_consumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
+| register_consumers.image.tag | string | `"0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
 | register_consumers.provisioningApiBaseUrl | string | `""` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
