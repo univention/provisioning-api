@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.27.0...v0.27.1) (2024-05-24)
+
+
+### Bug Fixes
+
+* **ci:** use fixed common-ci/helm package to not update dependency waiter tags ([ec98ab2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ec98ab2ceb13c80d654b803d160548c62a8c031f))
+
 ## [0.27.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.26.3...v0.27.0) (2024-05-23)
 
 
