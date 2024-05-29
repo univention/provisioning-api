@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.27.1...v0.27.2) (2024-05-29)
+
+
+### Bug Fixes
+
+* **register-consumer:** do not fail if subscription already exists ([de47892](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/de47892b91550b2bb0d832833ba3952e1548ee40))
+
 ## [0.27.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.27.0...v0.27.1) (2024-05-24)
 
 
