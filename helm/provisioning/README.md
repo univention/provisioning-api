@@ -186,6 +186,10 @@ A Helm Chart that deploys the provisioning services
 | resources.prefill.limits.memory | string | `"1Gi"` |  |
 | resources.prefill.requests.cpu | float | `0.1` |  |
 | resources.prefill.requests.memory | string | `"64Mi"` |  |
+| resources.register_consumer.limits.cpu | string | `"500m"` |  |
+| resources.register_consumer.limits.memory | string | `"256Mi"` |  |
+| resources.register_consumer.requests.cpu | string | `"250m"` |  |
+| resources.register_consumer.requests.memory | string | `"128Mi"` |  |
 | resources.udmTransformer.limits.cpu | int | `1` |  |
 | resources.udmTransformer.limits.memory | string | `"1Gi"` |  |
 | resources.udmTransformer.requests.cpu | float | `0.1` |  |
