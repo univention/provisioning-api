@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.27.2...v0.28.0) (2024-05-31)
+
+
+### Features
+
+* add logic to wait for the udm and nats ([d1ca562](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d1ca562fff57893f197d2e1405512ea6e1c4f2cb))
+
 ## [0.27.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.27.1...v0.27.2) (2024-05-29)
 
 
