@@ -18,4 +18,3 @@ For a detailed explanation of these points, check out our [Definition of Done](h
 
 
 /label ~"Team::SouvAP Dev"
-/assign_reviewer @souvap-developers
