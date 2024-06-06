@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.0...v0.28.1) (2024-06-06)
+
+
+### Bug Fixes
+
+* add python3-univention-directory-manager-rest-client to the prefill ([7c021ed](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7c021ed45a1957f26a5ed0efb9cfe2a4b9bd8301))
+
 ## [0.28.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.27.2...v0.28.0) (2024-05-31)
 
 
