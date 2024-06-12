@@ -3,21 +3,22 @@
 
 from typing import List, Optional
 from provisioning_listener.config import LdapProducerSettings
-from server.adapters.nats_adapter import NatsMQAdapter, messagepack_encoder
+from server.adapters.nats_adapter import NatsMessageQueue, messagepack_encoder
+from server.adapters.ports import MessageQueue
 from univention.provisioning.models.queue import Message
 
 
 class LDAPProducerPort:
     def __init__(self, settings: Optional[LdapProducerSettings] = None):
         self.settings = settings or LdapProducerSettings()
-        self.mq_adapter = NatsMQAdapter()
+        self.mq_adapter: MessageQueue = NatsMessageQueue()
 
     async def __aenter__(self):
         await self.mq_adapter.connect(
             self.settings.nats_server,
             self.settings.nats_user,
             self.settings.nats_password,
-            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
+            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,  # unexpected argument
         )
         return self
 
@@ -30,4 +31,4 @@ class LDAPProducerPort:
         )
 
     async def ensure_stream(self, stream: str, subjects: Optional[List[str]] = None):
-        await self.mq_adapter.ensure_stream(stream, subjects)
+        await self.mq_adapter.ensure_stream(stream, subjects)  # unexpected argument

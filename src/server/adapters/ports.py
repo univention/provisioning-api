@@ -11,8 +11,8 @@ from univention.provisioning.models import BaseMessage
 from univention.provisioning.models.subscription import Bucket
 
 
-class BaseKVStoreAdapter(ABC):
-    """The base class for key-value store adapters."""
+class KVStore(ABC):
+    """The interface (port) through which to talk to key-value stores."""
 
     @abstractmethod
     async def init(self, buckets: List[Bucket], user: str, password: str):
@@ -39,8 +39,8 @@ class BaseKVStoreAdapter(ABC):
         pass
 
 
-class BaseMQAdapter(ABC):
-    """The base class for message queue adapters."""
+class MessageQueue(ABC):
+    """The interface (port) through which to talk to message queues."""
 
     @abstractmethod
     async def connect(self, server: str, user: str, password: str):

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+from abc import ABC, abstractmethod
 import logging
 
 import aiohttp
@@ -10,12 +11,38 @@ from ..config import settings
 from univention.provisioning.models import FillQueueStatus, Message
 
 
-class InternalAPIAdapter:
+class InternalAPIClient(ABC):
     """
-    Client for the Internal REST API.
+    Port: Client for the Internal REST API.
     """
 
     def __init__(self, username: str, password: str):
+        ...
+
+    @abstractmethod
+    async def connect(self):
+        ...
+
+    @abstractmethod
+    async def close(self):
+        ...
+
+    @abstractmethod
+    async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
+        ...
+
+    @abstractmethod
+    async def send_event(self, message: Message):
+        ...
+
+
+class AsyncInternalAPIClient(InternalAPIClient):
+    """
+    Adapter to the InternalAPIClient port using aiohttp.
+    """
+
+    def __init__(self, username: str, password: str):
+        super().__init__(username, password)
         self.base_url = settings.internal_api_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
@@ -35,9 +62,7 @@ class InternalAPIAdapter:
         if self._session:
             await self._session.close()
 
-    async def update_subscription_queue_status(
-        self, name: str, queue_status: FillQueueStatus
-    ) -> None:
+    async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
         async with self._session.patch(
             f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
         ):

@@ -3,8 +3,8 @@
 
 import contextlib
 from typing import Optional
-from server.adapters.internal_api_adapter import InternalAPIAdapter
-from server.adapters.nats_adapter import NatsMQAdapter
+from server.adapters.internal_api_client import InternalAPIClient, AsyncInternalAPIClient
+from server.adapters.nats_adapter import NatsMessageQueue
 from server.adapters.udm_adapter import UDMAdapter
 from univention.provisioning.models import (
     FillQueueStatus,
@@ -14,14 +14,15 @@ from univention.provisioning.models import (
 )
 
 from .config import PrefillSettings
+from server.adapters.ports import MessageQueue
 
 
-class PrefillPort:
+class PrefillPort:  # Not a port in the sense of ports-and-adapters. What role does this class have?
     def __init__(self, settings: Optional[PrefillSettings] = None):
         self.settings = settings or PrefillSettings()
         self._udm_adapter = UDMAdapter()
-        self.mq_adapter = NatsMQAdapter()
-        self._internal_api_adapter = InternalAPIAdapter(
+        self.mq_adapter: MessageQueue = NatsMessageQueue()
+        self._internal_api: InternalAPIClient = AsyncInternalAPIClient(
             self.settings.prefill_username, self.settings.prefill_password
         )
 
@@ -34,9 +35,9 @@ class PrefillPort:
             server=port.settings.nats_server,
             user=port.settings.nats_user,
             password=port.settings.nats_password,
-            max_reconnect_attempts=port.settings.max_reconnect_attempts,
+            max_reconnect_attempts=port.settings.max_reconnect_attempts,  # unexpected argument
         )
-        await port._internal_api_adapter.connect()
+        await port._internal_api.connect()
 
         try:
             yield port
@@ -46,13 +47,13 @@ class PrefillPort:
     async def close(self):
         await self._udm_adapter.close()
         await self.mq_adapter.close()
-        await self._internal_api_adapter.close()
+        await self._internal_api.close()
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
         await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
 
     async def wait_for_event(self) -> MQMessage:
-        return await self.mq_adapter.wait_for_event()
+        return await self.mq_adapter.wait_for_event()  # expected type 'MQMessage', got 'Msg' instead
 
     async def get_object_types(self):
         return await self._udm_adapter.get_object_types()
@@ -66,7 +67,7 @@ class PrefillPort:
     async def update_subscription_queue_status(
         self, name: str, queue_status: FillQueueStatus
     ) -> None:
-        await self._internal_api_adapter.update_subscription_queue_status(
+        await self._internal_api.update_subscription_queue_status(
             name, queue_status
         )
 
@@ -88,10 +89,10 @@ class PrefillPort:
         await self.mq_adapter.ensure_consumer(subject)
 
     async def acknowledge_message(self, message: MQMessage):
-        await self.mq_adapter.acknowledge_message(message)
+        await self.mq_adapter.acknowledge_message(message)  # unresolved reference 'acknowledge_message' for class 'MessageQueue'
 
     async def acknowledge_message_in_progress(self, message: MQMessage):
-        await self.mq_adapter.acknowledge_message_in_progress(message)
+        await self.mq_adapter.acknowledge_message_in_progress(message)  # unresolved reference 'acknowledge_message_in_progress' for class 'MessageQueue'
 
     async def remove_old_messages_from_prefill_subject(self, stream: str, subject: str):
-        await self.mq_adapter.purge_subject_from_messages(stream, subject)
+        await self.mq_adapter.purge_subject_from_messages(stream, subject)  # unresolved reference 'purge_subject_from_messages' for class 'MessageQueue'

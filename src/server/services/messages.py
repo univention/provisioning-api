@@ -15,6 +15,7 @@ from univention.provisioning.models import (
     Message,
     NewSubscription,
     PrefillMessage,
+    PublisherName,
     PREFILL_SUBJECT_TEMPLATE,
     DISPATCHER_SUBJECT_TEMPLATE,
     DISPATCHER_STREAM,
@@ -94,7 +95,7 @@ class MessageService:
     async def send_request_to_prefill(self, subscription: NewSubscription):
         self.logger.info("Sending the requests to prefill")
         message = PrefillMessage(
-            publisher_name="consumer-registration",
+            publisher_name=PublisherName.consumer_registration,
             ts=datetime.now(),
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,

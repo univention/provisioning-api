@@ -22,7 +22,7 @@ from nats.js.kv import KV_DEL
 
 from univention.provisioning.models.queue import Message
 
-from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
+from .ports import KVStore, MessageQueue
 from ..config import settings
 from univention.provisioning.models import (
     BaseMessage,
@@ -49,7 +49,9 @@ class NatsKeys:
         return f"durable_name:{subject}"
 
 
-class NatsKVAdapter(BaseKVStoreAdapter):
+class NatsKVStore(KVStore):
+    """Adapter for a key-value store using NATS."""
+
     def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
@@ -79,7 +81,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         kv_store = await self._js.key_value(bucket.value)
         await kv_store.delete(key)
 
-    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
+    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:  # return value incompatible with super method
         kv_store = await self._js.key_value(bucket.value)
         try:
             result = await kv_store.get(key)
@@ -99,7 +101,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
             value = json.dumps(value)
         await kv_store.put(key, value.encode("utf-8"))
 
-    async def get_keys(self, bucket: Bucket) -> List[str]:
+    async def get_keys(self, bucket: Bucket) -> List[str]:  # no such function in super class
         kv_store = await self._js.key_value(bucket.value)
         try:
             return await kv_store.keys()
@@ -144,7 +146,9 @@ class Acknowledgements(typing.NamedTuple):
     acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]]
 
 
-class NatsMQAdapter(BaseMQAdapter):
+class NatsMessageQueue(MessageQueue):
+    """Adapter for message queueing using NATS."""
+
     def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
@@ -202,7 +206,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
         durable_name = NatsKeys.durable_name(durable_name)
         stream_name = NatsKeys.stream(stream)
-        self.pull_subscription = await self._js.pull_subscribe(
+        self.pull_subscription = await self._js.pull_subscribe(  # instance attribute defined outside __init__
             subject=subject,
             durable=durable_name,
             stream=stream_name,
@@ -265,7 +269,7 @@ class NatsMQAdapter(BaseMQAdapter):
         data = json.loads(msg.data)
         sequence_number = msg.reply.split(".")[-4]
         message = ProvisioningMessage(
-            sequence_number=sequence_number,
+            sequence_number=sequence_number,  # expected type 'int', got 'str' instead
             num_delivered=msg.metadata.num_delivered,
             publisher_name=data["publisher_name"],
             ts=data["ts"],
@@ -296,7 +300,7 @@ class NatsMQAdapter(BaseMQAdapter):
             data=data,
             headers=msg.headers,
             num_delivered=msg.metadata.num_delivered,
-            sequence_number=sequence_number,
+            sequence_number=sequence_number,  # expected type 'int', got 'str' instead
         )
         return message
 

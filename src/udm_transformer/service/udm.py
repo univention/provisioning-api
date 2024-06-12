@@ -15,7 +15,9 @@ from univention.management.console.modules.udm.udm_ldap import UDM_Module
 logger = logging.getLogger(__name__)
 
 
-class UDMMessagingService(univention.admin.uldap.access):
+class UDMMessagingService(univention.admin.uldap.access):  # Do NOT inherit from the uldap class, unless absolutely necessary!
+    # It is not a public API!
+    # Inheritance is the _strongest_ of all couplings.
     def __init__(self, port: UDMTransformerPort):
         super().__init__(
             host=port.settings.ldap_host,
@@ -89,9 +91,9 @@ class UDMMessagingService(univention.admin.uldap.access):
             module_obj.open()
             return Object.get_representation(module, module_obj, ["*"], self, False)
         except ModuleNotFound:
-            MODULE.error(
+            MODULE.error(  # Runs in py3.11, use f-strings.
                 "ReadControl response has object type %r, but the module was not found!"
-                % object_type
+                % object_type  # Local variable 'object_type' might be referenced before assignment. Move its init out of try-except block.
             )
             return None
 

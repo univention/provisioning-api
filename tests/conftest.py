@@ -13,7 +13,7 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 from tests import set_test_env_vars
-from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from server.adapters.nats_adapter import NatsKVStore, NatsMessageQueue
 from univention.provisioning.models.subscription import Bucket
 from univention.provisioning.models import (
     Message,
@@ -234,12 +234,12 @@ class FakeJs(AsyncMock):
 
 async def port_fake_dependency() -> Port:
     port = Port(AppSettings(nats_user="api", nats_password="apipass"))
-    port.mq_adapter = MockNatsMQAdapter()
-    port.kv_adapter = MockNatsKVAdapter()
+    port.mq = MockNatsMessageQueue()
+    port.kv = MockNatsKVStore()
     return port
 
 
-class MockNatsMQAdapter(NatsMQAdapter):
+class MockNatsMessageQueue(NatsMessageQueue):
     def __init__(self):
         super().__init__()
         self._nats = AsyncMock()
@@ -247,7 +247,7 @@ class MockNatsMQAdapter(NatsMQAdapter):
         self._message_queue = FakeMessageQueue()
 
 
-class MockNatsKVAdapter(NatsKVAdapter):
+class MockNatsKVStore(NatsKVStore):
     def __init__(self):
         super().__init__()
         self._nats = AsyncMock()

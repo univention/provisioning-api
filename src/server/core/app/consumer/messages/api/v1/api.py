@@ -107,7 +107,7 @@ async def subscription_websocket(
                 break
 
             if report.status == MessageProcessingStatus.ok:
-                await msg_service.delete_message(name, report)
+                await msg_service.delete_message(name, report)  # unresolved reference 'delete_message' for class 'MessageService'
             else:
                 logger.error(
                     "%s > WebSocket client reported status: %s", name, report.status

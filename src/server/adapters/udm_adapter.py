@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+from __future__ import annotations
 import logging
 
 import aiohttp
@@ -33,7 +34,7 @@ class UDMAdapter:
         self.headers = [("accept", "application/json")]
         self._session = None
 
-    async def connect(self) -> "UDMAdapter":
+    async def connect(self) -> UDMAdapter:
         if not self._session:
             self._session = aiohttp.ClientSession(
                 auth=self.auth, headers=self.headers, raise_for_status=True

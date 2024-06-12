@@ -129,7 +129,7 @@ def serialized_ldap_message(ldap_message):
 
 @pytest.fixture
 def mock_nats_adapter():
-    with patch("provisioning_listener.port.NatsMQAdapter", autospec=True) as mock:
+    with patch("provisioning_listener.port.NatsMessageQueue", autospec=True) as mock:
         adapter = mock.return_value
         adapter.connect = AsyncMock()
         adapter.close = AsyncMock()

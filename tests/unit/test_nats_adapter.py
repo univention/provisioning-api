@@ -20,15 +20,15 @@ from tests.conftest import (
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
     FakeKvStore,
-    MockNatsKVAdapter,
-    MockNatsMQAdapter,
+    MockNatsKVStore,
+    MockNatsMessageQueue,
     kv_sub_info,
 )
 
 
 @pytest.fixture
-def mock_nats_mq_adapter() -> MockNatsMQAdapter:
-    return MockNatsMQAdapter()
+def mock_nats_mq_adapter() -> MockNatsMessageQueue:
+    return MockNatsMessageQueue()
 
 
 @pytest.fixture
@@ -39,8 +39,8 @@ def mock_kv():
 
 
 @pytest.fixture
-def mock_nats_kv_adapter(mock_kv) -> MockNatsKVAdapter:
-    mock_nats = MockNatsKVAdapter()
+def mock_nats_kv_adapter(mock_kv) -> MockNatsKVStore:
+    mock_nats = MockNatsKVStore()
     mock_nats._js.key_value = AsyncMock(return_value=mock_kv)
     return mock_nats
 
