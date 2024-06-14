@@ -130,6 +130,7 @@ test-end-to-end:
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
+    - cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
     - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e/ -v --environment pipeline
   after_script:
     - docker logs events-and-consumer-api-dev >& provisioning-api.log

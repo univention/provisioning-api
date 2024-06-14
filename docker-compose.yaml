@@ -190,15 +190,10 @@ services:
     profiles:
       - test
     platform: "linux/amd64"
-    environment:
-      NATS_HOST: nats
-      NATS_PORT: "4222"
-      NATS_USER: "user"
-      NATS_PASSWORD: "pass"
-      PROVISIONING_API_HOST: events-and-consumer-api
-      PROVISIONING_API_USERNAME: ""
-      PROVISIONING_API_PASSWORD: ""
-      LDAP_HOST: "ldap-server"
+    volumes:
+      - "./tests:/app/tests"
+      - "./src:/app/src"
+      - "./pyproject.toml:/app/pyproject.toml"
 
   # Environment of the pre-commit linter.
   pre-commit:

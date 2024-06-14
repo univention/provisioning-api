@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import json
 import uuid
 from typing import AsyncGenerator, Any, NamedTuple
-import pytest
 from univention.admin.rest.client import UDM
 from tests.conftest import REALMS_TOPICS
 from univention.provisioning.consumer import AsyncClient, Settings
+import pytest
 
 
 class E2ETestSettings(NamedTuple):
@@ -27,45 +28,6 @@ class E2ETestSettings(NamedTuple):
     udm_rest_api_password: str
 
 
-def get_default_settings() -> E2ETestSettings:
-    return E2ETestSettings(
-        provisioning_api_base_url="http://localhost:7777",
-        provisioning_admin_username="admin",
-        provisioning_admin_password="provisioning",
-        provisioning_events_username="udm",
-        provisioning_events_password="udmpass",
-        ldap_server_uri="ldap://localhost:389",
-        ldap_base="dc=univention-organization,dc=intranet",
-        ldap_bind_dn="cn=admin,dc=univention-organization,dc=intranet",
-        ldap_bind_password="univention",
-        udm_rest_api_base_url="http://localhost:9979/udm/",
-        udm_rest_api_username="cn=admin",
-        udm_rest_api_password="univention",
-    )
-
-
-def get_devenv_settings() -> E2ETestSettings:
-    return get_default_settings()._replace(
-        ldap_server_uri="ldap://localhost:3890",
-        udm_rest_api_base_url="http://localhost:8000/univention/udm/",
-    )
-
-
-def get_pipeline_settings() -> E2ETestSettings:
-    return get_default_settings()._replace(
-        provisioning_api_base_url="http://events-and-consumer-api:7777",
-        ldap_server_uri="ldap://ldap-server:389",
-        udm_rest_api_base_url="http://udm-rest-api:9979/udm/",
-    )
-
-
-TEST_SETTINGS = {
-    "local": get_default_settings,
-    "dev-env": get_devenv_settings,
-    "pipeline": get_pipeline_settings,
-}
-
-
 def pytest_addoption(parser):
     # Portal tests options
     parser.addoption(
@@ -80,9 +42,22 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def test_settings(pytestconfig) -> E2ETestSettings:
-    test_settings = TEST_SETTINGS.get(pytestconfig.option.environment)
-    assert test_settings, "invalid value for --environment"
-    return test_settings()
+    environment = pytestconfig.option.environment
+    assert environment in (
+        "local",
+        "dev-env",
+        "pipeline",
+        "gaia",
+    ), "invalid value for --environment"
+
+    with open("./tests/e2e/e2e_settings.json") as f:
+        json_settings = json.load(f)
+
+    settings = E2ETestSettings(**json_settings["local"])
+    if environment == "local":
+        return settings
+
+    return settings._replace(**json_settings[environment])
 
 
 @pytest.fixture

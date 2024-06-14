@@ -1,0 +1,38 @@
+{
+  "local": {
+    "provisioning_api_base_url": "http://localhost:7777",
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "provisioning",
+    "provisioning_events_username": "udm",
+    "provisioning_events_password": "udmpass",
+    "ldap_server_uri": "ldap://localhost:389",
+    "ldap_base": "dc=univention-organization,dc=intranet",
+    "ldap_bind_dn": "cn=admin,dc=univention-organization,dc=intranet",
+    "ldap_bind_password": "univention",
+    "udm_rest_api_base_url": "http://localhost:9979/udm/",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "univention"
+  },
+  "dev-env": {
+    "ldap_server_uri": "ldap://localhost:3890",
+    "udm_rest_api_base_url": "http://localhost:8000/univention/udm/"
+  },
+  "pipeline": {
+    "provisioning_api_base_url": "http://events-and-consumer-api:7777",
+    "ldap_server_uri": "ldap://ldap-server:389",
+    "udm_rest_api_base_url": "http://udm-rest-api:9979/udm/"
+  },
+  "gaia": {
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "changeme",
+    "provisioning_events_username": "foo",
+    "provisioning_events_password": "changeme",
+    "ldap_server_uri": "ldap://localhost:3890",
+    "ldap_base": "dc=swp-ldap,dc=internal",
+    "ldap_bind_dn": "cn=admin,dc=swp-ldap,dc=internal",
+    "ldap_bind_password": "changeme",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "changeme"
+  }
+}
+

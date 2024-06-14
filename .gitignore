@@ -2,3 +2,5 @@
 .coverage
 .idea/
 dist/
+
+tests/e2e/e2e_settings.json

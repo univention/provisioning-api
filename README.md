@@ -1,7 +1,3 @@
-# Disclaimer - MVP, work in progress
-
-It contains MVP created in context of the openDesk project.
-
 # Provisioning
 
 Tooling for provisioning LDAP objects to external services.
@@ -29,6 +25,7 @@ Tooling for provisioning LDAP objects to external services.
 ### Start dependencies
 
 Build containers for testing:
+
 ```sh
 docker compose build
 ```
@@ -100,7 +97,22 @@ poetry run pytest <dir/of/test-subset>
 ```
 
 ### E2E tests
+#### Setup
 
+Copy the example e2e test settings json file:
+```sh
+cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
+```
+
+The json file includes all parameters, including credentials
+for the "local", "dev-env" and "pipeline" environments.
+This is acceptable because these environments are only run locally and never exposed publicly.
+Because the "gaia" environment is publicly available
+we don't put the real credentials for it into the tests/e2e/e2e_settings.json file.
+
+To also run the tests against a gaia deployment,
+you need to change all `"changeme"` entries in the `tests/e2e/e2e_settings.json`
+to their correct values.
 
 #### Using docker compose
 
@@ -137,14 +149,15 @@ and in case you can't or don't want to install the test dependencies locally,
 
 `docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --environment pipeline`
 
-
 #### Using the Tilt dev-env
 
 
 Start the necessary services via tilt:
+
 ```sh
 tilt up keycloak ldap-server ldap-notifier udm-rest-api stack-data-ums stack-data-swp provisioning provisioning-udm-listener
 ```
+
 Limiting the tilt-resources instead of plainly running `tilt up` will save time and machine resources.
 
 The provisioning-api and ldap-server are not accessible from the outside.
@@ -173,7 +186,9 @@ E.g.:
 ```sh
 poetry shell
 pytest -v -p no:cacheprovider tests/e2e/ --environment dev-env
+
 ```
+
 
 ### Pre-commit
 
