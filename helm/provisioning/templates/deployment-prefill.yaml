@@ -69,6 +69,22 @@ spec:
       {{- if .Values.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
+      initContainers:
+        - name: wait-for-udm
+          command: [ "/usr/bin/python3", "/scripts/wait-for-udm.py" ]
+          image: "{{ coalesce .Values.prefill.image.registry .Values.global.imageRegistry }}/{{ .Values.prefill.image.repository }}:{{ .Values.prefill.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
+            - secretRef:
+                name: {{ include "provisioning-prefill.credentialSecretName" . | quote }}
+          volumeMounts:
+            - name: wait-for-udm
+              mountPath: /scripts
+          {{- if .Values.resources.prefill }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.prefill "context" .) | nindent 12 }}
+          {{- end }}
       containers:
         - name: "prefill"
           {{- if .Values.containerSecurityContext.enabled }}

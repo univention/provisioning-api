@@ -50,7 +50,7 @@ class UDMTransformerController:
             message, acknowledgements = await self._port.get_message(timeout=10)
             if not message or not acknowledgements:
                 logger.debug(
-                    "No new LDAP messages found int the queue, continuing to wait."
+                    "No new LDAP messages found in the queue, continuing to wait."
                 )
                 continue
             try:
