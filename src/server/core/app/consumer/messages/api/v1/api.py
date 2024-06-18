@@ -4,20 +4,13 @@
 from typing import Annotated, Optional
 
 import fastapi
-import json
 import logging
 
 from fastapi import Depends
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from server.core.app.consumer.subscriptions.subscription.sink import (
-    SinkManager,
-    WebSocketSink,
-)
 from univention.provisioning.models import (
     MessageProcessingStatusReport,
-    MessageProcessingStatus,
-    Message,
     ProvisioningMessage,
 )
 from server.services.messages import MessageService
@@ -27,7 +20,6 @@ from server.services.subscriptions import SubscriptionService
 logger = logging.getLogger(__name__)
 
 router = fastapi.APIRouter()
-manager = SinkManager()
 security = HTTPBasic()
 
 
@@ -75,47 +67,3 @@ async def get_next_message(
 
     msg_service = MessageService(port)
     return await msg_service.get_next_message(name, timeout, pop)
-
-
-@router.websocket("/subscriptions/{name}/ws")
-async def subscription_websocket(
-    name: str,
-    websocket: fastapi.WebSocket,
-    port: PortDependency,
-):
-    """Stream messages for an existing subscription."""
-
-    msg_service = MessageService(port)
-
-    sink = await manager.add(name, WebSocketSink(websocket))
-
-    try:
-        while True:
-            message = await msg_service.get_next_message(name, 250, False)
-            if not message:
-                continue
-
-            await sink.send_message(Message.model_validate(message))
-
-            reply = await websocket.receive_text()
-            try:
-                report = MessageProcessingStatusReport(**json.loads(reply))
-            except Exception:
-                logger.error(
-                    "%s > Unexpected input from WebSocket client: %s", name, reply
-                )
-                break
-
-            if report.status == MessageProcessingStatus.ok:
-                await msg_service.delete_message(name, report)
-            else:
-                logger.error(
-                    "%s > WebSocket client reported status: %s", name, report.status
-                )
-                break
-    except fastapi.WebSocketDisconnect:
-        logger.info("%s WebSocket client disconnected.", name)
-    except Exception as exc:
-        logger.warning("%s WebSocket failed: %s", name, exc)
-    finally:
-        await manager.close(name)

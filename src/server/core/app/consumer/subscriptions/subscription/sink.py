@@ -3,9 +3,6 @@
 
 from abc import ABC, abstractmethod
 
-from fastapi import WebSocket
-from fastapi.websockets import WebSocketState
-
 from univention.provisioning.models import Message
 
 
@@ -33,39 +30,6 @@ class Sink(ABC):
     async def close(self):
         """Close connection with remote end."""
         pass
-
-
-class WebSocketSink(Sink):
-    """A consumer connected to a message queue via a WebSocket."""
-
-    def __init__(self, websocket: WebSocket):
-        super().__init__()
-        self.websocket = websocket
-
-    def _is_connected(self):
-        return (
-            self.websocket.application_state == WebSocketState.CONNECTED
-            and self.websocket.client_state == WebSocketState.CONNECTED
-        )
-
-    async def open(self):
-        """Open a connection with the remote end."""
-        await self.websocket.accept()
-
-    async def send(self, message: str):
-        """Send a message to the remote end."""
-        if self._is_connected():
-            await self.websocket.send_text(message)
-
-    async def close(self):
-        """Close connection with remote end."""
-        if self._is_connected():
-            try:
-                await self.websocket.close()
-            except Exception:
-                # if connection was already closed by the remote end,
-                # there is nothing we can do
-                pass
 
 
 class SinkManager:
