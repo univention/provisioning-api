@@ -12,8 +12,8 @@ metadata:
       {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-prefill" (include "common.names.fullname" .)) }}
       {{- $mergedLabels := merge $uiLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- if .Values.prefill.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.prefill.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount.prefill }}
@@ -30,8 +30,8 @@ spec:
     metadata:
       annotations:
         checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
+        {{- if .Values.prefill.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.prefill.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
       labels:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}

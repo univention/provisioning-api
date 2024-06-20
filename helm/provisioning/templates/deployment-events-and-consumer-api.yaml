@@ -12,11 +12,11 @@ metadata:
       {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-api" (include "common.names.fullname" .)) }}
       {{- $mergedLabels := merge $uiLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- if .Values.api.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.api.additionalLabels "context" . ) | nindent 4 }}
     {{- end }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- if .Values.api.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.api.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount.api }}
@@ -33,8 +33,8 @@ spec:
     metadata:
       annotations:
         checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
+        {{- if .Values.api.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.api.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
       labels:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
