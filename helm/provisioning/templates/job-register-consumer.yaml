@@ -6,8 +6,31 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+      {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
+      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register_consumers" (include "common.names.fullname" .)) }}
+      {{- $mergedLabels := merge $uiLabels $commonLabels}}
+      {{- toYaml $mergedLabels | nindent 4 }}
+    {{- if .Values.register_consumers.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.register_consumers.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.register_consumers.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.register_consumers.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
 spec:
   template:
+    metadata:
+      annotations:
+        checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.register_consumers.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.register_consumers.podAnnotations "context" .) | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
+        {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" (include "common.names.fullname" .)) }}
+        {{- $mergedLabels := merge $uiLabels $commonLabels}}
+        {{- toYaml $mergedLabels | nindent 8 }}
     spec:
       restartPolicy: Never
       volumes:
@@ -17,14 +40,14 @@ spec:
             secretName: {{ include "provisioning-register-consumers.jsonSecretName" . | quote }}
         {{- end }}
       initContainers:
-        - name: wait-for-provisioning-api
+        - name: wait-for-api-to-start
           image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
-          command: [ "sh", "-c", "until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null; do echo Waiting for provisioning-api; sleep 2; done;" ]
-          {{- if .Values.resources.register_consumer }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.register_consumer "context" .) | nindent 12 }}
+          command: [ "sh", "-c", "until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
+          {{- if .Values.resources.register_consumers }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.register_consumers "context" .) | nindent 12 }}
           {{- end }}
       containers:
         - name: consumer-registration
@@ -51,8 +74,6 @@ spec:
                 -d @"${file}" "${PROVISIONING_API_BASE_URL}")
                 if [ "${response}" -eq 201 ]; then
                   echo "Successful registration of the consumer: "${filename}""
-                elif [ "${response}" -eq 400 ]; then
-                  echo "Consumer with the name '"${filename}"' is already registered"
                 else
                   echo "Failed to register the consumer: "${filename}"
               Response code: "${response}"
@@ -61,7 +82,6 @@ spec:
                 fi
                 echo ------------------------------------
               done
-          {{- if .Values.resources.register_consumer }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.register_consumer "context" .) | nindent 12 }}
+          {{- if .Values.resources.register_consumers }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.register_consumers "context" .) | nindent 12 }}
           {{- end }}
-

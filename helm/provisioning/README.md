@@ -22,6 +22,8 @@ A Helm Chart that deploys the provisioning services
 | additionalAnnotations | object | `{}` | Additional custom annotations to add to all deployed objects. |
 | additionalLabels | object | `{}` | Additional custom labels to add to all deployed objects. |
 | affinity | object | `{}` | Affinity for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set. |
+| api.additionalAnnotations | object | `{}` |  |
+| api.additionalLabels | object | `{}` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"true"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
@@ -31,6 +33,7 @@ A Helm Chart that deploys the provisioning services
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"latest"` |  |
+| api.podAnnotations | object | `{}` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
 | containerSecurityContext.enabled | bool | `true` | Enable security context. |
@@ -39,6 +42,8 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.runAsNonRoot | bool | `true` | Run container as a user. |
 | containerSecurityContext.runAsUser | int | `1000` | Process user id. |
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
+| dispatcher.additionalAnnotations | object | `{}` |  |
+| dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.UDM_HOST | string | `""` |  |
 | dispatcher.config.UDM_PORT | int | `80` |  |
@@ -47,6 +52,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"latest"` |  |
+| dispatcher.podAnnotations | object | `{}` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
@@ -128,6 +134,8 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.fsGroup | int | `1000` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
+| prefill.additionalAnnotations | object | `{}` |  |
+| prefill.additionalLabels | object | `{}` |  |
 | prefill.config.LOG_LEVEL | string | `"INFO"` |  |
 | prefill.config.UDM_HOST | string | `""` |  |
 | prefill.config.UDM_PORT | int | `80` |  |
@@ -136,6 +144,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"latest"` |  |
+| prefill.podAnnotations | object | `{}` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
@@ -166,12 +175,15 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.udmTransformer.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
+| register_consumers.additionalAnnotations | object | `{}` |  |
+| register_consumers.additionalLabels | object | `{}` |  |
 | register_consumers.credentialSecretName | string | `""` |  |
 | register_consumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | register_consumers.image.registry | string | `""` |  |
 | register_consumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
 | register_consumers.image.tag | string | `"0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"` |  |
 | register_consumers.jsonSecretName | string | `""` |  |
+| register_consumers.podAnnotations | object | `{}` |  |
 | register_consumers.provisioningApiBaseUrl | string | `""` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
 | resources.api.limits.cpu | int | `1` |  |
@@ -186,10 +198,6 @@ A Helm Chart that deploys the provisioning services
 | resources.prefill.limits.memory | string | `"1Gi"` |  |
 | resources.prefill.requests.cpu | float | `0.1` |  |
 | resources.prefill.requests.memory | string | `"64Mi"` |  |
-| resources.register_consumer.limits.cpu | string | `"500m"` |  |
-| resources.register_consumer.limits.memory | string | `"256Mi"` |  |
-| resources.register_consumer.requests.cpu | string | `"250m"` |  |
-| resources.register_consumer.requests.memory | string | `"128Mi"` |  |
 | resources.udmTransformer.limits.cpu | int | `1` |  |
 | resources.udmTransformer.limits.memory | string | `"1Gi"` |  |
 | resources.udmTransformer.requests.cpu | float | `0.1` |  |
@@ -238,6 +246,8 @@ A Helm Chart that deploys the provisioning services
 | terminationGracePeriodSeconds | string | `""` | In seconds, time the given to the pod needs to terminate gracefully. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods |
 | tolerations | list | `[]` | Tolerations for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
+| udmTransformer.additionalAnnotations | object | `{}` |  |
+| udmTransformer.additionalLabels | object | `{}` |  |
 | udmTransformer.api.auth.credentialSecretName | string | `""` |  |
 | udmTransformer.config.EVENTS_PASSWORD_UDM | string | `"udmpass"` |  |
 | udmTransformer.config.EVENTS_USERNAME_UDM | string | `"udm"` |  |
@@ -258,4 +268,5 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.ldap.connection.host | string | `""` |  |
 | udmTransformer.ldap.connection.port | string | `""` |  |
 | udmTransformer.nats.auth.credentialSecretName | string | `""` |  |
+| udmTransformer.podAnnotations | object | `{}` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |

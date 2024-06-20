@@ -12,11 +12,11 @@ metadata:
       {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-api" (include "common.names.fullname" .)) }}
       {{- $mergedLabels := merge $uiLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- if .Values.api.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.api.additionalLabels "context" . ) | nindent 4 }}
     {{- end }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- if .Values.api.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.api.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount.api }}
@@ -33,8 +33,8 @@ spec:
     metadata:
       annotations:
         checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
+        {{- if .Values.api.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.api.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
       labels:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
@@ -72,26 +72,6 @@ spec:
       {{- if .Values.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
-      initContainers:
-        - name: wait-for-nats
-          command: [ "poetry", "run", "python", "/scripts/wait-for-nats.py" ]
-                {{ with .Values.api.image }}
-          image: "{{ if .registry }}{{ .registry }}/{{ end }}{{ .repository }}{{ if .sha256 }}@sha256:{{ .sha256 }}{{ else }}:{{ .tag }}{{ end }}"
-          imagePullPolicy: {{ .imagePullPolicy }}
-                {{ end }}
-          envFrom:
-            - configMapRef:
-                name: {{ printf "%s-common" (include "common.names.fullname" .) }}
-            - configMapRef:
-                name: {{ printf "%s-api" (include "common.names.fullname" .) }}
-            - secretRef:
-                name: {{ include "provisioning-api.credentialSecretName" . | quote }}
-          volumeMounts:
-            - name: wait-for-nats
-              mountPath: /scripts
-          {{- if .Values.resources.api }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.api "context" .) | nindent 12 }}
-          {{- end }}
       containers:
         - name: "api"
           {{- if .Values.containerSecurityContext.enabled }}
@@ -136,10 +116,8 @@ spec:
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
             {{- end }}
           {{- end }}
+      {{- if or .Values.nats.connection.tls.enabled .Values.extraVolumeMounts }}
       volumes:
-        - name: wait-for-nats
-          configMap:
-            name: {{ printf "%s-api" (include "common.names.fullname" .) }}
         {{- if .Values.nats.connection.tls.enabled }}
         - name: certificates-volume
           secret:
@@ -148,3 +126,4 @@ spec:
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
         {{- end }}
+      {{- end }}
