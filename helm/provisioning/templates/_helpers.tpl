@@ -8,7 +8,7 @@ They are defined so other sub-charts can read information that otherwise would b
 If compatible Helm charts set .Values.global.nubusDeployment to true, the templates defined here will be imported.
 */}}
 {{- define "nubusTemplates.nats.connection.host" -}}
-{{- printf "%s-provsioning-nats" .Release.Name -}}
+{{- printf "%s-provisioning-nats" .Release.Name -}}
 {{- end -}}
 
 {{- define "nubusTemplates.nats.connection.port" -}}
