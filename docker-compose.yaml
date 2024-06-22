@@ -154,39 +154,38 @@ services:
     depends_on:
       - "nats"
       - "ldap-server"
-      - "ldap-notifier"
 
-  ldap-notifier:
+  ldif-producer:
     platform: linux/amd64
-    image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.16.1-pre-jlohmer-bump-to-508
-    depends_on:
-      ldap-server:
-        condition: service_started
-    ports:
-      - 6669:6669
+    image: "artifacts.software-univention.de/nubus-dev/images/ldif-producer:0.16.1-pre-jlohmer-bump-to-508"
+    container_name: "ldif-producer"
+    environment:
+      SOCKET_FILE_LOCATION: "/var/lib/univention-ldap/slapd-sock/sock"
+      NATS_USER: ldif-producer
+      NATS_PASSWORD: ldifpass
+      NATS_HOST: "nats"
+      NATS_PORT: "4222"
+      NATS_MAX_RECONNECT_ATTEMPTS: 2
+      MAX_IN_FLIGHT_LDAP_MESSAGES: 1
+      LDAP_THREADS: 5
+      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
+      IGNORE_TEMPORARY_OBJECTS: true
     volumes:
-      - ldap-shared-data:/var/lib/univention-ldap/:rw
-      - ldap-shared-run:/var/run/slapd/:ro
+      - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
+      - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   ldap-server:
     platform: linux/amd64
     image: artifacts.software-univention.de/nubus-dev/images/ldap-server:0.16.1-pre-jlohmer-bump-to-508
     container_name: "ldap-server"
     environment:
-      DOMAIN_NAME: univention-organization.intranet
-      LDAP_BASE_DN: dc=univention-organization,dc=intranet
-      LDAP_CN_ADMIN_PW: "univention"
-      TLS_MODE: "off"
+      LDAP_CN_ADMIN_PW: univention
     ports:
       - 389:389
       - 636:636
     volumes:
-      - ldap-shared-data:/var/lib/univention-ldap/:rw
-      - ldap-shared-run:/var/run/slapd/:rw
-      - type: bind
-        source: ./tests/base.conf
-        target: /etc/univention/base.conf
-        read_only: true
+      - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
+      - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
 
   ldap-admin:
     image: osixia/phpldapadmin:0.9.0
@@ -277,5 +276,4 @@ services:
 
 volumes:
   pre-commit-cache:
-  ldap-shared-data:
-  ldap-shared-run:
+  ldap-socket:
