@@ -22,7 +22,7 @@ async def ensure_stream():
 
 async def handle_changes(new, old):
     message = Message(
-        publisher_name=PublisherName.udm_listener,
+        publisher_name=PublisherName.ldif_producer,
         ts=datetime.now(),
         realm="ldap",
         topic="ldap",
