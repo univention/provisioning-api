@@ -16,6 +16,7 @@ LDAP_SUBJECT = "ldap-producer-subject"
 
 class PublisherName(str, Enum):
     udm_listener = "udm-listener"
+    ldif_producer = "ldif-producer"
     udm_pre_fill = "udm-pre-fill"
     consumer_registration = "consumer-registration"
     consumer_client_test = "consumer_client_test"

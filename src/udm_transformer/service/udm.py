@@ -58,7 +58,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             return
 
         message = Message(
-            publisher_name=PublisherName.udm_listener,
+            publisher_name=PublisherName.ldif_producer,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,
