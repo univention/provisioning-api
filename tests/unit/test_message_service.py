@@ -36,11 +36,11 @@ class TestMessageService:
         )
 
         result = await message_service.get_next_message(
-            SUBSCRIPTION_NAME, timeout=5, pop=True
+            SUBSCRIPTION_NAME, timeout=1, pop=True
         )
 
-        sub_service.get_subscription_queue_status.assert_called_once_with(
-            SUBSCRIPTION_NAME
+        sub_service.get_subscription_queue_status.assert_has_calls(
+            [call(SUBSCRIPTION_NAME), call(SUBSCRIPTION_NAME)]
         )
         message_service._port.get_message.assert_not_called()
         assert result is None

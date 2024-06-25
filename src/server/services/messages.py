@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import asyncio
 import logging
 from datetime import datetime
 from typing import Optional
@@ -27,6 +27,22 @@ class MessageService:
         self._port = port
         self.logger = logging.getLogger(__name__)
 
+    async def check_subscription_status(
+        self, subscription_name: str, timeout: float
+    ) -> FillQueueStatus:
+        sub_service = SubscriptionService(self._port)
+        loop = asyncio.get_event_loop()
+        end_time = loop.time() + timeout
+        while loop.time() < end_time:
+            queue_status = await sub_service.get_subscription_queue_status(
+                subscription_name
+            )
+            if queue_status == FillQueueStatus.done:
+                return queue_status
+            await asyncio.sleep(1)
+
+        return await sub_service.get_subscription_queue_status(subscription_name)
+
     async def get_next_message(
         self,
         subscription_name: str,
@@ -42,12 +58,14 @@ class MessageService:
 
         # TODO: Timeout of 0 leads to internal server error
 
-        sub_service = SubscriptionService(self._port)
-        queue_status = await sub_service.get_subscription_queue_status(
-            subscription_name
-        )
-
-        if queue_status != FillQueueStatus.done:
+        if (
+            await self.check_subscription_status(subscription_name, timeout)
+            != FillQueueStatus.done
+        ):
+            self.logger.warning(
+                "Prefill status for subscription '%s' did not reach 'done' within the timeout period.",
+                subscription_name,
+            )
             return None
 
         message = await self.get_messages_from_prefill_queue(
