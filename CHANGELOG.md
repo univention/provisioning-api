@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.28.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.1...v0.28.2) (2024-06-25)
+
+
+### Bug Fixes
+
+* remove WebSocket API ([9c5e944](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9c5e9441479dea405824fc51cc75aa673df61ac1))
+* stop the infinite request loop due to failure to prefill ([52d64c1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/52d64c1e9e1cca3a2f1dfa6c831e87b0a0726323))
+
 ## [0.28.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.0...v0.28.1) (2024-06-06)
 
 
