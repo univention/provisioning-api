@@ -795,7 +795,7 @@ nats:
           key: NATS_PASSWORD
 
 
-register_consumers:
+registerConsumers:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""

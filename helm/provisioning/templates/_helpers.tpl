@@ -101,17 +101,17 @@ These template definitions are only used in this chart and do not relate to temp
 {{- end -}}
 
 {{- define "provisioning-register-consumers.credentialSecretName" -}}
-{{- coalesce .Values.register_consumers.credentialSecretName (printf "%s-provisioning-register-consumers-credentials" .Release.Name) -}}
+{{- coalesce .Values.registerConsumers.credentialSecretName (printf "%s-provisioning-register-consumers-credentials" .Release.Name) -}}
 {{- end -}}
 
 {{- define "provisioning-register-consumers.jsonSecretName" -}}
-{{- coalesce .Values.register_consumers.jsonSecretName (printf "%s-provisioning-register-consumers-json-secrets" .Release.Name) -}}
+{{- coalesce .Values.registerConsumers.jsonSecretName (printf "%s-provisioning-register-consumers-json-secrets" .Release.Name) -}}
 {{- end -}}
 
 {{- define "provisioning-register-consumers.provisioningApiBaseUrl" -}}
 {{- if .Values.global.nubusDeployment -}}
 {{ printf "http://%s-provisioning-api" .Release.Name }}
 {{- else -}}
-{{- required ".Values.register_consumers.provisioningApiBaseUrl must be defined." .Values.register_consumers.provisioningApiBaseUrl -}}
+{{- required ".Values.registerConsumers.provisioningApiBaseUrl must be defined." .Values.registerConsumers.provisioningApiBaseUrl -}}
 {{- end -}}
 {{- end -}}

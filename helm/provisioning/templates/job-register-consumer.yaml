@@ -9,22 +9,22 @@ metadata:
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
       {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
-      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register_consumers" (include "common.names.fullname" .)) }}
+      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-registerConsumers" (include "common.names.fullname" .)) }}
       {{- $mergedLabels := merge $uiLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
-    {{- if .Values.register_consumers.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.register_consumers.additionalLabels "context" . ) | nindent 4 }}
+    {{- if .Values.registerConsumers.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalLabels "context" . ) | nindent 4 }}
     {{- end }}
-  {{- if .Values.register_consumers.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.register_consumers.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- if .Values.registerConsumers.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 spec:
   template:
     metadata:
       annotations:
         checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.register_consumers.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.register_consumers.podAnnotations "context" .) | nindent 8 }}
+        {{- if .Values.registerConsumers.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.registerConsumers.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
       labels:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
@@ -41,17 +41,17 @@ spec:
         {{- end }}
       initContainers:
         - name: wait-for-api-to-start
-          image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
+          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
           command: [ "sh", "-c", "until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
-          {{- if .Values.resources.register_consumers }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.register_consumers "context" .) | nindent 12 }}
+          {{- if .Values.resources.registerConsumers }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
       containers:
         - name: consumer-registration
-          image: "{{ coalesce .Values.register_consumers.image.registry .Values.global.imageRegistry }}/{{ .Values.register_consumers.image.repository }}:{{ .Values.register_consumers.image.tag }}"
+          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           volumeMounts:
             - name: consumer-secrets
               mountPath: "/secrets"
@@ -82,6 +82,6 @@ spec:
                 fi
                 echo ------------------------------------
               done
-          {{- if .Values.resources.register_consumers }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.register_consumers "context" .) | nindent 12 }}
+          {{- if .Values.resources.registerConsumers }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
