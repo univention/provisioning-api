@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.28.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.2...v0.28.3) (2024-06-25)
+
+
+### Bug Fixes
+
+* adjust support for individual annotations for each deployment and job ([1073859](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/107385941771f5aebeb34b78ddb403319efce872))
+* rename register_consumers to registerConsumers ([539ff93](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/539ff9339610eae7f8cb2df97b5b73b8fa35cfec))
+* typo ... ([7249e74](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7249e74233b544d0a8e2332bbcbd603e64d95ec2))
+
 ## [0.28.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.1...v0.28.2) (2024-06-25)
 
 
