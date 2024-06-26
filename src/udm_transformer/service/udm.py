@@ -25,6 +25,10 @@ class UDMMessagingService(univention.admin.uldap.access):
             binddn=port.settings.ldap_bind_dn,
             bindpw=port.settings.ldap_bind_pw,
         )
+        self._my_ldap_position = univention.admin.uldap.position(
+            port.settings.ldap_base_dn
+        )
+
         self._messaging_port = port
 
     async def retrieve(self, dn: str):
@@ -64,7 +68,9 @@ class UDMMessagingService(univention.admin.uldap.access):
         await self._messaging_port.send_event(message)
 
     def _get_module(self, object_type):
-        module = UDM_Module(object_type, ldap_connection=self, ldap_position=None)
+        module = UDM_Module(
+            object_type, ldap_connection=self, ldap_position=self._my_ldap_position
+        )
         if not module or not module.module:
             raise ModuleNotFound
         return module
@@ -81,7 +87,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             module_obj = module.module.object(
                 co=None,
                 lo=self,
-                position=None,
+                position=self._my_ldap_position,
                 dn=entry["entryDN"][0],
                 superordinate=None,
                 attributes=entry,
