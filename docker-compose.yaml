@@ -124,7 +124,7 @@ services:
       - "events-and-consumer-api"
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:0.28.3"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile

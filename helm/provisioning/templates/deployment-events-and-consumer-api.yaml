@@ -134,8 +134,10 @@ spec:
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
             {{- end }}
           {{- end }}
-      {{- if or .Values.nats.connection.tls.enabled .Values.extraVolumeMounts }}
       volumes:
+        - name: wait-for-nats
+          configMap:
+            name: {{ printf "%s-api" (include "common.names.fullname" .) }}
         {{- if .Values.nats.connection.tls.enabled }}
         - name: certificates-volume
           secret:
@@ -144,4 +146,3 @@ spec:
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
         {{- end }}
-      {{- end }}

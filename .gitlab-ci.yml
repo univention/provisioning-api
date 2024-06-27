@@ -36,9 +36,6 @@ lint-pre-commit:
   - IMAGE_NAME: "provisioning-events-and-consumer-api-test"
     KANIKO_ARGS: "--target test"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
-  - IMAGE_NAME: "provisioning-udm-listener"
-    KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
   - IMAGE_NAME: "provisioning-dispatcher"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
@@ -56,8 +53,6 @@ lint-pre-commit:
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
     - "provisioning-events-and-consumer-api"
-  - IMAGE_NAME:
-    - "provisioning-udm-listener"
   - IMAGE_NAME:
     - "provisioning-dispatcher"
   - IMAGE_NAME:
@@ -107,7 +102,7 @@ test-integration:
     - docker compose down --volumes
 
 test-end-to-end:
-  allow_failure: true
+  # allow_failure: true
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
@@ -126,7 +121,7 @@ test-end-to-end:
     - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
     - docker compose config test
     - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server >& docker-compose.log
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
@@ -142,7 +137,6 @@ test-end-to-end:
     - docker compose down --volumes
   artifacts:
     paths:
-      - docker-compose.log
       - provisioning-api.log
       - dispatcher.log
       - prefill.log

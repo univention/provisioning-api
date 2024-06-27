@@ -39,7 +39,7 @@ A Helm chart for the Univention Portal Provisioning API
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `""` |  |
 | image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
-| image.tag | string | `"latest"` |  |
+| image.tag | string | `"0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"` |  |
 | ldap.credentialSecret.ldapPasswordKey | string | `"ldap.secret"` |  |
 | ldap.credentialSecret.machinePasswordKey | string | `"machine.secret"` |  |
 | ldap.credentialSecret.name | string | `""` |  |
