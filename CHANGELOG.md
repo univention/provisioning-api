@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.4...v0.28.5) (2024-06-27)
+
+
+### Bug Fixes
+
+* fix provisioning helm chart and pin udm-listener container to 0.28.3 ([ef2912c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ef2912c3f4d320fc02fd6a6f84d801eb5570b9d2))
+
 ## [0.28.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.3...v0.28.4) (2024-06-27)
 
 
