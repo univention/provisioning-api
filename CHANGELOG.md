@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.28.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.3...v0.28.4) (2024-06-27)
+
+
+### Bug Fixes
+
+* add ldap position to udm transformer code ([5c4ad70](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5c4ad70e7c4f07c39678611f7181a0132eafd940))
+* add wait-for-nats and respect global.imageRegistry ([48e338c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/48e338c8bcfa07488852e24f3551367eff6f2598))
+* **udm-transformer:** add udm extensions to udm-transformer container image ([945e62a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/945e62ae1a236a596c11c9ea9687d2fd754341b9))
+
 ## [0.28.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.2...v0.28.3) (2024-06-25)
 
 
