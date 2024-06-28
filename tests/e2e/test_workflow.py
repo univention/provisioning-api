@@ -17,6 +17,7 @@ from tests.e2e.conftest import E2ETestSettings
 
 REALM = "udm"
 TOPIC = "groups/group"
+TOPIC_2 = "container/dc"
 PASSWORD = "password"
 
 
@@ -139,14 +140,14 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
     assert message["body"]["old"]["dn"] == dn
 
 
-async def test_prefill(test_settings):
+async def test_prefill_with_multiple_topics(test_settings):
     name = str(uuid.uuid4())
 
     response = requests.post(
         f"{test_settings.provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
         json={
             "name": name,
-            "realms_topics": [[REALM, TOPIC]],
+            "realms_topics": [[REALM, TOPIC], [REALM, TOPIC_2]],
             "request_prefill": True,
             "password": PASSWORD,
         },
@@ -171,14 +172,26 @@ async def test_prefill(test_settings):
             break
         await asyncio.sleep(1)
 
-    response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?pop=true",
-        auth=(name, PASSWORD),
-    )
-    assert response.status_code == 200
+    topics = []
+    while True:
+        response = requests.get(
+            f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?pop=true",
+            auth=(name, PASSWORD),
+        )
+        assert response.status_code == 200
 
-    message = response.json()
+        message = response.json()
+        if not message:
+            break
+        topics.append(message["topic"])
 
-    assert message["realm"] == REALM
-    assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.udm_pre_fill
+        assert message["realm"] == REALM
+        assert message["publisher_name"] == PublisherName.udm_pre_fill
+
+    expected_topics_order = [TOPIC, TOPIC_2]
+    received_topics_order = []
+    for topic in topics:
+        if topic not in received_topics_order:
+            received_topics_order.append(topic)
+
+    assert received_topics_order == expected_topics_order

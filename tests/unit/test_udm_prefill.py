@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+from copy import deepcopy
 from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
 import pytest
@@ -16,6 +17,9 @@ from tests.conftest import (
     PREFILL_MESSAGE,
     MQMESSAGE_PREFILL,
     MQMESSAGE_PREFILL_REDELIVERED,
+    MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
+    TOPIC,
+    TOPIC_2,
 )
 
 
@@ -28,31 +32,40 @@ def udm_prefill() -> UDMPreFill:
 class TestUDMPreFill:
     prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
     mocked_date = datetime(2023, 11, 9, 11, 15, 52, 616061)
-    object_type = "groups/group"
-    url = f"http://udm-rest-api:9979/udm/{object_type}/..."
+    url = f"http://udm-rest-api:9979/udm/{TOPIC}/..."
+    url_2 = f"http://udm-rest-api:9979/udm/{TOPIC_2}/..."
     udm_modules = {
-        "name": object_type,
+        "name": TOPIC,
         "title": "Group",
-        "href": f"http://udm-rest-api:9979/udm/{object_type}/",
+        "href": f"http://udm-rest-api:9979/udm/{TOPIC}/",
     }
+    udm_modules_2 = deepcopy(udm_modules)
+    udm_modules_2["name"] = TOPIC_2
+    udm_modules_2["href"] = f"http://udm-rest-api:9979/udm/{TOPIC_2}/"
     obj = {
         "uri": url,
         "dn": "",
-        "objectType": object_type,
+        "objectType": TOPIC,
         "position": "",
         "properties": {},
         "uuid": "",
     }
+    obj_2 = deepcopy(obj)
+    obj_2["objectType"] = TOPIC_2
+    obj_2["uri"] = url_2
     msg = Message(
         publisher_name=PublisherName.udm_pre_fill,
         ts=mocked_date,
         realm="udm",
-        topic=object_type,
+        topic=TOPIC,
         body={
             "old": None,
             "new": obj,
         },
     )
+    msg2 = deepcopy(msg)
+    msg2.topic = TOPIC_2
+    msg2.body["new"] = obj_2
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill):
@@ -77,11 +90,58 @@ class TestUDMPreFill:
         )
         udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_called_once_with()
-        udm_prefill._port.list_objects.assert_called_once_with(self.object_type)
+        udm_prefill._port.list_objects.assert_called_once_with(TOPIC)
         udm_prefill._port.get_object.assert_called_once_with(self.url)
         udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
         udm_prefill._port.create_prefill_message.assert_called_once_with(
             SUBSCRIPTION_NAME, self.prefill_subject, self.msg
+        )
+        udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
+
+    @patch("server.core.prefill.service.udm_prefill.datetime")
+    async def test_handle_requests_to_prefill_multiple_topics(
+        self, mock_datetime, udm_prefill
+    ):
+        mock_datetime.now.return_value = self.mocked_date
+        udm_prefill._port.wait_for_event = AsyncMock(
+            side_effect=[
+                MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
+                Exception("Stop waiting for the new event"),
+            ]
+        )
+        udm_prefill._port.get_object_types = AsyncMock(
+            side_effect=[[self.udm_modules], [self.udm_modules_2]]
+        )
+        udm_prefill._port.list_objects = AsyncMock(
+            side_effect=[[self.url], [self.url_2]]
+        )
+        udm_prefill._port.get_object = AsyncMock(side_effect=[self.obj, self.obj_2])
+
+        with pytest.raises(Exception, match="Stop waiting for the new event"):
+            await udm_prefill.handle_requests_to_prefill()
+
+        udm_prefill._port.subscribe_to_queue.assert_called_once_with(
+            "prefill", "prefill-service"
+        )
+        udm_prefill._port.create_stream.assert_called_once_with("prefill-failures")
+        udm_prefill._port.create_consumer.assert_called_once_with("prefill-failures")
+        udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
+            SUBSCRIPTION_NAME, self.prefill_subject
+        )
+        udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
+        udm_prefill._port.get_object_types.assert_has_calls([call(), call()])
+        udm_prefill._port.list_objects.assert_has_calls([call(TOPIC), call(TOPIC_2)])
+        udm_prefill._port.get_object.assert_has_calls(
+            [call(self.url), call(self.url_2)]
+        )
+        udm_prefill._port.acknowledge_message.assert_called_once_with(
+            MQMESSAGE_PREFILL_MULTIPLE_TOPICS
+        )
+        udm_prefill._port.create_prefill_message.assert_has_calls(
+            [
+                call(SUBSCRIPTION_NAME, self.prefill_subject, self.msg),
+                call(SUBSCRIPTION_NAME, self.prefill_subject, self.msg2),
+            ]
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
