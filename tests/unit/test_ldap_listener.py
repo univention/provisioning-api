@@ -114,7 +114,7 @@ user_entry = {
 @pytest.fixture
 def ldap_message():
     return Message(
-        publisher_name=PublisherName.udm_listener,
+        publisher_name=PublisherName.ldif_producer,
         ts=datetime.now(),
         realm="ldap",
         topic="ldap",

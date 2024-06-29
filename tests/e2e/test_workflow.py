@@ -99,7 +99,7 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.udm_listener
+    assert message["publisher_name"] == PublisherName.ldif_producer
     assert message["body"]["old"] is None
     assert message["body"]["new"]["dn"] == dn
 
@@ -118,7 +118,7 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.udm_listener
+    assert message["publisher_name"] == PublisherName.ldif_producer
     assert message["body"]["old"]["dn"] == dn
     assert message["body"]["new"]["properties"]["description"] == new_description
 
@@ -135,7 +135,7 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.udm_listener
+    assert message["publisher_name"] == PublisherName.ldif_producer
     assert message["body"]["new"] is None
     assert message["body"]["old"]["dn"] == dn
 
