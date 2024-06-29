@@ -186,13 +186,6 @@ check-debian-updates:
 test_provisioning_lib:
   stage: test
   image: docker-registry.knut.univention.de/python:3.11-slim
-  rules:
-    - if: "$CI_COMMIT_MESSAGE =~ /skip-build/ || $pipeline =~ /skip-build/"
-      when: never
-    - if: "$CI_COMMIT_MESSAGE =~ /force-build/ || $pipeline =~ /force-build/"
-    - changes:
-        - src/univention/provisioning/**/*
-        - tests/unit/provisioning_lib/**/*
   script:
     - pip install poetry=="$POETRY_VERSION"
     - poetry config --local virtualenvs.create false
@@ -207,10 +200,6 @@ test_provisioning_lib:
 
 build_provisioning_lib:
   stage: package
-  rules:
-    - if: "$CI_COMMIT_MESSAGE =~ /skip-build/ || $pipeline =~ /skip-build/"
-      when: never
-    - if: "$CI_COMMIT_MESSAGE =~ /force-build/ || $pipeline =~ /force-build/"
   dependencies:
     - pre-semantic-release
   needs:
