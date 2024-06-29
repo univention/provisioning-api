@@ -138,8 +138,8 @@ services:
       NATS_HOST: "nats"
       NATS_PORT: "4222"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
-      MAX_IN_FLIGHT_LDAP_MESSAGES: 1
-      BACKPRESSURE_WAIT_TIMEOUT: 20
+      MAX_IN_FLIGHT_LDAP_MESSAGES: 10
+      BACKPRESSURE_WAIT_TIMEOUT: 10
       LDAP_THREADS: 5
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       IGNORE_TEMPORARY_OBJECTS: true
@@ -171,7 +171,7 @@ services:
       - 8001:80
 
   udm-rest-api:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:0.14.1-pre-jlohmer-bump-to-508
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:latest
     container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:

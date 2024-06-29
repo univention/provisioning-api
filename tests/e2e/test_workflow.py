@@ -85,6 +85,9 @@ def ldap_user(ldap_connection, subscription_name, test_settings, request):
     ldap_connection.delete(dn)
 
 
+@pytest.mark.skip(
+    "LDAP Controls need to be activated for the ldap3 library in the test setup"
+)
 async def test_workflow(test_settings, ldap_user, subscription_name):
     ldap_connection, dn = ldap_user
 
