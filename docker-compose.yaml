@@ -1,14 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+x-variables:
+  repo-tag: &repo-tag 0.28.1
+  ldap-tag: &ldap-tag 0.16.1-pre-jlohmer-bump-to-508
+
 services:
   events-and-consumer-api:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}"
+    image: artifacts.software-univention.de/nubus-dev/images/provisioning-events-and-consumer-api:${IMAGE_TAG:-0.28.1}
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
-      args:
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "events-and-consumer-api-dev"
     restart: "on-failure"
     environment:
@@ -47,12 +51,12 @@ services:
 
 
   dispatcher:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}"
+    image: artifacts.software-univention.de/nubus-dev/images/provisioning-dispatcher:${IMAGE_TAG:-0.28.1}
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
-      args:
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -67,12 +71,12 @@ services:
       - "events-and-consumer-api"
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-udm-transformer:${IMAGE_TAG:-0.28.1}"
     build:
       context: .
       dockerfile: docker/udm-transformer/Dockerfile
-      args:
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-udm-transformer"
     restart: "on-failure"
     environment:
@@ -99,12 +103,12 @@ services:
     # network_mode: "host"
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-prefill:${IMAGE_TAG:-0.28.1}"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
-      args:
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-prefill"
     restart: "on-failure"
     environment:
@@ -128,9 +132,9 @@ services:
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
-      args:
-        - LISTENER_BASE_IMAGE_TAG=latest
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - LISTENER_BASE_IMAGE_TAG=latest
+      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
     environment:
       NATS_HOST: "localhost"
@@ -154,7 +158,7 @@ services:
 
   ldap-notifier:
     platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-notifier:latest
+    image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.16.1-pre-jlohmer-bump-to-508
     depends_on:
       ldap-server:
         condition: service_started
@@ -164,13 +168,65 @@ services:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
       - ldap-shared-run:/var/run/slapd/:ro
 
+  ldap-server:
+    platform: linux/amd64
+    image: artifacts.software-univention.de/nubus-dev/images/ldap-server:0.16.1-pre-jlohmer-bump-to-508
+    container_name: "ldap-server"
+    environment:
+      DOMAIN_NAME: univention-organization.intranet
+      LDAP_BASE_DN: dc=univention-organization,dc=intranet
+      LDAP_CN_ADMIN_PW: "univention"
+      TLS_MODE: "off"
+    ports:
+      - 389:389
+      - 636:636
+    volumes:
+      - ldap-shared-data:/var/lib/univention-ldap/:rw
+      - ldap-shared-run:/var/run/slapd/:rw
+      - type: bind
+        source: ./tests/base.conf
+        target: /etc/univention/base.conf
+        read_only: true
+
+  ldap-admin:
+    image: osixia/phpldapadmin:0.9.0
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "#PYTHON2BASH:[{'ldap-server':{'login':{'bind_id':'cn=admin,dc=univention-organization,dc=intranet'}}}]"
+      PHPLDAPADMIN_HTTPS: "false"
+    links:
+      - ldap-server
+    ports:
+      - 8001:80
+
+  udm-rest-api:
+    image: artifacts.software-univention.de/nubus-dev/images/udm-rest-api:0.13.3-pre-jlohmer-bump-to-508
+    container_name: "udm-rest-api"
+    platform: "linux/amd64"
+    ports:
+      - 9979:9979
+    volumes:
+      - type: bind
+        source: ./tests/base.conf
+        target: /etc/univention/base.conf
+        read_only: true
+    environment:
+      DOMAINNAME: univention-organization.intranet
+      HOSTNAME: localhost:9979
+      LDAP_HOST: ldap-server
+      LDAP_PORT: 389
+      LDAP_BASE_DN: dc=univention-organization,dc=intranet
+      LDAP_HOST_DN: cn=admin,dc=univention-organization,dc=intranet
+      TLS_MODE: off
+      MACHINE_SECRET: univention
+      LDAP_CN_ADMIN_PW: univention
+
   example-client:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-example-client:${IMAGE_TAG:-0.28.1}"
     build:
       context: .
       dockerfile: docker/example-client/Dockerfile
-      args:
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: example-client
     environment:
       PROVISIONING_API_USERNAME: "example-client"
@@ -180,12 +236,12 @@ services:
 
 
   test:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/test:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/test:${IMAGE_TAG:-0.28.1}"
     build:
       context: .
       dockerfile: docker/test/Dockerfile
-      args:
-        - UCS_BASE_IMAGE_TAG=latest
+      # args:
+      #   - UCS_BASE_IMAGE_TAG=latest
     working_dir: /app
     profiles:
       - test
@@ -218,58 +274,6 @@ services:
       - ".:/src"
     profiles:
       - docs
-
-  ldap-server:
-    platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
-    container_name: "ldap-server"
-    environment:
-      DOMAIN_NAME: univention-organization.intranet
-      LDAP_BASE_DN: dc=univention-organization,dc=intranet
-      LDAP_CN_ADMIN_PW: "univention"
-      TLS_MODE: "off"
-    ports:
-      - 389:389
-      - 636:636
-    volumes:
-      - ldap-shared-data:/var/lib/univention-ldap/:rw
-      - ldap-shared-run:/var/run/slapd/:rw
-      - type: bind
-        source: ./tests/base.conf
-        target: /etc/univention/base.conf
-        read_only: true
-
-  ldap-admin:
-    image: osixia/phpldapadmin:0.9.0
-    environment:
-      PHPLDAPADMIN_LDAP_HOSTS: "#PYTHON2BASH:[{'ldap-server':{'login':{'bind_id':'cn=admin,dc=univention-organization,dc=intranet'}}}]"
-      PHPLDAPADMIN_HTTPS: "false"
-    links:
-      - ldap-server
-    ports:
-      - 8001:80
-
-  udm-rest-api:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:latest
-    container_name: "udm-rest-api"
-    platform: "linux/amd64"
-    ports:
-      - 9979:9979
-    volumes:
-      - type: bind
-        source: ./tests/base.conf
-        target: /etc/univention/base.conf
-        read_only: true
-    environment:
-      DOMAINNAME: univention-organization.intranet
-      HOSTNAME: localhost:9979
-      LDAP_HOST: ldap-server
-      LDAP_PORT: 389
-      LDAP_BASE_DN: dc=univention-organization,dc=intranet
-      LDAP_HOST_DN: cn=admin,dc=univention-organization,dc=intranet
-      TLS_MODE: off
-      MACHINE_SECRET: univention
-      LDAP_CN_ADMIN_PW: univention
 
 volumes:
   pre-commit-cache:
