@@ -127,38 +127,13 @@ services:
       - "nats"
       - "events-and-consumer-api"
 
-  udm-listener:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:0.28.3"
-    build:
-      context: .
-      dockerfile: docker/udm-listener/Dockerfile
-      # args:
-      #   - LISTENER_BASE_IMAGE_TAG=latest
-      #   - UCS_BASE_IMAGE_TAG=latest
-    container_name: "udm-listener"
-    environment:
-      NATS_HOST: "localhost"
-      NATS_PORT: "4222"
-      NATS_USER: "udmlistener"
-      NATS_PASSWORD: "udmlistenerpass"
-      LDAP_HOST: "localhost"
-      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
-      NOTIFIER_SERVER: "localhost"
-      DEBUG_LEVEL: "3"
-      TLS_MODE: "off"
-      LDAP_PASSWORD: "univention"
-      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
-      LDAP_PORT: 389
-    network_mode: "host"
-    depends_on:
-      - "nats"
-      - "ldap-server"
-
   ldif-producer:
     platform: linux/amd64
-    image: "artifacts.software-univention.de/nubus-dev/images/ldif-producer:0.16.1-pre-jlohmer-bump-to-508"
     container_name: "ldif-producer"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldif-producer:0.18.1-pre-jlohmer-bump-to-508"
+    # build:
+    #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
+    #   context: ../container-ldap/
     environment:
       SOCKET_FILE_LOCATION: "/var/lib/univention-ldap/slapd-sock/sock"
       NATS_USER: ldif-producer
@@ -167,6 +142,7 @@ services:
       NATS_PORT: "4222"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       MAX_IN_FLIGHT_LDAP_MESSAGES: 1
+      BACKPRESSURE_WAIT_TIMEOUT: 20
       LDAP_THREADS: 5
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       IGNORE_TEMPORARY_OBJECTS: true
@@ -184,7 +160,7 @@ services:
       - 389:389
       - 636:636
     volumes:
-      - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
+      - ${LDAP_SOCKET_LOCATION:-ldap-socket}:/var/lib/univention-ldap/slapd-sock/:rw
       - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
 
   ldap-admin:
@@ -204,10 +180,7 @@ services:
     ports:
       - 9979:9979
     volumes:
-      - type: bind
-        source: ./tests/base.conf
-        target: /etc/univention/base.conf
-        read_only: true
+      - ./tests/base.conf:/etc/univention/base.conf:ro
     environment:
       DOMAINNAME: univention-organization.intranet
       HOSTNAME: localhost:9979

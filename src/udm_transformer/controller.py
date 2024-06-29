@@ -4,7 +4,7 @@
 import logging
 
 from server.adapters.nats_adapter import Acknowledgements
-from univention.provisioning.models.queue import LDAP_STREAM, LDAP_SUBJECT, Message
+from univention.provisioning.models.queue import LDIF_STREAM, LDIF_SUBJECT, Message
 from server.utils.message_ack_manager import MessageAckManager
 from udm_transformer.port import UDMTransformerPort
 from udm_transformer.service.udm import UDMMessagingService
@@ -40,8 +40,8 @@ class UDMTransformerController:
 
     async def transform_events(self) -> None:
         await self._port.initialize_subscription(
-            LDAP_STREAM,
-            LDAP_SUBJECT,
+            LDIF_STREAM,
+            LDIF_SUBJECT,
             UDM_TRANSFORMER_CONSUMER_NAME,
         )
 
