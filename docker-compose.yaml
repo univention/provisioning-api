@@ -1,13 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-x-variables:
-  repo-tag: &repo-tag 0.28.1
-  ldap-tag: &ldap-tag 0.16.1-pre-jlohmer-bump-to-508
-
 services:
   events-and-consumer-api:
-    image: artifacts.software-univention.de/nubus-dev/images/provisioning-events-and-consumer-api:${IMAGE_TAG:-0.28.1}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
@@ -51,7 +47,7 @@ services:
 
 
   dispatcher:
-    image: artifacts.software-univention.de/nubus-dev/images/provisioning-dispatcher:${IMAGE_TAG:-0.28.1}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
@@ -71,7 +67,7 @@ services:
       - "events-and-consumer-api"
 
   udm-transformer:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-udm-transformer:${IMAGE_TAG:-0.28.1}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-transformer/Dockerfile
@@ -103,7 +99,7 @@ services:
     # network_mode: "host"
 
   prefill:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-prefill:${IMAGE_TAG:-0.28.1}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
@@ -130,7 +126,8 @@ services:
   ldif-producer:
     platform: linux/amd64
     container_name: "ldif-producer"
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldif-producer:0.18.1-pre-jlohmer-bump-to-508"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldif-producer:latest"
+    # Can be uncommented to simplify local development.
     # build:
     #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
     #   context: ../container-ldap/
@@ -152,7 +149,7 @@ services:
 
   ldap-server:
     platform: linux/amd64
-    image: artifacts.software-univention.de/nubus-dev/images/ldap-server:0.16.1-pre-jlohmer-bump-to-508
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
     container_name: "ldap-server"
     environment:
       LDAP_CN_ADMIN_PW: univention
@@ -174,7 +171,7 @@ services:
       - 8001:80
 
   udm-rest-api:
-    image: artifacts.software-univention.de/nubus-dev/images/udm-rest-api:0.13.3-pre-jlohmer-bump-to-508
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:0.14.1-pre-jlohmer-bump-to-508
     container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
@@ -193,7 +190,7 @@ services:
       LDAP_CN_ADMIN_PW: univention
 
   example-client:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-example-client:${IMAGE_TAG:-0.28.1}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/example-client/Dockerfile
@@ -208,12 +205,10 @@ services:
 
 
   test:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/test:${IMAGE_TAG:-0.28.1}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/test:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/test/Dockerfile
-      # args:
-      #   - UCS_BASE_IMAGE_TAG=latest
     working_dir: /app
     profiles:
       - test
