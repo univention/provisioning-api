@@ -48,6 +48,7 @@ def test_settings(pytestconfig) -> E2ETestSettings:
         "dev-env",
         "pipeline",
         "gaia",
+        "gaia_nubus",
     ), "invalid value for --environment"
 
     with open("./tests/e2e/e2e_settings.json") as f:
@@ -60,7 +61,7 @@ def test_settings(pytestconfig) -> E2ETestSettings:
     return settings._replace(**json_settings[environment])
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def udm(test_settings: E2ETestSettings) -> UDM:
     udm = UDM(
         test_settings.udm_rest_api_base_url,

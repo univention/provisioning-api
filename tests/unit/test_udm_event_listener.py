@@ -11,5 +11,5 @@ import pytest
 
 
 @pytest.mark.xfail()
-def test_udm_listener_enriches_ldap_object():
+def test_udm_transformer_enriches_ldap_object():
     raise NotImplementedError

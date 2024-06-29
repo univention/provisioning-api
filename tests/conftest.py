@@ -37,7 +37,7 @@ REALM = "udm"
 TOPIC = "groups/group"
 TOPIC_2 = "users/user"
 BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
-PUBLISHER_NAME = PublisherName.udm_listener
+PUBLISHER_NAME = PublisherName.ldif_producer
 REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS = [(REALM, TOPIC)]
 REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
@@ -164,7 +164,7 @@ MQMESSAGE_PREFILL_REDELIVERED = deepcopy(MQMESSAGE_PREFILL)
 MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 4
 
 FLAT_MESSAGE_ENCODED = (
-    b'{"publisher_name": "udm-listener", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "groups/group", '
+    b'{"publisher_name": "ldif-producer", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "groups/group", '
     b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}}'
 )
 
