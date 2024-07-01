@@ -10,19 +10,19 @@ readme = "README.md"
 packages = [{ include = "server", from = "src" }, ]
 
 [tool.poetry.dependencies]
-fastapi = "^0.103.1"
+fastapi = "^0.111.0"
 pydantic = "^2.3.0"
 pydantic-settings = "^2.0.3"
 python = "^3.7"
 pyyaml = "^6.0.1"
-uvicorn = "^0.21.1"
+uvicorn = "^0.30.0"
 aiohttp = "^3.8.5"
-trio = "^0.22.2"
+trio = "^0.25.0"
 daemoniker = "^0.2.3"
 requests = "^2.31.0"
 ldap3 = "^2.9.1"
 passlib = "^1.7.4"
-bcrypt = "4.0.1"
+bcrypt = "4.1.3"
 nats-py = "^2.7.0"
 msgpack = "1.0.*"
 
@@ -33,8 +33,8 @@ dev = "src.server.core.app:start_dev"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-httpx = "^0.24.0"
-pytest = "^7.4.2"
+httpx = "^0.27.0"
+pytest = "^8.0.0"
 pytest-cov = "4.1"
 udm-rest-api-client = "^0.0.2"
 

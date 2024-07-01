@@ -2,12 +2,12 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ARG PORTAL_EXTENSION_IMAGE=gitregistry.knut.univention.de/univention/components/univention-portal/portal-extension
-ARG PORTAL_EXTENSION_TAG=0.26.1
+ARG PORTAL_EXTENSION_TAG=0.26.3
 
 ARG OX_EXTENSION_IMAGE=gitregistry.knut.univention.de/univention/open-xchange/provisioning/ox-extension
-ARG OX_EXTENSION_TAG=0.9.0
+ARG OX_EXTENSION_TAG=0.9.1
 
-ARG UCS_BASE_IMAGE_TAG=0.12
+ARG UCS_BASE_IMAGE_TAG=0.13
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520
 
 ARG WORKDIR="/app"
