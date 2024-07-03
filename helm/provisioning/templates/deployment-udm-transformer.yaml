@@ -123,7 +123,6 @@ spec:
           {{- if .Values.lifecycleHooks }}
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
           {{- end }}
-          {{- if or .Values.nats.connection.tls.enabled .Values.extraVolumeMounts }}
           volumeMounts:
             {{- if .Values.nats.connection.tls.enabled }}
             - name: certificates-volume
@@ -132,7 +131,19 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
             {{- end }}
-          {{- end }}
+            - name: "config-map-ucr-defaults"
+              mountPath: "/etc/univention/base-defaults.conf"
+              subPath: "base.conf"
+            {{- if (include "udm-transformer.configMapUcr" .) }}
+            - name: "config-map-ucr"
+              mountPath: "/etc/univention/base.conf"
+              subPath: "base.conf"
+            {{- end }}
+            {{- if (include "udm-transformer.configMapUcrForced" .) }}
+            - name: "config-map-ucr-forced"
+              mountPath: "/etc/univention/base-forced.conf"
+              subPath: "base.conf"
+            {{- end }}
       volumes:
         - name: wait-for-nats
           configMap:
@@ -141,6 +152,19 @@ spec:
         - name: certificates-volume
           secret:
             secretName: {{ .Values.nats.connection.tls.secretName  | default (printf "%s-udm-transformer-tls" (include "common.names.fullname" .) ) | quote }}
+        {{- end }}
+        - name: "config-map-ucr-defaults"
+          configMap:
+            name: {{ include "udm-transformer.configMapUcrDefaults" . | quote }}
+        {{- if (include "udm-transformer.configMapUcr" .) }}
+        - name: "config-map-ucr"
+          configMap:
+            name: {{ include "udm-transformer.configMapUcr" . | quote }}
+        {{- end }}
+        {{- if (include "udm-transformer.configMapUcrForced" .) }}
+        - name: "config-map-ucr-forced"
+          configMap:
+            name: {{ include "udm-transformer.configMapUcrForced" . | quote }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
