@@ -63,7 +63,27 @@ RUN poetry config virtualenvs.options.system-site-packages true && \
     poetry install --only main
 
 ###############################################
-# Stage 2: final image
+# Stage 2: test image
+FROM build as test
+
+RUN poetry config virtualenvs.options.system-site-packages true && \
+    # install dependencies
+    poetry install --with dev
+
+COPY ./tests ./tests
+
+ENV \
+    ldap_tls_mode="off" \
+    ldap_bind_dn="cn=admin,dc=univention-organization,dc=intranet" \
+    ldap_bind_pw="univention" \
+    ldap_host="localhost" \
+    ldap_port="389" \
+    ldap_base_dn="dc=univention-organization,dc=intranet"
+
+CMD ["poetry", "run", "pytest", "./tests/integration/test_udm_messaging_service.py"]
+
+###############################################
+# Stage 3: final image
 FROM build as final
 ARG WORKDIR
 WORKDIR ${WORKDIR}
