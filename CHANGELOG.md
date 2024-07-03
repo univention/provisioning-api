@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.5...v0.28.6) (2024-07-03)
+
+
+### Bug Fixes
+
+* **udm-transformer:** mount ucr into udm-transformer pod ([d6e5424](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d6e542495c24fd7f99b055dcb8d7b009fe9b76d3))
+
 ## [0.28.5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.4...v0.28.5) (2024-06-27)
 
 
