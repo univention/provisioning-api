@@ -11,6 +11,7 @@ from udm_transformer.port import UDMTransformerPort
 import univention.admin.uldap
 from univention.management.console.log import MODULE
 from univention.management.console.modules.udm.udm_ldap import UDM_Module
+from univention.admin.uexceptions import noObject
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,9 @@ class UDMMessagingService(univention.admin.uldap.access):
                 "ReadControl response has object type %r, but the module was not found!"
                 % object_type
             )
+            return None
+        except noObject as e:
+            logger.error("Failed to transform ldap object to udm: %s", e)
             return None
 
     async def handle_changes(self, new_obj, old_obj, ts: datetime):
