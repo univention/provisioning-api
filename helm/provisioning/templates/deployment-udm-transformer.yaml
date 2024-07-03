@@ -123,7 +123,6 @@ spec:
           {{- if .Values.lifecycleHooks }}
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
           {{- end }}
-          {{- if or .Values.nats.connection.tls.enabled .Values.extraVolumeMounts }}
           volumeMounts:
             {{- if .Values.nats.connection.tls.enabled }}
             - name: certificates-volume
@@ -131,7 +130,6 @@ spec:
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
-            {{- end }}
             {{- end }}
             - name: "config-map-ucr-defaults"
               mountPath: "/etc/univention/base-defaults.conf"
@@ -141,7 +139,7 @@ spec:
               mountPath: "/etc/univention/base.conf"
               subPath: "base.conf"
             {{- end }}
-            {{- if (include "udm-rest-api.configMapUcrForced" .) }}
+            {{- if (include "udm-transformer.configMapUcrForced" .) }}
             - name: "config-map-ucr-forced"
               mountPath: "/etc/univention/base-forced.conf"
               subPath: "base.conf"
