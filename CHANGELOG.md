@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.6...v0.28.7) (2024-07-04)
+
+
+### Bug Fixes
+
+* remove LDAP index for App Center attribute ([b0357ae](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b0357ae861d1cf28db7a3985877e707ccaf58c3f))
+
 ## [0.28.6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.5...v0.28.6) (2024-07-03)
 
 
