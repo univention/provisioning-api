@@ -70,6 +70,38 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
+        - name: "load-internal-plugins"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ coalesce .Values.udmTransformer.image.registry .Values.global.imageRegistry }}/{{ .Values.udmTransformer.image.repository }}:{{ .Values.udmTransformer.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.udmTransformer.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              cp -av /usr/lib/python3/dist-packages/univention/udm/modules /target/udm-modules
+              cp -av /usr/lib/python3/dist-packages/univention/admin/hooks.d /target/udm-hooks.d
+              cp -av /usr/lib/python3/dist-packages/univention/admin/syntax.d /target/udm-syntax.d
+              cp -av /usr/lib/python3/dist-packages/univention/admin/handlers /target/udm-handlers
+          volumeMounts:
+            - name: plugin-targets
+              mountPath: /target
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.initResources "context" .) | nindent 12 }}
+        {{- $systemExtensions := default (list) (coalesce .Values.systemExtensions .Values.global.systemExtensions) -}}
+        {{- $extensions := default (list) (coalesce .Values.extensions .Values.global.extensions) -}}
+        {{- range (concat $systemExtensions $extensions) }}
+        - name: "load-{{ .name }}-extension"
+          {{- if $.Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ coalesce .image.registry $.Values.global.imageRegistry }}/{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ coalesce .image.imagePullPolicy $.Values.global.imagePullPolicy | quote }}
+          volumeMounts:
+            - name: plugin-targets
+              mountPath: /target
+          resources: {{- include "common.tplvalues.render" (dict "value" $.Values.initResources "context" $) | nindent 12 }}
+        {{- end }}
         - name: wait-for-nats
           command: [ "poetry", "run", "python", "/scripts/wait-for-nats.py" ]
           image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
@@ -144,6 +176,18 @@ spec:
               mountPath: "/etc/univention/base-forced.conf"
               subPath: "base.conf"
             {{- end }}
+            - name: plugin-targets
+              mountPath: /usr/lib/python3/dist-packages/univention/udm/modules
+              subPath: udm-modules
+            - name: plugin-targets
+              mountPath: /usr/lib/python3/dist-packages/univention/admin/hooks.d
+              subPath: udm-hooks.d
+            - name: plugin-targets
+              mountPath: /usr/lib/python3/dist-packages/univention/admin/syntax.d
+              subPath: udm-syntax.d
+            - name: plugin-targets
+              mountPath: /usr/lib/python3/dist-packages/univention/admin/handlers
+              subPath: udm-handlers
       volumes:
         - name: wait-for-nats
           configMap:
@@ -166,6 +210,8 @@ spec:
           configMap:
             name: {{ include "udm-transformer.configMapUcrForced" . | quote }}
         {{- end }}
+        - name: "plugin-targets"
+          emptyDir: {}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
         {{- end }}

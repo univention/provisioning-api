@@ -1,19 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-ARG PORTAL_EXTENSION_IMAGE=gitregistry.knut.univention.de/univention/components/univention-portal/portal-extension
-ARG PORTAL_EXTENSION_TAG=0.26.1
-
-ARG OX_EXTENSION_IMAGE=gitregistry.knut.univention.de/univention/open-xchange/provisioning/ox-extension
-ARG OX_EXTENSION_TAG=0.9.0
-
-ARG UCS_BASE_IMAGE_TAG=0.12
+ARG UCS_BASE_IMAGE_TAG=0.13.1
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520
 
 ARG WORKDIR="/app"
-
-FROM ${PORTAL_EXTENSION_IMAGE}:${PORTAL_EXTENSION_TAG} AS portal-extension
-FROM ${OX_EXTENSION_IMAGE}:${OX_EXTENSION_TAG} AS ox-extension
 
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as build
 ARG WORKDIR
@@ -67,27 +58,6 @@ RUN poetry config virtualenvs.options.system-site-packages true && \
 FROM build as final
 ARG WORKDIR
 WORKDIR ${WORKDIR}
-
-# Inject UDM Modules
-
-COPY --from=portal-extension /plugins/udm-modules/portal.py \
-    /usr/lib/python3/dist-packages/univention/udm/modules/portal.py
-
-COPY --from=portal-extension /plugins/udm-syntax.d/univention-portal.py \
-    /usr/lib/python3/dist-packages/univention/admin/syntax.d/univention-portal.py
-
-COPY --from=portal-extension /plugins/udm-handlers/portals \
-    /usr/lib/python3/dist-packages/univention/admin/handlers/portals
-
-COPY --from=ox-extension /plugins/udm-syntax.d/50_ox.py \
-    /usr/lib/python3/dist-packages/univention/admin/syntax.d/50_ox.py
-
-# oxmail and oxresources
-COPY --from=ox-extension /plugins/udm-handlers \
-    /usr/lib/python3/dist-packages/univention/admin/handlers
-
-COPY --from=ox-extension /plugins/udm-hooks.d \
-    /usr/lib/python3/dist-packages/univention/admin/hooks.d
 
 # Copy udm-transformer code
 COPY --from=build ${WORKDIR} ${WORKDIR}
