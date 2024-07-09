@@ -249,20 +249,13 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.additionalAnnotations | object | `{}` |  |
 | udmTransformer.additionalLabels | object | `{}` |  |
 | udmTransformer.api.auth.credentialSecretName | string | `""` |  |
-| udmTransformer.config.EVENTS_PASSWORD_UDM | string | `"udmpass"` |  |
-| udmTransformer.config.EVENTS_USERNAME_UDM | string | `"udm"` |  |
-| udmTransformer.config.LDAP_BASE_DN | string | `nil` |  |
-| udmTransformer.config.LDAP_HOST | string | `nil` |  |
-| udmTransformer.config.LDAP_PORT | string | `"389"` |  |
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
-| udmTransformer.config.UDM_HOST | string | `""` |  |
-| udmTransformer.config.UDM_PORT | string | `""` |  |
 | udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"latest"` |  |
-| udmTransformer.ldap.auth.bindDn | string | `""` |  |
+| udmTransformer.ldap.auth.bindDn | string | `""` | LDAP username with global read access |
 | udmTransformer.ldap.auth.credentialSecretName | string | `""` |  |
 | udmTransformer.ldap.baseDn | string | `""` |  |
 | udmTransformer.ldap.connection.host | string | `""` |  |

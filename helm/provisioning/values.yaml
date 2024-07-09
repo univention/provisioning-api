@@ -596,34 +596,23 @@ udmTransformer:
     auth:
       credentialSecretName: ""
   ldap:
+    # LDAP BASE DN of the LDAP domain.
     baseDn: ""
     auth:
+      # -- LDAP username with global read access
       bindDn: ""
       credentialSecretName: ""
     connection:
+      # Hostname of the LDAP Primary servers
       host: ""
+      # LDAP server port
       port: ""
   config:
     # Python log level
     LOG_LEVEL: "INFO"
-    # TODO: Make this an automatic secret
-    EVENTS_USERNAME_UDM: "udm"
-    EVENTS_PASSWORD_UDM: "udmpass"
-    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
-    UDM_HOST: ""
-    # UDM REST API: port
-    UDM_PORT: ""
-    # Hostname of an LDAP server
-    LDAP_HOST:
-    # LDAP server port
-    LDAP_PORT: "389"
-    # TODO: Does this do anything?
     # -- Whether to start ldap encryption and validate certificates.
     # Chose from "off", "unvalidated" and "secure".
     LDAP_TLS_MODE: "off"
-    # LDAP BASE DN of the LDAP domain.
-    LDAP_BASE_DN: null
-    # -- LDAP username with global read access
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
