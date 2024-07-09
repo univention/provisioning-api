@@ -14,6 +14,24 @@ from univention.management.console.modules.udm.udm_ldap import UDM_Module
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBJECT_TYPES = [
+    "oxmail/accessprofile",
+    "oxmail/functional_account",
+    "oxmail/oxcontext",
+    "oxresources/oxresources" "portals/all",
+    "portals/announcement",
+    "portals/category",
+    "portals/entry",
+    "portals/folder",
+    "portals/portal",
+    "portals/announcement",
+    "portals/category",
+    "portals/entry",
+    "portals/folder",
+    "portals/portal" "users/user",
+    "groups/group",
+]
+
 
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMTransformerPort):
@@ -81,8 +99,8 @@ class UDMMessagingService(univention.admin.uldap.access):
             MODULE.warn("ReadControl response is missing `univentionObjectType`!")
             return None
 
+        object_type = object_types[0].decode("utf-8")
         try:
-            object_type = object_types[0].decode("utf-8")
             module = self._get_module(object_type)
             module_obj = module.module.object(
                 co=None,
@@ -100,6 +118,16 @@ class UDMMessagingService(univention.admin.uldap.access):
                 % object_type
             )
             return None
+        except Exception:
+            if object_type in SUPPORTED_OBJECT_TYPES:
+                raise
+            logger.exception(
+                "Ignoring the failed transformation of a udm type: %s "
+                "because it's not a supported provisioning topic\n"
+                "object: %s",
+                object_type,
+                entry,
+            )
 
     async def handle_changes(self, new_obj, old_obj, ts: datetime):
         old = None
