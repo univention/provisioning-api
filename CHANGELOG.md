@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.7...v0.29.0) (2024-07-10)
+
+
+### Features
+
+* UDM producer container loads UDM extensions at deployment time ([498e016](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/498e0163296bce7b0e14253fc1fcd8e936576300))
+
 ## [0.28.7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.6...v0.28.7) (2024-07-04)
 
 
