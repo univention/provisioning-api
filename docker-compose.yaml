@@ -81,6 +81,7 @@ services:
       NATS_PORT: "4222"
       NATS_USER: "udm-transformer"
       NATS_PASSWORD: "udm-transformerpass"
+      LDAP_PUBLISHER_NAME: "ldif-producer"
 
       INTERNAL_API_HOST: "events-and-consumer-api"
       EVENTS_USERNAME_UDM: "udm"

@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 import json
-from univention.provisioning.models import Bucket, Message, PublisherName
+from univention.provisioning.models import Bucket, Message
 from univention.admin.rest.module import Object
 from udm_transformer.port import UDMTransformerPort
 import univention.admin.uldap
@@ -46,6 +46,7 @@ class UDMMessagingService(univention.admin.uldap.access):
         self._my_ldap_position = univention.admin.uldap.position(
             port.settings.ldap_base_dn
         )
+        self.ldap_publisher_name = port.settings.ldap_publisher_name
 
         self._messaging_port = port
 
@@ -76,7 +77,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             return
 
         message = Message(
-            publisher_name=PublisherName.ldif_producer,
+            publisher_name=self.ldap_publisher_name,
             ts=datetime.now(),
             realm="udm",
             topic=object_type,

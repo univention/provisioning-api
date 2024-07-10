@@ -3,6 +3,7 @@
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings
+from univention.provisioning.models.queue import PublisherName
 
 
 class UDMTransformerSettings(BaseSettings):
@@ -14,6 +15,8 @@ class UDMTransformerSettings(BaseSettings):
     nats_host: str
     # Nats: port
     nats_port: int
+    # Enables toggling between `ldif-producer` and `udm-listener`
+    ldap_publisher_name: PublisherName
 
     # Events API: username
     events_username_udm: str

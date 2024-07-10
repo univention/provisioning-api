@@ -251,6 +251,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.api.auth.credentialSecretName | string | `""` |  |
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
+| udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
 | udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |

@@ -157,6 +157,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 data:
+  LDAP_PUBLISHER_NAME: {{ required ".Values.udmTransformer.config.ldapPublisherName is required." .Values.udmTransformer.config.ldapPublisherName | quote  }}
   LOG_LEVEL: {{ required ".Values.udmTransformer.config.LOG_LEVEL is required." .Values.udmTransformer.config.LOG_LEVEL | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}

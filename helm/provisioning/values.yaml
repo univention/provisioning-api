@@ -608,6 +608,9 @@ udmTransformer:
       # LDAP server port
       port: ""
   config:
+    # Enables toggling between `ldif-producer` and `udm-listener`.
+    # Beware: `ldif-producer` is experimental and unsupported.
+    ldapPublisherName: "udm-listener"
     # Python log level
     LOG_LEVEL: "INFO"
     # -- Whether to start ldap encryption and validate certificates.
