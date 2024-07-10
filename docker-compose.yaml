@@ -129,9 +129,9 @@ services:
     container_name: "ldif-producer"
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldif-producer:latest"
     # Can be uncommented to simplify local development.
-    # build:
-    #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
-    #   context: ../container-ldap/
+    build:
+      dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
+      context: ../container-ldap/
     environment:
       SOCKET_FILE_LOCATION: "/var/lib/univention-ldap/slapd-sock/sock"
       NATS_USER: ldif-producer
