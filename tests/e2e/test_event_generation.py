@@ -11,11 +11,14 @@ from univention.admin.rest.client import UDM, BadRequest
 
 @pytest.fixture(scope="function")
 def maildomain(udm):
-    name = f"ldif-producer.unittests.{str(uuid.uuid1())}"
+    name = "ldif-producer.unittests"
     domains = udm.get("mail/domain")
-    maildomain = domains.new()
-    maildomain.properties.update({"name": name})
-    maildomain.save()
+    if maildomains := list(domains.search(f"name={name}")):
+        maildomain = domains.get(maildomains[0].dn)
+    else:
+        maildomain = domains.new()
+        maildomain.properties.update({"name": name})
+        maildomain.save()
     yield name
     maildomain.delete()
 
