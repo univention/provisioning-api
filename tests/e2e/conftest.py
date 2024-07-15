@@ -3,11 +3,18 @@
 
 import json
 import uuid
-from typing import AsyncGenerator, Any, NamedTuple
-from univention.admin.rest.client import UDM
-from tests.conftest import REALMS_TOPICS
-from univention.provisioning.consumer import AsyncClient, Settings
+from typing import AsyncGenerator, Any, Callable, Coroutine, NamedTuple
+
+import msgpack
+import nats
+from nats.aio.client import Client
+from nats.js.errors import NotFoundError
 import pytest
+from univention.admin.rest.client import UDM, HTTPError, NotFound
+from univention.provisioning.consumer import AsyncClient, Settings
+
+from .. import ENV_DEFAULTS
+from ..conftest import REALMS_TOPICS
 
 
 class E2ETestSettings(NamedTuple):
@@ -73,6 +80,11 @@ def udm(test_settings: E2ETestSettings) -> UDM:
     return udm
 
 
+@pytest.fixture(scope="session")
+def ldap_base(udm) -> str:
+    return udm.get_ldap_base()
+
+
 @pytest.fixture
 def subscriber_name() -> str:
     return str(uuid.uuid4())
@@ -135,3 +147,120 @@ async def simple_subscription(
     yield subscriber_name
 
     await provisioning_admin_client.cancel_subscription(subscriber_name)
+
+
+@pytest.fixture(scope="session")
+def maildomain(udm):
+    name = "ldif-producer.unittests"
+    domains = udm.get("mail/domain")
+    if maildomains := list(domains.search(f"name={name}")):
+        maildomain = domains.get(maildomains[0].dn)
+        print(f"Using existing mail domain {maildomain!r}.")
+    else:
+        maildomain = domains.new()
+        maildomain.properties.update({"name": name})
+        maildomain.save()
+        print(f"Created new mail domain {maildomain!r}.")
+    yield name
+    maildomain.delete()
+    print(f"Deleted mail domain {maildomain!r}.")
+
+
+@pytest.fixture(scope="session")
+def nats_connection_settings() -> dict[str, str]:
+    return {
+        "servers": ["nats://localhost:4222"],
+        "user": ENV_DEFAULTS["admin_nats_user"],
+        "password": ENV_DEFAULTS["admin_nats_password"],
+    }
+
+
+@pytest.fixture
+async def nats_connection(nats_connection_settings) -> Client:
+    nc = await nats.connect(**nats_connection_settings)
+    yield nc
+    await nc.close()
+
+
+@pytest.fixture(scope="session")
+def ldif_producer_stream_name() -> str:
+    return "stream:ldif-producer"
+
+
+@pytest.fixture
+def get_and_delete_all_messages(
+    nats_connection,
+) -> Callable[[str], AsyncGenerator[dict[str, Any], Any]]:
+    """Retrieve all messages of a streamm (iterator) and delete them."""
+
+    async def _get_and_delete_all_messages(
+        stream_name: str,
+    ) -> AsyncGenerator[dict[str, Any], Any]:
+        manager = nats.js.manager.JetStreamManager(nats_connection)
+        info = await manager.stream_info(stream_name)
+        for seq_id in range(info.state.first_seq, info.state.last_seq + 1):
+            try:
+                raw_msg = await manager.get_msg(stream_name, seq_id)
+            except NotFoundError:
+                print(seq_id, "NOT FOUND")
+                continue
+            msg = msgpack.unpackb(raw_msg.data)
+            yield msg["body"]
+            await manager.delete_msg(stream_name, seq_id)
+
+    return _get_and_delete_all_messages
+
+
+@pytest.fixture
+def purge_stream(nats_connection):
+    """Delete all messages from stream."""
+
+    async def _purge_stream(stream_name: str):
+        manager = nats.js.manager.JetStreamManager(nats_connection)
+        await manager.purge_stream(stream_name)
+        print(f"Purged NATS stream {stream_name!r}.")
+
+    return _purge_stream
+
+
+@pytest.fixture(autouse=True)
+async def auto_purge_stream(ldif_producer_stream_name, purge_stream):
+    await purge_stream(ldif_producer_stream_name)
+
+
+@pytest.fixture
+def delete_udm_object(udm: UDM) -> Callable[[str, str], Coroutine[Any, Any, None]]:
+    async def _delete_udm_object(udm_module: str, dn: str):
+        mod = udm.get(udm_module)
+        try:
+            obj = mod.get(dn)
+            obj.delete()
+        except NotFound:
+            print(f"Object doesn't exist: {udm_module!r}: {dn!r}.")
+        except HTTPError as exc:
+            print(f"HTTPError: {exc.response!r} | {exc.error_details!r} | {exc!s}")
+        else:
+            print(f"Deleted {udm_module!r}: {dn!r}.")
+
+    return _delete_udm_object
+
+
+@pytest.fixture
+async def schedule_delete_udm_object(delete_udm_object) -> Callable[[str, str], None]:
+    objects: list[tuple[str, str]] = []
+
+    def _schedule_delete_udm_object(udm_module: str, dn: str):
+        objects.append((udm_module, dn))
+
+    yield _schedule_delete_udm_object
+
+    for udm_module_, dn_ in objects:
+        await delete_udm_object(udm_module_, dn_)
+
+
+@pytest.fixture(scope="session")
+def udm_module_exists(udm: UDM) -> Callable[[str], bool]:
+    def _udm_module_exists(module_name: str) -> bool:
+        return module_name in {m.name for m in udm.modules()}
+
+    return _udm_module_exists
