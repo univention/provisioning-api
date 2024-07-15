@@ -205,15 +205,38 @@ def get_and_delete_all_messages(
                 print(seq_id, "NOT FOUND")
                 continue
             msg = msgpack.unpackb(raw_msg.data)
-            body = msg["body"]
-            old_dn = body["old"]["entryDN"][0].decode() if body["old"] else ""
-            new_dn = body["new"]["entryDN"][0].decode() if body["new"] else ""
-            msg_id = body['message_id']
-            req_id = body['request_id']
-            req_type = body['ldap_request_type']
-            print(f"msg: [{msg_id}][{req_id}] {req_type:<6} | old DN: {old_dn!r} | new DN: {new_dn!r}")
-            yield body
+            _print(msg["body"])
+            yield msg["body"]
             await manager.delete_msg(stream_name, seq_id)
+
+    def _print(body):
+        old = body["old"]
+        new = body["new"]
+        old_dn = old["entryDN"][0].decode() if old else ""
+        new_dn = new["entryDN"][0].decode() if new else ""
+        msg_id = body["message_id"]
+        req_id = body["request_id"]
+        req_type = body["ldap_request_type"]
+        print(
+            f"msg: [{msg_id}][{req_id}] {req_type:<6} | old DN: {old_dn!r} | new DN: {new_dn!r}"
+        )
+        if req_type in ("MODIFY", "MODRDN"):
+            if not old:
+                print("                        | !!! old=None")
+                return
+            diff: dict[str, tuple[Any, Any]] = {}
+            for k, v in old.items():
+                if k in {"entryCSN", "modifyTimestamp"}:
+                    continue
+                if k not in new:
+                    diff[k] = (v, None)
+                    continue
+                if v != new[k]:
+                    diff[k] = (v, new[k])
+            for k, v in new.items():
+                if k not in old:
+                    diff[k] = (None, v)
+            print(f"                        | diff: {diff!r}")
 
     return _get_and_delete_all_messages
 
