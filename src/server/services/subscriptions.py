@@ -44,14 +44,39 @@ class SubscriptionService:
     def hash_password(password: str) -> str:
         return password_context.hash(password)
 
-    async def register_subscription(self, new_sub: NewSubscription):
+    async def is_subscriptions_matching(
+        self, new_sub: NewSubscription, existing_sub: Subscription
+    ) -> bool:
+        if existing_sub.request_prefill != new_sub.request_prefill:
+            return False
+
+        hashed_password = await self._port.get_str_value(
+            new_sub.name, Bucket.credentials
+        )
+        valid = password_context.verify(new_sub.password, hashed_password)
+        if not valid:
+            return False
+
+        new_realms_topics = [
+            REALM_TOPIC_TEMPLATE.format(realm=r, topic=t)
+            for r, t in new_sub.realms_topics
+        ]
+        if new_realms_topics != existing_sub.realms_topics:
+            return False
+
+        return True
+
+    async def register_subscription(self, new_sub: NewSubscription) -> bool:
         """Register a new subscription."""
 
-        if await self._port.get_str_value(new_sub.name, Bucket.credentials):
-            raise HTTPException(
-                status_code=400,
-                detail="Subscription with the given name already registered",
-            )
+        existing_sub = await self.get_subscription_info(new_sub.name)
+        if existing_sub:
+            if not await self.is_subscriptions_matching(new_sub, existing_sub):
+                raise HTTPException(
+                    status_code=409,
+                    detail="Subscription with the given name already registered but with different parameters.",
+                )
+            return False
         else:
             self.logger.info(
                 "Registering new subscription with the name: %s", new_sub.name
@@ -60,10 +85,9 @@ class SubscriptionService:
             await self._port.put_value(
                 new_sub.name, encrypted_password, Bucket.credentials
             )
-
             await self.prepare_and_store_subscription_info(new_sub)
-
             self.logger.info("New subscription was registered")
+            return True
 
     async def prepare_and_store_subscription_info(self, new_sub: NewSubscription):
         if new_sub.request_prefill:

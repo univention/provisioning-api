@@ -13,6 +13,9 @@ from tests.conftest import (
     REALMS_TOPICS_STR,
     REALMS_TOPICS,
     CONSUMER_HASHED_PASSWORD,
+    REALM,
+    TOPIC,
+    TOPIC_2,
 )
 from univention.provisioning.models import FillQueueStatus, NewSubscription
 
@@ -62,28 +65,58 @@ class TestSubscriptionService:
     async def test_create_subscription_existing_subscription(
         self, sub_service: SubscriptionService
     ):
+        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
         sub_service._port.get_str_value = AsyncMock(
             return_value=CONSUMER_HASHED_PASSWORD
         )
 
-        with pytest.raises(HTTPException):
-            await sub_service.register_subscription(self.new_subscription)
+        result = await sub_service.register_subscription(self.new_subscription)
 
+        assert result is False
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
         sub_service._port.get_str_value.assert_called_once_with(
             SUBSCRIPTION_NAME, Bucket.credentials
         )
         sub_service._port.put_value.assert_not_called()
 
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("request_prefill", False),
+            ("password", "wrong_password"),
+            ("realms_topics", [(REALM, TOPIC), (REALM, TOPIC_2)]),
+        ],
+    )
+    async def test_create_subscription_existing_subscription_different_parameters(
+        self, field, value, sub_service: SubscriptionService
+    ):
+        sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
+        sub_service._port.get_str_value = AsyncMock(
+            return_value=CONSUMER_HASHED_PASSWORD
+        )
+
+        new_sub = deepcopy(self.new_subscription)
+        setattr(new_sub, field, value)
+        with pytest.raises(HTTPException):
+            await sub_service.register_subscription(new_sub)
+
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
+        )
+        sub_service._port.put_value.assert_not_called()
+
     async def test_add_subscription(self, sub_service: SubscriptionService):
-        sub_service._port.get_str_value = AsyncMock(side_effect=[None, None])
+        sub_service._port.get_dict_value = AsyncMock(return_value=None)
         sub_service._port.get_list_value = AsyncMock(return_value=[])
         sub_service._port.create_stream = AsyncMock()
         sub_service._port.create_consumer = AsyncMock()
 
         await sub_service.register_subscription(self.new_subscription)
 
-        sub_service._port.get_str_value.assert_called_once_with(
-            SUBSCRIPTION_NAME, Bucket.credentials
+        sub_service._port.get_dict_value.assert_called_once_with(
+            SUBSCRIPTION_NAME, Bucket.subscriptions
         )
         sub_service._port.get_list_value.assert_called_once_with(
             "realm:topic.udm:groups/group", Bucket.subscriptions

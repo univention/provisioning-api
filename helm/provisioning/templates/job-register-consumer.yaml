@@ -74,6 +74,8 @@ spec:
                 -d @"${file}" "${PROVISIONING_API_BASE_URL}")
                 if [ "${response}" -eq 201 ]; then
                   echo "Successful registration of the consumer: "${filename}""
+                elif [ "${response}" -eq 200 ]; then
+                  echo "Consumer with the name '"${filename}"' is already registered with the same parameters"
                 else
                   echo "Failed to register the consumer: "${filename}"
               Response code: "${response}"

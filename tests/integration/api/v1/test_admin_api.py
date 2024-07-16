@@ -5,7 +5,12 @@ import uuid
 from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
-from tests.conftest import REALMS_TOPICS_STR, SUBSCRIPTION_NAME, CREDENTIALS
+from tests.conftest import (
+    REALMS_TOPICS_STR,
+    SUBSCRIPTION_NAME,
+    CREDENTIALS,
+    REALM_TOPIC,
+)
 from univention.provisioning.models import FillQueueStatus
 from server.core.app.admin.api import v1_prefix as api_prefix
 from server.core.app.main import app as subscriptions_app, internal_app_path
@@ -49,6 +54,36 @@ class TestAdmin:
             auth=(CREDENTIALS.username, CREDENTIALS.password),
         )
         assert response.status_code == 201
+
+    async def test_create_subscription_existing_subscription(
+        self, subscriptions_client: httpx.AsyncClient, settings_mock
+    ):
+        response = await subscriptions_client.post(
+            f"{internal_app_path}{api_prefix}/subscriptions",
+            json={
+                "name": SUBSCRIPTION_NAME,
+                "realms_topics": [REALM_TOPIC],
+                "request_prefill": True,
+                "password": "password",
+            },
+            auth=(CREDENTIALS.username, CREDENTIALS.password),
+        )
+        assert response.status_code == 200
+
+    async def test_create_subscription_existing_subscription_different_parameters(
+        self, subscriptions_client: httpx.AsyncClient, settings_mock
+    ):
+        response = await subscriptions_client.post(
+            f"{internal_app_path}{api_prefix}/subscriptions",
+            json={
+                "name": SUBSCRIPTION_NAME,
+                "realms_topics": [["foo", "bar"]],
+                "request_prefill": False,
+                "password": "password",
+            },
+            auth=(CREDENTIALS.username, CREDENTIALS.password),
+        )
+        assert response.status_code == 409
 
     async def test_get_subscriptions(
         self, subscriptions_client: httpx.AsyncClient, settings_mock

@@ -3,7 +3,7 @@
 import logging
 from typing import List
 import fastapi
-from fastapi import Depends
+from fastapi import Depends, Response, status
 
 from server.core.app.auth import authenticate_admin
 from univention.provisioning.models import Subscription, NewSubscription
@@ -25,20 +25,15 @@ async def get_subscriptions(port: PortDependency) -> List[Subscription]:
 
 @router.post("/subscriptions", status_code=fastapi.status.HTTP_201_CREATED)
 async def register_subscription(
-    subscription: NewSubscription,
-    port: PortDependency,
+    subscription: NewSubscription, port: PortDependency, response: Response
 ):
     """Register a new subscription."""
 
     sub_service = SubscriptionService(port)
 
-    try:
-        await sub_service.register_subscription(subscription)
-    except ValueError as err:
-        logger.debug("Failed to register subscription: %s", err)
-        raise fastapi.HTTPException(
-            fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, str(err)
-        )
+    if not await sub_service.register_subscription(subscription):
+        response.status_code = status.HTTP_200_OK
+        return
 
     if subscription.request_prefill:
         msg_service = MessageService(port)
