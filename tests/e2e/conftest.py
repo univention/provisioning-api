@@ -205,7 +205,14 @@ def get_and_delete_all_messages(
                 print(seq_id, "NOT FOUND")
                 continue
             msg = msgpack.unpackb(raw_msg.data)
-            yield msg["body"]
+            body = msg["body"]
+            old_dn = body["old"]["entryDN"][0].decode() if body["old"] else ""
+            new_dn = body["new"]["entryDN"][0].decode() if body["new"] else ""
+            msg_id = body['message_id']
+            req_id = body['request_id']
+            req_type = body['ldap_request_type']
+            print(f"msg: [{msg_id}][{req_id}] {req_type:<6} | old DN: {old_dn!r} | new DN: {new_dn!r}")
+            yield body
             await manager.delete_msg(stream_name, seq_id)
 
     return _get_and_delete_all_messages
