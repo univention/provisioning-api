@@ -5,19 +5,19 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from nats.aio.msg import Msg
-
-from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
-from tests.conftest import (
-    SUBSCRIPTION_NAME,
-    MSG,
-    MockNatsMQAdapter,
-    MockNatsKVAdapter,
-    SUBSCRIPTIONS,
-    FLAT_MESSAGE_ENCODED,
-)
 from server.core.dispatcher.config import DispatcherSettings
 from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService
+from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
+
+from tests.conftest import (
+    FLAT_MESSAGE_ENCODED,
+    MSG,
+    SUBSCRIPTION_NAME,
+    SUBSCRIPTIONS,
+    MockNatsKVAdapter,
+    MockNatsMQAdapter,
+)
 
 
 @pytest.fixture(scope="session")
@@ -27,14 +27,10 @@ def anyio_backend():
 
 @pytest.fixture
 async def dispatcher_mock() -> DispatcherPort:
-    port = DispatcherPort(
-        DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass")
-    )
+    port = DispatcherPort(DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass"))
     port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
-    port.mq_adapter._message_queue.get = AsyncMock(
-        side_effect=[MSG, Exception("Stop waiting for the new event")]
-    )
+    port.mq_adapter._message_queue.get = AsyncMock(side_effect=[MSG, Exception("Stop waiting for the new event")])
     port.watch_for_changes = AsyncMock()
     Msg.in_progress = AsyncMock()
     Msg.ack = AsyncMock()

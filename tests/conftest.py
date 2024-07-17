@@ -7,29 +7,31 @@ from copy import copy, deepcopy
 from datetime import datetime
 from typing import Any
 from unittest.mock import AsyncMock
+
 import pytest
 from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
-from tests import set_test_env_vars
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from univention.provisioning.models.subscription import Bucket
 from univention.provisioning.models import (
     Message,
-    MessageProcessingStatusReport,
     MessageProcessingStatus,
+    MessageProcessingStatusReport,
     MQMessage,
-    PublisherName,
-    ProvisioningMessage,
     PrefillMessage,
+    ProvisioningMessage,
+    PublisherName,
 )
+from univention.provisioning.models.subscription import Bucket
+
+from tests import set_test_env_vars
 
 set_test_env_vars()
 
 from server.core.app.config import AppSettings  # noqa: E402
-from server.services.port import Port  # noqa: E402
 from server.core.app.main import app, internal_app  # noqa: E402
+from server.services.port import Port  # noqa: E402
 
 NATS_SERVER = "nats://localhost:4222"
 
@@ -50,9 +52,7 @@ REPORT = MessageProcessingStatusReport(
 )
 
 CONSUMER_PASSWORD = "password"
-CONSUMER_HASHED_PASSWORD = (
-    "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"
-)
+CONSUMER_HASHED_PASSWORD = "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"
 
 SUBSCRIPTION_INFO = {
     "name": SUBSCRIPTION_NAME,

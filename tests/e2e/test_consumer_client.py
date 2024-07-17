@@ -3,26 +3,23 @@
 
 import aiohttp
 import pytest
+from univention.admin.rest.client import UDM
 from univention.provisioning.consumer import AsyncClient
+
 from tests.e2e.conftest import E2ETestSettings
 from tests.e2e.helpers import (
     create_message_via_events_api,
     create_message_via_udm_rest_api,
     pop_all_messages,
 )
-from univention.admin.rest.client import UDM
 
 
-async def test_create_subscription(
-    provisioning_client: AsyncClient, simple_subscription
-):
+async def test_create_subscription(provisioning_client: AsyncClient, simple_subscription):
     response = await provisioning_client.get_subscription(simple_subscription)
     assert response
 
 
-async def test_get_empty_messages(
-    provisioning_client: AsyncClient, simple_subscription: str
-):
+async def test_get_empty_messages(provisioning_client: AsyncClient, simple_subscription: str):
     response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         timeout=1,
@@ -48,16 +45,12 @@ async def test_send_message(
 
 @pytest.mark.xfail()
 async def test_pop_message(provisioning_client: AsyncClient, simple_subscription: str):
-    response = await provisioning_client.get_subscription_message(
-        name=simple_subscription, timeout=1, pop=True
-    )
+    response = await provisioning_client.get_subscription_message(name=simple_subscription, timeout=1, pop=True)
 
     assert response is None
 
 
-async def test_get_real_messages(
-    provisioning_client: AsyncClient, simple_subscription: str, udm: UDM
-):
+async def test_get_real_messages(provisioning_client: AsyncClient, simple_subscription: str, udm: UDM):
     group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
     response = await provisioning_client.get_subscription_message(
@@ -68,9 +61,7 @@ async def test_get_real_messages(
     assert response is not None
 
 
-async def test_get_multiple_messages(
-    provisioning_client: AsyncClient, simple_subscription: str, udm: UDM
-):
+async def test_get_multiple_messages(provisioning_client: AsyncClient, simple_subscription: str, udm: UDM):
     group1 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
@@ -80,9 +71,7 @@ async def test_get_multiple_messages(
 
 
 @pytest.mark.xfail()
-async def test_get_messages_zero_timeout(
-    provisioning_client: AsyncClient, simple_subscription: str
-):
+async def test_get_messages_zero_timeout(provisioning_client: AsyncClient, simple_subscription: str):
     response = await provisioning_client.get_subscription_message(
         name=simple_subscription,
         timeout=0,
@@ -91,9 +80,7 @@ async def test_get_messages_zero_timeout(
     assert response is None
 
 
-async def test_get_messages_from_the_wrong_queue(
-    provisioning_client: AsyncClient, simple_subscription: str
-):
+async def test_get_messages_from_the_wrong_queue(provisioning_client: AsyncClient, simple_subscription: str):
     with pytest.raises(aiohttp.ClientResponseError, match="Unauthorized"):
         await provisioning_client.get_subscription_message(
             name="wrong_subscription_name",

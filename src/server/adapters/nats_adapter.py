@@ -4,8 +4,8 @@
 import asyncio
 import json
 import logging
-from typing import Any, Callable, Coroutine, List, Optional, Tuple, Union, Dict
 import typing
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, Union
 
 import msgpack
 from nats.aio.client import Client as NATS
@@ -20,17 +20,17 @@ from nats.js.errors import (
 )
 from nats.js.kv import KV_DEL
 
+from univention.provisioning.models import (
+    REALM_TOPIC_PREFIX,
+    BaseMessage,
+    Bucket,
+    MQMessage,
+    ProvisioningMessage,
+)
 from univention.provisioning.models.queue import Message
 
-from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 from ..config import settings
-from univention.provisioning.models import (
-    BaseMessage,
-    ProvisioningMessage,
-    MQMessage,
-    Bucket,
-    REALM_TOPIC_PREFIX,
-)
+from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -151,9 +151,7 @@ class NatsMQAdapter(BaseMQAdapter):
         self.logger = logging.getLogger(__name__)
         self._message_queue = asyncio.Queue()
 
-    async def connect(
-        self, server: str, user: str, password: str, max_reconnect_attempts=5, **kwargs
-    ):
+    async def connect(self, server: str, user: str, password: str, max_reconnect_attempts=5, **kwargs):
         """Connect to the NATS server.
 
         Arguments are passed directly to the NATS client.
@@ -193,9 +191,7 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(
-        self, stream: str, subject: str, durable_name: str
-    ) -> None:
+    async def initialize_subscription(self, stream: str, subject: str, durable_name: str) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
         await self.ensure_stream(stream, [subject])
         await self.ensure_consumer(stream)
@@ -208,9 +204,7 @@ class NatsMQAdapter(BaseMQAdapter):
             stream=stream_name,
         )
 
-    async def get_message(
-        self, stream: str, subject: str, timeout: float, pop: bool
-    ) -> Optional[ProvisioningMessage]:
+    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         """Retrieve multiple messages from a NATS subject."""
 
         stream_name = NatsKeys.stream(stream)
@@ -226,9 +220,7 @@ class NatsMQAdapter(BaseMQAdapter):
         consumer = await self._js.consumer_info(stream_name, durable_name)
 
         # TODO: Why is ConsumerInfo passed in as ConsumerConfig?
-        sub = await self._js.pull_subscribe(
-            subject, durable=durable_name, stream=stream_name, config=consumer
-        )
+        sub = await self._js.pull_subscribe(subject, durable=durable_name, stream=stream_name, config=consumer)
         try:
             msgs = await sub.fetch(1, timeout)
         except asyncio.TimeoutError:
@@ -309,9 +301,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def delete_consumer(self, subject: str):
         try:
-            await self._js.delete_consumer(
-                NatsKeys.stream(subject), NatsKeys.durable_name(subject)
-            )
+            await self._js.delete_consumer(NatsKeys.stream(subject), NatsKeys.durable_name(subject))
         except NotFoundError:
             return None
 
@@ -357,9 +347,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
         try:
             await self._js.consumer_info(stream_name, durable_name)
-            self.logger.info(
-                "A consumer with the name '%s' already exists", durable_name
-            )
+            self.logger.info("A consumer with the name '%s' already exists", durable_name)
         except NotFoundError:
             await self._js.add_consumer(
                 stream_name,

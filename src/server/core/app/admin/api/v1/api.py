@@ -2,14 +2,15 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import logging
 from typing import List
+
 import fastapi
 from fastapi import Depends, Response, status
 
 from server.core.app.auth import authenticate_admin
-from univention.provisioning.models import Subscription, NewSubscription
 from server.services.messages import MessageService
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService
+from univention.provisioning.models import NewSubscription, Subscription
 
 router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])
 logger = logging.getLogger(__name__)
@@ -24,9 +25,7 @@ async def get_subscriptions(port: PortDependency) -> List[Subscription]:
 
 
 @router.post("/subscriptions", status_code=fastapi.status.HTTP_201_CREATED)
-async def register_subscription(
-    subscription: NewSubscription, port: PortDependency, response: Response
-):
+async def register_subscription(subscription: NewSubscription, port: PortDependency, response: Response):
     """Register a new subscription."""
 
     sub_service = SubscriptionService(port)

@@ -3,7 +3,8 @@
 
 import enum
 from typing import List
-from pydantic import Field, BaseModel
+
+from pydantic import BaseModel, Field
 
 REALM_TOPIC_PREFIX = "realm:topic"
 
@@ -28,13 +29,9 @@ class Subscription(BaseModel):
         description="A list of `realm:topic` that this subscription subscribes to, e.g. `udm:users/user`."
     )
 
-    request_prefill: bool = Field(
-        description="Whether pre-filling of the queue was requested."
-    )
+    request_prefill: bool = Field(description="Whether pre-filling of the queue was requested.")
 
-    prefill_queue_status: FillQueueStatus = Field(
-        description="Pre-filling the queue: status."
-    )
+    prefill_queue_status: FillQueueStatus = Field(description="Pre-filling the queue: status.")
 
 
 class Bucket(str, enum.Enum):

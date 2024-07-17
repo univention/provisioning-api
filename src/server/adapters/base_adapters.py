@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Union, Optional, List
+from typing import Any, Callable, List, Optional, Union
 
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
@@ -92,7 +92,5 @@ class BaseMQAdapter(ABC):
         pass
 
     @abstractmethod
-    async def ensure_consumer(
-        self, subject: str, deliver_subject: Optional[str] = None
-    ):
+    async def ensure_consumer(self, subject: str, deliver_subject: Optional[str] = None):
         pass

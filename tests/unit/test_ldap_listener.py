@@ -3,9 +3,9 @@
 
 from datetime import datetime
 from unittest.mock import ANY, AsyncMock, patch
+
 import msgpack
 import pytest
-
 from provisioning_listener.config import get_ldap_producer_settings
 from provisioning_listener.service import ensure_stream, handle_changes
 from server.adapters.nats_adapter import messagepack_encoder
@@ -66,9 +66,7 @@ user_entry = {
     "univentionObjectType": [b"users/user"],
     "structuralObjectClass": [b"inetOrgPerson"],
     "entryUUID": [b"90f2821e-9ff3-103e-8c17-67ac117796a0"],
-    "creatorsName": [
-        b"uid=default.admin,cn=users,dc=univention-organization,dc=intranet"
-    ],
+    "creatorsName": [b"uid=default.admin,cn=users,dc=univention-organization,dc=intranet"],
     "createTimestamp": [b"20240506125448Z"],
     "memberOf": [
         b"cn=managed-by-attribute-Groupware,cn=groups,dc=univention-organization,dc=intranet",
@@ -83,9 +81,7 @@ user_entry = {
     "cn": [b"juanp garcia"],
     "gecos": [b"juanp garcia"],
     "displayName": [b"juanp garcia"],
-    "userPassword": [
-        b"{BCRYPT}$2b$12$68J5r4b.6ILOUXBH34ZnP.eJB3YhgfO7Mj/jojGyB1KmX7vJR2N9y"
-    ],
+    "userPassword": [b"{BCRYPT}$2b$12$68J5r4b.6ILOUXBH34ZnP.eJB3YhgfO7Mj/jojGyB1KmX7vJR2N9y"],
     "krb5Key": [
         b'0`\xa1+0)\xa0\x03\x02\x01\x12\xa1"\x04 Whj|\x98R\xba}\xde\x02\xce5\x84\x97\x99\x93\xd0\xb2Xt=p\xad \xcc\xde\xb0o\xc2.\x92\xea\xa210/\xa0\x03\x02\x01\x03\xa1(\x04&UNIVENTION-ORGANIZATION.INTRANETjuanpe',  # noqa E501
         b"0P\xa1\x1b0\x19\xa0\x03\x02\x01\x11\xa1\x12\x04\x10W\xb7\x97\x9b`\xb4\xba\xd9d\xa3\xfb\x85\xd7\x9fb\xc5\xa210/\xa0\x03\x02\x01\x03\xa1(\x04&UNIVENTION-ORGANIZATION.INTRANETjuanpe",  # noqa E501
@@ -101,9 +97,7 @@ user_entry = {
     "sambaNTPassword": [b"6744F58DB811D75B9CFF9CD7057F131A"],
     "sambaPwdLastSet": [b"1715007637"],
     "entryCSN": [b"20240506150037.834049Z#000000#000#000000"],
-    "modifiersName": [
-        b"uid=default.admin,cn=users,dc=univention-organization,dc=intranet"
-    ],
+    "modifiersName": [b"uid=default.admin,cn=users,dc=univention-organization,dc=intranet"],
     "modifyTimestamp": [b"20240506150037Z"],
     "entryDN": [b"uid=juanpe,cn=users,dc=univention-organization,dc=intranet"],
     "subschemaSubentry": [b"cn=Subschema"],
@@ -159,9 +153,7 @@ async def test_ensure_stream(mock_nats_adapter):
 
     mock_nats_adapter.connect.assert_awaited_once()
     mock_nats_adapter.close.assert_awaited_once()
-    mock_nats_adapter.ensure_stream.assert_awaited_once_with(
-        LDAP_STREAM, [LDAP_SUBJECT]
-    )
+    mock_nats_adapter.ensure_stream.assert_awaited_once_with(LDAP_STREAM, [LDAP_SUBJECT])
 
 
 async def test_handle_changes(mock_nats_adapter):

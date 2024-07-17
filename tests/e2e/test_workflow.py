@@ -2,17 +2,19 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
+import uuid
+
+import ldap3
 import pytest
 import requests
-import uuid
-from server.core.app.main import internal_app_path
-import ldap3
 from server.core.app.admin.api import v1_prefix as admin_api_prefix
 from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
 from server.core.app.consumer.subscriptions.api import (
     v1_prefix as subscriptions_api_prefix,
 )
-from univention.provisioning.models import PublisherName, FillQueueStatus
+from server.core.app.main import internal_app_path
+from univention.provisioning.models import FillQueueStatus, PublisherName
+
 from tests.e2e.conftest import E2ETestSettings
 
 REALM = "udm"
@@ -29,9 +31,7 @@ def anyio_backend():
 @pytest.fixture(scope="session")
 def ldap_connection(test_settings: E2ETestSettings):
     server = ldap3.Server(test_settings.ldap_server_uri)
-    connection = ldap3.Connection(
-        server, test_settings.ldap_bind_dn, test_settings.ldap_bind_password
-    )
+    connection = ldap3.Connection(server, test_settings.ldap_bind_dn, test_settings.ldap_bind_password)
     assert connection.bind()
     return connection
     # connection.unbind()
@@ -76,18 +76,14 @@ def ldap_user(ldap_connection, subscription_name, test_settings, request):
         object_class=("posixGroup", "univentionObject", "univentionGroup"),
         attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
     )
-    assert (
-        result
-    ), "No ldap change triggered, possible reasons: invalid request or test-data colision"
+    assert result, "No ldap change triggered, possible reasons: invalid request or test-data colision"
 
     yield ldap_connection, dn
 
     ldap_connection.delete(dn)
 
 
-@pytest.mark.skip(
-    "LDAP Controls need to be activated for the ldap3 library in the test setup"
-)
+@pytest.mark.skip("LDAP Controls need to be activated for the ldap3 library in the test setup")
 async def test_workflow(test_settings, ldap_user, subscription_name):
     ldap_connection, dn = ldap_user
 

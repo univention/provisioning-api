@@ -3,17 +3,20 @@
 
 import uuid
 from unittest.mock import AsyncMock, patch
+
 import httpx
 import pytest
+from server.core.app.admin.api import v1_prefix as api_prefix
+from server.core.app.main import app as subscriptions_app
+from server.core.app.main import internal_app_path
+from univention.provisioning.models import FillQueueStatus
+
 from tests.conftest import (
-    REALMS_TOPICS_STR,
-    SUBSCRIPTION_NAME,
     CREDENTIALS,
     REALM_TOPIC,
+    REALMS_TOPICS_STR,
+    SUBSCRIPTION_NAME,
 )
-from univention.provisioning.models import FillQueueStatus
-from server.core.app.admin.api import v1_prefix as api_prefix
-from server.core.app.main import app as subscriptions_app, internal_app_path
 
 
 @pytest.fixture(scope="session")
@@ -23,9 +26,7 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def subscriptions_client():
-    async with httpx.AsyncClient(
-        app=subscriptions_app, base_url="http://testserver"
-    ) as client:
+    async with httpx.AsyncClient(app=subscriptions_app, base_url="http://testserver") as client:
         yield client
 
 
@@ -39,9 +40,7 @@ def settings_mock() -> AsyncMock:
 
 @pytest.mark.anyio
 class TestAdmin:
-    async def test_create_subscription(
-        self, subscriptions_client: httpx.AsyncClient, settings_mock
-    ):
+    async def test_create_subscription(self, subscriptions_client: httpx.AsyncClient, settings_mock):
         name = str(uuid.uuid4())
         response = await subscriptions_client.post(
             f"{internal_app_path}{api_prefix}/subscriptions",
@@ -85,9 +84,7 @@ class TestAdmin:
         )
         assert response.status_code == 409
 
-    async def test_get_subscriptions(
-        self, subscriptions_client: httpx.AsyncClient, settings_mock
-    ):
+    async def test_get_subscriptions(self, subscriptions_client: httpx.AsyncClient, settings_mock):
         response = await subscriptions_client.get(
             f"{internal_app_path}{api_prefix}/subscriptions",
             auth=(CREDENTIALS.username, CREDENTIALS.password),
@@ -98,9 +95,4 @@ class TestAdmin:
         assert data[0]["request_prefill"]
         assert data[0]["prefill_queue_status"] == FillQueueStatus.done
         assert len(data[0]["realms_topics"]) == len([REALMS_TOPICS_STR])
-        assert all(
-            (
-                realm_topic in data[0]["realms_topics"]
-                for realm_topic in [REALMS_TOPICS_STR]
-            )
-        )
+        assert all((realm_topic in data[0]["realms_topics"] for realm_topic in [REALMS_TOPICS_STR]))

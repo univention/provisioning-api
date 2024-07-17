@@ -3,6 +3,7 @@
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings
+
 from univention.provisioning.models.queue import PublisherName
 
 

@@ -3,6 +3,7 @@
 
 import contextlib
 from typing import Optional
+
 from server.adapters.internal_api_adapter import InternalAPIAdapter
 from server.adapters.nats_adapter import NatsMQAdapter
 from server.adapters.udm_adapter import UDMAdapter
@@ -21,9 +22,7 @@ class PrefillPort:
         self.settings = settings or PrefillSettings()
         self._udm_adapter = UDMAdapter()
         self.mq_adapter = NatsMQAdapter()
-        self._internal_api_adapter = InternalAPIAdapter(
-            self.settings.prefill_username, self.settings.prefill_password
-        )
+        self._internal_api_adapter = InternalAPIAdapter(self.settings.prefill_username, self.settings.prefill_password)
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -63,19 +62,13 @@ class PrefillPort:
     async def get_object(self, url):
         return await self._udm_adapter.get_object(url)
 
-    async def update_subscription_queue_status(
-        self, name: str, queue_status: FillQueueStatus
-    ) -> None:
-        await self._internal_api_adapter.update_subscription_queue_status(
-            name, queue_status
-        )
+    async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
+        await self._internal_api_adapter.update_subscription_queue_status(name, queue_status)
 
     async def create_prefill_message(self, stream: str, subject: str, message: Message):
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def add_request_to_prefill_failures(
-        self, stream: str, subject: str, message: PrefillMessage
-    ):
+    async def add_request_to_prefill_failures(self, stream: str, subject: str, message: PrefillMessage):
         await self.mq_adapter.add_message(stream, subject, message)
 
     async def create_stream(self, subject: str):

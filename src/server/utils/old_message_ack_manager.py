@@ -19,18 +19,14 @@ class MessageAckManager:
         self,
         message: MQMessage,
         handle_message: Callable[[MQMessage], Coroutine[None, None, None]],
-        acknowledge_message_in_progress: Callable[
-            [MQMessage], Coroutine[None, None, None]
-        ],
+        acknowledge_message_in_progress: Callable[[MQMessage], Coroutine[None, None, None]],
     ):
         """
         Combines message processing and automatic AckWait extension.
         """
 
         message_handler = asyncio.create_task(handle_message(message))
-        ack_extender = asyncio.create_task(
-            self.extend_ack_wait(message, acknowledge_message_in_progress)
-        )
+        ack_extender = asyncio.create_task(self.extend_ack_wait(message, acknowledge_message_in_progress))
 
         await message_handler
 
@@ -39,9 +35,7 @@ class MessageAckManager:
     async def extend_ack_wait(
         self,
         message: MQMessage,
-        acknowledge_message_in_progress: Callable[
-            [MQMessage], Coroutine[None, None, None]
-        ],
+        acknowledge_message_in_progress: Callable[[MQMessage], Coroutine[None, None, None]],
     ):
         while True:
             await asyncio.sleep(self.ack_wait - self.ack_threshold)

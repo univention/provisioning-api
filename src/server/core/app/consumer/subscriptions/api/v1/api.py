@@ -5,12 +5,12 @@ from typing import Annotated
 
 import fastapi
 from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from server.core.app.auth import authenticate_admin
-from univention.provisioning.models import Subscription
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService
+from univention.provisioning.models import Subscription
 
 router = fastapi.APIRouter()
 security = HTTPBasic()

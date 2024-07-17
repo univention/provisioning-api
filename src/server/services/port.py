@@ -2,15 +2,17 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from typing import List, Optional, Union, Annotated
+from typing import Annotated, List, Optional, Union
+
 from fastapi import Depends
+
+from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from server.core.app.config import AppSettings
-from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
 from univention.provisioning.models import (
-    ProvisioningMessage,
-    PrefillMessage,
     Bucket,
     Message,
+    PrefillMessage,
+    ProvisioningMessage,
 )
 
 
@@ -42,14 +44,10 @@ class Port:
         await self.mq_adapter.close()
         await self.kv_adapter.close()
 
-    async def add_message(
-        self, stream: str, subject: str, message: Union[Message, PrefillMessage]
-    ):
+    async def add_message(self, stream: str, subject: str, message: Union[Message, PrefillMessage]):
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def get_message(
-        self, stream: str, subject: str, timeout: float, pop: bool
-    ) -> Optional[ProvisioningMessage]:
+    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         return await self.mq_adapter.get_message(stream, subject, timeout, pop)
 
     async def delete_message(self, stream: str, seq_num: int):

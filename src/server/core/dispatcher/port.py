@@ -3,10 +3,10 @@
 
 import contextlib
 import logging
-from typing import Optional, Dict
+from typing import Dict, Optional
 
-from server.adapters.nats_adapter import NatsMQAdapter, NatsKVAdapter
-from univention.provisioning.models import Message, MQMessage, Bucket
+from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from univention.provisioning.models import Bucket, Message, MQMessage
 
 from .config import DispatcherSettings
 
@@ -44,9 +44,7 @@ class DispatcherPort:
         await self.mq_adapter.close()
         await self.kv_adapter.close()
 
-    async def send_message_to_subscription(
-        self, stream: str, subject: str, message: Message
-    ):
+    async def send_message_to_subscription(self, stream: str, subject: str, message: Message):
         await self.mq_adapter.add_message(stream, subject, message)
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):

@@ -4,6 +4,9 @@
 import logging
 
 from server.adapters.nats_adapter import Acknowledgements
+from server.utils.message_ack_manager import MessageAckManager
+from udm_transformer.port import UDMTransformerPort
+from udm_transformer.service.udm import UDMMessagingService
 from univention.provisioning.models.queue import (
     LDAP_STREAM,
     LDAP_SUBJECT,
@@ -12,9 +15,6 @@ from univention.provisioning.models.queue import (
     Message,
     PublisherName,
 )
-from server.utils.message_ack_manager import MessageAckManager
-from udm_transformer.port import UDMTransformerPort
-from udm_transformer.service.udm import UDMMessagingService
 
 UDM_TRANSFORMER_CONSUMER_NAME = "udm-transformer"
 
@@ -38,9 +38,7 @@ class UDMTransformerController:
         self.ack_manager = MessageAckManager(ack_wait=30, ack_threshold=5)
         self.ldap_publisher_name = port.settings.ldap_publisher_name
 
-    async def handle_message(
-        self, message: Message, acknowledgements: Acknowledgements
-    ) -> None:
+    async def handle_message(self, message: Message, acknowledgements: Acknowledgements) -> None:
         message_handler = self._udm_service.handle_changes(
             message.body["new"],
             message.body["old"],
@@ -66,9 +64,7 @@ class UDMTransformerController:
             logger.debug("listening for new LDAP messages")
             message, acknowledgements = await self._port.get_message(timeout=10)
             if not message or not acknowledgements:
-                logger.debug(
-                    "No new LDAP messages found in the queue, continuing to wait."
-                )
+                logger.debug("No new LDAP messages found in the queue, continuing to wait.")
                 continue
             try:
                 await self.handle_message(message, acknowledgements)

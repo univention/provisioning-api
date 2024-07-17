@@ -2,26 +2,26 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from .api import (  # noqa: F401
+    Event,
     MessageProcessingStatus,
     MessageProcessingStatusReport,
-    Event,
     NewSubscription,
 )
 from .queue import (  # noqa: F401
-    Message,
-    PrefillMessage,
-    MQMessage,
-    PublisherName,
-    ProvisioningMessage,
-    BaseMessage,
-    PREFILL_SUBJECT_TEMPLATE,
-    PREFILL_STREAM,
-    DISPATCHER_SUBJECT_TEMPLATE,
     DISPATCHER_STREAM,
+    DISPATCHER_SUBJECT_TEMPLATE,
+    PREFILL_STREAM,
+    PREFILL_SUBJECT_TEMPLATE,
+    BaseMessage,
+    Message,
+    MQMessage,
+    PrefillMessage,
+    ProvisioningMessage,
+    PublisherName,
 )
 from .subscription import (  # noqa: F401
+    REALM_TOPIC_PREFIX,
+    Bucket,
     FillQueueStatus,
     Subscription,
-    Bucket,
-    REALM_TOPIC_PREFIX,
 )

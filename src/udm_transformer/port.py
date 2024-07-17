@@ -4,6 +4,7 @@
 import contextlib
 import json
 from typing import Optional
+
 from server.adapters.internal_api_adapter import InternalAPIAdapter
 from server.adapters.nats_adapter import (
     Acknowledgements,
@@ -12,6 +13,7 @@ from server.adapters.nats_adapter import (
     messagepack_decoder,
 )
 from univention.provisioning.models import Bucket, Message
+
 from .config import UDMTransformerSettings, get_udm_transformer_settings
 
 
@@ -51,13 +53,9 @@ class UDMTransformerPort:
         await self.mq_adapter.close()
 
     async def initialize_subscription(self, stream: str, subject: str, durable_name):
-        return await self.mq_adapter.initialize_subscription(
-            stream, subject, durable_name
-        )
+        return await self.mq_adapter.initialize_subscription(stream, subject, durable_name)
 
-    async def get_message(
-        self, timeout: float
-    ) -> tuple[Message | None, Acknowledgements | None]:
+    async def get_message(self, timeout: float) -> tuple[Message | None, Acknowledgements | None]:
         return await self.mq_adapter.get_one_message(timeout, messagepack_decoder)
 
     async def retrieve(self, url: str, bucket: Bucket):

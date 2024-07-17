@@ -3,7 +3,8 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, ClassVar, Dict, Optional, List, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Tuple
+
 from pydantic import BaseModel, Field, field_serializer
 
 PREFILL_SUBJECT_TEMPLATE = "{subscription}.prefill"
@@ -28,13 +29,9 @@ class PublisherName(str, Enum):
 class BaseMessage(BaseModel):
     """The common header properties of each message."""
 
-    publisher_name: PublisherName = Field(
-        description="The name of the publisher of the message."
-    )
+    publisher_name: PublisherName = Field(description="The name of the publisher of the message.")
 
-    ts: datetime = Field(
-        description="The timestamp when the message was received by the dispatcher."
-    )
+    ts: datetime = Field(description="The timestamp when the message was received by the dispatcher.")
 
     @field_serializer("ts")
     def serialize_dt(self, dt: datetime, _info):
@@ -48,17 +45,13 @@ class Message(BaseMessage):
 
     topic: str = Field(description="The topic of the message, e.g. `users/user`.")
 
-    body: Dict[str, Any] = Field(
-        description="The content of the message as a key/value dictionary."
-    )
+    body: Dict[str, Any] = Field(description="The content of the message as a key/value dictionary.")
 
 
 class PrefillMessage(BaseMessage):
     """This class represents the message used to send a request to the Prefill Service."""
 
-    subscription_name: str = Field(
-        description="The name of the subscription that requested the prefilling queue"
-    )
+    subscription_name: str = Field(description="The name of the subscription that requested the prefilling queue")
 
     realms_topics: List[Tuple[str, str]] = Field(
         description="A list of `(realm, topic)` that this subscriber subscribes to, e.g. [('udm', 'users/user')]."
@@ -100,9 +93,5 @@ class MQMessage(BaseModel):
 
 
 class ProvisioningMessage(Message):
-    sequence_number: int = Field(
-        description="The sequence number associated with the message."
-    )
-    num_delivered: int = Field(
-        description="The number of times that this message has been delivered."
-    )
+    sequence_number: int = Field(description="The sequence number associated with the message.")
+    num_delivered: int = Field(description="The number of times that this message has been delivered.")

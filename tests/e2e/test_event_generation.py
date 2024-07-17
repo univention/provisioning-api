@@ -3,20 +3,17 @@
 
 import asyncio
 import time
-from typing import Any
 import uuid
-
-import pytest
+from typing import Any
 
 import nats
+import pytest
 from univention.admin.rest.client import UDM
-
 
 NUM_TEST_USERS = 10
 
 
-class MissingUdmExtension(Exception):
-    ...
+class MissingUdmExtension(Exception): ...
 
 
 async def get_messages(
@@ -28,23 +25,22 @@ async def get_messages(
         messages_found.append(msg)
         dn_old = msg["old"]["entryDN"][0].decode() if msg["old"] else ""
         dn_new = msg["new"]["entryDN"][0].decode() if msg["new"] else ""
-        uni_obj_type = (
-            msg["old"]["univentionObjectType"][0]
-            if msg["old"]
-            else msg["new"]["univentionObjectType"][0]
-        )
-        messages_found_short.append(
-            (msg["ldap_request_type"], uni_obj_type.decode(), dn_old or dn_new)
-        )
+        uni_obj_type = msg["old"]["univentionObjectType"][0] if msg["old"] else msg["new"]["univentionObjectType"][0]
+        messages_found_short.append((msg["ldap_request_type"], uni_obj_type.decode(), dn_old or dn_new))
     return messages_found, messages_found_short
 
 
 @pytest.mark.timeout(10)
 @pytest.mark.asyncio
-async def test_create_delete_maildomain(
-    get_and_delete_all_messages, ldap_base, ldif_producer_stream_name, maildomain
-):
+async def test_create_delete_maildomain(get_and_delete_all_messages, ldap_base, ldif_producer_stream_name, maildomain):
     assert maildomain
+    name = "ldif-producer.unittests"
+    async for msg in get_and_delete_all_messages(ldif_producer_stream_name):
+        assert msg["ldap_request_type"] == "ADD"
+        assert not msg["old"]
+        assert msg["new"]["univentionObjectType"] == [b"mail/domain"]
+        assert msg["new"]["cn"] == [name.encode()]
+        assert msg["new"]["entryDN"][0].decode() == f"cn={name},cn=domain,cn=mail,{ldap_base}"
 
 
 def create_user(udm: UDM, props):
@@ -107,9 +103,7 @@ async def test_create_user(
             break
         await asyncio.sleep(1)
 
-    messages_found, messages_found_short = await get_messages(
-        get_and_delete_all_messages, ldif_producer_stream_name
-    )
+    messages_found, messages_found_short = await get_messages(get_and_delete_all_messages, ldif_producer_stream_name)
     assert len(messages_expected) == len(messages_found_short)
     assert set(messages_expected) == set(messages_found_short)
     assert messages_expected == messages_found_short
@@ -171,9 +165,7 @@ async def test_create_delete_user(
             break
         await asyncio.sleep(1)
 
-    messages_found, messages_found_short = await get_messages(
-        get_and_delete_all_messages, ldif_producer_stream_name
-    )
+    messages_found, messages_found_short = await get_messages(get_and_delete_all_messages, ldif_producer_stream_name)
     assert len(messages_expected) == len(messages_found_short)
     assert set(messages_expected) == set(messages_found_short)
     assert messages_expected == messages_found_short
@@ -201,9 +193,7 @@ async def test_create_delete_user(
         "userPassword",
     )
     for index, msg in enumerate(messages_found):
-        msg_attrs = set(msg["old"].keys() if msg["old"] else []).union(
-            set(msg["new"].keys() if msg["new"] else [])
-        )
+        msg_attrs = set(msg["old"].keys() if msg["old"] else []).union(set(msg["new"].keys() if msg["new"] else []))
         assert all(key in msg_attrs for key in attrs_all)
         if index % 6 == 0:
             assert msg["ldap_request_type"] == "ADD"
@@ -216,10 +206,7 @@ async def test_create_delete_user(
         elif index % 6 == 1:
             assert msg["ldap_request_type"] == "MODIFY"
             assert msg["new"] and msg["old"]
-            assert (
-                msg["old"]["entryDN"][0].decode()
-                == f"cn=Domain Users,cn=groups,{ldap_base}"
-            )
+            assert msg["old"]["entryDN"][0].decode() == f"cn=Domain Users,cn=groups,{ldap_base}"
             assert msg["new"]["univentionObjectType"] == [b"groups/group"]
             assert msg["new"]["gidNumber"] == [b"5001"]
             assert all(key in msg_attrs for key in attrs_groups)
@@ -230,10 +217,7 @@ async def test_create_delete_user(
         elif index % 6 == 2:
             assert msg["ldap_request_type"] == "MODIFY"
             assert msg["new"] and msg["old"]
-            assert (
-                msg["new"]["entryDN"][0].decode()
-                == f"cn=Domain Guests,cn=groups,{ldap_base}"
-            )
+            assert msg["new"]["entryDN"][0].decode() == f"cn=Domain Guests,cn=groups,{ldap_base}"
             assert msg["new"]["univentionObjectType"] == [b"groups/group"]
             assert msg["new"]["gidNumber"] == [b"5002"]
             assert dn not in msg["old"].get("uniqueMember", [])
@@ -251,31 +235,21 @@ async def test_create_delete_user(
         elif index % 6 == 4:
             assert msg["ldap_request_type"] == "MODIFY"
             assert msg["new"] and msg["old"]
-            assert (
-                msg["old"]["entryDN"][0].decode()
-                == f"cn=Domain Users,cn=groups,{ldap_base}"
-            )
+            assert msg["old"]["entryDN"][0].decode() == f"cn=Domain Users,cn=groups,{ldap_base}"
             assert all(key in msg_attrs for key in attrs_groups)
             # Fixme: DN missing in old, because of Refint overlay
             # assert dn in msg["old"].get("uniqueMember", [])
-            assert msg["old"]["modifiersName"] == [
-                b"cn=Referential Integrity Overlay"
-            ]  # <-- Refint
+            assert msg["old"]["modifiersName"] == [b"cn=Referential Integrity Overlay"]  # <-- Refint
             assert username in msg["old"].get("memberUid", [])
             assert dn not in msg["new"].get("uniqueMember", [])
             assert username not in msg["new"].get("memberUid", [])
         elif index % 6 == 5:
             assert msg["ldap_request_type"] == "MODIFY"
             assert msg["new"] and msg["old"]
-            assert (
-                msg["new"]["entryDN"][0].decode()
-                == f"cn=Domain Guests,cn=groups,{ldap_base}"
-            )
+            assert msg["new"]["entryDN"][0].decode() == f"cn=Domain Guests,cn=groups,{ldap_base}"
             # Fixme: DN missing in old, because of Refint overlay
             # assert dn in msg["old"].get("uniqueMember", [])
-            assert msg["old"]["modifiersName"] == [
-                b"cn=Referential Integrity Overlay"
-            ]  # <-- Refint
+            assert msg["old"]["modifiersName"] == [b"cn=Referential Integrity Overlay"]  # <-- Refint
             assert username in msg["old"].get("memberUid", [])
             assert dn not in msg["new"].get("uniqueMember", [])
             assert username not in msg["new"].get("memberUid", [])
@@ -309,12 +283,8 @@ async def test_rename_user(
         ("MODIFY", "groups/group", f"cn=Domain Users,cn=groups,{ldap_base}"),
     ]
 
-    schedule_delete_udm_object(
-        "users/user", f"uid={user_name_old},cn=users,{ldap_base}"
-    )
-    schedule_delete_udm_object(
-        "users/user", f"uid={user_name_new},cn=users,{ldap_base}"
-    )
+    schedule_delete_udm_object("users/user", f"uid={user_name_old},cn=users,{ldap_base}")
+    schedule_delete_udm_object("users/user", f"uid={user_name_new},cn=users,{ldap_base}")
 
     user_mod = udm.get("users/user")
     user = user_mod.new()
@@ -328,9 +298,7 @@ async def test_rename_user(
     user.properties["username"] = user_name_new
     user.save()
     dn_new = user.dn
-    print(
-        f"Renamed user from {user_name_old!r} to {user_name_new!r}. New DN: {dn_new!r}"
-    )
+    print(f"Renamed user from {user_name_old!r} to {user_name_new!r}. New DN: {dn_new!r}")
     assert dn_old != dn_new
 
     manager = nats.js.manager.JetStreamManager(nats_connection)
@@ -341,9 +309,7 @@ async def test_rename_user(
             break
         await asyncio.sleep(1)
 
-    messages_found, messages_found_short = await get_messages(
-        get_and_delete_all_messages, ldif_producer_stream_name
-    )
+    messages_found, messages_found_short = await get_messages(get_and_delete_all_messages, ldif_producer_stream_name)
     assert len(messages_expected) == len(messages_found_short)
     assert set(messages_expected) == set(messages_found_short)
     assert messages_expected == messages_found_short
@@ -373,9 +339,7 @@ async def test_rename_user(
             assert msg["new"]["entryDN"][0].decode() == dn_new
         elif index == 4:  # change memberUid (UDM)
             assert msg["new"] and msg["old"]
-            assert dn_new.encode() in msg["old"].get(
-                "uniqueMember", []
-            )  # refint already changed it
+            assert dn_new.encode() in msg["old"].get("uniqueMember", [])  # refint already changed it
             assert user_name_old.encode() in msg["old"].get("memberUid", [])
             assert dn_new.encode() in msg["new"].get("uniqueMember", [])
             assert user_name_new.encode() in msg["new"].get("memberUid", [])
@@ -434,9 +398,7 @@ async def test_create_modify_delete_group(
     assert user.dn == user_dn
 
     group.reload()
-    group.properties[
-        "description"
-    ] = new_description = f"New description for group {group_name!r}."
+    group.properties["description"] = new_description = f"New description for group {group_name!r}."
     group.save()
     print(f"Modified group {group.dn!r} (changed description).")
 
@@ -461,9 +423,7 @@ async def test_create_modify_delete_group(
             break
         await asyncio.sleep(1)
 
-    messages_found, messages_found_short = await get_messages(
-        get_and_delete_all_messages, ldif_producer_stream_name
-    )
+    messages_found, messages_found_short = await get_messages(get_and_delete_all_messages, ldif_producer_stream_name)
     assert len(messages_expected) == len(messages_found_short)
     assert set(messages_expected) == set(messages_found_short)
     assert messages_expected == messages_found_short
@@ -535,9 +495,7 @@ async def test_rename_group(
     group.properties["name"] = group_name_new
     group.save()
     dn_new = group.dn
-    print(
-        f"Renamed group from {group_name_old!r} to {group_name_new!r}. New DN: {dn_new!r}"
-    )
+    print(f"Renamed group from {group_name_old!r} to {group_name_new!r}. New DN: {dn_new!r}")
     assert dn_old != dn_new
 
     manager = nats.js.manager.JetStreamManager(nats_connection)
@@ -548,9 +506,7 @@ async def test_rename_group(
             break
         await asyncio.sleep(1)
 
-    messages_found, messages_found_short = await get_messages(
-        get_and_delete_all_messages, ldif_producer_stream_name
-    )
+    messages_found, messages_found_short = await get_messages(get_and_delete_all_messages, ldif_producer_stream_name)
     assert len(messages_expected) == len(messages_found_short)
     assert set(messages_expected) == set(messages_found_short)
     assert messages_expected == messages_found_short
@@ -602,9 +558,7 @@ def test_create_functional_account(udm: UDM, maildomain, udm_module_exists):
     account = accessprofile.new()
     name = str(uuid.uuid1())
 
-    account.properties.update(
-        {"name": name, "mailPrimaryAddress": f"{name}@{maildomain}"}
-    )
+    account.properties.update({"name": name, "mailPrimaryAddress": f"{name}@{maildomain}"})
 
     account.save()
     account.delete()

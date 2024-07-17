@@ -2,13 +2,15 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from unittest.mock import AsyncMock, call
+
 import pytest
 from server.core.dispatcher.service.dispatcher import DispatcherService
 from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
+
 from tests.conftest import (
-    SUBSCRIPTION_INFO,
     MESSAGE,
     MQMESSAGE,
+    SUBSCRIPTION_INFO,
     SUBSCRIPTIONS,
 )
 
@@ -20,9 +22,7 @@ def dispatcher_service() -> DispatcherService:
 
 @pytest.mark.anyio
 class TestDispatcherService:
-    main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(
-        subscription=SUBSCRIPTION_INFO["name"]
-    )
+    main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_INFO["name"])
 
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
         dispatcher_service._subscriptions = SUBSCRIPTIONS
@@ -33,12 +33,8 @@ class TestDispatcherService:
         with pytest.raises(Exception, match="Stop waiting for the new event"):
             await dispatcher_service.dispatch_events()
 
-        dispatcher_service._port.subscribe_to_queue.assert_called_once_with(
-            "incoming", "dispatcher-service"
-        )
-        dispatcher_service._port.watch_for_changes.assert_called_once_with(
-            SUBSCRIPTIONS
-        )
+        dispatcher_service._port.subscribe_to_queue.assert_called_once_with("incoming", "dispatcher-service")
+        dispatcher_service._port.watch_for_changes.assert_called_once_with(SUBSCRIPTIONS)
         dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
         dispatcher_service._port.send_message_to_subscription.assert_called_once_with(
             SUBSCRIPTION_INFO["name"], self.main_subject, MESSAGE

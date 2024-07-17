@@ -1,16 +1,17 @@
 # Callable | NoneSPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import json
 import logging
 from datetime import datetime
 from typing import Optional
-import json
-from univention.provisioning.models import Bucket, Message
-from univention.admin.rest.module import Object
-from udm_transformer.port import UDMTransformerPort
+
 import univention.admin.uldap
+from udm_transformer.port import UDMTransformerPort
+from univention.admin.rest.module import Object
 from univention.management.console.log import MODULE
 from univention.management.console.modules.udm.udm_ldap import UDM_Module
+from univention.provisioning.models import Bucket, Message
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +44,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             binddn=port.settings.ldap_bind_dn,
             bindpw=port.settings.ldap_bind_pw,
         )
-        self._my_ldap_position = univention.admin.uldap.position(
-            port.settings.ldap_base_dn
-        )
+        self._my_ldap_position = univention.admin.uldap.position(port.settings.ldap_base_dn)
         self.ldap_publisher_name = port.settings.ldap_publisher_name
 
         self._messaging_port = port
@@ -56,24 +55,16 @@ class UDMMessagingService(univention.admin.uldap.access):
 
     async def store(self, new_obj: dict):
         logger.info("Storing object to cache %s", new_obj)
-        await self._messaging_port.store(
-            new_obj["uuid"], json.dumps(new_obj), Bucket.cache
-        )
+        await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj), Bucket.cache)
 
-    async def send_event(
-        self, new_obj: Optional[dict], old_obj: Optional[dict], ts: datetime
-    ):
+    async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict], ts: datetime):
         if not (new_obj or old_obj):
             return
 
-        object_type = (
-            new_obj.get("objectType") if new_obj else old_obj.get("objectType")
-        )
+        object_type = new_obj.get("objectType") if new_obj else old_obj.get("objectType")
 
         if not object_type:
-            logger.error(
-                "could not identify objectType", {"old": old_obj, "new": new_obj}
-            )
+            logger.error("could not identify objectType", {"old": old_obj, "new": new_obj})
             return
 
         message = Message(
@@ -87,9 +78,7 @@ class UDMMessagingService(univention.admin.uldap.access):
         await self._messaging_port.send_event(message)
 
     def _get_module(self, object_type):
-        module = UDM_Module(
-            object_type, ldap_connection=self, ldap_position=self._my_ldap_position
-        )
+        module = UDM_Module(object_type, ldap_connection=self, ldap_position=self._my_ldap_position)
         if not module or not module.module:
             raise ModuleNotFound
         return module
@@ -114,10 +103,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             module_obj.open()
             return Object.get_representation(module, module_obj, ["*"], self, False)
         except ModuleNotFound:
-            MODULE.error(
-                "ReadControl response has object type %r, but the module was not found!"
-                % object_type
-            )
+            MODULE.error("ReadControl response has object type %r, but the module was not found!" % object_type)
             return None
         except Exception:
             if object_type in SUPPORTED_OBJECT_TYPES:

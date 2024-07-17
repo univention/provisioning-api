@@ -3,9 +3,10 @@
 
 import asyncio
 
+from daemoniker import Daemonizer
+
 from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService
-from daemoniker import Daemonizer
 
 
 async def run_dispatcher():

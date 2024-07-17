@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from typing import List, Tuple
+
 from pydantic import BaseModel, Field
 
 

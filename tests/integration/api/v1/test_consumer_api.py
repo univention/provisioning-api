@@ -2,24 +2,26 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from unittest.mock import AsyncMock, patch
+
 import httpx
 import pytest
 from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
-from tests.conftest import (
-    REALMS_TOPICS_STR,
-    REALM,
-    TOPIC,
-    PUBLISHER_NAME,
-    BODY,
-    SUBSCRIPTION_NAME,
-    CONSUMER_PASSWORD,
-    REPORT,
-    CREDENTIALS,
-)
-from univention.provisioning.models.subscription import FillQueueStatus
 from server.core.app.consumer.subscriptions.api import v1_prefix as api_prefix
 from server.core.app.main import app as messages_app
 from server.core.app.main import app as subscriptions_app
+from univention.provisioning.models.subscription import FillQueueStatus
+
+from tests.conftest import (
+    BODY,
+    CONSUMER_PASSWORD,
+    CREDENTIALS,
+    PUBLISHER_NAME,
+    REALM,
+    REALMS_TOPICS_STR,
+    REPORT,
+    SUBSCRIPTION_NAME,
+    TOPIC,
+)
 
 
 @pytest.fixture(scope="session")
@@ -29,17 +31,13 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def subscriptions_client():
-    async with httpx.AsyncClient(
-        app=subscriptions_app, base_url="http://testserver"
-    ) as client:
+    async with httpx.AsyncClient(app=subscriptions_app, base_url="http://testserver") as client:
         yield client
 
 
 @pytest.fixture(scope="session")
 async def messages_client():
-    async with httpx.AsyncClient(
-        app=messages_app, base_url="http://testserver"
-    ) as client:
+    async with httpx.AsyncClient(app=messages_app, base_url="http://testserver") as client:
         yield client
 
 
@@ -64,12 +62,7 @@ class TestConsumer:
         assert data["request_prefill"]
         assert data["prefill_queue_status"] == FillQueueStatus.done
         assert len(data["realms_topics"]) == len([REALMS_TOPICS_STR])
-        assert all(
-            (
-                realm_topic in data["realms_topics"]
-                for realm_topic in [REALMS_TOPICS_STR]
-            )
-        )
+        assert all((realm_topic in data["realms_topics"] for realm_topic in [REALMS_TOPICS_STR]))
 
     async def test_delete_subscription(self, subscriptions_client: httpx.AsyncClient):
         response = await subscriptions_client.delete(
@@ -78,9 +71,7 @@ class TestConsumer:
         )
         assert response.status_code == 200
 
-    async def test_delete_subscription_as_admin(
-        self, subscriptions_client: httpx.AsyncClient, settings_mock
-    ):
+    async def test_delete_subscription_as_admin(self, subscriptions_client: httpx.AsyncClient, settings_mock):
         response = await subscriptions_client.delete(
             f"{api_prefix}/subscriptions/{SUBSCRIPTION_NAME}",
             auth=(CREDENTIALS.username, CREDENTIALS.password),

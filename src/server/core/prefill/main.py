@@ -2,9 +2,11 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
+
+from daemoniker import Daemonizer
+
 from server.core.prefill.port import PrefillPort
 from server.core.prefill.service.udm_prefill import UDMPreFill
-from daemoniker import Daemonizer
 
 
 async def run_prefill():

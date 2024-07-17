@@ -5,9 +5,9 @@ import logging
 
 import aiohttp
 
-from ..config import settings
-
 from univention.provisioning.models import FillQueueStatus, Message
+
+from ..config import settings
 
 
 class InternalAPIAdapter:
@@ -27,24 +27,18 @@ class InternalAPIAdapter:
 
     async def connect(self):
         if not self._session:
-            self._session = aiohttp.ClientSession(
-                auth=self.auth, headers=self.headers, raise_for_status=True
-            )
+            self._session = aiohttp.ClientSession(auth=self.auth, headers=self.headers, raise_for_status=True)
 
     async def close(self):
         if self._session:
             await self._session.close()
 
-    async def update_subscription_queue_status(
-        self, name: str, queue_status: FillQueueStatus
-    ) -> None:
+    async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
         async with self._session.patch(
             f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
         ):
             pass
 
     async def send_event(self, message: Message):
-        async with self._session.post(
-            f"{self.base_url}events", json=message.model_dump()
-        ):
+        async with self._session.post(f"{self.base_url}events", json=message.model_dump()):
             pass

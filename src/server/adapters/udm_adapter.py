@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
+from typing import Dict, List, Optional
 
 import aiohttp
-from typing import Dict, List, Optional
 
 from ..core.prefill.config import prefill_settings
 
@@ -27,17 +27,13 @@ class UDMAdapter:
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(
-            prefill_settings.udm_username, prefill_settings.udm_password
-        )
+        self.auth = aiohttp.BasicAuth(prefill_settings.udm_username, prefill_settings.udm_password)
         self.headers = [("accept", "application/json")]
         self._session = None
 
     async def connect(self) -> "UDMAdapter":
         if not self._session:
-            self._session = aiohttp.ClientSession(
-                auth=self.auth, headers=self.headers, raise_for_status=True
-            )
+            self._session = aiohttp.ClientSession(auth=self.auth, headers=self.headers, raise_for_status=True)
         return self
 
     async def close(self) -> None:
@@ -53,9 +49,7 @@ class UDMAdapter:
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
-    async def list_objects(
-        self, object_type: str, position: Optional[str] = None
-    ) -> List[Dict]:
+    async def list_objects(self, object_type: str, position: Optional[str] = None) -> List[Dict]:
         """Return the URLs of all objects of the given type."""
 
         params = {
@@ -69,9 +63,7 @@ class UDMAdapter:
         if position:
             params["position"] = position
 
-        async with self._session.get(
-            f"{self.base_url}{object_type}/", params=params
-        ) as request:
+        async with self._session.get(f"{self.base_url}{object_type}/", params=params) as request:
             response = await request.json()
             n_results = response["results"]
             logger.info("Found %s results for %s.", n_results, object_type)

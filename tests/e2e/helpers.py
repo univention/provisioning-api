@@ -2,14 +2,16 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
+
 import requests
+from univention.admin.rest.client import UDM
 from univention.provisioning.consumer import AsyncClient
 from univention.provisioning.models import (
-    PublisherName,
     MessageProcessingStatus,
     MessageProcessingStatusReport,
+    PublisherName,
 )
-from univention.admin.rest.client import UDM
+
 from tests.conftest import REALM, TOPIC
 from tests.e2e.conftest import E2ETestSettings
 

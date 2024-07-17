@@ -9,8 +9,10 @@ import json
 import logging
 import sys
 from typing import Optional, Sequence
+
 from aiohttp import ClientResponseError
-from univention.provisioning.consumer import AsyncClient, Settings, MessageHandler
+
+from univention.provisioning.consumer import AsyncClient, MessageHandler, Settings
 from univention.provisioning.models import ProvisioningMessage
 
 
@@ -41,9 +43,7 @@ def print_header(msg: ProvisioningMessage, action=None):
     else:
         text = f"Realm: {msg.realm}  "
     _cprint(
-        text + f"##  Topic: {msg.topic}  "
-        f"##  From: {msg.publisher_name}  "
-        f"##  Time: {msg.ts}",
+        text + f"##  Topic: {msg.topic}  " f"##  From: {msg.publisher_name}  " f"##  Time: {msg.ts}",
         fg="k",
         bg="w",
     )
@@ -141,9 +141,7 @@ async def main() -> None:
             provisioning_api_password=arguments.admin_password,
             provisioning_api_base_url=settings.provisioning_api_base_url,
         )
-        realms_topics = [
-            tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic
-        ]
+        realms_topics = [tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic]
         prefill = arguments.prefill
         async with AsyncClient(admin_settings) as admin_client:
             try:
@@ -158,9 +156,7 @@ async def main() -> None:
 
     logging.info("Listening for messages")
     async with AsyncClient(settings) as client:
-        await MessageHandler(
-            client, settings.provisioning_api_username, [handle_message]
-        ).run()
+        await MessageHandler(client, settings.provisioning_api_username, [handle_message]).run()
 
 
 def run():

@@ -33,8 +33,8 @@
 
 import asyncio
 
-from univention.listener.handler import ListenerModuleHandler
 from provisioning_listener.service import ensure_stream, handle_changes
+from univention.listener.handler import ListenerModuleHandler
 
 name = "provisioning_handler"
 
@@ -61,7 +61,5 @@ class LdapListener(ListenerModuleHandler):
 
     class Configuration(ListenerModuleHandler.Configuration):
         name = name
-        description = (
-            "this listener will be used to send LDAP changes to provisioning consumers"
-        )
+        description = "this listener will be used to send LDAP changes to provisioning consumers"
         ldap_filter = "(objectClass=*)"

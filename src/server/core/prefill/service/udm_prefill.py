@@ -1,21 +1,21 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+import logging
 import re
 from datetime import datetime
-import logging
 
 from server.core.prefill.base import PreFillService
 from server.core.prefill.port import PrefillPort
+from server.utils.old_message_ack_manager import MessageAckManager
 from univention.provisioning.models import (
+    PREFILL_STREAM,
+    PREFILL_SUBJECT_TEMPLATE,
     FillQueueStatus,
-    PrefillMessage,
     Message,
     MQMessage,
+    PrefillMessage,
     PublisherName,
-    PREFILL_SUBJECT_TEMPLATE,
-    PREFILL_STREAM,
 )
-from server.utils.old_message_ack_manager import MessageAckManager
 
 
 def match_topic(sub_topic: str, module_name: str) -> bool:
@@ -60,9 +60,7 @@ class UDMPreFill(PreFillService):
 
                 await self._port.remove_old_messages_from_prefill_subject(
                     self._subscription_name,
-                    PREFILL_SUBJECT_TEMPLATE.format(
-                        subscription=self._subscription_name
-                    ),
+                    PREFILL_SUBJECT_TEMPLATE.format(subscription=self._subscription_name),
                 )
 
                 for realm, topic in validated_msg.realms_topics:
@@ -89,9 +87,7 @@ class UDMPreFill(PreFillService):
             self._subscription_name,
             self._topic,
         )
-        await self._port.update_subscription_queue_status(
-            self._subscription_name, FillQueueStatus.running
-        )
+        await self._port.update_subscription_queue_status(self._subscription_name, FillQueueStatus.running)
         await self.fetch()
         self._logger.info("Prefill request was processed")
 
@@ -102,9 +98,7 @@ class UDMPreFill(PreFillService):
         """
 
         udm_modules = await self._port.get_object_types()
-        udm_match = [
-            module for module in udm_modules if match_topic(self._topic, module["name"])
-        ]
+        udm_match = [module for module in udm_modules if match_topic(self._topic, module["name"])]
 
         if len(udm_match) == 0:
             self._logger.warning("No UDM modules match object type %s", self._topic)
@@ -154,9 +148,7 @@ class UDMPreFill(PreFillService):
             message,
         )
 
-    async def add_request_to_prefill_failures(
-        self, validated_msg: PrefillMessage, message: MQMessage
-    ):
+    async def add_request_to_prefill_failures(self, validated_msg: PrefillMessage, message: MQMessage):
         self._logger.info("Adding request to the prefill failures queue")
         await self._port.add_request_to_prefill_failures(
             self.PREFILL_FAILURES_STREAM, self.PREFILL_FAILURES_STREAM, validated_msg
@@ -165,14 +157,10 @@ class UDMPreFill(PreFillService):
 
     async def mark_request_as_done(self, msg: MQMessage):
         await self._port.acknowledge_message(msg)
-        await self._port.update_subscription_queue_status(
-            self._subscription_name, FillQueueStatus.done
-        )
+        await self._port.update_subscription_queue_status(self._subscription_name, FillQueueStatus.done)
 
     async def mark_request_as_failed(self):
-        await self._port.update_subscription_queue_status(
-            self._subscription_name, FillQueueStatus.failed
-        )
+        await self._port.update_subscription_queue_status(self._subscription_name, FillQueueStatus.failed)
 
     async def prepare_prefill_failures_queue(self):
         await self._port.create_stream(self.PREFILL_FAILURES_STREAM)

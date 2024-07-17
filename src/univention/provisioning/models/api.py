@@ -3,6 +3,7 @@
 
 import enum
 from typing import Any, Dict, List, Tuple
+
 from pydantic import BaseModel, Field
 
 
@@ -13,9 +14,7 @@ class NewSubscription(BaseModel):
     realms_topics: List[Tuple[str, str]] = Field(
         description="A list of `(realm, topic)` lists that this subscriber subscribes to, e.g. [('udm', 'users/user')]."
     )
-    request_prefill: bool = Field(
-        description="Whether pre-filling of the queue was requested."
-    )
+    request_prefill: bool = Field(description="Whether pre-filling of the queue was requested.")
     password: str = Field(description="Password for subscription registration.")
 
 
@@ -39,9 +38,5 @@ class MessageProcessingStatus(str, enum.Enum):
 class MessageProcessingStatusReport(BaseModel):
     """A subscriber reporting whether a message was processed."""
 
-    status: MessageProcessingStatus = Field(
-        description="Whether the message was processed by the subscriber."
-    )
-    message_seq_num: int = Field(
-        description="A sequence number representing the processed message."
-    )
+    status: MessageProcessingStatus = Field(description="Whether the message was processed by the subscriber.")
+    message_seq_num: int = Field(description="A sequence number representing the processed message.")

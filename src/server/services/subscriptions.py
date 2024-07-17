@@ -3,20 +3,22 @@
 
 import logging
 from typing import List, Optional
+
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 
-from .port import Port
 from univention.provisioning.models import (
-    Subscription,
-    FillQueueStatus,
-    NewSubscription,
-    Bucket,
-    REALM_TOPIC_PREFIX,
     DISPATCHER_SUBJECT_TEMPLATE,
     PREFILL_SUBJECT_TEMPLATE,
+    REALM_TOPIC_PREFIX,
+    Bucket,
+    FillQueueStatus,
+    NewSubscription,
+    Subscription,
 )
+
+from .port import Port
 
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -44,23 +46,16 @@ class SubscriptionService:
     def hash_password(password: str) -> str:
         return password_context.hash(password)
 
-    async def is_subscriptions_matching(
-        self, new_sub: NewSubscription, existing_sub: Subscription
-    ) -> bool:
+    async def is_subscriptions_matching(self, new_sub: NewSubscription, existing_sub: Subscription) -> bool:
         if existing_sub.request_prefill != new_sub.request_prefill:
             return False
 
-        hashed_password = await self._port.get_str_value(
-            new_sub.name, Bucket.credentials
-        )
+        hashed_password = await self._port.get_str_value(new_sub.name, Bucket.credentials)
         valid = password_context.verify(new_sub.password, hashed_password)
         if not valid:
             return False
 
-        new_realms_topics = [
-            REALM_TOPIC_TEMPLATE.format(realm=r, topic=t)
-            for r, t in new_sub.realms_topics
-        ]
+        new_realms_topics = [REALM_TOPIC_TEMPLATE.format(realm=r, topic=t) for r, t in new_sub.realms_topics]
         if new_realms_topics != existing_sub.realms_topics:
             return False
 
@@ -78,13 +73,9 @@ class SubscriptionService:
                 )
             return False
         else:
-            self.logger.info(
-                "Registering new subscription with the name: %s", new_sub.name
-            )
+            self.logger.info("Registering new subscription with the name: %s", new_sub.name)
             encrypted_password = self.hash_password(new_sub.password)
-            await self._port.put_value(
-                new_sub.name, encrypted_password, Bucket.credentials
-            )
+            await self._port.put_value(new_sub.name, encrypted_password, Bucket.credentials)
             await self.prepare_and_store_subscription_info(new_sub)
             self.logger.info("New subscription was registered")
             return True
@@ -95,10 +86,7 @@ class SubscriptionService:
         else:
             prefill_queue_status = FillQueueStatus.done
 
-        realms_topics_str = [
-            REALM_TOPIC_TEMPLATE.format(realm=r, topic=t)
-            for r, t in new_sub.realms_topics
-        ]
+        realms_topics_str = [REALM_TOPIC_TEMPLATE.format(realm=r, topic=t) for r, t in new_sub.realms_topics]
         sub_info = Subscription(
             name=new_sub.name,
             realms_topics=realms_topics_str,
@@ -106,9 +94,7 @@ class SubscriptionService:
             prefill_queue_status=prefill_queue_status,
         )
         await self.set_sub_info(new_sub.name, sub_info)
-        await self.update_realm_topic_subscriptions(
-            sub_info.realms_topics, new_sub.name
-        )
+        await self.update_realm_topic_subscriptions(sub_info.realms_topics, new_sub.name)
         await self._port.create_stream(
             new_sub.name,
             [
@@ -118,14 +104,10 @@ class SubscriptionService:
         )
         await self._port.create_consumer(new_sub.name)
 
-    async def update_realm_topic_subscriptions(
-        self, realms_topics: List[str], name: str
-    ):
+    async def update_realm_topic_subscriptions(self, realms_topics: List[str], name: str):
         for realm_topic in realms_topics:
             realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic}"
-            subs = await self._port.get_list_value(
-                realm_topic_key, Bucket.subscriptions
-            )
+            subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
             subs.append(name)
             await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
 
@@ -207,23 +189,15 @@ class SubscriptionService:
             headers={"WWW-Authenticate": "Basic"},
         )
 
-    async def authenticate_user(
-        self, credentials: HTTPBasicCredentials, subscription_name: Optional[str] = None
-    ):
+    async def authenticate_user(self, credentials: HTTPBasicCredentials, subscription_name: Optional[str] = None):
         if subscription_name and subscription_name != credentials.username:
             self.handle_authentication_error("You do not have access to this data")
 
-        hashed_password = await self._port.get_str_value(
-            credentials.username, Bucket.credentials
-        )
+        hashed_password = await self._port.get_str_value(credentials.username, Bucket.credentials)
 
-        valid, new_hash = password_context.verify_and_update(
-            credentials.password, hashed_password
-        )
+        valid, new_hash = password_context.verify_and_update(credentials.password, hashed_password)
         if valid:
             if new_hash:
-                await self._port.put_value(
-                    credentials.username, new_hash, Bucket.credentials
-                )
+                await self._port.put_value(credentials.username, new_hash, Bucket.credentials)
         else:
             self.handle_authentication_error("Incorrect username or password")

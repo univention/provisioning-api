@@ -6,6 +6,7 @@ from univention.provisioning.models import (
     MessageProcessingStatus,
     MessageProcessingStatusReport,
 )
+
 from tests.e2e.helpers import create_message_via_events_api
 
 
@@ -72,19 +73,13 @@ async def test_do_not_acknowledge_message(
     create_message_via_events_api(test_settings)
 
     # test the first delivery of a message
-    message = await provisioning_client.get_subscription_message(
-        name=simple_subscription, timeout=5
-    )
+    message = await provisioning_client.get_subscription_message(name=simple_subscription, timeout=5)
     assert message.body == body
 
     # test that the next message will not be delivered until the first one is temporary out of the stream
-    message2 = await provisioning_client.get_subscription_message(
-        name=simple_subscription, timeout=5
-    )
+    message2 = await provisioning_client.get_subscription_message(name=simple_subscription, timeout=5)
     assert message2 is None
 
     # test that the same unacknowledged message is delivered after 30 seconds of unavailability
-    message3 = await provisioning_client.get_subscription_message(
-        name=simple_subscription, timeout=30
-    )
+    message3 = await provisioning_client.get_subscription_message(name=simple_subscription, timeout=30)
     assert message3.body == body

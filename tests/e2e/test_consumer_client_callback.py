@@ -4,16 +4,13 @@
 import pytest
 from univention.provisioning.consumer import AsyncClient, MessageHandler
 from univention.provisioning.models import Message
+
 from tests.e2e.helpers import create_message_via_events_api
 
 
-async def test_no_callback_function_provided(
-    provisioning_client: AsyncClient, simple_subscription: str
-):
+async def test_no_callback_function_provided(provisioning_client: AsyncClient, simple_subscription: str):
     with pytest.raises(ValueError, match="Callback functions can't be empty"):
-        await MessageHandler(
-            provisioning_client, simple_subscription, [], message_limit=1
-        ).run()
+        await MessageHandler(provisioning_client, simple_subscription, [], message_limit=1).run()
 
 
 async def test_get_one_message(
@@ -28,9 +25,7 @@ async def test_get_one_message(
     async def test_callback(message: Message):
         result.append(message)
 
-    await MessageHandler(
-        provisioning_client, simple_subscription, [test_callback], message_limit=1
-    ).run()
+    await MessageHandler(provisioning_client, simple_subscription, [test_callback], message_limit=1).run()
 
     assert len(result) == 1
 
@@ -64,8 +59,6 @@ async def test_get_multiple_messages(
     async def test_callback(message: Message):
         result.append(message)
 
-    await MessageHandler(
-        provisioning_client, simple_subscription, [test_callback], message_limit=3
-    ).run()
+    await MessageHandler(provisioning_client, simple_subscription, [test_callback], message_limit=3).run()
 
     assert len(result) == 3

@@ -4,13 +4,13 @@ import asyncio
 import logging
 from typing import Dict, List
 
-from server.utils.old_message_ack_manager import MessageAckManager
 from server.core.dispatcher.port import DispatcherPort
+from server.utils.old_message_ack_manager import MessageAckManager
 from univention.provisioning.models import (
-    Message,
-    MQMessage,
     DISPATCHER_STREAM,
     DISPATCHER_SUBJECT_TEMPLATE,
+    Message,
+    MQMessage,
 )
 
 
@@ -38,9 +38,7 @@ class DispatcherService:
         self._logger.info("Received message with content: %s", message.data)
         validated_msg = Message.model_validate(message.data)
 
-        subscriptions = self._subscriptions.get(
-            f"{validated_msg.realm}:{validated_msg.topic}", []
-        )
+        subscriptions = self._subscriptions.get(f"{validated_msg.realm}:{validated_msg.topic}", [])
 
         for sub in subscriptions:
             self._logger.info("Sending message to '%s'", sub)

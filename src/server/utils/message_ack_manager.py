@@ -22,17 +22,13 @@ class MessageAckManager:
         """
 
         message_handler_task = asyncio.create_task(message_handler)
-        ack_extender = asyncio.create_task(
-            self.extend_ack_wait(acknowledge_message_in_progress)
-        )
+        ack_extender = asyncio.create_task(self.extend_ack_wait(acknowledge_message_in_progress))
 
         await message_handler_task
 
         ack_extender.cancel()
 
-    async def extend_ack_wait(
-        self, acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]]
-    ):
+    async def extend_ack_wait(self, acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]]):
         while True:
             await asyncio.sleep(self.ack_wait - self.ack_threshold)
             await acknowledge_message_in_progress()

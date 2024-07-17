@@ -1,21 +1,20 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import logging
 from typing import Annotated, Optional
 
 import fastapi
-import logging
-
 from fastapi import Depends
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
+from server.services.messages import MessageService
+from server.services.port import PortDependency
+from server.services.subscriptions import SubscriptionService
 from univention.provisioning.models import (
     MessageProcessingStatusReport,
     ProvisioningMessage,
 )
-from server.services.messages import MessageService
-from server.services.port import PortDependency
-from server.services.subscriptions import SubscriptionService
 
 logger = logging.getLogger(__name__)
 

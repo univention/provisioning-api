@@ -3,13 +3,13 @@
 
 import json
 import uuid
-from typing import AsyncGenerator, Any, Callable, Coroutine, NamedTuple
+from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple
 
 import msgpack
 import nats
+import pytest
 from nats.aio.client import Client
 from nats.js.errors import NotFoundError
-import pytest
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import AsyncClient, Settings
 
@@ -96,9 +96,7 @@ def subscriber_password() -> str:
 
 
 @pytest.fixture
-def client_settings(
-    test_settings: E2ETestSettings, subscriber_name, subscriber_password
-) -> Settings:
+def client_settings(test_settings: E2ETestSettings, subscriber_name, subscriber_password) -> Settings:
     return Settings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=subscriber_name,
@@ -217,9 +215,7 @@ def get_and_delete_all_messages(
         msg_id = body["message_id"]
         req_id = body["request_id"]
         req_type = body["ldap_request_type"]
-        print(
-            f"msg: [{msg_id}][{req_id}] {req_type:<6} | old DN: {old_dn!r} | new DN: {new_dn!r}"
-        )
+        print(f"msg: [{msg_id}][{req_id}] {req_type:<6} | old DN: {old_dn!r} | new DN: {new_dn!r}")
         if req_type in ("MODIFY", "MODRDN"):
             if not old:
                 print("                        | !!! old=None")

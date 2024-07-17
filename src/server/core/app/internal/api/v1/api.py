@@ -5,31 +5,25 @@ from typing import Annotated
 
 import fastapi
 from fastapi import Depends
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from server.core.app.config import app_settings
-from univention.provisioning.models import Message, FillQueueStatus
 from server.core.app.auth import authenticate_user
+from server.core.app.config import app_settings
 from server.services.messages import MessageService
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService
+from univention.provisioning.models import FillQueueStatus, Message
 
 router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()
 logger = logging.getLogger(__name__)
 
 
-def authenticate_prefill(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)]
-):
-    authenticate_user(
-        credentials, app_settings.prefill_username, app_settings.prefill_password
-    )
+def authenticate_prefill(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    authenticate_user(credentials, app_settings.prefill_username, app_settings.prefill_password)
 
 
-def authenticate_events_endpoint(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)]
-):
+def authenticate_events_endpoint(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
     authenticate_user(
         credentials,
         app_settings.events_username_udm,

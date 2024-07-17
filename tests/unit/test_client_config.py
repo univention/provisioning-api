@@ -2,11 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import os
-
 from typing import List
 
 from univention.provisioning.consumer.config import Settings
-
 
 env_api_url = "PROVISIONING_API_BASE_URL"
 env_username = "PROVISIONING_API_USERNAME"
@@ -56,9 +54,7 @@ def test_base_url():
 
 def test_property_consumer_registration_url():
     settings = Settings()
-    assert (
-        settings.consumer_registration_url == "http://localhost:7777/subscriptions/v1"
-    )
+    assert settings.consumer_registration_url == "http://localhost:7777/subscriptions/v1"
 
 
 def test_property_consumer_messages_url():
