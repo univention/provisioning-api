@@ -19,10 +19,12 @@ def maildomain(udm):
     maildomain.delete()
 
 
+@pytest.mark.timeout(10)
 def test_create_delete_maildomain(maildomain):
     assert maildomain
 
 
+@pytest.mark.timeout(30)
 def test_create_delete_user(udm: UDM, maildomain):
     users = udm.get("users/user")
     assert users

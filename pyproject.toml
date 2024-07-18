@@ -36,6 +36,7 @@ optional = true
 httpx = "^0.24.0"
 pytest = "^7.4.2"
 pytest-cov = "4.1"
+pytest-timeout = "2.3.1"
 udm-rest-api-client = "^0.0.2"
 
 [[tool.poetry.source]]
