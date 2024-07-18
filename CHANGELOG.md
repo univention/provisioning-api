@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.29.0...v0.29.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* fix consumer creation, add tests ([0893d91](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0893d912da6d55a1d42fde8108d20979f41b412c))
+
 ## [0.29.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.28.7...v0.29.0) (2024-07-10)
 
 
