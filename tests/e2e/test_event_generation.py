@@ -109,6 +109,7 @@ async def test_create_user(
     assert messages_expected == messages_found_short
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.asyncio
 async def test_create_delete_user(
     maildomain,
@@ -255,6 +256,7 @@ async def test_create_delete_user(
             assert username not in msg["new"].get("memberUid", [])
 
 
+@pytest.mark.timeout(10)
 @pytest.mark.asyncio
 async def test_rename_user(
     maildomain,
@@ -347,6 +349,7 @@ async def test_rename_user(
             raise AssertionError(f"Unexpected message. {index=} {msg=}")
 
 
+@pytest.mark.timeout(10)
 async def test_create_modify_delete_group(
     get_and_delete_all_messages,
     ldap_base,
@@ -455,6 +458,7 @@ async def test_create_modify_delete_group(
     assert not msg["new"] and msg["old"]
 
 
+@pytest.mark.timeout(10)
 @pytest.mark.asyncio
 async def test_rename_group(
     maildomain,
@@ -531,6 +535,7 @@ async def test_rename_group(
 
 
 # Only works after stack-data
+@pytest.mark.timeout(10)
 @pytest.mark.xfail(raises=MissingUdmExtension, reason="Missing OX UDM Extension")
 def test_create_accessprofile(udm: UDM, udm_module_exists):
     if not udm_module_exists("oxmail/accessprofile"):
@@ -548,6 +553,7 @@ def test_create_accessprofile(udm: UDM, udm_module_exists):
 
 
 # Only works after stack-data
+@pytest.mark.timeout(10)
 @pytest.mark.xfail(raises=MissingUdmExtension, reason="Missing OX UDM Extension")
 def test_create_functional_account(udm: UDM, maildomain, udm_module_exists):
     if not udm_module_exists("oxmail/functional_account"):
