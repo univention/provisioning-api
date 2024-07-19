@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.30.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.29.1...v0.30.0) (2024-07-19)
+
+
+### Features
+
+* **consumer-client:** change producer names from LDAP-* to LDIF-* ([ce75fdf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ce75fdfb5f271771a4307cf9430ff8fbe76ef2fc))
+
+
+### Bug Fixes
+
+* add ldif-producer to docker-compose ([8b11493](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8b114939280349bf4ee77709ea8903f976c8e46a))
+* migrate docker-compose to artifacts.software-univention.de ([1811d20](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1811d201dd13a746021f5e38b2b8eda56ede521e))
+* **models:** change publisher name from udm_listener to ldif_producer ([258b0a4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/258b0a4a3ce3c3ab401ad714e1df33e721ce0aad))
+* remove unnecessary env values ([b72ebc1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b72ebc107deae9a71df7e3f91ba45190de3793f4))
+* replace the UDM-listener with the new LDIF-Producer and activate it in the UDM REST API ([4c802f6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4c802f66ce01cc8646bb94b23be65a8cb71c93f6))
+* **udm-transformer:** make the ldap queue name configurable ([26e1778](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/26e1778674e2120c9a38ae374baccf9a93db7f3e))
+* **udm-transformer:** only crash when an transformation error occurred for a supported object type ([4aaff67](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4aaff672ae77e94fed0fd0e9842f9c86d9d7668e))
+* wip fixes for the e2e tests ([69d3d28](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/69d3d282d8f76ef35e5bcd85767e5a9a32eceed3))
+
 ## [0.29.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.29.0...v0.29.1) (2024-07-18)
 
 
