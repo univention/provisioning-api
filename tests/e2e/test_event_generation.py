@@ -4,7 +4,7 @@
 import asyncio
 import time
 import uuid
-from typing import Any
+from typing import Any, Callable
 
 import nats
 import pytest
@@ -56,11 +56,15 @@ def create_user(udm: UDM, props):
         return exc
 
 
-def create_user_properties(
-    usernames: list[str], maildomain: str, opendesk_extensions: bool
-) -> list[dict[str, str | bool]]:
-    result = []
-    for username in usernames:
+@pytest.fixture(scope="session")
+def opendesk_extensions(udm) -> bool:
+    # Check if opendesk extensions need to be disabled.
+    return bool(next(udm.get("settings/extended_attribute").search("cn=opendeskFileshareEnabledUser"), None))
+
+
+@pytest.fixture(scope="session")
+def user_properties_factory(maildomain, opendesk_extensions) -> Callable[[str], dict[str, str | bool]]:
+    def _user_properties(username: str) -> dict[str, str | bool]:
         properties = {
             "username": username,
             "firstname": "test_event_generation",
@@ -80,32 +84,26 @@ def create_user_properties(
                     "opendeskLivecollaborationEnabled": False,
                 }
             )
-        result.append(properties)
-    return result
+        return properties
 
-
-@pytest.fixture(scope="session")
-def opendesk_extensions(udm) -> bool:
-    # Check if opendesk extensions need to be disabled.
-    return bool(next(udm.get("settings/extended_attribute").search("cn=opendeskFileshareEnabledUser"), None))
+    return _user_properties
 
 
 @pytest.mark.timeout(30)
 @pytest.mark.asyncio
 async def test_create_user(
-    maildomain,
     get_and_delete_all_messages,
     ldif_producer_stream_name,
     schedule_delete_udm_object,
     ldap_base,
     nats_connection,
     udm,
-    opendesk_extensions,
+    user_properties_factory,
 ):
     user_mod = udm.get("users/user")
 
     usernames = [str(uuid.uuid4()) for _ in range(NUM_TEST_USERS)]
-    user_properties = create_user_properties(usernames, maildomain, opendesk_extensions)
+    user_properties = [user_properties_factory(username) for username in usernames]
 
     messages_expected: list[tuple[str, str, str]] = []
     for username in usernames:
@@ -140,16 +138,15 @@ async def test_create_user(
 @pytest.mark.timeout(30)
 @pytest.mark.asyncio
 async def test_create_delete_user(
-    maildomain,
     get_and_delete_all_messages,
     ldap_base,
     ldif_producer_stream_name,
     udm,
-    opendesk_extensions,
+    user_properties_factory,
     nats_connection,
 ):
     usernames = [str(uuid.uuid4()) for _ in range(NUM_TEST_USERS)]
-    user_properties = create_user_properties(usernames, maildomain, opendesk_extensions)
+    user_properties = [user_properties_factory(username) for username in usernames]
 
     messages_expected: list[tuple[str, str, str]] = []
     for username in usernames:
@@ -280,19 +277,18 @@ async def test_create_delete_user(
 @pytest.mark.timeout(10)
 @pytest.mark.asyncio
 async def test_rename_user(
-    maildomain,
     get_and_delete_all_messages,
     ldif_producer_stream_name,
     schedule_delete_udm_object,
     ldap_base,
     nats_connection,
     udm,
-    opendesk_extensions,
+    user_properties_factory,
 ):
     user_name_old = str(uuid.uuid4())
     user_name_new = str(uuid.uuid4())
 
-    user_properties = create_user_properties([user_name_old], maildomain, opendesk_extensions)[0]
+    user_properties = user_properties_factory(user_name_old)
 
     messages_expected: list[tuple[str, str, str]] = [
         ("ADD", "users/user", f"uid={user_name_old},cn=users,{ldap_base}"),
@@ -374,7 +370,7 @@ async def test_create_modify_delete_group(
     ldif_producer_stream_name,
     maildomain,
     udm,
-    opendesk_extensions,
+    user_properties_factory,
     nats_connection,
 ):
     group_name = str(uuid.uuid4())
@@ -385,7 +381,7 @@ async def test_create_modify_delete_group(
     }
     group_dn = f"cn={group_name},cn=groups,{ldap_base}"
     user_name = str(uuid.uuid4())
-    user_properties = create_user_properties([user_name], maildomain, opendesk_extensions)[0]
+    user_properties = user_properties_factory(user_name)
 
     user_dn = f"uid={user_name},cn=users,{ldap_base}"
     messages_expected: list[tuple[str, str, str]] = [
