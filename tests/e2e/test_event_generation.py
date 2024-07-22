@@ -56,6 +56,40 @@ def create_user(udm: UDM, props):
         return exc
 
 
+def create_user_properties(
+    usernames: list[str], maildomain: str, opendesk_extensions: bool
+) -> list[dict[str, str | bool]]:
+    result = []
+    for username in usernames:
+        properties = {
+            "username": username,
+            "firstname": "test_event_generation",
+            "lastname": username,
+            "password": "univention",
+            "mailPrimaryAddress": f"{username}@{maildomain}",
+        }
+        if opendesk_extensions:
+            properties.update(
+                {
+                    "isOxUser": False,
+                    "opendeskFileshareEnabled": False,
+                    "opendeskFileshareAdmin": False,
+                    "opendeskProjectmanagementEnabled": False,
+                    "opendeskProjectmanagementAdmin": False,
+                    "opendeskKnowledgemanagementEnabled": False,
+                    "opendeskLivecollaborationEnabled": False,
+                }
+            )
+        result.append(properties)
+    return result
+
+
+@pytest.fixture(scope="session")
+def opendesk_extensions(udm) -> bool:
+    # Check if opendesk extensions need to be disabled.
+    return bool(next(udm.get("settings/extended_attribute").search("cn=opendeskFileshareEnabledUser"), None))
+
+
 @pytest.mark.timeout(30)
 @pytest.mark.asyncio
 async def test_create_user(
@@ -66,18 +100,13 @@ async def test_create_user(
     ldap_base,
     nats_connection,
     udm,
+    opendesk_extensions,
 ):
+    user_mod = udm.get("users/user")
+
     usernames = [str(uuid.uuid4()) for _ in range(NUM_TEST_USERS)]
-    user_props = [
-        {
-            "username": username,
-            "firstname": "test_event_generation",
-            "lastname": username,
-            "password": "univention",
-            "mailPrimaryAddress": f"{username}@{maildomain}",
-        }
-        for username in usernames
-    ]
+    user_properties = create_user_properties(usernames, maildomain, opendesk_extensions)
+
     messages_expected: list[tuple[str, str, str]] = []
     for username in usernames:
         messages_expected.extend(
@@ -88,8 +117,7 @@ async def test_create_user(
         )
         schedule_delete_udm_object("users/user", f"uid={username},cn=users,{ldap_base}")
 
-    user_mod = udm.get("users/user")
-    for i, props in enumerate(user_props):
+    for i, props in enumerate(user_properties):
         user = user_mod.new()
         user.properties.update(props)
         user.save()
@@ -117,19 +145,12 @@ async def test_create_delete_user(
     ldap_base,
     ldif_producer_stream_name,
     udm,
+    opendesk_extensions,
     nats_connection,
 ):
     usernames = [str(uuid.uuid4()) for _ in range(NUM_TEST_USERS)]
-    user_props = [
-        {
-            "username": username,
-            "firstname": "test_event_generation",
-            "lastname": username,
-            "password": "univention",
-            "mailPrimaryAddress": f"{username}@{maildomain}",
-        }
-        for username in usernames
-    ]
+    user_properties = create_user_properties(usernames, maildomain, opendesk_extensions)
+
     messages_expected: list[tuple[str, str, str]] = []
     for username in usernames:
         messages_expected.extend(
@@ -146,7 +167,7 @@ async def test_create_delete_user(
     user_mod = udm.get("users/user")
     group_mod = udm.get("groups/group")
     guest_group_dn = list(group_mod.search("name=Domain Guests"))[0].dn
-    for i, props in enumerate(user_props):
+    for i, props in enumerate(user_properties):
         user = user_mod.new()
         user.properties.update(props)
         user.save()
@@ -266,16 +287,13 @@ async def test_rename_user(
     ldap_base,
     nats_connection,
     udm,
+    opendesk_extensions,
 ):
     user_name_old = str(uuid.uuid4())
     user_name_new = str(uuid.uuid4())
-    user_props = {
-        "username": user_name_old,
-        "firstname": "test_event_generation",
-        "lastname": user_name_old,
-        "password": "univention",
-        "mailPrimaryAddress": f"{user_name_old}@{maildomain}",
-    }
+
+    user_properties = create_user_properties([user_name_old], maildomain, opendesk_extensions)[0]
+
     messages_expected: list[tuple[str, str, str]] = [
         ("ADD", "users/user", f"uid={user_name_old},cn=users,{ldap_base}"),
         ("MODIFY", "groups/group", f"cn=Domain Users,cn=groups,{ldap_base}"),
@@ -290,7 +308,7 @@ async def test_rename_user(
 
     user_mod = udm.get("users/user")
     user = user_mod.new()
-    user.properties.update(user_props)
+    user.properties.update(user_properties)
     user.save()
     dn_old = user.dn
     print(f"Created user {dn_old!r}.")
@@ -356,6 +374,7 @@ async def test_create_modify_delete_group(
     ldif_producer_stream_name,
     maildomain,
     udm,
+    opendesk_extensions,
     nats_connection,
 ):
     group_name = str(uuid.uuid4())
@@ -366,13 +385,8 @@ async def test_create_modify_delete_group(
     }
     group_dn = f"cn={group_name},cn=groups,{ldap_base}"
     user_name = str(uuid.uuid4())
-    user_props = {
-        "username": user_name,
-        "firstname": "test_event_generation",
-        "lastname": user_name,
-        "password": "univention",
-        "mailPrimaryAddress": f"{user_name}@{maildomain}",
-    }
+    user_properties = create_user_properties([user_name], maildomain, opendesk_extensions)[0]
+
     user_dn = f"uid={user_name},cn=users,{ldap_base}"
     messages_expected: list[tuple[str, str, str]] = [
         ("ADD", "groups/group", group_dn),  # create group
@@ -392,10 +406,10 @@ async def test_create_modify_delete_group(
     print(f"Created group {group.dn!r}.")
     assert group.dn == group_dn
 
-    user_props["primaryGroup"] = group.dn
+    user_properties["primaryGroup"] = group.dn
 
     user = user_mod.new()
-    user.properties.update(user_props)
+    user.properties.update(user_properties)
     user.save()
     print(f"Created user {user.dn!r}.")
     assert user.dn == user_dn
