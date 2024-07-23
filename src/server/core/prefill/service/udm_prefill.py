@@ -30,6 +30,7 @@ def match_topic(sub_topic: str, module_name: str) -> bool:
 
 class UDMPreFill:
     PREFILL_FAILURES_STREAM = "prefill-failures"
+    PREFILL_DURABLE_NAME = "prefill-service"
 
     def __init__(self, port: PrefillPort):
         super().__init__()
