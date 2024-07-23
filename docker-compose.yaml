@@ -81,7 +81,8 @@ services:
       NATS_PORT: "4222"
       NATS_USER: "udm-transformer"
       NATS_PASSWORD: "udm-transformerpass"
-      LDAP_PUBLISHER_NAME: "ldif-producer"
+      # LDAP_PUBLISHER_NAME: "ldif-producer"
+      LDAP_PUBLISHER_NAME: "udm-listener"
 
       INTERNAL_API_HOST: "events-and-consumer-api"
       EVENTS_USERNAME_UDM: "udm"
@@ -129,9 +130,9 @@ services:
     container_name: "ldif-producer"
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldif-producer:latest"
     # Can be uncommented to simplify local development.
-    build:
-      dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
-      context: ../container-ldap/
+    # build:
+    #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
+    #   context: ../container-ldap/
     environment:
       SOCKET_FILE_LOCATION: "/var/lib/univention-ldap/slapd-sock/sock"
       NATS_USER: ldif-producer
@@ -148,6 +149,48 @@ services:
       - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
+  udm-listener:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:0.28.3"
+    # build:
+    #   context: .
+    #   dockerfile: docker/udm-listener/Dockerfile
+      # args:
+      #   - LISTENER_BASE_IMAGE_TAG=latest
+      #   - UCS_BASE_IMAGE_TAG=latest
+    container_name: "udm-listener"
+    environment:
+      NATS_HOST: "localhost"
+      NATS_PORT: "4222"
+      NATS_USER: ldif-producer
+      NATS_PASSWORD: ldifpass
+      LDAP_HOST: "localhost"
+      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
+      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
+      NOTIFIER_SERVER: "localhost"
+      DEBUG_LEVEL: "3"
+      TLS_MODE: "off"
+      LDAP_PASSWORD: "univention"
+      LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
+      LDAP_PORT: 389
+    network_mode: "host"
+    depends_on:
+      - "nats"
+      - "ldap-server"
+      - "ldap-notifier"
+
+  ldap-notifier:
+    platform: linux/amd64
+    image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.16.1-pre-jlohmer-bump-to-508
+    depends_on:
+      ldap-server:
+        condition: service_started
+    ports:
+      - 6669:6669
+    volumes:
+      - ldap-shared-data:/var/lib/univention-ldap/:rw
+      - ldap-shared-run:/var/run/slapd/:ro
+
+
   ldap-server:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
@@ -158,6 +201,8 @@ services:
       - 389:389
       - 636:636
     volumes:
+      - ldap-shared-data:/var/lib/univention-ldap/:rw
+      - ldap-shared-run:/var/run/slapd/:rw
       - ${LDAP_SOCKET_LOCATION:-ldap-socket}:/var/lib/univention-ldap/slapd-sock/:rw
       - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
 
@@ -244,5 +289,7 @@ services:
       - docs
 
 volumes:
+  ldap-shared-data:
+  ldap-shared-run:
   pre-commit-cache:
   ldap-socket:
