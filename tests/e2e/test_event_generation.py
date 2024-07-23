@@ -16,46 +16,6 @@ NUM_TEST_USERS = 10
 class MissingUdmExtension(Exception): ...
 
 
-async def get_messages(
-    get_and_delete_all_messages, ldif_producer_stream_name
-) -> tuple[list[dict[str, Any]], list[tuple[str, str, str]]]:
-    messages_found = []
-    messages_found_short: list[tuple[str, str, str]] = []
-    async for msg in get_and_delete_all_messages(ldif_producer_stream_name):
-        messages_found.append(msg)
-        dn_old = msg["old"]["entryDN"][0].decode() if msg["old"] else ""
-        dn_new = msg["new"]["entryDN"][0].decode() if msg["new"] else ""
-        uni_obj_type = msg["old"]["univentionObjectType"][0] if msg["old"] else msg["new"]["univentionObjectType"][0]
-        messages_found_short.append((msg["ldap_request_type"], uni_obj_type.decode(), dn_old or dn_new))
-    return messages_found, messages_found_short
-
-
-@pytest.mark.timeout(10)
-@pytest.mark.asyncio
-async def test_create_delete_maildomain(get_and_delete_all_messages, ldap_base, ldif_producer_stream_name, maildomain):
-    assert maildomain
-    name = "ldif-producer.unittests"
-    async for msg in get_and_delete_all_messages(ldif_producer_stream_name):
-        assert msg["ldap_request_type"] == "ADD"
-        assert not msg["old"]
-        assert msg["new"]["univentionObjectType"] == [b"mail/domain"]
-        assert msg["new"]["cn"] == [name.encode()]
-        assert msg["new"]["entryDN"][0].decode() == f"cn={name},cn=domain,cn=mail,{ldap_base}"
-
-
-def create_user(udm: UDM, props):
-    users = udm.get("users/user")
-    assert users
-    user = users.new()
-    user.properties.update(props)
-
-    try:
-        user.save()
-        return user
-    except Exception as exc:
-        return exc
-
-
 @pytest.fixture(scope="session")
 def opendesk_extensions(udm) -> bool:
     # Check if opendesk extensions need to be disabled.
@@ -89,6 +49,48 @@ def user_properties_factory(maildomain, opendesk_extensions) -> Callable[[str], 
     return _user_properties
 
 
+async def get_messages(
+    get_and_delete_all_messages, ldif_producer_stream_name
+) -> tuple[list[dict[str, Any]], list[tuple[str, str, str]]]:
+    messages_found = []
+    messages_found_short: list[tuple[str, str, str]] = []
+    async for msg in get_and_delete_all_messages(ldif_producer_stream_name):
+        messages_found.append(msg)
+        dn_old = msg["old"]["entryDN"][0].decode() if msg["old"] else ""
+        dn_new = msg["new"]["entryDN"][0].decode() if msg["new"] else ""
+        uni_obj_type = msg["old"]["univentionObjectType"][0] if msg["old"] else msg["new"]["univentionObjectType"][0]
+        messages_found_short.append((msg["ldap_request_type"], uni_obj_type.decode(), dn_old or dn_new))
+    return messages_found, messages_found_short
+
+
+def create_user(udm: UDM, props):
+    users = udm.get("users/user")
+    assert users
+    user = users.new()
+    user.properties.update(props)
+
+    try:
+        user.save()
+        return user
+    except Exception as exc:
+        return exc
+
+
+@pytest.mark.skip("only works with the ldif-producer")
+@pytest.mark.timeout(10)
+@pytest.mark.asyncio
+async def test_create_delete_maildomain(get_and_delete_all_messages, ldap_base, ldif_producer_stream_name, maildomain):
+    assert maildomain
+    name = "ldif-producer.unittests"
+    async for msg in get_and_delete_all_messages(ldif_producer_stream_name):
+        assert msg["ldap_request_type"] == "ADD"
+        assert not msg["old"]
+        assert msg["new"]["univentionObjectType"] == [b"mail/domain"]
+        assert msg["new"]["cn"] == [name.encode()]
+        assert msg["new"]["entryDN"][0].decode() == f"cn={name},cn=domain,cn=mail,{ldap_base}"
+
+
+@pytest.mark.skip("only works with the ldif-producer")
 @pytest.mark.timeout(30)
 @pytest.mark.asyncio
 async def test_create_user(
@@ -135,6 +137,7 @@ async def test_create_user(
     assert messages_expected == messages_found_short
 
 
+@pytest.mark.skip("only works with the ldif-producer")
 @pytest.mark.timeout(30)
 @pytest.mark.asyncio
 async def test_create_delete_user(
@@ -274,6 +277,7 @@ async def test_create_delete_user(
             assert username not in msg["new"].get("memberUid", [])
 
 
+@pytest.mark.skip("only works with the ldif-producer")
 @pytest.mark.timeout(10)
 @pytest.mark.asyncio
 async def test_rename_user(
@@ -363,6 +367,7 @@ async def test_rename_user(
             raise AssertionError(f"Unexpected message. {index=} {msg=}")
 
 
+@pytest.mark.skip("only works with the ldif-producer")
 @pytest.mark.timeout(10)
 async def test_create_modify_delete_group(
     get_and_delete_all_messages,
@@ -468,6 +473,7 @@ async def test_create_modify_delete_group(
     assert not msg["new"] and msg["old"]
 
 
+@pytest.mark.skip("only works with the ldif-producer")
 @pytest.mark.timeout(10)
 @pytest.mark.asyncio
 async def test_rename_group(
@@ -545,8 +551,8 @@ async def test_rename_group(
 
 
 # Only works after stack-data
-@pytest.mark.timeout(10)
 @pytest.mark.xfail(raises=MissingUdmExtension, reason="Missing OX UDM Extension")
+@pytest.mark.timeout(10)
 def test_create_accessprofile(udm: UDM, udm_module_exists):
     if not udm_module_exists("oxmail/accessprofile"):
         raise MissingUdmExtension
@@ -563,8 +569,8 @@ def test_create_accessprofile(udm: UDM, udm_module_exists):
 
 
 # Only works after stack-data
-@pytest.mark.timeout(10)
 @pytest.mark.xfail(raises=MissingUdmExtension, reason="Missing OX UDM Extension")
+@pytest.mark.timeout(10)
 def test_create_functional_account(udm: UDM, maildomain, udm_module_exists):
     if not udm_module_exists("oxmail/functional_account"):
         raise MissingUdmExtension
