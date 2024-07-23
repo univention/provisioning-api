@@ -27,10 +27,13 @@ from univention.provisioning.models import (
     MQMessage,
     ProvisioningMessage,
 )
-from univention.provisioning.models.queue import Message
 
 from ..config import settings
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
+
+
+class Empty(Exception): ...
+
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -192,15 +195,15 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(self, stream: str, subject: str, durable_name: str) -> None:
+    async def initialize_subscription(self, stream: str, subject: str | None, durable_name: str) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
-        await self.ensure_stream(stream, [subject])
+        await self.ensure_stream(stream, [subject] if subject else None)
         await self.ensure_consumer(stream)
 
         durable_name = NatsKeys.durable_name(durable_name)
         stream_name = NatsKeys.stream(stream)
         self.pull_subscription = await self._js.pull_subscribe(
-            subject=subject,
+            subject=subject if subject else "*",
             durable=durable_name,
             stream=stream_name,
         )
@@ -236,7 +239,7 @@ class NatsMQAdapter(BaseMQAdapter):
         self,
         timeout: float = 10,
         binary_decoder: Callable[[bytes], Any] = json_decoder,
-    ) -> Tuple[Optional[Message], Optional[Acknowledgements]]:
+    ) -> Tuple[MQMessage, Acknowledgements]:
         """Returns Optionals of Message and a Callable that acknowledges the message."""
         if not self.pull_subscription:
             raise ValueError(
@@ -246,12 +249,14 @@ class NatsMQAdapter(BaseMQAdapter):
         try:
             messages = await self.pull_subscription.fetch(1, timeout=timeout)
         except asyncio.TimeoutError:
-            return None, None
+            raise Empty()
 
-        message = binary_decoder(messages[0].data)
         acknowledgements = self.build_acknowledgements(messages[0])
 
-        return Message(**message), acknowledgements
+        return (
+            self.mq_message_from(messages[0], binary_decoder=binary_decoder),
+            acknowledgements,
+        )
 
     @staticmethod
     def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
@@ -280,8 +285,8 @@ class NatsMQAdapter(BaseMQAdapter):
         return msg
 
     @staticmethod
-    def mq_message_from(msg: Msg) -> MQMessage:
-        data = json.loads(msg.data)
+    def mq_message_from(msg: Msg, binary_decoder: Callable[[bytes], Any] = json_decoder) -> MQMessage:
+        data = binary_decoder(msg.data)
         sequence_number = msg.reply.split(".")[-4]
         message = MQMessage(
             subject=msg.subject,

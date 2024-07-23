@@ -2,17 +2,17 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import contextlib
-from typing import Optional
+from typing import Optional, Tuple
 
 from server.adapters.internal_api_adapter import InternalAPIAdapter
-from server.adapters.nats_adapter import NatsMQAdapter
+from server.adapters.nats_adapter import Acknowledgements, NatsMQAdapter
 from server.adapters.udm_adapter import UDMAdapter
 from univention.provisioning.models import (
     FillQueueStatus,
     Message,
     MQMessage,
-    PrefillMessage,
 )
+from univention.provisioning.models.queue import BaseMessage
 
 from .config import PrefillSettings
 
@@ -47,11 +47,13 @@ class PrefillPort:
         await self.mq_adapter.close()
         await self._internal_api_adapter.close()
 
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
+    async def initialize_subscription(self, stream: str, subject: str | None, durable_name: str) -> None:
+        await self.mq_adapter.initialize_subscription(stream, subject, durable_name)
 
-    async def wait_for_event(self) -> MQMessage:
-        return await self.mq_adapter.wait_for_event()
+    async def get_one_message(
+        self,
+    ) -> Tuple[MQMessage, Acknowledgements]:
+        return await self.mq_adapter.get_one_message()
 
     async def get_object_types(self):
         return await self._udm_adapter.get_object_types()
@@ -68,16 +70,16 @@ class PrefillPort:
     async def create_prefill_message(self, stream: str, subject: str, message: Message):
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def add_request_to_prefill_failures(self, stream: str, subject: str, message: PrefillMessage):
+    async def add_request_to_prefill_failures(self, stream: str, subject: str, message: BaseMessage):
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def create_stream(self, subject: str):
+    async def ensure_stream(self, subject: str):
         await self.mq_adapter.ensure_stream(subject)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
 
-    async def create_consumer(self, subject: str):
+    async def ensure_consumer(self, subject: str):
         await self.mq_adapter.ensure_consumer(subject)
 
     async def acknowledge_message(self, message: MQMessage):

@@ -38,14 +38,18 @@ class BaseMessage(BaseModel):
         return dt.isoformat()
 
 
-class Message(BaseMessage):
+class SimpleMessage(BaseMessage):
+    """Message with a minimal payload"""
+
+    body: Dict[str, Any] = Field(description="The content of the message as a key/value dictionary.")
+
+
+class Message(SimpleMessage):
     """The base class for any kind of message sent via the queues."""
 
     realm: str = Field(description="The realm of the message, e.g. `udm`.")
 
     topic: str = Field(description="The topic of the message, e.g. `users/user`.")
-
-    body: Dict[str, Any] = Field(description="The content of the message as a key/value dictionary.")
 
 
 class PrefillMessage(BaseMessage):

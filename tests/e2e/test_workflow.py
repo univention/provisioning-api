@@ -69,7 +69,7 @@ def subscription_name(test_settings: E2ETestSettings):
 
 
 @pytest.fixture(scope="function")
-def ldap_user(ldap_connection, subscription_name, test_settings, request):
+def ldap_group(ldap_connection, subscription_name, test_settings, request):
     dn = f"cn=test_group1235,cn=groups,{test_settings.ldap_base}"
     result = ldap_connection.add(
         dn=dn,
@@ -83,9 +83,8 @@ def ldap_user(ldap_connection, subscription_name, test_settings, request):
     ldap_connection.delete(dn)
 
 
-@pytest.mark.skip("LDAP Controls need to be activated for the ldap3 library in the test setup")
-async def test_workflow(test_settings, ldap_user, subscription_name):
-    ldap_connection, dn = ldap_user
+async def test_workflow(test_settings, ldap_group, subscription_name):
+    ldap_connection, dn = ldap_group
 
     # Test object was created
     response = requests.get(
@@ -98,7 +97,7 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.ldif_producer
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["old"] is None
     assert message["body"]["new"]["dn"] == dn
 
@@ -117,7 +116,7 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.ldif_producer
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["old"]["dn"] == dn
     assert message["body"]["new"]["properties"]["description"] == new_description
 
@@ -134,7 +133,7 @@ async def test_workflow(test_settings, ldap_user, subscription_name):
 
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
-    assert message["publisher_name"] == PublisherName.ldif_producer
+    assert message["publisher_name"] == PublisherName.udm_listener
     assert message["body"]["new"] is None
     assert message["body"]["old"]["dn"] == dn
 

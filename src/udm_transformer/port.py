@@ -13,6 +13,7 @@ from server.adapters.nats_adapter import (
     messagepack_decoder,
 )
 from univention.provisioning.models import Bucket, Message
+from univention.provisioning.models.queue import MQMessage
 
 from .config import UDMTransformerSettings, get_udm_transformer_settings
 
@@ -55,8 +56,8 @@ class UDMTransformerPort:
     async def initialize_subscription(self, stream: str, subject: str, durable_name):
         return await self.mq_adapter.initialize_subscription(stream, subject, durable_name)
 
-    async def get_message(self, timeout: float) -> tuple[Message | None, Acknowledgements | None]:
-        return await self.mq_adapter.get_one_message(timeout, messagepack_decoder)
+    async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
+        return await self.mq_adapter.get_one_message(timeout=timeout, binary_decoder=messagepack_decoder)
 
     async def retrieve(self, url: str, bucket: Bucket):
         result = await self.kv_adapter.get_value(url, bucket)

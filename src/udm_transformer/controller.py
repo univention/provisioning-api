@@ -3,7 +3,9 @@
 
 import logging
 
-from server.adapters.nats_adapter import Acknowledgements
+from pydantic import ValidationError
+
+from server.adapters.nats_adapter import Acknowledgements, Empty
 from server.utils.message_ack_manager import MessageAckManager
 from udm_transformer.port import UDMTransformerPort
 from udm_transformer.service.udm import UDMMessagingService
@@ -62,12 +64,18 @@ class UDMTransformerController:
 
         while True:
             logger.debug("listening for new LDAP messages")
-            message, acknowledgements = await self._port.get_message(timeout=10)
-            if not message or not acknowledgements:
+            try:
+                message, acknowledgements = await self._port.get_one_message(timeout=10)
+            except Empty:
                 logger.debug("No new LDAP messages found in the queue, continuing to wait.")
                 continue
             try:
-                await self.handle_message(message, acknowledgements)
+                validated_message = Message.model_validate(message.data)
+            except ValidationError:
+                logger.error("Failed to parse the ldap message.")
+                raise
+            try:
+                await self.handle_message(validated_message, acknowledgements)
             except Exception:
                 logger.exception("Failed to transform message")
                 raise
