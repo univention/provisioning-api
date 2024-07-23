@@ -13,12 +13,10 @@ from univention.provisioning.models import (
     PREFILL_STREAM,
     PREFILL_SUBJECT_TEMPLATE,
     FillQueueStatus,
-    Message,
     MQMessage,
     PrefillMessage,
-    PublisherName,
 )
-from univention.provisioning.models.queue import Body, SimpleMessage
+from univention.provisioning.models.queue import Body, Message, PublisherName, SimpleMessage
 
 
 class PrefillFailedError(Exception): ...
@@ -120,7 +118,6 @@ class UDMPreFill:
             )
             await self._port.update_subscription_queue_status(message.subscription_name, FillQueueStatus.running)
             await self.fetch_udm(message.subscription_name, topic)
-        self._logger.info("Prefill request was processed")
 
     async def fetch_udm(self, subscription_name: str, topic: str):
         """
