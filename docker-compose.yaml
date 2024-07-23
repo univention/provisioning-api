@@ -190,7 +190,6 @@ services:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
       - ldap-shared-run:/var/run/slapd/:ro
 
-
   ldap-server:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
