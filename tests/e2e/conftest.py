@@ -8,12 +8,11 @@ from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple
 import msgpack
 import nats
 import pytest
-from nats.aio.client import Client
+from nats.aio.client import Client as NATS
 from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import AsyncClient, Settings
 
-from .. import ENV_DEFAULTS
 from ..conftest import REALMS_TOPICS
 
 
@@ -24,6 +23,10 @@ class E2ETestSettings(NamedTuple):
 
     provisioning_events_username: str
     provisioning_events_password: str
+
+    nats_url: str
+    nats_user: str
+    nats_password: str
 
     ldap_server_uri: str
     ldap_base: str
@@ -164,18 +167,16 @@ def maildomain(udm):
     print(f"Deleted mail domain {maildomain!r}.")
 
 
-@pytest.fixture(scope="session")
-def nats_connection_settings() -> dict[str, str]:
-    return {
-        "servers": ["nats://localhost:4222"],
-        "user": ENV_DEFAULTS["admin_nats_user"],
-        "password": ENV_DEFAULTS["admin_nats_password"],
-    }
-
-
-@pytest.fixture
-async def nats_connection(nats_connection_settings) -> Client:
-    nc = await nats.connect(**nats_connection_settings)
+@pytest.fixture()
+async def nats_connection(test_settings: E2ETestSettings) -> AsyncGenerator[NATS, Any]:
+    nc = NATS()
+    await nc.connect(
+        servers=test_settings.nats_url,
+        user=test_settings.nats_user,
+        password=test_settings.nats_password,
+        max_reconnect_attempts=1,
+        connect_timeout=5,
+    )
     yield nc
     await nc.close()
 

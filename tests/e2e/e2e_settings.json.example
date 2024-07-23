@@ -5,6 +5,9 @@
     "provisioning_admin_password": "provisioning",
     "provisioning_events_username": "udm",
     "provisioning_events_password": "udmpass",
+    "nats_url": "nats://localhost:4222",
+    "nats_user": "admin",
+    "nats_password": "nimda",
     "ldap_server_uri": "ldap://localhost:389",
     "ldap_base": "dc=univention-organization,dc=intranet",
     "ldap_bind_dn": "cn=admin,dc=univention-organization,dc=intranet",
@@ -19,6 +22,7 @@
   },
   "pipeline": {
     "provisioning_api_base_url": "http://events-and-consumer-api:7777",
+    "nats_url": "nats://nats:4222",
     "ldap_server_uri": "ldap://ldap-server:389",
     "udm_rest_api_base_url": "http://udm-rest-api:9979/udm/"
   },
@@ -27,6 +31,8 @@
     "provisioning_admin_password": "changeme",
     "provisioning_events_username": "foo",
     "provisioning_events_password": "changeme",
+    "nats_user": "foo",
+    "nats_password": "bar",
     "ldap_server_uri": "ldap://localhost:3890",
     "ldap_base": "dc=swp-ldap,dc=internal",
     "ldap_bind_dn": "cn=admin,dc=swp-ldap,dc=internal",
