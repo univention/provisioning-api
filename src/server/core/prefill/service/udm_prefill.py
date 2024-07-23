@@ -7,7 +7,6 @@ from datetime import datetime
 from pydantic import ValidationError
 
 from server.adapters.nats_adapter import Empty
-from server.core.prefill.base import PreFillService
 from server.core.prefill.port import PrefillPort
 from server.utils.message_ack_manager import MessageAckManager
 from univention.provisioning.models import (
@@ -31,7 +30,8 @@ def match_topic(sub_topic: str, module_name: str) -> bool:
     return re.fullmatch(sub_topic, module_name) is not None
 
 
-class UDMPreFill(PreFillService):
+class UDMPreFill:
+    MAX_PREFILL_ATTEMPTS = 3
     PREFILL_FAILURES_STREAM = "prefill-failures"
     PREFILL_DURABLE_NAME = "prefill-service"
 
@@ -111,35 +111,35 @@ class UDMPreFill(PreFillService):
             if realm != "udm":
                 # FIXME: unhandled realm
                 self._logger.error("Unhandled realm: %s", realm)
-                return
+                continue
 
-        self._logger.info(
-            "Started the prefill for the subscriber %s with the topic %s",
-            message.subscription_name,
-            self._topic,
-        )
-        await self._port.update_subscription_queue_status(message.subscription_name, FillQueueStatus.running)
-        await self.fetch(message.subscription_name)
+            self._logger.info(
+                "Started the prefill for the subscriber %s with the topic %s",
+                message.subscription_name,
+                topic,
+            )
+            await self._port.update_subscription_queue_status(message.subscription_name, FillQueueStatus.running)
+            await self.fetch_udm(message.subscription_name, topic)
         self._logger.info("Prefill request was processed")
 
-    async def fetch(self, subscription_name: str):
+    async def fetch_udm(self, subscription_name: str, topic: str):
         """
         Start fetching all data for the given topic.
         Find all UDM object types which match the given topic.
         """
 
         udm_modules = await self._port.get_object_types()
-        udm_match = [module for module in udm_modules if match_topic(self._topic, module["name"])]
+        udm_match = [module for module in udm_modules if match_topic(topic, module["name"])]
 
         if len(udm_match) == 0:
-            self._logger.warning("No UDM modules match object type %s", self._topic)
+            self._logger.warning("No UDM modules match object type %s", topic)
 
         for module in udm_match:
             this_topic = module["name"]
             self._logger.info("Grabbing %s objects.", this_topic)
-            await self._fill_topic(this_topic, subscription_name)
+            await self._fill_udm_topic(this_topic, subscription_name)
 
-    async def _fill_topic(self, object_type: str, subscription_name: str):
+    async def _fill_udm_topic(self, object_type: str, subscription_name: str):
         """Find the DNs of all UDM objects for an object_type."""
 
         # Note: the size of the HTTP response is limited in the UDM REST API container
