@@ -178,6 +178,7 @@ async def nats_connection(test_settings: E2ETestSettings) -> AsyncGenerator[NATS
         connect_timeout=5,
     )
     yield nc
+
     await nc.close()
 
 
