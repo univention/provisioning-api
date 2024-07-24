@@ -24,6 +24,7 @@ ENV_DEFAULTS = {
     "provisioning_api_password": "bar",
     "prefill_username": "prefill",
     "prefill_password": "prefillpass",
+    "max_prefill_attempts": "10",
     "events_username_udm": "udm",
     "events_password_udm": "udmpass",
     "log_level": "DEBUG",

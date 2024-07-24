@@ -121,6 +121,7 @@ services:
       UDM_PASSWORD: "univention"
       PREFILL_USERNAME: "prefill"
       PREFILL_PASSWORD: "prefillpass"
+      MAX_PREFILL_ATTEMPTS: 5
     depends_on:
       - "nats"
       - "events-and-consumer-api"

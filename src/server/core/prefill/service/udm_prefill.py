@@ -31,7 +31,6 @@ def match_topic(sub_topic: str, module_name: str) -> bool:
 
 
 class UDMPreFill:
-    MAX_PREFILL_ATTEMPTS = 3
     PREFILL_FAILURES_STREAM = "prefill-failures"
     PREFILL_DURABLE_NAME = "prefill-service"
 
@@ -41,6 +40,7 @@ class UDMPreFill:
         self.ack_manager = MessageAckManager(ack_wait=30, ack_threshold=5)
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(__name__)
+        self.max_prefill_attempts = port.settings.max_prefill_attempts
 
     async def handle_requests_to_prefill(self):
         self._logger.info("Handling the requests to prefill")

@@ -629,6 +629,7 @@ prefill:
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
+    maxPrefillAttempts: 5
     # Python log level
     LOG_LEVEL: "INFO"
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api

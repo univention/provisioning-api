@@ -110,6 +110,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
   {{- end }}
 data:
+  MAX_PREFILL_ATTEMPTS: {{ required ".Values.prefill.config.maxPrefillAttempts is required." .Values.prefill.config.maxPrefillAttempts | quote  }}
   LOG_LEVEL: {{ required ".Values.prefill.config.LOG_LEVEL is required." .Values.prefill.config.LOG_LEVEL | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}

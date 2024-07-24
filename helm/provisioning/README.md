@@ -139,6 +139,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.LOG_LEVEL | string | `"INFO"` |  |
 | prefill.config.UDM_HOST | string | `""` |  |
 | prefill.config.UDM_PORT | int | `80` |  |
+| prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `""` |  |
