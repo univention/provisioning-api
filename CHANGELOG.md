@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.30.0...v0.30.1) (2024-07-25)
+
+
+### Bug Fixes
+
+* trigger for semantic-release ([d7260da](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7260da9396a750fac4159378660b2c3fe38e9b2))
+
 ## [0.30.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.29.1...v0.30.0) (2024-07-19)
 
 
