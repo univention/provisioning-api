@@ -68,6 +68,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
     async def close(self):
         await self._nats.close()
 
+    # TODO: Rename to ensure_kv_store()
     async def create_kv_store(self, bucket: Bucket):
         try:
             await self._js.key_value(bucket.value)

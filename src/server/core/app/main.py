@@ -17,6 +17,8 @@ from server.core.app.consumer.subscriptions.api import (
     router as subscriptions_api_router,
 )
 from server.core.app.internal.api import router as internal_api_router
+from server.services.port import Port
+from univention.provisioning.models.queue import PREFILL_STREAM
 
 # TODO split up logging
 # from .log import setup as setup_logging
@@ -76,6 +78,14 @@ internal_app.include_router(internal_api_router)
 internal_app_path = "/internal"
 
 app.mount(internal_app_path, internal_app)
+
+
+@app.on_event("startup")
+async def startup_task():
+    logging.info("ensuring prefill stream")
+
+    async with Port.port_context() as port:
+        await port.create_stream(PREFILL_STREAM)
 
 
 @app.exception_handler(RequestValidationError)

@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
+from contextlib import asynccontextmanager
 from typing import Annotated, List, Optional, Union
 
 from fastapi import Depends
@@ -25,20 +26,32 @@ class Port:
     @staticmethod
     async def port_dependency():
         port = Port()
-        await port.mq_adapter.connect(
-            server=port.settings.nats_server,
-            user=port.settings.nats_user,
-            password=port.settings.nats_password,
-        )
-        await port.kv_adapter.init(
-            [Bucket.subscriptions, Bucket.credentials],
-            user=port.settings.nats_user,
-            password=port.settings.nats_password,
-        )
+        await port.connect()
         try:
             yield port
         finally:
             await port.close()
+
+    @asynccontextmanager
+    async def port_context():
+        port = Port()
+        await port.connect()
+        try:
+            yield port
+        finally:
+            await port.close()
+
+    async def connect(self):
+        await self.mq_adapter.connect(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+        )
+        await self.kv_adapter.init(
+            [Bucket.subscriptions, Bucket.credentials],
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+        )
 
     async def close(self):
         await self.mq_adapter.close()
@@ -73,7 +86,7 @@ class Port:
     async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
         await self.kv_adapter.put_value(key, value, bucket)
 
-    async def create_stream(self, stream: str, subjects: List[str]):
+    async def create_stream(self, stream: str, subjects: List[str] | None = None):
         await self.mq_adapter.ensure_stream(stream, subjects)
 
     async def stream_exists(self, prefill_queue_name: str) -> bool:
