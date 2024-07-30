@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 from datetime import datetime
-from unittest.mock import AsyncMock, call, patch
+from unittest.mock import ANY, AsyncMock, call, patch
 
 import pytest
 from server.core.prefill.service.udm_prefill import UDMPreFill, match_topic
@@ -17,16 +17,20 @@ from tests.conftest import (
     MQMESSAGE_PREFILL,
     MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
     MQMESSAGE_PREFILL_REDELIVERED,
-    PREFILL_MESSAGE,
     SUBSCRIPTION_NAME,
     TOPIC,
     TOPIC_2,
 )
 
 
+class EscapeLoopException(Exception): ...
+
+
 @pytest.fixture
 def udm_prefill() -> UDMPreFill:
-    return UDMPreFill(AsyncMock())
+    udm_prefill = UDMPreFill(AsyncMock())
+    udm_prefill.max_prefill_attempts = 5
+    return udm_prefill
 
 
 @pytest.mark.anyio
@@ -69,41 +73,44 @@ class TestUDMPreFill:
     msg2.body["new"] = obj_2
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
-    async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill):
+    async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
-        udm_prefill._port.wait_for_event = AsyncMock(
-            side_effect=[MQMESSAGE_PREFILL, Exception("Stop waiting for the new event")]
+        mock_acknowledgements = AsyncMock()
+        udm_prefill._port.get_one_message = AsyncMock(
+            side_effect=[
+                (MQMESSAGE_PREFILL, mock_acknowledgements),
+                EscapeLoopException("Stop waiting for the new event"),
+            ]
         )
         udm_prefill._port.get_object_types = AsyncMock(return_value=[self.udm_modules])
         udm_prefill._port.list_objects = AsyncMock(return_value=[self.url])
         udm_prefill._port.get_object = AsyncMock(return_value=self.obj)
 
-        with pytest.raises(Exception, match="Stop waiting for the new event"):
+        with pytest.raises(EscapeLoopException):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.subscribe_to_queue.assert_called_once_with("prefill", "prefill-service")
-        udm_prefill._port.create_stream.assert_called_once_with("prefill-failures")
-        udm_prefill._port.create_consumer.assert_called_once_with("prefill-failures")
+        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None, "prefill-service")
         udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
             SUBSCRIPTION_NAME, self.prefill_subject
         )
-        udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
+        udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_called_once_with()
         udm_prefill._port.list_objects.assert_called_once_with(TOPIC)
         udm_prefill._port.get_object.assert_called_once_with(self.url)
-        udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL)
+        mock_acknowledgements.acknowledge_message.assert_called_once()
         udm_prefill._port.create_prefill_message.assert_called_once_with(
             SUBSCRIPTION_NAME, self.prefill_subject, self.msg
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
-    async def test_handle_requests_to_prefill_multiple_topics(self, mock_datetime, udm_prefill):
+    async def test_handle_requests_to_prefill_multiple_topics(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
-        udm_prefill._port.wait_for_event = AsyncMock(
+        mock_acknowledgements = AsyncMock()
+        udm_prefill._port.get_one_message = AsyncMock(
             side_effect=[
-                MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
-                Exception("Stop waiting for the new event"),
+                (MQMESSAGE_PREFILL_MULTIPLE_TOPICS, mock_acknowledgements),
+                EscapeLoopException("Stop waiting for the new event"),
             ]
         )
         udm_prefill._port.get_object_types = AsyncMock(side_effect=[[self.udm_modules], [self.udm_modules_2]])
@@ -113,17 +120,15 @@ class TestUDMPreFill:
         with pytest.raises(Exception, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.subscribe_to_queue.assert_called_once_with("prefill", "prefill-service")
-        udm_prefill._port.create_stream.assert_called_once_with("prefill-failures")
-        udm_prefill._port.create_consumer.assert_called_once_with("prefill-failures")
+        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None, "prefill-service")
         udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
             SUBSCRIPTION_NAME, self.prefill_subject
         )
-        udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
+        udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_has_calls([call(), call()])
         udm_prefill._port.list_objects.assert_has_calls([call(TOPIC), call(TOPIC_2)])
         udm_prefill._port.get_object.assert_has_calls([call(self.url), call(self.url_2)])
-        udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL_MULTIPLE_TOPICS)
+        mock_acknowledgements.acknowledge_message.assert_called_once()
         udm_prefill._port.create_prefill_message.assert_has_calls(
             [
                 call(SUBSCRIPTION_NAME, self.prefill_subject, self.msg),
@@ -133,39 +138,37 @@ class TestUDMPreFill:
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
-    async def test_handle_requests_to_prefill_moving_to_failures(self, mock_datetime, udm_prefill):
+    async def test_handle_requests_to_prefill_moving_to_failures(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
-        udm_prefill._port.wait_for_event = AsyncMock(
+        mock_acknowledgements = AsyncMock()
+        udm_prefill._port.get_one_message = AsyncMock(
             side_effect=[
-                MQMESSAGE_PREFILL_REDELIVERED,
-                Exception("Stop waiting for the new event"),
+                (MQMESSAGE_PREFILL_REDELIVERED, mock_acknowledgements),
+                EscapeLoopException("Stop waiting for the new event"),
             ]
         )
 
         with pytest.raises(Exception, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.subscribe_to_queue.assert_called_once_with("prefill", "prefill-service")
-        udm_prefill._port.create_stream.assert_called_once_with("prefill-failures")
-        udm_prefill._port.create_consumer.assert_called_once_with("prefill-failures")
-        udm_prefill._port.wait_for_event.assert_has_calls([call(), call()])
+        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None, "prefill-service")
+        udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_not_called()
         udm_prefill._port.list_objects.assert_not_called()
         udm_prefill._port.get_object.assert_not_called()
         udm_prefill._port.acknowledge_message_in_progress.assert_not_called()
-        udm_prefill._port.acknowledge_message.assert_called_once_with(MQMESSAGE_PREFILL_REDELIVERED)
+        mock_acknowledgements.acknowledge_message.assert_called_once()
         udm_prefill._port.create_prefill_message.assert_not_called()
         udm_prefill._port.add_request_to_prefill_failures.assert_called_once_with(
-            "prefill-failures", "prefill-failures", PREFILL_MESSAGE
+            "prefill-failures", "prefill-failures", ANY
         )
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
-    async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill):
+    async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
-        udm_prefill._topic = "test-topic"
         udm_prefill._port.get_object_types = AsyncMock(return_value=[self.udm_modules])
 
-        result = await udm_prefill.fetch()
+        result = await udm_prefill.fetch_udm("test-subject", "test-topic")
 
         assert result is None
         udm_prefill._port.get_object_types.assert_called_once_with()

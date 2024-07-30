@@ -161,11 +161,12 @@ MQMESSAGE_PREFILL_MULTIPLE_TOPICS = deepcopy(MQMESSAGE_PREFILL)
 MQMESSAGE_PREFILL_MULTIPLE_TOPICS.data = FLAT_PREFILL_MESSAGE_MULTIPLE_TOPICS
 
 MQMESSAGE_PREFILL_REDELIVERED = deepcopy(MQMESSAGE_PREFILL)
-MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 4
+MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 20
 
 FLAT_MESSAGE_ENCODED = (
-    b'{"publisher_name": "ldif-producer", "ts": "2023-11-09T11:15:52.616061", "realm": "udm", "topic": "groups/group", '
-    b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}}'
+    b'{"publisher_name": "ldif-producer", "ts": "2023-11-09T11:15:52.616061", '
+    b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, '
+    b'"realm": "udm", "topic": "groups/group"}'
 )
 
 BASE_KV_OBJ = KeyValue.Entry(
