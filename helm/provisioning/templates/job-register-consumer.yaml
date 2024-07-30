@@ -45,7 +45,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
-          command: [ "sh", "-c", "until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null; do echo Waiting for api; sleep 2; done;" ]
+          command: [ "bash", "-c", "set -euo pipefail; until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null || [ $? -ne 0 ]; do echo Waiting for api; sleep 2; done;" ]
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
