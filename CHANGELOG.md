@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.30.1...v0.30.2) (2024-07-31)
+
+
+### Bug Fixes
+
+* **provisioning-api:** add startup task to create the 'provisioning' nats stream ([1447b4f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1447b4f33ae1410467439ed23dcff58061f10093))
+
 ## [0.30.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.30.0...v0.30.1) (2024-07-25)
 
 
