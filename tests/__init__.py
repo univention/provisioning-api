@@ -26,6 +26,8 @@ ENV_DEFAULTS = {
     "prefill_password": "prefillpass",
     "events_username_udm": "udm",
     "events_password_udm": "udmpass",
+    "log_level": "DEBUG",
+    "max_ack_retries": "3",
 }
 
 

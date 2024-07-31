@@ -71,7 +71,8 @@ class TestMessageHandler:
 
         assert len(result) == 3
 
-    async def test_failed_to_acknowledge_message(self, async_client: AsyncClient):
+    @patch("asyncio.sleep", return_value=None)
+    async def test_failed_to_acknowledge_message(self, mock_sleep, async_client: AsyncClient):
         async_client.get_subscription_message = AsyncMock(return_value=PROVISIONING_MESSAGE)
         async_client.set_message_status = AsyncMock(side_effect=aiohttp.ClientError)
         result = []
@@ -84,5 +85,6 @@ class TestMessageHandler:
         ).run()
 
         async_client.get_subscription_message.assert_called_once_with(SUBSCRIPTION_NAME, timeout=10)
-        async_client.set_message_status.assert_called_once()
+        assert async_client.set_message_status.call_count == 4
         assert len(result) == 1
+        assert mock_sleep.call_count == 3

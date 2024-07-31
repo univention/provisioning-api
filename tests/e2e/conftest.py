@@ -11,7 +11,7 @@ import pytest
 from nats.aio.client import Client as NATS
 from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
-from univention.provisioning.consumer import AsyncClient, Settings
+from univention.provisioning.consumer import AsyncClient, AsyncClientSettings
 
 from ..conftest import REALMS_TOPICS
 
@@ -99,8 +99,8 @@ def subscriber_password() -> str:
 
 
 @pytest.fixture
-def client_settings(test_settings: E2ETestSettings, subscriber_name, subscriber_password) -> Settings:
-    return Settings(
+def client_settings(test_settings: E2ETestSettings, subscriber_name, subscriber_password) -> AsyncClientSettings:
+    return AsyncClientSettings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=subscriber_name,
         provisioning_api_password=subscriber_password,
@@ -108,8 +108,8 @@ def client_settings(test_settings: E2ETestSettings, subscriber_name, subscriber_
 
 
 @pytest.fixture
-def admin_client_settings(test_settings: E2ETestSettings) -> Settings:
-    return Settings(
+def admin_client_settings(test_settings: E2ETestSettings) -> AsyncClientSettings:
+    return AsyncClientSettings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=test_settings.provisioning_admin_username,
         provisioning_api_password=test_settings.provisioning_admin_password,

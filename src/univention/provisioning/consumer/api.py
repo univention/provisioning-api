@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import asyncio
 import logging
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
@@ -16,15 +16,15 @@ from univention.provisioning.models import (
     Subscription,
 )
 
-from .config import Settings
-
-logger = logging.getLogger(__file__)
+from .config import AsyncClientSettings, MessageHandlerSettings
 
 
 # TODO: the subscription part will be delegated to an admin using an admin API
 class AsyncClient:
-    def __init__(self, settings: Optional[Settings] = None, concurrency_limit: int = 10):
-        self.settings = settings or Settings()
+    def __init__(self, settings: Optional[AsyncClientSettings] = None, concurrency_limit: int = 10):
+        self.settings = settings or AsyncClientSettings()
+        self._logger = logging.getLogger("async-client")
+        self._logger.setLevel(self.settings.log_level)
         auth = aiohttp.BasicAuth(
             self.settings.provisioning_api_username,
             self.settings.provisioning_api_password,
@@ -49,7 +49,7 @@ class AsyncClient:
         realms_topics: List[Tuple[str, str]],
         request_prefill: bool = False,
     ):
-        logger.info("creating subscription for %s", str(realms_topics))
+        self._logger.info("creating subscription for %s", str(realms_topics))
         subscription = NewSubscription(
             name=name,
             realms_topics=realms_topics,
@@ -57,7 +57,7 @@ class AsyncClient:
             password=password,
         )
 
-        logger.debug(subscription.model_dump())
+        self._logger.debug(subscription.model_dump())
         return await self.session.post(
             f"{self.settings.provisioning_api_base_url}/internal/admin/v1/subscriptions",
             json=subscription.model_dump(),
@@ -121,6 +121,7 @@ class MessageHandler:
         client: AsyncClient,
         subscription_name: str,
         callbacks: List[Callable[[Message], Coroutine[None, None, None]]],
+        settings: Optional[MessageHandlerSettings] = None,
         pop_after_handling: bool = True,
         message_limit: Optional[int] = None,
     ):
@@ -140,11 +141,31 @@ class MessageHandler:
         """
         if not callbacks:
             raise ValueError("Callback functions can't be empty")
+        self.settings = settings or MessageHandlerSettings()
+        self._logger = logging.getLogger("message-handler")
+        self._logger.setLevel(self.settings.log_level)
         self.client = client
         self.subscription_name = subscription_name
         self.callbacks = callbacks
         self.pop_after_handling = pop_after_handling
         self.message_limit = message_limit
+
+    async def acknowledge_message(self, message_seq_num: int) -> bool:
+        self._logger.info("Acknowledging message with sequence number: %s", message_seq_num)
+        try:
+            report = MessageProcessingStatusReport(
+                status=MessageProcessingStatus.ok,
+                message_seq_num=message_seq_num,
+            )
+            await self.client.set_message_status(self.subscription_name, report)
+            return True
+        except (
+            aiohttp.ClientError,
+            aiohttp.ClientConnectionError,
+            aiohttp.ClientResponseError,
+        ) as exc:
+            self._logger.error("Failed to acknowledge message. - %s", repr(exc))
+            return False
 
     async def _callback_wrapper(
         self,
@@ -166,22 +187,21 @@ class MessageHandler:
         await callback(msg)
         if not self.pop_after_handling:
             return
-        try:
-            # TODO: Retry acknowledgement
-            report = MessageProcessingStatusReport(
-                status=MessageProcessingStatus.ok,
-                message_seq_num=message.sequence_number,
-            )
-            await self.client.set_message_status(self.subscription_name, report)
-        except (
-            aiohttp.ClientError,
-            aiohttp.ClientConnectionError,
-            aiohttp.ClientResponseError,
-        ) as exc:
-            logger.error(
-                "Failed to acknowledge message. It will be redelivered later. - %s",
-                repr(exc),
-            )
+
+        for retries in range(self.settings.max_ack_retries + 1):
+            if await self.acknowledge_message(message.sequence_number):
+                self._logger.info("Message was acknowledged")
+                return
+
+            self._logger.info("Failed to acknowledge message. Retries: %d", retries)
+            if retries != self.settings.max_ack_retries:
+                timeout = min(2**retries / 10, 30)
+                await asyncio.sleep(timeout)
+
+        self._logger.error(
+            "Maximum retries of %s reached. The message will be redelivered later",
+            self.settings.max_ack_retries,
+        )
 
     async def run(
         self,

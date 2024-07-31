@@ -12,7 +12,7 @@ from typing import Optional, Sequence
 
 from aiohttp import ClientResponseError
 
-from univention.provisioning.consumer import AsyncClient, MessageHandler, Settings
+from univention.provisioning.consumer import AsyncClient, AsyncClientSettings, MessageHandler
 from univention.provisioning.models import ProvisioningMessage
 
 
@@ -133,10 +133,10 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
 
 async def main() -> None:
     arguments = parse_args(sys.argv[1:])
-    settings = Settings()
+    settings = AsyncClientSettings()
 
     if len(sys.argv) > 1:
-        admin_settings = Settings(
+        admin_settings = AsyncClientSettings(
             provisioning_api_username=arguments.admin_username,
             provisioning_api_password=arguments.admin_password,
             provisioning_api_base_url=settings.provisioning_api_base_url,
