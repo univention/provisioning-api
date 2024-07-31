@@ -12,7 +12,11 @@ from typing import Optional, Sequence
 
 from aiohttp import ClientResponseError
 
-from univention.provisioning.consumer import AsyncClient, AsyncClientSettings, MessageHandler
+from univention.provisioning.consumer import (
+    MessageHandler,
+    ProvisioningConsumerClient,
+    ProvisioningConsumerClientSettings,
+)
 from univention.provisioning.models import ProvisioningMessage
 
 
@@ -133,17 +137,17 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
 
 async def main() -> None:
     arguments = parse_args(sys.argv[1:])
-    settings = AsyncClientSettings()
+    settings = ProvisioningConsumerClientSettings()
 
     if len(sys.argv) > 1:
-        admin_settings = AsyncClientSettings(
+        admin_settings = ProvisioningConsumerClientSettings(
             provisioning_api_username=arguments.admin_username,
             provisioning_api_password=arguments.admin_password,
             provisioning_api_base_url=settings.provisioning_api_base_url,
         )
         realms_topics = [tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic]
         prefill = arguments.prefill
-        async with AsyncClient(admin_settings) as admin_client:
+        async with ProvisioningConsumerClient(admin_settings) as admin_client:
             try:
                 await admin_client.create_subscription(
                     settings.provisioning_api_username,
@@ -155,7 +159,7 @@ async def main() -> None:
                 logging.warn("%s, Client already exists", e)
 
     logging.info("Listening for messages")
-    async with AsyncClient(settings) as client:
+    async with ProvisioningConsumerClient(settings) as client:
         await MessageHandler(client, settings.provisioning_api_username, [handle_message]).run()
 
 

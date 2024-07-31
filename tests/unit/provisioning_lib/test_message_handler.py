@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, call, patch
 
 import aiohttp
 import pytest
-from univention.provisioning.consumer import AsyncClient, MessageHandler
+from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models import Message
 
 from tests.conftest import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
@@ -13,7 +13,7 @@ from tests.conftest import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
 
 @pytest.fixture
 def async_client() -> AsyncMock:
-    yield patch("univention.provisioning.consumer.api.AsyncClient").start().return_value
+    yield patch("univention.provisioning.consumer.api.ProvisioningConsumerClient").start().return_value
 
 
 @pytest.mark.anyio
@@ -22,18 +22,18 @@ class TestMessageHandler:
     async def callback(result: list, message: Message):
         result.append(message)
 
-    async def test_no_callback_function_provided(self, async_client: AsyncClient):
+    async def test_no_callback_function_provided(self, async_client: ProvisioningConsumerClient):
         with pytest.raises(ValueError, match="Callback functions can't be empty"):
-            await MessageHandler(async_client, SUBSCRIPTION_NAME, [], message_limit=1).run()
+            await MessageHandler(async_client, [], message_limit=1).run()
 
-    async def test_get_one_message(self, async_client: AsyncClient):
+    async def test_get_one_message(self, async_client: ProvisioningConsumerClient):
         async_client.get_subscription_message = AsyncMock(return_value=PROVISIONING_MESSAGE)
         async_client.set_message_status = AsyncMock()
         result = []
 
+        async_client.settings.provisioning_api_username = SUBSCRIPTION_NAME
         await MessageHandler(
             async_client,
-            SUBSCRIPTION_NAME,
             [lambda message: self.callback(result, message)],
             message_limit=1,
         ).run()
@@ -42,7 +42,7 @@ class TestMessageHandler:
         async_client.set_message_status.assert_called_once()
         assert len(result) == 1
 
-    async def test_get_multiple_message(self, async_client: AsyncClient):
+    async def test_get_multiple_message(self, async_client: ProvisioningConsumerClient):
         async_client.get_subscription_message = AsyncMock(
             side_effect=[
                 PROVISIONING_MESSAGE,
@@ -53,9 +53,9 @@ class TestMessageHandler:
         async_client.set_message_status = AsyncMock()
         result = []
 
+        async_client.settings.provisioning_api_username = SUBSCRIPTION_NAME
         await MessageHandler(
             async_client,
-            SUBSCRIPTION_NAME,
             [lambda message: self.callback(result, message)],
             message_limit=3,
         ).run()
@@ -72,14 +72,14 @@ class TestMessageHandler:
         assert len(result) == 3
 
     @patch("asyncio.sleep", return_value=None)
-    async def test_failed_to_acknowledge_message(self, mock_sleep, async_client: AsyncClient):
+    async def test_failed_to_acknowledge_message(self, mock_sleep, async_client: ProvisioningConsumerClient):
         async_client.get_subscription_message = AsyncMock(return_value=PROVISIONING_MESSAGE)
         async_client.set_message_status = AsyncMock(side_effect=aiohttp.ClientError)
         result = []
 
+        async_client.settings.provisioning_api_username = SUBSCRIPTION_NAME
         await MessageHandler(
             async_client,
-            SUBSCRIPTION_NAME,
             [lambda message: self.callback(result, message)],
             message_limit=1,
         ).run()

@@ -11,7 +11,7 @@ import pytest
 from nats.aio.client import Client as NATS
 from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
-from univention.provisioning.consumer import AsyncClient, AsyncClientSettings
+from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
 
 from ..conftest import REALMS_TOPICS
 
@@ -99,36 +99,40 @@ def subscriber_password() -> str:
 
 
 @pytest.fixture
-def client_settings(test_settings: E2ETestSettings, subscriber_name, subscriber_password) -> AsyncClientSettings:
-    return AsyncClientSettings(
+def client_settings(
+    test_settings: E2ETestSettings, subscriber_name, subscriber_password
+) -> ProvisioningConsumerClientSettings:
+    return ProvisioningConsumerClientSettings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=subscriber_name,
         provisioning_api_password=subscriber_password,
+        log_level="DEBUG",
     )
 
 
 @pytest.fixture
-def admin_client_settings(test_settings: E2ETestSettings) -> AsyncClientSettings:
-    return AsyncClientSettings(
+def admin_client_settings(test_settings: E2ETestSettings) -> ProvisioningConsumerClientSettings:
+    return ProvisioningConsumerClientSettings(
         provisioning_api_base_url=test_settings.provisioning_api_base_url,
         provisioning_api_username=test_settings.provisioning_admin_username,
         provisioning_api_password=test_settings.provisioning_admin_password,
+        log_level="DEBUG",
     )
 
 
 @pytest.fixture
 async def provisioning_client(
     client_settings,
-) -> AsyncGenerator[AsyncClient, Any]:
-    async with AsyncClient(client_settings) as client:
+) -> AsyncGenerator[ProvisioningConsumerClient, Any]:
+    async with ProvisioningConsumerClient(client_settings) as client:
         yield client
 
 
 @pytest.fixture
 async def provisioning_admin_client(
     admin_client_settings,
-) -> AsyncGenerator[AsyncClient, Any]:
-    async with AsyncClient(admin_client_settings) as client:
+) -> AsyncGenerator[ProvisioningConsumerClient, Any]:
+    async with ProvisioningConsumerClient(admin_client_settings) as client:
         yield client
 
 
@@ -136,7 +140,7 @@ async def provisioning_admin_client(
 async def simple_subscription(
     subscriber_name,
     subscriber_password,
-    provisioning_admin_client: AsyncClient,
+    provisioning_admin_client: ProvisioningConsumerClient,
 ) -> AsyncGenerator[str, Any]:
     await provisioning_admin_client.create_subscription(
         name=subscriber_name,

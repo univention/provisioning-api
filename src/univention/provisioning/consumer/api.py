@@ -16,13 +16,13 @@ from univention.provisioning.models import (
     Subscription,
 )
 
-from .config import AsyncClientSettings, MessageHandlerSettings
+from .config import MessageHandlerSettings, ProvisioningConsumerClientSettings
 
 
 # TODO: the subscription part will be delegated to an admin using an admin API
-class AsyncClient:
-    def __init__(self, settings: Optional[AsyncClientSettings] = None, concurrency_limit: int = 10):
-        self.settings = settings or AsyncClientSettings()
+class ProvisioningConsumerClient:
+    def __init__(self, settings: Optional[ProvisioningConsumerClientSettings] = None, concurrency_limit: int = 10):
+        self.settings = settings or ProvisioningConsumerClientSettings()
         self._logger = logging.getLogger("async-client")
         self._logger.setLevel(self.settings.log_level)
         auth = aiohttp.BasicAuth(
@@ -118,8 +118,7 @@ class AsyncClient:
 class MessageHandler:
     def __init__(
         self,
-        client: AsyncClient,
-        subscription_name: str,
+        client: ProvisioningConsumerClient,
         callbacks: List[Callable[[Message], Coroutine[None, None, None]]],
         settings: Optional[MessageHandlerSettings] = None,
         pop_after_handling: bool = True,
@@ -131,7 +130,7 @@ class MessageHandler:
         each message and its callbacks are handled sequentially.
 
         Args:
-            client: AsyncClient
+            client: ProvisioningConsumerClient
             subscription_name: The name of the target subscription to listen on.
             callbacks: A list of asynchronous callback functions, each accepting a single message object as a parameter.
             message_limit: An optional integer specifying the maximum number of messages to process,
@@ -143,9 +142,8 @@ class MessageHandler:
             raise ValueError("Callback functions can't be empty")
         self.settings = settings or MessageHandlerSettings()
         self._logger = logging.getLogger("message-handler")
-        self._logger.setLevel(self.settings.log_level)
         self.client = client
-        self.subscription_name = subscription_name
+        self.subscription_name = self.client.settings.provisioning_api_username
         self.callbacks = callbacks
         self.pop_after_handling = pop_after_handling
         self.message_limit = message_limit
@@ -188,19 +186,19 @@ class MessageHandler:
         if not self.pop_after_handling:
             return
 
-        for retries in range(self.settings.max_ack_retries + 1):
+        for retries in range(self.settings.max_acknowledgement_retries + 1):
             if await self.acknowledge_message(message.sequence_number):
                 self._logger.info("Message was acknowledged")
                 return
 
             self._logger.info("Failed to acknowledge message. Retries: %d", retries)
-            if retries != self.settings.max_ack_retries:
+            if retries != self.settings.max_acknowledgement_retries:
                 timeout = min(2**retries / 10, 30)
                 await asyncio.sleep(timeout)
 
         self._logger.error(
             "Maximum retries of %s reached. The message will be redelivered later",
-            self.settings.max_ack_retries,
+            self.settings.max_acknowledgement_retries,
         )
 
     async def run(

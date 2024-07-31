@@ -27,7 +27,7 @@ ENV_DEFAULTS = {
     "events_username_udm": "udm",
     "events_password_udm": "udmpass",
     "log_level": "DEBUG",
-    "max_ack_retries": "3",
+    "max_acknowledgement_retries": "3",
 }
 
 

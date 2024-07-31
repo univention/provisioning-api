@@ -2,19 +2,19 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import pytest
-from univention.provisioning.consumer import AsyncClient, MessageHandler
+from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models import Message
 
 from tests.e2e.helpers import create_message_via_events_api
 
 
-async def test_no_callback_function_provided(provisioning_client: AsyncClient, simple_subscription: str):
+async def test_no_callback_function_provided(provisioning_client: ProvisioningConsumerClient, simple_subscription: str):
     with pytest.raises(ValueError, match="Callback functions can't be empty"):
         await MessageHandler(provisioning_client, simple_subscription, [], message_limit=1).run()
 
 
 async def test_get_one_message(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -31,7 +31,7 @@ async def test_get_one_message(
 
 
 async def test_timeout_while_waiting_for_messages(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -46,7 +46,7 @@ async def test_timeout_while_waiting_for_messages(
 
 
 async def test_get_multiple_messages(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     simple_subscription: str,
     test_settings,
 ):

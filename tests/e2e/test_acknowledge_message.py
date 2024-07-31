@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from univention.provisioning.consumer import AsyncClient
+from univention.provisioning.consumer import ProvisioningConsumerClient
 from univention.provisioning.models import (
     MessageProcessingStatus,
     MessageProcessingStatusReport,
@@ -11,7 +11,7 @@ from tests.e2e.helpers import create_message_via_events_api
 
 
 async def test_get_multiple_messages(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -32,7 +32,7 @@ async def test_get_multiple_messages(
 
 
 async def test_acknowledge_messages(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     simple_subscription: str,
     test_settings,
 ):
@@ -64,7 +64,7 @@ async def test_acknowledge_messages(
 
 
 async def test_do_not_acknowledge_message(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     simple_subscription: str,
     test_settings,
 ):

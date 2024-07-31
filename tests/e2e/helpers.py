@@ -5,7 +5,7 @@ import uuid
 
 import requests
 from univention.admin.rest.client import UDM
-from univention.provisioning.consumer import AsyncClient
+from univention.provisioning.consumer import ProvisioningConsumerClient
 from univention.provisioning.models import (
     MessageProcessingStatus,
     MessageProcessingStatusReport,
@@ -51,7 +51,7 @@ def create_message_via_udm_rest_api(udm: UDM):
 
 
 async def pop_all_messages(
-    provisioning_client: AsyncClient,
+    provisioning_client: ProvisioningConsumerClient,
     subscription_name: str,
     loop_number: int,
 ):

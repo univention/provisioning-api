@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings
 Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
-class AsyncClientSettings(BaseSettings):
+class ProvisioningConsumerClientSettings(BaseSettings):
     provisioning_api_base_url: str
     provisioning_api_username: str
     provisioning_api_password: str
@@ -25,5 +25,4 @@ class AsyncClientSettings(BaseSettings):
 
 
 class MessageHandlerSettings(BaseSettings):
-    log_level: Loglevel
-    max_ack_retries: conint(ge=0, le=10)
+    max_acknowledgement_retries: conint(ge=0, le=10)
