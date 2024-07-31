@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.31.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.30.2...v0.31.0) (2024-07-31)
+
+
+### Features
+
+* implement retry mechanism for message acknowledgment ([2cd3f5e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2cd3f5ee8142b53e99481c7a2d9df38b0f4686bb))
+
+
+### Bug Fixes
+
+* **consumer-client:** small consumer client fixes and renaming ([5e0fa8a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5e0fa8a3154190740269734ac612b992e2a4b899))
+
 ## [0.30.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.30.1...v0.30.2) (2024-07-31)
 
 
