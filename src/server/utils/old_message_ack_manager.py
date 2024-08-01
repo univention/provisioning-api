@@ -25,12 +25,12 @@ class MessageAckManager:
         Combines message processing and automatic AckWait extension.
         """
 
-        message_handler = asyncio.create_task(handle_message(message))
-        ack_extender = asyncio.create_task(self.extend_ack_wait(message, acknowledge_message_in_progress))
+        async with asyncio.TaskGroup() as task_group:
+            ack_extender = task_group.create_task(self.extend_ack_wait(message, acknowledge_message_in_progress))
+            message_handler_task = task_group.create_task(handle_message(message))
 
-        await message_handler
-
-        ack_extender.cancel()
+            await message_handler_task
+            ack_extender.cancel()
 
     async def extend_ack_wait(
         self,

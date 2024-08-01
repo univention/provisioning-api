@@ -13,6 +13,7 @@ from tests.conftest import (
     SUBSCRIPTION_INFO,
     SUBSCRIPTIONS,
 )
+from tests.unit import EscapeLoopException
 
 
 @pytest.fixture
@@ -27,11 +28,14 @@ class TestDispatcherService:
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
         dispatcher_service._subscriptions = SUBSCRIPTIONS
         dispatcher_service._port.wait_for_event = AsyncMock(
-            side_effect=[MQMESSAGE, Exception("Stop waiting for the new event")]
+            side_effect=[MQMESSAGE, EscapeLoopException("Stop waiting for the new event")]
         )
 
-        with pytest.raises(Exception, match="Stop waiting for the new event"):
+        with pytest.raises(ExceptionGroup) as exception:
             await dispatcher_service.dispatch_events()
+
+        assert isinstance(exception.value.exceptions[0], Exception)
+        assert str(exception.value.exceptions[0]) == "Stop waiting for the new event"
 
         dispatcher_service._port.subscribe_to_queue.assert_called_once_with("incoming", "dispatcher-service")
         dispatcher_service._port.watch_for_changes.assert_called_once_with(SUBSCRIPTIONS)

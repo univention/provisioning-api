@@ -22,9 +22,7 @@ from tests.conftest import (
     TOPIC,
     TOPIC_2,
 )
-
-
-class EscapeLoopException(Exception): ...
+from tests.unit import EscapeLoopException
 
 
 @pytest.fixture
@@ -115,7 +113,7 @@ class TestUDMPreFill:
         udm_prefill._port.list_objects = AsyncMock(side_effect=[[self.url], [self.url_2]])
         udm_prefill._port.get_object = AsyncMock(side_effect=[self.obj, self.obj_2])
 
-        with pytest.raises(Exception, match="Stop waiting for the new event"):
+        with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
         udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None, "prefill-service")
@@ -146,7 +144,7 @@ class TestUDMPreFill:
             ]
         )
 
-        with pytest.raises(Exception, match="Stop waiting for the new event"):
+        with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
         udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None, "prefill-service")

@@ -25,14 +25,18 @@ class DispatcherService:
     async def dispatch_events(self):
         self._logger.info("Storing event in consumer queues")
         await self._port.subscribe_to_queue(DISPATCHER_STREAM, "dispatcher-service")
-        asyncio.create_task(self._port.watch_for_changes(self._subscriptions))
 
-        while True:
-            self._logger.info("Waiting for the event...")
-            message = await self._port.wait_for_event()
-            await self.ack_manager.process_message_with_ack_wait_extension(
-                message, self.handle_message, self._port.acknowledge_message_in_progress
-            )
+        async with asyncio.TaskGroup() as task_group:
+            task_group.create_task(self._port.watch_for_changes(self._subscriptions))
+
+            while True:
+                self._logger.info("Waiting for the event...")
+                message = await self._port.wait_for_event()
+                await task_group.create_task(
+                    self.ack_manager.process_message_with_ack_wait_extension(
+                        message, self.handle_message, self._port.acknowledge_message_in_progress
+                    )
+                )
 
     async def handle_message(self, message: MQMessage):
         self._logger.info("Received message with content: %s", message.data)
