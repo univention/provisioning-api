@@ -3,7 +3,7 @@
 
 import json
 import uuid
-from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple
+from typing import Any, AsyncGenerator, Callable, Coroutine, List, NamedTuple, Tuple
 
 import msgpack
 import nats
@@ -13,7 +13,7 @@ from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
 
-from ..conftest import REALMS_TOPICS
+from ..conftest import DUMMY_REALMS_TOPICS, REALMS_TOPICS
 
 
 class E2ETestSettings(NamedTuple):
@@ -137,21 +137,35 @@ async def provisioning_admin_client(
 
 
 @pytest.fixture
-async def simple_subscription(
+async def create_subscription(
     subscriber_name,
     subscriber_password,
     provisioning_admin_client: ProvisioningConsumerClient,
-) -> AsyncGenerator[str, Any]:
-    await provisioning_admin_client.create_subscription(
-        name=subscriber_name,
-        password=subscriber_password,
-        realms_topics=REALMS_TOPICS,
-        request_prefill=False,
-    )
+) -> Callable[[List[Tuple[str, str]]], AsyncGenerator[dict[str, Any], Any]]:
+    async def _create_subscription(
+        realms_topics: List[Tuple[str, str]],
+    ) -> AsyncGenerator[dict[str, Any], Any]:
+        await provisioning_admin_client.create_subscription(
+            name=subscriber_name,
+            password=subscriber_password,
+            realms_topics=realms_topics,
+            request_prefill=False,
+        )
+        yield subscriber_name
 
-    yield subscriber_name
+        await provisioning_admin_client.cancel_subscription(subscriber_name)
 
-    await provisioning_admin_client.cancel_subscription(subscriber_name)
+    return _create_subscription
+
+
+@pytest.fixture
+async def real_subscription(create_subscription):
+    return await anext(create_subscription(REALMS_TOPICS))
+
+
+@pytest.fixture
+async def dummy_subscription(create_subscription):
+    return await anext(create_subscription(DUMMY_REALMS_TOPICS))
 
 
 @pytest.fixture(scope="session")

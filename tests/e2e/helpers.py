@@ -12,7 +12,7 @@ from univention.provisioning.models import (
     PublisherName,
 )
 
-from tests.conftest import REALM, TOPIC
+from tests.conftest import DUMMY_TOPIC, REALM, TOPIC
 from tests.e2e.conftest import E2ETestSettings
 
 
@@ -22,7 +22,7 @@ def create_message_via_events_api(test_settings: E2ETestSettings):
         "publisher_name": PublisherName.consumer_client_test,
         "ts": "2024-02-07T09:01:33.835Z",
         "realm": REALM,
-        "topic": TOPIC,
+        "topic": DUMMY_TOPIC,
         "body": body,
     }
     response = requests.post(

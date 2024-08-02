@@ -14,14 +14,14 @@ from tests.e2e.helpers import (
 )
 
 
-async def test_create_subscription(provisioning_client: ProvisioningConsumerClient, simple_subscription):
-    response = await provisioning_client.get_subscription(simple_subscription)
+async def test_create_subscription(provisioning_client: ProvisioningConsumerClient, dummy_subscription):
+    response = await provisioning_client.get_subscription(dummy_subscription)
     assert response
 
 
-async def test_get_empty_messages(provisioning_client: ProvisioningConsumerClient, simple_subscription: str):
+async def test_get_empty_messages(provisioning_client: ProvisioningConsumerClient, dummy_subscription: str):
     response = await provisioning_client.get_subscription_message(
-        name=simple_subscription,
+        name=dummy_subscription,
         timeout=1,
     )
 
@@ -30,13 +30,13 @@ async def test_get_empty_messages(provisioning_client: ProvisioningConsumerClien
 
 async def test_send_message(
     provisioning_client: ProvisioningConsumerClient,
-    simple_subscription: str,
+    dummy_subscription: str,
     test_settings: E2ETestSettings,
 ):
     data = create_message_via_events_api(test_settings)
 
     response = await provisioning_client.get_subscription_message(
-        name=simple_subscription,
+        name=dummy_subscription,
         timeout=10,
     )
 
@@ -44,38 +44,36 @@ async def test_send_message(
 
 
 @pytest.mark.xfail()
-async def test_pop_message(provisioning_client: ProvisioningConsumerClient, simple_subscription: str):
-    response = await provisioning_client.get_subscription_message(name=simple_subscription, timeout=1, pop=True)
+async def test_pop_message(provisioning_client: ProvisioningConsumerClient, dummy_subscription: str):
+    response = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=1, pop=True)
 
     assert response is None
 
 
-async def test_get_real_messages(provisioning_client: ProvisioningConsumerClient, simple_subscription: str, udm: UDM):
+async def test_get_real_messages(provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM):
     group = create_message_via_udm_rest_api(udm)  # noqa: F841
 
     response = await provisioning_client.get_subscription_message(
-        name=simple_subscription,
+        name=real_subscription,
         timeout=5,
     )
 
     assert response is not None
 
 
-async def test_get_multiple_messages(
-    provisioning_client: ProvisioningConsumerClient, simple_subscription: str, udm: UDM
-):
+async def test_get_multiple_messages(provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM):
     group1 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
     group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
 
-    result = await pop_all_messages(provisioning_client, simple_subscription, 6)
+    result = await pop_all_messages(provisioning_client, real_subscription, 6)
     assert len(result) == 3
 
 
 @pytest.mark.xfail()
-async def test_get_messages_zero_timeout(provisioning_client: ProvisioningConsumerClient, simple_subscription: str):
+async def test_get_messages_zero_timeout(provisioning_client: ProvisioningConsumerClient, dummy_subscription: str):
     response = await provisioning_client.get_subscription_message(
-        name=simple_subscription,
+        name=dummy_subscription,
         timeout=0,
     )
 
@@ -83,7 +81,7 @@ async def test_get_messages_zero_timeout(provisioning_client: ProvisioningConsum
 
 
 async def test_get_messages_from_the_wrong_queue(
-    provisioning_client: ProvisioningConsumerClient, simple_subscription: str
+    provisioning_client: ProvisioningConsumerClient, dummy_subscription: str
 ):
     with pytest.raises(aiohttp.ClientResponseError, match="Unauthorized"):
         await provisioning_client.get_subscription_message(
