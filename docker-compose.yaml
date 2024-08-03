@@ -13,7 +13,7 @@ services:
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
-      NATS_HOST: "nats"
+      NATS_HOST: "nats2"
       NATS_PORT: "4222"
       NATS_USER: "api"
       NATS_PASSWORD: "apipass"
@@ -27,23 +27,39 @@ services:
       EVENTS_USERNAME_UDM: "udm"
       EVENTS_PASSWORD_UDM: "udmpass"
     depends_on:
-      - "nats"
+      - "nats2"
     ports:
       - "7777:7777"
 
-  nats:
+  nats1:
     image: "nats:latest"
+    container_name: nats1
     environment:
       jetstream: "enabled"
     ports:
-      - "4222:4222" # Client connections
-      - "6222:6222" # Route connections
+      - "4222:4222"
       - "8222:8222" # HTTP monitoring port
     volumes:
       - ./nats.dev.conf:/etc/nats-config/nats.conf
       - type: tmpfs
         target: /var/run
-    command: --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf
+    command: --name nats1 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
+  nats2:
+    image: nats:latest
+    container_name: nats2
+    command: --name nats2 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
+    volumes:
+      - ./nats.dev.conf:/etc/nats-config/nats.conf
+      - type: tmpfs
+        target: /var/run
+  nats3:
+    image: nats:latest
+    container_name: nats3
+    command: --name nats3 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
+    volumes:
+      - ./nats.dev.conf:/etc/nats-config/nats.conf
+      - type: tmpfs
+        target: /var/run
 
 
   dispatcher:
@@ -57,13 +73,13 @@ services:
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
-      NATS_HOST: "nats"
+      NATS_HOST: "nats3"
       NATS_PORT: "4222"
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
       INTERNAL_API_HOST: "events-and-consumer-api"
     depends_on:
-      - "nats"
+      - "nats3"
       - "events-and-consumer-api"
 
   udm-transformer:
@@ -77,7 +93,7 @@ services:
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
-      NATS_HOST: "nats"
+      NATS_HOST: "nats1"
       NATS_PORT: "4222"
       NATS_USER: "udm-transformer"
       NATS_PASSWORD: "udm-transformerpass"
@@ -89,16 +105,14 @@ services:
       EVENTS_PASSWORD_UDM: "udmpass"
 
       LDAP_HOST: "ldap-server"
-      # LDAP_HOST: "localhost"
       LDAP_PORT: 389
       LDAP_TLS_MODE: "off"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_BIND_DN: "cn=admin,dc=univention-organization,dc=intranet"
       LDAP_BIND_PW: "univention"
     depends_on:
-      - "nats"
+      - "nats1"
       - "events-and-consumer-api"
-    # network_mode: "host"
 
   prefill:
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
@@ -111,7 +125,7 @@ services:
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
-      NATS_HOST: "nats"
+      NATS_HOST: "nats2"
       NATS_PORT: "4222"
       INTERNAL_API_HOST: "events-and-consumer-api"
       NATS_USER: "prefill"
@@ -123,7 +137,7 @@ services:
       PREFILL_PASSWORD: "prefillpass"
       MAX_PREFILL_ATTEMPTS: 5
     depends_on:
-      - "nats"
+      - "nats2"
       - "events-and-consumer-api"
 
   ldif-producer:
@@ -138,7 +152,7 @@ services:
       SOCKET_FILE_LOCATION: "/var/lib/univention-ldap/slapd-sock/sock"
       NATS_USER: ldif-producer
       NATS_PASSWORD: ldifpass
-      NATS_HOST: "nats"
+      NATS_HOST: "nats3"
       NATS_PORT: "4222"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       MAX_IN_FLIGHT_LDAP_MESSAGES: 10
@@ -160,28 +174,28 @@ services:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
     environment:
-      NATS_HOST: "localhost"
+      NATS_HOST: "nats1"
       NATS_PORT: "4222"
       NATS_USER: ldif-producer
       NATS_PASSWORD: ldifpass
-      LDAP_HOST: "localhost"
+      LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
-      NOTIFIER_SERVER: "localhost"
+      NOTIFIER_SERVER: "ldap-notifier"
       DEBUG_LEVEL: "3"
       TLS_MODE: "off"
       LDAP_PASSWORD: "univention"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
       LDAP_PORT: 389
-    network_mode: "host"
     depends_on:
-      - "nats"
+      - "nats1"
       - "ldap-server"
       - "ldap-notifier"
 
   ldap-notifier:
     platform: linux/amd64
     image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.16.1-pre-jlohmer-bump-to-508
+    container_name: "ldap-notifier"
     depends_on:
       ldap-server:
         condition: service_started
