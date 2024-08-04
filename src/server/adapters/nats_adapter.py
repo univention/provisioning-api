@@ -340,18 +340,21 @@ class NatsMQAdapter(BaseMQAdapter):
 
     async def ensure_stream(self, stream: str, subjects: Optional[List[str]] = None):
         stream_name = NatsKeys.stream(stream)
+        stream_config = StreamConfig(
+            name=stream_name,
+            subjects=subjects or [stream],
+            retention=RetentionPolicy.WORK_QUEUE,
+            num_replicas=3,
+        )
         try:
             await self._js.stream_info(stream_name)
             self.logger.info("A stream with the name '%s' already exists", stream_name)
         except NotFoundError:
-            stream_config = StreamConfig(
-                name=stream_name,
-                subjects=subjects or [stream],
-                retention=RetentionPolicy.WORK_QUEUE,
-                num_replicas=3,
-            )
             await self._js.add_stream(stream_config)
             self.logger.info("A stream with the name '%s' was created", stream_name)
+        else:
+            await self._js.update_stream(stream_config)
+            self.logger.info("A stream with the name '%s' was updated", stream_name)
 
     async def ensure_consumer(self, stream: str, deliver_subject: Optional[str] = None):
         stream_name = NatsKeys.stream(stream)

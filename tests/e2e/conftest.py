@@ -269,9 +269,9 @@ def purge_stream(nats_connection):
     return _purge_stream
 
 
-@pytest.fixture(autouse=True)
-async def auto_purge_stream(ldif_producer_stream_name, purge_stream):
-    await purge_stream(ldif_producer_stream_name)
+# @pytest.fixture(autouse=True)
+# async def auto_purge_stream(ldif_producer_stream_name, purge_stream):
+#     await purge_stream(ldif_producer_stream_name)
 
 
 @pytest.fixture
