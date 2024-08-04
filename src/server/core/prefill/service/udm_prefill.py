@@ -30,7 +30,6 @@ def match_topic(sub_topic: str, module_name: str) -> bool:
 
 class UDMPreFill:
     PREFILL_FAILURES_STREAM = "prefill-failures"
-    PREFILL_DURABLE_NAME = "prefill-service"
 
     def __init__(self, port: PrefillPort):
         super().__init__()
@@ -44,7 +43,7 @@ class UDMPreFill:
         self._logger.info("Handling the requests to prefill")
 
         await self.prepare_prefill_failures_queue()
-        await self._port.initialize_subscription(PREFILL_STREAM, None, self.PREFILL_DURABLE_NAME)
+        await self._port.initialize_subscription(PREFILL_STREAM, None)
 
         while True:
             self._logger.info("Waiting for new prefill requests...")

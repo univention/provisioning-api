@@ -18,8 +18,6 @@ from univention.provisioning.models.queue import (
     PublisherName,
 )
 
-UDM_TRANSFORMER_CONSUMER_NAME = "udm-transformer"
-
 STREAM = {
     PublisherName.ldif_producer: LDIF_STREAM,
     PublisherName.udm_listener: LDAP_STREAM,
@@ -59,7 +57,6 @@ class UDMTransformerController:
         await self._port.initialize_subscription(
             STREAM[self.ldap_publisher_name],
             SUBJECT[self.ldap_publisher_name],
-            UDM_TRANSFORMER_CONSUMER_NAME,
         )
 
         while True:

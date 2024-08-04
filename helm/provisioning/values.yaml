@@ -673,7 +673,8 @@ nats:
   # Ref: https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm/-/blob/main/README.md
   config:
     cluster:
-      replicas: 1
+      # -- Has to be set to at least 3, the minimum for nats clustering
+      replicas: 3
     jetstream:
       enabled: true
       fileStorage:

@@ -10,7 +10,7 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, Union
 import msgpack
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
-from nats.js.api import ConsumerConfig
+from nats.js.api import ConsumerConfig, RetentionPolicy, StreamConfig
 from nats.js.errors import (
     BucketNotFoundError,
     KeyNotFoundError,
@@ -195,12 +195,12 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(self, stream: str, subject: str | None, durable_name: str) -> None:
+    async def initialize_subscription(self, stream: str, subject: str | None) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
         await self.ensure_stream(stream, [subject] if subject else None)
         await self.ensure_consumer(stream)
 
-        durable_name = NatsKeys.durable_name(durable_name)
+        durable_name = NatsKeys.durable_name(stream)
         stream_name = NatsKeys.stream(stream)
         self.pull_subscription = await self._js.pull_subscribe(
             subject=subject if subject else "*",
@@ -344,7 +344,13 @@ class NatsMQAdapter(BaseMQAdapter):
             await self._js.stream_info(stream_name)
             self.logger.info("A stream with the name '%s' already exists", stream_name)
         except NotFoundError:
-            await self._js.add_stream(name=stream_name, subjects=subjects or [stream])
+            stream_config = StreamConfig(
+                name=stream_name,
+                subjects=subjects or [stream],
+                retention=RetentionPolicy.WORK_QUEUE,
+                num_replicas=3,
+            )
+            await self._js.add_stream(stream_config)
             self.logger.info("A stream with the name '%s' was created", stream_name)
 
     async def ensure_consumer(self, stream: str, deliver_subject: Optional[str] = None):
