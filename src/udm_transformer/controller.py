@@ -56,6 +56,7 @@ class UDMTransformerController:
     async def transform_events(self) -> None:
         await self._port.initialize_subscription(
             STREAM[self.ldap_publisher_name],
+            False,
             SUBJECT[self.ldap_publisher_name],
         )
 

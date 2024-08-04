@@ -43,7 +43,7 @@ class UDMPreFill:
         self._logger.info("Handling the requests to prefill")
 
         await self.prepare_prefill_failures_queue()
-        await self._port.initialize_subscription(PREFILL_STREAM, None)
+        await self._port.initialize_subscription(PREFILL_STREAM, False, None)
 
         while True:
             self._logger.info("Waiting for new prefill requests...")
@@ -184,5 +184,5 @@ class UDMPreFill:
         )
 
     async def prepare_prefill_failures_queue(self):
-        await self._port.ensure_stream(self.PREFILL_FAILURES_STREAM)
+        await self._port.ensure_stream(self.PREFILL_FAILURES_STREAM, False)
         await self._port.ensure_consumer(self.PREFILL_FAILURES_STREAM)

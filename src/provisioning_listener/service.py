@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 async def ensure_stream():
     async with LDAPProducerPort() as ldap_port:
-        await ldap_port.ensure_stream(LDAP_STREAM, [LDAP_SUBJECT])
+        await ldap_port.ensure_stream(LDAP_STREAM, False, [LDAP_SUBJECT])
 
 
 async def handle_changes(new: Dict[str, Any], old: Dict[str, Any]):

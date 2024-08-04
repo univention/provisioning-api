@@ -195,9 +195,9 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(self, stream: str, subject: str | None) -> None:
+    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str | None) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
-        await self.ensure_stream(stream, [subject] if subject else None)
+        await self.ensure_stream(stream, manual_delete, [subject] if subject else None)
         await self.ensure_consumer(stream)
 
         durable_name = NatsKeys.durable_name(stream)
@@ -315,7 +315,7 @@ class NatsMQAdapter(BaseMQAdapter):
         await self._message_queue.put(msg)
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.ensure_stream(subject)
+        await self.ensure_stream(subject, False)
         await self.ensure_consumer(subject, deliver_subject)
 
         await self._js.subscribe(
@@ -338,12 +338,12 @@ class NatsMQAdapter(BaseMQAdapter):
             return False
         return True
 
-    async def ensure_stream(self, stream: str, subjects: Optional[List[str]] = None):
+    async def ensure_stream(self, stream: str, manual_delete: bool, subjects: Optional[List[str]] = None):
         stream_name = NatsKeys.stream(stream)
         stream_config = StreamConfig(
             name=stream_name,
             subjects=subjects or [stream],
-            retention=RetentionPolicy.WORK_QUEUE,
+            retention=RetentionPolicy.LIMITS if manual_delete else RetentionPolicy.WORK_QUEUE,
             num_replicas=3,
         )
         try:

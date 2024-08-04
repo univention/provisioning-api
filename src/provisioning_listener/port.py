@@ -28,5 +28,5 @@ class LDAPProducerPort:
     async def add_message(self, stream: str, subject: str, message: Message):
         await self.mq_adapter.add_message(stream, subject, message, binary_encoder=messagepack_encoder)
 
-    async def ensure_stream(self, stream: str, subjects: Optional[List[str]] = None):
-        await self.mq_adapter.ensure_stream(stream, subjects)
+    async def ensure_stream(self, stream: str, manual_delete: bool, subjects: Optional[List[str]] = None):
+        await self.mq_adapter.ensure_stream(stream, manual_delete, subjects)

@@ -95,8 +95,9 @@ class SubscriptionService:
         )
         await self.set_sub_info(new_sub.name, sub_info)
         await self.update_realm_topic_subscriptions(sub_info.realms_topics, new_sub.name)
-        await self._port.create_stream(
+        await self._port.ensure_stream(
             new_sub.name,
+            True,
             [
                 DISPATCHER_SUBJECT_TEMPLATE.format(subscription=new_sub.name),
                 PREFILL_SUBJECT_TEMPLATE.format(subscription=new_sub.name),

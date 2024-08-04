@@ -4,7 +4,7 @@
 import uuid
 
 import pytest
-from nats.js.errors import BadRequestError
+from nats.js.errors import BadRequestError, ServerError
 from server.adapters.nats_adapter import NatsKeys, NatsMQAdapter
 
 from tests.e2e.conftest import E2ETestSettings
@@ -61,6 +61,11 @@ async def test_update_stream_subject(nats_mq_adapter: NatsMQAdapter, test_stream
     await nats_mq_adapter.ensure_stream(test_stream, False, [str(uuid.uuid4)[:8]])
     stream_info = await nats_mq_adapter._js.stream_info(NatsKeys.stream(test_stream))
     assert stream_info.config.subjects != [test_stream]
+
+
+async def test_update_stream_retention(nats_mq_adapter: NatsMQAdapter, test_stream):
+    with pytest.raises(ServerError):
+        await nats_mq_adapter.ensure_stream(test_stream, True)
 
 
 async def test_ensure_consumer(test_consumer: bool):

@@ -85,7 +85,7 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None)
+        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", False, None)
         udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
             SUBSCRIPTION_NAME, self.prefill_subject
         )
@@ -116,7 +116,7 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None)
+        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", False, None)
         udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
             SUBSCRIPTION_NAME, self.prefill_subject
         )
@@ -147,7 +147,7 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", None)
+        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", False, None)
         udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_not_called()
         udm_prefill._port.list_objects.assert_not_called()

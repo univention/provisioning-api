@@ -47,8 +47,8 @@ class PrefillPort:
         await self.mq_adapter.close()
         await self._internal_api_adapter.close()
 
-    async def initialize_subscription(self, stream: str, subject: str | None) -> None:
-        await self.mq_adapter.initialize_subscription(stream, subject)
+    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str | None) -> None:
+        await self.mq_adapter.initialize_subscription(stream, manual_delete, subject)
 
     async def get_one_message(
         self,
@@ -73,8 +73,8 @@ class PrefillPort:
     async def add_request_to_prefill_failures(self, stream: str, subject: str, message: BaseMessage):
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def ensure_stream(self, subject: str):
-        await self.mq_adapter.ensure_stream(subject)
+    async def ensure_stream(self, subject: str, manual_delete: bool):
+        await self.mq_adapter.ensure_stream(subject, manual_delete)
 
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)

@@ -86,8 +86,8 @@ class Port:
     async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
         await self.kv_adapter.put_value(key, value, bucket)
 
-    async def create_stream(self, stream: str, subjects: List[str] | None = None):
-        await self.mq_adapter.ensure_stream(stream, subjects)
+    async def ensure_stream(self, stream: str, manual_delete: bool, subjects: List[str] | None = None):
+        await self.mq_adapter.ensure_stream(stream, manual_delete, subjects)
 
     async def stream_exists(self, prefill_queue_name: str) -> bool:
         return await self.mq_adapter.stream_exists(prefill_queue_name)

@@ -154,7 +154,7 @@ async def test_ensure_stream(mock_nats_adapter):
 
     mock_nats_adapter.connect.assert_awaited_once()
     mock_nats_adapter.close.assert_awaited_once()
-    mock_nats_adapter.ensure_stream.assert_awaited_once_with(LDAP_STREAM, [LDAP_SUBJECT])
+    mock_nats_adapter.ensure_stream.assert_awaited_once_with(LDAP_STREAM, False, [LDAP_SUBJECT])
 
 
 async def test_handle_changes(mock_nats_adapter):
