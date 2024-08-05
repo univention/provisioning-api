@@ -671,6 +671,9 @@ nats:
       caFile: "/certificates/ca.crt"
   # The NATS server configuration.
   # Ref: https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm/-/blob/main/README.md
+  affinity:
+    # Disable the pod affinity rules when running on a cluster with less than 3 kubernetes nodes.
+    enabled: true
   config:
     cluster:
       # -- Has to be set to at least 3, the minimum for nats clustering
