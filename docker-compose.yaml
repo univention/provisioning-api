@@ -150,7 +150,7 @@ services:
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:0.28.3"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:0.28.4"
     # build:
     #   context: .
     #   dockerfile: docker/udm-listener/Dockerfile
@@ -180,7 +180,7 @@ services:
 
   ldap-notifier:
     platform: linux/amd64
-    image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.16.1-pre-jlohmer-bump-to-508
+    image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.18.1-pre-jlohmer-bump-to-508
     depends_on:
       ldap-server:
         condition: service_started
