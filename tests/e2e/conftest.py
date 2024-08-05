@@ -259,7 +259,7 @@ def get_and_delete_all_messages(
 
 
 @pytest.fixture
-def purge_stream(nats_connection):
+def purge_stream(nats_connection) -> Callable[[str], Coroutine[Any, Any, None]]:
     """Delete all messages from stream."""
 
     async def _purge_stream(stream_name: str):
