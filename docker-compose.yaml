@@ -247,6 +247,8 @@ services:
       PROVISIONING_API_USERNAME: "example-client"
       PROVISIONING_API_PASSWORD: "password"
       PROVISIONING_API_BASE_URL: "http://events-and-consumer-api:7777"
+      LOG_LEVEL: "DEBUG"
+      MAX_ACKNOWLEDGEMENT_RETRIES: 3
     restart: "on-failure"
 
 

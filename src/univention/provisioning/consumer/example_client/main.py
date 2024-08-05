@@ -78,8 +78,8 @@ def print_udm_diff(old: dict, new: dict):
 
 
 def handle_udm_message(msg: ProvisioningMessage):
-    old_full = msg.body.get("old") or {}
-    new_full = msg.body.get("new") or {}
+    old_full = msg.body.old
+    new_full = msg.body.new
 
     def shrink(obj, keys):
         return {key: obj.get(key) for key in keys} if obj else {}
@@ -160,7 +160,7 @@ async def main() -> None:
 
     logging.info("Listening for messages")
     async with ProvisioningConsumerClient(settings) as client:
-        await MessageHandler(client, settings.provisioning_api_username, [handle_message]).run()
+        await MessageHandler(client, [handle_message]).run()
 
 
 def run():
