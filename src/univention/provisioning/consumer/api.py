@@ -183,9 +183,8 @@ class MessageHandler:
             body=message.body,
         )
         await callback(msg)
-        if not self.pop_after_handling:
-            return
 
+    async def acknowledge_message_with_retries(self, message):
         for retries in range(self.settings.max_acknowledgement_retries + 1):
             if await self.acknowledge_message(message.sequence_number):
                 self._logger.info("Message was acknowledged")
@@ -219,10 +218,14 @@ class MessageHandler:
                 # TODO: pop is broken serverside at the moment
                 # pop= not pop_after_handling,
             )
-            if message:
-                for callback in self.callbacks:
-                    await self._callback_wrapper(message, callback)
-                if self.message_limit:
-                    counter += 1
-                    if counter >= self.message_limit:
-                        return
+            if not message:
+                continue
+            for callback in self.callbacks:
+                await self._callback_wrapper(message, callback)
+            if self.pop_after_handling:
+                await self.acknowledge_message_with_retries(message)
+
+            if self.message_limit:
+                counter += 1
+                if counter >= self.message_limit:
+                    return
