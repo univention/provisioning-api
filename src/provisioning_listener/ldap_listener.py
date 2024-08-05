@@ -46,7 +46,7 @@ class LdapListener(ListenerModuleHandler):
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
-        asyncio.run(handle_changes(new, None))
+        asyncio.run(handle_changes(new, {}))
 
     def modify(self, dn, old, new, old_dn):
         self.logger.info("[ modify ] dn: %r", dn)
@@ -57,7 +57,7 @@ class LdapListener(ListenerModuleHandler):
 
     def remove(self, dn, old):
         self.logger.info("[ remove ] dn: %r", dn)
-        asyncio.run(handle_changes(None, old))
+        asyncio.run(handle_changes({}, old))
 
     class Configuration(ListenerModuleHandler.Configuration):
         name = name

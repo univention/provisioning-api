@@ -18,7 +18,7 @@ from univention.provisioning.models import (
     PrefillMessage,
     PublisherName,
 )
-from univention.provisioning.models.queue import SimpleMessage
+from univention.provisioning.models.queue import Body, SimpleMessage
 
 
 class PrefillFailedError(Exception): ...
@@ -166,10 +166,7 @@ class UDMPreFill:
             ts=datetime.now(),
             realm="udm",
             topic=object_type,
-            body={
-                "old": None,
-                "new": obj,
-            },
+            body=Body(old={}, new=obj),
         )
         self._logger.info("Sending to the consumer prefill queue from: %s", url)
 

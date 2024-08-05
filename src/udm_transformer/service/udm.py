@@ -4,7 +4,6 @@
 import json
 import logging
 from datetime import datetime
-from typing import Optional
 
 import univention.admin.uldap
 from udm_transformer.port import UDMTransformerPort
@@ -12,6 +11,7 @@ from univention.admin.rest.module import Object
 from univention.management.console.log import MODULE
 from univention.management.console.modules.udm.udm_ldap import UDM_Module
 from univention.provisioning.models import Bucket, Message
+from univention.provisioning.models.queue import Body
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class UDMMessagingService(univention.admin.uldap.access):
         logger.info("Storing object to cache %s", new_obj)
         await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj), Bucket.cache)
 
-    async def send_event(self, new_obj: Optional[dict], old_obj: Optional[dict], ts: datetime):
+    async def send_event(self, new_obj: dict, old_obj: dict, ts: datetime):
         if not (new_obj or old_obj):
             return
 
@@ -72,7 +72,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             ts=datetime.now(),
             realm="udm",
             topic=object_type,
-            body={"new": new_obj, "old": old_obj},
+            body=Body(old=old_obj, new=new_obj),
         )
         logger.info("Sending event with body: %s", message.body)
         await self._messaging_port.send_event(message)
@@ -83,11 +83,11 @@ class UDMMessagingService(univention.admin.uldap.access):
             raise ModuleNotFound
         return module
 
-    def ldap_to_udm(self, entry: dict) -> Optional[dict]:
+    def ldap_to_udm(self, entry: dict) -> dict:
         object_types = entry.get("univentionObjectType", [])
         if not isinstance(object_types, list) or len(object_types) < 1:
             MODULE.warn("ReadControl response is missing `univentionObjectType`!")
-            return None
+            return {}
 
         object_type = object_types[0].decode("utf-8")
         try:
@@ -104,7 +104,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             return Object.get_representation(module, module_obj, ["*"], self, False)
         except ModuleNotFound:
             MODULE.error("ReadControl response has object type %r, but the module was not found!" % object_type)
-            return None
+            return {}
         except Exception:
             if object_type in SUPPORTED_OBJECT_TYPES:
                 raise
@@ -117,10 +117,10 @@ class UDMMessagingService(univention.admin.uldap.access):
             )
 
     async def handle_changes(self, new_obj, old_obj, ts: datetime):
-        old = None
+        old = {}
         if old_obj:
             old = await self.retrieve(old_obj["entryUUID"][0].decode())
-        new = None
+        new = {}
         if new_obj:
             new = self.ldap_to_udm(new_obj)
             if new:

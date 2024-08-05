@@ -23,6 +23,7 @@ from univention.provisioning.models import (
     ProvisioningMessage,
     PublisherName,
 )
+from univention.provisioning.models.queue import Body
 from univention.provisioning.models.subscription import Bucket
 
 from tests import set_test_env_vars
@@ -39,7 +40,8 @@ REALM = "udm"
 TOPIC = "groups/group"
 TOPIC_2 = "users/user"
 DUMMY_TOPIC = "tests/topic"
-BODY = {"new": {"New": "Object"}, "old": {"Old": "Object"}}
+BODY = Body(old={"Old": "Object"}, new={"New": "Object"})
+FLAT_BODY = {"old": {"Old": "Object"}, "new": {"New": "Object"}}
 PUBLISHER_NAME = PublisherName.ldif_producer
 REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS = [(REALM, TOPIC)]
@@ -90,7 +92,7 @@ FLAT_BASE_MESSAGE = {
     "ts": "2023-11-09T11:15:52.616061",
 }
 FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
-FLAT_MESSAGE["body"] = BODY
+FLAT_MESSAGE["body"] = FLAT_BODY
 FLAT_MESSAGE["realm"] = REALM
 FLAT_MESSAGE["topic"] = TOPIC
 

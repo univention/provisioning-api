@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 PREFILL_SUBJECT_TEMPLATE = "{subscription}.prefill"
 PREFILL_STREAM = "prefill"
@@ -38,18 +38,33 @@ class BaseMessage(BaseModel):
         return dt.isoformat()
 
 
+class Body(BaseModel):
+    old: Dict[str, Any] = Field(description="The UDM object before the change.")
+
+    new: Dict[str, Any] = Field(description="The UDM object after the change.")
+
+    # Temporary validator due to the hardcoded image version of udm-listener.
+    # This will be removed once we switch from udm-listener to ldif-producer.
+    @field_validator("old", "new", mode="before")
+    @classmethod
+    def set_empty_dict(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        return v or {}
+
+
 class SimpleMessage(BaseMessage):
     """Message with a minimal payload"""
 
     body: Dict[str, Any] = Field(description="The content of the message as a key/value dictionary.")
 
 
-class Message(SimpleMessage):
+class Message(BaseMessage):
     """The base class for any kind of message sent via the queues."""
 
     realm: str = Field(description="The realm of the message, e.g. `udm`.")
 
     topic: str = Field(description="The topic of the message, e.g. `users/user`.")
+
+    body: Body = Field(description="The content of the message as a key/value dictionary.")
 
 
 class PrefillMessage(BaseMessage):

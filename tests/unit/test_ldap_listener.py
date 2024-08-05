@@ -12,6 +12,7 @@ from server.adapters.nats_adapter import messagepack_encoder
 from univention.provisioning.models.queue import (
     LDAP_STREAM,
     LDAP_SUBJECT,
+    Body,
     Message,
     PublisherName,
 )
@@ -112,7 +113,7 @@ def ldap_message():
         ts=datetime.now(),
         realm="ldap",
         topic="ldap",
-        body={"new": None, "old": user_entry},
+        body=Body(old=user_entry, new={}),
     )
 
 

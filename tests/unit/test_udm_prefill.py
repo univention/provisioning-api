@@ -12,6 +12,7 @@ from univention.provisioning.models import (
     Message,
     PublisherName,
 )
+from univention.provisioning.models.queue import Body
 
 from tests.conftest import (
     MQMESSAGE_PREFILL,
@@ -63,14 +64,11 @@ class TestUDMPreFill:
         ts=mocked_date,
         realm="udm",
         topic=TOPIC,
-        body={
-            "old": None,
-            "new": obj,
-        },
+        body=Body(old={}, new=obj),
     )
     msg2 = deepcopy(msg)
     msg2.topic = TOPIC_2
-    msg2.body["new"] = obj_2
+    msg2.body.new = obj_2
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
     async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill: UDMPreFill):

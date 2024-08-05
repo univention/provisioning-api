@@ -12,9 +12,9 @@ from server.core.app.main import app as subscriptions_app
 from univention.provisioning.models.subscription import FillQueueStatus
 
 from tests.conftest import (
-    BODY,
     CONSUMER_PASSWORD,
     CREDENTIALS,
+    FLAT_BODY,
     PUBLISHER_NAME,
     REALM,
     REALMS_TOPICS_STR,
@@ -90,7 +90,7 @@ class TestConsumer:
         data = response.json()
         assert data["realm"] == REALM
         assert data["topic"] == TOPIC
-        assert data["body"] == BODY
+        assert data["body"] == FLAT_BODY
         assert data["publisher_name"] == PUBLISHER_NAME
         assert data["sequence_number"] == 1
 

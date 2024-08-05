@@ -3,11 +3,13 @@
 
 import logging
 from datetime import datetime
+from typing import Any, Dict
 
 from provisioning_listener.port import LDAPProducerPort
 from univention.provisioning.models.queue import (
     LDAP_STREAM,
     LDAP_SUBJECT,
+    Body,
     Message,
     PublisherName,
 )
@@ -20,13 +22,13 @@ async def ensure_stream():
         await ldap_port.ensure_stream(LDAP_STREAM, [LDAP_SUBJECT])
 
 
-async def handle_changes(new, old):
+async def handle_changes(new: Dict[str, Any], old: Dict[str, Any]):
     message = Message(
         publisher_name=PublisherName.ldif_producer,
         ts=datetime.now(),
         realm="ldap",
         topic="ldap",
-        body={"new": new, "old": old},
+        body=Body(new=new, old=old),
     )
 
     async with LDAPProducerPort() as ldap_port:

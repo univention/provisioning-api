@@ -42,8 +42,8 @@ class UDMTransformerController:
 
     async def handle_message(self, message: Message, acknowledgements: Acknowledgements) -> None:
         message_handler = self._udm_service.handle_changes(
-            message.body["new"],
-            message.body["old"],
+            message.body.new,
+            message.body.old,
             message.ts,
         )
         try:
