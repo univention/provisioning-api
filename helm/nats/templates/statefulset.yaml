@@ -56,8 +56,8 @@ spec:
         - name: "{{ . }}"
         {{- end }}
       {{- end }}
-      {{- if .Values.affinity }}
-      affinity: {{- include "common.tplvalues.render" (dict "value" .Values.affinity "context" .) | nindent 8 }}
+      {{- if .Values.affinity.enabled }}
+      affinity: {{- include "common.tplvalues.render" (dict "value" .Values.affinity.content "context" .) | nindent 8 }}
       {{- end }}
       {{- if .Values.tolerations }}
       tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.tolerations "context" .) | nindent 8 }}
