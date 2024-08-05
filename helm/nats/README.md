@@ -2,7 +2,7 @@
 
 A Helm Chart that deploys NATS
 
-- **Version**: 0.0.1
+- **Version**: 0.1.1
 - **Type**: application
 - **AppVersion**:
 - **Homepage:** <https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm>
@@ -95,24 +95,27 @@ nats consumer next teststream testconsumer
 			<td>object</td>
 			<td><pre lang="json">
 {
-  "podAntiAffinity": {
-    "requiredDuringSchedulingIgnoredDuringExecution": [
-      {
-        "labelSelector": {
-          "matchExpressions": [
-            {
-              "key": "app.kubernetes.io/name",
-              "operator": "In",
-              "values": [
-                "nats"
-              ]
-            }
-          ]
-        },
-        "topologyKey": "kubernetes.io/hostname"
-      }
-    ]
-  }
+  "content": {
+    "podAntiAffinity": {
+      "requiredDuringSchedulingIgnoredDuringExecution": [
+        {
+          "labelSelector": {
+            "matchExpressions": [
+              {
+                "key": "app.kubernetes.io/name",
+                "operator": "In",
+                "values": [
+                  "nats"
+                ]
+              }
+            ]
+          },
+          "topologyKey": "kubernetes.io/hostname"
+        }
+      ]
+    }
+  },
+  "enabled": true
 }
 </pre>
 </td>
