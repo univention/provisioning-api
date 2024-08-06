@@ -98,7 +98,8 @@ async def test_workflow(test_settings, ldap_group, subscription_name):
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
     assert message["publisher_name"] == PublisherName.udm_listener
-    assert message["body"]["old"] is None
+    assert isinstance(message["body"]["old"], dict)
+    assert not message["body"]["old"]
     assert message["body"]["new"]["dn"] == dn
 
     # Test modifying object
@@ -134,7 +135,8 @@ async def test_workflow(test_settings, ldap_group, subscription_name):
     assert message["realm"] == REALM
     assert message["topic"] == TOPIC
     assert message["publisher_name"] == PublisherName.udm_listener
-    assert message["body"]["new"] is None
+    assert isinstance(message["body"]["new"], dict)
+    assert not message["body"]["new"]
     assert message["body"]["old"]["dn"] == dn
 
 
