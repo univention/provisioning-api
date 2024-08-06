@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.31.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.31.0...v0.31.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* add wait-for-api initContainer to the Prefill deployment ([9d575f4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9d575f4cb493584a39d52606063ec7275bc74ca0))
+* **prefill:** make prefill retries configurable ([297845d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/297845d4683ea06d9fc86aa73b0ff702c5b52db9))
+
 ## [0.31.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.30.2...v0.31.0) (2024-07-31)
 
 
