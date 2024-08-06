@@ -3,8 +3,6 @@
 
 ARG LISTENER_BASE_IMAGE_TAG=0.7.0
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base
-ARG UDM_REST_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api
-ARG UDM_REST_IMAGE_TAG=latest
 
 ARG WORKDIR="/app"
 
@@ -16,7 +14,6 @@ WORKDIR ${WORKDIR}
 ARG USER=udm_listener
 RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
-    && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       pipx=0.12.1.0-1 \
       python3-venv=3.7.3-1 \
@@ -53,15 +50,12 @@ COPY poetry.lock \
 # install dependencies
 RUN poetry install --only main
 
-FROM ${UDM_REST_IMAGE}:${UDM_REST_IMAGE_TAG} as udm_rest_image
-
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
 
 ARG WORKDIR
 WORKDIR ${WORKDIR}
 
 COPY --from=builder ${WORKDIR} .
-COPY --from=udm_rest_image /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
 COPY ./src/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
 

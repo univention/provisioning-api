@@ -49,12 +49,17 @@ lint-pre-commit:
   - IMAGE_NAME: "provisioning-prefill"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+  - IMAGE_NAME: "provisioning-udm-listener"
+    KANIKO_ARGS: "--target final"
+    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
     - "provisioning-events-and-consumer-api"
   - IMAGE_NAME:
     - "provisioning-dispatcher"
+  - IMAGE_NAME:
+    - "provisioning-udm-listener"
   - IMAGE_NAME:
     - "provisioning-udm-transformer"
   - IMAGE_NAME:

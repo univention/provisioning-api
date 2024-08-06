@@ -195,7 +195,7 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str | None) -> None:
+    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: Union[str, None]) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
         await self.ensure_stream(stream, manual_delete, [subject] if subject else None)
         await self.ensure_consumer(stream)
