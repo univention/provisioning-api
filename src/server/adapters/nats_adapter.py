@@ -344,7 +344,8 @@ class NatsMQAdapter(BaseMQAdapter):
             name=stream_name,
             subjects=subjects or [stream],
             retention=RetentionPolicy.LIMITS if manual_delete else RetentionPolicy.WORK_QUEUE,
-            num_replicas=3,
+            # TODO: set to 3 after nats clustering is stable.
+            num_replicas=1,
         )
         try:
             await self._js.stream_info(stream_name)
