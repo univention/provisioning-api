@@ -169,8 +169,8 @@ MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 20
 
 FLAT_MESSAGE_ENCODED = (
     b'{"publisher_name": "ldif-producer", "ts": "2023-11-09T11:15:52.616061", '
-    b'"body": {"new": {"New": "Object"}, "old": {"Old": "Object"}}, '
-    b'"realm": "udm", "topic": "groups/group"}'
+    b'"realm": "udm", "topic": "groups/group", '
+    b'"body": {"old": {"Old": "Object"}, "new": {"New": "Object"}}}'
 )
 
 BASE_KV_OBJ = KeyValue.Entry(
