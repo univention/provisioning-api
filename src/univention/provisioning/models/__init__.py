@@ -13,6 +13,7 @@ from .queue import (  # noqa: F401
     PREFILL_STREAM,
     PREFILL_SUBJECT_TEMPLATE,
     BaseMessage,
+    Body,
     Message,
     MQMessage,
     PrefillMessage,
