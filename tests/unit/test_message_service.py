@@ -23,7 +23,9 @@ def sub_service() -> AsyncMock:
 
 @pytest.fixture
 def message_service() -> MessageService:
-    return MessageService(AsyncMock())
+    ms = MessageService(AsyncMock())
+    ms._subscription_prefill_done.clear()
+    return ms
 
 
 @pytest.mark.anyio
@@ -52,18 +54,17 @@ class TestMessageService:
 
     async def test_get_next_message_from_main_subject(self, message_service: MessageService, sub_service):
         sub_service.get_subscription_queue_status = AsyncMock(return_value=FillQueueStatus.done)
-        message_service._port.get_message = AsyncMock(side_effect=[None, MESSAGE])
+        message_service._port.get_message = AsyncMock(return_value=MESSAGE)
+        message_service._subscription_prefill_done[SUBSCRIPTION_NAME] = True
 
         result = await message_service.get_next_message(SUBSCRIPTION_NAME, timeout=5, pop=True)
 
-        sub_service.get_subscription_queue_status.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.get_subscription_queue_status.assert_not_called()
         message_service._port.get_message.assert_has_calls(
             [
-                call(SUBSCRIPTION_NAME, self.prefill_subject, 5, True),
                 call(SUBSCRIPTION_NAME, self.main_subject, 5, True),
             ]
         )
-
         assert result == MESSAGE
 
     async def test_post_message_status(self, message_service: MessageService):

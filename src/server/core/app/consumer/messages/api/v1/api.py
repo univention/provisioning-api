@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
+import time
 from typing import Annotated, Optional
 
 import fastapi
@@ -61,8 +62,21 @@ async def get_next_message(
 ) -> Optional[ProvisioningMessage]:
     """Return the next pending message for the given subscription."""
 
+    t0 = time.perf_counter()
     sub_service = SubscriptionService(port)
     await sub_service.authenticate_user(credentials, name)
+    td0 = time.perf_counter() - t0
 
+    t0 = time.perf_counter()
     msg_service = MessageService(port)
-    return await msg_service.get_next_message(name, timeout, pop)
+    msg = await msg_service.get_next_message(name, timeout, pop)
+    td1 = time.perf_counter() - t0
+    timing = f"Auth: {td0 * 1000:.1f} ms, MQ: {td1 * 1000:.1f} ms"
+    msg_details = (
+        f"new message ({timing}). Publisher: {msg.publisher_name.value} TS: {msg.ts.isoformat()} Realm: {msg.realm} "
+        f"Topic: {msg.topic}"
+        if msg
+        else f"no message ({timing})."
+    )
+    logger.debug("Got %s", msg_details)
+    return msg

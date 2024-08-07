@@ -8,7 +8,7 @@ from importlib.metadata import version
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -64,7 +64,7 @@ def add_exception_handlers(_app: FastAPI):
     """Workaround for FastAPI not catching exceptions in sub-apps: https://github.com/fastapi/fastapi/issues/1802"""
 
     @app.exception_handler(Exception)
-    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> Response:
         """Add Correlation-ID to HTTP 500."""
         return await http_exception_handler(
             request,
