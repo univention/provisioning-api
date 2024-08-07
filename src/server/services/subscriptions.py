@@ -21,13 +21,13 @@ from univention.provisioning.models import (
 from .port import Port
 
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
+logger = logging.getLogger(__name__)
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class SubscriptionService:
     def __init__(self, port: Port):
         self._port = port
-        self.logger = logging.getLogger(__name__)
 
     async def get_subscriptions(self) -> List[Subscription]:
         """
@@ -73,11 +73,11 @@ class SubscriptionService:
                 )
             return False
         else:
-            self.logger.info("Registering new subscription with the name: %s", new_sub.name)
+            logger.info("Registering new subscription with the name: %s", new_sub.name)
             encrypted_password = self.hash_password(new_sub.password)
             await self._port.put_value(new_sub.name, encrypted_password, Bucket.credentials)
             await self.prepare_and_store_subscription_info(new_sub)
-            self.logger.info("New subscription was registered")
+            logger.info("New subscription was registered")
             return True
 
     async def prepare_and_store_subscription_info(self, new_sub: NewSubscription):
@@ -165,7 +165,7 @@ class SubscriptionService:
         await self._port.delete_consumer(name)
 
     async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
-        self.logger.debug("Deleting subscription %s from %s", name, realm_topic_str)
+        logger.debug("Deleting subscription %s from %s", name, realm_topic_str)
         realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"
         subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
         if not subs:
@@ -177,7 +177,7 @@ class SubscriptionService:
         subs.remove(name)
         await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
 
-        self.logger.info("Subscription was deleted")
+        logger.info("Subscription was deleted")
 
     async def delete_sub_info(self, name: str):
         await self._port.delete_kv_pair(name, Bucket.subscriptions)
@@ -198,6 +198,7 @@ class SubscriptionService:
         valid, new_hash = password_context.verify_and_update(credentials.password, hashed_password)
         if valid:
             if new_hash:
+                logger.info("Storing new password hash for user %r.", credentials.username)
                 await self._port.put_value(credentials.username, new_hash, Bucket.credentials)
         else:
             self.handle_authentication_error("Incorrect username or password")

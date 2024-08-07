@@ -43,8 +43,7 @@ RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
 # copy source code
 COPY ./src/server ${WORKDIR}/src/server
 COPY ./src/univention/provisioning/models ${WORKDIR}/src/univention/provisioning/models
-COPY logging.yaml \
-     poetry.lock \
+COPY poetry.lock \
      pyproject.toml \
      README.md \
      ${WORKDIR}/
@@ -73,7 +72,6 @@ EXPOSE 7777
 ENTRYPOINT [ \
         "./.venv/bin/uvicorn", \
          "server.core.app.main:app", \
-        "--log-config", "logging.yaml", \
         "--host", "0.0.0.0", \
         "--port", "7777" \
     ]

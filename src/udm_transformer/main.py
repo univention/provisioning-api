@@ -6,6 +6,7 @@ import logging
 
 from daemoniker import Daemonizer
 
+from server.log import setup_logging
 from udm_transformer.controller import UDMTransformerController
 from udm_transformer.port import UDMTransformerPort
 
@@ -25,4 +26,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    setup_logging()
     asyncio.run(main())

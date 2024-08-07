@@ -22,11 +22,12 @@ from univention.provisioning.models import (
 from .port import Port
 from .subscriptions import SubscriptionService
 
+logger = logging.getLogger(__name__)
+
 
 class MessageService:
     def __init__(self, port: Port):
         self._port = port
-        self.logger = logging.getLogger(__name__)
 
     async def check_subscription_status(self, subscription_name: str, timeout: float) -> FillQueueStatus:
         sub_service = SubscriptionService(self._port)
@@ -52,11 +53,9 @@ class MessageService:
         :param bool pop: If the message should be deleted after request.
         :param float timeout: Max duration of the request before it expires.
         """
-
-        # TODO: Timeout of 0 leads to internal server error
-
+        timeout = max(timeout, 0.1)  # Timeout of 0 leads to internal server error
         if await self.check_subscription_status(subscription_name, timeout) != FillQueueStatus.done:
-            self.logger.warning(
+            logger.warning(
                 "Prefill status for subscription '%s' did not reach 'done' within the timeout period.",
                 subscription_name,
             )
@@ -64,7 +63,7 @@ class MessageService:
 
         message = await self.get_messages_from_prefill_queue(subscription_name, timeout, pop)
         if message is None:
-            self.logger.info("All messages from the prefill subject have been delivered")
+            logger.info("All messages from the prefill subject have been delivered")
             message = await self.get_messages_from_main_queue(subscription_name, timeout, pop)
 
         return message
@@ -73,14 +72,14 @@ class MessageService:
         self, subscription: str, timeout: float, pop: bool
     ) -> Optional[ProvisioningMessage]:
         main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=subscription)
-        self.logger.info("Getting the messages for the '%s' from the main subject", main_subject)
+        logger.info("Getting the messages for the '%s' from the main subject", main_subject)
         return await self._port.get_message(subscription, main_subject, timeout, pop)
 
     async def get_messages_from_prefill_queue(
         self, subscription: str, timeout: float, pop: bool
     ) -> Optional[ProvisioningMessage]:
         prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription)
-        self.logger.info(
+        logger.info(
             "Getting the messages for the '%s' from the prefill subject",
             prefill_subject,
         )
@@ -94,7 +93,7 @@ class MessageService:
         await self._port.add_message(DISPATCHER_STREAM, DISPATCHER_STREAM, event)
 
     async def send_request_to_prefill(self, subscription: NewSubscription):
-        self.logger.info("Sending the requests to prefill")
+        logger.info("Sending the requests to prefill")
         message = PrefillMessage(
             publisher_name="consumer-registration",
             ts=datetime.now(),

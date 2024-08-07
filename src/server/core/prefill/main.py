@@ -7,6 +7,7 @@ from daemoniker import Daemonizer
 
 from server.core.prefill.port import PrefillPort
 from server.core.prefill.service.udm_prefill import UDMPreFill
+from server.log import setup_logging
 
 
 async def run_prefill():
@@ -21,4 +22,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logging()
     main()

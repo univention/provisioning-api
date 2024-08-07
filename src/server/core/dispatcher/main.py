@@ -7,6 +7,7 @@ from daemoniker import Daemonizer
 
 from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService
+from server.log import setup_logging
 
 
 async def run_dispatcher():
@@ -21,4 +22,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logging()
     main()

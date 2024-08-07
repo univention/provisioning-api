@@ -45,8 +45,7 @@ RUN pipx install poetry==1.5.1
 COPY ./src/server ./src/server
 COPY ./src/univention/provisioning/models ./src/univention/provisioning/models
 COPY ./src/provisioning_listener ./src/provisioning_listener
-COPY logging.yaml \
-     poetry.lock \
+COPY poetry.lock \
      pyproject.toml \
      README.md \
      ./

@@ -10,7 +10,6 @@ def start_dev():
     """
     uvicorn.run(
         "app.main:app",
-        log_config="logging.yaml",
         host="0.0.0.0",
         port=7777,
         reload=True,

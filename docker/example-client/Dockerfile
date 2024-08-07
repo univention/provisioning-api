@@ -39,8 +39,7 @@ RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
 
 # copy source code
 COPY ./src/univention/provisioning ${WORKDIR}/univention/provisioning
-COPY logging.yaml \
-     ./src/poetry.lock \
+COPY ./src/poetry.lock \
      ./src/pyproject.toml \
      ${WORKDIR}/
 
