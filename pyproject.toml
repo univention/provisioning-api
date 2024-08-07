@@ -14,6 +14,7 @@ aiohttp = "^3.8.5"
 # py37 dropped in 4.3.0, raise when removing the udm-listener and using py311
 asgi-correlation-id = ">=4.2.0,<4.3.0"
 bcrypt = "4.0.1"
+cachetools = "^5.4.0"
 daemoniker = "^0.2.3"
 fastapi = "^0.103.1"
 fastapi-utils = "^0.7.0"
@@ -61,6 +62,10 @@ known-local-folder = ["tests"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+log_cli = 0  # activate on the CLI with: "-o log_cli=true"
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
 
 [build-system]
 requires = ["poetry-core"]

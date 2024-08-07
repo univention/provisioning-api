@@ -4,6 +4,7 @@
 import logging
 from typing import List, Optional
 
+import cachetools.func
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
@@ -23,6 +24,20 @@ from .port import Port
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 logger = logging.getLogger(__name__)
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+PASSWORD_CACHE_TTL = 30.0
+
+
+@cachetools.func.ttl_cache(maxsize=32, ttl=PASSWORD_CACHE_TTL)
+def verify_and_update_password(
+    cleartext_pw: str, hashed_pw: str, subscription_name: Optional[str] = None
+) -> tuple[bool, str | None]:
+    """
+    Caching wrapper around CryptContext.verify_and_update()
+
+    Caches all hits and exceptions!
+    But the caller (SubscriptionService.authenticate_user()) will delete negative hits, so we cache only positive hits.
+    """
+    return password_context.verify_and_update(cleartext_pw, hashed_pw)  # takes ~200ms
 
 
 class SubscriptionService:
@@ -183,7 +198,8 @@ class SubscriptionService:
     async def delete_sub_info(self, name: str):
         await self._port.delete_kv_pair(name, Bucket.subscriptions)
 
-    def handle_authentication_error(self, message: str):
+    @staticmethod
+    def handle_authentication_error(message: str):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=message,
@@ -195,11 +211,14 @@ class SubscriptionService:
             self.handle_authentication_error("You do not have access to this data")
 
         hashed_password = await self._port.get_str_value(credentials.username, Bucket.credentials)
-
-        valid, new_hash = password_context.verify_and_update(credentials.password, hashed_password)
+        cached_func_args = (credentials.password, hashed_password, subscription_name)
+        valid, new_hash = verify_and_update_password(*cached_func_args)
         if valid:
             if new_hash:
                 logger.info("Storing new password hash for user %r.", credentials.username)
                 await self._port.put_value(credentials.username, new_hash, Bucket.credentials)
         else:
+            # cache only positive authentication attempts -> remove cache entry for invalid password
+            cache_key = verify_and_update_password.cache_key(*cached_func_args)
+            verify_and_update_password.cache.pop(cache_key, None)
             self.handle_authentication_error("Incorrect username or password")
