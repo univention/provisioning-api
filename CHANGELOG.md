@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.32.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.31.1...v0.32.0) (2024-08-07)
+
+
+### Features
+
+* add request ID to logs, add request timing, fix log level config being ignored ([235768d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/235768d7cd6d7db9df3db0ccccf9eef0a5daa1e1))
+
 ## [0.31.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.31.0...v0.31.1) (2024-08-06)
 
 
