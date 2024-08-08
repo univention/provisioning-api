@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-from typing import Any, AsyncGenerator, Callable, Coroutine
+from typing import Any, AsyncGenerator, Callable, Coroutine, Literal
 
 import pytest
 
@@ -12,7 +12,7 @@ from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 from univention.provisioning.models.subscription import FillQueueStatus
 
-from tests.conftest import REALMS_TOPICS
+from tests.conftest import DUMMY_REALMS_TOPICS, REALMS_TOPICS
 from tests.e2e.conftest import E2ETestSettings
 from tests.e2e.helpers import create_message_via_events_api, create_message_via_udm_rest_api
 
@@ -22,14 +22,20 @@ EXPECTED_MAX_DELAY = 150
 
 def print_stats(durations: list[float]) -> None:
     print(f"all request times were: {durations}")
-    print(f"minimum request time: {min(durations)}")
-    print(f"maximum request time: {max(durations)}")
-    print(f"average request time: {sum(durations) / len(durations)}")
+    print(f"minimum request time: {min(durations):.2f}ms")
+    print(f"maximum request time: {max(durations):.2f}ms")
+    print(f"average request time: {sum(durations) / len(durations):.2f}ms")
+
+
+@pytest.fixture
+def realms_topics(request) -> Literal:
+    return getattr(request, "param", DUMMY_REALMS_TOPICS)
 
 
 @pytest.fixture
 async def subscription(
     request,
+    realms_topics,
     subscriber_name,
     subscriber_password,
     provisioning_admin_client: ProvisioningConsumerClient,
@@ -37,7 +43,7 @@ async def subscription(
 ) -> AsyncGenerator[str, Any]:
     request_prefill = getattr(request, "param", False)
     await provisioning_admin_client.create_subscription(
-        name=subscriber_name, password=subscriber_password, realms_topics=REALMS_TOPICS, request_prefill=request_prefill
+        name=subscriber_name, password=subscriber_password, realms_topics=realms_topics, request_prefill=request_prefill
     )
 
     # ensure that the pre-fill process is finished successfully
@@ -58,7 +64,9 @@ async def subscription(
     await provisioning_admin_client.cancel_subscription(subscriber_name)
 
 
-@pytest.mark.parametrize("subscription", [False, True], indirect=True, ids=["without_prefill", "with_prefill"])
+@pytest.mark.parametrize(
+    "subscription", [False, True], indirect=["subscription"], ids=["without_prefill", "with_prefill"]
+)
 async def test_simple_message_timing(
     provisioning_client: ProvisioningConsumerClient,
     subscription: str,
@@ -86,18 +94,18 @@ async def test_simple_message_timing(
         response = await provisioning_client.get_subscription_message(
             name=subscription,
         )
-        get_durations.append(time.perf_counter() - tic)
+        get_durations.append((time.perf_counter() - tic) * 1000)
 
         assert response.body == messages[i]
         responses.append(response)
-        print(f"request time was {get_durations[-1]:.3f}")
+        print(f"request time was {get_durations[-1]:.2f}")
 
         tic = time.perf_counter()
         await provisioning_client.set_message_status(
             subscription,
             MessageProcessingStatusReport(status=MessageProcessingStatus.ok, message_seq_num=response.sequence_number),
         )
-        status_durations.append(time.perf_counter() - tic)
+        status_durations.append((time.perf_counter() - tic) * 1000)
 
     print("get_subscription_message statistics")
     print_stats(get_durations)
@@ -110,6 +118,7 @@ async def test_simple_message_timing(
     assert max_d < EXPECTED_MAX_DELAY, f"maximum request duration was higher than {EXPECTED_MAX_DELAY} ms: {max_d}"
 
 
+@pytest.mark.parametrize("realms_topics", [REALMS_TOPICS], indirect=["realms_topics"])
 @pytest.mark.parametrize("subscription", [False, True], indirect=True, ids=["without_prefill", "with_prefill"])
 async def test_udm_message_timing(
     provisioning_client: ProvisioningConsumerClient,
@@ -138,17 +147,17 @@ async def test_udm_message_timing(
         response = await provisioning_client.get_subscription_message(
             name=subscription,
         )
-        assert response.body["new"]["dn"] == messages[i].dn
+        assert response.body.new["dn"] == messages[i].dn
         responses.append(response)
-        get_durations.append(time.perf_counter() - tic)
-        print(f"request time was {get_durations[-1]:.3f}")
+        get_durations.append((time.perf_counter() - tic) * 1000)
+        print(f"request time was {get_durations[-1]:.2f}")
 
         tic = time.perf_counter()
         await provisioning_client.set_message_status(
             subscription,
             MessageProcessingStatusReport(status=MessageProcessingStatus.ok, message_seq_num=response.sequence_number),
         )
-        status_durations.append(time.perf_counter() - tic)
+        status_durations.append((time.perf_counter() - tic) * 1000)
 
     print("get_subscription_message statistics")
     print_stats(get_durations)
