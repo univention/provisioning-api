@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.33.0...v0.33.1) (2024-08-08)
+
+
+### Bug Fixes
+
+* clean up nats credentials ([449ca00](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/449ca00ce69b292594861083606706cce35af63a))
+
 ## [0.33.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.32.0...v0.33.0) (2024-08-08)
 
 
