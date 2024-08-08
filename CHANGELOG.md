@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.33.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.32.0...v0.33.0) (2024-08-08)
+
+
+### Features
+
+* allow direct access to the Body model and MessageHandlerSettings from the module ([ccccaf4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ccccaf418bc152cfdd898a6ddb2455f81af0cbed))
+
+
+### Bug Fixes
+
+* **example-client:** fix example-client ([d7d121f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7d121fc3c2f58dd4cc0b71d001113ca643ac4a9))
+* replace dict with Pydantic model for the body field ([762b4cc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/762b4cc243139dd9ec4fb78b0718a6e457faf900))
+
 ## [0.32.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.31.1...v0.32.0) (2024-08-07)
 
 
