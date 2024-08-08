@@ -39,12 +39,11 @@ ENV \
 RUN pipx install poetry==1.5.1
 
 # copy source code
-COPY ./src/server ./src/server
+COPY ./provisioning-listener/src/server ./src/server
 COPY ./src/univention/provisioning/models ./src/univention/provisioning/models
-COPY ./src/provisioning_listener ./src/provisioning_listener
-COPY poetry.lock \
-     pyproject.toml \
-     README.md \
+COPY ./provisioning-listener/provisioning_listener ./src/provisioning_listener
+COPY ./provisioning-listener/poetry.lock \
+     ./provisioning-listener/pyproject.toml \
      ./
 
 # install dependencies
@@ -57,6 +56,6 @@ WORKDIR ${WORKDIR}
 
 COPY --from=builder ${WORKDIR} .
 
-COPY ./src/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
+COPY ./provisioning-listener/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
 
 ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages

@@ -113,7 +113,7 @@ async def startup_task():
 
     async with Port.port_context() as port:
         logger.info("Checking MQ connectivity...")
-        await port.create_stream(PREFILL_STREAM)
+        await port.ensure_stream(PREFILL_STREAM, False)
 
 
 @app.exception_handler(RequestValidationError)

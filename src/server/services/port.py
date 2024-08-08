@@ -98,7 +98,7 @@ class Port:
     async def get_bucket_keys(self, bucket: Bucket):
         return await self.kv_adapter.get_keys(bucket)
 
-    async def create_consumer(self, subject):
+    async def ensure_consumer(self, subject):
         await self.mq_adapter.ensure_consumer(subject)
 
 

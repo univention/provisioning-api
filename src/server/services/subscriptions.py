@@ -103,7 +103,7 @@ class SubscriptionService:
                 PREFILL_SUBJECT_TEMPLATE.format(subscription=new_sub.name),
             ],
         )
-        await self._port.create_consumer(new_sub.name)
+        await self._port.ensure_consumer(new_sub.name)
 
     async def update_realm_topic_subscriptions(self, realms_topics: List[str], name: str):
         for realm_topic in realms_topics:
