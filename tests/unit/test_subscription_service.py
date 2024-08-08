@@ -96,8 +96,8 @@ class TestSubscriptionService:
     async def test_add_subscription(self, sub_service: SubscriptionService):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
         sub_service._port.get_list_value = AsyncMock(return_value=[])
-        sub_service._port.create_stream = AsyncMock()
-        sub_service._port.create_consumer = AsyncMock()
+        sub_service._port.ensure_stream = AsyncMock()
+        sub_service._port.ensure_consumer = AsyncMock()
 
         await sub_service.register_subscription(self.new_subscription)
 
