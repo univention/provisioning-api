@@ -6,6 +6,7 @@ from unittest.mock import ANY, AsyncMock, patch
 
 import msgpack
 import pytest
+
 from provisioning_listener.config import get_ldap_producer_settings
 from provisioning_listener.service import ensure_stream, handle_changes
 from server.adapters.nats_adapter import messagepack_encoder

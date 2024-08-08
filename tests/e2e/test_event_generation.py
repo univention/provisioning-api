@@ -8,6 +8,7 @@ from typing import Any, Callable
 
 import nats
 import pytest
+
 from univention.admin.rest.client import UDM
 
 NUM_TEST_USERS = 10

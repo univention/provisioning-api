@@ -4,6 +4,7 @@
 from unittest.mock import AsyncMock, call
 
 import pytest
+
 from server.core.dispatcher.service.dispatcher import DispatcherService
 from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
 

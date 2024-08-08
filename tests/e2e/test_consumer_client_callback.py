@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import pytest
+
 from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models import Message
 

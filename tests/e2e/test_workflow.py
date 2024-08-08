@@ -7,6 +7,7 @@ import uuid
 import ldap3
 import pytest
 import requests
+
 from server.core.app.admin.api import v1_prefix as admin_api_prefix
 from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
 from server.core.app.consumer.subscriptions.api import (

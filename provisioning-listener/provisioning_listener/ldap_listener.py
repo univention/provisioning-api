@@ -33,9 +33,8 @@
 
 import asyncio
 
-from univention.listener.handler import ListenerModuleHandler
-
 from provisioning_listener.service import ensure_stream, handle_changes
+from univention.listener.handler import ListenerModuleHandler
 
 name = "provisioning_handler"
 

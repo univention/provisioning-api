@@ -19,6 +19,7 @@ from nats.js.errors import (
     ServerError,
 )
 from nats.js.kv import KV_DEL
+
 from univention.provisioning.models import (
     REALM_TOPIC_PREFIX,
     BaseMessage,

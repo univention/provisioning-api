@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
+
 from server.core.app.admin.api import v1_prefix as api_prefix
 from server.core.app.main import app as subscriptions_app
 from server.core.app.main import internal_app_path

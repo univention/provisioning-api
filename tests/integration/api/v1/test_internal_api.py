@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
+
 from server.core.app.internal.api import v1_prefix as api_prefix
 from server.core.app.main import app, internal_app_path
 

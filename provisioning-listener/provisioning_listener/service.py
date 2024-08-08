@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict
 
+from provisioning_listener.port import LDAPProducerPort
 from univention.provisioning.models.queue import (
     LDAP_STREAM,
     LDAP_SUBJECT,
@@ -12,8 +13,6 @@ from univention.provisioning.models.queue import (
     Message,
     PublisherName,
 )
-
-from provisioning_listener.port import LDAPProducerPort
 
 logger = logging.getLogger(__name__)
 

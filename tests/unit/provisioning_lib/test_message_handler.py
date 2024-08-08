@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, call, patch
 
 import aiohttp
 import pytest
+
 from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models import Message
 

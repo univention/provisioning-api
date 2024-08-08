@@ -25,13 +25,13 @@ repos:
 
   # "Commit messages"
   - repo: "https://github.com/compilerla/conventional-pre-commit"
-    rev: "v3.3.0"
+    rev: "v3.4.0"
     hooks:
       - id: "conventional-pre-commit"
         stages: ["commit-msg"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.2
+    rev: v0.5.6
     hooks:
       - id: ruff
         args: [ --fix ]

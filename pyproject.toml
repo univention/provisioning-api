@@ -55,6 +55,10 @@ line-length = 120
 [tool.ruff.lint]
 extend-select = ["I"]  # activate isort
 
+[tool.ruff.lint.isort]
+known-first-party = ["provisioning_listener", "server", "univention"]
+known-local-folder = ["tests"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 

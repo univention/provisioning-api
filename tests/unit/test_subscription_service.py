@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from fastapi import HTTPException
+
 from server.services.subscriptions import SubscriptionService
 from univention.provisioning.models import FillQueueStatus, NewSubscription
 from univention.provisioning.models.subscription import Bucket, Subscription

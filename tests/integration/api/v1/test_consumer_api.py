@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
+
 from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
 from server.core.app.consumer.subscriptions.api import v1_prefix as api_prefix
 from server.core.app.main import app as messages_app

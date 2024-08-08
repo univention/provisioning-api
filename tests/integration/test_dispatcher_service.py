@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from nats.aio.msg import Msg
+
 from server.core.dispatcher.config import DispatcherSettings
 from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService

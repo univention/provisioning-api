@@ -10,6 +10,7 @@ import nats
 import pytest
 from nats.aio.client import Client as NATS
 from nats.js.errors import NotFoundError
+
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
 

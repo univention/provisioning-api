@@ -13,6 +13,7 @@ from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
+
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from univention.provisioning.models import (
     Message,

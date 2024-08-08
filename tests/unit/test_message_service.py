@@ -4,6 +4,7 @@
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
+
 from server.services.messages import MessageService
 from univention.provisioning.models import (
     DISPATCHER_STREAM,

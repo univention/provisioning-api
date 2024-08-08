@@ -3,10 +3,9 @@
 
 from typing import List, Optional
 
+from provisioning_listener.config import LdapProducerSettings
 from server.adapters.nats_adapter import NatsMQAdapter, messagepack_encoder
 from univention.provisioning.models.queue import Message
-
-from provisioning_listener.config import LdapProducerSettings
 
 
 class LDAPProducerPort:

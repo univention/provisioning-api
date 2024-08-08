@@ -6,6 +6,7 @@ from typing import Any, Callable, List, Optional, Union
 
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
+
 from univention.provisioning.models import BaseMessage
 from univention.provisioning.models.subscription import Bucket
 

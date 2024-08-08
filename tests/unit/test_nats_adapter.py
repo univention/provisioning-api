@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
+
 from server.adapters.nats_adapter import NatsKeys
 from univention.provisioning.models import Bucket
 
