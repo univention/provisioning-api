@@ -59,13 +59,15 @@ None.
 
 There is a queue for each registered subscriber.
 The queues are implemented using [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream).
+See the `queue-configuration` section for details about the NATS configuration.
 
 Each item in the queue has a timestamp.
-Messages are sent to the subscribers one by one,
+Messages are requested by the subscribers one by one,
 starting with the earliest item available.
 
 A subscriber must acknowledge the successful processing of a message,
-only afterwards the next message is provided by the dispatcher.
+Until a message is acknowledged,
+the Provisioning API will redeliver the current message when asking for the next message.
 
 See the `prefill` section for further details.
 
