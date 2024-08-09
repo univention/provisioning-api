@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.33.1...v0.33.2) (2024-08-09)
+
+
+### Bug Fixes
+
+* improve the wait-for-provisioning api init container script ([57bc532](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/57bc53213df25bf48ec7fcffd4a7032684997ab2))
+
 ## [0.33.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.33.0...v0.33.1) (2024-08-08)
 
 
