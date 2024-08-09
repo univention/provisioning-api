@@ -37,6 +37,23 @@ data:
 kind: "ConfigMap"
 apiVersion: "v1"
 metadata:
+  name: {{ printf "%s-wait-for-api" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+{{ (.Files.Glob "wait-for-api.sh").AsConfig | required "Missing wait-for-api.sh config file" | indent 2 }}
+...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
   name: {{ printf "%s-api" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:

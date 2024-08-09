@@ -39,16 +39,23 @@ spec:
           secret:
             secretName: {{ include "provisioning-register-consumers.jsonSecretName" . | quote }}
         {{- end }}
+        - name: "scripts-volume"
+          configMap:
+            name: {{ printf "%s-wait-for-api" (include "common.names.fullname" .) }}
+            defaultMode: 0555
       initContainers:
-        - name: wait-for-api-to-start
+        - name: wait-for-provisioning-api
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
-          command: [ "bash", "-c", "set -euo pipefail; until curl -s ${PROVISIONING_API_BASE_URL} > /dev/null || [ $? -ne 0 ]; do echo Waiting for api; sleep 2; done;" ]
+          command: ["/bin/bash", "-c", "/scripts/wait-for-api.sh ${PROVISIONING_API_BASE_URL}"]
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
+          volumeMounts:
+            - name: scripts-volume
+              mountPath: /scripts
       containers:
         - name: consumer-registration
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
