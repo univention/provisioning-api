@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.34.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.33.2...v0.34.0) (2024-08-09)
+
+
+### Features
+
+* **nats-adapter:** set replicas to 3 and stream to type work queue to auto-delete messages ([d90c5bc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d90c5bcf48da04c2c681a8b0582352e01378759b))
+
+
+### Bug Fixes
+
+* **consumer-client:** acknowledge message only after all callbacks have been executed ([61992c5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/61992c51d90cb34c98f5a448865f50989e8fc205))
+* fix small rebase error ([758d885](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/758d885005e7f6eef027aaf4e820d27f4f4144a9))
+* make the nats stream type configurable ([30fd72d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/30fd72da1190344706418cb9389efe4dca0a7b76))
+* **nats-adapret:** fix nats stream update scenario and add nats adapter tests ([c825f4a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c825f4a9711dcee2ddd27b0261f6d0b1a6cf7347))
+* **nats-adapter:** set replicas back to 1 until nats clustering is reliable ([8e64bd4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8e64bd47fa3a5744f89378b173dc62c421d48e4c))
+* **udm-listener:** fix container build and reactivate the udm-listener build in ci ([f7d5956](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f7d5956d38bf7fe14e5e250ee3bce4072d15e250))
+* **udm-listener:** keep compatibility with python 3.7 for the udm-listener 5.0-7 container ([3b7f551](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3b7f5516c287441ea65d72781476c01b94b8510e))
+* **udm-listeren:** extract the listener into it's own pyproject.toml to upgrade the rest to python 3.11 ([3081120](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3081120faac6ba5d6f344cbd7f1568cfaafeb3e1))
+* use updated version of nats chart to fix disabling the anti affinity configuration ([8472e36](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8472e36111f3173fae64becf10f826be63539517))
+* wrap concurrent task executions in TaskGroup to propagate errors from any task ([b49f5a1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b49f5a13019b8f9aadbc7e03edd8e90e8fb9bfcd))
+
+
+### Reverts
+
+* "fix(udm-listener): keep compatibility with python 3.7 for the udm-listener 5.0-7 container" ([49e60bf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/49e60bf71073f45934d4d6fd62bd45e595df0850))
+
 ## [0.33.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.33.1...v0.33.2) (2024-08-09)
 
 
