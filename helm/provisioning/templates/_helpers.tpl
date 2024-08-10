@@ -72,7 +72,7 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 
 {{- define "provisioning.udmTransformer.ldap.connection.host" -}}
 {{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.connection.host" . -}}
+{{- include "nubusTemplates.connections.ldap.primary.host" . -}}
 {{- else -}}
 {{- required ".Values.udmTransformer.ldap.connection.host must be defined." .Values.udmTransformer.ldap.connection.host -}}
 {{- end -}}
