@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.35.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.34.0...v0.35.0) (2024-08-10)
+
+
+### Features
+
+* cache consumer prefill state, cache credentials verification ([d110689](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d1106893b7b4cdb09bea1731b296ac4fa9c34096))
+
+
+### Bug Fixes
+
+* **udm-transformer:** point the udm transformer to the ldap primary instead of the proxy, eliminating out-of-sync conditions. ([a8cae7c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a8cae7cd16805f11529e68e9f9b3c6b48165b323))
+
 ## [0.34.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.33.2...v0.34.0) (2024-08-09)
 
 
