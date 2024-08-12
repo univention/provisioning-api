@@ -13,7 +13,7 @@ class ProvisioningConsumerClientSettings(BaseSettings):
     provisioning_api_base_url: str
     provisioning_api_username: str
     provisioning_api_password: str
-    log_level: Loglevel
+    log_level: Loglevel = "INFO"
 
     @property
     def consumer_registration_url(self) -> str:

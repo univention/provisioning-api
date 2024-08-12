@@ -12,10 +12,11 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
+aiohttp = "^3.8.5"
+jsondiff = "^2.2.0"
 pydantic = "^2.3.0"
 pydantic-settings = "^2.0.3"
 python = "^3.11"
-aiohttp = "^3.8.5"
 
 [tool.poetry.scripts]
 consumer = "univention.provisioning.consumer.example_client.main:run"

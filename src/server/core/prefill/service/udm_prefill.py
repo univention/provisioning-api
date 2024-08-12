@@ -18,6 +18,8 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import Body, Message, PublisherName, SimpleMessage
 
+logger = logging.getLogger(__name__)
+
 
 class PrefillFailedError(Exception): ...
 
@@ -36,18 +38,16 @@ class UDMPreFill:
         super().__init__()
         self._port = port
         self.ack_manager = MessageAckManager(ack_wait=30, ack_threshold=5)
-        logging.basicConfig(level=logging.INFO)
-        self._logger = logging.getLogger(__name__)
         self.max_prefill_attempts = port.settings.max_prefill_attempts
 
     async def handle_requests_to_prefill(self):
-        self._logger.info("Handling the requests to prefill")
+        logger.info("Handling the requests to prefill")
 
         await self.prepare_prefill_failures_queue()
         await self._port.initialize_subscription(PREFILL_STREAM, False, None)
 
         while True:
-            self._logger.info("Waiting for new prefill requests...")
+            logger.info("Waiting for new prefill requests...")
             try:
                 message, acknowledgements = await self._port.get_one_message()
             except Empty:
@@ -59,7 +59,7 @@ class UDMPreFill:
                     message_handler, acknowledgements.acknowledge_message_in_progress
                 )
             except PrefillFailedError:
-                self._logger.warning(
+                logger.warning(
                     "A recoverable error happened while processing the prefill request. "
                     "The prefill request will be scheduled for redelivery and retried at a later time."
                 )
@@ -69,22 +69,22 @@ class UDMPreFill:
                 await acknowledgements.acknowledge_message_negatively()
                 raise
             except Exception:
-                self._logger.exception("Unknown error occured while processing the prefill request.")
+                logger.exception("Unknown error occured while processing the prefill request.")
                 await acknowledgements.acknowledge_message_negatively()
                 raise
 
             await acknowledgements.acknowledge_message()
 
     async def handle_message(self, message: MQMessage):
-        self._logger.info("Received message with content: %s", message.data)
+        logger.info("Received message with content: %s", message.data)
         try:
             validated_message = PrefillMessage.model_validate(message.data)
         except ValidationError:
-            self._logger.exception("failed to parse message queue message: %r", message.data)
+            logger.exception("failed to parse message queue message: %r", message.data)
             raise
 
         if self.max_prefill_attempts != -1 and message.num_delivered > self.max_prefill_attempts:
-            self._logger.error(
+            logger.error(
                 "The maximum number of retries for prefilling the subscription %s has been reached. "
                 "The prefill will not be retried again and the subscription will be marked as failed. "
                 "To trigger the prefill again, delete and recreate the subscription."
@@ -108,10 +108,10 @@ class UDMPreFill:
         for realm, topic in message.realms_topics:
             if realm != "udm":
                 # FIXME: unhandled realm
-                self._logger.error("Unhandled realm: %s", realm)
+                logger.error("Unhandled realm: %s", realm)
                 continue
 
-            self._logger.info(
+            logger.info(
                 "Started the prefill for the subscriber %s with the topic %s",
                 message.subscription_name,
                 topic,
@@ -129,11 +129,11 @@ class UDMPreFill:
         udm_match = [module for module in udm_modules if match_topic(topic, module["name"])]
 
         if len(udm_match) == 0:
-            self._logger.warning("No UDM modules match object type %s", topic)
+            logger.warning("No UDM modules match object type %s", topic)
 
         for module in udm_match:
             this_topic = module["name"]
-            self._logger.info("Grabbing %s objects.", this_topic)
+            logger.info("Grabbing %s objects.", this_topic)
             await self._fill_udm_topic(this_topic, subscription_name)
 
     async def _fill_udm_topic(self, object_type: str, subscription_name: str):
@@ -151,7 +151,7 @@ class UDMPreFill:
 
         urls = await self._port.list_objects(object_type)
         for url in urls:
-            self._logger.info("Grabbing object from: %s", url)
+            logger.info("Grabbing object from: %s", url)
             await self._fill_object(url, object_type, subscription_name)
 
     async def _fill_object(self, url: str, object_type: str, subscription_name: str):
@@ -165,7 +165,7 @@ class UDMPreFill:
             topic=object_type,
             body=Body(old={}, new=obj),
         )
-        self._logger.info("Sending to the consumer prefill queue from: %s", url)
+        logger.info("Sending to the consumer prefill queue from: %s", url)
 
         await self._port.create_prefill_message(
             subscription_name,
@@ -174,7 +174,7 @@ class UDMPreFill:
         )
 
     async def add_to_failure_queue(self, data: dict) -> None:
-        self._logger.info("Adding request to the prefill failures queue")
+        logger.info("Adding request to the prefill failures queue")
         message = SimpleMessage(
             publisher_name=PublisherName.udm_pre_fill,
             ts=datetime.now(),

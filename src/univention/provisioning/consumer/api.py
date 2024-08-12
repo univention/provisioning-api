@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import asyncio
+import inspect
 import logging
+import time
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
 import aiohttp
+from jsondiff import diff
 
 from univention.provisioning.models import (
     Event,
@@ -18,13 +22,13 @@ from univention.provisioning.models import (
 
 from .config import MessageHandlerSettings, ProvisioningConsumerClientSettings
 
+logger = logging.getLogger(__name__)
+
 
 # TODO: the subscription part will be delegated to an admin using an admin API
 class ProvisioningConsumerClient:
     def __init__(self, settings: Optional[ProvisioningConsumerClientSettings] = None, concurrency_limit: int = 10):
         self.settings = settings or ProvisioningConsumerClientSettings()
-        self._logger = logging.getLogger("async-client")
-        self._logger.setLevel(self.settings.log_level)
         auth = aiohttp.BasicAuth(
             self.settings.provisioning_api_username,
             self.settings.provisioning_api_password,
@@ -49,7 +53,7 @@ class ProvisioningConsumerClient:
         realms_topics: List[Tuple[str, str]],
         request_prefill: bool = False,
     ):
-        self._logger.info("creating subscription for %s", str(realms_topics))
+        logger.info("creating subscription for %s", str(realms_topics))
         subscription = NewSubscription(
             name=name,
             realms_topics=realms_topics,
@@ -57,7 +61,7 @@ class ProvisioningConsumerClient:
             password=password,
         )
 
-        self._logger.debug(subscription.model_dump())
+        logger.debug(subscription.model_dump())
         return await self.session.post(
             f"{self.settings.provisioning_api_base_url}/internal/admin/v1/subscriptions",
             json=subscription.model_dump(),
@@ -141,7 +145,6 @@ class MessageHandler:
         if not callbacks:
             raise ValueError("Callback functions can't be empty")
         self.settings = settings or MessageHandlerSettings()
-        self._logger = logging.getLogger("message-handler")
         self.client = client
         self.subscription_name = self.client.settings.provisioning_api_username
         self.callbacks = callbacks
@@ -149,7 +152,7 @@ class MessageHandler:
         self.message_limit = message_limit
 
     async def acknowledge_message(self, message_seq_num: int) -> bool:
-        self._logger.info("Acknowledging message with sequence number: %s", message_seq_num)
+        logger.debug("Acknowledging message with sequence number: %r", message_seq_num)
         try:
             report = MessageProcessingStatusReport(
                 status=MessageProcessingStatus.ok,
@@ -162,7 +165,7 @@ class MessageHandler:
             aiohttp.ClientConnectionError,
             aiohttp.ClientResponseError,
         ) as exc:
-            self._logger.error("Failed to acknowledge message. - %s", repr(exc))
+            logger.error("Failed to acknowledge message. - %s", repr(exc))
             return False
 
     async def _callback_wrapper(
@@ -187,15 +190,15 @@ class MessageHandler:
     async def acknowledge_message_with_retries(self, message):
         for retries in range(self.settings.max_acknowledgement_retries + 1):
             if await self.acknowledge_message(message.sequence_number):
-                self._logger.info("Message was acknowledged")
+                logger.info("Message %r was acknowledged.", message.sequence_number)
                 return
 
-            self._logger.info("Failed to acknowledge message. Retries: %d", retries)
+            logger.warning("Failed to acknowledge message. Retries: %d", retries)
             if retries != self.settings.max_acknowledgement_retries:
                 timeout = min(2**retries / 10, 30)
                 await asyncio.sleep(timeout)
 
-        self._logger.error(
+        logger.error(
             "Maximum retries of %s reached. The message will be redelivered later",
             self.settings.max_acknowledgement_retries,
         )
@@ -220,8 +223,15 @@ class MessageHandler:
             )
             if not message:
                 continue
+            logger.debug(self.debug_msg(message))
             for callback in self.callbacks:
+                t0 = time.perf_counter()
                 await self._callback_wrapper(message, callback)
+                logger.debug(
+                    "%r finished handling message in %.1f ms.",
+                    inspect.getmodule(callback).__spec__.name,
+                    (time.perf_counter() - t0) * 1000,
+                )
             if self.pop_after_handling:
                 await self.acknowledge_message_with_retries(message)
 
@@ -229,3 +239,31 @@ class MessageHandler:
                 counter += 1
                 if counter >= self.message_limit:
                     return
+
+    @staticmethod
+    def debug_msg(message: Message) -> str:
+        msg = f"realm: {message.realm!r} topic: {message.topic!r}"
+        if message.realm == "udm":
+            old = message.body.old
+            new = message.body.new
+            if old and new:
+                change = diff(message.body.old, message.body.new, syntax="rightonly")
+                if old["dn"] != new["dn"]:
+                    msg += " action: move"
+                    msg += f" old_dn: {old['dn']}"
+                    change.pop("dn", None)
+                else:
+                    msg += " action: update"
+                msg += f" dn: {new['dn']}"
+                msg += f" diff(old, new): {change!r}"
+            elif not old:
+                msg += " action: create"
+                msg += f" dn: {new['dn']}"
+            elif not new:
+                msg += " action: delete"
+                msg += f" dn: {old['dn']}"
+            else:
+                msg += " action: ERROR(No object data)"
+        else:
+            msg += f" body: {message.body!r}"
+        return msg

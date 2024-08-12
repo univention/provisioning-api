@@ -6,14 +6,12 @@ from typing import Callable, Coroutine
 
 from univention.provisioning.models import MQMessage
 
+logger = logging.getLogger(__name__)
+
 
 class MessageAckManager:
     ack_wait: int = 30
     ack_threshold: int = 5
-
-    def __init__(self):
-        logging.basicConfig(level=logging.INFO)
-        self._logger = logging.getLogger(__name__)
 
     async def process_message_with_ack_wait_extension(
         self,
@@ -40,4 +38,4 @@ class MessageAckManager:
         while True:
             await asyncio.sleep(self.ack_wait - self.ack_threshold)
             await acknowledge_message_in_progress(message)
-            self._logger.info("AckWait was extended")
+            logger.info("AckWait was extended")

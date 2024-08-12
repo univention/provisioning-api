@@ -41,8 +41,8 @@ REALM = "udm"
 TOPIC = "groups/group"
 TOPIC_2 = "users/user"
 DUMMY_TOPIC = "tests/topic"
-BODY = Body(old={"Old": "Object"}, new={"New": "Object"})
-FLAT_BODY = {"old": {"Old": "Object"}, "new": {"New": "Object"}}
+BODY = Body(old={"old": "Old", "dn": "uid=foo,dc=bar"}, new={"new": "New", "dn": "uid=foo,dc=bar"})
+FLAT_BODY = {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}
 PUBLISHER_NAME = PublisherName.ldif_producer
 REALM_TOPIC = [REALM, TOPIC]
 REALMS_TOPICS = [(REALM, TOPIC)]
@@ -171,7 +171,7 @@ MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 20
 FLAT_MESSAGE_ENCODED = (
     b'{"publisher_name": "ldif-producer", "ts": "2023-11-09T11:15:52.616061", '
     b'"realm": "udm", "topic": "groups/group", '
-    b'"body": {"old": {"Old": "Object"}, "new": {"New": "Object"}}}'
+    b'"body": {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}}'
 )
 
 BASE_KV_OBJ = KeyValue.Entry(

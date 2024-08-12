@@ -102,7 +102,7 @@ test-integration:
     - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
     - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 nats1 nats2 nats3
   script:
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest -v tests/integration
+    - docker compose run --quiet-pull --rm test /app/.venv/bin/python3 -m pytest -lvv tests/integration
   after_script:
     - docker compose down --volumes
 
@@ -131,7 +131,7 @@ test-end-to-end:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
     - cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e/ -v --environment pipeline
+    - docker compose run --quiet-pull --rm test /app/.venv/bin/python3 -m pytest tests/e2e/ -lvv --environment pipeline
   after_script:
     - docker logs events-and-consumer-api-dev >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
@@ -166,7 +166,7 @@ test-events-and-consumer-api:
   script:
     - poetry config virtualenvs.in-project true
     - poetry install --with dev
-    - poetry run pytest --ignore=tests/integration/ --ignore=tests/e2e --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
+    - poetry run pytest -lvv --ignore=tests/integration/ --ignore=tests/e2e --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
@@ -195,7 +195,7 @@ test_provisioning_lib:
     - pip install poetry=="$POETRY_VERSION"
     - poetry config --local virtualenvs.create false
     - poetry install --with dev
-    - pytest -vv tests/unit/provisioning_lib --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv tests/unit/provisioning_lib --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:

@@ -8,6 +8,7 @@ import difflib
 import json
 import logging
 import sys
+from importlib.metadata import version
 from typing import Optional, Sequence
 
 from aiohttp import ClientResponseError
@@ -18,6 +19,10 @@ from univention.provisioning.consumer import (
     ProvisioningConsumerClientSettings,
 )
 from univention.provisioning.models import ProvisioningMessage
+
+LOG_FORMAT = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+
+logger = logging.getLogger(__name__)
 
 
 def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):
@@ -33,13 +38,13 @@ def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwa
         color = f"0;{fg_color(fg)}"
         if bg:
             color += f";{bg_color(bg)}"
-        print("\x1b[6" + color + "m" + text + "\x1b[0m", **kwargs)
+        logger.info("\x1b[6" + color + "m" + text + "\x1b[0m", **kwargs)
     else:
-        print(text, **kwargs)
+        logger.info(text, **kwargs)
 
 
 def print_header(msg: ProvisioningMessage, action=None):
-    print()
+    logger.info("")
 
     text = ""
     if action:
@@ -104,7 +109,7 @@ def handle_udm_message(msg: ProvisioningMessage):
 
 def handle_any_message(msg: ProvisioningMessage):
     print_header(msg)
-    print(msg.model_dump_json(indent=2))
+    logger.info(msg.model_dump_json(indent=2))
 
 
 async def handle_message(message: ProvisioningMessage):
@@ -135,9 +140,8 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     return arguments
 
 
-async def main() -> None:
+async def main(settings: ProvisioningConsumerClientSettings) -> None:
     arguments = parse_args(sys.argv[1:])
-    settings = ProvisioningConsumerClientSettings()
 
     if len(sys.argv) > 1:
         admin_settings = ProvisioningConsumerClientSettings(
@@ -156,17 +160,16 @@ async def main() -> None:
                     prefill,
                 )
             except ClientResponseError as e:
-                logging.warn("%s, Client already exists", e)
+                logger.warning("%s, Client already exists", e)
 
-    logging.info("Listening for messages")
+    logger.info("Listening for messages")
     async with ProvisioningConsumerClient(settings) as client:
         await MessageHandler(client, [handle_message]).run()
 
 
-def run():
-    logging.info("args: %s", " ".join(sys.argv))
-    asyncio.run(main())
-
-
 if __name__ == "__main__":
-    run()
+    _settings = ProvisioningConsumerClientSettings()
+    logging.basicConfig(format=LOG_FORMAT, level=_settings.log_level)
+    logger.info("args: %r", sys.argv)
+    logger.info("Using 'nubus-provisioning-consumer' library version %r.", version("nubus-provisioning-consumer"))
+    asyncio.run(main(_settings))

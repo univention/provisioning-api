@@ -19,7 +19,7 @@ from tests.e2e.conftest import E2ETestSettings
 
 
 def create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
-    body = {"old": {}, "new": {str(uuid.uuid1()): str(uuid.uuid1())}}
+    body = {"old": {}, "new": {str(uuid.uuid1()): str(uuid.uuid1()), "dn": "cn=foo,dc=bar"}}
     payload = {
         "publisher_name": PublisherName.consumer_client_test,
         "ts": "2024-02-07T09:01:33.835Z",

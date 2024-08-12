@@ -25,33 +25,30 @@ ENV \
     WEB_CONCURRENCY=1 \
     # Do not buffer `stdout`
     PYTHONUNBUFFERED=1 \
-    # Do not create `.pyc` files
-    PYTHONDONTWRITEBYTECODE=1 \
     # Do not ask questions
-    POETRY_NO_INTERACTION=1 \
-    # Put .venv inside source folder
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    # Cache of poetry
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_NO_INTERACTION=1
 
 # install Poetry
-RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
+RUN pip3 install --break-system-packages --no-cache-dir poetry==1.8.3 poetry-plugin-export==1.8.0
 
 # copy source code
-COPY ./src/univention/provisioning ${WORKDIR}/univention/provisioning
 COPY ./src/poetry.lock \
      ./src/pyproject.toml \
      ${WORKDIR}/
 
 # install dependencies
-RUN poetry install --only main
+RUN poetry export -o ${WORKDIR}/requirements.txt
 
 ###############################################
 # Stage 2: final image
-FROM build as final
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as final
 ARG WORKDIR
 WORKDIR ${WORKDIR}
 
-COPY --from=build ${WORKDIR} ${WORKDIR}
+RUN apt-get --assume-yes --verbose-versions --no-install-recommends install 'python3-pip=23.0.*'
+COPY --from=build ${WORKDIR}/pyproject.toml ${WORKDIR}/requirements.txt ${WORKDIR}/
+RUN pip3 install --break-system-packages --no-cache-dir -r ${WORKDIR}/requirements.txt
+COPY ./src/univention/provisioning ${WORKDIR}/univention/provisioning
+RUN pip3 install --break-system-packages --no-cache-dir ${WORKDIR}/
 
-ENTRYPOINT ["poetry", "run", "consumer", "--"]
+ENTRYPOINT ["/usr/bin/python3", "-m", "univention.provisioning.consumer.example_client.main"]

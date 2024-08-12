@@ -11,13 +11,13 @@ packages = [{ include = "server", from = "src" }, ]
 
 [tool.poetry.dependencies]
 aiohttp = "^3.8.5"
-# py37 dropped in 4.3.0, raise when removing the udm-listener and using py311
-asgi-correlation-id = ">=4.2.0,<4.3.0"
+asgi-correlation-id = "^4.3.0"
 bcrypt = "4.0.1"
 cachetools = "^5.4.0"
 daemoniker = "^0.2.3"
 fastapi = "^0.103.1"
 fastapi-utils = "^0.7.0"
+jsondiff = "^2.2.0"
 ldap3 = "^2.9.1"
 msgpack = "1.0.*"
 nats-py = "^2.7.0"

@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-import logging
 from typing import List
 
 import fastapi
@@ -13,7 +12,6 @@ from server.services.subscriptions import SubscriptionService
 from univention.provisioning.models import NewSubscription, Subscription
 
 router = fastapi.APIRouter(tags=["admin"], dependencies=[Depends(authenticate_admin)])
-logger = logging.getLogger(__name__)
 
 
 @router.get("/subscriptions", status_code=fastapi.status.HTTP_200_OK)

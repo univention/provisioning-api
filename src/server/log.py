@@ -7,12 +7,12 @@ from asgi_correlation_id import CorrelationIdFilter
 
 from server.config import settings
 
-FILE_LOG_FORMAT = "%(asctime)s %(levelname)-5s [%(correlation_id)s] [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+LOG_FORMAT = "%(asctime)s %(levelname)-5s [%(correlation_id)s] [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 
 
 def setup_logging() -> None:
     logging.captureWarnings(True)
-    formatter = logging.Formatter(fmt=FILE_LOG_FORMAT)
+    formatter = logging.Formatter(fmt=LOG_FORMAT)
     handler = logging.StreamHandler()
     handler.setLevel(settings.log_level)
     handler.setFormatter(formatter)
