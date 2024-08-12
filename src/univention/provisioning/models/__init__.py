@@ -14,6 +14,8 @@ from .queue import (  # noqa: F401
     PREFILL_SUBJECT_TEMPLATE,
     BaseMessage,
     Body,
+    LDIFProducerBody,
+    LDIFProducerMessage,
     Message,
     MQMessage,
     PrefillMessage,

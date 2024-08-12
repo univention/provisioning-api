@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
+from typing_extensions import Literal
 
 PREFILL_SUBJECT_TEMPLATE = "{subscription}.prefill"
 PREFILL_STREAM = "prefill"
@@ -30,7 +31,6 @@ class BaseMessage(BaseModel):
     """The common header properties of each message."""
 
     publisher_name: PublisherName = Field(description="The name of the publisher of the message.")
-
     ts: datetime = Field(description="The timestamp when the message was received by the dispatcher.")
 
     @field_serializer("ts")
@@ -40,7 +40,6 @@ class BaseMessage(BaseModel):
 
 class Body(BaseModel):
     old: Dict[str, Any] = Field(description="The UDM object before the change.")
-
     new: Dict[str, Any] = Field(description="The UDM object after the change.")
 
     # Temporary validator due to the hardcoded image version of udm-listener.
@@ -49,6 +48,13 @@ class Body(BaseModel):
     @classmethod
     def set_empty_dict(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return v or {}
+
+
+class LDIFProducerBody(Body):
+    ldap_request_type: Literal["ADD", "MODIFY", "MODRDN", "DELETE"] = Field(description="The LDAP operation.")
+    binddn: str = Field(description="The LDAP user that triggered the operation.")
+    message_id: int = Field(description="An LDAP operation counter.")
+    request_id: str = Field(description="Reference ID in the LDIF producer logs.")
 
 
 class SimpleMessage(BaseMessage):
@@ -61,17 +67,20 @@ class Message(BaseMessage):
     """The base class for any kind of message sent via the queues."""
 
     realm: str = Field(description="The realm of the message, e.g. `udm`.")
-
     topic: str = Field(description="The topic of the message, e.g. `users/user`.")
-
     body: Body = Field(description="The content of the message as a key/value dictionary.")
+
+
+class LDIFProducerMessage(Message):
+    """Message the LDIF Producer sends"""
+
+    body: LDIFProducerBody = Field(description="The content of the message as a key/value dictionary.")
 
 
 class PrefillMessage(BaseMessage):
     """This class represents the message used to send a request to the Prefill Service."""
 
     subscription_name: str = Field(description="The name of the subscription that requested the prefilling queue")
-
     realms_topics: List[Tuple[str, str]] = Field(
         description="A list of `(realm, topic)` that this subscriber subscribes to, e.g. [('udm', 'users/user')]."
     )
@@ -83,7 +92,6 @@ class UDMMessage(BaseMessage):
     _realm: ClassVar[str] = "udm"
 
     old: Dict[str, Any] = Field(description="The UDM object before the change.")
-
     new: Dict[str, Any] = Field(description="The UDM object after the change.")
 
     @classmethod
