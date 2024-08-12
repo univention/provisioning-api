@@ -42,7 +42,7 @@ config:
   # -- Where to search for the CA Certificate file.
   # caCertFile: "/var/secrets/ca_cert"
   caCertFile: ""
-  debugLevel: "4"
+  debugLevel: "2"
   ldapBaseDn: null
   # -- LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set.
   ldapPassword: ""
