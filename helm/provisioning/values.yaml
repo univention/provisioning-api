@@ -29,9 +29,7 @@ global:
   #            kubelet attempts to start the container; otherwise, startup fails.
   imagePullPolicy: "IfNotPresent"
 
-  configMapUcrDefaults: "stack-data-ums-ucr"
-  configMapUcr: "stack-data-swp-ucr"
-  configMapUcrForced: null
+  configMapUcr: "stack-data-ums-ucr"
 
   # -- Define configuration regarding nats connectivity.
   nats:

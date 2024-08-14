@@ -163,19 +163,12 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
             {{- end }}
-            - name: "config-map-ucr-defaults"
-              mountPath: "/etc/univention/base-defaults.conf"
-              subPath: "base.conf"
-            {{- if (include "udm-transformer.configMapUcr" .) }}
             - name: "config-map-ucr"
               mountPath: "/etc/univention/base.conf"
               subPath: "base.conf"
-            {{- end }}
-            {{- if (include "udm-transformer.configMapUcrForced" .) }}
-            - name: "config-map-ucr-forced"
-              mountPath: "/etc/univention/base-forced.conf"
-              subPath: "base.conf"
-            {{- end }}
+            - name: "config-map-ucr"
+              mountPath: "/etc/univention/base-defaults.conf"
+              subPath: "base-defaults.conf"
             - name: plugin-targets
               mountPath: /usr/lib/python3/dist-packages/univention/udm/modules
               subPath: udm-modules
@@ -197,19 +190,9 @@ spec:
           secret:
             secretName: {{ .Values.nats.connection.tls.secretName  | default (printf "%s-udm-transformer-tls" (include "common.names.fullname" .) ) | quote }}
         {{- end }}
-        - name: "config-map-ucr-defaults"
-          configMap:
-            name: {{ include "udm-transformer.configMapUcrDefaults" . | quote }}
-        {{- if (include "udm-transformer.configMapUcr" .) }}
         - name: "config-map-ucr"
           configMap:
             name: {{ include "udm-transformer.configMapUcr" . | quote }}
-        {{- end }}
-        {{- if (include "udm-transformer.configMapUcrForced" .) }}
-        - name: "config-map-ucr-forced"
-          configMap:
-            name: {{ include "udm-transformer.configMapUcrForced" . | quote }}
-        {{- end }}
         - name: "plugin-targets"
           emptyDir: {}
         {{- if .Values.extraVolumes }}
