@@ -1,6 +1,7 @@
 # Callable | NoneSPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import importlib
 import json
 import logging
 from datetime import datetime
@@ -125,6 +126,9 @@ class UDMMessagingService(univention.admin.uldap.access):
             new = self.ldap_to_udm(new_obj)
             if new:
                 await self.store(new)
+                if new["objectType"].startswith("settings/"):
+                    logger.info("UDM reinitialization triggered after creating settings/* object.")
+                    importlib.reload(univention.management.console.modules.udm.udm_ldap)
         await self.send_event(new, old, ts)
 
 
