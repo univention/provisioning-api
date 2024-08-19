@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
+from typing import Optional
 
 import requests
 
@@ -14,7 +15,7 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import Body
 
-from tests.conftest import DUMMY_TOPIC, REALM, TOPIC
+from tests.conftest import DUMMY_TOPIC, REALM, USERS_TOPIC
 from tests.e2e.conftest import E2ETestSettings
 
 
@@ -42,14 +43,49 @@ def create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
     return Body.model_validate(body)
 
 
-def create_message_via_udm_rest_api(udm: UDM):
-    groups = udm.get(TOPIC)
-    assert groups
-    group = groups.new()
-    group.properties["name"] = str(uuid.uuid1())
-    group.save()
+def create_udm_obj(udm: UDM, object_type: str, properties: dict, position: Optional[str] = None):
+    objs = udm.get(object_type)
+    assert objs
+    obj = objs.new(position=position)
+    obj.properties.update(properties)
+    obj.save()
+    return obj
 
-    return group
+
+def create_user_via_udm_rest_api(udm: UDM, extended_attributes: Optional[dict] = None):
+    base_properties = {
+        "username": str(uuid.uuid1()),
+        "firstname": "John",
+        "lastname": "Doe",
+        "password": "password",
+        "pwdChangeNextLogin": True,
+    }
+    properties = {**base_properties, **(extended_attributes or {})}
+    return create_udm_obj(udm, USERS_TOPIC, properties)
+
+
+def create_extended_attribute_via_udm_rest_api(udm: UDM):
+    properties = {
+        "name": "UniventionPasswordSelfServiceEmail",
+        "CLIName": "PasswordRecoveryEmail",
+        "module": ["users/user"],
+        "syntax": "emailAddress",
+        "default": "",
+        "ldapMapping": "univentionPasswordSelfServiceEmail",
+        "objectClass": "univentionPasswordSelfService",
+        "shortDescription": "Password recovery e-mail address",
+        "tabAdvanced": False,
+        "tabName": "Password recovery",
+        "multivalue": False,
+        "valueRequired": False,
+        "mayChange": True,
+        "doNotSearch": False,
+        "deleteObjectClass": False,
+        "overwriteTab": False,
+        "fullWidth": True,
+    }
+    position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
+    return create_udm_obj(udm, "settings/extended_attribute", properties, position)
 
 
 async def pop_all_messages(

@@ -38,16 +38,17 @@ from server.services.port import Port  # noqa: E402
 NATS_SERVER = "nats://localhost:4222"
 
 REALM = "udm"
-TOPIC = "groups/group"
-TOPIC_2 = "users/user"
+GROUPS_TOPIC = "groups/group"
+USERS_TOPIC = "users/user"
 DUMMY_TOPIC = "tests/topic"
 BODY = Body(old={"old": "Old", "dn": "uid=foo,dc=bar"}, new={"new": "New", "dn": "uid=foo,dc=bar"})
 FLAT_BODY = {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}
 PUBLISHER_NAME = PublisherName.ldif_producer
-REALM_TOPIC = [REALM, TOPIC]
-REALMS_TOPICS = [(REALM, TOPIC)]
+REALM_TOPIC = [REALM, GROUPS_TOPIC]
+GROUPS_REALMS_TOPICS = [(REALM, GROUPS_TOPIC)]
+USERS_REALMS_TOPICS = [(REALM, USERS_TOPIC)]
 DUMMY_REALMS_TOPICS = [(REALM, DUMMY_TOPIC)]
-REALMS_TOPICS_STR = f"{REALM}:{TOPIC}"
+REALMS_TOPICS_STR = f"{REALM}:{GROUPS_TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
 
@@ -69,20 +70,20 @@ MESSAGE = Message(
     publisher_name=PUBLISHER_NAME,
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
     realm=REALM,
-    topic=TOPIC,
+    topic=GROUPS_TOPIC,
     body=BODY,
 )
 PREFILL_MESSAGE = PrefillMessage(
     publisher_name=PUBLISHER_NAME,
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
-    realms_topics=REALMS_TOPICS,
+    realms_topics=GROUPS_REALMS_TOPICS,
     subscription_name=SUBSCRIPTION_NAME,
 )
 PROVISIONING_MESSAGE = ProvisioningMessage(
     publisher_name=PUBLISHER_NAME,
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
     realm=REALM,
-    topic=TOPIC,
+    topic=GROUPS_TOPIC,
     body=BODY,
     sequence_number=1,
     num_delivered=1,
@@ -95,16 +96,16 @@ FLAT_BASE_MESSAGE = {
 FLAT_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_MESSAGE["body"] = FLAT_BODY
 FLAT_MESSAGE["realm"] = REALM
-FLAT_MESSAGE["topic"] = TOPIC
+FLAT_MESSAGE["topic"] = GROUPS_TOPIC
 
 FLAT_PREFILL_MESSAGE = deepcopy(FLAT_BASE_MESSAGE)
 FLAT_PREFILL_MESSAGE["subscription_name"] = SUBSCRIPTION_NAME
-FLAT_PREFILL_MESSAGE["realms_topics"] = REALMS_TOPICS
+FLAT_PREFILL_MESSAGE["realms_topics"] = GROUPS_REALMS_TOPICS
 
 FLAT_PREFILL_MESSAGE_MULTIPLE_TOPICS = deepcopy(FLAT_PREFILL_MESSAGE)
 FLAT_PREFILL_MESSAGE_MULTIPLE_TOPICS["realms_topics"] = [
-    (REALM, TOPIC),
-    (REALM, TOPIC_2),
+    (REALM, GROUPS_TOPIC),
+    (REALM, USERS_TOPIC),
 ]
 
 MSG = Msg(

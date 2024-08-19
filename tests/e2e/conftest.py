@@ -14,7 +14,7 @@ from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
 
-from ..conftest import DUMMY_REALMS_TOPICS, REALMS_TOPICS
+from ..conftest import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 
 
 class E2ETestSettings(NamedTuple):
@@ -161,7 +161,7 @@ async def create_subscription(
 
 @pytest.fixture
 async def real_subscription(create_subscription):
-    return await anext(create_subscription(REALMS_TOPICS))
+    return await anext(create_subscription(USERS_REALMS_TOPICS))
 
 
 @pytest.fixture

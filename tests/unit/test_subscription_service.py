@@ -13,13 +13,13 @@ from univention.provisioning.models.subscription import Bucket, Subscription
 
 from tests.conftest import (
     CONSUMER_HASHED_PASSWORD,
+    GROUPS_REALMS_TOPICS,
+    GROUPS_TOPIC,
     REALM,
-    REALMS_TOPICS,
     REALMS_TOPICS_STR,
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
-    TOPIC,
-    TOPIC_2,
+    USERS_TOPIC,
 )
 
 
@@ -32,7 +32,7 @@ def sub_service() -> SubscriptionService:
 class TestSubscriptionService:
     new_subscription = NewSubscription(
         name=SUBSCRIPTION_NAME,
-        realms_topics=REALMS_TOPICS,
+        realms_topics=GROUPS_REALMS_TOPICS,
         request_prefill=True,
         password="password",
     )
@@ -77,7 +77,7 @@ class TestSubscriptionService:
         [
             ("request_prefill", False),
             ("password", "wrong_password"),
-            ("realms_topics", [(REALM, TOPIC), (REALM, TOPIC_2)]),
+            ("realms_topics", [(REALM, GROUPS_TOPIC), (REALM, USERS_TOPIC)]),
         ],
     )
     async def test_create_subscription_existing_subscription_different_parameters(

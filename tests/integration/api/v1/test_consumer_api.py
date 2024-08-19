@@ -16,12 +16,12 @@ from tests.conftest import (
     CONSUMER_PASSWORD,
     CREDENTIALS,
     FLAT_BODY,
+    GROUPS_TOPIC,
     PUBLISHER_NAME,
     REALM,
     REALMS_TOPICS_STR,
     REPORT,
     SUBSCRIPTION_NAME,
-    TOPIC,
 )
 
 
@@ -90,7 +90,7 @@ class TestConsumer:
         assert response.status_code == 200
         data = response.json()
         assert data["realm"] == REALM
-        assert data["topic"] == TOPIC
+        assert data["topic"] == GROUPS_TOPIC
         assert data["body"] == FLAT_BODY
         assert data["publisher_name"] == PUBLISHER_NAME
         assert data["sequence_number"] == 1

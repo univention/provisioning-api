@@ -16,12 +16,12 @@ from univention.provisioning.models import (
 from univention.provisioning.models.queue import Body
 
 from tests.conftest import (
+    GROUPS_TOPIC,
     MQMESSAGE_PREFILL,
     MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
     MQMESSAGE_PREFILL_REDELIVERED,
     SUBSCRIPTION_NAME,
-    TOPIC,
-    TOPIC_2,
+    USERS_TOPIC,
 )
 from tests.unit import EscapeLoopException
 
@@ -37,36 +37,36 @@ def udm_prefill() -> UDMPreFill:
 class TestUDMPreFill:
     prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
     mocked_date = datetime(2023, 11, 9, 11, 15, 52, 616061)
-    url = f"http://udm-rest-api:9979/udm/{TOPIC}/..."
-    url_2 = f"http://udm-rest-api:9979/udm/{TOPIC_2}/..."
+    url = f"http://udm-rest-api:9979/udm/{GROUPS_TOPIC}/..."
+    url_2 = f"http://udm-rest-api:9979/udm/{USERS_TOPIC}/..."
     udm_modules = {
-        "name": TOPIC,
+        "name": GROUPS_TOPIC,
         "title": "Group",
-        "href": f"http://udm-rest-api:9979/udm/{TOPIC}/",
+        "href": f"http://udm-rest-api:9979/udm/{GROUPS_TOPIC}/",
     }
     udm_modules_2 = deepcopy(udm_modules)
-    udm_modules_2["name"] = TOPIC_2
-    udm_modules_2["href"] = f"http://udm-rest-api:9979/udm/{TOPIC_2}/"
+    udm_modules_2["name"] = USERS_TOPIC
+    udm_modules_2["href"] = f"http://udm-rest-api:9979/udm/{USERS_TOPIC}/"
     obj = {
         "uri": url,
         "dn": "",
-        "objectType": TOPIC,
+        "objectType": GROUPS_TOPIC,
         "position": "",
         "properties": {},
         "uuid": "",
     }
     obj_2 = deepcopy(obj)
-    obj_2["objectType"] = TOPIC_2
+    obj_2["objectType"] = USERS_TOPIC
     obj_2["uri"] = url_2
     msg = Message(
         publisher_name=PublisherName.udm_pre_fill,
         ts=mocked_date,
         realm="udm",
-        topic=TOPIC,
+        topic=GROUPS_TOPIC,
         body=Body(old={}, new=obj),
     )
     msg2 = deepcopy(msg)
-    msg2.topic = TOPIC_2
+    msg2.topic = USERS_TOPIC
     msg2.body.new = obj_2
 
     @patch("server.core.prefill.service.udm_prefill.datetime")
@@ -92,7 +92,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_called_once_with()
-        udm_prefill._port.list_objects.assert_called_once_with(TOPIC)
+        udm_prefill._port.list_objects.assert_called_once_with(GROUPS_TOPIC)
         udm_prefill._port.get_object.assert_called_once_with(self.url)
         mock_acknowledgements.acknowledge_message.assert_called_once()
         udm_prefill._port.create_prefill_message.assert_called_once_with(
@@ -123,7 +123,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
         udm_prefill._port.get_object_types.assert_has_calls([call(), call()])
-        udm_prefill._port.list_objects.assert_has_calls([call(TOPIC), call(TOPIC_2)])
+        udm_prefill._port.list_objects.assert_has_calls([call(GROUPS_TOPIC), call(USERS_TOPIC)])
         udm_prefill._port.get_object.assert_has_calls([call(self.url), call(self.url_2)])
         mock_acknowledgements.acknowledge_message.assert_called_once()
         udm_prefill._port.create_prefill_message.assert_has_calls(

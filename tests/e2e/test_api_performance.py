@@ -12,9 +12,9 @@ from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 from univention.provisioning.models.subscription import FillQueueStatus
 
-from tests.conftest import DUMMY_REALMS_TOPICS, REALMS_TOPICS
+from tests.conftest import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 from tests.e2e.conftest import E2ETestSettings
-from tests.e2e.helpers import create_message_via_events_api, create_message_via_udm_rest_api
+from tests.e2e.helpers import create_message_via_events_api, create_user_via_udm_rest_api
 
 EXPECTED_AVG_DELAY = 50
 EXPECTED_MAX_DELAY = 150
@@ -118,7 +118,7 @@ async def test_simple_message_timing(
     assert max_d < EXPECTED_MAX_DELAY, f"maximum request duration was higher than {EXPECTED_MAX_DELAY} ms: {max_d}"
 
 
-@pytest.mark.parametrize("realms_topics", [REALMS_TOPICS], indirect=["realms_topics"])
+@pytest.mark.parametrize("realms_topics", [USERS_REALMS_TOPICS], indirect=["realms_topics"])
 @pytest.mark.parametrize("subscription", [False, True], indirect=True, ids=["without_prefill", "with_prefill"])
 async def test_udm_message_timing(
     provisioning_client: ProvisioningConsumerClient,
@@ -137,7 +137,7 @@ async def test_udm_message_timing(
 
     print("Adding udm messages to the incoming queue")
     for _ in range(test_number):
-        messages.append(create_message_via_udm_rest_api(udm))  # noqa: F841
+        messages.append(create_user_via_udm_rest_api(udm))  # noqa: F841
 
     await asyncio.sleep(1)
 

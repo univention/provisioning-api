@@ -4,13 +4,14 @@
 import aiohttp
 import pytest
 
-from univention.admin.rest.client import UDM
+from univention.admin.rest.client import UDM, UnprocessableEntity
 from univention.provisioning.consumer import ProvisioningConsumerClient
 
 from tests.e2e.conftest import E2ETestSettings
 from tests.e2e.helpers import (
+    create_extended_attribute_via_udm_rest_api,
     create_message_via_events_api,
-    create_message_via_udm_rest_api,
+    create_user_via_udm_rest_api,
     pop_all_messages,
 )
 
@@ -52,7 +53,7 @@ async def test_pop_message(provisioning_client: ProvisioningConsumerClient, dumm
 
 
 async def test_get_real_messages(provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM):
-    group = create_message_via_udm_rest_api(udm)  # noqa: F841
+    user = create_user_via_udm_rest_api(udm)  # noqa: F841
 
     response = await provisioning_client.get_subscription_message(
         name=real_subscription,
@@ -63,9 +64,9 @@ async def test_get_real_messages(provisioning_client: ProvisioningConsumerClient
 
 
 async def test_get_multiple_messages(provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM):
-    group1 = create_message_via_udm_rest_api(udm)  # noqa: F841
-    group2 = create_message_via_udm_rest_api(udm)  # noqa: F841
-    group3 = create_message_via_udm_rest_api(udm)  # noqa: F841
+    user1 = create_user_via_udm_rest_api(udm)  # noqa: F841
+    user2 = create_user_via_udm_rest_api(udm)  # noqa: F841
+    user3 = create_user_via_udm_rest_api(udm)  # noqa: F841
 
     result = await pop_all_messages(provisioning_client, real_subscription, 6)
     assert len(result) == 3
@@ -89,3 +90,28 @@ async def test_get_messages_from_the_wrong_queue(
             name="wrong_subscription_name",
             timeout=5,
         )
+
+
+async def test_create_user_with_extended_attribute(
+    provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM
+):
+    extended_attribute = create_extended_attribute_via_udm_rest_api(udm)
+
+    try:
+        user = create_user_via_udm_rest_api(udm, {"PasswordRecoveryEmail": "test@univention.de"})
+
+        message = await provisioning_client.get_subscription_message(
+            name=real_subscription,
+            timeout=5,
+        )
+        assert message.body.new.get("dn") == user.dn
+        assert message.body.new["properties"]["PasswordRecoveryEmail"] == user.properties["PasswordRecoveryEmail"]
+    finally:
+        extended_attribute.delete()
+
+
+async def test_create_user_with_missing_extended_attribute(
+    provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM
+):
+    with pytest.raises(UnprocessableEntity, match="The User module has no property PasswordRecoveryEmail."):
+        create_user_via_udm_rest_api(udm, {"PasswordRecoveryEmail": "test@univention.de"})
