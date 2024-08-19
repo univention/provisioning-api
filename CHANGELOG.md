@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.36.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.35.0...v0.36.0) (2024-08-19)
+
+
+### Features
+
+* add message model for LDIF Producer ([41024f0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/41024f03b5b91197c4734fb975a643b724c2e189))
+
+
+### Bug Fixes
+
+* h11._util.LocalProtocolError caused by timing_middleware ([8b2e4e4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8b2e4e4af663c7a73b20ee61077b047192daa527))
+* UDM listener logs at INFO level ([66df353](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/66df3536efa00787d507653b14b5bb9e9c2ebdca))
+* use of Python logging library ([68a3cda](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/68a3cda25ea873b82990b5c8ce3a5fb68cb2d0ba))
+
 ## [0.35.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.34.0...v0.35.0) (2024-08-10)
 
 
