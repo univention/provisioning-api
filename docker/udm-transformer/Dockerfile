@@ -62,4 +62,4 @@ WORKDIR ${WORKDIR}
 COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # run
-ENTRYPOINT ["/bin/bash", "-c", "./.venv/bin/python3 src/udm_transformer/main.py"]
+ENTRYPOINT ["/app/.venv/bin/python3", "/app/src/udm_transformer/main.py"]

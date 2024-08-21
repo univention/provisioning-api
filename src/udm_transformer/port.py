@@ -59,9 +59,9 @@ class UDMTransformerPort:
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq_adapter.get_one_message(timeout=timeout, binary_decoder=messagepack_decoder)
 
-    async def retrieve(self, url: str, bucket: Bucket):
+    async def retrieve(self, url: str, bucket: Bucket) -> dict:
         result = await self.kv_adapter.get_value(url, bucket)
-        return json.loads(result) if result else None
+        return json.loads(result) if result else {}
 
     async def store(self, url: str, new_obj: str, bucket: Bucket):
         await self.kv_adapter.put_value(url, new_obj, bucket)

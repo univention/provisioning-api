@@ -26,5 +26,8 @@ async def main():
 
 
 if __name__ == "__main__":
+    # UDM adds an unwanted handler to the root logger
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
     setup_logging()
     asyncio.run(main())

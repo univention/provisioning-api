@@ -34,6 +34,14 @@ SUPPORTED_OBJECT_TYPES = [
     "groups/group",
 ]
 
+UDM_MODULES_RELOAD_TRIGGER = {
+    "settings/extended_attribute",
+    "settings/extended_options",
+    "settings/udm_hook",
+    "settings/udm_module",
+    "settings/udm_syntax",
+}
+
 
 class UDMMessagingService(univention.admin.uldap.access):
     def __init__(self, port: UDMTransformerPort):
@@ -50,7 +58,15 @@ class UDMMessagingService(univention.admin.uldap.access):
 
         self._messaging_port = port
 
-    async def retrieve(self, dn: str):
+    @staticmethod
+    def reload_udm(obj: dict):
+        if obj.get("objectType") not in UDM_MODULES_RELOAD_TRIGGER:
+            return
+
+        logger.info("Reload of UDM modules triggered after creating/updating/deleting %r object.", obj["objectType"])
+        importlib.reload(univention.management.console.modules.udm.udm_ldap)
+
+    async def retrieve(self, dn: str) -> dict:
         logger.info("Retrieving object from cache")
         return await self._messaging_port.retrieve(dn, Bucket.cache)
 
@@ -126,9 +142,8 @@ class UDMMessagingService(univention.admin.uldap.access):
             new = self.ldap_to_udm(new_obj)
             if new:
                 await self.store(new)
-                if new["objectType"].startswith("settings/"):
-                    logger.info("UDM reinitialization triggered after creating settings/* object.")
-                    importlib.reload(univention.management.console.modules.udm.udm_ldap)
+
+        self.reload_udm(new or old)
         await self.send_event(new, old, ts)
 
 
