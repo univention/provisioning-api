@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.37.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.36.0...v0.37.0) (2024-08-21)
+
+
+### Features
+
+* **register-consumer:** add data loader check to the consumer registration job ([749b63d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/749b63dd2a0a4b8972598d51ea4fd5185901a36f))
+
+
+### Bug Fixes
+
+* improve method to reload UDM lib, fix duplicate logs ([689adb8](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/689adb86cc926d0f03343cbb66af4376c46d78bc))
+* reload the UDM library to react to the changes in the data schema ([1b2a9ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1b2a9ca3f64efa10e4c8bdcf65aa921153aa20e0))
+
 ## [0.36.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.35.0...v0.36.0) (2024-08-19)
 
 
