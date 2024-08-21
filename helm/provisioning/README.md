@@ -45,8 +45,6 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.additionalAnnotations | object | `{}` |  |
 | dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
-| dispatcher.config.UDM_HOST | string | `""` |  |
-| dispatcher.config.UDM_PORT | int | `80` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `""` |  |
@@ -179,6 +177,8 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | registerConsumers.additionalAnnotations | object | `{}` |  |
 | registerConsumers.additionalLabels | object | `{}` |  |
+| registerConsumers.config.UDM_HOST | string | `""` |  |
+| registerConsumers.config.UDM_PORT | int | `80` |  |
 | registerConsumers.credentialSecretName | string | `""` |  |
 | registerConsumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | registerConsumers.image.registry | string | `""` |  |

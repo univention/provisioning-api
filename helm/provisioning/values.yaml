@@ -572,12 +572,6 @@ dispatcher:
   config:
     # Python log level
     LOG_LEVEL: "INFO"
-    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
-    # TODO: Should not be necessary
-    UDM_HOST: ""
-    # UDM REST API: port
-    # TODO: Should not be necessary
-    UDM_PORT: 80
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
@@ -783,6 +777,11 @@ registerConsumers:
     imagePullPolicy: "IfNotPresent"
     repository: "nubus/images/wait-for-dependency"
     tag: "0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"
+  config:
+    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    UDM_HOST: ""
+    # UDM REST API: port
+    UDM_PORT: 80
   credentialSecretName: ""
   jsonSecretName: ""
   provisioningApiBaseUrl: ""

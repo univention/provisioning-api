@@ -203,5 +203,19 @@ metadata:
   {{- end }}
 data:
   PROVISIONING_API_BASE_URL: {{ printf "%s/internal/admin/v1/subscriptions" (include "provisioning-register-consumers.provisioningApiBaseUrl" .) | quote  }}
+  UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
+  UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
+  LDAP_BASE_DN: {{ include "provisioning.udmTransformer.ldap.baseDn" . | quote }}
+  wait-for-data-loader.sh: |
+    #!/bin/bash
+    # TODO: find a way to not leak the udm passwort into the log
+    set -euxo pipefail
+
+    while ! curl -o- --fail -X GET -u "${UDM_USERNAME}:${UDM_PASSWORD}" "http://${UDM_HOST}:${UDM_PORT}/udm/settings/data/cn=stack-data-ums.done,cn=data,cn=univention,${LDAP_BASE_DN}" -H 'Accept: application/json'; do
+      echo "Data loader not finished yet, waiting..."
+      sleep 2
+    done
+
+    echo "Success, the data loader has finished."
 ...
 
