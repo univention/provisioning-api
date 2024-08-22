@@ -15,7 +15,7 @@ class BaseKVStoreAdapter(ABC):
     """The base class for key-value store adapters."""
 
     @abstractmethod
-    async def init(self, buckets: List[Bucket], user: str, password: str):
+    async def init(self, server: str, user: str, password: str, buckets: List[Bucket]):
         pass
 
     @abstractmethod

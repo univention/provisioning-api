@@ -25,28 +25,32 @@ class UDMTransformerPort:
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
-            self.settings.events_username_udm, self.settings.events_password_udm
+            self.settings.internal_api_url, self.settings.events_username_udm, self.settings.events_password_udm
         )
 
     @staticmethod
     @contextlib.asynccontextmanager
     async def port_context():
         port = UDMTransformerPort()
-        await port.kv_adapter.init(
-            [Bucket.cache],
-            user=port.settings.nats_user,
-            password=port.settings.nats_password,
-        )
-        await port.mq_adapter.connect(
-            port.settings.nats_server,
-            port.settings.nats_user,
-            port.settings.nats_password,
-        )
-        await port._internal_api_adapter.connect()
+        await port.connect()
         try:
             yield port
         finally:
             await port.close()
+
+    async def connect(self):
+        await self.mq_adapter.connect(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+        )
+        await self.kv_adapter.init(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+            buckets=[Bucket.cache],
+        )
+        await self._internal_api_adapter.connect()
 
     async def close(self):
         await self.kv_adapter.close()

@@ -8,12 +8,13 @@ from fastapi import Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from server.core.app.auth import authenticate_user
-from server.core.app.config import app_settings
+from server.core.app.config import get_app_settings
 from server.services.messages import MessageService
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService
 from univention.provisioning.models import FillQueueStatus, Message
 
+app_settings = get_app_settings()
 router = fastapi.APIRouter(tags=["internal"])
 security = HTTPBasic()
 logger = logging.getLogger(__name__)

@@ -8,14 +8,14 @@ from typing import Dict, Optional
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from univention.provisioning.models import Bucket, Message, MQMessage
 
-from .config import DispatcherSettings
+from .config import DispatcherSettings, get_dispatcher_settings
 
 logger = logging.getLogger(__name__)
 
 
 class DispatcherPort:
     def __init__(self, settings: Optional[DispatcherSettings] = None):
-        self.settings = settings or DispatcherSettings()
+        self.settings = settings or get_dispatcher_settings()
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
 
@@ -23,22 +23,25 @@ class DispatcherPort:
     @contextlib.asynccontextmanager
     async def port_context():
         port = DispatcherPort()
-        await port.mq_adapter.connect(
-            server=port.settings.nats_server,
-            user=port.settings.nats_user,
-            password=port.settings.nats_password,
-            max_reconnect_attempts=port.settings.max_reconnect_attempts,
-        )
-        await port.kv_adapter.init(
-            buckets=[Bucket.subscriptions],
-            user=port.settings.nats_user,
-            password=port.settings.nats_password,
-        )
-
+        await port.connect()
         try:
             yield port
         finally:
             await port.close()
+
+    async def connect(self):
+        await self.mq_adapter.connect(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+            max_reconnect_attempts=self.settings.max_reconnect_attempts,
+        )
+        await self.kv_adapter.init(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+            buckets=[Bucket.subscriptions],
+        )
 
     async def close(self):
         await self.mq_adapter.close()

@@ -5,21 +5,19 @@ import logging
 
 from asgi_correlation_id import CorrelationIdFilter
 
-from server.config import settings
-
 LOG_FORMAT = "%(asctime)s %(levelname)-5s [%(correlation_id)s] [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 
 
-def setup_logging() -> None:
+def setup_logging(log_level: str) -> None:
     logging.captureWarnings(True)
     formatter = logging.Formatter(fmt=LOG_FORMAT)
     handler = logging.StreamHandler()
-    handler.setLevel(settings.log_level)
+    handler.setLevel(log_level)
     handler.setFormatter(formatter)
     cid_filter = CorrelationIdFilter(uuid_length=10)
     handler.addFilter(cid_filter)
     logger = logging.getLogger()
-    logger.setLevel(settings.log_level)
+    logger.setLevel(log_level)
     logger.addHandler(handler)
     for name in ("uvicorn.access", "uvicorn.error"):  # replace the already existing handlers for uvicorn with ours
         logger = logging.getLogger(name)

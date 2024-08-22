@@ -7,16 +7,14 @@ import aiohttp
 
 from univention.provisioning.models import FillQueueStatus, Message
 
-from ..config import settings
-
 
 class InternalAPIAdapter:
     """
     Client for the Internal REST API.
     """
 
-    def __init__(self, username: str, password: str):
-        self.base_url = settings.internal_api_url
+    def __init__(self, url: str, username: str, password: str):
+        self.base_url = url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 

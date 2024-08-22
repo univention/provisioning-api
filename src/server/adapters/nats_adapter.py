@@ -28,7 +28,6 @@ from univention.provisioning.models import (
     ProvisioningMessage,
 )
 
-from ..config import settings
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 
 
@@ -57,9 +56,9 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         self._nats = NATS()
         self._js = self._nats.jetstream()
 
-    async def init(self, buckets: List[Bucket], user: str, password: str):
+    async def init(self, server: str, user: str, password: str, buckets: List[Bucket]):
         await self._nats.connect(
-            [settings.nats_server],
+            servers=server,
             user=user,
             password=password,
             max_reconnect_attempts=1,
@@ -187,7 +186,7 @@ class NatsMQAdapter(BaseMQAdapter):
             binary_encoder(message.model_dump()),
             stream=stream_name,
         )
-        logger.info(
+        logger.debug(
             "Message was published to the stream: %s with the subject: %s",
             stream_name,
             subject,

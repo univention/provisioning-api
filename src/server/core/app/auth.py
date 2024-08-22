@@ -7,9 +7,10 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from server.core.app.config import app_settings
+from server.core.app.config import get_app_settings
 
 security = HTTPBasic()
+app_settings = get_app_settings()
 
 
 def authenticate_user(credentials: HTTPBasicCredentials, username: str, password: str):

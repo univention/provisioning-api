@@ -15,8 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_utils.timing import add_timing_middleware
 
-from server.config import settings
 from server.core.app.admin.api import router as admin_api_router
+from server.core.app.config import get_app_settings
 from server.core.app.consumer.messages.api import router as messages_api_router
 from server.core.app.consumer.subscriptions.api import (
     router as subscriptions_api_router,
@@ -26,7 +26,9 @@ from server.log import setup_logging
 from server.services.port import Port
 from univention.provisioning.models.queue import PREFILL_STREAM
 
-setup_logging()
+app_settings = get_app_settings()
+
+setup_logging(app_settings.log_level)
 logger = logging.getLogger(__name__)
 
 openapi_tags = [
@@ -37,17 +39,17 @@ openapi_tags = [
 ]
 
 app = FastAPI(
-    debug=settings.debug,
+    debug=app_settings.debug,
     description="Forward LDAP changes to subscribers",
     openapi_tags=openapi_tags,
-    root_path=settings.root_path,
+    root_path=app_settings.root_path,
     title="Provisioning Dispatcher",
     version="v1",
 )
 add_timing_middleware(app, record=logger.info)
 app.add_middleware(CorrelationIdMiddleware)
 
-if settings.cors_all:
+if app_settings.cors_all:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -92,10 +94,10 @@ internal_openapi_tags = [
     },
 ]
 internal_app = FastAPI(
-    debug=settings.debug,
+    debug=app_settings.debug,
     description="Internal endpoints for Provisioning Dispatcher",
     openapi_tags=internal_openapi_tags,
-    root_path=settings.root_path,
+    root_path=app_settings.root_path,
     title="Internal API",
     version="v1",
 )

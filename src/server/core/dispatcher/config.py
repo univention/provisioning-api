@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+from functools import lru_cache
 
 from pydantic_settings import BaseSettings
 
 
 class DispatcherSettings(BaseSettings):
+    # Python log level
+    log_level: str = "INFO"
+
     # Nats user name specific to Dispatcher
     nats_user: str
     # Nats password specific to Dispatcher
@@ -21,4 +25,6 @@ class DispatcherSettings(BaseSettings):
         return f"nats://{self.nats_host}:{self.nats_port}"
 
 
-dispatcher_settings = DispatcherSettings()
+@lru_cache
+def get_dispatcher_settings() -> DispatcherSettings:
+    return DispatcherSettings()

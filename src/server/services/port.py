@@ -32,6 +32,7 @@ class Port:
         finally:
             await port.close()
 
+    @staticmethod
     @asynccontextmanager
     async def port_context():
         port = Port()
@@ -48,9 +49,10 @@ class Port:
             password=self.settings.nats_password,
         )
         await self.kv_adapter.init(
-            [Bucket.subscriptions, Bucket.credentials],
+            server=self.settings.nats_server,
             user=self.settings.nats_user,
             password=self.settings.nats_password,
+            buckets=[Bucket.subscriptions, Bucket.credentials],
         )
 
     async def close(self):

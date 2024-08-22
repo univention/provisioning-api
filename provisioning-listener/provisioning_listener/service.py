@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import logging
 from datetime import datetime
 from typing import Any, Dict
 
@@ -13,8 +12,6 @@ from univention.provisioning.models.queue import (
     Message,
     PublisherName,
 )
-
-logger = logging.getLogger(__name__)
 
 
 async def ensure_stream():

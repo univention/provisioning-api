@@ -6,8 +6,6 @@ from typing import Dict, List, Optional
 
 import aiohttp
 
-from ..core.prefill.config import prefill_settings
-
 logger = logging.getLogger(__name__)
 
 
@@ -22,12 +20,12 @@ class UDMAdapter:
     ```
     """
 
-    def __init__(self):
-        self.base_url = prefill_settings.udm_url
+    def __init__(self, url: str, username: str, password: str):
+        self.base_url = url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(prefill_settings.udm_username, prefill_settings.udm_password)
+        self.auth = aiohttp.BasicAuth(username, password)
         self.headers = [("accept", "application/json")]
         self._session = None
 

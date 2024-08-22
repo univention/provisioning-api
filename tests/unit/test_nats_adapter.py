@@ -3,7 +3,7 @@
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call
 
 import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
@@ -48,15 +48,6 @@ def mock_nats_kv_adapter(mock_kv) -> MockNatsKVAdapter:
 
 
 @pytest.fixture
-def settings_mock() -> AsyncMock:
-    settings = patch("server.adapters.nats_adapter.settings").start()
-    settings.nats_username = CREDENTIALS.username
-    settings.nats_password = CREDENTIALS.password
-    settings.nats_server = "nats://localhost:4222"
-    return settings
-
-
-@pytest.fixture
 def mock_fetch(mock_nats_mq_adapter):
     sub = AsyncMock()
     sub.fetch = AsyncMock(return_value=[MSG])
@@ -66,17 +57,18 @@ def mock_fetch(mock_nats_mq_adapter):
 
 @pytest.mark.anyio
 class TestNatsKVAdapter:
-    async def test_connect(self, mock_nats_kv_adapter, settings_mock):
+    async def test_connect(self, mock_nats_kv_adapter):
         mock_nats_kv_adapter._js.key_value = AsyncMock(side_effect=BucketNotFoundError)
 
         result = await mock_nats_kv_adapter.init(
-            [Bucket.subscriptions],
+            server="nats://localhost:4222",
             user=CREDENTIALS.username,
             password=CREDENTIALS.password,
+            buckets=[Bucket.subscriptions],
         )
 
         mock_nats_kv_adapter._nats.connect.assert_called_once_with(
-            ["nats://localhost:4222"],
+            servers="nats://localhost:4222",
             user=CREDENTIALS.username,
             password=CREDENTIALS.password,
             max_reconnect_attempts=1,

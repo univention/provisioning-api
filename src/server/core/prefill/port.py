@@ -14,15 +14,17 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import BaseMessage
 
-from .config import PrefillSettings
+from .config import PrefillSettings, get_prefill_settings
 
 
 class PrefillPort:
     def __init__(self, settings: Optional[PrefillSettings] = None):
-        self.settings = settings or PrefillSettings()
-        self._udm_adapter = UDMAdapter()
+        self.settings = settings or get_prefill_settings()
         self.mq_adapter = NatsMQAdapter()
-        self._internal_api_adapter = InternalAPIAdapter(self.settings.prefill_username, self.settings.prefill_password)
+        self._internal_api_adapter = InternalAPIAdapter(
+            self.settings.internal_api_url, self.settings.prefill_username, self.settings.prefill_password
+        )
+        self._udm_adapter = UDMAdapter(self.settings.udm_url, self.settings.udm_username, self.settings.udm_password)
 
     @staticmethod
     @contextlib.asynccontextmanager

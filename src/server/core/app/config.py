@@ -1,10 +1,21 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+from functools import lru_cache
 
 from pydantic_settings import BaseSettings
 
 
 class AppSettings(BaseSettings):
+    # Python log level
+    log_level: str = "INFO"
+
+    # FastAPI: debug mode
+    debug: bool = True
+    # FastAPI: webserver root path
+    root_path: str = ""
+    # FastAPI: disable CORS checks
+    cors_all: bool = False
+
     # Admin API: username
     admin_username: str
     # Admin API: password
@@ -38,4 +49,6 @@ class AppSettings(BaseSettings):
         return f"nats://{self.nats_host}:{self.nats_port}"
 
 
-app_settings = AppSettings()
+@lru_cache
+def get_app_settings() -> AppSettings:
+    return AppSettings()
