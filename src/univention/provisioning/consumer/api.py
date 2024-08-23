@@ -168,25 +168,6 @@ class MessageHandler:
             logger.error("Failed to acknowledge message. - %s", repr(exc))
             return False
 
-    async def _callback_wrapper(
-        self,
-        message: ProvisioningMessage,
-        callback: Callable[[Message], Coroutine[None, None, None]],
-    ):
-        """
-        Wrapper around a client's callback function to encapsulate
-        error handling and message acknowledgement
-        """
-        # TODO: Message is not enough, we need a specific ClientMessage, that includes for example num_redelivered
-        msg = Message(
-            publisher_name=message.publisher_name,
-            ts=message.ts,
-            realm=message.realm,
-            topic=message.topic,
-            body=message.body,
-        )
-        await callback(msg)
-
     async def acknowledge_message_with_retries(self, message):
         for retries in range(self.settings.max_acknowledgement_retries + 1):
             if await self.acknowledge_message(message.sequence_number):
@@ -226,7 +207,7 @@ class MessageHandler:
             logger.debug(self.debug_msg(message))
             for callback in self.callbacks:
                 t0 = time.perf_counter()
-                await self._callback_wrapper(message, callback)
+                await callback(message)
                 logger.debug(
                     "%r finished handling message in %.1f ms.",
                     inspect.getmodule(callback).__spec__.name,
