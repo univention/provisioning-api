@@ -2,15 +2,12 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import contextlib
-import logging
 from typing import Dict, Optional
 
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from univention.provisioning.models import Bucket, Message, MQMessage
 
 from .config import DispatcherSettings, get_dispatcher_settings
-
-logger = logging.getLogger(__name__)
 
 
 class DispatcherPort:

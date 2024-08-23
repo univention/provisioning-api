@@ -109,7 +109,7 @@ def handle_udm_message(msg: ProvisioningMessage):
 
 def handle_any_message(msg: ProvisioningMessage):
     print_header(msg)
-    logger.info(msg.model_dump_json(indent=2))
+    logger.debug(msg.body.model_dump_json(indent=2))
 
 
 async def handle_message(message: ProvisioningMessage):

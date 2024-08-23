@@ -13,8 +13,6 @@ from udm_transformer.port import UDMTransformerPort
 
 UDM_TRANSFORMER_CONSUMER_NAME = "udm-transformer"
 
-logger = logging.getLogger(__name__)
-
 
 async def run_udm_transformer() -> None:
     async with UDMTransformerPort.port_context() as transformer_port:

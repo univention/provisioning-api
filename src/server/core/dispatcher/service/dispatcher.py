@@ -39,7 +39,9 @@ class DispatcherService:
                 )
 
     async def handle_message(self, message: MQMessage):
-        logger.info("Received message with content: %s", message.data)
+        logger.info("Received message with topic: %s", message.data.get("topic"))
+        logger.debug("Message content: %s", message.data)
+
         validated_msg = Message.model_validate(message.data)
 
         subscriptions = self._subscriptions.get(f"{validated_msg.realm}:{validated_msg.topic}", [])

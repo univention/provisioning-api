@@ -64,6 +64,8 @@ class UDMTransformerController:
             logger.debug("listening for new LDAP messages")
             try:
                 message, acknowledgements = await self._port.get_one_message(timeout=10)
+                logger.info("Received message to handle")
+                logger.debug("Message content: %s", message.data)
             except Empty:
                 logger.debug("No new LDAP messages found in the queue, continuing to wait.")
                 continue

@@ -69,18 +69,19 @@ class UDMPreFill:
                 await acknowledgements.acknowledge_message_negatively()
                 raise
             except Exception:
-                logger.exception("Unknown error occured while processing the prefill request.")
+                logger.exception("Unknown error occurred while processing the prefill request.")
                 await acknowledgements.acknowledge_message_negatively()
                 raise
 
             await acknowledgements.acknowledge_message()
 
     async def handle_message(self, message: MQMessage):
-        logger.info("Received message with content: %s", message.data)
+        logger.info("Received message with subscription_name: %s", message.data.get("subscription_name"))
+        logger.debug("Message content: %s", message.data)
         try:
             validated_message = PrefillMessage.model_validate(message.data)
         except ValidationError:
-            logger.exception("failed to parse message queue message: %r", message.data)
+            logger.exception("failed to parse message with sequence_number: %r", message.sequence_number)
             raise
 
         if self.max_prefill_attempts != -1 and message.num_delivered > self.max_prefill_attempts:

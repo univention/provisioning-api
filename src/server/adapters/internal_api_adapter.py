@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import logging
-
 import aiohttp
 
 from univention.provisioning.models import FillQueueStatus, Message
@@ -21,7 +19,6 @@ class InternalAPIAdapter:
         self.auth = aiohttp.BasicAuth(username, password)
         self.headers = [("accept", "application/json")]
         self._session = None
-        self.logger = logging.getLogger(__name__)
 
     async def connect(self):
         if not self._session:
