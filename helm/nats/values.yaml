@@ -440,3 +440,10 @@ config:
     #     publish: ">"
     #     subscribe: ">"
     users: []
+
+  # Ref: https://docs.nats.io/running-a-nats-service/configuration
+  # Example:
+  # extraConfig:
+  #   max_connections: 128K
+  #   max_payload: 8MB
+  extraConfig: {}

@@ -203,6 +203,15 @@ false
 			<td></td>
 		</tr>
 		<tr>
+			<td>config.extraConfig</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
 			<td>config.jetstream</td>
 			<td>object</td>
 			<td><pre lang="json">
