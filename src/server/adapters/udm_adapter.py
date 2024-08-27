@@ -64,7 +64,7 @@ class UDMAdapter:
         async with self._session.get(f"{self.base_url}{object_type}/", params=params) as request:
             response = await request.json()
             n_results = response["results"]
-            logger.info("Found %s results for %s.", n_results, object_type)
+            logger.info("Found %r results for %r.", n_results, object_type)
             if n_results > 0:
                 uris = [obj["uri"] for obj in response["_embedded"]["udm:object"]]
                 return uris

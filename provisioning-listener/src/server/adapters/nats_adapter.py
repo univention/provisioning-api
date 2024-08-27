@@ -121,7 +121,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
                     else:
                         updated_subscriptions = json.loads(update.value.decode("utf-8"))
                         subscriptions[realm_topic] = updated_subscriptions
-                    logger.info("Subscriptions were updated: %s", subscriptions)
+                    logger.info("Subscriptions were updated: %r", subscriptions)
 
 
 def json_encoder(data: Any) -> bytes:
@@ -187,7 +187,7 @@ class NatsMQAdapter(BaseMQAdapter):
             stream=stream_name,
         )
         logger.info(
-            "Message was published to the stream: %s with the subject: %s",
+            "Message was published to the stream: %r with the subject: %r",
             stream_name,
             subject,
         )

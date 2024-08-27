@@ -64,13 +64,20 @@ class UDMTransformerController:
             logger.debug("listening for new LDAP messages")
             try:
                 message, acknowledgements = await self._port.get_one_message(timeout=10)
-                logger.info("Received message to handle")
-                logger.debug("Message content: %s", message.data)
+                data = message.data
+                logger.info(
+                    "Received message to handle (Publisher: %r Realm: %r Topic: %r TS: %s).",
+                    data.get("publisher_name"),
+                    data.get("realm"),
+                    data.get("topic"),
+                    data.get("ts"),
+                )
+                logger.debug("Message content: %r", data)
             except Empty:
                 logger.debug("No new LDAP messages found in the queue, continuing to wait.")
                 continue
             try:
-                validated_message = Message.model_validate(message.data)
+                validated_message = Message.model_validate(data)
             except ValidationError:
                 logger.error("Failed to parse the ldap message.")
                 raise

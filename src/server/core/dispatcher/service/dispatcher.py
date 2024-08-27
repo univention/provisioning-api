@@ -30,7 +30,7 @@ class DispatcherService:
             task_group.create_task(self._port.watch_for_changes(self._subscriptions))
 
             while True:
-                logger.info("Waiting for the event...")
+                logger.debug("Waiting for an event...")
                 message = await self._port.wait_for_event()
                 await task_group.create_task(
                     self.ack_manager.process_message_with_ack_wait_extension(
@@ -39,15 +39,22 @@ class DispatcherService:
                 )
 
     async def handle_message(self, message: MQMessage):
-        logger.info("Received message with topic: %s", message.data.get("topic"))
-        logger.debug("Message content: %s", message.data)
+        data = message.data
+        logger.info(
+            "Received message to handle (Publisher: %r Realm: %r Topic: %r TS: %s).",
+            data.get("publisher_name"),
+            data.get("realm"),
+            data.get("topic"),
+            data.get("ts"),
+        )
+        logger.debug("Message content: %r", data)
 
-        validated_msg = Message.model_validate(message.data)
+        validated_msg = Message.model_validate(data)
 
         subscriptions = self._subscriptions.get(f"{validated_msg.realm}:{validated_msg.topic}", [])
 
         for sub in subscriptions:
-            logger.info("Sending message to '%s'", sub)
+            logger.info("Sending message to %r", sub)
             await self._port.send_message_to_subscription(
                 sub, DISPATCHER_SUBJECT_TEMPLATE.format(subscription=sub), validated_msg
             )

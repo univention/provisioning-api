@@ -88,7 +88,7 @@ class SubscriptionService:
                 )
             return False
         else:
-            logger.info("Registering new subscription with the name: %s", new_sub.name)
+            logger.info("Registering new subscription with the name: %r", new_sub.name)
             encrypted_password = self.hash_password(new_sub.password)
             await self._port.put_value(new_sub.name, encrypted_password, Bucket.credentials)
             await self.prepare_and_store_subscription_info(new_sub)
@@ -181,7 +181,7 @@ class SubscriptionService:
         await self._port.delete_consumer(name)
 
     async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
-        logger.debug("Deleting subscription %s from %s", name, realm_topic_str)
+        logger.debug("Deleting subscription %r from %r", name, realm_topic_str)
         realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"
         subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
         if not subs:

@@ -67,11 +67,11 @@ class UDMMessagingService(univention.admin.uldap.access):
         importlib.reload(univention.management.console.modules.udm.udm_ldap)
 
     async def retrieve(self, dn: str) -> dict:
-        logger.info("Retrieving object from cache")
+        logger.debug("Retrieving object from cache")
         return await self._messaging_port.retrieve(dn, Bucket.cache)
 
     async def store(self, new_obj: dict):
-        logger.info("Storing object to cache with dn: %s", new_obj.get("dn"))
+        logger.debug("Storing object to cache with dn: %r", new_obj.get("dn"))
         await self._messaging_port.store(new_obj["uuid"], json.dumps(new_obj), Bucket.cache)
 
     async def send_event(self, new_obj: dict, old_obj: dict, ts: datetime):
@@ -81,8 +81,8 @@ class UDMMessagingService(univention.admin.uldap.access):
         object_type = new_obj.get("objectType") if new_obj else old_obj.get("objectType")
 
         if not object_type:
-            logger.error("could not identify objectType for dn: %s", new_obj.get("dn") or old_obj.get("dn"))
-            logger.debug("old_obj: %s, new_obj: %s", old_obj, new_obj)
+            logger.error("could not identify objectType for dn: %r", new_obj.get("dn") or old_obj.get("dn"))
+            logger.debug("old_obj: %r, new_obj: %r", old_obj, new_obj)
             return
 
         message = Message(
@@ -92,7 +92,7 @@ class UDMMessagingService(univention.admin.uldap.access):
             topic=object_type,
             body=Body(old=old_obj, new=new_obj),
         )
-        logger.debug("Sending the message with body: %s", message.body)
+        logger.debug("Sending the message with body: %r", message.body)
         await self._messaging_port.send_event(message)
         logger.info("The message was sent")
 
@@ -128,9 +128,9 @@ class UDMMessagingService(univention.admin.uldap.access):
             if object_type in SUPPORTED_OBJECT_TYPES:
                 raise
             logger.exception(
-                "Ignoring the failed transformation of a udm type: %s "
+                "Ignoring the failed transformation of a udm type: %r "
                 "because it's not a supported provisioning topic\n"
-                "object: %s",
+                "object: %r",
                 object_type,
                 entry,
             )

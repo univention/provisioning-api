@@ -25,6 +25,6 @@ class DispatcherSettings(BaseSettings):
         return f"nats://{self.nats_host}:{self.nats_port}"
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def get_dispatcher_settings() -> DispatcherSettings:
     return DispatcherSettings()

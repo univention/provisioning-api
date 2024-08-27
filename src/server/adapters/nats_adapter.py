@@ -74,7 +74,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         try:
             await self._js.key_value(bucket.value)
         except BucketNotFoundError:
-            logger.info("Creating bucket with the name: %s", bucket)
+            logger.info("Creating bucket with the name: %r", bucket)
             await self._js.create_key_value(bucket=bucket.value)
 
     async def delete_kv_pair(self, key: str, bucket: Bucket):
@@ -121,7 +121,7 @@ class NatsKVAdapter(BaseKVStoreAdapter):
                     else:
                         updated_subscriptions = json.loads(update.value.decode("utf-8"))
                         subscriptions[realm_topic] = updated_subscriptions
-                    logger.info("Subscriptions were updated: %s", subscriptions)
+                    logger.info("Subscriptions were updated: %r", subscriptions)
 
 
 def json_encoder(data: Any) -> bytes:
@@ -187,7 +187,7 @@ class NatsMQAdapter(BaseMQAdapter):
             stream=stream_name,
         )
         logger.debug(
-            "Message was published to the stream: %s with the subject: %s",
+            "Message was published to the stream: %r with the subject: %r",
             stream_name,
             subject,
         )
@@ -346,13 +346,13 @@ class NatsMQAdapter(BaseMQAdapter):
         )
         try:
             await self._js.stream_info(stream_name)
-            logger.info("A stream with the name '%s' already exists", stream_name)
+            logger.info("A stream with the name %r already exists", stream_name)
         except NotFoundError:
             await self._js.add_stream(stream_config)
-            logger.info("A stream with the name '%s' was created", stream_name)
+            logger.info("A stream with the name %r was created", stream_name)
         else:
             await self._js.update_stream(stream_config)
-            logger.info("A stream with the name '%s' was updated", stream_name)
+            logger.info("A stream with the name %r was updated", stream_name)
 
     async def ensure_consumer(self, stream: str, deliver_subject: Optional[str] = None):
         stream_name = NatsKeys.stream(stream)
@@ -360,7 +360,7 @@ class NatsMQAdapter(BaseMQAdapter):
 
         try:
             await self._js.consumer_info(stream_name, durable_name)
-            logger.info("A consumer with the name '%s' already exists", durable_name)
+            logger.info("A consumer with the name %r already exists", durable_name)
         except NotFoundError:
             await self._js.add_consumer(
                 stream_name,
@@ -370,7 +370,7 @@ class NatsMQAdapter(BaseMQAdapter):
                     max_ack_pending=1,
                 ),
             )
-            logger.info("A consumer with the name '%s' was created", durable_name)
+            logger.info("A consumer with the name %r was created", durable_name)
 
     def build_acknowledgements(self, message: Msg) -> Acknowledgements:
         return Acknowledgements(
@@ -392,7 +392,7 @@ class NatsMQAdapter(BaseMQAdapter):
         await msg.in_progress()
 
     async def delete_message(self, stream: str, seq_num: int):
-        logger.info("Deleting message from the stream: %s", stream)
+        logger.info("Deleting message from the stream: %r", stream)
         try:
             await self._js.get_msg(NatsKeys.stream(stream), seq_num)
             await self._js.delete_msg(NatsKeys.stream(stream), seq_num)

@@ -58,6 +58,6 @@ class UDMTransformerSettings(BaseSettings):
         return f"http://{self.internal_api_host}:{self.internal_api_port}/internal/v1"
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def get_udm_transformer_settings() -> UDMTransformerSettings:
     return UDMTransformerSettings()

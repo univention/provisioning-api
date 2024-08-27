@@ -47,7 +47,7 @@ class UDMPreFill:
         await self._port.initialize_subscription(PREFILL_STREAM, False, None)
 
         while True:
-            logger.info("Waiting for new prefill requests...")
+            logger.debug("Waiting for new prefill requests...")
             try:
                 message, acknowledgements = await self._port.get_one_message()
             except Empty:
@@ -76,10 +76,16 @@ class UDMPreFill:
             await acknowledgements.acknowledge_message()
 
     async def handle_message(self, message: MQMessage):
-        logger.info("Received message with subscription_name: %s", message.data.get("subscription_name"))
-        logger.debug("Message content: %s", message.data)
+        data = message.data
+        logger.info(
+            "Received message to handle (Subscription: %r Realms-Topics: %r TS: %s).",
+            data.get("subscription_name"),
+            data.get("realms_topics"),
+            data.get("ts"),
+        )
+        logger.debug("Message content: %r", data)
         try:
-            validated_message = PrefillMessage.model_validate(message.data)
+            validated_message = PrefillMessage.model_validate(data)
         except ValidationError:
             logger.exception("failed to parse message with sequence_number: %r", message.sequence_number)
             raise
@@ -90,7 +96,7 @@ class UDMPreFill:
                 "The prefill will not be retried again and the subscription will be marked as failed. "
                 "To trigger the prefill again, delete and recreate the subscription."
             )
-            await self.add_to_failure_queue(message.data)
+            await self.add_to_failure_queue(data)
             await self._port.update_subscription_queue_status(
                 validated_message.subscription_name, FillQueueStatus.failed
             )
@@ -109,11 +115,11 @@ class UDMPreFill:
         for realm, topic in message.realms_topics:
             if realm != "udm":
                 # FIXME: unhandled realm
-                logger.error("Unhandled realm: %s", realm)
+                logger.error("Unhandled realm: %r", realm)
                 continue
 
             logger.info(
-                "Started the prefill for the subscriber %s with the topic %s",
+                "Started the prefill for the subscriber %r with the topic %r",
                 message.subscription_name,
                 topic,
             )
@@ -130,11 +136,11 @@ class UDMPreFill:
         udm_match = [module for module in udm_modules if match_topic(topic, module["name"])]
 
         if len(udm_match) == 0:
-            logger.warning("No UDM modules match object type %s", topic)
+            logger.warning("No UDM modules match object type %r", topic)
 
         for module in udm_match:
             this_topic = module["name"]
-            logger.info("Grabbing %s objects.", this_topic)
+            logger.info("Grabbing %r objects.", this_topic)
             await self._fill_udm_topic(this_topic, subscription_name)
 
     async def _fill_udm_topic(self, object_type: str, subscription_name: str):
@@ -152,7 +158,7 @@ class UDMPreFill:
 
         urls = await self._port.list_objects(object_type)
         for url in urls:
-            logger.info("Grabbing object from: %s", url)
+            logger.info("Grabbing object from: %r", url)
             await self._fill_object(url, object_type, subscription_name)
 
     async def _fill_object(self, url: str, object_type: str, subscription_name: str):
@@ -166,7 +172,7 @@ class UDMPreFill:
             topic=object_type,
             body=Body(old={}, new=obj),
         )
-        logger.info("Sending to the consumer prefill queue from: %s", url)
+        logger.info("Sending to the consumer prefill queue from: %r", url)
 
         await self._port.create_prefill_message(
             subscription_name,

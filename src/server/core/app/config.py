@@ -49,6 +49,6 @@ class AppSettings(BaseSettings):
         return f"nats://{self.nats_host}:{self.nats_port}"
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def get_app_settings() -> AppSettings:
     return AppSettings()
