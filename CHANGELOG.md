@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.37.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.37.0...v0.37.1) (2024-08-28)
+
+
+### Bug Fixes
+
+* **nubus-provisioning-consumer:** return ProvisioningMessage with sequence_number and num_delivered to the consumer ([4704c6f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4704c6f867cb58197f88354b3ffc6ece089fb354))
+* update log messages, add maxsize to [@lru](https://git.knut.univention.de/lru)_cache ([9845df0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9845df0e348b18b3e15ccff76a00f5ed80ade147))
+* update logs to display message content only at the DEBUG level ([2735d4a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2735d4a9153d6c8b7b3be3b890884cf3cb5c7e9b))
+
 ## [0.37.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.36.0...v0.37.0) (2024-08-21)
 
 
