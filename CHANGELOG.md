@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.37.1...v0.38.0) (2024-08-28)
+
+
+### Features
+
+* unify UCR configuration ([02038e1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/02038e1c9d9b2884311992f7d3d440f79f079282))
+
 ## [0.37.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.37.0...v0.37.1) (2024-08-28)
 
 
