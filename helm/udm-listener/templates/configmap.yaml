@@ -1,10 +1,21 @@
-# SPDX-License-Identifier: AGPL-3.0-only
-# SPDX-FileCopyrightText: 2024 Univention GmbH
-
+{{/*
+SPDX-FileCopyrightText: 2024 Univention GmbH
+SPDX-License-Identifier: AGPL-3.0-only
+*/}}
 ---
-{{ include "common.configMap" (dict "top" . "overrides" "udm-listener.configMap") }}
-{{- define "udm-listener.configMap" }}
-{{- with .top }}
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
 data:
   CA_CERT: "{{ .Values.config.caCert }}"
   CA_CERT_FILE: "{{ .Values.config.caCertFile }}"
@@ -21,6 +32,52 @@ data:
   INTERNAL_API_PORT: {{ include "udm-listener.provisioningApi.connection.port" . | quote }}
   NOTIFIER_SERVER: {{ include "udm-listener.ldapNotifier.connection.host" . | quote }}
   TLS_MODE: "{{ .Values.config.tlsMode }}"
-{{ end }}
-{{ end }}
+
+...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ printf "%s-files" (include "common.names.fullname" .) | quote }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  base.conf: |
+    # univention_ base.conf
+
+    cron/autostart: yes
+    server/role: memberserver
+    ldap/master: {{ include "udm-listener.ldap.connection.host" . }}
+    ldap/master/port: {{ include "udm-listener.ldap.connection.port" . }}
+    ldap/hostdn: {{ include "udm-listener.ldapAdminDn" . }}
+    ldap/base: {{ include "udm-listener.ldapBaseDn" . }}
+    uldap/start-tls: 0
+    listener/debug/level: {{ .Values.config.debugLevel }}
+
+    # end of univention_ base.conf
+
+  base-forced.conf: |
+
+
+  base-ldap.conf: |
+
+
+  base-schedule.conf: |
+
+
+  base-defaults.conf: |
+
+
+  ldap.conf: |
+    TLS_REQCERT never
+    BASE {{ include "udm-listener.ldapBaseDn" . }}
+
+
 ...

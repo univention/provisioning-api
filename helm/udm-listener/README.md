@@ -10,19 +10,18 @@ A Helm chart for the Univention Portal Provisioning API
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | ums-common(common) | ^0.2.0 |
+| oci://registry-1.docker.io/bitnamicharts | common | ^2.x.x |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","internalApiHost":"provisioning-api","internalApiPort":"80","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapHostIp":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"udmlistenerpass","natsPort":"4222","natsUser":"udmlistener","notifierServer":"ldap-notifier","provisioningApi":{"auth":{"credentialSecret":{"name":"","passwordKey":"EVENTS_PASSWORD_UDM","userNameKey":"EVENTS_USERNAME_UDM"}}},"secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","internalApiHost":"provisioning-api","internalApiPort":"80","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"udmlistenerpass","natsPort":"4222","natsUser":"udmlistener","notifierServer":"ldap-notifier","provisioningApi":{"auth":{"credentialSecret":{"name":"","passwordKey":"EVENTS_PASSWORD_UDM","userNameKey":"EVENTS_USERNAME_UDM"}}},"secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.eventsUsernameUdm | string | `"udm"` | Messages-API Port |
 | config.internalApiHost | string | `"provisioning-api"` | Messages-API Hostname |
-| config.ldapHostIp | string | `nil` | Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set |
 | config.ldapPassword | string | `""` | LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set. |
 | config.ldapPasswordFile | string | `"/var/secrets/ldap_secret"` | The path to the "ldapPasswordFile" docker secret or a plain file |
 | config.natsHost | string | `nil` | NATS: host (required if nats.bundled == false) |
@@ -32,14 +31,28 @@ A Helm chart for the Univention Portal Provisioning API
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
 | config.secretMountPath | string | `"/var/secrets"` | Path to mount the secrets to. |
 | config.tlsMode | string | `"off"` | Whether to start encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
+| containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
+| containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
+| containerSecurityContext.enabled | bool | `true` | Enable security context. |
+| containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Mounts the container's root filesystem as read-only. |
+| containerSecurityContext.runAsGroup | int | `65534` | Process group id. |
+| containerSecurityContext.runAsNonRoot | bool | `true` | Run container as a user. |
+| containerSecurityContext.runAsUser | int | `102` | Process user id. |
+| containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
 | environment | object | `{}` |  |
+| extraInitContainers | list | `[]` |  |
+| extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
+| extraVolumes | list | `[]` | Optionally specify an extra list of additional volumes. |
 | fullnameOverride | string | `""` |  |
+| global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
+| global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | image.imagePullPolicy | string | `"Always"` |  |
 | image.registry | string | `""` |  |
 | image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
 | image.tag | string | `"0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"` |  |
+| imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ldap.credentialSecret.ldapPasswordKey | string | `"ldap.secret"` |  |
 | ldap.credentialSecret.machinePasswordKey | string | `"machine.secret"` |  |
 | ldap.credentialSecret.name | string | `""` |  |
@@ -52,7 +65,10 @@ A Helm chart for the Univention Portal Provisioning API
 | nats.bundled | bool | `true` |  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
-| podSecurityContext | object | `{}` |  |
+| podSecurityContext.enabled | bool | `true` | Enable security context. |
+| podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
+| podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
+| podSecurityContext.sysctls | list | `[]` | Allow binding to ports below 1024 without root access. |
 | probes.liveness.enabled | bool | `true` |  |
 | probes.liveness.failureThreshold | int | `30` |  |
 | probes.liveness.initialDelaySeconds | int | `10` |  |
@@ -69,6 +85,10 @@ A Helm chart for the Univention Portal Provisioning API
 | resources | object | `{}` |  |
 | securityContext | object | `{}` |  |
 | serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.automountServiceAccountToken | bool | `false` |  |
 | serviceAccount.create | bool | `true` |  |
+| serviceAccount.labels | object | `{}` | Additional custom labels for the ServiceAccount. |
 | serviceAccount.name | string | `""` |  |
+| terminationGracePeriodSeconds | string | `""` | In seconds, time the given to the pod needs to terminate gracefully. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods |
 | tolerations | list | `[]` |  |
+| topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |

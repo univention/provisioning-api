@@ -1,0 +1,12 @@
+--- listener.py	2024-09-04 07:38:23
++++ listener.py	2024-09-04 07:38:17
+@@ -70,7 +70,8 @@
+     if isinstance(uid, string_types):
+         uid = getpwnam(uid)[2]
+     assert isinstance(uid, int)
+-    os.seteuid(uid)
++    return None
++    # os.seteuid(uid)
+
+
+ __listener_uid = -1

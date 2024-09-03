@@ -18,8 +18,7 @@ appVersion: "1.16.0"
 
 dependencies:
   - name: "common"
-    alias: "ums-common"
-    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
-    version: "^0.2.0"
+    version: "^2.x.x"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
 
 ...

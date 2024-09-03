@@ -56,6 +56,19 @@ WORKDIR ${WORKDIR}
 
 COPY --from=builder ${WORKDIR} .
 
+# Copy patch files
+COPY ./docker/udm-listener/*.patch /tmp/
+
+# Install patch utility
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get --assume-yes --verbose-versions --no-install-recommends install \
+    patch && \
+    patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
+    patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
+    apt-get purge --auto-remove --assume-yes patch && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
 COPY ./provisioning-listener/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
 
 ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages

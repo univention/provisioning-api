@@ -8,25 +8,98 @@ global:
   nubusDeployment: false
   # -- Container registry address.
   imageRegistry: "artifacts.software-univention.de"
+  # -- Credentials to fetch images from private registry.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  #
+  # imagePullSecrets:
+  #   - "docker-registry"
+  imagePullSecrets: []
 
+  # -- Define an ImagePullPolicy.
+  #
+  # Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+  #
+  # "IfNotPresent" => The image is pulled only if it is not already present locally.
+  # "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to
+  #             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached
+  #             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved
+  #             digest, and uses that image to launch the container.
+  # "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the
+  #            kubelet attempts to start the container; otherwise, startup fails.
+  imagePullPolicy: "IfNotPresent"
 
 # Default values for the UMS provisioning udm-listener.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 
-## Global values
 affinity: {}
 environment: {}
 fullnameOverride: ""
 nameOverride: ""
 nodeSelector: {}
 podAnnotations: {}
-podSecurityContext: {}
 replicaCount: 1
 securityContext: {}
 tolerations: []
 mountSecrets: true
+
+# Security Context.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+containerSecurityContext:
+  # -- Enable container privileged escalation.
+  allowPrivilegeEscalation: false
+  # -- Security capabilities for container.
+  capabilities:
+    drop:
+      - "ALL"
+  # -- Enable security context.
+  enabled: true
+  # -- Process user id.
+  runAsUser: 102
+  # -- Process group id.
+  runAsGroup: 65534
+  # Set Seccomp profile.
+  seccompProfile:
+    # -- Disallow custom Seccomp profile by setting it to RuntimeDefault.
+    type: "RuntimeDefault"
+  # -- Mounts the container's root filesystem as read-only.
+  readOnlyRootFilesystem: true
+  # -- Run container as a user.
+  runAsNonRoot: true
+
+# Pod Security Context.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext:
+  # -- Enable security context.
+  enabled: true
+
+  # -- If specified, all processes of the container are also part of the supplementary group.
+  fsGroup: 65534
+
+  # -- Change ownership and permission of the volume before being exposed inside a Pod.
+  fsGroupChangePolicy: "Always"
+
+  # -- Allow binding to ports below 1024 without root access.
+  sysctls: []
+
+# Define extra init containers.
+#
+# Ref.: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+extraInitContainers: []
+
+# -- Optionally specify an extra list of additional volumes.
+extraVolumes: []
+
+# -- Optionally specify an extra list of additional volumeMounts.
+extraVolumeMounts: []
+
+# -- Credentials to fetch images from private registry.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+#
+# imagePullSecrets:
+#   - "docker-registry"
+imagePullSecrets: []
 
 image:
   registry: ""
@@ -34,6 +107,18 @@ image:
   imagePullPolicy: "Always"
   tag: "0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"
 
+# -- In seconds, time the given to the pod needs to terminate gracefully.
+# Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+terminationGracePeriodSeconds: ""
+
+# -- Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in.
+# Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+#
+# topologySpreadConstraints:
+#   - maxSkew: 1
+#     topologyKey: failure-domain.beta.kubernetes.io/zone
+#     whenUnsatisfiable: DoNotSchedule
+topologySpreadConstraints: []
 
 # -- Configuration of the UDM Listener that is notified on LDAP changes
 config:
@@ -50,8 +135,6 @@ config:
   ldapPasswordFile: "/var/secrets/ldap_secret"
   ldapHost: ""
   ldapHostDn: null
-  # -- Will add a mapping from "ldapHost" to "ldapHostIp" into "/etc/hosts" if set
-  ldapHostIp: null
   ldapPort: "389"
   # -- NATS: host (required if nats.bundled == false)
   natsHost: null
@@ -99,7 +182,8 @@ probes:
     failureThreshold: 3
     successThreshold: 1
 
-
+# Service account to use.
+# Ref.: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -108,6 +192,12 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+  ## @param serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+  ## Can be set to false if pods using this serviceAccount do not need to use K8s API
+  ##
+  automountServiceAccountToken: false
+  # -- Additional custom labels for the ServiceAccount.
+  labels: {}
 
 ## Deployment resources
 resources: {}

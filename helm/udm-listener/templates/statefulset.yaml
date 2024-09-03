@@ -1,6 +1,7 @@
-# SPDX-License-Identifier: AGPL-3.0-only
-# SPDX-FileCopyrightText: 2024 Univention GmbH
-
+{{/*
+SPDX-FileCopyrightText: 2024 Univention GmbH
+SPDX-License-Identifier: AGPL-3.0-only
+*/}}
 ---
 
 apiVersion: "apps/v1"
@@ -26,29 +27,63 @@ spec:
       labels:
         {{- include "common.labels.matchLabels" . | nindent 8 }}
     spec:
-      # TODO: Remove `Values.imagePullSecrets` once it has been replaced by `image.pullSecrets` everywhere.
-      {{- with (coalesce .Values.image.pullSecrets .Values.imagePullSecrets ) }}
+      {{- if or .Values.imagePullSecrets .Values.global.imagePullSecrets  }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{- range .Values.global.imagePullSecrets }}
+        - name: "{{ . }}"
+        {{- end }}
+        {{- range .Values.imagePullSecrets }}
+        - name: "{{ . }}"
+        {{- end }}
       {{- end }}
-      serviceAccountName: '{{ include "common.names.fullname" . }}'
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.config.ldapHostIp }}
-      hostAliases:
-        - hostnames:
-            - {{ .Values.config.ldapHost | quote }}
-          ip: {{ .Values.config.ldapHostIp | quote }}
+      {{- if .Values.affinity }}
+      affinity: {{- include "common.tplvalues.render" (dict "value" .Values.affinity "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "common.names.fullname" . }}
+      {{- end }}
+      {{- if .Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- if .Values.extraInitContainers }}
+      initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.extraInitContainers "context" .) | nindent 8 }}
       {{- end }}
       containers:
         - name: "udm-listener"
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ coalesce .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: '{{ .Values.image.pullPolicy }}'
           envFrom:
             - configMapRef:
                 name: '{{ include "common.names.fullname" . }}'
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+              /usr/sbin/univention-directory-listener \
+              -F \
+              -x \
+              -d "${DEBUG_LEVEL}" \
+              -b "${LDAP_BASE_DN}" \
+              -D "cn=admin,${LDAP_BASE_DN}" \
+              -n "${NOTIFIER_SERVER}" \
+              -m "/usr/lib/univention-directory-listener/system" \
+              -c "/var/lib/univention-directory-listener" \
+              -y "${LDAP_PASSWORD_FILE}" -Z
           env:
             - name: NATS_USER
               value: {{ .Values.config.natsUser | quote }}
@@ -84,6 +119,11 @@ spec:
               containerPort: 80
               protocol: "TCP"
           volumeMounts:
+            - name: "config-files"
+              mountPath: "/etc/univention"
+            - name: "config-files"
+              mountPath: "/etc/ldap/ldap.conf"
+              subPath: "ldap.conf"
             {{- if and .Values.mountSecrets (not .Values.global.nubusDeployment) }}
             - name: "secrets"
               mountPath: "{{ .Values.config.secretMountPath }}"
@@ -107,9 +147,19 @@ spec:
             {{- end }}
             - name: "data"
               mountPath: "/var/lib/univention-directory-listener"
+            - name: "data"
+              mountPath: "/var/lib/univention-ldap/schema/id"
+            - name: "data"
+              mountPath: "/var/log/univention"
+            {{- if .Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: "config-files"
+          configMap:
+            name: {{ printf "%s-files" (include "common.names.fullname" .) | quote }}
         {{- if and .Values.mountSecrets (not .Values.global.nubusDeployment) }}
         - name: "secrets"
           secret:
@@ -125,6 +175,9 @@ spec:
           secret:
             secretName: {{ (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
