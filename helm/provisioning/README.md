@@ -135,7 +135,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.additionalLabels | object | `{}` |  |
 | prefill.config.LOG_LEVEL | string | `"INFO"` |  |
 | prefill.config.UDM_HOST | string | `""` |  |
-| prefill.config.UDM_PORT | int | `80` |  |
+| prefill.config.UDM_PORT | int | `9979` |  |
 | prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -176,7 +176,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.additionalAnnotations | object | `{}` |  |
 | registerConsumers.additionalLabels | object | `{}` |  |
 | registerConsumers.config.UDM_HOST | string | `""` |  |
-| registerConsumers.config.UDM_PORT | int | `80` |  |
+| registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.credentialSecretName | string | `""` |  |
 | registerConsumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | registerConsumers.image.registry | string | `""` |  |

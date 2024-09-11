@@ -627,7 +627,7 @@ prefill:
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
     UDM_HOST: ""
     # UDM REST API: port
-    UDM_PORT: 80
+    UDM_PORT: 9979
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
@@ -779,7 +779,7 @@ registerConsumers:
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
     UDM_HOST: ""
     # UDM REST API: port
-    UDM_PORT: 80
+    UDM_PORT: 9979
   credentialSecretName: ""
   jsonSecretName: ""
   provisioningApiBaseUrl: ""
