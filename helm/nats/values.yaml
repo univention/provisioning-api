@@ -404,10 +404,6 @@ config:
     enabled: true
     fileStore:
       dir: /data
-      pvc:
-        size: "1Gi"
-        # -- Name of the storage class to use
-        storageClassName: ""
     memoryStore:
       size: "256Mi"
   # Ref: https://docs.nats.io/running-a-nats-service/configuration/clustering/cluster_config

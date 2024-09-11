@@ -218,11 +218,7 @@ false
 {
   "enabled": true,
   "fileStore": {
-    "dir": "/data",
-    "pvc": {
-      "size": "1Gi",
-      "storageClassName": ""
-    }
+    "dir": "/data"
   },
   "memoryStore": {
     "size": "256Mi"
@@ -231,15 +227,6 @@ false
 </pre>
 </td>
 			<td>JetStream configuration Ref: https://docs.nats.io/running-a-nats-service/configuration/resource_management</td>
-		</tr>
-		<tr>
-			<td>config.jetstream.fileStore.pvc.storageClassName</td>
-			<td>string</td>
-			<td><pre lang="json">
-""
-</pre>
-</td>
-			<td>Name of the storage class to use</td>
 		</tr>
 		<tr>
 			<td>config.lame_duck_duration</td>
