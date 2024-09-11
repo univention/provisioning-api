@@ -55,7 +55,7 @@ data:
       {{- end }}
       {{- if .Values.config.jetstream.enabled }}
       jetstream {
-        max_file_store: {{ .Values.config.jetstream.fileStore.pvc.size | required ".Values.config.jetstream.fileStore.pvc.size is required" }}
+        max_file_store: {{ .Values.persistence.size | required ".Values.persistence.size is required" }}
         max_memory_store: {{ .Values.config.jetstream.memoryStore.size | required ".Values.config.jetstream.memoryStore.size is required" }}
         store_dir: "/data"
       }
