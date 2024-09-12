@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.38.0...v0.38.1) (2024-09-12)
+
+
+### Bug Fixes
+
+* new default port because of moving udm to a headless service ([383084b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/383084b9a6779b6e7198d3737f7d30349b5679c5))
+
 ## [0.38.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.37.1...v0.38.0) (2024-08-28)
 
 
