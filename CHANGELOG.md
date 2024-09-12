@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.38.1...v0.39.0) (2024-09-12)
+
+
+### Features
+
+* changes relating to BSI compliance (udm-listener) ([49b6128](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/49b612867f258429b76c338ed57cb9bebbede14c))
+
 ## [0.38.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.38.0...v0.38.1) (2024-09-12)
 
 
