@@ -5,7 +5,7 @@
 
 include:
   - project: "univention/customers/dataport/upx/common-ci"
-    ref: "v1.31.1"
+    ref: "v1.33.0"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -73,13 +73,9 @@ container-build:
   variables:
     KANIKO_BUILD_CONTEXT: "${CI_PROJECT_DIR}"
 
-container-generate-sbom:
+container-malware-scan:
   parallel:
-    matrix: *build-matrix
-
-container-sign-external:
-  parallel:
-    matrix: *build-matrix
+    matrix: *publish-matrix
 
 test-integration:
   stage: "test"
