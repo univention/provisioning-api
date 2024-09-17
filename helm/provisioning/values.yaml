@@ -551,7 +551,7 @@ api:
     # FastAPI: debug mode
     DEBUG: "true"
     # FastAPI: webserver root path
-    ROOT_PATH: "/univention/provisioning-api"
+    ROOT_PATH: "/"
     # FastAPI: disable CORS checks
     CORS_ALL: "false"
   additionalLabels: {}

@@ -27,7 +27,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"true"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
-| api.config.ROOT_PATH | string | `"/univention/provisioning-api"` |  |
+| api.config.ROOT_PATH | string | `"/"` |  |
 | api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | api.image.registry | string | `""` |  |

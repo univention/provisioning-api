@@ -5,6 +5,7 @@
 
 import logging
 from importlib.metadata import version
+from urllib.parse import urljoin
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
@@ -93,18 +94,18 @@ internal_openapi_tags = [
         "description": "Internal actions",
     },
 ]
+internal_app_path = "/internal"
 internal_app = FastAPI(
     debug=app_settings.debug,
     description="Internal endpoints for Provisioning Dispatcher",
     openapi_tags=internal_openapi_tags,
-    root_path=app_settings.root_path,
+    root_path=urljoin(app_settings.root_path, internal_app_path),
     title="Internal API",
     version="v1",
 )
 add_exception_handlers(internal_app)
 internal_app.include_router(admin_api_router)
 internal_app.include_router(internal_api_router)
-internal_app_path = "/internal"
 
 app.mount(internal_app_path, internal_app)
 
