@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.0...v0.40.1) (2024-09-19)
+
+
+### Bug Fixes
+
+* **provisioning-consumer:** Modules executing from __main__ debug logging ([3db85ee](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3db85eea3165577bfbf83e24a174fd4a93e600fc))
+
 ## [0.40.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.39.0...v0.40.0) (2024-09-16)
 
 
