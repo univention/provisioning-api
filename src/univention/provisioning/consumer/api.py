@@ -210,7 +210,7 @@ class MessageHandler:
                 await callback(message)
                 logger.debug(
                     "%r finished handling message in %.1f ms.",
-                    inspect.getmodule(callback).__spec__.name,
+                    getattr(inspect.getmodule(callback).__spec__, "name", "__main__"),
                     (time.perf_counter() - t0) * 1000,
                 )
             if self.pop_after_handling:
