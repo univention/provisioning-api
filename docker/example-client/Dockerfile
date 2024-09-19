@@ -31,12 +31,12 @@ ENV \
 # install Poetry
 RUN pip3 install --break-system-packages --no-cache-dir poetry==1.8.3 poetry-plugin-export==1.8.0
 
-# copy source code
+# copy dependencies configuration
 COPY ./src/poetry.lock \
      ./src/pyproject.toml \
      ${WORKDIR}/
 
-# install dependencies
+# export dependencies
 RUN poetry export -o ${WORKDIR}/requirements.txt
 
 ###############################################

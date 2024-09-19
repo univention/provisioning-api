@@ -38,19 +38,20 @@ ENV \
 # install Poetry
 RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
 
-# copy source code
-COPY ./src/server ${WORKDIR}/src/server
-COPY ./src/univention/provisioning/models ${WORKDIR}/src/univention/provisioning/models
-COPY ./src/udm_transformer ${WORKDIR}/src/udm_transformer
+# install dependencies
 COPY poetry.lock \
      pyproject.toml \
      README.md \
      ${WORKDIR}/
-
 # Activate system packages to get the debian installed udm library
 RUN poetry config virtualenvs.options.system-site-packages true && \
-    # install dependencies
-    poetry install --only main
+    poetry install --no-root
+
+# copy source code
+COPY ./src/server ${WORKDIR}/src/server
+COPY ./src/univention/provisioning/models ${WORKDIR}/src/univention/provisioning/models
+COPY ./src/udm_transformer ${WORKDIR}/src/udm_transformer
+RUN poetry install --only main
 
 ###############################################
 # Stage 2: final image
