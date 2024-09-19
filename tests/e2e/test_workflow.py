@@ -8,25 +8,14 @@ import ldap3
 import pytest
 import requests
 
-from server.core.app.admin.api import v1_prefix as admin_api_prefix
-from server.core.app.consumer.messages.api import v1_prefix as messages_api_prefix
-from server.core.app.consumer.subscriptions.api import (
-    v1_prefix as subscriptions_api_prefix,
-)
-from server.core.app.main import internal_app_path
 from univention.provisioning.models import FillQueueStatus, PublisherName
 
-from tests.e2e.conftest import E2ETestSettings
+from .conftest import E2ETestSettings
 
 REALM = "udm"
 TOPIC = "groups/group"
 TOPIC_2 = "container/dc"
 PASSWORD = "password"
-
-
-@pytest.fixture(scope="session", autouse=True)
-def anyio_backend():
-    return "asyncio"
 
 
 @pytest.fixture(scope="session")
@@ -43,7 +32,7 @@ def subscription_name(test_settings: E2ETestSettings):
     name = str(uuid.uuid4())
 
     response = requests.post(
-        f"{test_settings.provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
+        test_settings.subscriptions_url,
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC]],
@@ -60,7 +49,7 @@ def subscription_name(test_settings: E2ETestSettings):
     yield name
 
     response = requests.delete(
-        f"{test_settings.provisioning_api_base_url}{subscriptions_api_prefix}/subscriptions/{name}",
+        f"{test_settings.subscriptions_url}/{name}",
         auth=(
             test_settings.provisioning_admin_username,
             test_settings.provisioning_admin_password,
@@ -89,7 +78,7 @@ async def test_workflow(test_settings, ldap_group, subscription_name):
 
     # Test object was created
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?pop=true",
+        f"{test_settings.subscriptions_messages_url(subscription_name)}/next?pop=true",
         auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
@@ -109,7 +98,7 @@ async def test_workflow(test_settings, ldap_group, subscription_name):
     ldap_connection.modify(dn, changes)
 
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?pop=true",
+        f"{test_settings.subscriptions_messages_url(subscription_name)}/next?pop=true",
         auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
@@ -126,7 +115,7 @@ async def test_workflow(test_settings, ldap_group, subscription_name):
     ldap_connection.delete(dn)
 
     response = requests.get(
-        f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{subscription_name}/messages?pop=true",
+        f"{test_settings.subscriptions_messages_url(subscription_name)}/next?pop=true",
         auth=(subscription_name, PASSWORD),
     )
     assert response.status_code == 200
@@ -145,7 +134,7 @@ async def test_prefill_with_multiple_topics(test_settings):
     name = str(uuid.uuid4())
 
     response = requests.post(
-        f"{test_settings.provisioning_api_base_url}{internal_app_path}{admin_api_prefix}/subscriptions",
+        test_settings.subscriptions_url,
         json={
             "name": name,
             "realms_topics": [[REALM, TOPIC], [REALM, TOPIC_2]],
@@ -161,10 +150,7 @@ async def test_prefill_with_multiple_topics(test_settings):
 
     # ensure that the pre-fill process is finished successfully
     while True:
-        response = requests.get(
-            f"{test_settings.provisioning_api_base_url}{subscriptions_api_prefix}/subscriptions/{name}",
-            auth=(name, PASSWORD),
-        )
+        response = requests.get(f"{test_settings.subscriptions_url}/{name}", auth=(name, PASSWORD))
         assert response.status_code == 200
         prefill_queue_status = response.json()["prefill_queue_status"]
         if prefill_queue_status == FillQueueStatus.failed:
@@ -176,8 +162,7 @@ async def test_prefill_with_multiple_topics(test_settings):
     topics = []
     while True:
         response = requests.get(
-            f"{test_settings.provisioning_api_base_url}{messages_api_prefix}/subscriptions/{name}/messages?pop=true",
-            auth=(name, PASSWORD),
+            f"{test_settings.subscriptions_messages_url(name)}/next?pop=true", auth=(name, PASSWORD)
         )
         assert response.status_code == 200
 

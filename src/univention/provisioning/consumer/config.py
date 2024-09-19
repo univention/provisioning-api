@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+from functools import cached_property
 from typing import Literal
+from urllib.parse import urljoin
 
 from pydantic import conint
 from pydantic_settings import BaseSettings
@@ -15,13 +17,16 @@ class ProvisioningConsumerClientSettings(BaseSettings):
     provisioning_api_password: str
     log_level: Loglevel = "INFO"
 
-    @property
-    def consumer_registration_url(self) -> str:
-        return f"{self.provisioning_api_base_url}/subscriptions/v1"
+    @cached_property
+    def subscriptions_url(self) -> str:
+        return urljoin(self.provisioning_api_base_url, "/v1/subscriptions")
 
-    @property
-    def consumer_messages_url(self) -> str:
-        return f"{self.provisioning_api_base_url}/messages/v1"
+    def subscriptions_messages_url(self, name: str) -> str:
+        return f"{self.subscriptions_url}/{name}/messages"
+
+    @cached_property
+    def messages_url(self) -> str:
+        return urljoin(self.provisioning_api_base_url, "/v1/messages")
 
 
 class MessageHandlerSettings(BaseSettings):

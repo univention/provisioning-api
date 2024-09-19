@@ -22,7 +22,7 @@ class PrefillPort:
         self.settings = settings or get_prefill_settings()
         self.mq_adapter = NatsMQAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
-            self.settings.internal_api_url, self.settings.prefill_username, self.settings.prefill_password
+            self.settings.provisioning_api_url, self.settings.prefill_username, self.settings.prefill_password
         )
         self._udm_adapter = UDMAdapter(self.settings.udm_url, self.settings.udm_username, self.settings.udm_password)
 

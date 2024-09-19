@@ -59,10 +59,10 @@ line-length = 120
 extend-select = ["I"]  # activate isort
 
 [tool.ruff.lint.isort]
-known-first-party = ["provisioning_listener", "server", "univention"]
-known-local-folder = ["tests"]
+known-first-party = ["provisioning_listener", "server", "tests", "univention"]
 
 [tool.pytest.ini_options]
+markers = ["provisioning_lib: marks tests that test the provisioning client library",]
 asyncio_mode = "auto"
 log_cli = 0  # activate on the CLI with: "-o log_cli=true"
 log_cli_level = "DEBUG"

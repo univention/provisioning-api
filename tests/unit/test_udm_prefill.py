@@ -15,7 +15,7 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import Body
 
-from tests.conftest import (
+from ..mock_data import (
     GROUPS_TOPIC,
     MQMESSAGE_PREFILL,
     MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
@@ -23,7 +23,7 @@ from tests.conftest import (
     SUBSCRIPTION_NAME,
     USERS_TOPIC,
 )
-from tests.unit import EscapeLoopException
+from ..unit import EscapeLoopException
 
 
 @pytest.fixture

@@ -4,6 +4,7 @@
 import json
 import uuid
 from typing import Any, AsyncGenerator, Callable, Coroutine, List, NamedTuple, Tuple
+from urllib.parse import urljoin
 
 import msgpack
 import nats
@@ -14,7 +15,7 @@ from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
 
-from ..conftest import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
+from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 
 
 class E2ETestSettings(NamedTuple):
@@ -37,6 +38,17 @@ class E2ETestSettings(NamedTuple):
     udm_rest_api_base_url: str
     udm_rest_api_username: str
     udm_rest_api_password: str
+
+    @property
+    def subscriptions_url(self) -> str:
+        return urljoin(self.provisioning_api_base_url, "/v1/subscriptions")
+
+    def subscriptions_messages_url(self, name: str) -> str:
+        return f"{self.subscriptions_url}/{name}/messages"
+
+    @property
+    def messages_url(self) -> str:
+        return urljoin(self.provisioning_api_base_url, "/v1/messages")
 
 
 def pytest_addoption(parser):

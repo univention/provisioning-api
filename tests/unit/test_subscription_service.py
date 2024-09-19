@@ -11,7 +11,7 @@ from server.services.subscriptions import SubscriptionService
 from univention.provisioning.models import FillQueueStatus, NewSubscription
 from univention.provisioning.models.subscription import Bucket, Subscription
 
-from tests.conftest import (
+from ..mock_data import (
     CONSUMER_HASHED_PASSWORD,
     GROUPS_REALMS_TOPICS,
     GROUPS_TOPIC,

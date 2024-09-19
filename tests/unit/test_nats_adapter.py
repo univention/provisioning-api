@@ -11,7 +11,7 @@ from nats.js.errors import BucketNotFoundError, NotFoundError
 from server.adapters.nats_adapter import NatsKeys
 from univention.provisioning.models import Bucket
 
-from tests.conftest import (
+from ..mock_data import (
     CREDENTIALS,
     FLAT_MESSAGE_ENCODED,
     MESSAGE,
@@ -21,11 +21,9 @@ from tests.conftest import (
     PROVISIONING_MESSAGE,
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
-    FakeKvStore,
-    MockNatsKVAdapter,
-    MockNatsMQAdapter,
     kv_sub_info,
 )
+from ..mocks import FakeKvStore, MockNatsKVAdapter, MockNatsMQAdapter
 
 
 @pytest.fixture

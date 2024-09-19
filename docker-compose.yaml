@@ -77,7 +77,7 @@ services:
       NATS_PORT: "4222"
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
-      INTERNAL_API_HOST: "events-and-consumer-api"
+      PROVISIONING_API_HOST: "events-and-consumer-api"
     depends_on:
       - "nats3"
       - "events-and-consumer-api"
@@ -100,7 +100,7 @@ services:
       # LDAP_PUBLISHER_NAME: "ldif-producer"
       LDAP_PUBLISHER_NAME: "udm-listener"
 
-      INTERNAL_API_HOST: "events-and-consumer-api"
+      PROVISIONING_API_HOST: "events-and-consumer-api"
       EVENTS_USERNAME_UDM: "udm"
       EVENTS_PASSWORD_UDM: "udmpass"
 
@@ -127,7 +127,7 @@ services:
       LOG_LEVEL: "DEBUG"
       NATS_HOST: "nats2"
       NATS_PORT: "4222"
-      INTERNAL_API_HOST: "events-and-consumer-api"
+      PROVISIONING_API_HOST: "events-and-consumer-api"
       NATS_USER: "prefill"
       NATS_PASSWORD: "prefillpass"
       UDM_HOST: "udm-rest-api"

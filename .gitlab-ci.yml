@@ -195,7 +195,7 @@ test_provisioning_lib:
     - pip install poetry=="$POETRY_VERSION"
     - poetry config --local virtualenvs.create false
     - poetry install --with dev
-    - python3 -m pytest -lvv tests/unit/provisioning_lib --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv -m provisioning_lib --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:

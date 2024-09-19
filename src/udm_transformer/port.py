@@ -25,7 +25,7 @@ class UDMTransformerPort:
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
-            self.settings.internal_api_url, self.settings.events_username_udm, self.settings.events_password_udm
+            self.settings.provisioning_api_url, self.settings.events_username_udm, self.settings.events_password_udm
         )
 
     @staticmethod

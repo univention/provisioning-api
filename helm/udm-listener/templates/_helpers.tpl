@@ -73,7 +73,7 @@ cn=admin,dc=univention-organization,dc=intranet
 {{- if .Values.global.nubusDeployment -}}
 {{- include "nubusTemplates.provisioningApi.connection.host" . -}}
 {{- else -}}
-{{ required ".Values.config.internalApiHost must be defined." .Values.config.internalApiHost}}
+{{ required ".Values.config.provisioningApiHost must be defined." .Values.config.provisioningApiHost}}
 {{- end -}}
 {{- end -}}
 
@@ -81,7 +81,7 @@ cn=admin,dc=univention-organization,dc=intranet
 {{- if .Values.global.nubusDeployment -}}
 {{- include "nubusTemplates.provisioningApi.connection.port" . -}}
 {{- else -}}
-{{ required ".Values.config.internalApiPort must be defined." .Values.config.internalApiPort}}
+{{ required ".Values.config.provisioningApiPort must be defined." .Values.config.provisioningApiPort}}
 {{- end -}}
 {{- end -}}
 

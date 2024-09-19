@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings
@@ -50,5 +51,5 @@ class AppSettings(BaseSettings):
 
 
 @lru_cache(maxsize=1)
-def get_app_settings() -> AppSettings:
+def app_settings() -> AppSettings:
     return AppSettings()

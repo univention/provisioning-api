@@ -9,7 +9,7 @@ import pytest
 from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models import Message
 
-from tests.conftest import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
+from ..mock_data import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
 
 
 @pytest.fixture
@@ -18,6 +18,7 @@ def async_client() -> AsyncMock:
 
 
 @pytest.mark.anyio
+@pytest.mark.provisioning_lib
 class TestMessageHandler:
     @staticmethod
     async def callback(result: list, message: Message):

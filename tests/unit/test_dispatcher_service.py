@@ -8,13 +8,13 @@ import pytest
 from server.core.dispatcher.service.dispatcher import DispatcherService
 from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
 
-from tests.conftest import (
+from ..mock_data import (
     MESSAGE,
     MQMESSAGE,
     SUBSCRIPTION_INFO,
     SUBSCRIPTIONS,
 )
-from tests.unit import EscapeLoopException
+from ..unit import EscapeLoopException
 
 
 @pytest.fixture

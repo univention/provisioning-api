@@ -11,19 +11,8 @@ from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService
 from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
 
-from tests.conftest import (
-    FLAT_MESSAGE_ENCODED,
-    MSG,
-    SUBSCRIPTION_NAME,
-    SUBSCRIPTIONS,
-    MockNatsKVAdapter,
-    MockNatsMQAdapter,
-)
-
-
-@pytest.fixture(scope="session")
-def anyio_backend():
-    return "asyncio"
+from ..mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
+from ..mocks import MockNatsKVAdapter, MockNatsMQAdapter
 
 
 @pytest.fixture

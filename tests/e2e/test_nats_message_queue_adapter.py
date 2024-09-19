@@ -8,7 +8,7 @@ from nats.js.errors import BadRequestError, ServerError
 
 from server.adapters.nats_adapter import NatsKeys, NatsMQAdapter
 
-from tests.e2e.conftest import E2ETestSettings
+from .conftest import E2ETestSettings
 
 
 @pytest.fixture

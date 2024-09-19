@@ -7,7 +7,7 @@ from univention.provisioning.models import (
     MessageProcessingStatusReport,
 )
 
-from tests.e2e.helpers import create_message_via_events_api
+from .helpers import create_message_via_events_api
 
 
 async def test_get_multiple_messages(

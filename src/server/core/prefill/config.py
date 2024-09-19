@@ -38,10 +38,10 @@ class PrefillSettings(BaseSettings):
     # Maximum number of reconnect attempts to the NATS server
     max_reconnect_attempts: conint(ge=0) = 5
 
-    # Internal REST API: host
-    internal_api_host: str = "localhost"
-    # Internal REST API: port
-    internal_api_port: int = 7777
+    # Provisioning REST API: host
+    provisioning_api_host: str = "localhost"
+    # Provisioning REST API: port
+    provisioning_api_port: int = 7777
 
     @property
     def nats_server(self) -> str:
@@ -52,8 +52,8 @@ class PrefillSettings(BaseSettings):
         return f"http://{self.udm_host}:{self.udm_port}/udm"
 
     @property
-    def internal_api_url(self) -> str:
-        return f"http://{self.internal_api_host}:{self.internal_api_port}/internal/v1"
+    def provisioning_api_url(self) -> str:
+        return f"http://{self.provisioning_api_host}:{self.provisioning_api_port}"
 
 
 @lru_cache(maxsize=1)

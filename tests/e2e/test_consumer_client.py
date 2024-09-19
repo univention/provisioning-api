@@ -7,8 +7,8 @@ import pytest
 from univention.admin.rest.client import UDM, UnprocessableEntity
 from univention.provisioning.consumer import ProvisioningConsumerClient
 
-from tests.e2e.conftest import E2ETestSettings
-from tests.e2e.helpers import (
+from .conftest import E2ETestSettings
+from .helpers import (
     create_extended_attribute_via_udm_rest_api,
     create_message_via_events_api,
     create_user_via_udm_rest_api,

@@ -12,9 +12,7 @@ class InternalAPIAdapter:
     """
 
     def __init__(self, url: str, username: str, password: str):
-        self.base_url = url
-        if not self.base_url.endswith("/"):
-            self.base_url += "/"
+        self.base_url = url.rstrip("/")
 
         self.auth = aiohttp.BasicAuth(username, password)
         self.headers = [("accept", "application/json")]
@@ -30,10 +28,10 @@ class InternalAPIAdapter:
 
     async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
         async with self._session.patch(
-            f"{self.base_url}subscriptions/{name}?prefill_queue_status={queue_status.value}"
+            f"{self.base_url}/v1/subscriptions/{name}/prefill?prefill_queue_status={queue_status.value}"
         ):
             pass
 
     async def send_event(self, message: Message):
-        async with self._session.post(f"{self.base_url}events", json=message.model_dump()):
+        async with self._session.post(f"{self.base_url}/v1/messages", json=message.model_dump()):
             pass

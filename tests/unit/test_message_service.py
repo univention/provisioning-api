@@ -13,7 +13,7 @@ from univention.provisioning.models import (
     FillQueueStatus,
 )
 
-from tests.conftest import MESSAGE, REPORT, SUBSCRIPTION_NAME
+from ..mock_data import MESSAGE, REPORT, SUBSCRIPTION_NAME
 
 
 @pytest.fixture

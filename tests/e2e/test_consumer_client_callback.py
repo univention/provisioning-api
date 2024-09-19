@@ -6,7 +6,7 @@ import pytest
 from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models import Message
 
-from tests.e2e.helpers import create_message_via_events_api
+from .helpers import create_message_via_events_api
 
 
 async def test_no_callback_function_provided(provisioning_client: ProvisioningConsumerClient, dummy_subscription: str):

@@ -62,18 +62,13 @@ class ProvisioningConsumerClient:
         )
 
         logger.debug(subscription.model_dump())
-        return await self.session.post(
-            f"{self.settings.provisioning_api_base_url}/internal/admin/v1/subscriptions",
-            json=subscription.model_dump(),
-        )
+        return await self.session.post(self.settings.subscriptions_url, json=subscription.model_dump())
 
     async def cancel_subscription(self, name: str):
-        return await self.session.delete(
-            f"{self.settings.consumer_registration_url}/subscriptions/{name}",
-        )
+        return await self.session.delete(f"{self.settings.subscriptions_url}/{name}")
 
     async def get_subscription(self, name: str) -> Subscription:
-        response = await self.session.get(f"{self.settings.consumer_registration_url}/subscriptions/{name}")
+        response = await self.session.get(f"{self.settings.subscriptions_url}/{name}")
         data = await response.json()
         return Subscription.model_validate(data)
 
@@ -89,22 +84,19 @@ class ProvisioningConsumerClient:
         }
         params = {k: v for k, v in _params.items() if v is not None}
 
-        response = await self.session.get(
-            f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages",
-            params=params,
-        )
+        response = await self.session.get(f"{self.settings.subscriptions_messages_url(name)}/next", params=params)
         msg = await response.json()
         return ProvisioningMessage.model_validate(msg) if msg else msg
 
     async def set_message_status(self, name: str, report: MessageProcessingStatusReport):
-        return await self.session.post(
-            f"{self.settings.consumer_messages_url}/subscriptions/{name}/messages-status",
+        return await self.session.patch(
+            f"{self.settings.subscriptions_messages_url(name)}/{report.message_seq_num}/status",
             json=report.model_dump(),
         )
 
     # TODO: move this method to the AdminClient
     async def get_subscriptions(self) -> List[Subscription]:
-        response = await self.session.get(f"{self.settings.consumer_registration_url}/subscriptions")
+        response = await self.session.get(self.settings.subscriptions_url)
         data = await response.json()
         # TODO: parse a list of subscriptions instead
         return [Subscription.model_validate(data)]
@@ -113,10 +105,7 @@ class ProvisioningConsumerClient:
     async def submit_message(self, realm: str, topic: str, body: Dict[str, Any], name: str):
         message = Event(realm=realm, topic=topic, body=body)
 
-        return await self.session.post(
-            f"{self.settings.consumer_registration_url}/messages",
-            json=message.model_dump(),
-        )
+        return await self.session.post(self.settings.messages_url, json=message.model_dump())
 
 
 class MessageHandler:

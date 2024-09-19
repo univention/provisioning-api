@@ -15,8 +15,8 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import Body
 
-from tests.conftest import DUMMY_TOPIC, REALM, USERS_TOPIC
-from tests.e2e.conftest import E2ETestSettings
+from ..mock_data import DUMMY_TOPIC, REALM, USERS_TOPIC
+from .conftest import E2ETestSettings
 
 
 def create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
@@ -29,7 +29,7 @@ def create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
         "body": body,
     }
     response = requests.post(
-        f"{test_settings.provisioning_api_base_url}/internal/v1/events",
+        test_settings.messages_url,
         json=payload,
         auth=(
             test_settings.provisioning_events_username,

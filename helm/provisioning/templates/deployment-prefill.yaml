@@ -90,7 +90,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
-          command: [ "bash", "-c", "set -euo pipefail; until curl -s http://${INTERNAL_API_HOST}:${INTERNAL_API_PORT}/internal/admin/v1/subscriptions > /dev/null || [ $? -ne 0 ]; do echo Waiting for api; sleep 2; done;" ]
+          command: [ "bash", "-c", "set -euo pipefail; until curl -s http://${PROVISIONING_API_HOST}:${PROVISIONING_API_PORT}/v1/subscriptions > /dev/null || [ $? -ne 0 ]; do echo Waiting for api; sleep 2; done;" ]
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}

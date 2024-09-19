@@ -12,9 +12,9 @@ from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models.api import MessageProcessingStatus, MessageProcessingStatusReport
 from univention.provisioning.models.subscription import FillQueueStatus
 
-from tests.conftest import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
-from tests.e2e.conftest import E2ETestSettings
-from tests.e2e.helpers import create_message_via_events_api, create_user_via_udm_rest_api
+from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
+from .conftest import E2ETestSettings
+from .helpers import create_message_via_events_api, create_user_via_udm_rest_api
 
 EXPECTED_AVG_DELAY = 50
 EXPECTED_MAX_DELAY = 150
