@@ -37,10 +37,8 @@ REALMS_TOPICS_STR = f"{REALM}:{GROUPS_TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
 
-REPORT = MessageProcessingStatusReport(
-    status=MessageProcessingStatus.ok,
-    message_seq_num=1,
-)
+REPORT = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
+REPORT_SEQ_ID = 1
 
 CONSUMER_PASSWORD = "password"
 CONSUMER_HASHED_PASSWORD = "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"

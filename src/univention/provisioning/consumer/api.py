@@ -88,9 +88,9 @@ class ProvisioningConsumerClient:
         msg = await response.json()
         return ProvisioningMessage.model_validate(msg) if msg else msg
 
-    async def set_message_status(self, name: str, report: MessageProcessingStatusReport):
+    async def set_message_status(self, name: str, seq_num: int, report: MessageProcessingStatusReport):
         return await self.session.patch(
-            f"{self.settings.subscriptions_messages_url(name)}/{report.message_seq_num}/status",
+            f"{self.settings.subscriptions_messages_url(name)}/{seq_num}/status",
             json=report.model_dump(),
         )
 
@@ -143,11 +143,8 @@ class MessageHandler:
     async def acknowledge_message(self, message_seq_num: int) -> bool:
         logger.debug("Acknowledging message with sequence number: %r", message_seq_num)
         try:
-            report = MessageProcessingStatusReport(
-                status=MessageProcessingStatus.ok,
-                message_seq_num=message_seq_num,
-            )
-            await self.client.set_message_status(self.subscription_name, report)
+            report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
+            await self.client.set_message_status(self.subscription_name, message_seq_num, report)
             return True
         except (
             aiohttp.ClientError,

@@ -20,7 +20,7 @@ class NewSubscription(BaseModel):
 
 class Event(BaseModel):
     """
-    A message as it arrives on the API.
+    A message as it arrives at the API.
     """
 
     realm: str = Field(description="The realm of the message, e.g. `udm`.")
@@ -31,7 +31,7 @@ class Event(BaseModel):
 
 
 class MessageProcessingStatus(str, enum.Enum):
-    # Message was processed successfully.
+    # The message was processed successfully.
     ok = "ok"
 
 
@@ -39,4 +39,3 @@ class MessageProcessingStatusReport(BaseModel):
     """A subscriber reporting whether a message was processed."""
 
     status: MessageProcessingStatus = Field(description="Whether the message was processed by the subscriber.")
-    message_seq_num: int = Field(description="A sequence number representing the processed message.")

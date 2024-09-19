@@ -19,6 +19,7 @@ from ..mock_data import (
     REALM_TOPIC,
     REALMS_TOPICS_STR,
     REPORT,
+    REPORT_SEQ_ID,
     SUBSCRIPTION_NAME,
 )
 
@@ -120,7 +121,7 @@ class TestSubscriptionsRoute:
 
     async def test_update_messages_status(self, client: httpx.AsyncClient):
         response = await client.patch(
-            f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}/messages/{REPORT.message_seq_num}/status",
+            f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}/messages/{REPORT_SEQ_ID}/status",
             json=REPORT.model_dump(),
             auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )

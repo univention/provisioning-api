@@ -24,11 +24,8 @@ async def test_get_multiple_messages(
             timeout=5,
         )
         assert message.body == body
-        report = MessageProcessingStatusReport(
-            status=MessageProcessingStatus.ok,
-            message_seq_num=message.sequence_number,
-        )
-        await provisioning_client.set_message_status(dummy_subscription, report)
+        report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
+        await provisioning_client.set_message_status(dummy_subscription, message.sequence_number, report)
 
 
 async def test_acknowledge_messages(
@@ -45,11 +42,8 @@ async def test_acknowledge_messages(
 
     assert message.body == body
 
-    report = MessageProcessingStatusReport(
-        status=MessageProcessingStatus.ok,
-        message_seq_num=message.sequence_number,
-    )
-    await provisioning_client.set_message_status(dummy_subscription, report)
+    report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
+    await provisioning_client.set_message_status(dummy_subscription, message.sequence_number, report)
 
     response2 = await provisioning_client.get_subscription_message(
         name=dummy_subscription,

@@ -101,11 +101,8 @@ async def pop_all_messages(
         )
         if message is None:
             continue
-        report = MessageProcessingStatusReport(
-            status=MessageProcessingStatus.ok,
-            message_seq_num=message.sequence_number,
-        )
-        await provisioning_client.set_message_status(subscription_name, report)
+        report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
+        await provisioning_client.set_message_status(subscription_name, message.sequence_number, report)
         result.append(message)
 
     return result

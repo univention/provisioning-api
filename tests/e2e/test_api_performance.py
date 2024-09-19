@@ -103,7 +103,8 @@ async def test_simple_message_timing(
         tic = time.perf_counter()
         await provisioning_client.set_message_status(
             subscription,
-            MessageProcessingStatusReport(status=MessageProcessingStatus.ok, message_seq_num=response.sequence_number),
+            response.sequence_number,
+            MessageProcessingStatusReport(status=MessageProcessingStatus.ok),
         )
         status_durations.append((time.perf_counter() - tic) * 1000)
 
@@ -155,7 +156,8 @@ async def test_udm_message_timing(
         tic = time.perf_counter()
         await provisioning_client.set_message_status(
             subscription,
-            MessageProcessingStatusReport(status=MessageProcessingStatus.ok, message_seq_num=response.sequence_number),
+            response.sequence_number,
+            MessageProcessingStatusReport(status=MessageProcessingStatus.ok),
         )
         status_durations.append((time.perf_counter() - tic) * 1000)
 

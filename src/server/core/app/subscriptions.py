@@ -6,7 +6,7 @@ import time
 from typing import Annotated, Optional
 
 import fastapi
-from fastapi import Depends, HTTPException, Response, status
+from fastapi import Depends, HTTPException, Response
 
 from server.services.messages import MessageService
 from server.services.port import PortDependency
@@ -72,7 +72,7 @@ async def create_subscription(subscription: NewSubscription, port: PortDependenc
     sub_service = SubscriptionService(port)
 
     if not await sub_service.register_subscription(subscription):
-        response.status_code = status.HTTP_200_OK
+        response.status_code = fastapi.status.HTTP_200_OK
         return
 
     if subscription.request_prefill:
@@ -135,7 +135,7 @@ async def update_message_status(
     msg_service = MessageService(port)
 
     try:
-        await msg_service.post_message_status(name, report)
+        await msg_service.post_message_status(name, seq_num, report)
     except ValueError as err:
         logger.debug("Failed to post message status: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))

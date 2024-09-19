@@ -13,7 +13,7 @@ from univention.provisioning.models import (
     FillQueueStatus,
 )
 
-from ..mock_data import MESSAGE, REPORT, SUBSCRIPTION_NAME
+from ..mock_data import MESSAGE, REPORT, REPORT_SEQ_ID, SUBSCRIPTION_NAME
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ class TestMessageService:
     async def test_post_message_status(self, message_service: MessageService):
         message_service._port.delete_message = AsyncMock()
 
-        result = await message_service.post_message_status(SUBSCRIPTION_NAME, REPORT)
+        result = await message_service.post_message_status(SUBSCRIPTION_NAME, REPORT_SEQ_ID, REPORT)
 
         message_service._port.delete_message.assert_called_once_with(SUBSCRIPTION_NAME, 1)
         assert result is None
