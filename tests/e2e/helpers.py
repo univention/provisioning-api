@@ -10,7 +10,6 @@ from univention.admin.rest.client import UDM
 from univention.provisioning.consumer import ProvisioningConsumerClient
 from univention.provisioning.models import (
     MessageProcessingStatus,
-    MessageProcessingStatusReport,
     PublisherName,
 )
 from univention.provisioning.models.queue import Body
@@ -31,10 +30,7 @@ def create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
     response = requests.post(
         test_settings.messages_url,
         json=payload,
-        auth=(
-            test_settings.provisioning_events_username,
-            test_settings.provisioning_events_password,
-        ),
+        auth=(test_settings.provisioning_events_username, test_settings.provisioning_events_password),
     )
 
     print(response.json())
@@ -95,14 +91,12 @@ async def pop_all_messages(
 ):
     result = []
     for _ in range(loop_number):
-        message = await provisioning_client.get_subscription_message(
-            name=subscription_name,
-            timeout=1,
-        )
+        message = await provisioning_client.get_subscription_message(name=subscription_name, timeout=1)
         if message is None:
             continue
-        report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
-        await provisioning_client.set_message_status(subscription_name, message.sequence_number, report)
+        await provisioning_client.set_message_status(
+            subscription_name, message.sequence_number, MessageProcessingStatus.ok
+        )
         result.append(message)
 
     return result

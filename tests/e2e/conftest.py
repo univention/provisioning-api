@@ -3,7 +3,7 @@
 
 import json
 import uuid
-from typing import Any, AsyncGenerator, Callable, Coroutine, List, NamedTuple, Tuple
+from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple
 from urllib.parse import urljoin
 
 import msgpack
@@ -14,6 +14,7 @@ from nats.js.errors import NotFoundError
 
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
+from univention.provisioning.models import RealmTopic
 
 from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 
@@ -154,10 +155,8 @@ async def create_subscription(
     subscriber_name,
     subscriber_password,
     provisioning_admin_client: ProvisioningConsumerClient,
-) -> Callable[[List[Tuple[str, str]]], AsyncGenerator[dict[str, Any], Any]]:
-    async def _create_subscription(
-        realms_topics: List[Tuple[str, str]],
-    ) -> AsyncGenerator[dict[str, Any], Any]:
+) -> Callable[[list[RealmTopic]], AsyncGenerator[dict[str, Any], Any]]:
+    async def _create_subscription(realms_topics: list[RealmTopic]) -> AsyncGenerator[dict[str, Any], Any]:
         await provisioning_admin_client.create_subscription(
             name=subscriber_name,
             password=subscriber_password,

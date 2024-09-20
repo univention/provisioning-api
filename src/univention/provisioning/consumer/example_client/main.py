@@ -18,7 +18,7 @@ from univention.provisioning.consumer import (
     ProvisioningConsumerClient,
     ProvisioningConsumerClientSettings,
 )
-from univention.provisioning.models import ProvisioningMessage
+from univention.provisioning.models import ProvisioningMessage, RealmTopic
 
 LOG_FORMAT = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 
@@ -149,14 +149,15 @@ async def main(settings: ProvisioningConsumerClientSettings) -> None:
             provisioning_api_password=arguments.admin_password,
             provisioning_api_base_url=settings.provisioning_api_base_url,
         )
-        realms_topics = [tuple(realm_topic.split(":")) for realm_topic in arguments.realm_topic]
+        realms_topics_args = [realm_topic.split(":") for realm_topic in arguments.realm_topic]
+        assert all(len(x) == 2 for x in realms_topics_args), "'realm_topic' argument must contain exactly one colon."
         prefill = arguments.prefill
         async with ProvisioningConsumerClient(admin_settings) as admin_client:
             try:
                 await admin_client.create_subscription(
                     settings.provisioning_api_username,
                     settings.provisioning_api_password,
-                    realms_topics,
+                    [RealmTopic(realm=realm, topic=topic) for realm, topic in realms_topics_args],
                     prefill,
                 )
             except ClientResponseError as e:

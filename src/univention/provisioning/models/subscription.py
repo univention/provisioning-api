@@ -20,6 +20,12 @@ class FillQueueStatus(str, enum.Enum):
     done = "done"
 
 
+class FillQueueStatusReport(BaseModel):
+    """Update a subscription's prefill queue status."""
+
+    status: FillQueueStatus = Field(description="State of the prefill process.")
+
+
 class Subscription(BaseModel):
     """A registered subscription."""
 

@@ -2,15 +2,15 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-from typing import Any, AsyncGenerator, Callable, Coroutine, Literal
+from typing import Any, AsyncGenerator, Callable, Coroutine
 
 import pytest
 
 from server.adapters.nats_adapter import NatsKeys
 from univention.admin.rest.client import UDM, time
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
-from univention.provisioning.models.api import MessageProcessingStatus, MessageProcessingStatusReport
-from univention.provisioning.models.subscription import FillQueueStatus
+from univention.provisioning.models import FillQueueStatus, RealmTopic
+from univention.provisioning.models.api import MessageProcessingStatus
 
 from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 from .conftest import E2ETestSettings
@@ -28,7 +28,7 @@ def print_stats(durations: list[float]) -> None:
 
 
 @pytest.fixture
-def realms_topics(request) -> Literal:
+def realms_topics(request) -> list[RealmTopic]:
     return getattr(request, "param", DUMMY_REALMS_TOPICS)
 
 
@@ -91,9 +91,7 @@ async def test_simple_message_timing(
     print("Starting the test run")
     for i in range(test_number):
         tic = time.perf_counter()
-        response = await provisioning_client.get_subscription_message(
-            name=subscription,
-        )
+        response = await provisioning_client.get_subscription_message(name=subscription)
         get_durations.append((time.perf_counter() - tic) * 1000)
 
         assert response.body == messages[i]
@@ -102,9 +100,7 @@ async def test_simple_message_timing(
 
         tic = time.perf_counter()
         await provisioning_client.set_message_status(
-            subscription,
-            response.sequence_number,
-            MessageProcessingStatusReport(status=MessageProcessingStatus.ok),
+            subscription, response.sequence_number, status=MessageProcessingStatus.ok
         )
         status_durations.append((time.perf_counter() - tic) * 1000)
 
@@ -124,6 +120,7 @@ async def test_simple_message_timing(
 async def test_udm_message_timing(
     provisioning_client: ProvisioningConsumerClient,
     subscription: str,
+    realms_topics: list[RealmTopic],
     udm: UDM,
     purge_stream: Callable[[str], Coroutine[Any, Any, None]],
 ):
@@ -145,20 +142,14 @@ async def test_udm_message_timing(
     print("Starting the test run")
     for i in range(test_number):
         tic = time.perf_counter()
-        response = await provisioning_client.get_subscription_message(
-            name=subscription,
-        )
+        response = await provisioning_client.get_subscription_message(name=subscription)
         assert response.body.new["dn"] == messages[i].dn
         responses.append(response)
         get_durations.append((time.perf_counter() - tic) * 1000)
         print(f"request time was {get_durations[-1]:.2f}")
 
         tic = time.perf_counter()
-        await provisioning_client.set_message_status(
-            subscription,
-            response.sequence_number,
-            MessageProcessingStatusReport(status=MessageProcessingStatus.ok),
-        )
+        await provisioning_client.set_message_status(subscription, response.sequence_number, MessageProcessingStatus.ok)
         status_durations.append((time.perf_counter() - tic) * 1000)
 
     print("get_subscription_message statistics")

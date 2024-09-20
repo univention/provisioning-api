@@ -5,7 +5,7 @@ import asyncio
 import inspect
 import logging
 import time
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
+from typing import Any, Callable, Coroutine, Optional
 
 import aiohttp
 from jsondiff import diff
@@ -14,9 +14,9 @@ from univention.provisioning.models import (
     Event,
     Message,
     MessageProcessingStatus,
-    MessageProcessingStatusReport,
     NewSubscription,
     ProvisioningMessage,
+    RealmTopic,
     Subscription,
 )
 
@@ -29,10 +29,7 @@ logger = logging.getLogger(__name__)
 class ProvisioningConsumerClient:
     def __init__(self, settings: Optional[ProvisioningConsumerClientSettings] = None, concurrency_limit: int = 10):
         self.settings = settings or ProvisioningConsumerClientSettings()
-        auth = aiohttp.BasicAuth(
-            self.settings.provisioning_api_username,
-            self.settings.provisioning_api_password,
-        )
+        auth = aiohttp.BasicAuth(self.settings.provisioning_api_username, self.settings.provisioning_api_password)
         connector = aiohttp.TCPConnector(limit=concurrency_limit)
         self.session = aiohttp.ClientSession(auth=auth, connector=connector, raise_for_status=True)
 
@@ -50,10 +47,10 @@ class ProvisioningConsumerClient:
         self,
         name: str,
         password: str,
-        realms_topics: List[Tuple[str, str]],
+        realms_topics: list[RealmTopic],
         request_prefill: bool = False,
     ):
-        logger.info("creating subscription for %s", str(realms_topics))
+        logger.info("Creating subscription for %r", realms_topics)
         subscription = NewSubscription(
             name=name,
             realms_topics=realms_topics,
@@ -77,34 +74,29 @@ class ProvisioningConsumerClient:
         name: str,
         timeout: Optional[float] = None,
         pop: Optional[bool] = None,
-    ) -> ProvisioningMessage:
-        _params = {
-            "timeout": timeout,
-            "pop": pop,
-        }
+    ) -> Optional[ProvisioningMessage]:
+        _params = {"timeout": timeout, "pop": pop}
         params = {k: v for k, v in _params.items() if v is not None}
 
         response = await self.session.get(f"{self.settings.subscriptions_messages_url(name)}/next", params=params)
         msg = await response.json()
         return ProvisioningMessage.model_validate(msg) if msg else msg
 
-    async def set_message_status(self, name: str, seq_num: int, report: MessageProcessingStatusReport):
+    async def set_message_status(self, name: str, seq_num: int, status: MessageProcessingStatus):
         return await self.session.patch(
-            f"{self.settings.subscriptions_messages_url(name)}/{seq_num}/status",
-            json=report.model_dump(),
+            f"{self.settings.subscriptions_messages_url(name)}/{seq_num}/status", json={"status": status.value}
         )
 
     # TODO: move this method to the AdminClient
-    async def get_subscriptions(self) -> List[Subscription]:
+    async def get_subscriptions(self) -> list[Subscription]:
         response = await self.session.get(self.settings.subscriptions_url)
         data = await response.json()
         # TODO: parse a list of subscriptions instead
         return [Subscription.model_validate(data)]
 
     # FIXME: What is the purpose of this method? It looks like it wants to publish_event via Event API
-    async def submit_message(self, realm: str, topic: str, body: Dict[str, Any], name: str):
+    async def submit_message(self, realm: str, topic: str, body: dict[str, Any], name: str):
         message = Event(realm=realm, topic=topic, body=body)
-
         return await self.session.post(self.settings.messages_url, json=message.model_dump())
 
 
@@ -112,7 +104,7 @@ class MessageHandler:
     def __init__(
         self,
         client: ProvisioningConsumerClient,
-        callbacks: List[Callable[[Message], Coroutine[None, None, None]]],
+        callbacks: list[Callable[[Message], Coroutine[None, None, None]]],
         settings: Optional[MessageHandlerSettings] = None,
         pop_after_handling: bool = True,
         message_limit: Optional[int] = None,
@@ -143,8 +135,7 @@ class MessageHandler:
     async def acknowledge_message(self, message_seq_num: int) -> bool:
         logger.debug("Acknowledging message with sequence number: %r", message_seq_num)
         try:
-            report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
-            await self.client.set_message_status(self.subscription_name, message_seq_num, report)
+            await self.client.set_message_status(self.subscription_name, message_seq_num, MessageProcessingStatus.ok)
             return True
         except (
             aiohttp.ClientError,

@@ -14,7 +14,6 @@ from univention.provisioning.models import (
     FillQueueStatus,
     Message,
     MessageProcessingStatus,
-    MessageProcessingStatusReport,
     NewSubscription,
     PrefillMessage,
     ProvisioningMessage,
@@ -99,8 +98,8 @@ class MessageService:
         prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription)
         return await self._port.get_message(subscription, prefill_subject, timeout, pop)
 
-    async def post_message_status(self, subscription_name: str, seq_num: int, report: MessageProcessingStatusReport):
-        if report.status == MessageProcessingStatus.ok:
+    async def post_message_status(self, subscription_name: str, seq_num: int, status: MessageProcessingStatus):
+        if status == MessageProcessingStatus.ok:
             await self._port.delete_message(subscription_name, seq_num)
 
     async def add_live_event(self, event: Message):

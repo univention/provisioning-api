@@ -13,13 +13,13 @@ from univention.provisioning.models.subscription import FillQueueStatus
 from ..mock_data import (
     CONSUMER_PASSWORD,
     FLAT_BODY,
+    GROUPS_REALMS_TOPICS,
     GROUPS_TOPIC,
+    MESSAGE_PROCESSING_SEQ_ID,
+    MESSAGE_PROCESSING_STATUS,
     PUBLISHER_NAME,
     REALM,
-    REALM_TOPIC,
     REALMS_TOPICS_STR,
-    REPORT,
-    REPORT_SEQ_ID,
     SUBSCRIPTION_NAME,
 )
 
@@ -35,7 +35,7 @@ class TestSubscriptionsRoute:
             self.subscriptions_url,
             json={
                 "name": name,
-                "realms_topics": [["foo", "bar"]],
+                "realms_topics": [{"realm": "foo", "topic": "bar"}],
                 "request_prefill": False,
                 "password": "password",
             },
@@ -48,7 +48,7 @@ class TestSubscriptionsRoute:
             self.subscriptions_url,
             json={
                 "name": SUBSCRIPTION_NAME,
-                "realms_topics": [REALM_TOPIC],
+                "realms_topics": [t.model_dump() for t in GROUPS_REALMS_TOPICS],
                 "request_prefill": True,
                 "password": "password",
             },
@@ -61,7 +61,7 @@ class TestSubscriptionsRoute:
             self.subscriptions_url,
             json={
                 "name": SUBSCRIPTION_NAME,
-                "realms_topics": [["foo", "bar"]],
+                "realms_topics": [{"realm": "foo", "topic": "bar"}],
                 "request_prefill": False,
                 "password": "password",
             },
@@ -121,8 +121,8 @@ class TestSubscriptionsRoute:
 
     async def test_update_messages_status(self, client: httpx.AsyncClient):
         response = await client.patch(
-            f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}/messages/{REPORT_SEQ_ID}/status",
-            json=REPORT.model_dump(),
+            f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}/messages/{MESSAGE_PROCESSING_SEQ_ID}/status",
+            json={"status": MESSAGE_PROCESSING_STATUS.value},
             auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200

@@ -70,7 +70,7 @@ class SubscriptionService:
         if not valid:
             return False
 
-        new_realms_topics = [REALM_TOPIC_TEMPLATE.format(realm=r, topic=t) for r, t in new_sub.realms_topics]
+        new_realms_topics = [REALM_TOPIC_TEMPLATE.format(realm=r.realm, topic=r.topic) for r in new_sub.realms_topics]
         if new_realms_topics != existing_sub.realms_topics:
             return False
 
@@ -101,7 +101,7 @@ class SubscriptionService:
         else:
             prefill_queue_status = FillQueueStatus.done
 
-        realms_topics_str = [REALM_TOPIC_TEMPLATE.format(realm=r, topic=t) for r, t in new_sub.realms_topics]
+        realms_topics_str = [REALM_TOPIC_TEMPLATE.format(realm=r.realm, topic=r.topic) for r in new_sub.realms_topics]
         sub_info = Subscription(
             name=new_sub.name,
             realms_topics=realms_topics_str,
@@ -120,9 +120,9 @@ class SubscriptionService:
         )
         await self._port.ensure_consumer(new_sub.name)
 
-    async def update_realm_topic_subscriptions(self, realms_topics: List[str], name: str):
-        for realm_topic in realms_topics:
-            realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic}"
+    async def update_realm_topic_subscriptions(self, realms_topics_strs: List[str], name: str):
+        for realm_topic_str in realms_topics_strs:
+            realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"
             subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
             subs.append(name)
             await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
@@ -172,8 +172,8 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscription was not found.")
 
-        for realm_topic in sub_info.realms_topics:
-            await self.delete_sub_from_realm_topic(realm_topic, name)
+        for realm_topic_str in sub_info.realms_topics:
+            await self.delete_sub_from_realm_topic(realm_topic_str, name)
 
         await self._port.delete_kv_pair(name, Bucket.credentials)
         await self.delete_sub_info(name)

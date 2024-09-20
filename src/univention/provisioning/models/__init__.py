@@ -6,6 +6,7 @@ from .api import (  # noqa: F401
     MessageProcessingStatus,
     MessageProcessingStatusReport,
     NewSubscription,
+    RealmTopic,
 )
 from .queue import (  # noqa: F401
     DISPATCHER_STREAM,
@@ -26,5 +27,6 @@ from .subscription import (  # noqa: F401
     REALM_TOPIC_PREFIX,
     Bucket,
     FillQueueStatus,
+    FillQueueStatusReport,
     Subscription,
 )

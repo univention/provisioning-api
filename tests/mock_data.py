@@ -12,11 +12,11 @@ from nats.js.kv import KeyValue
 from univention.provisioning.models import (
     Message,
     MessageProcessingStatus,
-    MessageProcessingStatusReport,
     MQMessage,
     PrefillMessage,
     ProvisioningMessage,
     PublisherName,
+    RealmTopic,
 )
 from univention.provisioning.models.queue import Body
 
@@ -29,16 +29,15 @@ DUMMY_TOPIC = "tests/topic"
 BODY = Body(old={"old": "Old", "dn": "uid=foo,dc=bar"}, new={"new": "New", "dn": "uid=foo,dc=bar"})
 FLAT_BODY = {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}
 PUBLISHER_NAME = PublisherName.ldif_producer
-REALM_TOPIC = [REALM, GROUPS_TOPIC]
-GROUPS_REALMS_TOPICS = [(REALM, GROUPS_TOPIC)]
-USERS_REALMS_TOPICS = [(REALM, USERS_TOPIC)]
-DUMMY_REALMS_TOPICS = [(REALM, DUMMY_TOPIC)]
+GROUPS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=GROUPS_TOPIC)]
+USERS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=USERS_TOPIC)]
+DUMMY_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=DUMMY_TOPIC)]
 REALMS_TOPICS_STR = f"{REALM}:{GROUPS_TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
 
-REPORT = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
-REPORT_SEQ_ID = 1
+MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
+MESSAGE_PROCESSING_SEQ_ID = 1
 
 CONSUMER_PASSWORD = "password"
 CONSUMER_HASHED_PASSWORD = "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"
@@ -87,8 +86,8 @@ FLAT_PREFILL_MESSAGE["realms_topics"] = GROUPS_REALMS_TOPICS
 
 FLAT_PREFILL_MESSAGE_MULTIPLE_TOPICS = deepcopy(FLAT_PREFILL_MESSAGE)
 FLAT_PREFILL_MESSAGE_MULTIPLE_TOPICS["realms_topics"] = [
-    (REALM, GROUPS_TOPIC),
-    (REALM, USERS_TOPIC),
+    RealmTopic(realm=REALM, topic=GROUPS_TOPIC),
+    RealmTopic(realm=REALM, topic=USERS_TOPIC),
 ]
 
 MSG = Msg(
@@ -105,10 +104,14 @@ MSG = Msg(
         domain=None,
     ),
 )
+_FLAT_PREFILL_MESSAGE_dumpable = deepcopy(FLAT_PREFILL_MESSAGE)
+_FLAT_PREFILL_MESSAGE_dumpable["realms_topics"] = [
+    r.model_dump() for r in _FLAT_PREFILL_MESSAGE_dumpable["realms_topics"]
+]
 MSG_PREFILL = Msg(
     _client="nats",
     reply=REPLY,
-    data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
+    data=json.dumps(_FLAT_PREFILL_MESSAGE_dumpable).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
         num_pending=0,
@@ -122,7 +125,7 @@ MSG_PREFILL = Msg(
 MSG_PREFILL_REDELIVERED = Msg(
     _client="nats",
     reply=REPLY,
-    data=json.dumps(FLAT_PREFILL_MESSAGE).encode(),
+    data=json.dumps(_FLAT_PREFILL_MESSAGE_dumpable).encode(),
     _metadata=Msg.Metadata(
         sequence=Msg.Metadata.SequencePair(consumer=5, stream=5),
         num_pending=0,

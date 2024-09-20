@@ -3,7 +3,7 @@
 
 import aiohttp
 
-from univention.provisioning.models import FillQueueStatus, Message
+from univention.provisioning.models import FillQueueStatus, FillQueueStatusReport, Message
 
 
 class InternalAPIAdapter:
@@ -28,7 +28,8 @@ class InternalAPIAdapter:
 
     async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
         async with self._session.patch(
-            f"{self.base_url}/v1/subscriptions/{name}/prefill?prefill_queue_status={queue_status.value}"
+            f"{self.base_url}/v1/subscriptions/{name}/prefill",
+            json=FillQueueStatusReport(status=queue_status.value).model_dump(),
         ):
             pass
 

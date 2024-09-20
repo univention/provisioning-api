@@ -112,19 +112,19 @@ class UDMPreFill:
             PREFILL_SUBJECT_TEMPLATE.format(subscription=message.subscription_name),
         )
 
-        for realm, topic in message.realms_topics:
-            if realm != "udm":
+        for realm_topic in message.realms_topics:
+            if realm_topic.realm != "udm":
                 # FIXME: unhandled realm
-                logger.error("Unhandled realm: %r", realm)
+                logger.error("Unhandled realm: %r", realm_topic.realm)
                 continue
 
             logger.info(
                 "Started the prefill for the subscriber %r with the topic %r",
                 message.subscription_name,
-                topic,
+                realm_topic.topic,
             )
             await self._port.update_subscription_queue_status(message.subscription_name, FillQueueStatus.running)
-            await self.fetch_udm(message.subscription_name, topic)
+            await self.fetch_udm(message.subscription_name, realm_topic.topic)
 
     async def fetch_udm(self, subscription_name: str, topic: str):
         """

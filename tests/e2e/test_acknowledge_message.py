@@ -2,10 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from univention.provisioning.consumer import ProvisioningConsumerClient
-from univention.provisioning.models import (
-    MessageProcessingStatus,
-    MessageProcessingStatusReport,
-)
+from univention.provisioning.models import MessageProcessingStatus
 
 from .helpers import create_message_via_events_api
 
@@ -19,13 +16,11 @@ async def test_get_multiple_messages(
     body_2 = create_message_via_events_api(test_settings)
 
     for body in [body_1, body_2]:
-        message = await provisioning_client.get_subscription_message(
-            name=dummy_subscription,
-            timeout=5,
-        )
+        message = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=5)
         assert message.body == body
-        report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
-        await provisioning_client.set_message_status(dummy_subscription, message.sequence_number, report)
+        await provisioning_client.set_message_status(
+            dummy_subscription, message.sequence_number, MessageProcessingStatus.ok
+        )
 
 
 async def test_acknowledge_messages(
@@ -35,23 +30,18 @@ async def test_acknowledge_messages(
 ):
     body = create_message_via_events_api(test_settings)
 
-    message = await provisioning_client.get_subscription_message(
-        name=dummy_subscription,
-        timeout=5,
-    )
+    message = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=5)
 
     assert message.body == body
 
-    report = MessageProcessingStatusReport(status=MessageProcessingStatus.ok)
-    await provisioning_client.set_message_status(dummy_subscription, message.sequence_number, report)
-
-    response2 = await provisioning_client.get_subscription_message(
-        name=dummy_subscription,
-        timeout=35,
+    await provisioning_client.set_message_status(
+        dummy_subscription, message.sequence_number, MessageProcessingStatus.ok
     )
 
+    response2 = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=35)
+
     # Sometimes other messages like the "DC Backup Hosts" group can sneak into the queue
-    # The test is considered successful if the response is empty or if the response is not a redelivery
+    # The test is considered successful if the response is empty, or if the response is not a redelivery
     # of the previous message
     if response2:
         assert response2.body != body

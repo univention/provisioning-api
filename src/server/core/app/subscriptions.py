@@ -12,7 +12,7 @@ from server.services.messages import MessageService
 from server.services.port import PortDependency
 from server.services.subscriptions import SubscriptionService
 from univention.provisioning.models import (
-    FillQueueStatus,
+    FillQueueStatusReport,
     MessageProcessingStatusReport,
     NewSubscription,
     ProvisioningMessage,
@@ -83,15 +83,15 @@ async def create_subscription(subscription: NewSubscription, port: PortDependenc
 @router.patch("/{name}/prefill", status_code=fastapi.status.HTTP_200_OK)
 async def update_subscription_prefill_status(
     name: str,
-    prefill_queue_status: FillQueueStatus,
+    report: FillQueueStatusReport,
     port: PortDependency,
     authentication: Annotated[None, Depends(authenticate_prefill)],
 ):
-    """Update subscription's prefill queue status"""
+    """Update a subscription's prefill queue status"""
 
     service = SubscriptionService(port)
     try:
-        await service.set_subscription_queue_status(name, prefill_queue_status)
+        await service.set_subscription_queue_status(name, report.status)
     except ValueError as err:
         logger.debug("Failed to update subscription queue status: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
@@ -135,7 +135,7 @@ async def update_message_status(
     msg_service = MessageService(port)
 
     try:
-        await msg_service.post_message_status(name, seq_num, report)
+        await msg_service.post_message_status(name, seq_num, report.status)
     except ValueError as err:
         logger.debug("Failed to post message status: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))

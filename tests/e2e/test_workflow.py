@@ -35,14 +35,11 @@ def subscription_name(test_settings: E2ETestSettings):
         test_settings.subscriptions_url,
         json={
             "name": name,
-            "realms_topics": [[REALM, TOPIC]],
+            "realms_topics": [{"realm": REALM, "topic": TOPIC}],
             "request_prefill": False,
             "password": PASSWORD,
         },
-        auth=(
-            test_settings.provisioning_admin_username,
-            test_settings.provisioning_admin_password,
-        ),
+        auth=(test_settings.provisioning_admin_username, test_settings.provisioning_admin_password),
     )
     assert response.status_code == 201, "creating client subscription failed"
 
@@ -50,10 +47,7 @@ def subscription_name(test_settings: E2ETestSettings):
 
     response = requests.delete(
         f"{test_settings.subscriptions_url}/{name}",
-        auth=(
-            test_settings.provisioning_admin_username,
-            test_settings.provisioning_admin_password,
-        ),
+        auth=(test_settings.provisioning_admin_username, test_settings.provisioning_admin_password),
     )
     assert response.status_code == 200, "deleting client subscription failed"
 
@@ -137,14 +131,11 @@ async def test_prefill_with_multiple_topics(test_settings):
         test_settings.subscriptions_url,
         json={
             "name": name,
-            "realms_topics": [[REALM, TOPIC], [REALM, TOPIC_2]],
+            "realms_topics": [{"realm": REALM, "topic": TOPIC}, {"realm": REALM, "topic": TOPIC_2}],
             "request_prefill": True,
             "password": PASSWORD,
         },
-        auth=(
-            test_settings.provisioning_admin_username,
-            test_settings.provisioning_admin_password,
-        ),
+        auth=(test_settings.provisioning_admin_username, test_settings.provisioning_admin_password),
     )
     assert response.status_code == 201
 

@@ -8,7 +8,7 @@ import pytest
 from fastapi import HTTPException
 
 from server.services.subscriptions import SubscriptionService
-from univention.provisioning.models import FillQueueStatus, NewSubscription
+from univention.provisioning.models import FillQueueStatus, NewSubscription, RealmTopic
 from univention.provisioning.models.subscription import Bucket, Subscription
 
 from ..mock_data import (
@@ -77,7 +77,10 @@ class TestSubscriptionService:
         [
             ("request_prefill", False),
             ("password", "wrong_password"),
-            ("realms_topics", [(REALM, GROUPS_TOPIC), (REALM, USERS_TOPIC)]),
+            (
+                "realms_topics",
+                [RealmTopic(realm=REALM, topic=GROUPS_TOPIC), RealmTopic(realm=REALM, topic=USERS_TOPIC)],
+            ),
         ],
     )
     async def test_create_subscription_existing_subscription_different_parameters(
@@ -87,6 +90,7 @@ class TestSubscriptionService:
         sub_service._port.get_str_value = AsyncMock(return_value=CONSUMER_HASHED_PASSWORD)
 
         new_sub = deepcopy(self.new_subscription)
+
         setattr(new_sub, field, value)
         with pytest.raises(HTTPException):
             await sub_service.register_subscription(new_sub)
