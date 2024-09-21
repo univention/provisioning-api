@@ -23,7 +23,7 @@ while [ $response_code -ne 401 ]; do
   fi
 
   echo "Waiting for the Provisioning API to be available ..."
-  response_code=$(curl -s -o response.txt -w "%{http_code}" -X POST "$1")
+  response_code=$(set +x; curl -s -o response.txt -w "%{http_code}" -X POST "$1")
   if [ "${response_code}" -ne 401 ]; then
     echo "Provisioning API is not reachable, status code: $response_code"
     cat response.txt

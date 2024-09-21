@@ -94,9 +94,10 @@ spec:
             - |
               for file in /secrets/*; do
                 filename=$(basename "${file}" .json)
-                response=$(curl -s -o response.txt -w "%{http_code}" -u "${ADMIN_USERNAME}":"${ADMIN_PASSWORD}" \
+                response=$(set +x; curl -s -o response.txt -w "%{http_code}" -u "${ADMIN_USERNAME}":"${ADMIN_PASSWORD}" \
                 -H 'Content-Type: application/json' \
                 -d @"${file}" "${PROVISIONING_API_BASE_URL}")
+
                 if [ "${response}" -eq 201 ]; then
                   echo "Successful registration of the consumer: "${filename}""
                 elif [ "${response}" -eq 200 ]; then
