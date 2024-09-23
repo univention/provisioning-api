@@ -672,9 +672,8 @@ nats:
       replicas: 3
     jetstream:
       enabled: true
-      fileStorage:
-        pvc:
-          size: 1Gi
+    extraConfig:
+      max_payload: "16MB"
     authorization:
       enabled: true
       users:
