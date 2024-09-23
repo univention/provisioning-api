@@ -3,14 +3,14 @@
 
 from typing import List, Optional
 
-from provisioning_listener.config import LdapProducerSettings
+from provisioning_listener.config import LdapProducerSettings, ldap_producer_settings
 from server.adapters.nats_adapter import NatsMQAdapter, messagepack_encoder
 from univention.provisioning.models.queue import Message
 
 
 class LDAPProducerPort:
     def __init__(self, settings: Optional[LdapProducerSettings] = None):
-        self.settings = settings or LdapProducerSettings()
+        self.settings = settings or ldap_producer_settings()
         self.mq_adapter = NatsMQAdapter()
 
     async def __aenter__(self):

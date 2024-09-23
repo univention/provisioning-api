@@ -1,13 +1,16 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings
+
+Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 class DispatcherSettings(BaseSettings):
     # Python log level
-    log_level: str = "INFO"
+    log_level: Loglevel
 
     # Nats user name specific to Dispatcher
     nats_user: str
@@ -18,7 +21,7 @@ class DispatcherSettings(BaseSettings):
     # Nats: port
     nats_port: int
     # Maximum number of reconnect attempts to the NATS server
-    max_reconnect_attempts: int = 5
+    nats_max_reconnect_attempts: int
 
     @property
     def nats_server(self) -> str:
@@ -26,5 +29,5 @@ class DispatcherSettings(BaseSettings):
 
 
 @lru_cache(maxsize=1)
-def get_dispatcher_settings() -> DispatcherSettings:
+def dispatcher_settings() -> DispatcherSettings:
     return DispatcherSettings()

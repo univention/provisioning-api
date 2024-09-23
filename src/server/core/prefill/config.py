@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import conint
 from pydantic_settings import BaseSettings
 
+Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
 
 class PrefillSettings(BaseSettings):
     # Python log level
-    log_level: str = "INFO"
+    log_level: Loglevel
 
     # Nats user name specific to Prefill Daemon
     nats_user: str
@@ -18,6 +21,8 @@ class PrefillSettings(BaseSettings):
     nats_host: str
     # Nats: port
     nats_port: int
+    # Maximum number of reconnect attempts to the NATS server
+    nats_max_reconnect_attempts: conint(ge=0)
 
     # Prefill: username
     prefill_username: str
@@ -28,20 +33,18 @@ class PrefillSettings(BaseSettings):
     max_prefill_attempts: conint(ge=-1)
 
     # UDM REST API: host
-    udm_host: str = "localhost"
+    udm_host: str
     # UDM REST API: port
-    udm_port: int = 9979
+    udm_port: int
     # UDM REST API: username
     udm_username: str
     # UDM REST API: password
     udm_password: str
-    # Maximum number of reconnect attempts to the NATS server
-    max_reconnect_attempts: conint(ge=0) = 5
 
     # Provisioning REST API: host
-    provisioning_api_host: str = "localhost"
+    provisioning_api_host: str
     # Provisioning REST API: port
-    provisioning_api_port: int = 7777
+    provisioning_api_port: int
 
     @property
     def nats_server(self) -> str:
@@ -57,5 +60,5 @@ class PrefillSettings(BaseSettings):
 
 
 @lru_cache(maxsize=1)
-def get_prefill_settings() -> PrefillSettings:
+def prefill_settings() -> PrefillSettings:
     return PrefillSettings()

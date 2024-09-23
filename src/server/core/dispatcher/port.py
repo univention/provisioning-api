@@ -7,12 +7,12 @@ from typing import Dict, Optional
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
 from univention.provisioning.models import Bucket, Message, MQMessage
 
-from .config import DispatcherSettings, get_dispatcher_settings
+from .config import DispatcherSettings, dispatcher_settings
 
 
 class DispatcherPort:
     def __init__(self, settings: Optional[DispatcherSettings] = None):
-        self.settings = settings or get_dispatcher_settings()
+        self.settings = settings or dispatcher_settings()
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
 
@@ -31,7 +31,7 @@ class DispatcherPort:
             server=self.settings.nats_server,
             user=self.settings.nats_user,
             password=self.settings.nats_password,
-            max_reconnect_attempts=self.settings.max_reconnect_attempts,
+            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
         )
         await self.kv_adapter.init(
             server=self.settings.nats_server,

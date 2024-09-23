@@ -109,6 +109,7 @@ metadata:
   {{- end }}
 data:
   LOG_LEVEL: {{ required ".Values.dispatcher.config.LOG_LEVEL is required." .Values.dispatcher.config.LOG_LEVEL | quote  }}
+  NATS_MAX_RECONNECT_ATTEMPTS: {{ required ".Values.dispatcher.config.natsMaxReconnectAttempts is required." .Values.dispatcher.config.natsMaxReconnectAttempts | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
 ...
@@ -128,6 +129,7 @@ metadata:
   {{- end }}
 data:
   MAX_PREFILL_ATTEMPTS: {{ required ".Values.prefill.config.maxPrefillAttempts is required." .Values.prefill.config.maxPrefillAttempts | quote  }}
+  NATS_MAX_RECONNECT_ATTEMPTS: {{ required ".Values.prefill.config.maxReconnectAttempts is required." .Values.prefill.config.natsMaxReconnectAttempts | quote  }}
   LOG_LEVEL: {{ required ".Values.prefill.config.LOG_LEVEL is required." .Values.prefill.config.LOG_LEVEL | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}

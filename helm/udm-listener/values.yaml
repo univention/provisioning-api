@@ -144,6 +144,8 @@ config:
   natsUser: "udmlistener"
   # -- NATS: password
   natsPassword: "udmlistenerpass"
+  # -- NATS: maximum number of reconnect attempts to the NATS server
+  nats_max_reconnect_attempts: "5"
   # -- Provisioning-API Hostname
   provisioningApiHost: "provisioning-api"
   # -- Provisioning-API Port

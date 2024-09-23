@@ -8,14 +8,14 @@ from pydantic_settings import BaseSettings
 
 class AppSettings(BaseSettings):
     # Python log level
-    log_level: str = "INFO"
+    log_level: str
 
-    # FastAPI: debug mode
-    debug: bool = True
+    # FastAPI: debug mode: send traceback in response on errors
+    debug: bool
     # FastAPI: webserver root path
-    root_path: str = ""
+    root_path: str
     # FastAPI: disable CORS checks
-    cors_all: bool = False
+    cors_all: bool
 
     # Admin API: username
     admin_username: str

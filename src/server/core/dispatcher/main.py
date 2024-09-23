@@ -5,7 +5,7 @@ import asyncio
 
 from daemoniker import Daemonizer
 
-from server.core.dispatcher.config import get_dispatcher_settings
+from server.core.dispatcher.config import dispatcher_settings
 from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService
 from server.log import setup_logging
@@ -23,6 +23,6 @@ def main():
 
 
 if __name__ == "__main__":
-    dispatcher_settings = get_dispatcher_settings()
+    dispatcher_settings = dispatcher_settings()
     setup_logging(dispatcher_settings.log_level)
     main()

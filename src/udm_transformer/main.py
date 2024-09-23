@@ -7,7 +7,7 @@ import logging
 from daemoniker import Daemonizer
 
 from server.log import setup_logging
-from udm_transformer.config import get_udm_transformer_settings
+from udm_transformer.config import udm_transformer_settings
 from udm_transformer.controller import UDMTransformerController
 from udm_transformer.port import UDMTransformerPort
 
@@ -28,6 +28,6 @@ if __name__ == "__main__":
     # UDM adds an unwanted handler to the root logger
     root_logger = logging.getLogger()
     root_logger.handlers.clear()
-    udm_transformer_settings = get_udm_transformer_settings()
+    udm_transformer_settings = udm_transformer_settings()
     setup_logging(udm_transformer_settings.log_level)
     asyncio.run(main())

@@ -20,12 +20,17 @@ services:
       ADMIN_NATS_USER: "admin"
       ADMIN_NATS_PASSWORD: "nimda"
       UDM_HOST: "udm-rest-api"
+      UDM_PORT: 9979
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "provisioning"
       PREFILL_USERNAME: "prefill"
       PREFILL_PASSWORD: "prefillpass"
+      MAX_PREFILL_ATTEMPTS: 5
       EVENTS_USERNAME_UDM: "udm"
       EVENTS_PASSWORD_UDM: "udmpass"
+      DEBUG: "false"
+      ROOT_PATH: "/"
+      CORS_ALL: "false"
     depends_on:
       - "nats2"
     ports:
@@ -77,7 +82,9 @@ services:
       NATS_PORT: "4222"
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
+      NATS_MAX_RECONNECT_ATTEMPTS: 2
       PROVISIONING_API_HOST: "events-and-consumer-api"
+      PROVISIONING_API_PORT: 7777
     depends_on:
       - "nats3"
       - "events-and-consumer-api"
@@ -101,6 +108,7 @@ services:
       LDAP_PUBLISHER_NAME: "udm-listener"
 
       PROVISIONING_API_HOST: "events-and-consumer-api"
+      PROVISIONING_API_PORT: 7777
       EVENTS_USERNAME_UDM: "udm"
       EVENTS_PASSWORD_UDM: "udmpass"
 
@@ -128,9 +136,12 @@ services:
       NATS_HOST: "nats2"
       NATS_PORT: "4222"
       PROVISIONING_API_HOST: "events-and-consumer-api"
+      PROVISIONING_API_PORT: 7777
       NATS_USER: "prefill"
       NATS_PASSWORD: "prefillpass"
+      NATS_MAX_RECONNECT_ATTEMPTS: 2
       UDM_HOST: "udm-rest-api"
+      UDM_PORT: 9979
       UDM_USERNAME: "cn=admin"
       UDM_PASSWORD: "univention"
       PREFILL_USERNAME: "prefill"
@@ -178,6 +189,7 @@ services:
       NATS_PORT: "4222"
       NATS_USER: ldif-producer
       NATS_PASSWORD: ldifpass
+      NATS_MAX_RECONNECT_ATTEMPTS: 2
       LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"

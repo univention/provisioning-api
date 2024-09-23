@@ -15,12 +15,12 @@ from server.adapters.nats_adapter import (
 from univention.provisioning.models import Bucket, Message
 from univention.provisioning.models.queue import MQMessage
 
-from .config import UDMTransformerSettings, get_udm_transformer_settings
+from .config import UDMTransformerSettings, udm_transformer_settings
 
 
 class UDMTransformerPort:
     def __init__(self, settings: Optional[UDMTransformerSettings] = None):
-        self.settings = settings or get_udm_transformer_settings()
+        self.settings = settings or udm_transformer_settings()
 
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()

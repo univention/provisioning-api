@@ -20,7 +20,12 @@ from univention.provisioning.models import (
     Subscription,
 )
 
-from .config import MessageHandlerSettings, ProvisioningConsumerClientSettings
+from .config import (
+    MessageHandlerSettings,
+    ProvisioningConsumerClientSettings,
+    message_handler_settings,
+    provisioning_consumer_client_settings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ logger = logging.getLogger(__name__)
 # TODO: the subscription part will be delegated to an admin using an admin API
 class ProvisioningConsumerClient:
     def __init__(self, settings: Optional[ProvisioningConsumerClientSettings] = None, concurrency_limit: int = 10):
-        self.settings = settings or ProvisioningConsumerClientSettings()
+        self.settings = settings or provisioning_consumer_client_settings()
         auth = aiohttp.BasicAuth(self.settings.provisioning_api_username, self.settings.provisioning_api_password)
         connector = aiohttp.TCPConnector(limit=concurrency_limit)
         self.session = aiohttp.ClientSession(auth=auth, connector=connector, raise_for_status=True)
@@ -125,7 +130,7 @@ class MessageHandler:
         """
         if not callbacks:
             raise ValueError("Callback functions can't be empty")
-        self.settings = settings or MessageHandlerSettings()
+        self.settings = settings or message_handler_settings()
         self.client = client
         self.subscription_name = self.client.settings.provisioning_api_username
         self.callbacks = callbacks

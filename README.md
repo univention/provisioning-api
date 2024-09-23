@@ -88,10 +88,20 @@ docker compose up example-client
 
 ## Tests
 
-### Unit or Integration tests
+### Unit tests
 
 ```sh
-poetry run pytest <dir/of/test-subset>
+poetry run pytest tests/unit
+```
+or
+```shell
+python3 -m pytest tests/unit
+```
+
+### Integration tests
+
+```shell
+docker compose run --quiet-pull --rm test /app/.venv/bin/python3 -m pytest tests/integration
 ```
 
 ### E2E tests
@@ -123,7 +133,7 @@ docker compose up --detach --remove-orphans
 optimized command:
 
 ```sh
-docker compose up --pull always --build events-and-consumer-api nats dispatcher prefill udm-listener udm-transformer ldap-notifier udm-rest-api ldap-server
+docker compose up --pull always --build events-and-consumer-api nats1 nats2 nats3 dispatcher prefill udm-listener udm-transformer ldap-notifier udm-rest-api ldap-server
 ```
 
 Wait for up to 1 minute for the default LDAP changes to be processed by the dispatcher.

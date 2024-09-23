@@ -23,6 +23,7 @@ ENV_DEFAULTS = {
     "nats_port": "1234",
     "nats_user": "api",
     "nats_password": "apipass",
+    "nats_max_reconnect_attempts": "2",
     "admin_nats_user": "admin",
     "admin_nats_password": "nimda",
     "provisioning_api_base_url": "http://localhost:7777",
@@ -35,6 +36,9 @@ ENV_DEFAULTS = {
     "events_password_udm": "udmpass",
     "log_level": "DEBUG",
     "max_acknowledgement_retries": "3",
+    "debug": "false",
+    "root_path": "/",
+    "cors_all": "false",
 }
 
 

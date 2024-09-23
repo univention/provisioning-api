@@ -5,7 +5,7 @@ import asyncio
 
 from daemoniker import Daemonizer
 
-from server.core.prefill.config import get_prefill_settings
+from server.core.prefill.config import prefill_settings
 from server.core.prefill.port import PrefillPort
 from server.core.prefill.service.udm_prefill import UDMPreFill
 from server.log import setup_logging
@@ -23,6 +23,6 @@ def main():
 
 
 if __name__ == "__main__":
-    prefill_settings = get_prefill_settings()
+    prefill_settings = prefill_settings()
     setup_logging(prefill_settings.log_level)
     main()

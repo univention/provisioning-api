@@ -548,8 +548,8 @@ api:
     # Python log level
     LOG_LEVEL: "INFO"
     ## api
-    # FastAPI: debug mode
-    DEBUG: "true"
+    # FastAPI: debug mode: send traceback in response on errors
+    DEBUG: "false"
     # FastAPI: webserver root path
     ROOT_PATH: "/"
     # FastAPI: disable CORS checks
@@ -570,6 +570,7 @@ dispatcher:
   config:
     # Python log level
     LOG_LEVEL: "INFO"
+    natsMaxReconnectAttempts: 5
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
@@ -622,6 +623,7 @@ prefill:
   credentialSecretName: ""
   config:
     maxPrefillAttempts: 5
+    natsMaxReconnectAttempts: 5
     # Python log level
     LOG_LEVEL: "INFO"
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api

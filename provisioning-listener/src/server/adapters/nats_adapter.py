@@ -34,8 +34,6 @@ from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 class Empty(Exception): ...
 
 
-MAX_RECONNECT_ATTEMPTS = 5
-
 logger = logging.getLogger(__name__)
 
 

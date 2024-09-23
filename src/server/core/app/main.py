@@ -4,7 +4,6 @@
 
 import logging
 from importlib.metadata import version
-from urllib.parse import urljoin
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id

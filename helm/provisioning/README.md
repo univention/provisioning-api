@@ -25,7 +25,7 @@ A Helm Chart that deploys the provisioning services
 | api.additionalAnnotations | object | `{}` |  |
 | api.additionalLabels | object | `{}` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
-| api.config.DEBUG | string | `"true"` |  |
+| api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
 | api.config.ROOT_PATH | string | `"/"` |  |
 | api.credentialSecretName | string | `""` |  |
@@ -45,6 +45,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.additionalAnnotations | object | `{}` |  |
 | dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
+| dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `""` |  |
@@ -137,6 +138,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_HOST | string | `""` |  |
 | prefill.config.UDM_PORT | int | `9979` |  |
 | prefill.config.maxPrefillAttempts | int | `5` |  |
+| prefill.config.natsMaxReconnectAttempts | int | `5` |  |
 | prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `""` |  |

@@ -1,15 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings
 
 from univention.provisioning.models.queue import PublisherName
 
+Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
 
 class UDMTransformerSettings(BaseSettings):
     # Python log level
-    log_level: str = "INFO"
+    log_level: Loglevel
 
     # Nats user name specific to UdmProducerSettings
     nats_user: str
@@ -41,9 +44,9 @@ class UDMTransformerSettings(BaseSettings):
     ldap_bind_pw: str
 
     # Provisioning REST API: host
-    provisioning_api_host: str = "localhost"
+    provisioning_api_host: str
     # Provisioning REST API: port
-    provisioning_api_port: int = 7777
+    provisioning_api_port: int
 
     @property
     def nats_server(self) -> str:
@@ -59,5 +62,5 @@ class UDMTransformerSettings(BaseSettings):
 
 
 @lru_cache(maxsize=1)
-def get_udm_transformer_settings() -> UDMTransformerSettings:
+def udm_transformer_settings() -> UDMTransformerSettings:
     return UDMTransformerSettings()

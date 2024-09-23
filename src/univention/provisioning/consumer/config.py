@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from functools import cached_property
+from functools import cached_property, lru_cache
 from typing import Literal
 from urllib.parse import urljoin
 
@@ -15,7 +15,7 @@ class ProvisioningConsumerClientSettings(BaseSettings):
     provisioning_api_base_url: str
     provisioning_api_username: str
     provisioning_api_password: str
-    log_level: Loglevel = "INFO"
+    log_level: Loglevel
 
     @cached_property
     def subscriptions_url(self) -> str:
@@ -31,3 +31,13 @@ class ProvisioningConsumerClientSettings(BaseSettings):
 
 class MessageHandlerSettings(BaseSettings):
     max_acknowledgement_retries: conint(ge=0, le=10)
+
+
+@lru_cache(maxsize=1)
+def provisioning_consumer_client_settings() -> ProvisioningConsumerClientSettings:
+    return ProvisioningConsumerClientSettings()
+
+
+@lru_cache(maxsize=1)
+def message_handler_settings() -> MessageHandlerSettings:
+    return MessageHandlerSettings()

@@ -8,7 +8,7 @@ from typing import Annotated, List, Optional, Union
 from fastapi import Depends
 
 from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
-from server.core.app.config import AppSettings
+from server.core.app.config import AppSettings, app_settings
 from univention.provisioning.models import (
     Bucket,
     Message,
@@ -19,7 +19,7 @@ from univention.provisioning.models import (
 
 class Port:
     def __init__(self, settings: Optional[AppSettings] = None):
-        self.settings = settings or AppSettings()
+        self.settings = settings or app_settings()
         self.mq_adapter = NatsMQAdapter()
         self.kv_adapter = NatsKVAdapter()
 

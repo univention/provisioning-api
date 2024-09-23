@@ -14,12 +14,12 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import BaseMessage
 
-from .config import PrefillSettings, get_prefill_settings
+from .config import PrefillSettings, prefill_settings
 
 
 class PrefillPort:
     def __init__(self, settings: Optional[PrefillSettings] = None):
-        self.settings = settings or get_prefill_settings()
+        self.settings = settings or prefill_settings()
         self.mq_adapter = NatsMQAdapter()
         self._internal_api_adapter = InternalAPIAdapter(
             self.settings.provisioning_api_url, self.settings.prefill_username, self.settings.prefill_password
@@ -35,7 +35,7 @@ class PrefillPort:
             server=port.settings.nats_server,
             user=port.settings.nats_user,
             password=port.settings.nats_password,
-            max_reconnect_attempts=port.settings.max_reconnect_attempts,
+            max_reconnect_attempts=port.settings.nats_max_reconnect_attempts,
         )
         await port._internal_api_adapter.connect()
 
