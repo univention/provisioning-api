@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.2...v0.40.3) (2024-09-23)
+
+
+### Bug Fixes
+
+* Don't leak secrets in bash scripts ([7178582](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/71785823232a914019a8460c35a44d4dcda333cd))
+
 ## [0.40.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.1...v0.40.2) (2024-09-23)
 
 
