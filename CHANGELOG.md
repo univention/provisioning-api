@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.3...v0.40.4) (2024-09-23)
+
+
+### Bug Fixes
+
+* OpenAPI schema paths ([211eb4f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/211eb4f4d60859882f8586562cd8c0946d94c1fc))
+
 ## [0.40.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.2...v0.40.3) (2024-09-23)
 
 
