@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.1...v0.40.2) (2024-09-23)
+
+
+### Bug Fixes
+
+* **provisioning-nats:** Increase the maximum nats messages size to 16MB ([7396f0a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7396f0afdcfcb88e0312000e760e744e968887c8))
+
 ## [0.40.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.0...v0.40.1) (2024-09-19)
 
 
