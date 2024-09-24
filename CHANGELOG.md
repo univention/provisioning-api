@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.41.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.4...v0.41.0) (2024-09-24)
+
+
+### Features
+
+* change subscription and messages API, simplify project structure. rename settings ([5297c4a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5297c4a338b307d8beb3afc9233148a9b77f5240))
+* convert realm_topic parameter from list to object ([8e58585](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8e58585f4665573c922e080dd9fcf58baf29d9ff))
+* remove message_seq_num from PATCH payload, as it's already in the path ([d79911f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d79911f1d0719b8afc80a51f4eb5b8574700386c))
+
+
+### Bug Fixes
+
+* remove config defaults from code, config name consistency ([62f8e7a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/62f8e7ac123b2fd400d3fbfe78aded3c134f2a9c))
+
 ## [0.40.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.3...v0.40.4) (2024-09-23)
 
 
