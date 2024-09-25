@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.42.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.41.0...v0.42.0) (2024-09-25)
+
+
+### Features
+
+* make subscriptions format consistent in REST API and persistence ([7314aac](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7314aac61a50772f08824ffb3d0aa33c390f5a1e))
+
+
+### Bug Fixes
+
+* increase wait for api timeout ([7ce1d5b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7ce1d5bfbeb420e09ed4002e8172b1caa102d7da))
+
 ## [0.41.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.40.4...v0.41.0) (2024-09-24)
 
 
