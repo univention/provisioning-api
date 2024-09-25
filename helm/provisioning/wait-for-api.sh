@@ -13,7 +13,7 @@ set -uxo pipefail
 
 retry_interval=2
 response_code=404
-timeout_duration=120
+timeout_duration=240
 end_time=$((SECONDS + timeout_duration))
 
 while [ $response_code -ne 401 ]; do
