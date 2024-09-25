@@ -3,7 +3,7 @@
 
 import json
 import uuid
-from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple
+from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple, Optional
 from urllib.parse import urljoin
 
 import msgpack
@@ -195,6 +195,28 @@ def maildomain(udm):
     yield name
     maildomain.delete()
     print(f"Deleted mail domain {maildomain!r}.")
+
+
+@pytest.fixture(scope="session")
+def create_user_via_udm_rest_api(udm: UDM, maildomain: str):
+    users_user = udm.get("users/user")
+
+    def create_user(extended_attributes: Optional[dict] = None):
+        username = str(uuid.uuid1())
+        base_properties = {
+            "username": username,
+            "firstname": "John",
+            "lastname": "Doe",
+            "password": "duianbqudvleqvxqfch234x",
+            "pwdChangeNextLogin": True,
+            "mailPrimaryAddress": f"{username}@{maildomain}",
+        }
+        user = users_user.new()
+        user.properties.update({**base_properties, **(extended_attributes or {})})
+        user.save()
+        return user
+
+    return create_user
 
 
 @pytest.fixture()

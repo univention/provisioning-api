@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import uuid
-from typing import Optional
 
 import requests
 
@@ -14,7 +13,7 @@ from univention.provisioning.models import (
 )
 from univention.provisioning.models.queue import Body
 
-from ..mock_data import DUMMY_TOPIC, REALM, USERS_TOPIC
+from ..mock_data import DUMMY_TOPIC, REALM
 from .conftest import E2ETestSettings
 
 
@@ -39,28 +38,8 @@ def create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
     return Body.model_validate(body)
 
 
-def create_udm_obj(udm: UDM, object_type: str, properties: dict, position: Optional[str] = None):
-    objs = udm.get(object_type)
-    assert objs
-    obj = objs.new(position=position)
-    obj.properties.update(properties)
-    obj.save()
-    return obj
-
-
-def create_user_via_udm_rest_api(udm: UDM, extended_attributes: Optional[dict] = None):
-    base_properties = {
-        "username": str(uuid.uuid1()),
-        "firstname": "John",
-        "lastname": "Doe",
-        "password": "password",
-        "pwdChangeNextLogin": True,
-    }
-    properties = {**base_properties, **(extended_attributes or {})}
-    return create_udm_obj(udm, USERS_TOPIC, properties)
-
-
 def create_extended_attribute_via_udm_rest_api(udm: UDM):
+    settings_exdended_attributes = udm.get("settings/extended_attribute")
     properties = {
         "name": "UniventionPasswordSelfServiceEmail",
         "CLIName": "PasswordRecoveryEmail",
@@ -80,8 +59,10 @@ def create_extended_attribute_via_udm_rest_api(udm: UDM):
         "overwriteTab": False,
         "fullWidth": True,
     }
-    position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
-    return create_udm_obj(udm, "settings/extended_attribute", properties, position)
+    extended_attribute = settings_exdended_attributes.new()
+    extended_attribute.properties.update(properties)
+    extended_attribute.save()
+    return extended_attribute
 
 
 async def pop_all_messages(

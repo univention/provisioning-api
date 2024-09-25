@@ -2,19 +2,19 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
+import time
 from typing import Any, AsyncGenerator, Callable, Coroutine
 
 import pytest
 
 from server.adapters.nats_adapter import NatsKeys
-from univention.admin.rest.client import UDM, time
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models import FillQueueStatus, RealmTopic
 from univention.provisioning.models.api import MessageProcessingStatus
 
 from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 from .conftest import E2ETestSettings
-from .helpers import create_message_via_events_api, create_user_via_udm_rest_api
+from .helpers import create_message_via_events_api
 
 EXPECTED_AVG_DELAY = 50
 EXPECTED_MAX_DELAY = 150
@@ -120,9 +120,8 @@ async def test_simple_message_timing(
 async def test_udm_message_timing(
     provisioning_client: ProvisioningConsumerClient,
     subscription: str,
-    realms_topics: list[RealmTopic],
-    udm: UDM,
     purge_stream: Callable[[str], Coroutine[Any, Any, None]],
+    create_user_via_udm_rest_api,
 ):
     test_number = 10
     get_durations = []
@@ -135,7 +134,7 @@ async def test_udm_message_timing(
 
     print("Adding udm messages to the incoming queue")
     for _ in range(test_number):
-        messages.append(create_user_via_udm_rest_api(udm))  # noqa: F841
+        messages.append(create_user_via_udm_rest_api())  # noqa: F841
 
     await asyncio.sleep(1)
 
