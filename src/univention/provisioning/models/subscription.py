@@ -26,18 +26,42 @@ class FillQueueStatusReport(BaseModel):
     status: FillQueueStatus = Field(description="State of the prefill process.")
 
 
-class Subscription(BaseModel):
-    """A registered subscription."""
+class RealmTopic(BaseModel):
+    """A message's realm and topic."""
+
+    realm: str = Field(description="The realm of the message, e.g. `udm`.")
+    topic: str = Field(description="The topic of the message, e.g. `users/user`.")
+
+
+class BaseSubscription(BaseModel):
+    """Common subscription fields."""
 
     name: str = Field(description="The identifier of the subscription.")
-
-    realms_topics: List[str] = Field(
-        description="A list of `realm:topic` that this subscription subscribes to, e.g. `udm:users/user`."
+    realms_topics: List[RealmTopic] = Field(
+        description="A list of realm-topic combinations that this subscriber subscribes to, "
+        'e.g. [{"realm": "udm", "topic": "users/user"}].'
     )
-
     request_prefill: bool = Field(description="Whether pre-filling of the queue was requested.")
 
+    def __eq__(self, other: "BaseSubscription") -> bool:
+        if not super().__eq__(other):
+            return False
+        if self.name != other.name or self.realms_topics != other.realms_topics:
+            return False
+        if len(self.realms_topics) != len(other.realms_topics):
+            return False
+        return all(realm_topic in other.realms_topics for realm_topic in self.realms_topics)
+
+
+class Subscription(BaseSubscription):
+    """A registered subscription."""
+
     prefill_queue_status: FillQueueStatus = Field(description="Pre-filling the queue: status.")
+
+    def __eq__(self, other: "Subscription") -> bool:
+        if not super().__eq__(other):
+            return False
+        return self.prefill_queue_status == other.prefill_queue_status
 
 
 class Bucket(str, enum.Enum):

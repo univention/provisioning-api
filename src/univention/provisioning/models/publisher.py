@@ -5,7 +5,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from .api import RealmTopic
+from .subscription import RealmTopic
 
 
 class Publisher(BaseModel):

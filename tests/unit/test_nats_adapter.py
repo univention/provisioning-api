@@ -19,8 +19,8 @@ from ..mock_data import (
     MSG,
     NATS_SERVER,
     PROVISIONING_MESSAGE,
-    SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
+    SUBSCRIPTION_INFO_dumpable,
     kv_sub_info,
 )
 from ..mocks import FakeKvStore, MockNatsKVAdapter, MockNatsMQAdapter
@@ -100,7 +100,7 @@ class TestNatsKVAdapter:
 
         mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
         mock_kv.get.assert_called_once_with(SUBSCRIPTION_NAME)
-        assert result == json.dumps(SUBSCRIPTION_INFO)
+        assert result == json.dumps(SUBSCRIPTION_INFO_dumpable)
 
     async def test_get_value_by_unknown_key(self, mock_nats_kv_adapter, mock_kv):
         result = await mock_nats_kv_adapter.get_value("unknown", Bucket.subscriptions)
@@ -110,7 +110,9 @@ class TestNatsKVAdapter:
         assert result is None
 
     async def test_put_value(self, mock_nats_kv_adapter, mock_kv):
-        result = await mock_nats_kv_adapter.put_value(SUBSCRIPTION_NAME, SUBSCRIPTION_INFO, Bucket.subscriptions)
+        result = await mock_nats_kv_adapter.put_value(
+            SUBSCRIPTION_NAME, SUBSCRIPTION_INFO_dumpable, Bucket.subscriptions
+        )
 
         mock_nats_kv_adapter._js.key_value.assert_called_once_with(Bucket.subscriptions)
         mock_kv.delete.delete.assert_not_called()

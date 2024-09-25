@@ -8,7 +8,7 @@ from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from typing_extensions import Literal
 
-from .api import RealmTopic
+from .subscription import RealmTopic
 
 PREFILL_SUBJECT_TEMPLATE = "{subscription}.prefill"
 PREFILL_STREAM = "prefill"

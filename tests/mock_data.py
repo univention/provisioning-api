@@ -30,6 +30,7 @@ BODY = Body(old={"old": "Old", "dn": "uid=foo,dc=bar"}, new={"new": "New", "dn":
 FLAT_BODY = {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}
 PUBLISHER_NAME = PublisherName.ldif_producer
 GROUPS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=GROUPS_TOPIC)]
+GROUPS_REALMS_TOPICS_as_dicts = [r.model_dump() for r in GROUPS_REALMS_TOPICS]
 USERS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=USERS_TOPIC)]
 DUMMY_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=DUMMY_TOPIC)]
 REALMS_TOPICS_STR = f"{REALM}:{GROUPS_TOPIC}"
@@ -44,10 +45,12 @@ CONSUMER_HASHED_PASSWORD = "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzEN
 
 SUBSCRIPTION_INFO = {
     "name": SUBSCRIPTION_NAME,
-    "realms_topics": [REALMS_TOPICS_STR],
+    "realms_topics": GROUPS_REALMS_TOPICS,
     "request_prefill": True,
     "prefill_queue_status": "done",
 }
+SUBSCRIPTION_INFO_dumpable = deepcopy(SUBSCRIPTION_INFO)
+SUBSCRIPTION_INFO_dumpable["realms_topics"] = [r.model_dump() for r in SUBSCRIPTION_INFO_dumpable["realms_topics"]]
 MESSAGE = Message(
     publisher_name=PUBLISHER_NAME,
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
@@ -174,7 +177,9 @@ BASE_KV_OBJ = KeyValue.Entry(
 kv_sub_info = copy(BASE_KV_OBJ)
 kv_sub_info.key = SUBSCRIPTION_NAME
 kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", "realms_topics": ["udm:groups/group"], "request_prefill": true, '
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", '
+    b'"realms_topics": [{"realm": "udm", "topic": "groups/group"}], '
+    b'"request_prefill": true, '
     b'"prefill_queue_status": "done"}'
 )
 

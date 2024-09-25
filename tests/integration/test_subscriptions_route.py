@@ -19,8 +19,8 @@ from ..mock_data import (
     MESSAGE_PROCESSING_STATUS,
     PUBLISHER_NAME,
     REALM,
-    REALMS_TOPICS_STR,
     SUBSCRIPTION_NAME,
+    GROUPS_REALMS_TOPICS_as_dicts,
 )
 
 
@@ -76,10 +76,10 @@ class TestSubscriptionsRoute:
         assert response.status_code == 200
         data = response.json()
         assert data[0]["name"] == SUBSCRIPTION_NAME
-        assert data[0]["request_prefill"]
+        assert data[0]["request_prefill"] is True
         assert data[0]["prefill_queue_status"] == FillQueueStatus.done
-        assert len(data[0]["realms_topics"]) == len([REALMS_TOPICS_STR])
-        assert all((realm_topic in data[0]["realms_topics"] for realm_topic in [REALMS_TOPICS_STR]))
+        assert len(data[0]["realms_topics"]) == len(GROUPS_REALMS_TOPICS)
+        assert all(realm_topic in data[0]["realms_topics"] for realm_topic in GROUPS_REALMS_TOPICS_as_dicts)
 
     async def test_get_subscription(self, client: httpx.AsyncClient):
         response = await client.get(
@@ -88,10 +88,10 @@ class TestSubscriptionsRoute:
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == SUBSCRIPTION_NAME
-        assert data["request_prefill"]
+        assert data["request_prefill"] is True
         assert data["prefill_queue_status"] == FillQueueStatus.done
-        assert len(data["realms_topics"]) == len([REALMS_TOPICS_STR])
-        assert all((realm_topic in data["realms_topics"] for realm_topic in [REALMS_TOPICS_STR]))
+        assert len(data["realms_topics"]) == len(GROUPS_REALMS_TOPICS)
+        assert all(realm_topic in data["realms_topics"] for realm_topic in GROUPS_REALMS_TOPICS_as_dicts)
 
     async def test_delete_subscription(self, client: httpx.AsyncClient):
         response = await client.delete(

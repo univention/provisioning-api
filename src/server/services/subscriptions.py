@@ -16,6 +16,7 @@ from univention.provisioning.models import (
     Bucket,
     FillQueueStatus,
     NewSubscription,
+    RealmTopic,
     Subscription,
 )
 
@@ -65,13 +66,12 @@ class SubscriptionService:
         if existing_sub.request_prefill != new_sub.request_prefill:
             return False
 
+        if new_sub.realms_topics != existing_sub.realms_topics:
+            return False
+
         hashed_password = await self._port.get_str_value(new_sub.name, Bucket.credentials)
         valid = password_context.verify(new_sub.password, hashed_password)
         if not valid:
-            return False
-
-        new_realms_topics = [REALM_TOPIC_TEMPLATE.format(realm=r.realm, topic=r.topic) for r in new_sub.realms_topics]
-        if new_realms_topics != existing_sub.realms_topics:
             return False
 
         return True
@@ -101,10 +101,9 @@ class SubscriptionService:
         else:
             prefill_queue_status = FillQueueStatus.done
 
-        realms_topics_str = [REALM_TOPIC_TEMPLATE.format(realm=r.realm, topic=r.topic) for r in new_sub.realms_topics]
         sub_info = Subscription(
             name=new_sub.name,
-            realms_topics=realms_topics_str,
+            realms_topics=new_sub.realms_topics,
             request_prefill=new_sub.request_prefill,
             prefill_queue_status=prefill_queue_status,
         )
@@ -120,9 +119,9 @@ class SubscriptionService:
         )
         await self._port.ensure_consumer(new_sub.name)
 
-    async def update_realm_topic_subscriptions(self, realms_topics_strs: List[str], name: str):
-        for realm_topic_str in realms_topics_strs:
-            realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"
+    async def update_realm_topic_subscriptions(self, realms_topics: List[RealmTopic], name: str):
+        for realm_topic in realms_topics:
+            realm_topic_key = self._realm_topic_key(realm_topic)
             subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
             subs.append(name)
             await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
@@ -172,17 +171,17 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscription was not found.")
 
-        for realm_topic_str in sub_info.realms_topics:
-            await self.delete_sub_from_realm_topic(realm_topic_str, name)
+        for realm_topic in sub_info.realms_topics:
+            await self.delete_sub_from_realm_topic(realm_topic, name)
 
         await self._port.delete_kv_pair(name, Bucket.credentials)
         await self.delete_sub_info(name)
         await self._port.delete_stream(name)
         await self._port.delete_consumer(name)
 
-    async def delete_sub_from_realm_topic(self, realm_topic_str: str, name: str):
-        logger.debug("Deleting subscription %r from %r", name, realm_topic_str)
-        realm_topic_key = f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"
+    async def delete_sub_from_realm_topic(self, realm_topic: RealmTopic, name: str):
+        logger.debug("Deleting subscription %r from %r", name, realm_topic)
+        realm_topic_key = self._realm_topic_key(realm_topic)
         subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
         if not subs:
             raise ValueError("There are no subscriptions")
@@ -222,3 +221,8 @@ class SubscriptionService:
             cache_key = verify_and_update_password.cache_key(*cached_func_args)
             verify_and_update_password.cache.pop(cache_key, None)
             self.handle_authentication_error("Incorrect username or password")
+
+    @staticmethod
+    def _realm_topic_key(realm_topic: RealmTopic) -> str:
+        realm_topic_str = REALM_TOPIC_TEMPLATE.format(realm=realm_topic.realm, topic=realm_topic.topic)
+        return f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"

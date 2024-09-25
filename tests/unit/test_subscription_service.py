@@ -20,6 +20,7 @@ from ..mock_data import (
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
     USERS_TOPIC,
+    SUBSCRIPTION_INFO_dumpable,
 )
 
 
@@ -42,7 +43,7 @@ class TestSubscriptionService:
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
         subscription = Subscription(
             name=SUBSCRIPTION_NAME,
-            realms_topics=[REALMS_TOPICS_STR],
+            realms_topics=GROUPS_REALMS_TOPICS,
             request_prefill=True,
             prefill_queue_status="done",
         )
@@ -144,10 +145,10 @@ class TestSubscriptionService:
         sub_service._port.put_value.assert_not_called()
 
     async def test_set_subscription_queue_status_with_subscriptions(self, sub_service: SubscriptionService):
-        sub_info = deepcopy(SUBSCRIPTION_INFO)
         sub_service._port.get_dict_value = AsyncMock(return_value=SUBSCRIPTION_INFO)
-
         result = await sub_service.set_subscription_queue_status(SUBSCRIPTION_NAME, FillQueueStatus.pending)
+
+        sub_info = deepcopy(SUBSCRIPTION_INFO_dumpable)
         sub_info["prefill_queue_status"] = "pending"
 
         sub_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME, Bucket.subscriptions)
