@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.43.0...v0.43.1) (2024-09-26)
+
+
+### Bug Fixes
+
+* add missing imagePullSecret and imagePullPolicy to the helmfile templates ([8c6fb2f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/8c6fb2f4bf190f30264586e459fd925ecb21e5b5))
+
 ## [0.43.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.42.0...v0.43.0) (2024-09-26)
 
 
