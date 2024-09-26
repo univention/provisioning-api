@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.42.0...v0.43.0) (2024-09-26)
+
+
+### Features
+
+* **ci:** enable malware scanning, disable sbom generation ([c47f943](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c47f943285b8d23333f5898b2904eca13714fc17))
+
 ## [0.42.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.41.0...v0.42.0) (2024-09-25)
 
 
