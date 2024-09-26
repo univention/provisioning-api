@@ -32,6 +32,15 @@ spec:
         {{- $mergedLabels := merge $uiLabels $commonLabels}}
         {{- toYaml $mergedLabels | nindent 8 }}
     spec:
+      {{- if or .Values.imagePullSecrets .Values.global.imagePullSecrets  }}
+      imagePullSecrets:
+        {{- range .Values.global.imagePullSecrets }}
+        - name: "{{ . }}"
+        {{- end }}
+        {{- range .Values.imagePullSecrets }}
+        - name: "{{ . }}"
+        {{- end }}
+      {{- end }}
       restartPolicy: Never
       volumes:
         - name: consumer-secrets
@@ -49,6 +58,7 @@ spec:
       initContainers:
         - name: wait-for-provisioning-api
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
@@ -62,7 +72,7 @@ spec:
         - name: wait-for-data-loader
           command: ["/bin/bash", "/scripts/wait-for-data-loader.sh"]
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
@@ -71,12 +81,13 @@ spec:
           volumeMounts:
             - name: wait-for-data-loader
               mountPath: /scripts
-          {{- if .Values.resources.prefill }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.prefill "context" .) | nindent 12 }}
+          {{- if .Values.resources.registerConsumers }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
       containers:
         - name: consumer-registration
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           volumeMounts:
             - name: consumer-secrets
               mountPath: "/secrets"

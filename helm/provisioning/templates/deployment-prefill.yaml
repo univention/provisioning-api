@@ -87,6 +87,7 @@ spec:
           {{- end }}
         - name: wait-for-api-to-start
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}

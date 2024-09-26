@@ -10,6 +10,8 @@ resources:
       cpu: "100m"
       memory: "32Mi"
   prefill:
+    config:
+      UDM_HOST: "udm-host"
     limits:
       cpu: "1"
       memory: "1Gi"
@@ -23,4 +25,25 @@ resources:
     requests:
       cpu: "100m"
       memory: "32Mi"
+  udmTransformer:
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "32Mi"
+
+prefill:
+  config:
+    UDM_HOST: "udm-host"
+udmTransformer:
+  ldap:
+    connection:
+      host: "ldap-host"
+      port: "1234"
+    baseDn: "ldap-base-dn"
+    auth:
+      bindDn: "ldap-bind-dn"
+registerConsumers:
+  provisioningApiBaseUrl: "provisioning-base-url"
 ...
