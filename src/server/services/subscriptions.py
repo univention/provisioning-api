@@ -12,11 +12,9 @@ from passlib.context import CryptContext
 from univention.provisioning.models import (
     DISPATCHER_SUBJECT_TEMPLATE,
     PREFILL_SUBJECT_TEMPLATE,
-    REALM_TOPIC_PREFIX,
     Bucket,
     FillQueueStatus,
     NewSubscription,
-    RealmTopic,
     Subscription,
 )
 
@@ -63,6 +61,10 @@ class SubscriptionService:
         return password_context.hash(password)
 
     async def is_subscriptions_matching(self, new_sub: NewSubscription, existing_sub: Subscription) -> bool:
+        """
+        Determine if `new_sub` and `existing_sub` have the same values in their common fields
+        (ignoring `prefill_queue_status` and `password`).
+        """
         if existing_sub.request_prefill != new_sub.request_prefill:
             return False
 
@@ -83,16 +85,21 @@ class SubscriptionService:
         if existing_sub:
             if not await self.is_subscriptions_matching(new_sub, existing_sub):
                 raise HTTPException(
-                    status_code=409,
+                    status_code=status.HTTP_409_CONFLICT,
                     detail="Subscription with the given name already registered but with different parameters.",
                 )
             return False
         else:
-            logger.info("Registering new subscription with the name: %r", new_sub.name)
+            logger.info(
+                "Registering new subscription (name: %r realms_topics: %r request_prefill: %r).",
+                new_sub.name,
+                new_sub.realms_topics,
+                new_sub.request_prefill,
+            )
             encrypted_password = self.hash_password(new_sub.password)
             await self._port.put_value(new_sub.name, encrypted_password, Bucket.credentials)
             await self.prepare_and_store_subscription_info(new_sub)
-            logger.info("New subscription was registered")
+            logger.info("New subscription was registered: %r", new_sub.name)
             return True
 
     async def prepare_and_store_subscription_info(self, new_sub: NewSubscription):
@@ -108,7 +115,6 @@ class SubscriptionService:
             prefill_queue_status=prefill_queue_status,
         )
         await self.set_sub_info(new_sub.name, sub_info)
-        await self.update_realm_topic_subscriptions(sub_info.realms_topics, new_sub.name)
         await self._port.ensure_stream(
             new_sub.name,
             True,
@@ -119,22 +125,14 @@ class SubscriptionService:
         )
         await self._port.ensure_consumer(new_sub.name)
 
-    async def update_realm_topic_subscriptions(self, realms_topics: List[RealmTopic], name: str):
-        for realm_topic in realms_topics:
-            realm_topic_key = self._realm_topic_key(realm_topic)
-            subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
-            subs.append(name)
-            await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
-
     async def get_subscription(self, name: str) -> Subscription:
         """
         Get information about a registered subscription.
         """
-        sub = await self.get_subscription_info(name)
-        if not sub:
+        if sub := await self.get_subscription_info(name):
+            return sub
+        else:
             raise ValueError("Subscription was not found.")
-
-        return sub
 
     async def get_subscription_info(self, name: str) -> Optional[Subscription]:
         result = await self._port.get_dict_value(name, Bucket.subscriptions)
@@ -171,28 +169,10 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscription was not found.")
 
-        for realm_topic in sub_info.realms_topics:
-            await self.delete_sub_from_realm_topic(realm_topic, name)
-
         await self._port.delete_kv_pair(name, Bucket.credentials)
         await self.delete_sub_info(name)
         await self._port.delete_stream(name)
         await self._port.delete_consumer(name)
-
-    async def delete_sub_from_realm_topic(self, realm_topic: RealmTopic, name: str):
-        logger.debug("Deleting subscription %r from %r", name, realm_topic)
-        realm_topic_key = self._realm_topic_key(realm_topic)
-        subs = await self._port.get_list_value(realm_topic_key, Bucket.subscriptions)
-        if not subs:
-            raise ValueError("There are no subscriptions")
-
-        if name not in subs:
-            raise ValueError("The subscription with the given name does not exist")
-
-        subs.remove(name)
-        await self._port.put_value(realm_topic_key, subs, Bucket.subscriptions)
-
-        logger.info("Subscription was deleted")
 
     async def delete_sub_info(self, name: str):
         await self._port.delete_kv_pair(name, Bucket.subscriptions)
@@ -221,8 +201,3 @@ class SubscriptionService:
             cache_key = verify_and_update_password.cache_key(*cached_func_args)
             verify_and_update_password.cache.pop(cache_key, None)
             self.handle_authentication_error("Incorrect username or password")
-
-    @staticmethod
-    def _realm_topic_key(realm_topic: RealmTopic) -> str:
-        realm_topic_str = REALM_TOPIC_TEMPLATE.format(realm=realm_topic.realm, topic=realm_topic.topic)
-        return f"{REALM_TOPIC_PREFIX}.{realm_topic_str}"

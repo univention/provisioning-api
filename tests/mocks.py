@@ -13,7 +13,7 @@ from server.core.app.config import AppSettings
 from server.services.port import Port
 from univention.provisioning.models.subscription import Bucket
 
-from .mock_data import MSG, SUBSCRIPTION_NAME, kv_password, kv_sub_info, kv_subs
+from .mock_data import MSG, SUBSCRIPTION_NAME, kv_password, kv_sub_info
 
 
 class FakeMessageQueue(AsyncMock):
@@ -31,11 +31,7 @@ class FakeKvStore(AsyncMock):
         if self.bucket == Bucket.credentials:
             self._values = {SUBSCRIPTION_NAME: kv_password}
         else:
-            self._values = {
-                "abc:def": kv_subs,
-                "foo:bar": kv_subs,
-                SUBSCRIPTION_NAME: kv_sub_info,
-            }
+            self._values = {SUBSCRIPTION_NAME: kv_sub_info}
 
     async def get(self, key: str, revision: Optional[int] = None) -> KeyValue.Entry:
         if self._values.get(key):

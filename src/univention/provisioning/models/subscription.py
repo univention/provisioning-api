@@ -6,8 +6,6 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-REALM_TOPIC_PREFIX = "realm:topic"
-
 
 class FillQueueStatus(str, enum.Enum):
     # Pre-filling the queue was not yet started.
@@ -62,6 +60,9 @@ class Subscription(BaseSubscription):
         if not super().__eq__(other):
             return False
         return self.prefill_queue_status == other.prefill_queue_status
+
+    def __hash__(self) -> int:
+        return hash(self.name)
 
 
 class Bucket(str, enum.Enum):

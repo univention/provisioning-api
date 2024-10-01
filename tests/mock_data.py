@@ -17,6 +17,7 @@ from univention.provisioning.models import (
     ProvisioningMessage,
     PublisherName,
     RealmTopic,
+    Subscription,
 )
 from univention.provisioning.models.queue import Body
 
@@ -33,7 +34,6 @@ GROUPS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=GROUPS_TOPIC)]
 GROUPS_REALMS_TOPICS_as_dicts = [r.model_dump() for r in GROUPS_REALMS_TOPICS]
 USERS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=USERS_TOPIC)]
 DUMMY_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=DUMMY_TOPIC)]
-REALMS_TOPICS_STR = f"{REALM}:{GROUPS_TOPIC}"
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
 
@@ -178,15 +178,10 @@ kv_sub_info.value = (
 )
 kv_sub_info.revision = 12
 
-kv_subs = copy(BASE_KV_OBJ)
-kv_subs.key = "abc:def"
-kv_subs.value = b'["0f084f8c-1093-4024-b215-55fe8631ddf6"]'
-kv_subs.revision = 34
-
 kv_password = copy(BASE_KV_OBJ)
 kv_password.key = SUBSCRIPTION_NAME
 kv_password.value = CONSUMER_HASHED_PASSWORD.encode()
 
 CREDENTIALS = HTTPBasicCredentials(username="dev-user", password="dev-password")
 
-SUBSCRIPTIONS = {REALMS_TOPICS_STR: [SUBSCRIPTION_NAME]}
+SUBSCRIPTIONS = {REALM: {GROUPS_TOPIC: {Subscription.model_validate(SUBSCRIPTION_INFO)}}}

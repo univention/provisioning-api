@@ -16,7 +16,6 @@ from ..mock_data import (
     GROUPS_REALMS_TOPICS,
     GROUPS_TOPIC,
     REALM,
-    REALMS_TOPICS_STR,
     SUBSCRIPTION_INFO,
     SUBSCRIPTION_NAME,
     USERS_TOPIC,
@@ -108,8 +107,7 @@ class TestSubscriptionService:
         await sub_service.register_subscription(self.new_subscription)
 
         sub_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME, Bucket.subscriptions)
-        sub_service._port.get_list_value.assert_called_once_with("realm:topic.udm:groups/group", Bucket.subscriptions)
-        assert sub_service._port.put_value.call_count == 3
+        assert sub_service._port.put_value.call_count == 2  # credentials, subscription
 
     async def test_get_subscription_not_found(self, sub_service):
         sub_service._port.get_dict_value = AsyncMock(return_value=None)
@@ -171,12 +169,6 @@ class TestSubscriptionService:
         await sub_service.delete_subscription(SUBSCRIPTION_NAME)
 
         sub_service._port.get_dict_value.assert_called_once_with(SUBSCRIPTION_NAME, Bucket.subscriptions)
-        sub_service._port.get_list_value.assert_called_once_with(
-            "realm:topic." + REALMS_TOPICS_STR, Bucket.subscriptions
-        )
-        sub_service._port.put_value.assert_called_once_with(
-            "realm:topic." + REALMS_TOPICS_STR, [], Bucket.subscriptions
-        )
         sub_service._port.delete_kv_pair.assert_has_calls(
             [
                 call(SUBSCRIPTION_NAME, Bucket.credentials),

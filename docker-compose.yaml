@@ -170,7 +170,7 @@ services:
       BACKPRESSURE_WAIT_TIMEOUT: 10
       LDAP_THREADS: 5
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-      IGNORE_TEMPORARY_OBJECTS: true
+      IGNORE_TEMPORARY_OBJECTS: "true"
     volumes:
       - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
@@ -257,7 +257,7 @@ services:
       LDAP_PORT: 389
       LDAP_BASE_DN: dc=univention-organization,dc=intranet
       LDAP_HOST_DN: cn=admin,dc=univention-organization,dc=intranet
-      TLS_MODE: off
+      TLS_MODE: "off"
       MACHINE_SECRET: univention
       LDAP_CN_ADMIN_PW: univention
 

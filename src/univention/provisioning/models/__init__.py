@@ -23,7 +23,6 @@ from .queue import (  # noqa: F401
     PublisherName,
 )
 from .subscription import (  # noqa: F401
-    REALM_TOPIC_PREFIX,
     Bucket,
     FillQueueStatus,
     FillQueueStatusReport,

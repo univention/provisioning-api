@@ -5,7 +5,7 @@ import asyncio
 import json
 import logging
 import typing
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, Union
+from typing import Any, AsyncGenerator, Awaitable, Callable, Coroutine, List, Optional, Tuple, Union
 
 import msgpack
 from nats.aio.client import Client as NATS
@@ -19,15 +19,9 @@ from nats.js.errors import (
     NotFoundError,
     ServerError,
 )
-from nats.js.kv import KV_DEL
+from nats.js.kv import KV_DEL, KV_PURGE
 
-from univention.provisioning.models import (
-    REALM_TOPIC_PREFIX,
-    BaseMessage,
-    Bucket,
-    MQMessage,
-    ProvisioningMessage,
-)
+from univention.provisioning.models import BaseMessage, Bucket, MQMessage, ProvisioningMessage, Subscription
 
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 
@@ -137,20 +131,37 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         except NoKeysError:
             return []
 
-    async def watch_for_changes(self, subscriptions: Dict[str, list]):
+    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
         kv_store = await self._js.key_value(Bucket.subscriptions.value)
-        watcher = await kv_store.watch(f"{REALM_TOPIC_PREFIX}.*", include_history=True)
+        for key in await self.get_keys(Bucket.subscriptions):
+            entry = await kv_store.get(key)
+            try:
+                subscription_dict = json.loads(entry.value)
+                subscription = Subscription.model_validate(subscription_dict)
+            except ValueError as exc:
+                logger.error("Bad subscription data in KV store. key=%r entry=%r exc=%s", key, entry, exc)
+                raise
+            yield subscription
+
+    async def watch_for_subscription_changes(self, callback: Callable[[str, Optional[bytes]], Awaitable[None]]) -> None:
+        """
+        Call the `callback` function for any change to the Subscriptions KV bucket.
+
+        :param callback: Async function that accepts two arguments: the key of the changed entry (str)
+            and its value (bytes). When the value is None, the key has been deleted.
+        """
+        kv_store = await self._js.key_value(Bucket.subscriptions.value)
+        watcher = await kv_store.watchall()
 
         while True:
             async for update in watcher:
-                if update:
-                    _, realm_topic = update.key.split(".", maxsplit=1)
-                    if update.operation == KV_DEL:
-                        subscriptions.pop(realm_topic, None)
-                    else:
-                        updated_subscriptions = json.loads(update.value.decode("utf-8"))
-                        subscriptions[realm_topic] = updated_subscriptions
-                    logger.info("Subscriptions were updated: %r", subscriptions)
+                # update is of type: nats.js.kv.KeyValue.Entry
+                # update.key is the subscription's name
+                # update.values is the JSON dump of a Subscription object or None when the key was deleted/purged
+                # update.operation is the type of operation that triggered this
+                if not update:
+                    continue
+                await callback(update.key, None if update.operation in {KV_DEL, KV_PURGE} else update.value)
 
 
 def json_encoder(data: Any) -> bytes:

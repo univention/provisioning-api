@@ -21,7 +21,7 @@ async def dispatcher_mock() -> DispatcherPort:
     port.mq_adapter = MockNatsMQAdapter()
     port.kv_adapter = MockNatsKVAdapter()
     port.mq_adapter._message_queue.get = AsyncMock(side_effect=[MSG, Exception("Stop waiting for the new event")])
-    port.watch_for_changes = AsyncMock()
+    port.watch_for_subscription_changes = AsyncMock()
     Msg.in_progress = AsyncMock()
     Msg.ack = AsyncMock()
 
@@ -47,8 +47,8 @@ class TestDispatcher:
 
         try:
             await service.dispatch_events()
-        except Exception:
-            pass
+        except Exception as exc:
+            print(f"Ignoring exception: {exc!s}")
 
         # check subscribing to the incoming queue
         dispatcher_mock.mq_adapter._js.subscribe.assert_called_once_with(
@@ -62,7 +62,7 @@ class TestDispatcher:
         dispatcher_mock.mq_adapter._message_queue.get.assert_has_calls([call(), call()])
 
         # check getting subscriptions for the realm_topic
-        dispatcher_mock.watch_for_changes.assert_called_once_with(SUBSCRIPTIONS)
+        dispatcher_mock.watch_for_subscription_changes.assert_called_once_with(service.update_subscriptions_mapping)
 
         # check storing event in the consumer queue
         dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(

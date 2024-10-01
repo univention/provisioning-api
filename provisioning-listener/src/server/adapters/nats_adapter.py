@@ -5,7 +5,7 @@ import asyncio
 import json
 import logging
 import typing
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Coroutine, List, Optional, Tuple, Union
 
 import msgpack
 from nats.aio.client import Client as NATS
@@ -18,15 +18,8 @@ from nats.js.errors import (
     NotFoundError,
     ServerError,
 )
-from nats.js.kv import KV_DEL
 
-from univention.provisioning.models import (
-    REALM_TOPIC_PREFIX,
-    BaseMessage,
-    Bucket,
-    MQMessage,
-    ProvisioningMessage,
-)
+from univention.provisioning.models import BaseMessage, Bucket, MQMessage, ProvisioningMessage
 
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
 
@@ -108,21 +101,6 @@ class NatsKVAdapter(BaseKVStoreAdapter):
             return await kv_store.keys()
         except NoKeysError:
             return []
-
-    async def watch_for_changes(self, subscriptions: Dict[str, list]):
-        kv_store = await self._js.key_value(Bucket.subscriptions.value)
-        watcher = await kv_store.watch(f"{REALM_TOPIC_PREFIX}.*", include_history=True)
-
-        while True:
-            async for update in watcher:
-                if update:
-                    _, realm_topic = update.key.split(".", maxsplit=1)
-                    if update.operation == KV_DEL:
-                        subscriptions.pop(realm_topic, None)
-                    else:
-                        updated_subscriptions = json.loads(update.value.decode("utf-8"))
-                        subscriptions[realm_topic] = updated_subscriptions
-                    logger.info("Subscriptions were updated: %r", subscriptions)
 
 
 def json_encoder(data: Any) -> bytes:
