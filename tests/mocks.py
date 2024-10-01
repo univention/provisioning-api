@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import Any
+from typing import Any, Optional
 from unittest.mock import AsyncMock
 
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
+from nats.js.kv import KeyValue
 
-from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter, UpdateConflict
 from server.core.app.config import AppSettings
 from server.services.port import Port
 from univention.provisioning.models.subscription import Bucket
@@ -22,27 +23,38 @@ class FakeMessageQueue(AsyncMock):
 
 
 class FakeKvStore(AsyncMock):
+    """Mock of nats.js.kv.KeyValue"""
+
     def __init__(self, bucket: Bucket, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.bucket = bucket
-
-    async def get(self, key: str):
         if self.bucket == Bucket.credentials:
-            values = {SUBSCRIPTION_NAME: kv_password}
+            self._values = {SUBSCRIPTION_NAME: kv_password}
         else:
-            values = {
+            self._values = {
                 "abc:def": kv_subs,
                 "foo:bar": kv_subs,
                 SUBSCRIPTION_NAME: kv_sub_info,
-                "realm:topic.udm:groups/group": kv_subs,
             }
-        if values.get(key):
-            return values.get(key)
+
+    async def get(self, key: str, revision: Optional[int] = None) -> KeyValue.Entry:
+        if self._values.get(key):
+            return self._values.get(key)
         raise KeyNotFoundError
 
-    @classmethod
-    async def keys(cls):
-        return [SUBSCRIPTION_NAME]
+    async def keys(self):
+        return list(self._values.keys())
+
+    async def put(self, key: str, value: bytes) -> int:
+        self._values[key] = value
+        return 43
+
+    async def update(self, key: str, value: bytes, last: Optional[int] = None) -> int:
+        value = self._values.get(key)
+        if last is not None and value.revision != last:
+            raise UpdateConflict(f"Stored value has revision {value.revision}. Passed revision {last} doesn't match.")
+        self._values[key] = value
+        return 43
 
 
 class FakeJs(AsyncMock):

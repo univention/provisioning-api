@@ -165,13 +165,7 @@ FLAT_MESSAGE_ENCODED = (
 )
 
 BASE_KV_OBJ = KeyValue.Entry(
-    "KV_bucket",
-    "",
-    None,
-    None,
-    None,
-    None,
-    None,
+    bucket="KV_bucket", key="", value=None, revision=1, delta=None, created=None, operation=None
 )
 
 kv_sub_info = copy(BASE_KV_OBJ)
@@ -182,10 +176,12 @@ kv_sub_info.value = (
     b'"request_prefill": true, '
     b'"prefill_queue_status": "done"}'
 )
+kv_sub_info.revision = 12
 
 kv_subs = copy(BASE_KV_OBJ)
 kv_subs.key = "abc:def"
 kv_subs.value = b'["0f084f8c-1093-4024-b215-55fe8631ddf6"]'
+kv_subs.revision = 34
 
 kv_password = copy(BASE_KV_OBJ)
 kv_password.key = SUBSCRIPTION_NAME

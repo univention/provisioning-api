@@ -87,6 +87,9 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         except KeyNotFoundError:
             pass
 
+    # async def get_value_with_revision(self, key: str, bucket: Bucket) -> Optional[Tuple[str, int]]:
+    #     raise NotImplementedError
+
     async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
         kv_store = await self._js.key_value(bucket.value)
 

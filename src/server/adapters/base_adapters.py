@@ -2,10 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from nats.aio.msg import Msg
-from nats.js.kv import KeyValue
 
 from univention.provisioning.models import BaseMessage
 from univention.provisioning.models.subscription import Bucket
@@ -31,11 +30,30 @@ class BaseKVStoreAdapter(ABC):
         pass
 
     @abstractmethod
-    async def get_value(self, key: str, bucket: Bucket) -> Optional[KeyValue.Entry]:
+    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
+        """
+        Retrieve value at `key` in `bucket`.
+        Returns the value or None if key does not exist.
+        """
         pass
 
     @abstractmethod
-    async def put_value(self, key: str, value: Union[str, dict], bucket: Bucket):
+    async def get_value_with_revision(self, key: str, bucket: Bucket) -> Optional[Tuple[str, int]]:
+        """
+        Retrieve value and latest version (revision) at `key` in `bucket`.
+        Returns a tuple (value, revision) or None if key does not exist.
+        """
+        pass
+
+    @abstractmethod
+    async def put_value(
+        self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None
+    ) -> None:
+        """
+        Store `value` at `key` in `bucket`.
+        If `revision` is None overwrite value in DB without a further check.
+        If `revision` is not None and the revision in the DB is different, raise UpdateConflict.
+        """
         pass
 
 

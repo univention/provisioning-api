@@ -14,6 +14,7 @@ from nats.js.api import ConsumerConfig, RetentionPolicy, StreamConfig
 from nats.js.errors import (
     BucketNotFoundError,
     KeyNotFoundError,
+    KeyWrongLastSequenceError,
     NoKeysError,
     NotFoundError,
     ServerError,
@@ -29,6 +30,9 @@ from univention.provisioning.models import (
 )
 
 from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
+
+
+class UpdateConflict(Exception): ...
 
 
 class Empty(Exception): ...
@@ -80,14 +84,33 @@ class NatsKVAdapter(BaseKVStoreAdapter):
         await kv_store.delete(key)
 
     async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
+        """
+        Retrieve value at `key` in `bucket`.
+        Returns the value or None if key does not exist.
+        """
+        result = await self.get_value_with_revision(key, bucket)
+        return result[0] if result else None
+
+    async def get_value_with_revision(self, key: str, bucket: Bucket) -> Optional[Tuple[str, int]]:
+        """
+        Retrieve value and latest version (revision) at `key` in `bucket`.
+        Returns a tuple (value, revision) or None if key does not exist.
+        """
         kv_store = await self._js.key_value(bucket.value)
         try:
             result = await kv_store.get(key)
-            return result.value.decode("utf-8") if result else None
+            return result.value.decode("utf-8"), result.revision if result else None
         except KeyNotFoundError:
             pass
 
-    async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
+    async def put_value(
+        self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None
+    ) -> None:
+        """
+        Store `value` at `key` in `bucket`.
+        If `revision` is None overwrite value in DB without a further check.
+        If `revision` is not None and the revision in the DB is different, raise UpdateConflict.
+        """
         kv_store = await self._js.key_value(bucket.value)
 
         if not value:
@@ -97,7 +120,15 @@ class NatsKVAdapter(BaseKVStoreAdapter):
 
         if not isinstance(value, str):
             value = json.dumps(value)
-        await kv_store.put(key, value.encode("utf-8"))
+
+        if revision:
+            try:
+                await kv_store.update(key, value.encode("utf-8"), revision)
+            except KeyWrongLastSequenceError as exc:
+                raise UpdateConflict(str(exc)) from exc
+        else:
+            await kv_store.put(key, value.encode("utf-8"))
+            return
 
     async def get_keys(self, bucket: Bucket) -> List[str]:
         kv_store = await self._js.key_value(bucket.value)

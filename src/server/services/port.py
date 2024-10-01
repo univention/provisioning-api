@@ -85,8 +85,8 @@ class Port:
     async def delete_kv_pair(self, key: str, bucket: Bucket):
         await self.kv_adapter.delete_kv_pair(key, bucket)
 
-    async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket):
-        await self.kv_adapter.put_value(key, value, bucket)
+    async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None):
+        await self.kv_adapter.put_value(key, value, bucket, revision)
 
     async def ensure_stream(self, stream: str, manual_delete: bool, subjects: List[str] | None = None):
         await self.mq_adapter.ensure_stream(stream, manual_delete, subjects)
