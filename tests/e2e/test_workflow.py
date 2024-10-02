@@ -8,7 +8,8 @@ import ldap3
 import pytest
 import requests
 
-from univention.provisioning.models import FillQueueStatus, PublisherName
+from univention.provisioning.models.constants import PublisherName
+from univention.provisioning.rest.models import FillQueueStatus
 
 from .conftest import E2ETestSettings
 
