@@ -20,7 +20,8 @@ SUPPORTED_OBJECT_TYPES = [
     "oxmail/accessprofile",
     "oxmail/functional_account",
     "oxmail/oxcontext",
-    "oxresources/oxresources" "portals/all",
+    "oxresources/oxresources",
+    "portals/all",
     "portals/announcement",
     "portals/category",
     "portals/entry",
@@ -30,7 +31,8 @@ SUPPORTED_OBJECT_TYPES = [
     "portals/category",
     "portals/entry",
     "portals/folder",
-    "portals/portal" "users/user",
+    "portals/portal",
+    "users/user",
     "groups/group",
 ]
 
