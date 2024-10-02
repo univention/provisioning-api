@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.44.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.43.1...v0.44.0) (2024-10-02)
+
+
+### Features
+
+* remove duplicate data from KV DB, Dispatcher generates reverse-mapping dynamically ([680c326](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/680c32613c476133472fdeaa22a2b602e1c6155c))
+* support safely updating values in KV DB ([95c707f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/95c707f1dc3c02ea140e775c3509737ca227c5e9))
+
 ## [0.43.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.43.0...v0.43.1) (2024-09-26)
 
 
