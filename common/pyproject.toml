@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "nubus-provisioning-common"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning common code"
+authors = ["Univention GmbH <packages@univention.de>"]
+license = "GNU Affero General Public License v3"
+readme = "README.md"
+packages = [{ include = "univention", from = "src" }]
+
+[tool.poetry.dependencies]
+######################################
+# Python 3.7 - listener imports this #
+######################################
+asgi-correlation-id = ">=4.2.0"  # py311: "^4.3.3"
+python = ">=3.7,<4.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4.4"  # py311: "^8.3.3"
+pytest-asyncio = ">=0.21.2"  # py311: "^0.24"
+pytest-cov = ">=4.1.0"  # py311: "^5.0"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+    "--cov=src/univention/provisioning",
+    "--cov=tests",
+    "--cov-report=term-missing",
+]
+asyncio_mode = "auto"
+log_cli = 0  # activate on the CLI with: "-o log_cli=true"
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

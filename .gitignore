@@ -1,6 +1,7 @@
+**/.coverage
+**/.venv
 **/__pycache__
-.coverage
+**/dist/
 .idea/
-dist/
 
 tests/e2e/e2e_settings.json
