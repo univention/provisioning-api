@@ -12,7 +12,7 @@ from univention.provisioning.models import (
     MessageProcessingStatus,
     PublisherName,
 )
-from univention.provisioning.models.queue import Body
+from univention.provisioning.models.message import Body
 
 from ..mock_data import DUMMY_TOPIC, REALM, USERS_TOPIC
 from .conftest import E2ETestSettings

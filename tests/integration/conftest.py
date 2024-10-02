@@ -5,7 +5,7 @@
 import httpx
 import pytest
 
-from server.core.app.main import app
+from univention.provisioning.rest.main import app
 
 
 @pytest.fixture(scope="session")

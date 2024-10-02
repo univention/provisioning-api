@@ -5,7 +5,6 @@ import uuid
 
 import pytest
 from nats.js.errors import BadRequestError, ServerError
-
 from server.adapters.nats_adapter import NatsKeys, NatsMQAdapter
 
 from .conftest import E2ETestSettings
