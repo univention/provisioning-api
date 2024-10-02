@@ -8,10 +8,10 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter, UpdateConflict
-from server.core.app.config import AppSettings
-from server.services.port import Port
-from univention.provisioning.models.subscription import Bucket
+from univention.provisioning.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter, UpdateConflict
+from univention.provisioning.models.constants import Bucket
+from univention.provisioning.rest.config import AppSettings
+from univention.provisioning.services.port import Port
 
 from .mock_data import MSG, SUBSCRIPTION_NAME, kv_password, kv_sub_info
 
