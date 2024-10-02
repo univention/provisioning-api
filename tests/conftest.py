@@ -3,7 +3,6 @@
 
 
 import pytest
-
 from server.core.app.main import app
 from server.services.port import Port
 

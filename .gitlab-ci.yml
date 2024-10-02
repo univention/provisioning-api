@@ -188,10 +188,13 @@ test_provisioning_lib:
   stage: test
   image: docker-registry.knut.univention.de/python:3.11-slim
   script:
-    - pip install poetry=="$POETRY_VERSION"
-    - poetry config --local virtualenvs.create false
+    - pip install -U pip poetry=="$POETRY_VERSION"
+    - poetry config virtualenvs.create false
+    - poetry install -C common
+    - poetry install -C tests
+    - cd consumer
     - poetry install --with dev
-    - python3 -m pytest -lvv -m provisioning_lib --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
@@ -208,7 +211,7 @@ build_provisioning_lib:
     - pre-semantic-release
   artifacts:
     paths:
-      - src/dist/
+      - consumer/dist/
     expire_in: 1 week
   image: docker-registry.knut.univention.de/python:3.11-slim
   before_script:
@@ -228,8 +231,8 @@ build_provisioning_lib:
           export package_version="$version_number"
       fi
   script:
-    - cd src
-    - pip install poetry=="$POETRY_VERSION"
+    - pip install -U pip poetry=="$POETRY_VERSION"
+    - cd consumer
     - poetry version "$package_version"
     - poetry config --local virtualenvs.create false
     - poetry build
@@ -245,8 +248,8 @@ publish_provisioning_lib:
     - test_provisioning_lib
     - pre-semantic-release
   script:
-    - cd src
-    - pip install poetry=="$POETRY_VERSION"
+    - pip install -U pip poetry=="$POETRY_VERSION"
+    - cd consumer
     - poetry version "$package_version"
     - poetry config --local virtualenvs.create false
     - poetry config --local repositories.project_local ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
