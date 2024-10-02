@@ -6,11 +6,11 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 
-from server.core.dispatcher.config import DispatcherSettings
-from server.core.dispatcher.port import DispatcherPort
-from server.core.dispatcher.service.dispatcher import DispatcherService
-from src.server.adapters.nats_adapter import json_decoder
-from univention.provisioning.models import DISPATCHER_SUBJECT_TEMPLATE
+from univention.provisioning.adapters.nats_adapter import json_decoder
+from univention.provisioning.dispatcher.config import DispatcherSettings
+from univention.provisioning.dispatcher.port import DispatcherPort
+from univention.provisioning.dispatcher.service import DispatcherService
+from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 
 from ..mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 from ..mocks import MockNatsKVAdapter, MockNatsMQAdapter

@@ -5,7 +5,7 @@
 import httpx
 import pytest
 
-from server.core.app.config import app_settings
+from univention.provisioning.rest.config import app_settings
 
 from ..mock_data import FLAT_MESSAGE
 
