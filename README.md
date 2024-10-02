@@ -1,24 +1,24 @@
 # Provisioning
 
-Tooling for provisioning LDAP objects to external services.
+Nubus component for provisioning LDAP objects to external services.
 
-## Components
+See [Nubus for Kubernetes - Architecture Manual](https://docs.software-univention.de/nubus-kubernetes-architecture/latest/en/components/provisioning-service.html) for an in-depth explanation.
 
-- [Dispatcher service](./src/server/dispatcher/)
+## Sub projects
 
-  The central service to receive LDAP changes and forward them to subscribed clients.
+This repository contains multiple Poetry projects.
+Each one has its own README.md.
+Click on the name in the following list, to navigate to it:
 
-- [Core](./src/server/)
-
-  Server side of the provisioning project
-
-- [Client library](src/univention/provisioning/consumer)
-
-  The provisioning consumer library
-
-- [Example client](./src/univention/provisioning/consumer/example_client/)
-
-  An example implementation of a client.
+- [backends](backends/README.md): database backend code (MQ and KV)
+- [common](common/README.md): shared code
+- [consumer](consumer/README.md): provisioning consumer library
+- [consumer_example](consumer_example/README.md): example implementation of a consumer
+- [dispatcher](dispatcher/README.md): service that distributes incoming events to subscribed consumers
+- [listener](listener/README.md): LDAP change event generation source (temporary, until _LDIF Producer_ takes over)
+- [prefill](prefill/README.md): service to synthesize event data for consumer initialization
+- [rest-api](rest-api/README.md): REST APIs for consumers
+- [udm-transformer](udm-transformer/README.md): service to transform LDAP objects to UDM objects
 
 ## Usage Overview
 
