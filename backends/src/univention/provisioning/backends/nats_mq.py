@@ -4,31 +4,16 @@
 import asyncio
 import json
 import logging
-import typing
-from typing import Any, AsyncGenerator, Awaitable, Callable, Coroutine, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple
 
-import msgpack
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig, RetentionPolicy, StreamConfig
-from nats.js.errors import (
-    BucketNotFoundError,
-    KeyNotFoundError,
-    KeyWrongLastSequenceError,
-    NoKeysError,
-    NotFoundError,
-    ServerError,
-)
-from nats.js.kv import KV_DEL, KV_PURGE
+from nats.js.errors import NotFoundError, ServerError
 
-from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
-from univention.provisioning.models.subscription import Subscription
 
-from .base_adapters import BaseKVStoreAdapter, BaseMQAdapter
-
-
-class UpdateConflict(Exception): ...
+from .message_queue import Acknowledgements, MessageQueue, json_decoder, json_encoder
 
 
 class Empty(Exception): ...
@@ -49,165 +34,33 @@ class NatsKeys:
         return f"durable_name:{subject}"
 
 
-class NatsKVAdapter(BaseKVStoreAdapter):
-    def __init__(self):
-        self._nats = NATS()
-        self._js = self._nats.jetstream()
+class NatsMessageQueue(MessageQueue):
+    """Message queueing using NATS."""
 
-    async def init(self, server: str, user: str, password: str, buckets: List[Bucket]):
-        await self._nats.connect(
-            servers=server,
-            user=user,
-            password=password,
-            max_reconnect_attempts=1,
+    def __init__(self, server: str, user: str, password: str, max_reconnect_attempts: int = 5, **connect_kwargs):
+        super().__init__(
+            server=server, user=user, password=password, max_reconnect_attempts=max_reconnect_attempts, **connect_kwargs
         )
-        for bucket in buckets:
-            await self.create_kv_store(bucket)
-
-    async def close(self):
-        await self._nats.close()
-
-    # TODO: Rename to ensure_kv_store()
-    async def create_kv_store(self, bucket: Bucket):
-        try:
-            await self._js.key_value(bucket.value)
-        except BucketNotFoundError:
-            logger.info("Creating bucket with the name: %r", bucket)
-            await self._js.create_key_value(bucket=bucket.value)
-
-    async def delete_kv_pair(self, key: str, bucket: Bucket):
-        kv_store = await self._js.key_value(bucket.value)
-        await kv_store.delete(key)
-
-    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
-        """
-        Retrieve value at `key` in `bucket`.
-        Returns the value or None if key does not exist.
-        """
-        result = await self.get_value_with_revision(key, bucket)
-        return result[0] if result else None
-
-    async def get_value_with_revision(self, key: str, bucket: Bucket) -> Optional[Tuple[str, int]]:
-        """
-        Retrieve value and latest version (revision) at `key` in `bucket`.
-        Returns a tuple (value, revision) or None if key does not exist.
-        """
-        kv_store = await self._js.key_value(bucket.value)
-        try:
-            result = await kv_store.get(key)
-            return result.value.decode("utf-8"), result.revision if result else None
-        except KeyNotFoundError:
-            pass
-
-    async def put_value(
-        self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None
-    ) -> None:
-        """
-        Store `value` at `key` in `bucket`.
-        If `revision` is None overwrite value in DB without a further check.
-        If `revision` is not None and the revision in the DB is different, raise UpdateConflict.
-        """
-        kv_store = await self._js.key_value(bucket.value)
-
-        if not value:
-            # Avoid creating a pair with an empty value
-            await self.delete_kv_pair(key, bucket)
-            return
-
-        if not isinstance(value, str):
-            value = json.dumps(value)
-
-        if revision:
-            try:
-                await kv_store.update(key, value.encode("utf-8"), revision)
-            except KeyWrongLastSequenceError as exc:
-                raise UpdateConflict(str(exc)) from exc
-        else:
-            await kv_store.put(key, value.encode("utf-8"))
-            return
-
-    async def get_keys(self, bucket: Bucket) -> List[str]:
-        kv_store = await self._js.key_value(bucket.value)
-        try:
-            return await kv_store.keys()
-        except NoKeysError:
-            return []
-
-    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
-        kv_store = await self._js.key_value(Bucket.subscriptions.value)
-        for key in await self.get_keys(Bucket.subscriptions):
-            entry = await kv_store.get(key)
-            try:
-                subscription_dict = json.loads(entry.value)
-                subscription = Subscription.model_validate(subscription_dict)
-            except ValueError as exc:
-                logger.error("Bad subscription data in KV store. key=%r entry=%r exc=%s", key, entry, exc)
-                raise
-            yield subscription
-
-    async def watch_for_subscription_changes(self, callback: Callable[[str, Optional[bytes]], Awaitable[None]]) -> None:
-        """
-        Call the `callback` function for any change to the Subscriptions KV bucket.
-
-        :param callback: Async function that accepts two arguments: the key of the changed entry (str)
-            and its value (bytes). When the value is None, the key has been deleted.
-        """
-        kv_store = await self._js.key_value(Bucket.subscriptions.value)
-        watcher = await kv_store.watchall()
-
-        while True:
-            async for update in watcher:
-                # update is of type: nats.js.kv.KeyValue.Entry
-                # update.key is the subscription's name
-                # update.values is the JSON dump of a Subscription object or None when the key was deleted/purged
-                # update.operation is the type of operation that triggered this
-                if not update:
-                    continue
-                await callback(update.key, None if update.operation in {KV_DEL, KV_PURGE} else update.value)
-
-
-def json_encoder(data: Any) -> bytes:
-    return json.dumps(data).encode("utf-8")
-
-
-def json_decoder(data: Any) -> bytes:
-    return json.loads(data)
-
-
-def messagepack_encoder(data: Any) -> bytes:
-    return msgpack.packb(data)
-
-
-def messagepack_decoder(data: bytes) -> Any:
-    return msgpack.unpackb(data)
-
-
-class Acknowledgements(typing.NamedTuple):
-    acknowledge_message: Callable[[], Coroutine[Any, Any, None]]
-    acknowledge_message_negatively: Callable[[], Coroutine[Any, Any, None]]
-    acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]]
-
-
-class NatsMQAdapter(BaseMQAdapter):
-    def __init__(self):
         self._nats = NATS()
         self._js = self._nats.jetstream()
         self._message_queue = asyncio.Queue()
+        self.pull_subscription = None
 
-    async def connect(self, server: str, user: str, password: str, max_reconnect_attempts=5, **kwargs):
-        """Connect to the NATS server.
+    async def connect(self):
+        """
+        Connect to the NATS server.
 
         Arguments are passed directly to the NATS client.
         https://nats-io.github.io/nats.py/modules.html#asyncio-client
 
-        by default it fails after a maximum of 10 seconds because of a 2 second connect timout * 5 reconnect attempts.
+        By default, it fails after a maximum of 10 seconds because of a 2 second connect timout * 5 reconnect attempts.
         """
         await self._nats.connect(
-            servers=server,
-            user=user,
-            password=password,
-            max_reconnect_attempts=max_reconnect_attempts,
-            **kwargs,
+            servers=self._server,
+            user=self._user,
+            password=self._password,
+            max_reconnect_attempts=self._max_reconnect_attempts,
+            **self._connect_kwargs,
         )
 
     async def close(self):
@@ -234,7 +87,7 @@ class NatsMQAdapter(BaseMQAdapter):
             subject,
         )
 
-    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: Union[str, None]) -> None:
+    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: Optional[str]) -> None:
         """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
         await self.ensure_stream(stream, manual_delete, [subject] if subject else None)
         await self.ensure_consumer(stream)
@@ -300,7 +153,7 @@ class NatsMQAdapter(BaseMQAdapter):
     @staticmethod
     def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
         data = json.loads(msg.data)
-        sequence_number = msg.reply.split(".")[-4]
+        sequence_number = int(msg.reply.split(".")[-4])
         message = ProvisioningMessage(
             sequence_number=sequence_number,
             num_delivered=msg.metadata.num_delivered,
@@ -326,7 +179,7 @@ class NatsMQAdapter(BaseMQAdapter):
     @staticmethod
     def mq_message_from(msg: Msg, binary_decoder: Callable[[bytes], Any] = json_decoder) -> MQMessage:
         data = binary_decoder(msg.data)
-        sequence_number = msg.reply.split(".")[-4]
+        sequence_number = int(msg.reply.split(".")[-4])
         message = MQMessage(
             subject=msg.subject,
             reply=msg.reply,

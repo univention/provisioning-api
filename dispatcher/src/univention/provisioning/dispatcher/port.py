@@ -6,7 +6,7 @@ from __future__ import annotations
 import contextlib
 from typing import Any, AsyncGenerator, Awaitable, Callable, Optional
 
-from univention.provisioning.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from univention.provisioning.backends import key_value_store, message_queue
 from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
@@ -17,8 +17,17 @@ from .config import DispatcherSettings, dispatcher_settings
 class DispatcherPort:
     def __init__(self, settings: Optional[DispatcherSettings] = None):
         self.settings = settings or dispatcher_settings()
-        self.mq_adapter = NatsMQAdapter()
-        self.kv_adapter = NatsKVAdapter()
+        self.mq = message_queue(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
+        )
+        self.kv = key_value_store(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+        )
 
     @staticmethod
     @contextlib.asynccontextmanager
@@ -31,41 +40,31 @@ class DispatcherPort:
             await port.close()
 
     async def connect(self) -> None:
-        await self.mq_adapter.connect(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
-        )
-        await self.kv_adapter.init(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-            buckets=[Bucket.subscriptions],
-        )
+        await self.mq.connect()
+        await self.kv.init(buckets=[Bucket.subscriptions])
 
     async def close(self) -> None:
-        await self.mq_adapter.close()
-        await self.kv_adapter.close()
+        await self.mq.close()
+        await self.kv.close()
 
     async def send_message_to_subscription(self, stream: str, subject: str, message: Message) -> None:
-        await self.mq_adapter.add_message(stream, subject, message)
+        await self.mq.add_message(stream, subject, message)
 
     async def subscribe_to_queue(self, subject: str, deliver_subject: str) -> None:
-        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
+        await self.mq.subscribe_to_queue(subject, deliver_subject)
 
     async def wait_for_event(self) -> MQMessage:
-        return await self.mq_adapter.wait_for_event()
+        return await self.mq.wait_for_event()
 
     async def acknowledge_message(self, message: MQMessage) -> None:
-        await self.mq_adapter.acknowledge_message(message)
+        await self.mq.acknowledge_message(message)
 
     async def acknowledge_message_in_progress(self, message: MQMessage) -> None:
-        await self.mq_adapter.acknowledge_message_in_progress(message)
+        await self.mq.acknowledge_message_in_progress(message)
 
     async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
-        async for sub in self.kv_adapter.get_all_subscriptions():
+        async for sub in self.kv.get_all_subscriptions():
             yield sub
 
     async def watch_for_subscription_changes(self, callback: Callable[[str, Optional[bytes]], Awaitable[None]]) -> None:
-        await self.kv_adapter.watch_for_subscription_changes(callback)
+        await self.kv.watch_for_subscription_changes(callback)
