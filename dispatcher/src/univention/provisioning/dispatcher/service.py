@@ -3,12 +3,11 @@
 import asyncio
 import logging
 
-from pydantic_core.core_schema import model_ser_schema
-from univention.provisioning.utils.old_message_ack_manager import MessageAckManager
-
 from univention.provisioning.models.constants import DISPATCHER_STREAM, DISPATCHER_SUBJECT_TEMPLATE
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
+from univention.provisioning.utils.message_ack_manager import MessageAckManager
+
 from .port import DispatcherPort
 
 logger = logging.getLogger(__name__)
@@ -34,9 +33,11 @@ class DispatcherService:
             while True:
                 logger.debug("Waiting for an event...")
                 message = await self._port.wait_for_event()
+                message_handler = self.handle_message(message)
+                acknowledge_message_in_progress = lambda: self._port.acknowledge_message_in_progress(message)  # noqa: E731
                 await task_group.create_task(
                     self.ack_manager.process_message_with_ack_wait_extension(
-                        message, self.handle_message, self._port.acknowledge_message_in_progress
+                        message_handler, acknowledge_message_in_progress
                     )
                 )
 
