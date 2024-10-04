@@ -7,7 +7,7 @@ from typing import Annotated, List, Optional, Union
 
 from fastapi import Depends
 
-from univention.provisioning.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from univention.provisioning.backends import key_value_store, message_queue
 from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.message import Message, ProvisioningMessage
 from univention.provisioning.prefill.models import PrefillMessage
@@ -17,8 +17,16 @@ from univention.provisioning.rest.config import AppSettings, app_settings
 class Port:
     def __init__(self, settings: Optional[AppSettings] = None):
         self.settings = settings or app_settings()
-        self.mq_adapter = NatsMQAdapter()
-        self.kv_adapter = NatsKVAdapter()
+        self.mq_adapter = message_queue(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+        )
+        self.kv_adapter = key_value_store(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+        )
 
     @staticmethod
     async def port_dependency():
@@ -40,17 +48,8 @@ class Port:
             await port.close()
 
     async def connect(self):
-        await self.mq_adapter.connect(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-        )
-        await self.kv_adapter.init(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-            buckets=[Bucket.subscriptions, Bucket.credentials],
-        )
+        await self.mq_adapter.connect()
+        await self.kv_adapter.init(buckets=[Bucket.subscriptions, Bucket.credentials])
 
     async def close(self):
         await self.mq_adapter.close()

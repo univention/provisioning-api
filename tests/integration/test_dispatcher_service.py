@@ -19,17 +19,14 @@ from ..mocks import MockNatsKVAdapter, MockNatsMQAdapter
 @pytest.fixture
 async def dispatcher_mock() -> DispatcherPort:
     port = DispatcherPort(DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass"))
-    port.mq_adapter = MockNatsMQAdapter()
-    port.kv_adapter = MockNatsKVAdapter()
+    port.mq = MockNatsMQAdapter()
+    port.kv = MockNatsKVAdapter()
     fake_ack = AsyncMock()
     mod_MSG = deepcopy(MSG)
     mod_MSG.data = json_decoder(mod_MSG.data.decode())
-    port.mq_adapter.get_one_message = AsyncMock(
+    port.mq.get_one_message = AsyncMock(
         side_effect=[(mod_MSG, fake_ack), StopLoopException("Stop waiting for the new event")]
     )
-    port.watch_for_subscription_changes = AsyncMock()
-    mod_MSG.in_progress = AsyncMock()
-    mod_MSG.ack = AsyncMock()
 
     return port
 
@@ -57,14 +54,22 @@ class TestDispatcher:
         with pytest.raises(ExceptionGroup):
             await service.dispatch_events()
 
+        # check subscribing to the incoming queue
+        dispatcher_mock.mq._js.subscribe.assert_called_once_with(
+            "incoming",
+            cb=dispatcher_mock.mq.cb,
+            durable="durable_name:incoming",
+            stream="stream:incoming",
+            manual_ack=True,
+        )
         # check waiting for the event
-        dispatcher_mock.mq_adapter.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
+        dispatcher_mock.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
 
         # check getting subscriptions for the realm_topic
         dispatcher_mock.watch_for_subscription_changes.assert_called_once_with(service.update_subscriptions_mapping)
 
         # check storing event in the consumer queue
-        dispatcher_mock.mq_adapter._js.publish.assert_called_once_with(
+        dispatcher_mock.mq._js.publish.assert_called_once_with(
             self.main_subject,
             FLAT_MESSAGE_ENCODED,
             stream=f"stream:{SUBSCRIPTION_NAME}",

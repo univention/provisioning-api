@@ -2,19 +2,22 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Optional, Tuple, Union
-
-from nats.aio.msg import Msg
+from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
 from univention.provisioning.models.constants import Bucket
-from univention.provisioning.models.message import BaseMessage
+from univention.provisioning.models.subscription import Subscription
 
 
-class BaseKVStoreAdapter(ABC):
+class KeyValueDB(ABC):
     """The base class for key-value store adapters."""
 
+    def __init__(self, server: str, user: str, password: str):
+        self._server = server
+        self._user = user
+        self._password = password
+
     @abstractmethod
-    async def init(self, server: str, user: str, password: str, buckets: List[Bucket]):
+    async def init(self, buckets: List[Bucket]):
         pass
 
     @abstractmethod
@@ -56,59 +59,20 @@ class BaseKVStoreAdapter(ABC):
         """
         pass
 
-
-class BaseMQAdapter(ABC):
-    """The base class for message queue adapters."""
-
     @abstractmethod
-    async def connect(self, server: str, user: str, password: str):
+    async def get_keys(self, bucket: Bucket) -> List[str]:
         pass
 
     @abstractmethod
-    async def close(self):
+    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
         pass
 
     @abstractmethod
-    async def add_message(
-        self,
-        stream: str,
-        subject: str,
-        message: BaseMessage,
-        binary_encoder: Callable[[Any], bytes],
-    ):
-        pass
+    async def watch_for_subscription_changes(self, callback: Callable[[str, Optional[bytes]], Awaitable[None]]) -> None:
+        """
+        Call the `callback` function for any change to the Subscriptions KV bucket.
 
-    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool):
-        pass
-
-    @abstractmethod
-    async def delete_message(self, stream: str, seq_num: int):
-        pass
-
-    @abstractmethod
-    async def delete_stream(self, stream_name: str):
-        pass
-
-    @abstractmethod
-    async def cb(self, msg):
-        pass
-
-    @abstractmethod
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        pass
-
-    @abstractmethod
-    async def wait_for_event(self) -> Msg:
-        pass
-
-    @abstractmethod
-    async def stream_exists(self, subject: str):
-        pass
-
-    @abstractmethod
-    async def ensure_stream(self, subject: str):
-        pass
-
-    @abstractmethod
-    async def ensure_consumer(self, subject: str, deliver_subject: Optional[str] = None):
+        :param callback: Async function that accepts two arguments: the key of the changed entry (str)
+            and its value (bytes). When the value is None, the key has been deleted.
+        """
         pass
