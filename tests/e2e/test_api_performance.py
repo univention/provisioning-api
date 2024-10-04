@@ -7,7 +7,7 @@ from typing import Any, AsyncGenerator, Callable, Coroutine
 import pytest
 
 from univention.admin.rest.client import UDM, time
-from univention.provisioning.adapters.nats_adapter import NatsKeys
+from univention.provisioning.backends import NatsKeys
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models.subscription import RealmTopic
 from univention.provisioning.rest.models import FillQueueStatus, MessageProcessingStatus

@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import ValidationError
 
-from univention.provisioning.adapters.nats_adapter import Empty
+from univention.provisioning.backends import Empty
 from univention.provisioning.models.constants import PREFILL_STREAM, PREFILL_SUBJECT_TEMPLATE, PublisherName
 from univention.provisioning.models.message import (
     Body,

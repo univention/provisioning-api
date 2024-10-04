@@ -4,20 +4,27 @@
 import contextlib
 from typing import Optional, Tuple
 
-from univention.provisioning.adapters.internal_api_adapter import InternalAPIAdapter
-from univention.provisioning.adapters.nats_adapter import Acknowledgements, NatsMQAdapter
+from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.nats_mq import NatsMessageQueue
 from univention.provisioning.models.message import BaseMessage, Message, MQMessage
-from univention.provisioning.rest.models import FillQueueStatus
+from univention.provisioning.models.subscription import FillQueueStatus
 
 from .config import PrefillSettings, prefill_settings
 from .udm_adapter import UDMAdapter
+from .update_sub_q_status_adapter_rest_api import SubscriptionsRestApiAdapter
+from .update_sub_q_status_port import UpdateSubscriptionsQueueStatusPort
 
 
 class PrefillPort:
     def __init__(self, settings: Optional[PrefillSettings] = None):
         self.settings = settings or prefill_settings()
-        self.mq_adapter = NatsMQAdapter()
-        self._internal_api_adapter = InternalAPIAdapter(
+        self.mq_adapter = NatsMessageQueue(
+            server=self.settings.nats_server,
+            user=self.settings.nats_user,
+            password=self.settings.nats_password,
+            max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
+        )
+        self._update_sub_q_status: UpdateSubscriptionsQueueStatusPort = SubscriptionsRestApiAdapter(
             self.settings.provisioning_api_url, self.settings.prefill_username, self.settings.prefill_password
         )
         self._udm_adapter = UDMAdapter(self.settings.udm_url, self.settings.udm_username, self.settings.udm_password)
@@ -27,13 +34,8 @@ class PrefillPort:
     async def port_context():
         port = PrefillPort()
         await port._udm_adapter.connect()
-        await port.mq_adapter.connect(
-            server=port.settings.nats_server,
-            user=port.settings.nats_user,
-            password=port.settings.nats_password,
-            max_reconnect_attempts=port.settings.nats_max_reconnect_attempts,
-        )
-        await port._internal_api_adapter.connect()
+        await port.mq_adapter.connect()
+        await port._update_sub_q_status.connect()
 
         try:
             yield port
@@ -43,7 +45,7 @@ class PrefillPort:
     async def close(self):
         await self._udm_adapter.close()
         await self.mq_adapter.close()
-        await self._internal_api_adapter.close()
+        await self._update_sub_q_status.close()
 
     async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str | None) -> None:
         await self.mq_adapter.initialize_subscription(stream, manual_delete, subject)
@@ -63,7 +65,7 @@ class PrefillPort:
         return await self._udm_adapter.get_object(url)
 
     async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
-        await self._internal_api_adapter.update_subscription_queue_status(name, queue_status)
+        await self._update_sub_q_status.update_subscription_queue_status(name, queue_status)
 
     async def create_prefill_message(self, stream: str, subject: str, message: Message):
         await self.mq_adapter.add_message(stream, subject, message)
