@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.44.0...v0.44.1) (2024-10-04)
+
+
+### Bug Fixes
+
+* **udm-transformer:** fix typo ([973581d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/973581d9e489a64f4952aa4e9a74f05cc2d208a2))
+
 ## [0.44.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.43.1...v0.44.0) (2024-10-02)
 
 
