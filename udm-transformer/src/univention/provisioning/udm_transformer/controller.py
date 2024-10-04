@@ -5,7 +5,7 @@ import logging
 
 from pydantic import ValidationError
 
-from univention.provisioning.adapters.nats_adapter import Acknowledgements, Empty
+from univention.provisioning.backends import Acknowledgements, Empty
 from univention.provisioning.models.constants import LDAP_STREAM, LDIF_STREAM, PublisherName
 from univention.provisioning.models.message import (
     Message,
