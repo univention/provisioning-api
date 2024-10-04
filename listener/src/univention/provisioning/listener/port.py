@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from univention.provisioning.adapters.nats_adapter import NatsMQAdapter, messagepack_encoder
 
+from univention.provisioning.backends import message_queue
 from univention.provisioning.models.message import Message
 
 from .config import LdapProducerSettings, ldap_producer_settings
@@ -13,15 +14,15 @@ from .config import LdapProducerSettings, ldap_producer_settings
 class LDAPProducerPort:
     def __init__(self, settings: Optional[LdapProducerSettings] = None):
         self.settings = settings or ldap_producer_settings()
-        self.mq_adapter = NatsMQAdapter()
-
-    async def __aenter__(self):
-        await self.mq_adapter.connect(
+        self.mq = message_queue(
             self.settings.nats_server,
             self.settings.nats_user,
             self.settings.nats_password,
             max_reconnect_attempts=self.settings.nats_max_reconnect_attempts,
         )
+
+    async def __aenter__(self):
+        await self.mq.connect()
         return self
 
     async def __aexit__(self, *args):
