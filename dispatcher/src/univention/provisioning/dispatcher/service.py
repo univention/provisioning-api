@@ -4,7 +4,6 @@ import asyncio
 import logging
 
 from univention.provisioning.adapters.nats_adapter import Empty
-from univention.provisioning.utils.old_message_ack_manager import MessageAckManager
 from univention.provisioning.models.constants import DISPATCHER_STREAM, DISPATCHER_SUBJECT_TEMPLATE
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
@@ -37,10 +36,11 @@ class DispatcherService:
                 except Empty:
                     logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
                     continue
+                message_handler = self.handle_message(message)
                 try:
                     await task_group.create_task(
                         self.ack_manager.process_message_with_ack_wait_extension(
-                            message, self.handle_message, self._port.acknowledge_message_in_progress
+                            message_handler, acknowledgements.acknowledge_message_in_progress
                         )
                     )
                 except Exception:
