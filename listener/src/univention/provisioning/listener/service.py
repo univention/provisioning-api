@@ -4,10 +4,7 @@
 from datetime import datetime
 from typing import Any, Dict
 
-from univention.provisioning.models.message import (
-    Body,
-    Message,
-)
+from univention.provisioning.models.message import Body, Message
 from univention.provisioning.models.constants import PublisherName, LDAP_STREAM
 
 from .port import LDAPProducerPort
