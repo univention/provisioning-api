@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, call, patch
 import pytest
 
 from univention.provisioning.models.constants import (
-    DISPATCHER_STREAM,
+    DISPATCHER_QUEUE_NAME,
     DISPATCHER_SUBJECT_TEMPLATE,
     PREFILL_SUBJECT_TEMPLATE,
     FillQueueStatus,
@@ -80,4 +80,4 @@ class TestMessageService:
     async def test_add_live_message(self, message_service: MessageService):
         await message_service.add_live_event(MESSAGE)
 
-        message_service._port.add_message.assert_called_once_with(DISPATCHER_STREAM, DISPATCHER_STREAM, MESSAGE)
+        message_service._port.add_message.assert_called_once_with(DISPATCHER_QUEUE_NAME, DISPATCHER_QUEUE_NAME, MESSAGE)
