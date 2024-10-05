@@ -9,11 +9,11 @@ import fastapi
 from fastapi import Depends, HTTPException, Response
 
 from univention.provisioning.models.message import ProvisioningMessage
-from univention.provisioning.models.subscription import Subscription
+from univention.provisioning.models.subscription import FillQueueStatusReport, Subscription
 
 from .dependencies import AppSettingsDep, HttpBasicDep, authenticate_admin, authenticate_prefill
 from .message_service import MessageService
-from .models import FillQueueStatusReport, MessageProcessingStatusReport, NewSubscription
+from .models import MessageProcessingStatusReport, NewSubscription
 from .port import PortDependency
 from .subscription_service import SubscriptionService
 

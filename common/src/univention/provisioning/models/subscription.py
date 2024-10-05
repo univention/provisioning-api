@@ -1,11 +1,20 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import enum
 from typing import List
 
 from pydantic import BaseModel, Field
 
-from univention.provisioning.rest.models import FillQueueStatus
+
+class FillQueueStatus(str, enum.Enum):
+    # Pre-filling the queue was not yet started.
+    pending = "pending"
+    # The queue is being pre-filled.
+    running = "running"
+    # The pre-fill task failed.
+    failed = "failed"
+    # The queue was pre-filled successfully.
+    done = "done"
 
 
 class RealmTopic(BaseModel):
@@ -47,3 +56,9 @@ class Subscription(BaseSubscription):
 
     def __hash__(self) -> int:
         return hash(self.name)
+
+
+class FillQueueStatusReport(BaseModel):
+    """Update a subscription's prefill queue status."""
+
+    status: FillQueueStatus = Field(description="State of the prefill process.")

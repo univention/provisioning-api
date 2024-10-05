@@ -9,8 +9,8 @@ import pytest
 from univention.admin.rest.client import UDM, time
 from univention.provisioning.backends.nats_mq import NatsKeys
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
-from univention.provisioning.models.subscription import RealmTopic
-from univention.provisioning.rest.models import FillQueueStatus, MessageProcessingStatus
+from univention.provisioning.models.subscription import FillQueueStatus, RealmTopic
+from univention.provisioning.rest.models import MessageProcessingStatus
 
 from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 from .conftest import E2ETestSettings

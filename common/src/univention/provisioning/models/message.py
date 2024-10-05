@@ -2,12 +2,13 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from typing_extensions import Literal
 
 from .constants import PublisherName
+from .subscription import RealmTopic
 
 
 class BaseMessage(BaseModel):
@@ -96,3 +97,13 @@ class MQMessage(BaseModel):
 class ProvisioningMessage(Message):
     sequence_number: int = Field(description="The sequence number associated with the message.")
     num_delivered: int = Field(description="The number of times that this message has been delivered.")
+
+
+class PrefillMessage(BaseMessage):
+    """This class represents the message used to send a request to the Prefill Service."""
+
+    subscription_name: str = Field(description="The name of the subscription that requested the prefilling queue")
+    realms_topics: List[RealmTopic] = Field(
+        description="A list of realm-topic combinations that this subscriber subscribes to, "
+        'e.g. [{"realm": "udm", "topic": "users/user"}].'
+    )
