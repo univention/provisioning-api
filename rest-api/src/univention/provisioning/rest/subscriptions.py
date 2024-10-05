@@ -10,13 +10,12 @@ from fastapi import Depends, HTTPException, Response
 
 from univention.provisioning.models.message import ProvisioningMessage
 from univention.provisioning.models.subscription import Subscription
-from univention.provisioning.rest.models import MessageProcessingStatusReport, NewSubscription
-from univention.provisioning.services.port import PortDependency
-from univention.provisioning.services.subscriptions import SubscriptionService
 
 from .dependencies import AppSettingsDep, HttpBasicDep, authenticate_admin, authenticate_prefill
 from .message_service import MessageService
-from .models import FillQueueStatusReport
+from .models import FillQueueStatusReport, MessageProcessingStatusReport, NewSubscription
+from .port import PortDependency
+from .subscription_service import SubscriptionService
 
 router = fastapi.APIRouter(prefix="/v1/subscriptions", tags=["subscriptions"])
 logger = logging.getLogger(__name__)

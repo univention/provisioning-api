@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from univention.provisioning.consumer import ProvisioningConsumerClient
-from univention.provisioning.models import MessageProcessingStatus
+from univention.provisioning.consumer.api import ProvisioningConsumerClient
+from univention.provisioning.rest.models import MessageProcessingStatus
 
 from .helpers import create_message_via_events_api
 

@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends import Empty
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager
 from univention.provisioning.models.constants import PREFILL_STREAM, PREFILL_SUBJECT_TEMPLATE, PublisherName
 from univention.provisioning.models.message import (
     Body,
@@ -15,7 +15,6 @@ from univention.provisioning.models.message import (
     SimpleMessage,
 )
 from univention.provisioning.rest.models import FillQueueStatus
-from univention.provisioning.utils.message_ack_manager import MessageAckManager
 
 from .models import PrefillMessage
 from .port import PrefillPort
