@@ -5,12 +5,11 @@ import logging
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends import Acknowledgements, Empty
+from univention.provisioning.backends.message_queue import Acknowledgements, Empty, MessageAckManager
 from univention.provisioning.models.constants import LDAP_STREAM, LDIF_STREAM, PublisherName
 from univention.provisioning.models.message import (
     Message,
 )
-from univention.provisioning.utils.message_ack_manager import MessageAckManager
 
 from .port import UDMTransformerPort
 from .udm import UDMMessagingService

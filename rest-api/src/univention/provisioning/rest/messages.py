@@ -8,10 +8,10 @@ from fastapi import Depends
 from fastapi.security import HTTPBasic
 
 from univention.provisioning.models.message import Message
-from univention.provisioning.services.port import PortDependency
 
 from .dependencies import authenticate_events_endpoint
 from .message_service import MessageService
+from .port import PortDependency
 
 router = fastapi.APIRouter(prefix="/v1/messages", tags=["messages"])
 security = HTTPBasic()

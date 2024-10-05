@@ -7,11 +7,9 @@ from typing import Optional
 import requests
 
 from univention.admin.rest.client import UDM
-from univention.provisioning.consumer import ProvisioningConsumerClient
-from univention.provisioning.models import (
-    MessageProcessingStatus,
-    PublisherName,
-)
+from univention.provisioning.consumer.api import ProvisioningConsumerClient
+from univention.provisioning.models.message import PublisherName
+from univention.provisioning.rest.models import MessageProcessingStatus
 from univention.provisioning.models.message import Body
 
 from ..mock_data import DUMMY_TOPIC, REALM, USERS_TOPIC

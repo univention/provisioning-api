@@ -3,8 +3,6 @@
 
 from typing import List, Optional, Any
 import msgpack
-from univention.provisioning.adapters.message_queue import MessageQueue
-from univention.provisioning.adapters.nats_mq import NatsMQAdapter
 
 from univention.provisioning.backends import message_queue
 from univention.provisioning.models.message import Message
