@@ -14,12 +14,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_utils.timing import add_timing_middleware
 
-from univention.provisioning.services.port import Port
+from univention.provisioning.models.constants import PREFILL_STREAM
 from univention.provisioning.utils.log import setup_logging
 
-from ..models.constants import PREFILL_STREAM
 from .config import app_settings
 from .messages import router as messages_api_router
+from .port import Port
 from .subscriptions import router as subscriptions_api_router
 
 settings = app_settings()

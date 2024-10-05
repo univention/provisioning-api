@@ -17,10 +17,7 @@ from nats.js.kv import KV_DEL, KV_PURGE
 from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.subscription import Subscription
 
-from .key_value_db import KeyValueDB
-
-
-class UpdateConflict(Exception): ...
+from .key_value_db import KeyValueDB, UpdateConflict
 
 
 logger = logging.getLogger(__name__)

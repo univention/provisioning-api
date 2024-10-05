@@ -1,13 +1,19 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
-
+import asyncio
 import json
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Coroutine, List, NamedTuple, Optional, Tuple
 
 from nats.aio.msg import Msg
 
 from univention.provisioning.models.message import BaseMessage, MQMessage
+
+logger = logging.getLogger(__name__)
+
+
+class Empty(Exception): ...
 
 
 def json_encoder(data: Any) -> bytes:
@@ -125,3 +131,31 @@ class MessageQueue(ABC):
     @abstractmethod
     async def ensure_consumer(self, subject: str, deliver_subject: Optional[str] = None):
         pass
+
+
+class MessageAckManager:
+    def __init__(self, ack_wait: int = 30, ack_threshold: int = 5):
+        self.ack_wait = ack_wait
+        self.ack_threshold = ack_threshold
+
+    async def process_message_with_ack_wait_extension(
+        self,
+        message_handler: Coroutine[Any, Any, None],
+        acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]],
+    ) -> None:
+        """
+        Combines message processing and automatic AckWait extension.
+        """
+
+        async with asyncio.TaskGroup() as task_group:
+            ack_extender = task_group.create_task(self.extend_ack_wait(acknowledge_message_in_progress))
+            message_handler_task = task_group.create_task(message_handler)
+
+            await message_handler_task
+            ack_extender.cancel()
+
+    async def extend_ack_wait(self, acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]]) -> None:
+        while True:
+            await asyncio.sleep(self.ack_wait - self.ack_threshold)
+            await acknowledge_message_in_progress()
+            logger.info("AckWait was extended")
