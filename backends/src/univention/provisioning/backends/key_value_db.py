@@ -8,6 +8,9 @@ from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.subscription import Subscription
 
 
+class UpdateConflict(Exception): ...
+
+
 class KeyValueDB(ABC):
     """The base class for key-value store adapters."""
 
