@@ -7,8 +7,8 @@ import uuid
 import httpx
 import pytest
 
+from univention.provisioning.models.subscription import FillQueueStatus
 from univention.provisioning.rest.config import app_settings
-from univention.provisioning.rest.models import FillQueueStatus
 
 from ..mock_data import (
     CONSUMER_PASSWORD,

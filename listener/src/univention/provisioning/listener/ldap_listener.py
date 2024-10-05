@@ -1,66 +1,54 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-#
-# Univention Listener Converter
-#  Listener integration
-#
-# Copyright 2021 Univention GmbH
-#
-# https://www.univention.de/
-#
-# All rights reserved.
-#
-# The source code of this program is made available
-# under the terms of the GNU Affero General Public License version 3
-# (GNU AGPL V3) as published by the Free Software Foundation.
-#
-# Binary versions of this program provided by Univention to you as
-# well as other copyrighted, protected or trademarked materials like
-# Logos, graphics, fonts, specific documentations and configurations,
-# cryptographic keys etc. are subject to a license agreement between
-# you and Univention and not subject to the GNU AGPL V3.
-#
-# In the case you use this program under the terms of the GNU AGPL V3,
-# the program is provided in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License with the Debian GNU/Linux or Univention distribution in file
-# /usr/share/common-licenses/AGPL-3; if not, see
-# <https://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
 
 from univention.listener.handler import ListenerModuleHandler
-
-from .service import ensure_stream, handle_changes
+from univention.provisioning.listener.config import ldap_producer_settings
+from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAdapter
+from univention.provisioning.listener.mq_port import MessageQueuePort
 
 name = "provisioning_handler"
 
 
 class LdapListener(ListenerModuleHandler):
-    def initialize(self):
-        self.logger.info("handler stub initialize")
-        asyncio.run(ensure_stream())
+    class Configuration(ListenerModuleHandler.Configuration):
+        name = name
+        description = "Listener module that forwards LDAP changes to the UDM Transformer."
+        ldap_filter = "(objectClass=*)"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mq: MessageQueuePort = MessageQueueNatsAdapter(ldap_producer_settings())
+        self._ensure_queue_exists()
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
-        asyncio.run(handle_changes(new, {}))
+        self._send_message(new, {})
 
     def modify(self, dn, old, new, old_dn):
-        self.logger.info("[ modify ] dn: %r", dn)
         if old_dn:
-            self.logger.debug("it is (also) a move! old_dn: %r", old_dn)
+            self.logger.info("[ modify & move ] dn: %r old_dn: %r", dn, old_dn)
+        else:
+            self.logger.info("[ modify ] dn: %r", dn)
         self.logger.debug("changed attributes: %r", self.diff(old, new))
-        asyncio.run(handle_changes(new, old))
+        self._send_message(new, old)
 
     def remove(self, dn, old):
         self.logger.info("[ remove ] dn: %r", dn)
-        asyncio.run(handle_changes({}, old))
+        self._send_message({}, old)
 
-    class Configuration(ListenerModuleHandler.Configuration):
-        name = name
-        description = "this listener will be used to send LDAP changes to provisioning consumers"
-        ldap_filter = "(objectClass=*)"
+    def _ensure_queue_exists(self) -> None:
+        asyncio.run(self._async_ensure_queue_exists())
+
+    async def _async_ensure_queue_exists(self) -> None:
+        async with self.mq as mq:
+            await mq.ensure_queue_exists()
+
+    def _send_message(self, new, old) -> None:
+        asyncio.run(self._async_send_message(new, old))
+
+    async def _async_send_message(self, new, old) -> None:
+        async with self.mq as mq:
+            await mq.enqueue_change_event(new, old)
