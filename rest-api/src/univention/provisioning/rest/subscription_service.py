@@ -15,10 +15,10 @@ from univention.provisioning.rest.models import NewSubscription
 
 from .port import Port
 
-REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 logger = logging.getLogger(__name__)
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 PASSWORD_CACHE_TTL = 30.0
+REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 
 
 @cachetools.func.ttl_cache(maxsize=32, ttl=PASSWORD_CACHE_TTL)

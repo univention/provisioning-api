@@ -3,8 +3,8 @@
 
 import pytest
 
-from univention.provisioning.consumer import MessageHandler, ProvisioningConsumerClient
-from univention.provisioning.models import Message
+from univention.provisioning.consumer.api import MessageHandler, ProvisioningConsumerClient
+from univention.provisioning.models.message import Message
 
 from .helpers import create_message_via_events_api
 
