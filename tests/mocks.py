@@ -8,9 +8,9 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from univention.provisioning.backends.nats_mq import NatsMessageQueue
-from univention.provisioning.backends.nats_kv import NatsKeyValueDB
 from univention.provisioning.backends.key_value_db import UpdateConflict
+from univention.provisioning.backends.nats_kv import NatsKeyValueDB
+from univention.provisioning.backends.nats_mq import NatsMessageQueue
 from univention.provisioning.models.constants import Bucket
 from univention.provisioning.rest.config import AppSettings
 from univention.provisioning.rest.port import Port

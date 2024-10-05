@@ -7,16 +7,16 @@ from datetime import datetime
 from pydantic import ValidationError
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import PREFILL_STREAM, PREFILL_SUBJECT_TEMPLATE, PublisherName
+from univention.provisioning.models.constants import PREFILL_QUEUE_NAME, PREFILL_SUBJECT_TEMPLATE, PublisherName
 from univention.provisioning.models.message import (
     Body,
     Message,
     MQMessage,
+    PrefillMessage,
     SimpleMessage,
 )
-from univention.provisioning.rest.models import FillQueueStatus
+from univention.provisioning.models.subscription import FillQueueStatus
 
-from .models import PrefillMessage
 from .port import PrefillPort
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class UDMPreFill:
         logger.info("Handling the requests to prefill")
 
         await self.prepare_prefill_failures_queue()
-        await self._port.initialize_subscription(PREFILL_STREAM, False, None)
+        await self._port.initialize_subscription(PREFILL_QUEUE_NAME, False, None)
 
         while True:
             logger.debug("Waiting for new prefill requests...")

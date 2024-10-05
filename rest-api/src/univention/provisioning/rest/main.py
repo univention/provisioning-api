@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_utils.timing import add_timing_middleware
 
-from univention.provisioning.models.constants import PREFILL_STREAM
+from univention.provisioning.models.constants import PREFILL_QUEUE_NAME
 from univention.provisioning.utils.log import setup_logging
 
 from .config import app_settings
@@ -78,7 +78,7 @@ async def startup_task():
 
     async with Port.port_context() as port:
         logger.info("Checking MQ connectivity...")
-        await port.ensure_stream(PREFILL_STREAM, False)
+        await port.ensure_stream(PREFILL_QUEUE_NAME, False)
 
 
 @app.exception_handler(RequestValidationError)

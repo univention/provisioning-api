@@ -9,6 +9,7 @@ packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
 daemoniker = "^0.2.3"
+msgpack = "^1.1.0"
 nubus-provisioning-common = "^0.1.0"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"

@@ -9,8 +9,8 @@ from fastapi import HTTPException
 
 from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.message import RealmTopic
-from univention.provisioning.models.subscription import Subscription
-from univention.provisioning.rest.models import FillQueueStatus, NewSubscription
+from univention.provisioning.models.subscription import FillQueueStatus, Subscription
+from univention.provisioning.rest.models import NewSubscription
 from univention.provisioning.services.subscriptions import SubscriptionService
 
 from ..mock_data import (
