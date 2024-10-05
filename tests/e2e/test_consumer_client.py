@@ -5,7 +5,7 @@ import aiohttp
 import pytest
 
 from univention.admin.rest.client import UDM, UnprocessableEntity
-from univention.provisioning.consumer import ProvisioningConsumerClient
+from univention.provisioning.consumer.api import ProvisioningConsumerClient
 
 from .conftest import E2ETestSettings
 from .helpers import (
