@@ -6,8 +6,8 @@ import asyncio
 from univention.provisioning.utils.log import setup_logging
 
 from .config import dispatcher_settings
-from .dispatcher import DispatcherService
 from .port import DispatcherPort
+from .service import DispatcherService
 
 
 async def run_dispatcher():

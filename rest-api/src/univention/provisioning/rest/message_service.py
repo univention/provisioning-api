@@ -7,16 +7,16 @@ from datetime import datetime
 from typing import Optional
 
 from univention.provisioning.models.constants import (
-    DISPATCHER_STREAM,
+    DISPATCHER_QUEUE_NAME,
     DISPATCHER_SUBJECT_TEMPLATE,
-    PREFILL_STREAM,
+    PREFILL_QUEUE_NAME,
     PREFILL_SUBJECT_TEMPLATE,
     PublisherName,
 )
-from univention.provisioning.models.message import Message, ProvisioningMessage
-from univention.provisioning.prefill.models import PrefillMessage
+from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
+from univention.provisioning.models.subscription import FillQueueStatus
 
-from .models import FillQueueStatus, MessageProcessingStatus, NewSubscription
+from .models import MessageProcessingStatus, NewSubscription
 from .port import Port
 from .subscription_service import SubscriptionService
 
@@ -100,7 +100,7 @@ class MessageService:
             await self._port.delete_message(subscription_name, seq_num)
 
     async def add_live_event(self, event: Message):
-        await self._port.add_message(DISPATCHER_STREAM, DISPATCHER_STREAM, event)
+        await self._port.add_message(DISPATCHER_QUEUE_NAME, DISPATCHER_QUEUE_NAME, event)
 
     async def send_request_to_prefill(self, subscription: NewSubscription):
         logger.info("Sending the requests to prefill")
@@ -110,4 +110,4 @@ class MessageService:
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,
         )
-        await self._port.add_message(PREFILL_STREAM, PREFILL_STREAM, message)
+        await self._port.add_message(PREFILL_QUEUE_NAME, PREFILL_QUEUE_NAME, message)

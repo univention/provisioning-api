@@ -9,9 +9,15 @@ from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
-from univention.provisioning.models.message import Body, Message, MQMessage, ProvisioningMessage, PublisherName
+from univention.provisioning.models.message import (
+    Body,
+    Message,
+    MQMessage,
+    PrefillMessage,
+    ProvisioningMessage,
+    PublisherName,
+)
 from univention.provisioning.models.subscription import RealmTopic, Subscription
-from univention.provisioning.prefill.models import PrefillMessage
 from univention.provisioning.rest.models import MessageProcessingStatus
 
 NATS_SERVER = "nats://localhost:4222"

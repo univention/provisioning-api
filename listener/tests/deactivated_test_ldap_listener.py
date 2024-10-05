@@ -9,7 +9,7 @@ import pytest
 from univention.provisioning.listener.config import ldap_producer_settings
 from univention.provisioning.listener.port import messagepack_encoder
 from univention.provisioning.listener.service import ensure_stream, handle_changes
-from univention.provisioning.models.constants import PublisherName, LDAP_STREAM
+from univention.provisioning.models.constants import PublisherName, LDAP_PRODUCER_QUEUE_NAME
 from univention.provisioning.models.message import Body, Message
 from univention.provisioning.listener.service import LDAP_SUBJECT
 
@@ -125,7 +125,7 @@ def mock_nats_adapter():
         adapter.connect = AsyncMock()
         adapter.close = AsyncMock()
         adapter.add_message = AsyncMock()
-        adapter.ensure_stream = AsyncMock()
+        adapter.ensure_queue_exists = AsyncMock()
 
         yield adapter
 
@@ -150,7 +150,7 @@ async def test_ensure_stream(mock_nats_adapter):
 
     mock_nats_adapter.connect.assert_awaited_once()
     mock_nats_adapter.close.assert_awaited_once()
-    mock_nats_adapter.ensure_stream.assert_awaited_once_with(LDAP_STREAM, False, [LDAP_SUBJECT])
+    mock_nats_adapter.ensure_queue_exists.assert_awaited_once_with(LDAP_PRODUCER_QUEUE_NAME, False, [LDAP_SUBJECT])
 
 
 async def test_handle_changes(mock_nats_adapter):
@@ -159,5 +159,5 @@ async def test_handle_changes(mock_nats_adapter):
     mock_nats_adapter.connect.assert_awaited_once()
     mock_nats_adapter.close.assert_awaited_once()
     mock_nats_adapter.add_message.assert_awaited_once_with(
-        LDAP_STREAM, LDAP_SUBJECT, ANY, binary_encoder=messagepack_encoder
+        LDAP_PRODUCER_QUEUE_NAME, LDAP_SUBJECT, ANY, binary_encoder=messagepack_encoder
     )
