@@ -9,9 +9,9 @@ from fastapi import Depends
 
 from univention.provisioning.backends import key_value_store, message_queue
 from univention.provisioning.models.constants import Bucket
-from univention.provisioning.models.message import Message, ProvisioningMessage
-from univention.provisioning.prefill.models import PrefillMessage
-from univention.provisioning.rest.config import AppSettings, app_settings
+from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
+
+from .config import AppSettings, app_settings
 
 
 class Port:

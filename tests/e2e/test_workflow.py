@@ -9,7 +9,7 @@ import pytest
 import requests
 
 from univention.provisioning.models.constants import PublisherName
-from univention.provisioning.rest.models import FillQueueStatus
+from univention.provisioning.models.subscription import FillQueueStatus
 
 from .conftest import E2ETestSettings
 
