@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, Mock, call
 
 import pytest
 from nats.js.errors import BucketNotFoundError, NotFoundError
-
-from univention.provisioning.backends import NatsKeys, UpdateConflict
+from univention.provisioning.backends.nats_mq import NatsKeys
+from univention.provisioning.backends.key_value_db import UpdateConflict
 from univention.provisioning.models.constants import Bucket
 
 from ..mock_data import (

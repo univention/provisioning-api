@@ -3,10 +3,10 @@
 import asyncio
 import logging
 
+from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.models.constants import DISPATCHER_STREAM, DISPATCHER_SUBJECT_TEMPLATE
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
-from univention.provisioning.utils.message_ack_manager import MessageAckManager
 
 from .port import DispatcherPort
 

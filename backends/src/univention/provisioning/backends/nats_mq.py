@@ -13,11 +13,7 @@ from nats.js.errors import NotFoundError, ServerError
 
 from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
 
-from .message_queue import Acknowledgements, MessageQueue, json_decoder, json_encoder
-
-
-class Empty(Exception): ...
-
+from .message_queue import Acknowledgements, Empty, MessageQueue, json_decoder, json_encoder
 
 logger = logging.getLogger(__name__)
 

@@ -15,10 +15,10 @@ from univention.provisioning.models.constants import (
 )
 from univention.provisioning.models.message import Message, ProvisioningMessage
 from univention.provisioning.prefill.models import PrefillMessage
-from univention.provisioning.services.port import Port
-from univention.provisioning.services.subscriptions import SubscriptionService
 
 from .models import FillQueueStatus, MessageProcessingStatus, NewSubscription
+from .port import Port
+from .subscription_service import SubscriptionService
 
 logger = logging.getLogger(__name__)
 
