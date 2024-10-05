@@ -6,7 +6,7 @@ import logging
 from pydantic import ValidationError
 
 from univention.provisioning.backends.message_queue import Acknowledgements, Empty, MessageAckManager
-from univention.provisioning.models.constants import LDAP_STREAM, LDIF_STREAM, PublisherName
+from univention.provisioning.models.constants import LDAP_PRODUCER_QUEUE_NAME, LDIF_PRODUCER_QUEUE_NAME, PublisherName
 from univention.provisioning.models.message import (
     Message,
 )
@@ -17,8 +17,8 @@ from .udm import UDMMessagingService
 LDAP_SUBJECT = "ldap-producer-subject"
 LDIF_SUBJECT = "ldif-producer-subject"
 STREAM = {
-    PublisherName.ldif_producer: LDIF_STREAM,
-    PublisherName.udm_listener: LDAP_STREAM,
+    PublisherName.ldif_producer: LDIF_PRODUCER_QUEUE_NAME,
+    PublisherName.udm_listener: LDAP_PRODUCER_QUEUE_NAME,
 }
 SUBJECT = {
     PublisherName.ldif_producer: LDIF_SUBJECT,

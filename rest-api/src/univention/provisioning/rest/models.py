@@ -9,23 +9,6 @@ from pydantic import BaseModel, Field
 from univention.provisioning.models.subscription import BaseSubscription
 
 
-class FillQueueStatus(str, enum.Enum):
-    # Pre-filling the queue was not yet started.
-    pending = "pending"
-    # The queue is being pre-filled.
-    running = "running"
-    # The pre-fill task failed.
-    failed = "failed"
-    # The queue was pre-filled successfully.
-    done = "done"
-
-
-class FillQueueStatusReport(BaseModel):
-    """Update a subscription's prefill queue status."""
-
-    status: FillQueueStatus = Field(description="State of the prefill process.")
-
-
 class NewSubscription(BaseSubscription):
     """Request to register a subscription."""
 

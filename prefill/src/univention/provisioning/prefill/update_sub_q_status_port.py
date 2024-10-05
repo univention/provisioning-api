@@ -3,7 +3,7 @@
 
 import abc
 
-from univention.provisioning.rest.models import FillQueueStatus
+from univention.provisioning.models.subscription import FillQueueStatus
 
 
 class UpdateSubscriptionsQueueStatusPort(abc.ABC):
