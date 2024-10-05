@@ -3,7 +3,7 @@
 
 import aiohttp
 
-from univention.provisioning.rest.models import FillQueueStatus, FillQueueStatusReport
+from univention.provisioning.models.subscription import FillQueueStatus, FillQueueStatusReport
 
 from .update_sub_q_status_port import UpdateSubscriptionsQueueStatusPort
 

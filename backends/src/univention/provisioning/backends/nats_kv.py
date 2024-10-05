@@ -19,7 +19,6 @@ from univention.provisioning.models.subscription import Subscription
 
 from .key_value_db import KeyValueDB, UpdateConflict
 
-
 logger = logging.getLogger(__name__)
 
 
