@@ -8,6 +8,7 @@ readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
+aiohttp = "^3.10.9"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
