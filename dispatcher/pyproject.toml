@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
-nubus-provisioning-common = "^0.1.0"
+nubus-provisioning-common = ">=0.1.0"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
 # tests.mock_data
