@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "provisioning-listener"
+name = "nubus-provisioning-listener"
 version = "0.1.0"
 description = "Nubus - Provisioning Listener (depricated in favor of LDIF Producer)"
 authors = ["Univention GmbH <packages@univention.de>"]
@@ -11,14 +11,13 @@ packages = [{ include = "univention", from = "src" }]
 ##############
 # Python 3.7 #
 ##############
-aiohttp = "^3.8.5"
 daemoniker = "^0.2.3"
 msgpack = "1.0.5"  # py311: "^1.1.0"
-nubus-provisioning-common = "^0.1.0"
+nats-py = "<=2.7.0"  # py311: "^2.9.0" # newer versions use Literal from typing which is Python 3.8+
+nubus-provisioning-backends = ">=0.1.0"
+nubus-provisioning-common = ">=0.1.0"
 pydantic-settings = "^2.0.3"  # py311: "^2.5.2"
 python = "^3.7"
-# univention.provisioning.models
-# server.adapters.nats_adapter
 # univention.listener
 
 [tool.poetry.group.dev.dependencies]

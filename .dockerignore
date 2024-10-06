@@ -1,4 +1,11 @@
 docs/
 helm/
+.git/
 .gitlab/
-
+.idea/
+.pre-commit-config.yaml
+**/.coverage
+**/.pytest_cache
+**/.ruff_cache
+**/.venv
+**/__pycache__
