@@ -8,14 +8,12 @@ readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
+nubus-provisioning-backends = ">=0.1.0"
 nubus-provisioning-common = ">=0.1.0"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
 # tests.mock_data
 # tests.EscapeLoopException
-# server.adapters.nats_adapter
-# univention.provisioning.models
-# server.utils.old_message_ack_manager
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
