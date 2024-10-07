@@ -22,7 +22,7 @@ python = "^3.11"
 consumer = "univention.provisioning.consumer.example_client.main:run"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.2"
+pytest = "^8.0.0"
 pytest-cov = "4.1"
 
 [[tool.poetry.source]]
