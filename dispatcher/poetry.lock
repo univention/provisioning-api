@@ -118,6 +118,19 @@ files = [
 ]
 
 [[package]]
+name = "nubus-provisioning-backends"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning Backends"
+optional = false
+python-versions = "*"
+files = []
+develop = true
+
+[package.source]
+type = "directory"
+url = "../backends"
+
+[[package]]
 name = "nubus-provisioning-common"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning common code"
@@ -384,4 +397,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "079a222c699731bb8430d4da4276cd5fe558ae8db2e8ee102b7e24b42b9c544a"
+content-hash = "6e89d6c067ee7b85ffa93011c94c3aa0006e03d8dfa6ebc287f4be35888b5603"
