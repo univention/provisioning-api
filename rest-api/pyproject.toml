@@ -8,15 +8,15 @@ readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
+asgi-correlation-id = "^4.3.3"
 fastapi = "^0.103.1"
 fastapi-utils = "^0.7.0"
-httptools="^0.6.1"
+httptools = "^0.6.1"
+nubus-provisioning-backends = ">=0.1.0"
+nubus-provisioning-common = ">=0.1.0"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
-# univention.provisioning.models
-# server.services.messages
-# server.services.subscriptions
 # tests.mock_data
 
 [tool.poetry.group.dev.dependencies]

@@ -32,6 +32,23 @@ test = ["anyio[trio]", "coverage[toml] (>=4.5)", "hypothesis (>=4.0)", "mock (>=
 trio = ["trio (<0.22)"]
 
 [[package]]
+name = "asgi-correlation-id"
+version = "4.3.3"
+description = "Middleware correlating project logs to individual requests"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "asgi_correlation_id-4.3.3-py3-none-any.whl", hash = "sha256:62ba38c359aa004c1c3e2b8e0cdf0e8ad4aa5a93864eaadc46e77d5c142a206a"},
+    {file = "asgi_correlation_id-4.3.3.tar.gz", hash = "sha256:25d89b52f3d32c0f3b4915a9fc38d9cffc7395960d05910bdce5c13023dc237b"},
+]
+
+[package.dependencies]
+starlette = ">=0.18"
+
+[package.extras]
+celery = ["celery"]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -238,6 +255,32 @@ files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
 ]
+
+[[package]]
+name = "nubus-provisioning-backends"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning Backends"
+optional = false
+python-versions = "*"
+files = []
+develop = true
+
+[package.source]
+type = "directory"
+url = "../backends"
+
+[[package]]
+name = "nubus-provisioning-common"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning common code"
+optional = false
+python-versions = "*"
+files = []
+develop = true
+
+[package.source]
+type = "directory"
+url = "../common"
 
 [[package]]
 name = "packaging"
@@ -549,4 +592,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "ceeb805b5eb04bf3a0b911b4688ed2f88ae5dae13fab318431b74797a41ab03a"
+content-hash = "7bfb4d8d8b5e2872b8d69b4fc6f4540a7cf57cac71c1aaa1f70d14856dda2d0c"
