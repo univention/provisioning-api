@@ -3,8 +3,9 @@
 
 
 import pytest
-from server.core.app.main import app
-from server.services.port import Port
+
+from univention.provisioning.rest.main import app
+from univention.provisioning.rest.port import Port
 
 # from server.core.app.dependencies import AppSettingsDep
 from .mocks import port_fake_dependency
