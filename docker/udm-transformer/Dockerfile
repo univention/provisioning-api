@@ -4,63 +4,89 @@
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-521
 ARG UCS_BASE_IMAGE_TAG=0.18.1-build-2025-05-15
 
-ARG WORKDIR="/app"
+###############################################
+# Stage 1: build dependencies and software
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as dep_builder
 
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as build
-ARG WORKDIR
+ARG WORKDIR="/app"
+ENV POETRY_NO_INTERACTION=1
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR ${WORKDIR}
 
+RUN apt-get update \
+    && apt-get --assume-yes --verbose-versions --no-install-recommends install python3-pip=23.* \
+    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
+    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.8.3 poetry-plugin-export==1.8.0 \
+    && poetry config virtualenvs.create false \
+    && poetry config warnings.export false
+
+# copy source code
+COPY ./CHANGELOG.md /tmp/
+COPY ./backends ${WORKDIR}/backends/
+COPY ./common ${WORKDIR}/common/
+COPY ./udm-transformer ${WORKDIR}/udm-transformer/
+
+# build wheels of dependencies and project
+RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
+    && poetry version "$VERSION" -C ${WORKDIR}/common \
+    && poetry version "$VERSION" -C ${WORKDIR}/backends \
+    && poetry version "$VERSION" -C ${WORKDIR}/udm-transformer \
+    && poetry build --format=wheel -C ${WORKDIR}/common \
+    && poetry build --format=wheel -C ${WORKDIR}/backends \
+    && poetry build --format=wheel -C ${WORKDIR}/udm-transformer
+
+# export dev requirements
+RUN poetry export --only=dev -C ${WORKDIR}/udm-transformer -o ${WORKDIR}/requirements_udm-transformer_dev.txt
+
+###############################################
+# Stage 2: install dependencies and software
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as app_builder
+
 ARG USER=udm-transformer
-RUN useradd -m "$USER"
-RUN chown "$USER":"$USER" "$WORKDIR" \
-    && apt-get -qq update \
+ARG WORKDIR="/app"
+ENV WEB_CONCURRENCY=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+WORKDIR ${WORKDIR}
+
+RUN apt-get update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       python3-pip \
       python3-univention-directory-manager-rest \
+    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-USER "$USER"
-ENV \
-    PATH="/home/${USER}/.local/bin:${PATH}" \
-    PYTHONPATH="." \
-    WEB_CONCURRENCY=1 \
-    # Do not buffer `stdout`
-    PYTHONUNBUFFERED=1 \
-    # Do not create `.pyc` files
-    PYTHONDONTWRITEBYTECODE=1 \
-    # Do not ask questions
-    POETRY_NO_INTERACTION=1 \
-    # Put .venv inside source folder
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    # Cache of poetry
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+# allow image scanners like trivy to detect Python packages (additionally "pip freeze" below)
+COPY ./backends/poetry.lock ./backends/pyproject.toml ${WORKDIR}/backends/
+COPY ./common/poetry.lock ./common/pyproject.toml ${WORKDIR}/common/
+COPY ./udm-transformer/poetry.lock ./udm-transformer/pyproject.toml ${WORKDIR}/udm-transformer/
 
-# install Poetry
-RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
-
-# install dependencies
-COPY poetry.lock \
-     pyproject.toml \
-     README.md \
-     ${WORKDIR}/
-# Activate system packages to get the debian installed udm library
-RUN poetry config virtualenvs.options.system-site-packages true && \
-    poetry install --no-root
-
-# copy source code
-COPY ./src/server ${WORKDIR}/src/server
-COPY ./src/univention/provisioning/models ${WORKDIR}/src/univention/provisioning/models
-COPY ./src/udm_transformer ${WORKDIR}/src/udm_transformer
-RUN poetry install --only main
+# install dependencies and project
+COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
+RUN useradd -m "$USER" \
+    && chown "$USER":"$USER" "$WORKDIR" \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_udm_transformer-*.whl \
+    && python3 -m pip freeze --all > ${WORKDIR}/requirements.txt \
+    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ###############################################
-# Stage 2: final image
-FROM build as final
-ARG WORKDIR
+# Stage 3: test image
+FROM app_builder as test
 WORKDIR ${WORKDIR}
 
-# Copy udm-transformer code
-COPY --from=build ${WORKDIR} ${WORKDIR}
+COPY --from=dep_builder ${WORKDIR}/requirements_udm-transformer_dev.txt /tmp
 
-# run
-ENTRYPOINT ["/app/.venv/bin/python3", "/app/src/udm_transformer/main.py"]
+RUN grep -v 'file:///app' "/tmp/requirements_udm-transformer_dev.txt" > "/tmp/requirements_udm-transformer_dev2.txt" \
+    && python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements_udm-transformer_dev2.txt \
+    && python3 -m pip freeze --all > "${WORKDIR}/requirements.txt" \
+    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
+
+###############################################
+# Stage 3: final image
+FROM app_builder as final
+
+ENTRYPOINT ["python3", "-m", "univention.provisioning.udm_transformer.main"]
