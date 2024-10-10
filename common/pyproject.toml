@@ -12,6 +12,7 @@ packages = [{ include = "univention", from = "src" }]
 # Python 3.7 - listener imports this #
 ######################################
 asgi-correlation-id = ">=4.2.0"  # py311: "^4.3.3"
+pydantic = ">=2.5.2"  # py311: "^2.9.2"
 python = ">=3.7,<4.0"
 
 [tool.poetry.group.dev.dependencies]
