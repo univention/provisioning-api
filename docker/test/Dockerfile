@@ -35,7 +35,7 @@ COPY ./udm-transformer ${WORKDIR}/udm-transformer/
 
 # set package version, build wheels of projects, and export dev dependencies
 RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
-    && for DIR in common backends consumer consumer_example dispatcher prefill rest-api udm-transformer; do \
+    && for DIR in common backends consumer consumer_example dispatcher prefill rest-api tests udm-transformer; do \
          echo "== ${WORKDIR}/${DIR} ==" \
          && poetry version "$VERSION" -C "${WORKDIR}/$DIR" \
          && poetry build --format=wheel -C ${WORKDIR}/$DIR \
@@ -79,7 +79,7 @@ RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
       python3-univention-directory-manager-rest-client=12.* \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 RUN python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && for DIR in common backends consumer consumer_example dispatcher prefill rest-api udm-transformer; do \
+    && for DIR in common backends consumer consumer_example dispatcher prefill rest-api tests udm-transformer; do \
          python3 -m pip install --break-system-packages --no-cache-dir -U "/tmp/nubus_provisioning_$(echo $DIR | tr - _)-*.whl" \
          && if [ -e /tmp/requirements_${DIR}_dev.txt ]; then \
               python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements_${DIR}_dev.txt; \
