@@ -55,3 +55,4 @@ extend-select = ["I"]  # activate isort
 
 [tool.ruff.lint.isort]
 known-first-party = ["univention"]
+known-third-party = ["difflib"]
