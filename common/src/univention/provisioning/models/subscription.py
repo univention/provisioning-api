@@ -60,3 +60,14 @@ class FillQueueStatusReport(BaseModel):
     """Update a subscription's prefill queue status."""
 
     status: FillQueueStatus = Field(description="State of the prefill process.")
+
+
+class NewSubscription(BaseSubscription):
+    """Request to register a subscription."""
+
+    password: str = Field(description="Password for subscription registration.")
+
+    def __eq__(self, other: "NewSubscription") -> bool:
+        if not super().__eq__(other):
+            return False
+        return self.password == other.password
