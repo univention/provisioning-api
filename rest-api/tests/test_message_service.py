@@ -10,8 +10,9 @@ from univention.provisioning.models.constants import (
     DISPATCHER_SUBJECT_TEMPLATE,
     PREFILL_SUBJECT_TEMPLATE,
 )
+from univention.provisioning.models.message import MessageProcessingStatus
 from univention.provisioning.models.subscription import FillQueueStatus
-from univention.provisioning.rest.message_service import MessageProcessingStatus, MessageService
+from univention.provisioning.rest.message_service import MessageService
 from univention.provisioning.testing.mock_data import MESSAGE, SUBSCRIPTION_NAME
 
 MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
