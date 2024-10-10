@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import difflib
 import json
 import logging
 from typing import Optional
+
+import difflib
 
 from univention.provisioning.models.message import ProvisioningMessage
 

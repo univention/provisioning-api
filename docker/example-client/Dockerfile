@@ -4,51 +4,67 @@
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-521
 ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
+###############################################
+# Stage 1: build dependencies and software
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as dep_builder
 
 ARG WORKDIR="/app"
-
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as build
-ARG WORKDIR
+ENV POETRY_NO_INTERACTION=1
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR ${WORKDIR}
 
-ARG USER=fastapi
-RUN useradd -m "$USER"
-RUN chown "$USER":"$USER" "$WORKDIR" \
-    && apt-get -qq update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip \
-    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
-USER "$USER"
-ENV \
-    PATH="/home/${USER}/.local/bin:${PATH}" \
-    PYTHONPATH="." \
-    WEB_CONCURRENCY=1 \
-    # Do not buffer `stdout`
-    PYTHONUNBUFFERED=1 \
-    # Do not ask questions
-    POETRY_NO_INTERACTION=1
+RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
+    && apt-get update \
+    && apt-get --assume-yes --verbose-versions --no-install-recommends install python3-pip=23.* \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
+    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.8.3 \
+    && poetry config virtualenvs.create false
 
-# install Poetry
-RUN pip3 install --break-system-packages --no-cache-dir poetry==1.8.3 poetry-plugin-export==1.8.0
+# copy source code
+COPY ./CHANGELOG.md /tmp/
+COPY ./common ${WORKDIR}/common/
+COPY ./consumer ${WORKDIR}/consumer/
+COPY ./consumer_example ${WORKDIR}/consumer_example/
 
-# copy dependencies configuration
-COPY ./src/poetry.lock \
-     ./src/pyproject.toml \
-     ${WORKDIR}/
-
-# export dependencies
-RUN poetry export -o ${WORKDIR}/requirements.txt
+# build wheels of dependencies and project
+RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
+    && poetry version "$VERSION" -C ${WORKDIR}/common \
+    && poetry version "$VERSION" -C ${WORKDIR}/consumer \
+    && poetry version "$VERSION" -C ${WORKDIR}/consumer_example \
+    && poetry build --format=wheel -C ${WORKDIR}/common \
+    && poetry build --format=wheel -C ${WORKDIR}/consumer \
+    && poetry build --format=wheel -C ${WORKDIR}/consumer_example
 
 ###############################################
-# Stage 2: final image
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as final
-ARG WORKDIR
+# Stage 2: install dependencies and software
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG}
+
+ARG USER=consumer_example
+ARG WORKDIR="/app"
+ENV WEB_CONCURRENCY=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 WORKDIR ${WORKDIR}
 
-RUN apt-get --assume-yes --verbose-versions --no-install-recommends install 'python3-pip=23.0.*'
-COPY --from=build ${WORKDIR}/pyproject.toml ${WORKDIR}/requirements.txt ${WORKDIR}/
-RUN pip3 install --break-system-packages --no-cache-dir -r ${WORKDIR}/requirements.txt
-COPY ./src/univention/provisioning ${WORKDIR}/univention/provisioning
-RUN pip3 install --break-system-packages --no-cache-dir ${WORKDIR}/
+RUN apt-get update \
+    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
+      python3-pip=23.* \
+    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
+    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-ENTRYPOINT ["/usr/bin/python3", "-m", "univention.provisioning.consumer.example_client.main"]
+# allow image scanners like trivy to detect Python packages (additionally "pip freeze" below)
+COPY ./consumer/poetry.lock ./consumer/pyproject.toml ${WORKDIR}/consumer/
+COPY ./consumer_example/poetry.lock ./consumer_example/pyproject.toml ${WORKDIR}/consumer_example/
+
+# install dependencies and project
+COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
+RUN useradd -m "$USER" \
+    && chown "$USER":"$USER" "$WORKDIR" \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer-*.whl \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer_example-*.whl \
+    && python3 -m pip freeze --all > ${WORKDIR}/requirements.txt \
+    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
+
+ENTRYPOINT ["python3", "-m", "univention.provisioning.consumer_example.main"]
