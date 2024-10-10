@@ -20,6 +20,7 @@ nubus-provisioning-tests = ">=0.1.0"
 pytest = "^8.3.3"
 pytest-asyncio = "^0.24"
 pytest-cov = "^5.0"
+pytest-env = "^1.1.5"
 
 [[tool.poetry.source]]
 name = "PyPI"
@@ -37,6 +38,13 @@ log_cli = 0  # activate on the CLI with: "-o log_cli=true"
 log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
+
+[tool.pytest_env]
+LOG_LEVEL = {value = "DEBUG", skip_if_set = true}
+MAX_ACKNOWLEDGEMENT_RETRIES = {value = 3, skip_if_set = true}
+PROVISIONING_API_BASE_URL = {value = "http://localhost:7777", skip_if_set = true}
+PROVISIONING_API_PASSWORD = {value = "bar", skip_if_set = true}
+PROVISIONING_API_USERNAME = {value = "foo", skip_if_set = true}
 
 [build-system]
 requires = ["poetry-core"]
