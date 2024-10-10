@@ -13,10 +13,9 @@ from univention.provisioning.models.constants import (
     PREFILL_SUBJECT_TEMPLATE,
     PublisherName,
 )
-from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
-from univention.provisioning.models.subscription import FillQueueStatus
+from univention.provisioning.models.message import Message, MessageProcessingStatus, PrefillMessage, ProvisioningMessage
+from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription
 
-from .models import MessageProcessingStatus, NewSubscription
 from .port import Port
 from .subscription_service import SubscriptionService
 
