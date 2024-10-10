@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
-from univention.provisioning.rest.models import MessageProcessingStatus
+from univention.provisioning.models.message import MessageProcessingStatus
 
 
 async def test_get_multiple_messages(
