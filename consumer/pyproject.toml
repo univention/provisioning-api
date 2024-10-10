@@ -11,7 +11,6 @@ packages = [{ include = "univention", from = "src" }]
 aiohttp = "^3.10.9"
 jsondiff = "^2.2.1"
 nubus-provisioning-common = ">=0.1.0"
-# TODO: nubus-provisioning-rest used in api.py - move
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
