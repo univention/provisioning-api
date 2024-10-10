@@ -9,19 +9,20 @@ import pytest
 
 from univention.provisioning.models.subscription import FillQueueStatus
 from univention.provisioning.rest.config import app_settings
-
-from ..mock_data import (
+from univention.provisioning.rest.models import MessageProcessingStatus
+from univention.provisioning.testing.mock_data import (
     CONSUMER_PASSWORD,
     FLAT_BODY,
     GROUPS_REALMS_TOPICS,
     GROUPS_TOPIC,
-    MESSAGE_PROCESSING_SEQ_ID,
-    MESSAGE_PROCESSING_STATUS,
     PUBLISHER_NAME,
     REALM,
     SUBSCRIPTION_NAME,
     GROUPS_REALMS_TOPICS_as_dicts,
 )
+
+MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
+MESSAGE_PROCESSING_SEQ_ID = 1
 
 
 @pytest.mark.anyio

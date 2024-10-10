@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-
-class EscapeLoopException(Exception): ...
+pytest_plugins = ["univention.provisioning.testing.conftest"]

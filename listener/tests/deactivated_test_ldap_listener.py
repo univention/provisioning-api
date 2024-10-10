@@ -7,11 +7,11 @@ from unittest.mock import ANY, AsyncMock, patch
 import msgpack
 import pytest
 from univention.provisioning.listener.config import ldap_producer_settings
-from univention.provisioning.listener.port import messagepack_encoder
+from univention.provisioning.listener.mq_adapter_nats import messagepack_encoder
 from univention.provisioning.listener.service import ensure_stream, handle_changes
 from univention.provisioning.models.constants import PublisherName, LDAP_PRODUCER_QUEUE_NAME
 from univention.provisioning.models.message import Body, Message
-from univention.provisioning.listener.service import LDAP_SUBJECT
+from univention.provisioning.listener.message_queue import LDAP_SUBJECT
 
 user_entry = {
     "krb5MaxLife": [b"86400"],
