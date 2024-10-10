@@ -3,7 +3,11 @@
 
 import copy
 from typing import Any, Optional
-from unittest.mock import AsyncMock
+
+try:
+    from unittest.mock import AsyncMock
+except ImportError:
+    from mock import AsyncMock
 
 from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
@@ -83,15 +87,15 @@ class FakeJs(AsyncMock):
 
 
 class MockNatsMQAdapter(NatsMessageQueue):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, server: str, user: str, password: str, max_reconnect_attempts: int = 5, **connect_kwargs):
+        super().__init__(server, user, password, max_reconnect_attempts, **connect_kwargs)
         self._nats = AsyncMock()
         self._js = FakeJs()
         self._message_queue = FakeMessageQueue()
 
 
 class MockNatsKVAdapter(NatsKeyValueDB):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, server: str, user: str, password: str):
+        super().__init__(server, user, password)
         self._nats = AsyncMock()
         self._js = FakeJs()

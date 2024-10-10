@@ -2,12 +2,16 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
+
+try:
+    from unittest.mock import AsyncMock
+except ImportError:
+    from mock import AsyncMock
 
 import pytest
 from nats.js.errors import NotFoundError
 
-from univention.provisioning.backends.mocks import MockNatsMQAdapter
 from univention.provisioning.backends.nats_mq import NatsKeys
 from univention.provisioning.testing.mock_data import (
     FLAT_MESSAGE_ENCODED,
@@ -19,35 +23,18 @@ from univention.provisioning.testing.mock_data import (
     SUBSCRIPTION_NAME,
 )
 
-CREDENTIALS = {"username": "dev-user", "password": "dev-password"}
-
-
-@pytest.fixture
-def mock_nats_mq_adapter() -> MockNatsMQAdapter:
-    return MockNatsMQAdapter()
-
-
-@pytest.fixture
-def mock_fetch(mock_nats_mq_adapter):
-    sub = AsyncMock()
-    sub.fetch = AsyncMock(return_value=[MSG])
-    mock_nats_mq_adapter._js.pull_subscribe = AsyncMock(return_value=sub)
-    return sub.fetch
-
 
 @pytest.mark.anyio
 class TestNatsMQAdapter:
     subject = "subject"
 
-    async def test_connect(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.connect(
-            server=NATS_SERVER, user=CREDENTIALS["username"], password=CREDENTIALS["password"]
-        )
+    async def test_connect(self, mock_nats_mq_adapter, nats_credentials):
+        result = await mock_nats_mq_adapter.connect()
 
         mock_nats_mq_adapter._nats.connect.assert_called_once_with(
             servers=NATS_SERVER,
-            user=CREDENTIALS["username"],
-            password=CREDENTIALS["password"],
+            user=nats_credentials["username"],
+            password=nats_credentials["password"],
             max_reconnect_attempts=5,
         )
         assert result is None

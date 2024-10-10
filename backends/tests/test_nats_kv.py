@@ -3,7 +3,12 @@
 
 import json
 from contextlib import nullcontext
-from unittest.mock import AsyncMock, call
+from unittest.mock import call
+
+try:
+    from unittest.mock import AsyncMock
+except ImportError:
+    from mock import AsyncMock
 
 import pytest
 from nats.js.errors import BucketNotFoundError
@@ -12,8 +17,6 @@ from univention.provisioning.backends.key_value_db import UpdateConflict
 from univention.provisioning.backends.mocks import FakeKvStore, MockNatsKVAdapter, kv_sub_info
 from univention.provisioning.models.constants import Bucket
 from univention.provisioning.testing.mock_data import SUBSCRIPTION_NAME, SUBSCRIPTION_INFO_dumpable
-
-CREDENTIALS = {"username": "dev-user", "password": "dev-password"}
 
 
 @pytest.fixture
@@ -27,28 +30,25 @@ def mock_kv():
 
 
 @pytest.fixture
-def mock_nats_kv_adapter(mock_kv) -> MockNatsKVAdapter:
-    mock_nats = MockNatsKVAdapter()
+def mock_nats_kv_adapter(mock_kv, nats_credentials) -> MockNatsKVAdapter:
+    mock_nats = MockNatsKVAdapter(
+        server="nats://localhost:4222", user=nats_credentials["username"], password=nats_credentials["password"]
+    )
     mock_nats._js.key_value = AsyncMock(return_value=mock_kv)
     return mock_nats
 
 
 @pytest.mark.anyio
 class TestNatsKVAdapter:
-    async def test_connect(self, mock_nats_kv_adapter):
+    async def test_connect(self, mock_nats_kv_adapter, nats_credentials):
         mock_nats_kv_adapter._js.key_value = AsyncMock(side_effect=BucketNotFoundError)
 
-        result = await mock_nats_kv_adapter.init(
-            server="nats://localhost:4222",
-            user=CREDENTIALS["username"],
-            password=CREDENTIALS["password"],
-            buckets=[Bucket.subscriptions],
-        )
+        result = await mock_nats_kv_adapter.init(buckets=[Bucket.subscriptions])
 
         mock_nats_kv_adapter._nats.connect.assert_called_once_with(
             servers="nats://localhost:4222",
-            user=CREDENTIALS["username"],
-            password=CREDENTIALS["password"],
+            user=nats_credentials["username"],
+            password=nats_credentials["password"],
             max_reconnect_attempts=1,
         )
         mock_nats_kv_adapter._js.create_key_value.assert_called_once_with(bucket=Bucket.subscriptions)
