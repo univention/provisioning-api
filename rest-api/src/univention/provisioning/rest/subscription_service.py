@@ -10,9 +10,8 @@ from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE, PREFILL_SUBJECT_TEMPLATE, Bucket
-from univention.provisioning.models.subscription import FillQueueStatus, Subscription
+from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
 
-from .models import NewSubscription
 from .port import Port
 
 logger = logging.getLogger(__name__)
