@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import copy
 from typing import Any, Optional
 from unittest.mock import AsyncMock
 
@@ -8,14 +9,26 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from univention.provisioning.backends.key_value_db import UpdateConflict
-from univention.provisioning.backends.nats_kv import NatsKeyValueDB
-from univention.provisioning.backends.nats_mq import NatsMessageQueue
 from univention.provisioning.models.constants import Bucket
-from univention.provisioning.rest.config import AppSettings
-from univention.provisioning.rest.port import Port
+from univention.provisioning.testing.mock_data import BASE_KV_OBJ, CONSUMER_HASHED_PASSWORD, MSG, SUBSCRIPTION_NAME
 
-from .mock_data import MSG, SUBSCRIPTION_NAME, kv_password, kv_sub_info
+from .key_value_db import UpdateConflict
+from .nats_kv import NatsKeyValueDB
+from .nats_mq import NatsMessageQueue
+
+kv_password = copy.copy(BASE_KV_OBJ)
+kv_password.key = SUBSCRIPTION_NAME
+kv_password.value = CONSUMER_HASHED_PASSWORD.encode()
+
+kv_sub_info = copy.copy(BASE_KV_OBJ)
+kv_sub_info.key = SUBSCRIPTION_NAME
+kv_sub_info.value = (
+    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", '
+    b'"realms_topics": [{"realm": "udm", "topic": "groups/group"}], '
+    b'"request_prefill": true, '
+    b'"prefill_queue_status": "done"}'
+)
+kv_sub_info.revision = 12
 
 
 class FakeMessageQueue(AsyncMock):
@@ -67,13 +80,6 @@ class FakeJs(AsyncMock):
     @classmethod
     async def key_value(cls, bucket: str):
         return FakeKvStore(bucket)
-
-
-async def port_fake_dependency() -> Port:
-    port = Port(AppSettings(nats_user="api", nats_password="apipass"))
-    port.mq_adapter = MockNatsMQAdapter()
-    port.kv_adapter = MockNatsKVAdapter()
-    return port
 
 
 class MockNatsMQAdapter(NatsMessageQueue):

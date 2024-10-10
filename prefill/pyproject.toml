@@ -15,15 +15,9 @@ nubus-provisioning-common = ">=0.1.0"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
-# server.adapters.internal_api_adapter
-# server.adapters.nats_adapter
-# server.adapters.udm_adapter
-# server.utils.message_ack_manager
-# univention.provisioning.models
-# test.mock_data
-# test.unit
 
 [tool.poetry.group.dev.dependencies]
+nubus-provisioning-tests = ">=0.1.0"
 pytest = "^8.3.3"
 pytest-asyncio = "^0.24"
 pytest-cov = "^5.0"
