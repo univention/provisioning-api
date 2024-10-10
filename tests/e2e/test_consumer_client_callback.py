@@ -6,8 +6,6 @@ import pytest
 from univention.provisioning.consumer.api import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models.message import Message
 
-from .helpers import create_message_via_events_api
-
 
 async def test_no_callback_function_provided(provisioning_client: ProvisioningConsumerClient, dummy_subscription: str):
     with pytest.raises(ValueError, match="Callback functions can't be empty"):
@@ -15,6 +13,7 @@ async def test_no_callback_function_provided(provisioning_client: ProvisioningCo
 
 
 async def test_get_one_message(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     dummy_subscription: str,
     test_settings,
@@ -32,6 +31,7 @@ async def test_get_one_message(
 
 
 async def test_timeout_while_waiting_for_messages(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     dummy_subscription: str,
     test_settings,
@@ -47,6 +47,7 @@ async def test_timeout_while_waiting_for_messages(
 
 
 async def test_get_multiple_messages(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     dummy_subscription: str,
     test_settings,
