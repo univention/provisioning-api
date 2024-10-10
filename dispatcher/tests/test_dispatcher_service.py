@@ -7,9 +7,10 @@ import pytest
 
 from univention.provisioning.dispatcher.service import DispatcherService
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
+from univention.provisioning.testing.mock_data import MESSAGE, MQMESSAGE, SUBSCRIPTION_INFO, SUBSCRIPTIONS
 
-from ..mock_data import MESSAGE, MQMESSAGE, SUBSCRIPTION_INFO, SUBSCRIPTIONS
-from ..unit import EscapeLoopException
+
+class EscapeLoopException(Exception): ...
 
 
 @pytest.fixture

@@ -20,6 +20,7 @@ python = "^3.11"
 # univention.management.console
 
 [tool.poetry.group.dev.dependencies]
+nubus-provisioning-tests = ">=0.1.0"
 pytest = "^8.3.3"
 pytest-asyncio = "^0.24"
 pytest-cov = "^5.0"

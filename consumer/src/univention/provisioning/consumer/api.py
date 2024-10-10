@@ -12,7 +12,7 @@ from jsondiff import diff
 
 from univention.provisioning.models.message import Message, ProvisioningMessage, RealmTopic
 from univention.provisioning.models.subscription import Subscription
-from univention.provisioning.rest.models import Event, MessageProcessingStatus, NewSubscription
+from univention.provisioning.rest.models import Event, MessageProcessingStatus, NewSubscription  # TODO: move to common?
 
 from .config import (
     MessageHandlerSettings,

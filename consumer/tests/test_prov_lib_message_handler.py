@@ -8,8 +8,7 @@ import pytest
 
 from univention.provisioning.consumer.api import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models.message import Message
-
-from ..mock_data import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
+from univention.provisioning.testing.mock_data import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
 
 
 @pytest.fixture
