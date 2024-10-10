@@ -7,8 +7,7 @@ import pytest
 from nats.js.errors import BadRequestError, ServerError
 
 from univention.provisioning.backends.nats_mq import NatsKeys, NatsMessageQueue
-
-from .conftest import E2ETestSettings
+from univention.provisioning.testing.e2e_settings import E2ETestSettings
 
 
 @pytest.fixture

@@ -3,53 +3,28 @@
 
 import json
 import uuid
-from typing import Any, AsyncGenerator, Callable, Coroutine, NamedTuple
-from urllib.parse import urljoin
+from typing import Any, AsyncGenerator, Callable, Coroutine, Optional
 
 import msgpack
 import nats
 import pytest
-from nats.aio.client import Client as NATS
+import requests
+from nats.aio.client import Client as NatsClient
 from nats.js.errors import NotFoundError
 
 from univention.admin.rest.client import UDM, HTTPError, NotFound
-from univention.provisioning.consumer import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
-from univention.provisioning.models import RealmTopic
-
-from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
-
-
-class E2ETestSettings(NamedTuple):
-    provisioning_api_base_url: str
-    provisioning_admin_username: str
-    provisioning_admin_password: str
-
-    provisioning_events_username: str
-    provisioning_events_password: str
-
-    nats_url: str
-    nats_user: str
-    nats_password: str
-
-    ldap_server_uri: str
-    ldap_base: str
-    ldap_bind_dn: str
-    ldap_bind_password: str
-
-    udm_rest_api_base_url: str
-    udm_rest_api_username: str
-    udm_rest_api_password: str
-
-    @property
-    def subscriptions_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url, "/v1/subscriptions")
-
-    def subscriptions_messages_url(self, name: str) -> str:
-        return f"{self.subscriptions_url}/{name}/messages"
-
-    @property
-    def messages_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url, "/v1/messages")
+from univention.admin.rest.client import Object as UdmObject
+from univention.provisioning.consumer.api import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
+from univention.provisioning.models.message import Body, PublisherName
+from univention.provisioning.models.subscription import RealmTopic
+from univention.provisioning.testing.e2e_settings import E2ETestSettings
+from univention.provisioning.testing.mock_data import (
+    DUMMY_REALMS_TOPICS,
+    DUMMY_TOPIC,
+    REALM,
+    USERS_REALMS_TOPICS,
+    USERS_TOPIC,
+)
 
 
 def pytest_addoption(parser):
@@ -198,8 +173,8 @@ def maildomain(udm):
 
 
 @pytest.fixture()
-async def nats_connection(test_settings: E2ETestSettings) -> AsyncGenerator[NATS, Any]:
-    nc = NATS()
+async def nats_connection(test_settings: E2ETestSettings) -> AsyncGenerator[NatsClient, Any]:
+    nc = NatsClient()
     await nc.connect(
         servers=test_settings.nats_url,
         user=test_settings.nats_user,
@@ -322,3 +297,85 @@ def udm_module_exists(udm: UDM) -> Callable[[str], bool]:
         return module_name in {m.name for m in udm.modules()}
 
     return _udm_module_exists
+
+
+@pytest.fixture(scope="session")
+def create_message_via_events_api() -> Callable[[E2ETestSettings], Body]:
+    def _create_message_via_events_api(test_settings: E2ETestSettings) -> Body:
+        body = {"old": {}, "new": {str(uuid.uuid1()): str(uuid.uuid1()), "dn": "cn=foo,dc=bar"}}
+        payload = {
+            "publisher_name": PublisherName.consumer_client_test,
+            "ts": "2024-02-07T09:01:33.835Z",
+            "realm": REALM,
+            "topic": DUMMY_TOPIC,
+            "body": body,
+        }
+        response = requests.post(
+            test_settings.messages_url,
+            json=payload,
+            auth=(test_settings.provisioning_events_username, test_settings.provisioning_events_password),
+        )
+
+        print(response.json())
+        assert response.status_code == 202, "Failed to post message to queue"
+
+        return Body.model_validate(body)
+
+    return _create_message_via_events_api
+
+
+@pytest.fixture(scope="session")
+def create_udm_obj() -> Callable[[UDM, str, dict, Optional[str]], UdmObject]:
+    def _create_udm_obj(udm: UDM, object_type: str, properties: dict, position: Optional[str] = None) -> UdmObject:
+        objs = udm.get(object_type)
+        assert objs
+        obj = objs.new(position=position)
+        obj.properties.update(properties)
+        obj.save()
+        return obj
+
+    return _create_udm_obj
+
+
+@pytest.fixture(scope="session")
+def create_user_via_udm_rest_api(create_udm_obj) -> Callable[[UDM, Optional[dict]], UdmObject]:
+    def _create_user_via_udm_rest_api(udm: UDM, extended_attributes: Optional[dict] = None) -> UdmObject:
+        base_properties = {
+            "username": str(uuid.uuid1()),
+            "firstname": "John",
+            "lastname": "Doe",
+            "password": "password",
+            "pwdChangeNextLogin": True,
+        }
+        properties = {**base_properties, **(extended_attributes or {})}
+        return create_udm_obj(udm, USERS_TOPIC, properties)
+
+    return _create_user_via_udm_rest_api
+
+
+@pytest.fixture(scope="session")
+def create_extended_attribute_via_udm_rest_api(create_udm_obj) -> Callable[[UDM], UdmObject]:
+    def _create_extended_attribute_via_udm_rest_api(udm: UDM):
+        properties = {
+            "name": "UniventionPasswordSelfServiceEmail",
+            "CLIName": "PasswordRecoveryEmail",
+            "module": ["users/user"],
+            "syntax": "emailAddress",
+            "default": "",
+            "ldapMapping": "univentionPasswordSelfServiceEmail",
+            "objectClass": "univentionPasswordSelfService",
+            "shortDescription": "Password recovery e-mail address",
+            "tabAdvanced": False,
+            "tabName": "Password recovery",
+            "multivalue": False,
+            "valueRequired": False,
+            "mayChange": True,
+            "doNotSearch": False,
+            "deleteObjectClass": False,
+            "overwriteTab": False,
+            "fullWidth": True,
+        }
+        position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
+        return create_udm_obj(udm, "settings/extended_attribute", properties, position)
+
+    return _create_extended_attribute_via_udm_rest_api

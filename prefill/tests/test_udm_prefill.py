@@ -10,8 +10,7 @@ import pytest
 from univention.provisioning.models.constants import PREFILL_SUBJECT_TEMPLATE, PublisherName
 from univention.provisioning.models.message import Body, Message
 from univention.provisioning.prefill.udm_prefill import UDMPreFill, match_topic
-
-from ..mock_data import (
+from univention.provisioning.testing.mock_data import (
     GROUPS_TOPIC,
     MQMESSAGE_PREFILL,
     MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
@@ -19,7 +18,9 @@ from ..mock_data import (
     SUBSCRIPTION_NAME,
     USERS_TOPIC,
 )
-from ..unit import EscapeLoopException
+
+
+class EscapeLoopException(Exception): ...
 
 
 @pytest.fixture

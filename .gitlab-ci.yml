@@ -98,7 +98,7 @@ test-integration:
     - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
     - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 nats1 nats2 nats3
   script:
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/python3 -m pytest -lvv tests/integration
+    - docker compose run --quiet-pull --rm test python3 -m pytest -lvv tests/integration
   after_script:
     - docker compose down --volumes
 
@@ -127,7 +127,7 @@ test-end-to-end:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
     - cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
-    - docker compose run --quiet-pull --rm test /app/.venv/bin/python3 -m pytest tests/e2e/ -lvv --environment pipeline
+    - docker compose run --quiet-pull --rm test python3 -m pytest -lvv tests/e2e/ -lvv --environment pipeline
   after_script:
     - docker logs events-and-consumer-api-dev >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
