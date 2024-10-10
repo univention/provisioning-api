@@ -35,9 +35,7 @@ class BaseSubscription(BaseModel):
     request_prefill: bool = Field(description="Whether pre-filling of the queue was requested.")
 
     def __eq__(self, other: "BaseSubscription") -> bool:
-        if not super().__eq__(other):
-            return False
-        if self.name != other.name or self.realms_topics != other.realms_topics:
+        if self.name != other.name or self.request_prefill != other.request_prefill:
             return False
         if len(self.realms_topics) != len(other.realms_topics):
             return False
