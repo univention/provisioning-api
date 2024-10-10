@@ -18,6 +18,7 @@ pydantic-settings = ">=2.0.3"  # py311: "^2.5.2"
 python = ">=3.7,<4.0"
 
 [tool.poetry.group.dev.dependencies]
+nubus-provisioning-tests = ">=0.1.0"
 pytest = ">=7.4.4"  # py311: "^8.3.3"
 pytest-asyncio = ">=0.21.2"  # py311: "^0.24"
 pytest-cov = ">=4.1.0"  # py311: "^5.0"

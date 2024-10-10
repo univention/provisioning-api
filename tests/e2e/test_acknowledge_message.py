@@ -4,10 +4,9 @@
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.rest.models import MessageProcessingStatus
 
-from .helpers import create_message_via_events_api
-
 
 async def test_get_multiple_messages(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     dummy_subscription: str,
     test_settings,
@@ -24,6 +23,7 @@ async def test_get_multiple_messages(
 
 
 async def test_acknowledge_messages(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     dummy_subscription: str,
     test_settings,
@@ -48,6 +48,7 @@ async def test_acknowledge_messages(
 
 
 async def test_do_not_acknowledge_message(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     dummy_subscription: str,
     test_settings,
