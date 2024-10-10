@@ -10,9 +10,14 @@ from typing import Any, Callable, Coroutine, Optional
 import aiohttp
 from jsondiff import diff
 
-from univention.provisioning.models.message import Message, ProvisioningMessage, RealmTopic
-from univention.provisioning.models.subscription import Subscription
-from univention.provisioning.rest.models import Event, MessageProcessingStatus, NewSubscription  # TODO: move to common?
+from univention.provisioning.models.message import (
+    Event,
+    Message,
+    MessageProcessingStatus,
+    ProvisioningMessage,
+    RealmTopic,
+)
+from univention.provisioning.models.subscription import NewSubscription, Subscription
 
 from .config import (
     MessageHandlerSettings,
