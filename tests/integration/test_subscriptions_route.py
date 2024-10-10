@@ -7,9 +7,9 @@ import uuid
 import httpx
 import pytest
 
+from univention.provisioning.models.message import MessageProcessingStatus
 from univention.provisioning.models.subscription import FillQueueStatus
 from univention.provisioning.rest.config import app_settings
-from univention.provisioning.rest.models import MessageProcessingStatus
 from univention.provisioning.testing.mock_data import (
     CONSUMER_PASSWORD,
     FLAT_BODY,
