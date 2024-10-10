@@ -11,10 +11,8 @@ from univention.provisioning.backends.nats_mq import NatsKeys
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models.subscription import FillQueueStatus, RealmTopic
 from univention.provisioning.rest.models import MessageProcessingStatus
-
-from ..mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
-from .conftest import E2ETestSettings
-from .helpers import create_message_via_events_api, create_user_via_udm_rest_api
+from univention.provisioning.testing.e2e_settings import E2ETestSettings
+from univention.provisioning.testing.mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 
 EXPECTED_AVG_DELAY = 50
 EXPECTED_MAX_DELAY = 150
@@ -68,6 +66,7 @@ async def subscription(
     "subscription", [False, True], indirect=["subscription"], ids=["without_prefill", "with_prefill"]
 )
 async def test_simple_message_timing(
+    create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
     subscription: str,
     test_settings: E2ETestSettings,
@@ -118,6 +117,7 @@ async def test_simple_message_timing(
 @pytest.mark.parametrize("realms_topics", [USERS_REALMS_TOPICS], indirect=["realms_topics"])
 @pytest.mark.parametrize("subscription", [False, True], indirect=True, ids=["without_prefill", "with_prefill"])
 async def test_udm_message_timing(
+    create_user_via_udm_rest_api,
     provisioning_client: ProvisioningConsumerClient,
     subscription: str,
     realms_topics: list[RealmTopic],

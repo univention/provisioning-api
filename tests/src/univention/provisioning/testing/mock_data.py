@@ -2,10 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from copy import copy, deepcopy
+from copy import deepcopy
 from datetime import datetime
 
-from fastapi.security import HTTPBasicCredentials
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
@@ -18,7 +17,6 @@ from univention.provisioning.models.message import (
     PublisherName,
 )
 from univention.provisioning.models.subscription import RealmTopic, Subscription
-from univention.provisioning.rest.models import MessageProcessingStatus
 
 NATS_SERVER = "nats://localhost:4222"
 
@@ -35,9 +33,6 @@ USERS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=USERS_TOPIC)]
 DUMMY_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=DUMMY_TOPIC)]
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
 REPLY = f"$JS.ACK.stream:{SUBSCRIPTION_NAME}.durable_name:{SUBSCRIPTION_NAME}.1.1.1.1699615014739091916.0"
-
-MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
-MESSAGE_PROCESSING_SEQ_ID = 1
 
 CONSUMER_PASSWORD = "password"
 CONSUMER_HASHED_PASSWORD = "$2b$12$G56ltBheLThdzppmOX.bcuAdZ.Ffx65oo7Elc.OChmzENtXtA1iSe"
@@ -166,21 +161,5 @@ FLAT_MESSAGE_ENCODED = (
 BASE_KV_OBJ = KeyValue.Entry(
     bucket="KV_bucket", key="", value=None, revision=1, delta=None, created=None, operation=None
 )
-
-kv_sub_info = copy(BASE_KV_OBJ)
-kv_sub_info.key = SUBSCRIPTION_NAME
-kv_sub_info.value = (
-    b'{"name": "0f084f8c-1093-4024-b215-55fe8631ddf6", '
-    b'"realms_topics": [{"realm": "udm", "topic": "groups/group"}], '
-    b'"request_prefill": true, '
-    b'"prefill_queue_status": "done"}'
-)
-kv_sub_info.revision = 12
-
-kv_password = copy(BASE_KV_OBJ)
-kv_password.key = SUBSCRIPTION_NAME
-kv_password.value = CONSUMER_HASHED_PASSWORD.encode()
-
-CREDENTIALS = HTTPBasicCredentials(username="dev-user", password="dev-password")
 
 SUBSCRIPTIONS = {REALM: {GROUPS_TOPIC: {Subscription.model_validate(SUBSCRIPTION_INFO)}}}

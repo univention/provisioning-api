@@ -11,9 +11,8 @@ from univention.provisioning.models.constants import Bucket
 from univention.provisioning.models.message import RealmTopic
 from univention.provisioning.models.subscription import FillQueueStatus, Subscription
 from univention.provisioning.rest.models import NewSubscription
-from univention.provisioning.services.subscriptions import SubscriptionService
-
-from ..mock_data import (
+from univention.provisioning.rest.subscriptions import SubscriptionService
+from univention.provisioning.testing.mock_data import (
     CONSUMER_HASHED_PASSWORD,
     GROUPS_REALMS_TOPICS,
     GROUPS_TOPIC,
