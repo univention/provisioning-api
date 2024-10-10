@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-import os
+import pytest
 
 from univention.provisioning.consumer.config import ProvisioningConsumerClientSettings
 
@@ -10,45 +10,37 @@ env_username = "PROVISIONING_API_USERNAME"
 env_password = "PROVISIONING_API_PASSWORD"
 
 
-def _clear_env_vars(env_vars: list[str]):
-    for env_var in env_vars:
-        if env_var in os.environ:
-            os.environ.pop(env_var)
+def test_consumer_name(monkeypatch):
+    monkeypatch.delenv(env_username)
+    with pytest.raises(ValueError):
+        ProvisioningConsumerClientSettings()
 
-
-def test_consumer_name():
-    _clear_env_vars([env_username])
+    monkeypatch.setenv(env_username, "test-consumer")
     settings = ProvisioningConsumerClientSettings()
-
-    os.environ[env_username] = "test-consumer"
-    settings = ProvisioningConsumerClientSettings()
-
     assert settings.provisioning_api_username == "test-consumer"
-    _clear_env_vars([env_username])
 
 
-def test_consumer_password():
-    _clear_env_vars([env_password])
+def test_consumer_password(monkeypatch):
+    monkeypatch.delenv(env_password)
+    with pytest.raises(ValueError):
+        ProvisioningConsumerClientSettings()
+
+    monkeypatch.setenv(env_password, "test-consumer")
     settings = ProvisioningConsumerClientSettings()
-
-    os.environ[env_password] = "test-consumer"
-    settings = ProvisioningConsumerClientSettings()
-
     assert settings.provisioning_api_password == "test-consumer"
-    _clear_env_vars([env_password])
 
 
-def test_base_url():
-    _clear_env_vars([env_api_url])
+def test_base_url(monkeypatch):
     settings = ProvisioningConsumerClientSettings()
-
     assert settings.provisioning_api_base_url == "http://localhost:7777"
 
-    os.environ[env_api_url] = "http://testhost:1234"
-    settings = ProvisioningConsumerClientSettings()
+    monkeypatch.delenv(env_api_url)
+    with pytest.raises(ValueError):
+        ProvisioningConsumerClientSettings()
 
+    monkeypatch.setenv(env_api_url, "http://testhost:1234")
+    settings = ProvisioningConsumerClientSettings()
     assert settings.provisioning_api_base_url == "http://testhost:1234"
-    _clear_env_vars([env_api_url])
 
 
 def test_property_consumer_registration_url():
@@ -56,7 +48,7 @@ def test_property_consumer_registration_url():
     assert settings.subscriptions_url == "http://localhost:7777/v1/subscriptions"
 
 
-def test_property_consumer_messages_url():
-    os.environ[env_api_url] = "http://foobar:5678"
+def test_property_consumer_messages_url(monkeypatch):
+    monkeypatch.setenv(env_api_url, "http://foobar:5678")
     settings = ProvisioningConsumerClientSettings()
     assert settings.messages_url == "http://foobar:5678/v1/messages"
