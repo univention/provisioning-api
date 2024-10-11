@@ -31,8 +31,8 @@ app = FastAPI(
     debug=settings.debug,
     description="APIs for subscription and message handling.",
     root_path=settings.root_path,
-    title="Provisioning APIs",
-    version=version("provisioning"),
+    title="Provisioning REST APIs",
+    version=version("nubus-provisioning-rest-api"),
 )
 add_timing_middleware(app, record=logger.info)
 app.add_middleware(CorrelationIdMiddleware)
@@ -74,7 +74,7 @@ add_exception_handlers(app)
 
 @app.on_event("startup")
 async def startup_task():
-    logger.info("Started %s version %s.", app.title, version("provisioning"))
+    logger.info("Started %s version %s.", app.title, version("nubus-provisioning-rest-api"))
 
     async with Port.port_context() as port:
         logger.info("Checking MQ connectivity...")
