@@ -36,6 +36,14 @@ Run containers:
 docker compose up --detach --remove-orphans
 ```
 
+#### Problems building 'tests' container
+
+If you encounter conflicting dependencies building the `tests` container, update all Poetry lock files:
+
+```shell
+for DIR in backends common consumer consumer_example dispatcher listener prefill rest-api tests udm-transformer; do (cd $DIR && . .venv/bin/activate && poetry update; deactivate); done
+```
+
 ### Create a Subscription
 To create a subscription, open http://localhost:7777/docs and find the method called 'Create Subscription'.
 Enter the following data into the request body:

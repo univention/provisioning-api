@@ -12,8 +12,8 @@ from univention.provisioning.testing.e2e_settings import E2ETestSettings
 
 @pytest.fixture
 async def nats_mq_adapter(test_settings: E2ETestSettings):
-    nats_adapter = NatsMessageQueue()
-    await nats_adapter.connect(test_settings.nats_url, test_settings.nats_user, test_settings.nats_password, 1)
+    nats_adapter = NatsMessageQueue(test_settings.nats_url, test_settings.nats_user, test_settings.nats_password, 1)
+    await nats_adapter.connect()
     yield nats_adapter
     await nats_adapter.close()
 
