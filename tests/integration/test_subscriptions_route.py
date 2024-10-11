@@ -27,8 +27,11 @@ MESSAGE_PROCESSING_SEQ_ID = 1
 
 @pytest.mark.anyio
 class TestSubscriptionsRoute:
-    settings = app_settings()
     subscriptions_url = "/v1/subscriptions"
+
+    @classmethod
+    def setup_class(cls):
+        cls.settings = app_settings()
 
     async def test_create_subscription(self, client: httpx.AsyncClient):
         name = str(uuid.uuid4())

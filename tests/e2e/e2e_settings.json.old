@@ -1,0 +1,62 @@
+{
+  "local": {
+    "provisioning_api_base_url": "http://localhost:7777",
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "provisioning",
+    "provisioning_events_username": "udm",
+    "provisioning_events_password": "udmpass",
+    "ldap_server_uri": "ldap://localhost:389",
+    "ldap_base": "dc=univention-organization,dc=intranet",
+    "ldap_bind_dn": "cn=admin,dc=univention-organization,dc=intranet",
+    "ldap_bind_password": "univention",
+    "udm_rest_api_base_url": "http://localhost:9979/udm/",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "univention"
+  },
+  "dev-env": {
+    "ldap_server_uri": "ldap://localhost:3890",
+    "udm_rest_api_base_url": "http://localhost:8000/univention/udm/"
+  },
+  "pipeline": {
+    "provisioning_api_base_url": "http://events-and-consumer-api:7777",
+    "ldap_server_uri": "ldap://ldap-server:389",
+    "udm_rest_api_base_url": "http://udm-rest-api:9979/udm/"
+  },
+  "gaia": {
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "9f42908c164a41d2771b4451397f68ae3c13a220",
+    "provisioning_events_username": "udmproducer",
+    "provisioning_events_password": "05c19490698eb7294776565f70e88abcca183499",
+    "ldap_server_uri": "ldap://localhost:3890",
+    "ldap_base": "dc=swp-ldap,dc=internal",
+    "ldap_bind_dn": "cn=admin,dc=swp-ldap,dc=internal",
+    "ldap_bind_password": "e958ec347ebf4cd1959f4e8536dcedfc3fcea023",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "e958ec347ebf4cd1959f4e8536dcedfc3fcea023"
+  },
+  "gaia_old": {
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "0d702e15cf95c218695ccd7dbc4ec7e2f86eeae1",
+    "provisioning_events_username": "udmListener",
+    "provisioning_events_password": "e1a5d2cddc1e4423c9a8b4d4da9c5a9393b31b48",
+    "ldap_server_uri": "ldap://localhost:3890",
+    "ldap_base": "dc=swp-ldap,dc=internal",
+    "ldap_bind_dn": "cn=admin,dc=swp-ldap,dc=internal",
+    "ldap_bind_password": "e958ec347ebf4cd1959f4e8536dcedfc3fcea023",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "e958ec347ebf4cd1959f4e8536dcedfc3fcea023"
+  },
+  "gaia_nubus": {
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "915f96b323e47cf1fdb98d7b2dc40a10a1f9fbf2",
+    "provisioning_events_username": "udm",
+    "provisioning_events_password": "95fff4a9c36f11fb3d8f59c2d25079c1213ce24d",
+    "ldap_server_uri": "ldap://localhost:3890",
+    "ldap_base": "dc=swp-ldap,dc=internal",
+    "ldap_bind_dn": "cn=admin,dc=swp-ldap,dc=internal",
+    "ldap_bind_password": "2977b4976d900342df2197ebe88efb2b76f281cf",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "2977b4976d900342df2197ebe88efb2b76f281cf"
+  }
+}
+
