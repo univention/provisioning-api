@@ -16,7 +16,7 @@ from univention.provisioning.testing.mock_data import FLAT_MESSAGE_ENCODED, MSG,
 
 
 @pytest.fixture
-async def dispatcher_mock() -> DispatcherPort:
+async def dispatcher_mock(mock_nats_kv_adapter, mock_nats_mq_adapter) -> DispatcherPort:
     port = DispatcherPort(DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass"))
     port.mq = MockNatsMQAdapter()
     port.kv = MockNatsKVAdapter()
@@ -37,10 +37,7 @@ class StopLoopException(Exception): ...
 class TestDispatcher:
     main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
 
-    async def test_dispatch_events(
-        self,
-        dispatcher_mock: DispatcherPort,
-    ):
+    async def test_dispatch_events(self, dispatcher_mock: DispatcherPort):
         """
         This abstract test focuses on checking the interaction between the Dispatcher Service and the Nats,
         specifically verifying the usage of the NATS and jetstream. If the technology changes, the test will fail

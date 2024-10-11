@@ -294,8 +294,6 @@ services:
     platform: "linux/amd64"
     volumes:
       - "./tests:/app/tests"
-      - "./src:/app/src"
-      - "./pyproject.toml:/app/pyproject.toml"
 
   # Environment of the pre-commit linter.
   pre-commit:
