@@ -11,7 +11,9 @@ from univention.provisioning.testing.mock_data import FLAT_MESSAGE
 
 @pytest.mark.anyio
 class TestInternalApi:
-    settings = app_settings()
+    @classmethod
+    def setup_class(cls):
+        cls.settings = app_settings()
 
     async def test_add_event(self, client: httpx.AsyncClient):
         response = await client.post(
