@@ -12,7 +12,7 @@ from univention.provisioning.models.constants import (
 )
 from univention.provisioning.models.message import MessageProcessingStatus
 from univention.provisioning.models.subscription import FillQueueStatus
-from univention.provisioning.rest.message_service import MessageService
+from univention.provisioning.rest.message_service import MessageService, SubscriptionService
 from univention.provisioning.testing.mock_data import MESSAGE, SUBSCRIPTION_NAME
 
 MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
@@ -20,13 +20,14 @@ MESSAGE_PROCESSING_SEQ_ID = 1
 
 
 @pytest.fixture
-def sub_service() -> AsyncMock:
-    yield patch("server.services.messages.SubscriptionService").start().return_value
+def sub_service() -> SubscriptionService:
+    yield patch("univention.provisioning.rest.subscription_service.SubscriptionService").start().return_value
 
 
 @pytest.fixture
-def message_service() -> MessageService:
+def message_service(sub_service) -> MessageService:
     ms = MessageService(AsyncMock())
+    ms.sub_service = sub_service
     ms._subscription_prefill_done.clear()
     return ms
 
@@ -36,7 +37,9 @@ class TestMessageService:
     prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
     main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
 
-    async def test_get_next_message_prefill_running(self, message_service: MessageService, sub_service):
+    async def test_get_next_message_prefill_running(
+        self, message_service: MessageService, sub_service: SubscriptionService
+    ):
         sub_service.get_subscription_queue_status = AsyncMock(return_value=FillQueueStatus.running)
 
         result = await message_service.get_next_message(SUBSCRIPTION_NAME, timeout=1, pop=True)
