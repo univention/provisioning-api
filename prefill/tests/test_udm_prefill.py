@@ -66,7 +66,7 @@ class TestUDMPreFill:
     msg2.topic = USERS_TOPIC
     msg2.body.new = obj_2
 
-    @patch("server.core.prefill.service.udm_prefill.datetime")
+    @patch("univention.provisioning.prefill.udm_prefill.datetime")
     async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
         mock_acknowledgements = AsyncMock()
@@ -97,7 +97,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
-    @patch("server.core.prefill.service.udm_prefill.datetime")
+    @patch("univention.provisioning.prefill.udm_prefill.datetime")
     async def test_handle_requests_to_prefill_multiple_topics(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
         mock_acknowledgements = AsyncMock()
@@ -131,7 +131,7 @@ class TestUDMPreFill:
         )
         udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
 
-    @patch("server.core.prefill.service.udm_prefill.datetime")
+    @patch("univention.provisioning.prefill.udm_prefill.datetime")
     async def test_handle_requests_to_prefill_moving_to_failures(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
         mock_acknowledgements = AsyncMock()
@@ -157,7 +157,7 @@ class TestUDMPreFill:
             "prefill-failures", "prefill-failures", ANY
         )
 
-    @patch("server.core.prefill.service.udm_prefill.datetime")
+    @patch("univention.provisioning.prefill.udm_prefill.datetime")
     async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill: UDMPreFill):
         mock_datetime.now.return_value = self.mocked_date
         udm_prefill._port.get_object_types = AsyncMock(return_value=[self.udm_modules])
