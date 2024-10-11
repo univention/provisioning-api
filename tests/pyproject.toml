@@ -11,25 +11,26 @@ packages = [{ include = "univention", from = "src" }]
 #####################################
 # Python 3.7 - commmon imports this #
 #####################################
-nats-py = ">=2.9.0"
+nats-py = ">=2.7.0"  # py311: "^2.9.0"
 nubus-provisioning-backends = ">=0.1.0"
 nubus-provisioning-common = ">=0.1.0"
 python = ">=3.7"
 pytest = ">=7.4.4"  # py311: "^8.3.3"
 pytest-asyncio = ">=0.21.2"  # py311: "^0.24"
 pytest-cov = ">=4.1.0"  # py311: "^5.0"
-pytest-env = ">=1.0.1"  # py311: "^1.5.0"
 
 [tool.poetry.group.e2e-tests.dependencies]
 ldap3 = "^2.9.1"
 nubus-provisioning-consumer = ">=0.1.0"
 nubus-provisioning-rest-api = ">=0.1.0"
+pytest-env = ">=1.0.1"  # py311: "^1.1.5"
 requests = "^2.23.3"
 udm-rest-api-client = "^0.0.2"
 
 [tool.poetry.group.integration-tests.dependencies]
 nubus-provisioning-dispatcher = ">=0.1.0"
 nubus-provisioning-rest-api = ">=0.1.0"
+pytest-env = ">=1.0.1"  # py311: "^1.1.5"
 
 [[tool.poetry.source]]
 name = "PyPI"
@@ -39,74 +40,36 @@ priority = "primary"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-# With pytest-env==1.0.1 we can set env vars like this:
+# The following works only with pytest-env>=1.1 (and Python 3.8+), which we'll get in the test Docker container.
 
-#[tool.pytest.ini_options]
-#env = [
-#    "HOME=~/tmp",
-#    "RUN_ENV=test",
-#    "ADMIN_USERNAME=admin",
-#    "ADMIN_PASSWORD=provisioning",
-#    "UDM_USERNAME=cn=admin",
-#    "UDM_PASSWORD=univention",
-#    "LDAP_PORT=389",
-#    "LDAP_HOST=ldap-server",
-#    "TLS_MODE=off",
-#    "LDAP_BASE_DN=dc=univention-organization,dc=intranet",
-#    "LDAP_HOST_DN=cn=admin,dc=univention-organization,dc=intranet",
-#    "LDAP_PASSWORD=univention",
-#    "NATS_HOST=foo",
-#    "NATS_PORT=1234",
-#    "NATS_USER=api",
-#    "NATS_PASSWORD=apipass",
-#    "NATS_MAX_RECONNECT_ATTEMPTS=2",
-#    "ADMIN_NATS_USER=admin",
-#    "ADMIN_NATS_PASSWORD=nimda",
-#    "PROVISIONING_API_BASE_URL=http://localhost:7777",
-#    "PROVISIONING_API_USERNAME=foo",
-#    "PROVISIONING_API_PASSWORD=bar",
-#    "PREFILL_USERNAME=prefill",
-#    "PREFILL_PASSWORD=prefillpass",
-#    "MAX_PREFILL_ATTEMPTS=10",
-#    "EVENTS_USERNAME_UDM=udm",
-#    "EVENTS_PASSWORD_UDM=udmpass",
-#    "LOG_LEVEL=DEBUG",
-#    "MAX_ACKNOWLEDGEMENT_RETRIES=3",
-#    "DEBUG=false",
-#    "ROOT_PATH=/",
-#    "CORS_ALL=false",
-#]
-
-# If we can use Python 3.8+ and thus pytest-env>=1.1 we can do:
-
-#[tool.pytest_env]
-#ADMIN_USERNAME = {value = "admin", skip_if_set = true}
-#ADMIN_PASSWORD = {value = "provisioning", skip_if_set = true}
-#UDM_USERNAME = {value = "cn=admin", skip_if_set = true}
-#UDM_PASSWORD = {value = "univention", skip_if_set = true}
-#LDAP_PORT = {value = 389, skip_if_set = true}
-#LDAP_HOST = {value = "ldap-server", skip_if_set = true}
-#TLS_MODE = {value = "off", skip_if_set = true}
-#LDAP_BASE_DN = {value = "dc=univention-organization,dc=intranet", skip_if_set = true}
-#LDAP_HOST_DN = {value = "cn=admin,{LDAP_BASE_DN}", transform = true}
-#LDAP_PASSWORD = {value = "univention", skip_if_set = true}
-#NATS_HOST = {value = "foo", skip_if_set = true}
-#NATS_PORT = {value = 1234, skip_if_set = true}
-#NATS_USER = {value = "api", skip_if_set = true}
-#NATS_PASSWORD = {value = "apipass", skip_if_set = true}
-#NATS_MAX_RECONNECT_ATTEMPTS = {value = 2, skip_if_set = true}
-#ADMIN_NATS_USER = {value = "admin", skip_if_set = true}
-#ADMIN_NATS_PASSWORD = {value = "nimda", skip_if_set = true}
-#PROVISIONING_API_BASE_URL = {value = "http://localhost:7777", skip_if_set = true}
-#PROVISIONING_API_USERNAME = {value = "foo", skip_if_set = true}
-#PROVISIONING_API_PASSWORD = {value = "bar", skip_if_set = true}
-#PREFILL_USERNAME = {value = "prefill", skip_if_set = true}
-#PREFILL_PASSWORD = {value = "prefillpass", skip_if_set = true}
-#MAX_PREFILL_ATTEMPTS = {value = 10, skip_if_set = true}
-#EVENTS_USERNAME_UDM = {value = "udm", skip_if_set = true}
-#EVENTS_PASSWORD_UDM = {value = "udmpass", skip_if_set = true}
-#LOG_LEVEL = {value = "DEBUG", skip_if_set = true}
-#MAX_ACKNOWLEDGEMENT_RETRIES = {value = 3, skip_if_set = true}
-#DEBUG = {value = "false", skip_if_set = true}
-#ROOT_PATH = {value = "/", skip_if_set = true}
-#CORS_ALL = {value = "false", skip_if_set = true}
+[tool.pytest_env]
+ADMIN_USERNAME = {value = "admin", skip_if_set = true}
+ADMIN_PASSWORD = {value = "provisioning", skip_if_set = true}
+UDM_USERNAME = {value = "cn=admin", skip_if_set = true}
+UDM_PASSWORD = {value = "univention", skip_if_set = true}
+LDAP_PORT = {value = 389, skip_if_set = true}
+LDAP_HOST = {value = "ldap-server", skip_if_set = true}
+TLS_MODE = {value = "off", skip_if_set = true}
+LDAP_BASE_DN = {value = "dc=univention-organization,dc=intranet", skip_if_set = true}
+LDAP_HOST_DN = {value = "cn=admin,{LDAP_BASE_DN}", transform = true}
+LDAP_PASSWORD = {value = "univention", skip_if_set = true}
+NATS_HOST = {value = "foo", skip_if_set = true}
+NATS_PORT = {value = 1234, skip_if_set = true}
+NATS_USER = {value = "api", skip_if_set = true}
+NATS_PASSWORD = {value = "apipass", skip_if_set = true}
+NATS_MAX_RECONNECT_ATTEMPTS = {value = 2, skip_if_set = true}
+ADMIN_NATS_USER = {value = "admin", skip_if_set = true}
+ADMIN_NATS_PASSWORD = {value = "nimda", skip_if_set = true}
+PROVISIONING_API_BASE_URL = {value = "http://localhost:7777", skip_if_set = true}
+PROVISIONING_API_USERNAME = {value = "foo", skip_if_set = true}
+PROVISIONING_API_PASSWORD = {value = "bar", skip_if_set = true}
+PREFILL_USERNAME = {value = "prefill", skip_if_set = true}
+PREFILL_PASSWORD = {value = "prefillpass", skip_if_set = true}
+MAX_PREFILL_ATTEMPTS = {value = 10, skip_if_set = true}
+EVENTS_USERNAME_UDM = {value = "udm", skip_if_set = true}
+EVENTS_PASSWORD_UDM = {value = "udmpass", skip_if_set = true}
+LOG_LEVEL = {value = "DEBUG", skip_if_set = true}
+MAX_ACKNOWLEDGEMENT_RETRIES = {value = 3, skip_if_set = true}
+DEBUG = {value = "false", skip_if_set = true}
+ROOT_PATH = {value = "/", skip_if_set = true}
+CORS_ALL = {value = "false", skip_if_set = true}
