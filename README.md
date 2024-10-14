@@ -38,10 +38,11 @@ docker compose up --detach --remove-orphans
 
 #### Problems building 'tests' container
 
-If you encounter conflicting dependencies building the `tests` container, update all Poetry lock files:
+If you encounter conflicting dependencies building the `tests` container, update all Poetry lock files.
+Assuming you have a virtual env `.venv` in each subproject directory:
 
 ```shell
-for DIR in backends common consumer consumer_example dispatcher listener prefill rest-api tests udm-transformer; do (cd $DIR && . .venv/bin/activate && poetry update; deactivate); done
+for DIR in backends common consumer consumer_example dispatcher listener prefill rest-api tests udm-transformer; do (cd $DIR && .venv/bin/poetry update); done
 ```
 
 ### Create a Subscription
