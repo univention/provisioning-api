@@ -26,6 +26,13 @@ from univention.provisioning.testing.mock_data import (
     USERS_TOPIC,
 )
 
+pytest_plugins = ["univention.provisioning.testing.conftest"]
+
+
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
+
 
 def pytest_addoption(parser):
     # Portal tests options

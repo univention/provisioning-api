@@ -127,7 +127,7 @@ test-end-to-end:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
     - cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
-    - docker compose run --quiet-pull --rm test python3 -m pytest -lvv tests/e2e/ -lvv --environment pipeline
+    - docker compose run --quiet-pull --rm test python3 -m pytest -lvv --timeout=300 --environment pipeline tests/e2e/
   after_script:
     - docker logs events-and-consumer-api-dev >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
