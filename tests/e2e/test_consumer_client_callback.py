@@ -12,6 +12,7 @@ async def test_no_callback_function_provided(provisioning_client: ProvisioningCo
         await MessageHandler(provisioning_client, [], message_limit=1).run()
 
 
+@pytest.mark.timeout(10)
 async def test_get_one_message(
     create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
@@ -46,6 +47,7 @@ async def test_timeout_while_waiting_for_messages(
     assert response.body == body
 
 
+@pytest.mark.timeout(10)
 async def test_get_multiple_messages(
     create_message_via_events_api,
     provisioning_client: ProvisioningConsumerClient,
