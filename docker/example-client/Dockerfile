@@ -46,7 +46,7 @@ ARG WORKDIR
 WORKDIR ${WORKDIR}
 
 RUN apt-get --assume-yes --verbose-versions --no-install-recommends install 'python3-pip=23.0.*'
-COPY --from=build ${WORKDIR}/pyproject.toml ${WORKDIR}/requirements.txt ${WORKDIR}/
+COPY --from=build ${WORKDIR}/pyproject.toml ${WORKDIR}/requirements.txt ${WORKDIR}/poetry.lock ${WORKDIR}/
 RUN pip3 install --break-system-packages --no-cache-dir -r ${WORKDIR}/requirements.txt
 COPY ./src/univention/provisioning ${WORKDIR}/univention/provisioning
 RUN pip3 install --break-system-packages --no-cache-dir ${WORKDIR}/
