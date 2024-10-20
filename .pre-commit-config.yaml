@@ -80,4 +80,14 @@ repos:
       - id: "addlicense"
         name: "Check or add license headers to files"
 
+  - repo: local
+    hooks:
+      - id: kyverno-test
+        name: Kyverno test policies
+        entry: python3 kyverno_test.py
+        language: python
+        # files: helm/
+        files: ^helm/.*\.(yaml|yml|tpl|lock)$
+        exclude: helm/example-client
+        require_serial: true
 ...
