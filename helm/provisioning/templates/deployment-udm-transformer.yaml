@@ -87,7 +87,9 @@ spec:
           volumeMounts:
             - name: plugin-targets
               mountPath: /target
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.initResources "context" .) | nindent 12 }}
+          {{- if .Values.resources.udmTransformer }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.udmTransformer "context" .) | nindent 12 }}
+          {{- end }}
         {{- $systemExtensions := default (list) (coalesce .Values.systemExtensions .Values.global.systemExtensions) -}}
         {{- $extensions := default (list) (coalesce .Values.extensions .Values.global.extensions) -}}
         {{- range (concat $systemExtensions $extensions) }}
@@ -100,10 +102,11 @@ spec:
           volumeMounts:
             - name: plugin-targets
               mountPath: /target
-          resources: {{- include "common.tplvalues.render" (dict "value" $.Values.initResources "context" $) | nindent 12 }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.udmTransformer "context" .) | nindent 12 }}
         {{- end }}
         - name: wait-for-nats
           command: [ "poetry", "run", "python", "/scripts/wait-for-nats.py" ]
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.api.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:

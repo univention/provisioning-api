@@ -43,6 +43,12 @@ spec:
         - name: "{{ . }}"
         {{- end }}
       {{- end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "common.names.fullname" . }}
+      {{- end }}
       restartPolicy: Never
       volumes:
         {{- if .Values.registerConsumers.createUsers }}
@@ -66,6 +72,7 @@ spec:
             name: {{ printf "%s-register-consumers" $fullname }}
       initContainers:
         - name: wait-for-provisioning-api
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
@@ -79,6 +86,7 @@ spec:
             - name: scripts-volume
               mountPath: /scripts
         - name: wait-for-data-loader
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           command: ["/bin/bash", "/scripts/wait-for-data-loader.sh"]
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
@@ -101,6 +109,7 @@ spec:
           {{- end }}
       containers:
         - name: consumer-registration
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           volumeMounts:

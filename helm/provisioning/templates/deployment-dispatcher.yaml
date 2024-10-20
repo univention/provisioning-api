@@ -75,6 +75,7 @@ spec:
       initContainers:
         - name: wait-for-nats
           command: [ "poetry", "run", "python", "/scripts/wait-for-nats.py" ]
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.api.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:

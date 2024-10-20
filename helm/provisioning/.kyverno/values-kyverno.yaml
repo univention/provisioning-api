@@ -25,4 +25,20 @@ persistence:
     RWO: "kyverno-test"
   size:
     clamav: "42Gi"
+
+api:
+  image:
+    tag: "kyverno"
+
+dispatcher:
+  image:
+    tag: "kyverno"
+
+udmTransformer:
+  image:
+    tag: "kyverno"
+
+prefill:
+  image:
+    tag: "kyverno"
 ...

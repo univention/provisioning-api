@@ -34,7 +34,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
 | api.config.ROOT_PATH | string | `"/"` |  |
-| api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| api.image.imagePullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"` |  |
@@ -44,6 +44,7 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
 | containerSecurityContext.enabled | bool | `true` | Enable security context. |
+| containerSecurityContext.privileged | bool | `false` |  |
 | containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Mounts the container's root filesystem as read-only. |
 | containerSecurityContext.runAsGroup | int | `1000` | Process group id. |
 | containerSecurityContext.runAsNonRoot | bool | `true` | Run container as a user. |
@@ -53,7 +54,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
-| dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| dispatcher.image.imagePullPolicy | string | `nil` |  |
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"` |  |
@@ -66,7 +67,7 @@ A Helm Chart that deploys the provisioning services
 | extraVolumes | list | `[]` | Optionally specify an extra list of additional volumes. |
 | fullnameOverride | string | `""` | Provide a name to substitute for the full names of resources. |
 | global.configMapUcr | string | `nil` |  |
-| global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
+| global.imagePullPolicy | string | `nil` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
 | global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
 | global.nats | object | `{"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
@@ -149,7 +150,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `9979` |  |
 | prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.config.natsMaxReconnectAttempts | int | `5` |  |
-| prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| prefill.image.imagePullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
@@ -191,7 +192,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.createUsers | object | `{}` |  |
-| registerConsumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| registerConsumers.image.imagePullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
 | registerConsumers.image.tag | string | `"0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"` |  |
@@ -211,6 +212,10 @@ A Helm Chart that deploys the provisioning services
 | resources.prefill.limits.memory | string | `"1Gi"` |  |
 | resources.prefill.requests.cpu | float | `0.1` |  |
 | resources.prefill.requests.memory | string | `"64Mi"` |  |
+| resources.registerConsumers.limits.cpu | int | `1` |  |
+| resources.registerConsumers.limits.memory | string | `"1Gi"` |  |
+| resources.registerConsumers.requests.cpu | float | `0.1` |  |
+| resources.registerConsumers.requests.memory | string | `"64Mi"` |  |
 | resources.udmTransformer.limits.cpu | int | `1` |  |
 | resources.udmTransformer.limits.memory | string | `"1Gi"` |  |
 | resources.udmTransformer.requests.cpu | float | `0.1` |  |
@@ -264,7 +269,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
-| udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| udmTransformer.image.imagePullPolicy | string | `nil` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"` |  |
