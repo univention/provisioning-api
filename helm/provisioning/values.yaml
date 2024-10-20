@@ -51,6 +51,7 @@ affinity: {}
 # Security Context.
 # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 containerSecurityContext:
+  privileged: false
   # -- Enable container privileged escalation.
   allowPrivilegeEscalation: false
   # -- Security capabilities for container.
@@ -539,7 +540,7 @@ updateStrategy:
 api:
   image:
     registry: ""
-    imagePullPolicy: "IfNotPresent"
+    imagePullPolicy: null
     repository: "nubus-dev/images/provisioning-events-and-consumer-api"
     tag: "latest"
   # If specified environment variables will be set on the container
@@ -562,7 +563,7 @@ dispatcher:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
-    imagePullPolicy: "IfNotPresent"
+    imagePullPolicy: null
     repository: "nubus-dev/images/provisioning-dispatcher"
     tag: "latest"
   # If specified environment variables will be set on the container
@@ -578,7 +579,7 @@ dispatcher:
 udmTransformer:
   image:
     registry: ""
-    imagePullPolicy: "IfNotPresent"
+    imagePullPolicy: null
     repository: "nubus-dev/images/provisioning-udm-transformer"
     tag: "latest"
   # If specified environment variables will be set on the container
@@ -616,7 +617,7 @@ udmTransformer:
 prefill:
   image:
     registry: ""
-    imagePullPolicy: "IfNotPresent"
+    imagePullPolicy: null
     repository: "nubus-dev/images/provisioning-prefill"
     tag: "latest"
   # If specified environment variables will be set on the container
@@ -773,7 +774,7 @@ registerConsumers:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
-    imagePullPolicy: "IfNotPresent"
+    imagePullPolicy: null
     repository: "nubus/images/wait-for-dependency"
     tag: "0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"
   config:

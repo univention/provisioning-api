@@ -29,7 +29,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
 | api.config.ROOT_PATH | string | `"/"` |  |
 | api.credentialSecretName | string | `""` |  |
-| api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| api.image.imagePullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"latest"` |  |
@@ -37,6 +37,7 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
 | containerSecurityContext.enabled | bool | `true` | Enable security context. |
+| containerSecurityContext.privileged | bool | `false` |  |
 | containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Mounts the container's root filesystem as read-only. |
 | containerSecurityContext.runAsGroup | int | `1000` | Process group id. |
 | containerSecurityContext.runAsNonRoot | bool | `true` | Run container as a user. |
@@ -47,7 +48,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
 | dispatcher.credentialSecretName | string | `""` |  |
-| dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| dispatcher.image.imagePullPolicy | string | `nil` |  |
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"latest"` |  |
@@ -140,7 +141,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.config.natsMaxReconnectAttempts | int | `5` |  |
 | prefill.credentialSecretName | string | `""` |  |
-| prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| prefill.image.imagePullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"latest"` |  |
@@ -180,7 +181,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.credentialSecretName | string | `""` |  |
-| registerConsumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| registerConsumers.image.imagePullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
 | registerConsumers.image.tag | string | `"0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"` |  |
@@ -254,7 +255,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
-| udmTransformer.image.imagePullPolicy | string | `"IfNotPresent"` |  |
+| udmTransformer.image.imagePullPolicy | string | `nil` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"latest"` |  |
