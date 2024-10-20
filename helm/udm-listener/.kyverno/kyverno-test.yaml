@@ -1,0 +1,97 @@
+## SPDX-FileCopyrightText: 2024 Bundesministerium des Innern und für Heimat, PG ZenDiS "Projektgruppe für Aufbau ZenDiS"
+## SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: "cli.kyverno.io/v1alpha1"
+kind: "Test"
+metadata:
+  name: "nubus-test"
+policies:
+  - "../../../../container-pre-commit/kyverno/policies/disallow-container-sock-mounts.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/disallow-default-serviceaccount.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/disallow-host-namespaces.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/disallow-host-path.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/disallow-host-ports.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/disallow-host-process.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/disallow-latest-tag.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/require-containersecuritycontext.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/require-health-and-liveness-check.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/require-imagepullpolicy.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/require-requests-limits.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/require-tag-and-digest.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/template-image-registries.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/template-ingress.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/template-replicas.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/template-require-imagepullsecets.yaml"
+  - "../../../../container-pre-commit/kyverno/policies/template-storage.yaml"
+resources:
+  - "manifest.yaml"
+results:
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-default-serviceaccount"
+    kind: "StatefulSet"
+    rule: "disallow-default-serviceAccountName"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-health-and-liveness-check"
+    kind: "StatefulSet"
+    rule: "require-health-and-liveness-check"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-ro-rootfs"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-no-privilege-escalation"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-all-capabilities-dropped"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-no-privileged"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-run-as-user"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-run-as-group"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-seccomp-profile"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-run-as-non-root"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-empty-seLinuxOptions"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+...
