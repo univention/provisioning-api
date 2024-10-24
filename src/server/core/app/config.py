@@ -30,6 +30,7 @@ class AppSettings(BaseSettings):
     nats_host: str
     # Nats: port
     nats_port: int
+    # TODO: Remove this, it's not used and a security risk
     # Admin Nats user name
     admin_nats_user: str
     # Admin Nats password
