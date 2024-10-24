@@ -68,244 +68,6 @@ global:
         key: null
         value: null
 
-  postgresql:
-    auth:
-      postgresqlProvisioning:
-        create: null
-        name: null
-        key: null
-        value: null
-      guardian:
-        create: null
-        name: null
-        key: null
-        value: null
-      keycloakExtensions:
-        create: null
-        name: null
-        key: null
-        value: null
-      keycloak:
-        create: null
-        name: null
-        key: null
-        value: null
-      notificationsApi:
-        create: null
-        name: null
-        key: null
-        value: null
-      umcServer:
-        create: null
-        name: null
-        key: null
-        value: null
-  objectStorage:
-    auth:
-      minioProvisioning:
-        create: null
-        name: null
-        key: null
-        value: null
-      portalServer:
-        create: null
-        name: null
-        key: null
-        value: null
-      portalConsumer:
-        create: null
-        name: null
-        key: null
-        value: null
-  memcached:
-    auth:
-      umcServer:
-        create: null
-        name: null
-        key: null
-        value: null
-  smtp:
-    auth:
-      keycloakExtensions:
-        create: null
-        name: null
-        key: null
-        value: null
-      umcServer:
-        create: null
-        name: null
-        key: null
-        value: null
-  ldap:
-    auth:
-      cnAdmin:
-        create: null
-        name: null
-        key: null
-        value: null
-      administrator:
-        create: null
-        name: null
-        key: null
-        value: null
-      keycloak:
-        create: null
-        name: null
-        key: null
-        value: null
-  keycloak:
-    auth:
-      admin:
-        create: null
-        name: null
-        key: null
-        value: null
-      guardianClient:
-        create: null
-        name: null
-        key: null
-        value: null
-  portal:
-    auth:
-      centralNavigation:
-        create: null
-        name: null
-        key: null
-        value: null
-  provisioning:
-    auth:
-      portalConsumer:
-        create: null
-        name: null
-        key: null
-        value: null
-      selfserviceConsumer:
-        create: null
-        name: null
-        key: null
-        value: null
-  provisioningApi:
-    auth:
-      admin:
-        create: null
-        name: null
-        key: null
-        value: null
-      eventsUdm:
-        create: null
-        name: null
-        key: null
-        value: null
-      prefill:
-        create: null
-        name: null
-        key: null
-        value: null
-
-postgresql:
-  auth:
-    postgresqlProvisioning:
-      create: null
-      name: null
-      key: null
-      value: null
-    guardian:
-      create: null
-      name: null
-      key: null
-      value: null
-    keycloakExtensions:
-      create: null
-      name: null
-      key: null
-      value: null
-    keycloak:
-      create: null
-      name: null
-      key: null
-      value: null
-    notificationsApi:
-      create: null
-      name: null
-      key: null
-      value: null
-    umcServer:
-      create: null
-      name: null
-      key: null
-      value: null
-objectStorage:
-  auth:
-    minioProvisioning:
-      create: null
-      name: null
-      key: null
-      value: null
-    portalServer:
-      create: null
-      name: null
-      key: null
-      value: null
-    portalConsumer:
-      create: null
-      name: null
-      key: null
-      value: null
-memcached:
-  auth:
-    umcServer:
-      create: null
-      name: null
-      key: null
-      value: null
-smtp:
-  auth:
-    keycloakExtensions:
-      create: null
-      name: null
-      key: null
-      value: null
-    umcServer:
-      create: null
-      name: null
-      key: null
-      value: null
-ldap:
-  auth:
-    cnAdmin:
-      create: null
-      name: null
-      key: null
-      value: null
-    administrator:
-      create: null
-      name: null
-      key: null
-      value: null
-    keycloak:
-      create: null
-      name: null
-      key: null
-      value: null
-keycloak:
-  auth:
-    admin:
-      create: null
-      name: null
-      key: null
-      value: null
-    guardianClient:
-      create: null
-      name: null
-      key: null
-      value: null
-portal:
-  auth:
-    centralNavigation:
-      create: null
-      name: null
-      key: null
-      value: null
 provisioning:
   auth:
     portalConsumer:
@@ -323,16 +85,16 @@ provisioningApi:
     admin:
       create: null
       name: null
-      key: null
+      key: ADMIN_PASSWORD
       value: null
     eventsUdm:
       create: null
       name: null
-      key: null
+      key: EVENTS_PASSWORD_UDM
       value: null
     prefill:
       create: null
-      name: null
+      name: PREFILL_PASSWORD
       key: null
       value: null
 
@@ -1052,32 +814,32 @@ nats:
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.admin.name" . }}'
-          key: '{{ include "provisioning.nats.auth.admin.key" . }}'
+          key: '{{ .Values.global.nats.auth.admin.key }}'
     - name: NATS_API_PASSWORD
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.provisioningApi.name" . }}'
-          key: '{{ include "provisioning.nats.auth.provisioningApi.key" . }}'
+          key: '{{ .Values.global.nats.auth.provisioningApi.key }}'
     - name: NATS_DISPATCHER_PASSWORD
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.dispatcher.name" . }}'
-          key: '{{ include "provisioning.nats.auth.dispatcher.key" . }}'
+          key: '{{ .Values.global.nats.auth.dispatcher.key }}'
     - name: NATS_UDM_TRANSFORMER_PASSWORD
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.udmTransformer.name" . }}'
-          key: '{{ include "provisioning.nats.auth.udmTransformer.key" . }}'
+          key: '{{ .Values.global.nats.auth.udmTransformer.key }}'
     - name: NATS_PREFILL_PASSWORD
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.prefill.name" . }}'
-          key: '{{ include "provisioning.nats.auth.prefill.key" . }}'
+          key: '{{ .Values.global.nats.auth.prefill.key }}'
     - name: NATS_UDM_LISTENER_PASSWORD
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.udmListener.name" . }}'
-          key: '{{ include "provisioning.nats.auth.udmListener.key" . }}'
+          key: '{{ .Values.global.nats.auth.udmListener.key }}'
 
 registerConsumers:
   image:

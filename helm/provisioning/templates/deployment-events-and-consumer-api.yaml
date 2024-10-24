@@ -89,7 +89,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
-                  key: {{ include "provisioning.nats.auth.provisioningApi.key" . }}
+                  key: {{ .Values.global.nats.auth.provisioningApi.key }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -115,21 +115,21 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.admin.name" . }}
-                  key: {{ include "provisioning.provisioningApi.auth.admin.key" . }}
+                  key: {{ .Values.provisioningApi.auth.admin.key }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
-                  key: {{ include "provisioning.provisioningApi.auth.eventsUdm.key" . }}
+                  key: {{ .Values.provisioningApi.auth.eventsUdm.key }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
-                  key: {{ include "provisioning.provisioningApi.auth.prefill.key" . }}
+                  key: {{ .Values.provisioningApi.auth.prefill.key }}
             - name: ADMIN_NATS_USER
               value: "placeholder"
             - name: ADMIN_NATS_PASSWORD
@@ -140,7 +140,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
-                  key: {{ include "provisioning.nats.auth.provisioningApi.key" . }}
+                  key: {{ .Values.global.nats.auth.provisioningApi.key }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
