@@ -78,38 +78,7 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- end -}}
 {{- end -}}
 
-{{- /*
-These template definitions are only used in this chart and do not relate to templates defined elsewhere.
-*/}}
-
-{{- define "provisioning-dispatcher.credentialSecretName" -}}
-{{- coalesce .Values.dispatcher.credentialSecretName (printf "%s-provisioning-dispatcher-credentials" .Release.Name) -}}
-{{- end -}}
-
-{{- define "provisioning-udm-transformer.api.auth.credentialSecretName" -}}
-{{- coalesce .Values.udmTransformer.api.auth.credentialSecretName (printf "%s-provisioning-udm-transformer-api-credentials" .Release.Name) -}}
-{{- end -}}
-
-{{- define "provisioning-udm-transformer.nats.auth.credentialSecretName" -}}
-{{- coalesce .Values.udmTransformer.nats.auth.credentialSecretName (printf "%s-provisioning-udm-transformer-nats-credentials" .Release.Name) -}}
-{{- end -}}
-
-{{- define "provisioning-udm-transformer.ldap.auth.credentialSecretName" -}}
-{{- coalesce .Values.udmTransformer.ldap.auth.credentialSecretName (printf "%s-provisioning-udm-transformer-ldap-credentials" .Release.Name) -}}
-{{- end -}}
-
-{{- define "provisioning-api.credentialSecretName" -}}
-{{- coalesce .Values.api.credentialSecretName (printf "%s-provisioning-api-credentials" .Release.Name) -}}
-{{- end -}}
-
-{{- define "provisioning-prefill.credentialSecretName" -}}
-{{- coalesce .Values.prefill.credentialSecretName (printf "%s-provisioning-prefill-credentials" .Release.Name) -}}
-{{- end -}}
-
-{{- define "provisioning-register-consumers.credentialSecretName" -}}
-{{- coalesce .Values.registerConsumers.credentialSecretName (printf "%s-provisioning-register-consumers-credentials" .Release.Name) -}}
-{{- end -}}
-
+# TODO: remove this and migrate it to the new style
 {{- define "provisioning-register-consumers.jsonSecretName" -}}
 {{- coalesce .Values.registerConsumers.jsonSecretName (printf "%s-provisioning-register-consumers-json-secrets" .Release.Name) -}}
 {{- end -}}

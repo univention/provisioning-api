@@ -135,7 +135,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
-                  key: {{ .Values.provisioningApi.auth.prefill.key }}
+                  key: {{ .Values.api.auth.prefill.key }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

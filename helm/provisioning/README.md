@@ -24,11 +24,16 @@ A Helm Chart that deploys the provisioning services
 | affinity | object | `{}` | Affinity for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set. |
 | api.additionalAnnotations | object | `{}` |  |
 | api.additionalLabels | object | `{}` |  |
+| api.auth.admin.key | string | `"ADMIN_PASSWORD"` |  |
+| api.auth.admin.name | string | `nil` |  |
+| api.auth.eventsUdm.key | string | `"EVENTS_PASSWORD_UDM"` |  |
+| api.auth.eventsUdm.name | string | `nil` |  |
+| api.auth.prefill.key | string | `nil` |  |
+| api.auth.prefill.name | string | `"PREFILL_PASSWORD"` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
 | api.config.ROOT_PATH | string | `"/"` |  |
-| api.credentialSecretName | string | `""` |  |
 | api.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
@@ -46,7 +51,6 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
-| dispatcher.credentialSecretName | string | `""` |  |
 | dispatcher.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
@@ -61,7 +65,7 @@ A Helm Chart that deploys the provisioning services
 | global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
 | global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
-| global.nats | object | `{"auth":{"admin":{"create":null,"key":null,"name":null,"value":null},"dispatcher":{"create":null,"key":null,"name":null,"value":null},"prefill":{"create":null,"key":null,"name":null,"value":null},"provisioningApi":{"create":null,"key":null,"name":null,"value":null},"udmListener":{"create":null,"key":null,"name":null,"value":null},"udmTransformer":{"create":null,"key":null,"name":null,"value":null}},"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
+| global.nats | object | `{"auth":{"admin":{"key":"admin_password","name":null},"dispatcher":{"key":"NATS_PASSWORD","name":null},"prefill":{"key":"NATS_PASSWORD","name":null},"provisioningApi":{"key":"NATS_PASSWORD","name":null},"udmListener":{"key":"NATS_PASSWORD","name":null},"udmTransformer":{"key":"NATS_PASSWORD","name":null}},"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ingress.annotations | object | `{}` | Define custom ingress annotations. annotations:   nginx.ingress.kubernetes.io/rewrite-target: / |
@@ -139,32 +143,11 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `9979` |  |
 | prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.config.natsMaxReconnectAttempts | int | `5` |  |
-| prefill.credentialSecretName | string | `""` |  |
 | prefill.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
 | prefill.podAnnotations | object | `{}` |  |
-| provisioning.auth.portalConsumer.create | string | `nil` |  |
-| provisioning.auth.portalConsumer.key | string | `nil` |  |
-| provisioning.auth.portalConsumer.name | string | `nil` |  |
-| provisioning.auth.portalConsumer.value | string | `nil` |  |
-| provisioning.auth.selfserviceConsumer.create | string | `nil` |  |
-| provisioning.auth.selfserviceConsumer.key | string | `nil` |  |
-| provisioning.auth.selfserviceConsumer.name | string | `nil` |  |
-| provisioning.auth.selfserviceConsumer.value | string | `nil` |  |
-| provisioningApi.auth.admin.create | string | `nil` |  |
-| provisioningApi.auth.admin.key | string | `"ADMIN_PASSWORD"` |  |
-| provisioningApi.auth.admin.name | string | `nil` |  |
-| provisioningApi.auth.admin.value | string | `nil` |  |
-| provisioningApi.auth.eventsUdm.create | string | `nil` |  |
-| provisioningApi.auth.eventsUdm.key | string | `"EVENTS_PASSWORD_UDM"` |  |
-| provisioningApi.auth.eventsUdm.name | string | `nil` |  |
-| provisioningApi.auth.eventsUdm.value | string | `nil` |  |
-| provisioningApi.auth.prefill.create | string | `nil` |  |
-| provisioningApi.auth.prefill.key | string | `nil` |  |
-| provisioningApi.auth.prefill.name | string | `"PREFILL_PASSWORD"` |  |
-| provisioningApi.auth.prefill.value | string | `nil` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
@@ -199,7 +182,6 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.additionalLabels | object | `{}` |  |
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
-| registerConsumers.credentialSecretName | string | `""` |  |
 | registerConsumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
@@ -270,7 +252,6 @@ A Helm Chart that deploys the provisioning services
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
 | udmTransformer.additionalAnnotations | object | `{}` |  |
 | udmTransformer.additionalLabels | object | `{}` |  |
-| udmTransformer.api.auth.credentialSecretName | string | `""` |  |
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
@@ -279,10 +260,8 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"` |  |
 | udmTransformer.ldap.auth.bindDn | string | `""` | LDAP username with global read access |
-| udmTransformer.ldap.auth.credentialSecretName | string | `""` |  |
 | udmTransformer.ldap.baseDn | string | `""` |  |
 | udmTransformer.ldap.connection.host | string | `""` |  |
 | udmTransformer.ldap.connection.port | string | `""` |  |
-| udmTransformer.nats.auth.credentialSecretName | string | `""` |  |
 | udmTransformer.podAnnotations | object | `{}` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |
