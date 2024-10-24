@@ -61,8 +61,100 @@ A Helm Chart that deploys the provisioning services
 | global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
 | global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
-| global.nats | object | `{"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
+| global.keycloak.auth.admin.create | string | `nil` |  |
+| global.keycloak.auth.admin.key | string | `nil` |  |
+| global.keycloak.auth.admin.name | string | `nil` |  |
+| global.keycloak.auth.admin.value | string | `nil` |  |
+| global.keycloak.auth.guardianClient.create | string | `nil` |  |
+| global.keycloak.auth.guardianClient.key | string | `nil` |  |
+| global.keycloak.auth.guardianClient.name | string | `nil` |  |
+| global.keycloak.auth.guardianClient.value | string | `nil` |  |
+| global.ldap.auth.administrator.create | string | `nil` |  |
+| global.ldap.auth.administrator.key | string | `nil` |  |
+| global.ldap.auth.administrator.name | string | `nil` |  |
+| global.ldap.auth.administrator.value | string | `nil` |  |
+| global.ldap.auth.cnAdmin.create | string | `nil` |  |
+| global.ldap.auth.cnAdmin.key | string | `nil` |  |
+| global.ldap.auth.cnAdmin.name | string | `nil` |  |
+| global.ldap.auth.cnAdmin.value | string | `nil` |  |
+| global.ldap.auth.keycloak.create | string | `nil` |  |
+| global.ldap.auth.keycloak.key | string | `nil` |  |
+| global.ldap.auth.keycloak.name | string | `nil` |  |
+| global.ldap.auth.keycloak.value | string | `nil` |  |
+| global.memcached.auth.umcServer.create | string | `nil` |  |
+| global.memcached.auth.umcServer.key | string | `nil` |  |
+| global.memcached.auth.umcServer.name | string | `nil` |  |
+| global.memcached.auth.umcServer.value | string | `nil` |  |
+| global.nats | object | `{"auth":{"admin":{"create":null,"key":null,"name":null,"value":null},"dispatcher":{"create":null,"key":null,"name":null,"value":null},"prefill":{"create":null,"key":null,"name":null,"value":null},"provisioningApi":{"create":null,"key":null,"name":null,"value":null},"udmListener":{"create":null,"key":null,"name":null,"value":null},"udmTransformer":{"create":null,"key":null,"name":null,"value":null}},"connection":{"host":"","port":""}}` | Define configuration regarding nats connectivity. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
+| global.objectStorage.auth.minioProvisioning.create | string | `nil` |  |
+| global.objectStorage.auth.minioProvisioning.key | string | `nil` |  |
+| global.objectStorage.auth.minioProvisioning.name | string | `nil` |  |
+| global.objectStorage.auth.minioProvisioning.value | string | `nil` |  |
+| global.objectStorage.auth.portalConsumer.create | string | `nil` |  |
+| global.objectStorage.auth.portalConsumer.key | string | `nil` |  |
+| global.objectStorage.auth.portalConsumer.name | string | `nil` |  |
+| global.objectStorage.auth.portalConsumer.value | string | `nil` |  |
+| global.objectStorage.auth.portalServer.create | string | `nil` |  |
+| global.objectStorage.auth.portalServer.key | string | `nil` |  |
+| global.objectStorage.auth.portalServer.name | string | `nil` |  |
+| global.objectStorage.auth.portalServer.value | string | `nil` |  |
+| global.portal.auth.centralNavigation.create | string | `nil` |  |
+| global.portal.auth.centralNavigation.key | string | `nil` |  |
+| global.portal.auth.centralNavigation.name | string | `nil` |  |
+| global.portal.auth.centralNavigation.value | string | `nil` |  |
+| global.postgresql.auth.guardian.create | string | `nil` |  |
+| global.postgresql.auth.guardian.key | string | `nil` |  |
+| global.postgresql.auth.guardian.name | string | `nil` |  |
+| global.postgresql.auth.guardian.value | string | `nil` |  |
+| global.postgresql.auth.keycloak.create | string | `nil` |  |
+| global.postgresql.auth.keycloak.key | string | `nil` |  |
+| global.postgresql.auth.keycloak.name | string | `nil` |  |
+| global.postgresql.auth.keycloak.value | string | `nil` |  |
+| global.postgresql.auth.keycloakExtensions.create | string | `nil` |  |
+| global.postgresql.auth.keycloakExtensions.key | string | `nil` |  |
+| global.postgresql.auth.keycloakExtensions.name | string | `nil` |  |
+| global.postgresql.auth.keycloakExtensions.value | string | `nil` |  |
+| global.postgresql.auth.notificationsApi.create | string | `nil` |  |
+| global.postgresql.auth.notificationsApi.key | string | `nil` |  |
+| global.postgresql.auth.notificationsApi.name | string | `nil` |  |
+| global.postgresql.auth.notificationsApi.value | string | `nil` |  |
+| global.postgresql.auth.postgresqlProvisioning.create | string | `nil` |  |
+| global.postgresql.auth.postgresqlProvisioning.key | string | `nil` |  |
+| global.postgresql.auth.postgresqlProvisioning.name | string | `nil` |  |
+| global.postgresql.auth.postgresqlProvisioning.value | string | `nil` |  |
+| global.postgresql.auth.umcServer.create | string | `nil` |  |
+| global.postgresql.auth.umcServer.key | string | `nil` |  |
+| global.postgresql.auth.umcServer.name | string | `nil` |  |
+| global.postgresql.auth.umcServer.value | string | `nil` |  |
+| global.provisioning.auth.portalConsumer.create | string | `nil` |  |
+| global.provisioning.auth.portalConsumer.key | string | `nil` |  |
+| global.provisioning.auth.portalConsumer.name | string | `nil` |  |
+| global.provisioning.auth.portalConsumer.value | string | `nil` |  |
+| global.provisioning.auth.selfserviceConsumer.create | string | `nil` |  |
+| global.provisioning.auth.selfserviceConsumer.key | string | `nil` |  |
+| global.provisioning.auth.selfserviceConsumer.name | string | `nil` |  |
+| global.provisioning.auth.selfserviceConsumer.value | string | `nil` |  |
+| global.provisioningApi.auth.admin.create | string | `nil` |  |
+| global.provisioningApi.auth.admin.key | string | `nil` |  |
+| global.provisioningApi.auth.admin.name | string | `nil` |  |
+| global.provisioningApi.auth.admin.value | string | `nil` |  |
+| global.provisioningApi.auth.eventsUdm.create | string | `nil` |  |
+| global.provisioningApi.auth.eventsUdm.key | string | `nil` |  |
+| global.provisioningApi.auth.eventsUdm.name | string | `nil` |  |
+| global.provisioningApi.auth.eventsUdm.value | string | `nil` |  |
+| global.provisioningApi.auth.prefill.create | string | `nil` |  |
+| global.provisioningApi.auth.prefill.key | string | `nil` |  |
+| global.provisioningApi.auth.prefill.name | string | `nil` |  |
+| global.provisioningApi.auth.prefill.value | string | `nil` |  |
+| global.smtp.auth.keycloakExtensions.create | string | `nil` |  |
+| global.smtp.auth.keycloakExtensions.key | string | `nil` |  |
+| global.smtp.auth.keycloakExtensions.name | string | `nil` |  |
+| global.smtp.auth.keycloakExtensions.value | string | `nil` |  |
+| global.smtp.auth.umcServer.create | string | `nil` |  |
+| global.smtp.auth.umcServer.key | string | `nil` |  |
+| global.smtp.auth.umcServer.name | string | `nil` |  |
+| global.smtp.auth.umcServer.value | string | `nil` |  |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ingress.annotations | object | `{}` | Define custom ingress annotations. annotations:   nginx.ingress.kubernetes.io/rewrite-target: / |
 | ingress.enabled | bool | `false` | Enable creation of Ingress. |
@@ -84,6 +176,26 @@ A Helm Chart that deploys the provisioning services
 | istio.virtualService | object | `{"annotations":{},"enabled":true,"pathOverrides":[],"paths":[]}` | The hostname. This parameter has to be supplied. Example `portal.example`. host: provisioning.local |
 | istio.virtualService.pathOverrides | list | `[]` | Allows to inject deployment specific path configuration which is configured before the elements from `paths` below. This allows to redirect some paths to other services, e.g. in order to supply a file `custom.css`. |
 | istio.virtualService.paths | list | `[]` | The paths configuration. The default only grabs what is known to be part of the frontend.  `pathOverrides` is provided as a workaround so that specific sub-paths can be redirected to other services. |
+| keycloak.auth.admin.create | string | `nil` |  |
+| keycloak.auth.admin.key | string | `nil` |  |
+| keycloak.auth.admin.name | string | `nil` |  |
+| keycloak.auth.admin.value | string | `nil` |  |
+| keycloak.auth.guardianClient.create | string | `nil` |  |
+| keycloak.auth.guardianClient.key | string | `nil` |  |
+| keycloak.auth.guardianClient.name | string | `nil` |  |
+| keycloak.auth.guardianClient.value | string | `nil` |  |
+| ldap.auth.administrator.create | string | `nil` |  |
+| ldap.auth.administrator.key | string | `nil` |  |
+| ldap.auth.administrator.name | string | `nil` |  |
+| ldap.auth.administrator.value | string | `nil` |  |
+| ldap.auth.cnAdmin.create | string | `nil` |  |
+| ldap.auth.cnAdmin.key | string | `nil` |  |
+| ldap.auth.cnAdmin.name | string | `nil` |  |
+| ldap.auth.cnAdmin.value | string | `nil` |  |
+| ldap.auth.keycloak.create | string | `nil` |  |
+| ldap.auth.keycloak.key | string | `nil` |  |
+| ldap.auth.keycloak.name | string | `nil` |  |
+| ldap.auth.keycloak.value | string | `nil` |  |
 | lifecycleHooks | object | `{}` | Lifecycle to automate configuration before or after startup. |
 | livenessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
@@ -115,8 +227,12 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
 | livenessProbe.udmTransformer.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
+| memcached.auth.umcServer.create | string | `nil` |  |
+| memcached.auth.umcServer.key | string | `nil` |  |
+| memcached.auth.umcServer.name | string | `nil` |  |
+| memcached.auth.umcServer.value | string | `nil` |  |
 | nameOverride | string | `"provisioning"` | String to partially override release name. |
-| nats | object | `{"affinity":{"enabled":true},"bundled":true,"config":{"authorization":{"enabled":true,"users":[{"password":"$NATS_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_USER"},{"password":"$NATS_API_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_API_USER"},{"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_DISPATCHER_USER"},{"password":"$NATS_UDM_TRANSFORMER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDM_TRANSFORMER_USER"},{"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_PREFILL_USER"},{"password":"$NATS_UDMLISTENER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDMLISTENER_USER"}]},"cluster":{"replicas":3},"extraConfig":{"max_payload":"16MB"},"jetstream":{"enabled":true}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"extraEnvVars":[{"name":"NATS_USER","value":"admin"},{"name":"NATS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"admin_password","name":"{{ printf \"%s-provisioning-nats-credentials\" .Release.Name }}"}}},{"name":"NATS_API_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_API_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_UDM_TRANSFORMER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-transformer-credentials\" .Release.Name }}"}}},{"name":"NATS_UDM_TRANSFORMER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-transformer-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}}],"nameOverride":"provisioning-nats","nats":{"image":{"registry":"docker.io"}},"natsBox":{"image":{"registry":"docker.io"}},"reloader":{"image":{"registry":"docker.io"}}}` | NATS server settings. |
+| nats | object | `{"affinity":{"enabled":true},"auth":{"admin":{"create":null,"key":null,"name":null,"value":null},"dispatcher":{"create":null,"key":null,"name":null,"value":null},"prefill":{"create":null,"key":null,"name":null,"value":null},"provisioningApi":{"create":null,"key":null,"name":null,"value":null},"udmListener":{"create":null,"key":null,"name":null,"value":null},"udmTransformer":{"create":null,"key":null,"name":null,"value":null}},"bundled":true,"config":{"authorization":{"enabled":true,"users":[{"password":"$NATS_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_USER"},{"password":"$NATS_API_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_API_USER"},{"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_DISPATCHER_USER"},{"password":"$NATS_UDM_TRANSFORMER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDM_TRANSFORMER_USER"},{"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_PREFILL_USER"},{"password":"$NATS_UDMLISTENER_PASSWORD","permissions":{"publish":">","subscribe":">"},"user":"$NATS_UDMLISTENER_USER"}]},"cluster":{"replicas":3},"extraConfig":{"max_payload":"16MB"},"jetstream":{"enabled":true}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"extraEnvVars":[{"name":"NATS_USER","value":"admin"},{"name":"NATS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"admin_password","name":"{{ printf \"%s-provisioning-nats-credentials\" .Release.Name }}"}}},{"name":"NATS_API_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_API_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-api-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_DISPATCHER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-dispatcher-credentials\" .Release.Name }}"}}},{"name":"NATS_UDM_TRANSFORMER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-transformer-credentials\" .Release.Name }}"}}},{"name":"NATS_UDM_TRANSFORMER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-transformer-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_PREFILL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-prefill-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_USER","valueFrom":{"secretKeyRef":{"key":"NATS_USER","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}},{"name":"NATS_UDMLISTENER_PASSWORD","valueFrom":{"secretKeyRef":{"key":"NATS_PASSWORD","name":"{{ printf \"%s-provisioning-udm-listener-credentials\" .Release.Name }}"}}}],"nameOverride":"provisioning-nats","nats":{"image":{"registry":"docker.io"}},"natsBox":{"image":{"registry":"docker.io"}},"reloader":{"image":{"registry":"docker.io"}}}` | NATS server settings. |
 | nats.bundled | bool | `true` | Set to `true` if you want NATS to be installed as well. |
 | nats.config.cluster.replicas | int | `3` | Has to be set to at least 3, the minimum for nats clustering |
 | nats.connection.host | string | `""` | The NATS service to connect to. |
@@ -126,12 +242,52 @@ A Helm Chart that deploys the provisioning services
 | nats.connection.tls.certFile | string | `"/certificates/tls.crt"` | The certificate to present when initialising the connection. |
 | nats.connection.tls.keyFile | string | `"/certificates/tls.key"` | The private key to use for the connection. |
 | nodeSelector | object | `{}` | Node labels for pod assignment. Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| objectStorage.auth.minioProvisioning.create | string | `nil` |  |
+| objectStorage.auth.minioProvisioning.key | string | `nil` |  |
+| objectStorage.auth.minioProvisioning.name | string | `nil` |  |
+| objectStorage.auth.minioProvisioning.value | string | `nil` |  |
+| objectStorage.auth.portalConsumer.create | string | `nil` |  |
+| objectStorage.auth.portalConsumer.key | string | `nil` |  |
+| objectStorage.auth.portalConsumer.name | string | `nil` |  |
+| objectStorage.auth.portalConsumer.value | string | `nil` |  |
+| objectStorage.auth.portalServer.create | string | `nil` |  |
+| objectStorage.auth.portalServer.key | string | `nil` |  |
+| objectStorage.auth.portalServer.name | string | `nil` |  |
+| objectStorage.auth.portalServer.value | string | `nil` |  |
 | podAnnotations | object | `{}` | Pod Annotations. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | podLabels | object | `{}` | Pod Labels. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | podSecurityContext.enabled | bool | `true` | Enable security context. |
 | podSecurityContext.fsGroup | int | `1000` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
+| portal.auth.centralNavigation.create | string | `nil` |  |
+| portal.auth.centralNavigation.key | string | `nil` |  |
+| portal.auth.centralNavigation.name | string | `nil` |  |
+| portal.auth.centralNavigation.value | string | `nil` |  |
+| postgresql.auth.guardian.create | string | `nil` |  |
+| postgresql.auth.guardian.key | string | `nil` |  |
+| postgresql.auth.guardian.name | string | `nil` |  |
+| postgresql.auth.guardian.value | string | `nil` |  |
+| postgresql.auth.keycloak.create | string | `nil` |  |
+| postgresql.auth.keycloak.key | string | `nil` |  |
+| postgresql.auth.keycloak.name | string | `nil` |  |
+| postgresql.auth.keycloak.value | string | `nil` |  |
+| postgresql.auth.keycloakExtensions.create | string | `nil` |  |
+| postgresql.auth.keycloakExtensions.key | string | `nil` |  |
+| postgresql.auth.keycloakExtensions.name | string | `nil` |  |
+| postgresql.auth.keycloakExtensions.value | string | `nil` |  |
+| postgresql.auth.notificationsApi.create | string | `nil` |  |
+| postgresql.auth.notificationsApi.key | string | `nil` |  |
+| postgresql.auth.notificationsApi.name | string | `nil` |  |
+| postgresql.auth.notificationsApi.value | string | `nil` |  |
+| postgresql.auth.postgresqlProvisioning.create | string | `nil` |  |
+| postgresql.auth.postgresqlProvisioning.key | string | `nil` |  |
+| postgresql.auth.postgresqlProvisioning.name | string | `nil` |  |
+| postgresql.auth.postgresqlProvisioning.value | string | `nil` |  |
+| postgresql.auth.umcServer.create | string | `nil` |  |
+| postgresql.auth.umcServer.key | string | `nil` |  |
+| postgresql.auth.umcServer.name | string | `nil` |  |
+| postgresql.auth.umcServer.value | string | `nil` |  |
 | prefill.additionalAnnotations | object | `{}` |  |
 | prefill.additionalLabels | object | `{}` |  |
 | prefill.config.LOG_LEVEL | string | `"INFO"` |  |
@@ -145,6 +301,26 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"latest"` |  |
 | prefill.podAnnotations | object | `{}` |  |
+| provisioning.auth.portalConsumer.create | string | `nil` |  |
+| provisioning.auth.portalConsumer.key | string | `nil` |  |
+| provisioning.auth.portalConsumer.name | string | `nil` |  |
+| provisioning.auth.portalConsumer.value | string | `nil` |  |
+| provisioning.auth.selfserviceConsumer.create | string | `nil` |  |
+| provisioning.auth.selfserviceConsumer.key | string | `nil` |  |
+| provisioning.auth.selfserviceConsumer.name | string | `nil` |  |
+| provisioning.auth.selfserviceConsumer.value | string | `nil` |  |
+| provisioningApi.auth.admin.create | string | `nil` |  |
+| provisioningApi.auth.admin.key | string | `nil` |  |
+| provisioningApi.auth.admin.name | string | `nil` |  |
+| provisioningApi.auth.admin.value | string | `nil` |  |
+| provisioningApi.auth.eventsUdm.create | string | `nil` |  |
+| provisioningApi.auth.eventsUdm.key | string | `nil` |  |
+| provisioningApi.auth.eventsUdm.name | string | `nil` |  |
+| provisioningApi.auth.eventsUdm.value | string | `nil` |  |
+| provisioningApi.auth.prefill.create | string | `nil` |  |
+| provisioningApi.auth.prefill.key | string | `nil` |  |
+| provisioningApi.auth.prefill.name | string | `nil` |  |
+| provisioningApi.auth.prefill.value | string | `nil` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
@@ -215,6 +391,14 @@ A Helm Chart that deploys the provisioning services
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.labels | object | `{}` | Additional custom labels for the ServiceAccount. |
 | serviceAccount.name | string | `""` |  |
+| smtp.auth.keycloakExtensions.create | string | `nil` |  |
+| smtp.auth.keycloakExtensions.key | string | `nil` |  |
+| smtp.auth.keycloakExtensions.name | string | `nil` |  |
+| smtp.auth.keycloakExtensions.value | string | `nil` |  |
+| smtp.auth.umcServer.create | string | `nil` |  |
+| smtp.auth.umcServer.key | string | `nil` |  |
+| smtp.auth.umcServer.name | string | `nil` |  |
+| smtp.auth.umcServer.value | string | `nil` |  |
 | startupProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | startupProbe.api.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
 | startupProbe.api.periodSeconds | int | `20` | Time between probe executions. |

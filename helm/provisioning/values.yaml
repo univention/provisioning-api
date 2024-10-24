@@ -36,6 +36,306 @@ global:
     connection:
       host: ""
       port: ""
+    auth:
+      admin:
+        create: null
+        name: null
+        key: null
+        value: null
+      provisioningApi:
+        create: null
+        name: null
+        key: null
+        value: null
+      prefill:
+        create: null
+        name: null
+        key: null
+        value: null
+      dispatcher:
+        create: null
+        name: null
+        key: null
+        value: null
+      udmTransformer:
+        create: null
+        name: null
+        key: null
+        value: null
+      udmListener:
+        create: null
+        name: null
+        key: null
+        value: null
+
+  postgresql:
+    auth:
+      postgresqlProvisioning:
+        create: null
+        name: null
+        key: null
+        value: null
+      guardian:
+        create: null
+        name: null
+        key: null
+        value: null
+      keycloakExtensions:
+        create: null
+        name: null
+        key: null
+        value: null
+      keycloak:
+        create: null
+        name: null
+        key: null
+        value: null
+      notificationsApi:
+        create: null
+        name: null
+        key: null
+        value: null
+      umcServer:
+        create: null
+        name: null
+        key: null
+        value: null
+  objectStorage:
+    auth:
+      minioProvisioning:
+        create: null
+        name: null
+        key: null
+        value: null
+      portalServer:
+        create: null
+        name: null
+        key: null
+        value: null
+      portalConsumer:
+        create: null
+        name: null
+        key: null
+        value: null
+  memcached:
+    auth:
+      umcServer:
+        create: null
+        name: null
+        key: null
+        value: null
+  smtp:
+    auth:
+      keycloakExtensions:
+        create: null
+        name: null
+        key: null
+        value: null
+      umcServer:
+        create: null
+        name: null
+        key: null
+        value: null
+  ldap:
+    auth:
+      cnAdmin:
+        create: null
+        name: null
+        key: null
+        value: null
+      administrator:
+        create: null
+        name: null
+        key: null
+        value: null
+      keycloak:
+        create: null
+        name: null
+        key: null
+        value: null
+  keycloak:
+    auth:
+      admin:
+        create: null
+        name: null
+        key: null
+        value: null
+      guardianClient:
+        create: null
+        name: null
+        key: null
+        value: null
+  portal:
+    auth:
+      centralNavigation:
+        create: null
+        name: null
+        key: null
+        value: null
+  provisioning:
+    auth:
+      portalConsumer:
+        create: null
+        name: null
+        key: null
+        value: null
+      selfserviceConsumer:
+        create: null
+        name: null
+        key: null
+        value: null
+  provisioningApi:
+    auth:
+      admin:
+        create: null
+        name: null
+        key: null
+        value: null
+      eventsUdm:
+        create: null
+        name: null
+        key: null
+        value: null
+      prefill:
+        create: null
+        name: null
+        key: null
+        value: null
+
+postgresql:
+  auth:
+    postgresqlProvisioning:
+      create: null
+      name: null
+      key: null
+      value: null
+    guardian:
+      create: null
+      name: null
+      key: null
+      value: null
+    keycloakExtensions:
+      create: null
+      name: null
+      key: null
+      value: null
+    keycloak:
+      create: null
+      name: null
+      key: null
+      value: null
+    notificationsApi:
+      create: null
+      name: null
+      key: null
+      value: null
+    umcServer:
+      create: null
+      name: null
+      key: null
+      value: null
+objectStorage:
+  auth:
+    minioProvisioning:
+      create: null
+      name: null
+      key: null
+      value: null
+    portalServer:
+      create: null
+      name: null
+      key: null
+      value: null
+    portalConsumer:
+      create: null
+      name: null
+      key: null
+      value: null
+memcached:
+  auth:
+    umcServer:
+      create: null
+      name: null
+      key: null
+      value: null
+smtp:
+  auth:
+    keycloakExtensions:
+      create: null
+      name: null
+      key: null
+      value: null
+    umcServer:
+      create: null
+      name: null
+      key: null
+      value: null
+ldap:
+  auth:
+    cnAdmin:
+      create: null
+      name: null
+      key: null
+      value: null
+    administrator:
+      create: null
+      name: null
+      key: null
+      value: null
+    keycloak:
+      create: null
+      name: null
+      key: null
+      value: null
+keycloak:
+  auth:
+    admin:
+      create: null
+      name: null
+      key: null
+      value: null
+    guardianClient:
+      create: null
+      name: null
+      key: null
+      value: null
+portal:
+  auth:
+    centralNavigation:
+      create: null
+      name: null
+      key: null
+      value: null
+provisioning:
+  auth:
+    portalConsumer:
+      create: null
+      name: null
+      key: null
+      value: null
+    selfserviceConsumer:
+      create: null
+      name: null
+      key: null
+      value: null
+provisioningApi:
+  auth:
+    admin:
+      create: null
+      name: null
+      key: null
+      value: null
+    eventsUdm:
+      create: null
+      name: null
+      key: null
+      value: null
+    prefill:
+      create: null
+      name: null
+      key: null
+      value: null
+
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}
@@ -636,6 +936,37 @@ prefill:
 
 # -- NATS server settings.
 nats:
+  auth:
+    admin:
+      create: null
+      name: null
+      key: null
+      value: null
+    provisioningApi:
+      create: null
+      name: null
+      key: null
+      value: null
+    prefill:
+      create: null
+      name: null
+      key: null
+      value: null
+    dispatcher:
+      create: null
+      name: null
+      key: null
+      value: null
+    udmTransformer:
+      create: null
+      name: null
+      key: null
+      value: null
+    udmListener:
+      create: null
+      name: null
+      key: null
+      value: null
   nats:
     image:
       registry: "docker.io"
