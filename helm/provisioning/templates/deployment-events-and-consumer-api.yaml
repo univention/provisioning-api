@@ -82,8 +82,14 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
-            - secretRef:
-                name: {{ include "provisioning-api.credentialSecretName" . | quote }}
+          env:
+            - name: NATS_USER
+              value: "api"
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
+                  key: {{ include "provisioning.nats.auth.provisioningApi.key" . }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -102,10 +108,39 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
-          {{- if (include "provisioning-api.credentialSecretName" .) }}
-            - secretRef:
-                name: {{ include "provisioning-api.credentialSecretName" . | quote }}
-          {{- end }}
+          env:
+            - name: ADMIN_USERNAME
+              value: "admin"
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.admin.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.admin.key" . }}
+            - name: EVENTS_USERNAME_UDM
+              value: "udm"
+            - name: EVENTS_PASSWORD_UDM
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.eventsUdm.key" . }}
+            - name: PREFILL_USERNAME
+              value: "prefill"
+            - name: PREFILL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.prefill.key" . }}
+            - name: ADMIN_NATS_USER
+              value: "placeholder"
+            - name: ADMIN_NATS_PASSWORD
+              value: "placeholder"
+            - name: NATS_USER
+              value: "api"
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
+                  key: {{ include "provisioning.nats.auth.provisioningApi.key" . }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

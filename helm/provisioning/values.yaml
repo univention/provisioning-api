@@ -835,13 +835,12 @@ updateStrategy:
   # https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70
   type: "Recreate"
 
-
 api:
   image:
     registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-events-and-consumer-api"
-    tag: "latest"
+    tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -864,7 +863,7 @@ dispatcher:
     registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-dispatcher"
-    tag: "latest"
+    tag: "0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -880,7 +879,7 @@ udmTransformer:
     registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-udm-transformer"
-    tag: "latest"
+    tag: "0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"
   # If specified environment variables will be set on the container
   api:
     auth:
@@ -918,7 +917,7 @@ prefill:
     registry: ""
     imagePullPolicy: "IfNotPresent"
     repository: "nubus-dev/images/provisioning-prefill"
-    tag: "latest"
+    tag: "0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"
   # If specified environment variables will be set on the container
   credentialSecretName: ""
   config:
@@ -936,37 +935,37 @@ prefill:
 
 # -- NATS server settings.
 nats:
-  auth:
-    admin:
-      create: null
-      name: null
-      key: null
-      value: null
-    provisioningApi:
-      create: null
-      name: null
-      key: null
-      value: null
-    prefill:
-      create: null
-      name: null
-      key: null
-      value: null
-    dispatcher:
-      create: null
-      name: null
-      key: null
-      value: null
-    udmTransformer:
-      create: null
-      name: null
-      key: null
-      value: null
-    udmListener:
-      create: null
-      name: null
-      key: null
-      value: null
+  # auth:
+  #   admin:
+  #     create: null
+  #     name: null
+  #     key: null
+  #     value: null
+  #   provisioningApi:
+  #     create: null
+  #     name: null
+  #     key: null
+  #     value: null
+  #   prefill:
+  #     create: null
+  #     name: null
+  #     key: null
+  #     value: null
+  #   dispatcher:
+  #     create: null
+  #     name: null
+  #     key: null
+  #     value: null
+  #   udmTransformer:
+  #     create: null
+  #     name: null
+  #     key: null
+  #     value: null
+  #   udmListener:
+  #     create: null
+  #     name: null
+  #     key: null
+  #     value: null
   nats:
     image:
       registry: "docker.io"
@@ -1009,96 +1008,76 @@ nats:
       max_payload: "16MB"
     authorization:
       enabled: true
+# "udmtransformer"
+# "api"
+# "admin"
+# "dispatcher"
+# "prefill"
+# "udmlistener"
+# "udmtransformer"
+# "selfservice"
       users:
-        - user: "$NATS_USER"
+        - user: "admin"
           password: "$NATS_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
-        - user: "$NATS_API_USER"
+        - user: "api"
           password: "$NATS_API_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
-        - user: "$NATS_DISPATCHER_USER"
+        - user: "dispatcher"
           password: "$NATS_DISPATCHER_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
-        - user: "$NATS_UDM_TRANSFORMER_USER"
+        - user: "udmtransformer"
           password: "$NATS_UDM_TRANSFORMER_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
-        - user: "$NATS_PREFILL_USER"
+        - user: "prefill"
           password: "$NATS_PREFILL_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
-        - user: "$NATS_UDMLISTENER_USER"
-          password: "$NATS_UDMLISTENER_PASSWORD"
+        - user: "udmlistener"
+          password: "$NATS_UDM_LISTENER_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
   extraEnvVars:
-    - name: NATS_USER
-      value: "admin"
     - name: NATS_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ printf "%s-provisioning-nats-credentials" .Release.Name }}'
-          key: admin_password
-    - name: NATS_API_USER
-      valueFrom:
-        secretKeyRef:
-          name: '{{ printf "%s-provisioning-api-credentials" .Release.Name }}'
-          key: NATS_USER
+          name: '{{ include "provisioning.nats.auth.admin.name" . }}'
+          key: '{{ include "provisioning.nats.auth.admin.key" . }}'
     - name: NATS_API_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ printf "%s-provisioning-api-credentials" .Release.Name }}'
-          key: NATS_PASSWORD
-    - name: NATS_DISPATCHER_USER
-      valueFrom:
-        secretKeyRef:
-          name: '{{ printf "%s-provisioning-dispatcher-credentials" .Release.Name }}'
-          key: NATS_USER
+          name: '{{ include "provisioning.nats.auth.provisioningApi.name" . }}'
+          key: '{{ include "provisioning.nats.auth.provisioningApi.key" . }}'
     - name: NATS_DISPATCHER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ printf "%s-provisioning-dispatcher-credentials" .Release.Name }}'
-          key: NATS_PASSWORD
-    - name: NATS_UDM_TRANSFORMER_USER
-      valueFrom:
-        secretKeyRef:
-          name: '{{ printf "%s-provisioning-udm-transformer-credentials" .Release.Name }}'
-          key: NATS_USER
+          name: '{{ include "provisioning.nats.auth.dispatcher.name" . }}'
+          key: '{{ include "provisioning.nats.auth.dispatcher.key" . }}'
     - name: NATS_UDM_TRANSFORMER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ printf "%s-provisioning-udm-transformer-credentials" .Release.Name }}'
-          key: NATS_PASSWORD
-    - name: NATS_PREFILL_USER
-      valueFrom:
-        secretKeyRef:
-          name: '{{ printf "%s-provisioning-prefill-credentials" .Release.Name }}'
-          key: NATS_USER
+          name: '{{ include "provisioning.nats.auth.udmTransformer.name" . }}'
+          key: '{{ include "provisioning.nats.auth.udmTransformer.key" . }}'
     - name: NATS_PREFILL_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ printf "%s-provisioning-prefill-credentials" .Release.Name }}'
-          key: NATS_PASSWORD
-    - name: NATS_UDMLISTENER_USER
+          name: '{{ include "provisioning.nats.auth.prefill.name" . }}'
+          key: '{{ include "provisioning.nats.auth.prefill.key" . }}'
+    - name: NATS_UDM_LISTENER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ printf "%s-provisioning-udm-listener-credentials" .Release.Name }}'
-          key: NATS_USER
-    - name: NATS_UDMLISTENER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ printf "%s-provisioning-udm-listener-credentials" .Release.Name }}'
-          key: NATS_PASSWORD
-
+          name: '{{ include "provisioning.nats.auth.udmListener.name" . }}'
+          key: '{{ include "provisioning.nats.auth.udmListener.key" . }}'
 
 registerConsumers:
   image:

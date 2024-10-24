@@ -111,8 +111,28 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
-            - secretRef:
-                name: {{ include "provisioning-api.credentialSecretName" . | quote }}
+          env:
+            - name: NATS_USER
+              value: "udmtransformer"
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.nats.auth.udmTransformer.name" . }}
+                  key: {{ include "provisioning.nats.auth.udmTransformer.key" . }}
+            - name: UDM_USERNAME
+              value: "cn=admin"
+            - name: UDM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.ldap.auth.cnAdmin.name" . }}
+                  key: {{ include "provisioning.ldap.auth.cnAdmin.key" . }}
+            - name: PREFILL_USERNAME
+              value: "prefill"
+            - name: PREFILL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.prefill.key" . }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -131,18 +151,28 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-udm-transformer" (include "common.names.fullname" .) }}
-          {{- if (include "provisioning-udm-transformer.api.auth.credentialSecretName" .) }}
-            - secretRef:
-                name: {{ include "provisioning-udm-transformer.api.auth.credentialSecretName" . | quote }}
-          {{- end }}
-          {{- if (include "provisioning-udm-transformer.nats.auth.credentialSecretName" .) }}
-            - secretRef:
-                name: {{ include "provisioning-udm-transformer.nats.auth.credentialSecretName" . | quote }}
-          {{- end }}
-          {{- if (include "provisioning-udm-transformer.ldap.auth.credentialSecretName" .) }}
-            - secretRef:
-                name: {{ include "provisioning-udm-transformer.ldap.auth.credentialSecretName" . | quote }}
-          {{- end }}
+          env:
+            - name: NATS_USER
+              value: "udmtransformer"
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.nats.auth.udmTransformer.name" . }}
+                  key: {{ include "provisioning.nats.auth.udmTransformer.key" . }}
+            - name: EVENTS_USERNAME_UDM
+              value: "udm"
+            - name: EVENTS_PASSWORD_UDM
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.eventsUdm.key" . }}
+            - name: LDAP_B ND_PW
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.ldap.auth.cnAdmin.name" . }}
+                  key: {{ include "provisioning.ldap.auth.cnAdmin.key" . }}
+                  {{/* name: {{ tpl .Values.ldap.cnAdmin.password.name . }} */}}
+                  {{/* key: {{ tpl .Values.ldap.cnAdmin.password.name . }} */}}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
