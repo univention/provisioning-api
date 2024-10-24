@@ -33,6 +33,15 @@ resources:
       cpu: "100m"
       memory: "32Mi"
 
+ldap:
+  auth:
+    cnAdmin:
+      password:
+        # create: true
+        name: "dummy-ldap-cn-admin-secret-name"
+        key: "dummy-ldap-cn-admin-secret-key"
+        # value: null
+
 prefill:
   config:
     UDM_HOST: "udm-host"

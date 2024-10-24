@@ -89,7 +89,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
-                  key: {{ include "provisioning.nats.auth.provisioningApi.key" . }}
+                  key: {{ .Values.global.nats.auth.provisioningApi.key }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -114,7 +114,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
-                  key: {{ include "provisioning.nats.auth.provisioningApi.key" . }}
+                  key: {{ .Values.global.nats.auth.provisioningApi.key }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
