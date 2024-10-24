@@ -28,15 +28,69 @@ resources:
 results:
   - resources:
       - "release-name-udm-listener"
+    policy: "require-tag-and-digest"
+    kind: "StatefulSet"
+    rule: "require-tag-and-digest"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
     policy: "disallow-default-serviceaccount"
     kind: "StatefulSet"
     rule: "disallow-default-serviceAccountName"
     result: "pass"
   - resources:
       - "release-name-udm-listener"
+    policy: "template-imagepullsecrets"
+    kind: "StatefulSet"
+    rule: "template-imagePullSecrets"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-latest-tag"
+    kind: "StatefulSet"
+    rule: "disallow-latest-tag"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-latest-tag"
+    kind: "StatefulSet"
+    rule: "require-image-tag-or-digest"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-imagepullpolicy"
+    kind: "StatefulSet"
+    rule: "require-imagePullPolicy"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
     policy: "require-health-and-liveness-check"
     kind: "StatefulSet"
     rule: "require-health-and-liveness-check"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "template-storage"
+    kind: "StatefulSet"
+    rule: "template-storageClassName-pvc"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "template-storage"
+    kind: "StatefulSet"
+    rule: "template-requests-storage-pvc"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-requests-limits"
+    kind: "StatefulSet"
+    rule: "validate-resources"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "template-image-registries"
+    kind: "StatefulSet"
+    rule: "template-image-registries"
     result: "pass"
   - resources:
       - "release-name-udm-listener"
@@ -94,4 +148,68 @@ results:
     result: "pass"
   - resources:
       - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "require-default-procMount"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "require-containersecuritycontext"
+    kind: "StatefulSet"
+    rule: "restrict-sysctls"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-container-sock-mounts"
+    kind: "StatefulSet"
+    rule: "validate-docker-sock-mount"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-container-sock-mounts"
+    kind: "StatefulSet"
+    rule: "validate-containerd-sock-mount"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-container-sock-mounts"
+    kind: "StatefulSet"
+    rule: "validate-crio-sock-mount"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-container-sock-mounts"
+    kind: "StatefulSet"
+    rule: "validate-dockerd-sock-mount"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-host-namespaces"
+    kind: "StatefulSet"
+    rule: "disallow-host-namespaces"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-host-path"
+    kind: "StatefulSet"
+    rule: "disallow-host-path"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-host-ports"
+    kind: "StatefulSet"
+    rule: "disallow-host-ports"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "disallow-host-process"
+    kind: "StatefulSet"
+    rule: "disallow-host-process"
+    result: "pass"
+  - resources:
+      - "release-name-udm-listener"
+    policy: "template-replicas"
+    kind: "StatefulSet"
+    rule: "template-replicas"
+    result: "pass"
 ...
