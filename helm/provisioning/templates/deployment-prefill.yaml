@@ -77,8 +77,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
-            - secretRef:
-                name: {{ include "provisioning-prefill.credentialSecretName" . | quote }}
+          env:
+            - name: NATS_USER
+              value: "prefill"
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.nats.auth.prefill.name" . }}
+                  key: {{ include "provisioning.nats.auth.prefill.key" . }}
           volumeMounts:
             - name: wait-for-udm
               mountPath: /scripts
@@ -107,10 +113,29 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
-          {{- if (include "provisioning-prefill.credentialSecretName" .) }}
-            - secretRef:
-                name: {{ include "provisioning-prefill.credentialSecretName" . | quote }}
-          {{- end }}
+          env:
+            - name: NATS_USER
+              value: "prefill"
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.nats.auth.prefill.name" . }}
+                  key: {{ include "provisioning.nats.auth.prefill.key" . }}
+                {{/* name: {{ include "provisioning-prefill.credentialSecretName" . | quote }} */}}
+            - name: UDM_USERNAME
+              value: "cn=admin"
+            - name: UDM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.ldap.auth.cnAdmin.name" . }}
+                  key: {{ include "provisioning.ldap.auth.cnAdmin.key" . }}
+            - name: PREFILL_USERNAME
+              value: "prefill"
+            - name: PREFILL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.prefill.key" . }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

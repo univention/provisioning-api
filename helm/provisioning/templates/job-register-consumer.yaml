@@ -76,8 +76,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
-            - secretRef:
-                name: {{ include "provisioning-register-consumers.credentialSecretName" . | quote }}
+          env:
+            - name: UDM_USERNAME
+              value: "cn=admin"
+            - name: UDM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.ldap.auth.cnAdmin.name" . }}
+                  key: {{ include "provisioning.ldap.auth.cnAdmin.key" . }}
           volumeMounts:
             - name: wait-for-data-loader
               mountPath: /scripts
@@ -94,10 +100,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
-          {{- if (include "provisioning-register-consumers.credentialSecretName" .) }}
-            - secretRef:
-                name: {{ include "provisioning-register-consumers.credentialSecretName" . | quote }}
-          {{- end }}
+          env:
+            - name: ADMIN_USERNAME
+              value: "admin"
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "provisioning.provisioningApi.auth.admin.name" . }}
+                  key: {{ include "provisioning.provisioningApi.auth.admin.key" . }}
           command:
             - "/bin/sh"
             - "-c"
