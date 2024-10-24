@@ -43,6 +43,7 @@ spec:
       {{- end }}
       restartPolicy: Never
       volumes:
+        # TODO: Figure this out and make it pretty!
         - name: consumer-secrets
         {{- if (include "provisioning-register-consumers.jsonSecretName" .) }}
           secret:
@@ -107,7 +108,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.admin.name" . }}
-                  key: {{ .Values.provisioningApi.auth.admin.key }}
+                  key: {{ .Values.api.auth.admin.key }}
           command:
             - "/bin/sh"
             - "-c"

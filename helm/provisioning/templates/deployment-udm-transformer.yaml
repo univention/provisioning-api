@@ -132,7 +132,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
-                  key: {{ .Values.provisioningApi.auth.prefill.key }}
+                  key: {{ .Values.api.auth.prefill.key }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -165,7 +165,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
-                  key: {{ .Values.provisioningApi.auth.eventsUdm.key }}
+                  key: {{ .Values.api.auth.eventsUdm.key }}
             - name: LDAP_B ND_PW
               valueFrom:
                 secretKeyRef:

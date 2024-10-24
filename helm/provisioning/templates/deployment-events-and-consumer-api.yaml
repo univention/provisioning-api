@@ -115,21 +115,21 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.admin.name" . }}
-                  key: {{ .Values.provisioningApi.auth.admin.key }}
+                  key: {{ .Values.api.auth.admin.key }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
-                  key: {{ .Values.provisioningApi.auth.eventsUdm.key }}
+                  key: {{ .Values.api.auth.eventsUdm.key }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
-                  key: {{ .Values.provisioningApi.auth.prefill.key }}
+                  key: {{ .Values.api.auth.prefill.key }}
             - name: ADMIN_NATS_USER
               value: "placeholder"
             - name: ADMIN_NATS_PASSWORD

@@ -38,65 +38,265 @@ global:
       port: ""
     auth:
       admin:
-        create: null
+        # create: null
         name: null
-        key: null
-        value: null
+        key: admin_password
+        # value: null
       provisioningApi:
-        create: null
+        # create: null
         name: null
-        key: null
-        value: null
+        key: NATS_PASSWORD
+        # value: null
       prefill:
-        create: null
+        # create: null
         name: null
-        key: null
-        value: null
+        key: NATS_PASSWORD
+        # value: null
       dispatcher:
-        create: null
+        # create: null
         name: null
-        key: null
-        value: null
+        key: NATS_PASSWORD
+        # value: null
       udmTransformer:
-        create: null
+        # create: null
         name: null
-        key: null
-        value: null
+        key: NATS_PASSWORD
+        # value: null
       udmListener:
-        create: null
+        # create: null
         name: null
-        key: null
-        value: null
+        key: NATS_PASSWORD
+        # value: null
 
-provisioning:
-  auth:
-    portalConsumer:
-      create: null
-      name: null
-      key: null
-      value: null
-    selfserviceConsumer:
-      create: null
-      name: null
-      key: null
-      value: null
-provisioningApi:
+api:
+  image:
+    registry: ""
+    imagePullPolicy: "IfNotPresent"
+    repository: "nubus-dev/images/provisioning-events-and-consumer-api"
+    tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
+  # If specified environment variables will be set on the container
   auth:
     admin:
-      create: null
+      # create: null
       name: null
       key: ADMIN_PASSWORD
-      value: null
+      # value: null
     eventsUdm:
-      create: null
+      # create: null
       name: null
       key: EVENTS_PASSWORD_UDM
-      value: null
+      # value: null
     prefill:
-      create: null
+      # create: null
       name: PREFILL_PASSWORD
       key: null
-      value: null
+      # value: null
+
+  config:
+    # Python log level
+    LOG_LEVEL: "INFO"
+    ## api
+    # FastAPI: debug mode: send traceback in response on errors
+    DEBUG: "false"
+    # FastAPI: webserver root path
+    ROOT_PATH: "/"
+    # FastAPI: disable CORS checks
+    CORS_ALL: "false"
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podAnnotations: {}
+
+dispatcher:
+  image:
+    # TODO: unset when global.imageRegistry is supported by update-helm-values
+    registry: ""
+    imagePullPolicy: "IfNotPresent"
+    repository: "nubus-dev/images/provisioning-dispatcher"
+    tag: "0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"
+  # If specified environment variables will be set on the container
+  config:
+    # Python log level
+    LOG_LEVEL: "INFO"
+    natsMaxReconnectAttempts: 5
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podAnnotations: {}
+
+udmTransformer:
+  image:
+    registry: ""
+    imagePullPolicy: "IfNotPresent"
+    repository: "nubus-dev/images/provisioning-udm-transformer"
+    tag: "0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"
+  # If specified environment variables will be set on the container
+  ldap:
+    # LDAP BASE DN of the LDAP domain.
+    baseDn: ""
+    auth:
+      # -- LDAP username with global read access
+      bindDn: ""
+    connection:
+      # Hostname of the LDAP Primary servers
+      host: ""
+      # LDAP server port
+      port: ""
+  config:
+    # Enables toggling between `ldif-producer` and `udm-listener`.
+    # Beware: `ldif-producer` is experimental and unsupported.
+    ldapPublisherName: "udm-listener"
+    # Python log level
+    LOG_LEVEL: "INFO"
+    # -- Whether to start ldap encryption and validate certificates.
+    # Chose from "off", "unvalidated" and "secure".
+    LDAP_TLS_MODE: "off"
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podAnnotations: {}
+
+prefill:
+  image:
+    registry: ""
+    imagePullPolicy: "IfNotPresent"
+    repository: "nubus-dev/images/provisioning-prefill"
+    tag: "0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"
+  # If specified environment variables will be set on the container
+  config:
+    maxPrefillAttempts: 5
+    natsMaxReconnectAttempts: 5
+    # Python log level
+    LOG_LEVEL: "INFO"
+    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    UDM_HOST: ""
+    # UDM REST API: port
+    UDM_PORT: 9979
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podAnnotations: {}
+
+registerConsumers:
+  image:
+    # TODO: unset when global.imageRegistry is supported by update-helm-values
+    registry: ""
+    imagePullPolicy: "IfNotPresent"
+    repository: "nubus/images/wait-for-dependency"
+    tag: "0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"
+  config:
+    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    UDM_HOST: ""
+    # UDM REST API: port
+    UDM_PORT: 9979
+  jsonSecretName: ""
+  provisioningApiBaseUrl: ""
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podAnnotations: {}
+
+# -- NATS server settings.
+nats:
+  nats:
+    image:
+      registry: "docker.io"
+  reloader:
+    image:
+      registry: "docker.io"
+  natsBox:
+    image:
+      registry: "docker.io"
+  # -- Set to `true` if you want NATS to be installed as well.
+  bundled: true
+  nameOverride: "provisioning-nats"
+  connection:
+    # -- The NATS service to connect to.
+    host: ""
+    # -- The port to connect to the NATS service.
+    port: ""
+    # -- The token to use when connecting to the NATS service.
+    # token:
+    tls:
+      enabled: false
+      # -- The private key to use for the connection.
+      keyFile: "/certificates/tls.key"
+      # -- The certificate to present when initialising the connection.
+      certFile: "/certificates/tls.crt"
+      # -- The CA to verify the servers identity when initialising the connection.
+      caFile: "/certificates/ca.crt"
+  # The NATS server configuration.
+  # Ref: https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm/-/blob/main/README.md
+  affinity:
+    # Disable the pod affinity rules when running on a cluster with less than 3 kubernetes nodes.
+    enabled: true
+  config:
+    cluster:
+      # -- Has to be set to at least 3, the minimum for nats clustering
+      replicas: 3
+    jetstream:
+      enabled: true
+    extraConfig:
+      max_payload: "16MB"
+    authorization:
+      enabled: true
+      users:
+        - user: "admin"
+          password: "$NATS_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "api"
+          password: "$NATS_API_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "dispatcher"
+          password: "$NATS_DISPATCHER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "udmtransformer"
+          password: "$NATS_UDM_TRANSFORMER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "prefill"
+          password: "$NATS_PREFILL_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+        - user: "udmlistener"
+          password: "$NATS_UDM_LISTENER_PASSWORD"
+          permissions:
+            publish: ">"
+            subscribe: ">"
+  extraEnvVars:
+    - name: NATS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "provisioning.nats.auth.admin.name" . }}'
+          key: '{{ .Values.global.nats.auth.admin.key }}'
+    - name: NATS_API_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "provisioning.nats.auth.provisioningApi.name" . }}'
+          key: '{{ .Values.global.nats.auth.provisioningApi.key }}'
+    - name: NATS_DISPATCHER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "provisioning.nats.auth.dispatcher.name" . }}'
+          key: '{{ .Values.global.nats.auth.dispatcher.key }}'
+    - name: NATS_UDM_TRANSFORMER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "provisioning.nats.auth.udmTransformer.name" . }}'
+          key: '{{ .Values.global.nats.auth.udmTransformer.key }}'
+    - name: NATS_PREFILL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "provisioning.nats.auth.prefill.name" . }}'
+          key: '{{ .Values.global.nats.auth.prefill.key }}'
+    - name: NATS_UDM_LISTENER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "provisioning.nats.auth.udmListener.name" . }}'
+          key: '{{ .Values.global.nats.auth.udmListener.key }}'
 
 
 # -- Additional custom annotations to add to all deployed objects.
@@ -596,266 +796,3 @@ updateStrategy:
   # FIXME: Change to `RollingUpdate` after this bug is fixed
   # https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70
   type: "Recreate"
-
-api:
-  image:
-    registry: ""
-    imagePullPolicy: "IfNotPresent"
-    repository: "nubus-dev/images/provisioning-events-and-consumer-api"
-    tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
-  # If specified environment variables will be set on the container
-  credentialSecretName: ""
-  config:
-    # Python log level
-    LOG_LEVEL: "INFO"
-    ## api
-    # FastAPI: debug mode: send traceback in response on errors
-    DEBUG: "false"
-    # FastAPI: webserver root path
-    ROOT_PATH: "/"
-    # FastAPI: disable CORS checks
-    CORS_ALL: "false"
-  additionalLabels: {}
-  additionalAnnotations: {}
-  podAnnotations: {}
-
-dispatcher:
-  image:
-    # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: ""
-    imagePullPolicy: "IfNotPresent"
-    repository: "nubus-dev/images/provisioning-dispatcher"
-    tag: "0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"
-  # If specified environment variables will be set on the container
-  credentialSecretName: ""
-  config:
-    # Python log level
-    LOG_LEVEL: "INFO"
-    natsMaxReconnectAttempts: 5
-  additionalLabels: {}
-  additionalAnnotations: {}
-  podAnnotations: {}
-
-udmTransformer:
-  image:
-    registry: ""
-    imagePullPolicy: "IfNotPresent"
-    repository: "nubus-dev/images/provisioning-udm-transformer"
-    tag: "0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"
-  # If specified environment variables will be set on the container
-  api:
-    auth:
-      credentialSecretName: ""
-  nats:
-    auth:
-      credentialSecretName: ""
-  ldap:
-    # LDAP BASE DN of the LDAP domain.
-    baseDn: ""
-    auth:
-      # -- LDAP username with global read access
-      bindDn: ""
-      credentialSecretName: ""
-    connection:
-      # Hostname of the LDAP Primary servers
-      host: ""
-      # LDAP server port
-      port: ""
-  config:
-    # Enables toggling between `ldif-producer` and `udm-listener`.
-    # Beware: `ldif-producer` is experimental and unsupported.
-    ldapPublisherName: "udm-listener"
-    # Python log level
-    LOG_LEVEL: "INFO"
-    # -- Whether to start ldap encryption and validate certificates.
-    # Chose from "off", "unvalidated" and "secure".
-    LDAP_TLS_MODE: "off"
-  additionalLabels: {}
-  additionalAnnotations: {}
-  podAnnotations: {}
-
-prefill:
-  image:
-    registry: ""
-    imagePullPolicy: "IfNotPresent"
-    repository: "nubus-dev/images/provisioning-prefill"
-    tag: "0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"
-  # If specified environment variables will be set on the container
-  credentialSecretName: ""
-  config:
-    maxPrefillAttempts: 5
-    natsMaxReconnectAttempts: 5
-    # Python log level
-    LOG_LEVEL: "INFO"
-    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
-    UDM_HOST: ""
-    # UDM REST API: port
-    UDM_PORT: 9979
-  additionalLabels: {}
-  additionalAnnotations: {}
-  podAnnotations: {}
-
-# -- NATS server settings.
-nats:
-  # auth:
-  #   admin:
-  #     create: null
-  #     name: null
-  #     key: null
-  #     value: null
-  #   provisioningApi:
-  #     create: null
-  #     name: null
-  #     key: null
-  #     value: null
-  #   prefill:
-  #     create: null
-  #     name: null
-  #     key: null
-  #     value: null
-  #   dispatcher:
-  #     create: null
-  #     name: null
-  #     key: null
-  #     value: null
-  #   udmTransformer:
-  #     create: null
-  #     name: null
-  #     key: null
-  #     value: null
-  #   udmListener:
-  #     create: null
-  #     name: null
-  #     key: null
-  #     value: null
-  nats:
-    image:
-      registry: "docker.io"
-  reloader:
-    image:
-      registry: "docker.io"
-  natsBox:
-    image:
-      registry: "docker.io"
-  # -- Set to `true` if you want NATS to be installed as well.
-  bundled: true
-  nameOverride: "provisioning-nats"
-  connection:
-    # -- The NATS service to connect to.
-    host: ""
-    # -- The port to connect to the NATS service.
-    port: ""
-    # -- The token to use when connecting to the NATS service.
-    # token:
-    tls:
-      enabled: false
-      # -- The private key to use for the connection.
-      keyFile: "/certificates/tls.key"
-      # -- The certificate to present when initialising the connection.
-      certFile: "/certificates/tls.crt"
-      # -- The CA to verify the servers identity when initialising the connection.
-      caFile: "/certificates/ca.crt"
-  # The NATS server configuration.
-  # Ref: https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm/-/blob/main/README.md
-  affinity:
-    # Disable the pod affinity rules when running on a cluster with less than 3 kubernetes nodes.
-    enabled: true
-  config:
-    cluster:
-      # -- Has to be set to at least 3, the minimum for nats clustering
-      replicas: 3
-    jetstream:
-      enabled: true
-    extraConfig:
-      max_payload: "16MB"
-    authorization:
-      enabled: true
-# "udmtransformer"
-# "api"
-# "admin"
-# "dispatcher"
-# "prefill"
-# "udmlistener"
-# "udmtransformer"
-# "selfservice"
-      users:
-        - user: "admin"
-          password: "$NATS_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "api"
-          password: "$NATS_API_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "dispatcher"
-          password: "$NATS_DISPATCHER_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "udmtransformer"
-          password: "$NATS_UDM_TRANSFORMER_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "prefill"
-          password: "$NATS_PREFILL_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "udmlistener"
-          password: "$NATS_UDM_LISTENER_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-  extraEnvVars:
-    - name: NATS_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.admin.name" . }}'
-          key: '{{ .Values.global.nats.auth.admin.key }}'
-    - name: NATS_API_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.provisioningApi.name" . }}'
-          key: '{{ .Values.global.nats.auth.provisioningApi.key }}'
-    - name: NATS_DISPATCHER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.dispatcher.name" . }}'
-          key: '{{ .Values.global.nats.auth.dispatcher.key }}'
-    - name: NATS_UDM_TRANSFORMER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.udmTransformer.name" . }}'
-          key: '{{ .Values.global.nats.auth.udmTransformer.key }}'
-    - name: NATS_PREFILL_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.prefill.name" . }}'
-          key: '{{ .Values.global.nats.auth.prefill.key }}'
-    - name: NATS_UDM_LISTENER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.udmListener.name" . }}'
-          key: '{{ .Values.global.nats.auth.udmListener.key }}'
-
-registerConsumers:
-  image:
-    # TODO: unset when global.imageRegistry is supported by update-helm-values
-    registry: ""
-    imagePullPolicy: "IfNotPresent"
-    repository: "nubus/images/wait-for-dependency"
-    tag: "0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"
-  config:
-    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
-    UDM_HOST: ""
-    # UDM REST API: port
-    UDM_PORT: 9979
-  credentialSecretName: ""
-  jsonSecretName: ""
-  provisioningApiBaseUrl: ""
-  additionalLabels: {}
-  additionalAnnotations: {}
-  podAnnotations: {}
