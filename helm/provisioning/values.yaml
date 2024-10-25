@@ -68,6 +68,24 @@ global:
         key: NATS_PASSWORD
         # value: null
 
+ldap:
+  auth:
+    cnAdmin:
+      password:
+        # create: true
+        name: null
+        key: null
+        # value: null
+
+provisioningConsumer:
+  auth: {}
+    # demoConsumerName:
+    #   password:
+    #     # create: null
+    #     name: "demo-consumer-secret-name"
+    #     key: "demo-consumer-secret-key"
+    #     # value: null
+
 api:
   image:
     registry: ""

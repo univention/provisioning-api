@@ -88,6 +88,8 @@ A Helm Chart that deploys the provisioning services
 | istio.virtualService | object | `{"annotations":{},"enabled":true,"pathOverrides":[],"paths":[]}` | The hostname. This parameter has to be supplied. Example `portal.example`. host: provisioning.local |
 | istio.virtualService.pathOverrides | list | `[]` | Allows to inject deployment specific path configuration which is configured before the elements from `paths` below. This allows to redirect some paths to other services, e.g. in order to supply a file `custom.css`. |
 | istio.virtualService.paths | list | `[]` | The paths configuration. The default only grabs what is known to be part of the frontend.  `pathOverrides` is provided as a workaround so that specific sub-paths can be redirected to other services. |
+| ldap.auth.cnAdmin.password.key | string | `nil` |  |
+| ldap.auth.cnAdmin.password.name | string | `nil` |  |
 | lifecycleHooks | object | `{}` | Lifecycle to automate configuration before or after startup. |
 | livenessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
@@ -148,6 +150,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
 | prefill.podAnnotations | object | `{}` |  |
+| provisioningConsumer.auth | object | `{}` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
