@@ -1,5 +1,5 @@
 {{/*
-Provisioning NATS admin credentials user credentials name
+Provisioning NATS admin user credentials name
 */}}
 {{- define "provisioning.nats.auth.admin.name" -}}
 
@@ -12,7 +12,7 @@ Provisioning NATS admin credentials user credentials name
 {{- end -}}
 
 {{/*
-Provisioning NATS API credentials user credentials name
+Provisioning NATS API user credentials name
 */}}
 {{- define "provisioning.nats.auth.provisioningApi.name" -}}
 
@@ -25,7 +25,7 @@ Provisioning NATS API credentials user credentials name
 {{- end -}}
 
 {{/*
-Provisioning NATS prefill credentials user credentials name
+Provisioning NATS prefill user credentials name
 */}}
 {{- define "provisioning.nats.auth.prefill.name" -}}
 
@@ -38,7 +38,7 @@ Provisioning NATS prefill credentials user credentials name
 {{- end -}}
 
 {{/*
-Provisioning NATS dispatcher credentials user credentials name
+Provisioning NATS dispatcher user credentials name
 */}}
 {{- define "provisioning.nats.auth.dispatcher.name" -}}
 
@@ -51,7 +51,7 @@ Provisioning NATS dispatcher credentials user credentials name
 {{- end -}}
 
 {{/*
-Provisioning NATS UDM transformer credentials user credentials name
+Provisioning NATS UDM transformer user credentials name
 */}}
 {{- define "provisioning.nats.auth.udmTransformer.name" -}}
 
@@ -64,7 +64,7 @@ Provisioning NATS UDM transformer credentials user credentials name
 {{- end -}}
 
 {{/*
-Provisioning NATS UDM listener credentials user credentials name
+Provisioning NATS UDM listener user credentials name
 */}}
 {{- define "provisioning.nats.auth.udmListener.name" -}}
 
