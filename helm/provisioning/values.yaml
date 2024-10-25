@@ -38,10 +38,12 @@ global:
       port: ""
     auth:
       admin:
-        # create: null
-        name: null
-        key: admin_password
-        # value: null
+        # TODO: Not yet supported
+        # password: null
+        existingSecret: {}
+          # name: nats-admin-account-secret-name
+          # keyMapping:
+          #   password: nats-admin-account-secret-key
       provisioningApi:
         # create: null
         name: null
@@ -289,7 +291,7 @@ nats:
       valueFrom:
         secretKeyRef:
           name: '{{ include "provisioning.nats.auth.admin.name" . }}'
-          key: '{{ .Values.global.nats.auth.admin.key }}'
+          key: '{{ include "provisioning.nats.auth.admin.key" . }}'
     - name: NATS_API_PASSWORD
       valueFrom:
         secretKeyRef:
