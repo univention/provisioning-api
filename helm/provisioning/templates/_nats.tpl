@@ -3,11 +3,23 @@ Provisioning NATS admin user credentials name
 */}}
 {{- define "provisioning.nats.auth.admin.name" -}}
 
-{{- if .Values.global.nats.auth.admin.name -}}
-  {{- .Values.global.nats.auth.admin.name -}}
+{{- if .Values.global.nats.auth.admin.existingSecret -}}
+  {{- .Values.global.nats.auth.admin.existingSecret.name -}}
 {{- else -}}
 {{- $namePrefix := default .Release.Name .Values.global.releaseNameOverride | trunc 63 | trimSuffix "-" -}}
 {{- printf "%s-provisioning-nats-credentials" $namePrefix -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Provisioning NATS admin user credentials key
+*/}}
+{{- define "provisioning.nats.auth.admin.key" -}}
+
+{{- if .Values.global.nats.auth.admin.existingSecret -}}
+  {{- .Values.global.nats.auth.admin.existingSecret.key -}}
+{{- else -}}
+admin_password
 {{- end -}}
 {{- end -}}
 
