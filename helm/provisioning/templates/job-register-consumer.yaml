@@ -43,12 +43,16 @@ spec:
       {{- end }}
       restartPolicy: Never
       volumes:
-        # TODO: Figure this out and make it pretty!
         - name: consumer-secrets
-        {{- if (include "provisioning-register-consumers.jsonSecretName" .) }}
-          secret:
-            secretName: {{ include "provisioning-register-consumers.jsonSecretName" . | quote }}
-        {{- end }}
+          projected:
+            sources:
+              {{- range $consumer, $data := .Values.provisioningConsumer.auth }}
+              - secret:
+                  name: {{ $data.password.name | quote }}
+                  items:
+                    - key: {{ $data.password.key | quote }}
+                      path: {{ printf "%s.json" ( lower $consumer ) }}
+              {{- end }}
         - name: "scripts-volume"
           configMap:
             name: {{ printf "%s-wait-for-api" (include "common.names.fullname" .) }}

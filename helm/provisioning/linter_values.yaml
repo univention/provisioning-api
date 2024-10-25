@@ -42,6 +42,21 @@ ldap:
         key: "dummy-ldap-cn-admin-secret-key"
         # value: null
 
+provisioningConsumer:
+  auth:
+    portalConsumer:
+      password:
+        # create: null
+        name: "dummy-provisioning-portal-consumer-secret-name"
+        key: "dummy-provisioning-portal-consumer-secret-key"
+        # value: null
+    selfserviceConsumer:
+      password:
+        # create: null
+        name: "dummy-provisioning-selfservice-consumer-secret-name"
+        key: "dummy-provisioning-selfservice-consumer-secret-key"
+        # value: null
+
 prefill:
   config:
     UDM_HOST: "udm-host"
