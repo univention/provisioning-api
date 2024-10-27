@@ -42,7 +42,19 @@ ldap:
         key: "dummy-ldap-cn-admin-secret-key"
         # value: null
 
-provisioningConsumer:
+prefill:
+  config:
+    UDM_HOST: "udm-host"
+udmTransformer:
+  ldap:
+    connection:
+      host: "ldap-host"
+      port: "1234"
+    baseDn: "ldap-base-dn"
+    auth:
+      bindDn: "ldap-bind-dn"
+registerConsumers:
+  provisioningApiBaseUrl: "provisioning-base-url"
   auth:
     portalConsumer:
       password:
@@ -57,17 +69,4 @@ provisioningConsumer:
         key: "dummy-provisioning-selfservice-consumer-secret-key"
         # value: null
 
-prefill:
-  config:
-    UDM_HOST: "udm-host"
-udmTransformer:
-  ldap:
-    connection:
-      host: "ldap-host"
-      port: "1234"
-    baseDn: "ldap-base-dn"
-    auth:
-      bindDn: "ldap-bind-dn"
-registerConsumers:
-  provisioningApiBaseUrl: "provisioning-base-url"
 ...

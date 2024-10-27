@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+{{ $fullname := include "common.names.fullname" . }}
+{{ $fullnameWithRevision := include "nubus-common.names.fullnameWithRevision" (dict "localName" "register-consumers" "context" .) }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+  name: {{ $fullnameWithRevision }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
       {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
-      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-registerConsumers" (include "common.names.fullname" .)) }}
+      {{- $uiLabels := dict "app.kubernetes.io/name" $fullnameWithRevision }}
       {{- $mergedLabels := merge $uiLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
     {{- if .Values.registerConsumers.additionalLabels }}
@@ -28,7 +30,7 @@ spec:
         {{- end }}
       labels:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
-        {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" (include "common.names.fullname" .)) }}
+        {{- $uiLabels := dict "app.kubernetes.io/name" $fullnameWithRevision }}
         {{- $mergedLabels := merge $uiLabels $commonLabels}}
         {{- toYaml $mergedLabels | nindent 8 }}
     spec:
@@ -46,27 +48,27 @@ spec:
         - name: consumer-secrets
           projected:
             sources:
-              {{- range $consumer, $data := .Values.provisioningConsumer.auth }}
+              {{- range $consumer, $data := .Values.registerConsumers.auth }}
               - secret:
-                  name: {{ $data.password.name | quote }}
+                  name: {{ tpl $data.password.name $ | quote }}
                   items:
-                    - key: {{ $data.password.key | quote }}
+                    - key: {{ tpl $data.password.key $ | quote }}
                       path: {{ printf "%s.json" ( lower $consumer ) }}
               {{- end }}
         - name: "scripts-volume"
           configMap:
-            name: {{ printf "%s-wait-for-api" (include "common.names.fullname" .) }}
+            name: {{ printf "%s-wait-for-api" $fullname }}
             defaultMode: 0555
         - name: wait-for-data-loader
           configMap:
-            name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+            name: {{ printf "%s-register-consumers" $fullname }}
       initContainers:
         - name: wait-for-provisioning-api
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
-                name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+                name: {{ printf "%s-register-consumers" $fullname }}
           command: ["/bin/bash", "-c", "/scripts/wait-for-api.sh ${PROVISIONING_API_BASE_URL}"]
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
@@ -80,7 +82,7 @@ spec:
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
-                name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+                name: {{ printf "%s-register-consumers" $fullname }}
           env:
             - name: UDM_USERNAME
               value: "cn=admin"
@@ -104,7 +106,7 @@ spec:
               mountPath: "/secrets"
           envFrom:
             - configMapRef:
-                name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+                name: {{ printf "%s-register-consumers" $fullname }}
           env:
             - name: ADMIN_USERNAME
               value: "admin"

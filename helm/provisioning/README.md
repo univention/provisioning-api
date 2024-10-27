@@ -28,8 +28,8 @@ A Helm Chart that deploys the provisioning services
 | api.auth.admin.name | string | `nil` |  |
 | api.auth.eventsUdm.key | string | `"EVENTS_PASSWORD_UDM"` |  |
 | api.auth.eventsUdm.name | string | `nil` |  |
-| api.auth.prefill.key | string | `nil` |  |
-| api.auth.prefill.name | string | `"PREFILL_PASSWORD"` |  |
+| api.auth.prefill.key | string | `"PREFILL_PASSWORD"` |  |
+| api.auth.prefill.name | string | `nil` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
@@ -150,7 +150,6 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
 | prefill.podAnnotations | object | `{}` |  |
-| provisioningConsumer.auth | object | `{}` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
@@ -183,6 +182,7 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | registerConsumers.additionalAnnotations | object | `{}` |  |
 | registerConsumers.additionalLabels | object | `{}` |  |
+| registerConsumers.auth | object | `{}` |  |
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.image.imagePullPolicy | string | `"IfNotPresent"` |  |
