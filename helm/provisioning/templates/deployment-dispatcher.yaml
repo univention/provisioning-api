@@ -88,8 +88,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
-                  key: {{ .Values.global.nats.auth.provisioningApi.key }}
+                  name: {{ include "provisioning.nats.auth.dispatcher.name" . }}
+                  key: {{ .Values.global.nats.auth.dispatcher.key }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -108,13 +108,14 @@ spec:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
             - configMapRef:
                 name: {{ printf "%s-dispatcher" (include "common.names.fullname" .) }}
+          env:
             - name: NATS_USER
               value: "dispatcher"
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.nats.auth.provisioningApi.name" . }}
-                  key: {{ .Values.global.nats.auth.provisioningApi.key }}
+                  name: {{ include "provisioning.nats.auth.dispatcher.name" . }}
+                  key: {{ .Values.global.nats.auth.dispatcher.key }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

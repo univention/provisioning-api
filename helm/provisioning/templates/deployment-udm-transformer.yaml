@@ -166,7 +166,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
                   key: {{ .Values.api.auth.eventsUdm.key }}
-            - name: LDAP_B ND_PW
+            - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
                   name: {{ tpl .Values.ldap.auth.cnAdmin.password.name . }}

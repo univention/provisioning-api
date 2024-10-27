@@ -78,13 +78,13 @@ spec:
             - configMapRef:
                 name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
           env:
-            - name: NATS_USER
-              value: "prefill"
-            - name: NATS_PASSWORD
+            - name: UDM_USERNAME
+              value: "cn=admin"
+            - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.nats.auth.prefill.name" . }}
-                  key: {{ .Values.global.nats.auth.prefill.key }}
+                  name: {{ tpl .Values.ldap.auth.cnAdmin.password.name . }}
+                  key: {{ tpl .Values.ldap.auth.cnAdmin.password.key . }}
           volumeMounts:
             - name: wait-for-udm
               mountPath: /scripts

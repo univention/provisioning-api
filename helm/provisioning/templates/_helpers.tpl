@@ -78,11 +78,6 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- end -}}
 {{- end -}}
 
-# TODO: remove this and migrate it to the new style
-{{- define "provisioning-register-consumers.jsonSecretName" -}}
-{{- coalesce .Values.registerConsumers.jsonSecretName (printf "%s-provisioning-register-consumers-json-secrets" .Release.Name) -}}
-{{- end -}}
-
 {{- define "provisioning-register-consumers.provisioningApiBaseUrl" -}}
 {{- if .Values.global.nubusDeployment -}}
 {{ printf "http://%s-provisioning-api" .Release.Name }}

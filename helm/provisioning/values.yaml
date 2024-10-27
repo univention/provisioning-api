@@ -79,15 +79,6 @@ ldap:
         key: null
         # value: null
 
-provisioningConsumer:
-  auth: {}
-    # demoConsumerName:
-    #   password:
-    #     # create: null
-    #     name: "demo-consumer-secret-name"
-    #     key: "demo-consumer-secret-key"
-    #     # value: null
-
 api:
   image:
     registry: ""
@@ -108,8 +99,8 @@ api:
       # value: null
     prefill:
       # create: null
-      name: PREFILL_PASSWORD
-      key: null
+      name: null
+      key: PREFILL_PASSWORD
       # value: null
 
   config:
@@ -200,6 +191,14 @@ registerConsumers:
     imagePullPolicy: "IfNotPresent"
     repository: "nubus/images/wait-for-dependency"
     tag: "0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"
+  auth: {}
+    # demoConsumerName:
+    #   password:
+    #     # create: null
+    #     name: "demo-consumer-secret-name"
+    #     key: "demo-consumer-secret-key"
+    #     # value: null
+
   config:
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
     UDM_HOST: ""
