@@ -1,6 +1,41 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 ---
+global:
+  configMapUcr: "dummy-ucr-configmap-name"
+  nats:
+    auth:
+      admin:
+        existingSecret:
+          name: nats-admin-account-secret-name
+          keyMapping:
+            adminPassword: nats-admin-account-secret-key
+      provisioningApi:
+        existingSecret:
+          name: nats-provisioning-api-account-secret-name
+          keyMapping:
+            provisioningApiPassword: nats-provisioning-api-account-secret-key
+      prefill:
+        existingSecret:
+          name: nats-prefill-account-secret-name
+          keyMapping:
+            prefillPassword: nats-prefill-account-secret-key
+      dispatcher:
+        existingSecret:
+          name: nats-dispatcher-account-secret-name
+          keyMapping:
+            dispatcherPassword: nats-dispatcher-account-secret-key
+      udmTransformer:
+        existingSecret:
+          name: nats-udm-transformer-account-secret-name
+          keyMapping:
+            udmTransformerPassword: nats-udm-transformer-account-secret-key
+      udmListener:
+        existingSecret:
+          name: nats-udm-listener-account-secret-name
+          keyMapping:
+            udmListenerPassword: nats-udm-listener-account-secret-key
+
 resources:
   dispatcher:
     limits:
@@ -68,5 +103,4 @@ registerConsumers:
         name: "dummy-provisioning-selfservice-consumer-secret-name"
         key: "dummy-provisioning-selfservice-consumer-secret-key"
         # value: null
-
 ...

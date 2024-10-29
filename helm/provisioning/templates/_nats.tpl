@@ -12,18 +12,6 @@ Provisioning NATS admin user credentials name
 {{- end -}}
 
 {{/*
-Provisioning NATS admin user credentials key
-*/}}
-{{- define "provisioning.nats.auth.admin.key" -}}
-
-{{- if .Values.global.nats.auth.admin.existingSecret -}}
-  {{- .Values.global.nats.auth.admin.existingSecret.key -}}
-{{- else -}}
-admin_password
-{{- end -}}
-{{- end -}}
-
-{{/*
 Provisioning NATS API user credentials name
 */}}
 {{- define "provisioning.nats.auth.provisioningApi.name" -}}
