@@ -29,7 +29,7 @@ global:
   #            kubelet attempts to start the container; otherwise, startup fails.
   imagePullPolicy: "IfNotPresent"
 
-  configMapUcr: "stack-data-ums-ucr"
+  configMapUcr: null
 
   # -- Define configuration regarding nats connectivity.
   nats:
@@ -38,37 +38,57 @@ global:
       port: ""
     auth:
       admin:
-        # TODO: Not yet supported
+        # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
         # password: null
-        existingSecret: {}
-          # name: nats-admin-account-secret-name
-          # keyMapping:
-          #   password: nats-admin-account-secret-key
+        existingSecret:
+          name: null
+          keyMapping:
+            adminPassword: null
       provisioningApi:
-        # create: null
+        # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+        # password: null
+        existingSecret:
+          name: null
+          keyMapping:
+            provisioningApiPassword: null
         name: null
         key: NATS_PASSWORD
-        # value: null
       prefill:
-        # create: null
+        # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+        # password: null
+        existingSecret:
+          name: null
+          keyMapping:
+            prefillPassword: null
         name: null
         key: NATS_PASSWORD
-        # value: null
       dispatcher:
-        # create: null
+        # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+        # password: null
+        existingSecret:
+          name: null
+          keyMapping:
+            dispatcherPassword: null
         name: null
         key: NATS_PASSWORD
-        # value: null
       udmTransformer:
-        # create: null
+        # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+        # password: null
+        existingSecret:
+          name: null
+          keyMapping:
+            udmTransformerPassword: null
         name: null
         key: NATS_PASSWORD
-        # value: null
       udmListener:
-        # create: null
+        # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+        # password: null
+        existingSecret:
+          name: null
+          keyMapping:
+            udmListenerPassword: null
         name: null
         key: NATS_PASSWORD
-        # value: null
 
 ldap:
   auth:
@@ -261,7 +281,7 @@ nats:
             publish: ">"
             subscribe: ">"
         - user: "api"
-          password: "$NATS_API_PASSWORD"
+          password: "$NATS_PROVISIONING_API_PASSWORD"
           permissions:
             publish: ">"
             subscribe: ">"
@@ -289,34 +309,33 @@ nats:
     - name: NATS_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.admin.name" . }}'
-          key: '{{ include "provisioning.nats.auth.admin.key" . }}'
-    - name: NATS_API_PASSWORD
+          name: "{{ .Values.global.nats.auth.admin.existingSecret.name }}"
+          key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.admin.existingSecret "key" "adminPassword") }}'
+    - name: NATS_PROVISIONING_API_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.provisioningApi.name" . }}'
-          key: '{{ .Values.global.nats.auth.provisioningApi.key }}'
+          name: "{{ .Values.global.nats.auth.provisioningApi.existingSecret.name }}"
+          key: '{{ required ".Values.global.nats.auth.provisioningApi.existingSecret.keyMapping.provisioningApiPassword is required" (include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.provisioningApi.existingSecret "key" "provisioningApiPassword")) }}'
     - name: NATS_DISPATCHER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.dispatcher.name" . }}'
-          key: '{{ .Values.global.nats.auth.dispatcher.key }}'
+          name: "{{ .Values.global.nats.auth.dispatcher.existingSecret.name }}"
+          key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.dispatcher.existingSecret "key" "dispatcherPassword") }}'
     - name: NATS_UDM_TRANSFORMER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.udmTransformer.name" . }}'
-          key: '{{ .Values.global.nats.auth.udmTransformer.key }}'
+          name: "{{ .Values.global.nats.auth.udmTransformer.existingSecret.name }}"
+          key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.udmTransformer.existingSecret "key" "udmTransformerPassword") }}'
     - name: NATS_PREFILL_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.prefill.name" . }}'
-          key: '{{ .Values.global.nats.auth.prefill.key }}'
+          name: "{{ .Values.global.nats.auth.prefill.existingSecret.name }}"
+          key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.prefill.existingSecret "key" "prefillPassword") }}'
     - name: NATS_UDM_LISTENER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: '{{ include "provisioning.nats.auth.udmListener.name" . }}'
-          key: '{{ .Values.global.nats.auth.udmListener.key }}'
-
+          name: "{{ .Values.global.nats.auth.udmListener.existingSecret.name }}"
+          key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.udmListener.existingSecret "key" "udmListenerPassword") }}'
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}
