@@ -83,8 +83,8 @@ spec:
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.cnAdmin.password.name . }}
-                  key: {{ tpl .Values.ldap.auth.cnAdmin.password.key . }}
+                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
           volumeMounts:
             - name: wait-for-udm
               mountPath: /scripts
@@ -119,15 +119,15 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.global.nats.auth.prefill.existingSecret.name . }}
-                  key: {{ tpl .Values.global.nats.auth.prefill.existingSecret.keyMapping.prefillPassword . }}
+                  name: {{ tpl .Values.prefill.nats.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.prefill.nats.auth.existingSecret.keyMapping.prefillPassword . }}
             - name: UDM_USERNAME
               value: "cn=admin"
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.cnAdmin.password.name . }}
-                  key: {{ tpl .Values.ldap.auth.cnAdmin.password.key . }}
+                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
