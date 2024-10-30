@@ -422,7 +422,6 @@ config:
   lame_duck_grace_period: "10s"
   # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro#authorization-map
   authorization:
-    enabled: false
     # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tokens
     # Example:
     # token: "$NATS_TOKEN"
