@@ -133,8 +133,8 @@ spec:
             - name: PREFILL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
-                  key: {{ .Values.api.auth.prefill.key }}
+                  name: {{ tpl .Values.api.auth.prefill.existingSecret.name . }}
+                  key: {{ tpl .Values.api.auth.prefill.existingSecret.keyMapping.password . }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

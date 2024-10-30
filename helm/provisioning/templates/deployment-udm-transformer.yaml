@@ -119,20 +119,6 @@ spec:
                 secretKeyRef:
                   name: {{ tpl .Values.udmTransformer.nats.auth.existingSecret.name . }}
                   key: {{ tpl .Values.udmTransformer.nats.auth.existingSecret.keyMapping.udmTransformerPassword . }}
-            - name: UDM_USERNAME
-              value: "cn=admin"
-            - name: UDM_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
-            - name: PREFILL_USERNAME
-              value: "prefill"
-            - name: PREFILL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "provisioning.provisioningApi.auth.prefill.name" . }}
-                  key: {{ .Values.api.auth.prefill.key }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -164,8 +150,8 @@ spec:
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.provisioningApi.auth.eventsUdm.name" . }}
-                  key: {{ .Values.api.auth.eventsUdm.key }}
+                  name: {{ tpl .Values.api.auth.eventsUdm.existingSecret.name . }}
+                  key: {{ tpl .Values.api.auth.eventsUdm.existingSecret.keyMapping.password . }}
             - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
