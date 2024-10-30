@@ -30,7 +30,7 @@ authorization {
   {{- if .Values.config.authorization.token }}
   token: {{ .Values.config.authorization.token }}
   {{- end }}
-  {{- if .Values.config.authorization.users }}
+  {{- if .Values.config.createUsers }}
   users: [
     {{- range $_, $config := .Values.config.createUsers }}
     {

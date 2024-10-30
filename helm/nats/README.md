@@ -122,15 +122,6 @@ nats consumer next teststream testconsumer
 			<td>Affinity for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set.</td>
 		</tr>
 		<tr>
-			<td>config.authorization.enabled</td>
-			<td>bool</td>
-			<td><pre lang="json">
-false
-</pre>
-</td>
-			<td></td>
-		</tr>
-		<tr>
 			<td>config.authorization.token</td>
 			<td>string</td>
 			<td><pre lang="json">
