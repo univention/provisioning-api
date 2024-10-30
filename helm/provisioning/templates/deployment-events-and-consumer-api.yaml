@@ -88,8 +88,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.global.nats.auth.provisioningApi.existingSecret.name . }}
-                  key: {{ tpl .Values.global.nats.auth.provisioningApi.existingSecret.keyMapping.provisioningApiPassword . }}
+                  name: {{ tpl .Values.api.nats.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.api.nats.auth.existingSecret.keyMapping.provisioningApiPassword . }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -139,8 +139,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.global.nats.auth.provisioningApi.existingSecret.name . }}
-                  key: {{ tpl .Values.global.nats.auth.provisioningApi.existingSecret.keyMapping.provisioningApiPassword . }}
+                  name: {{ tpl .Values.api.nats.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.api.nats.auth.existingSecret.keyMapping.provisioningApiPassword . }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

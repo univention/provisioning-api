@@ -117,15 +117,15 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.name . }}
-                  key: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.keyMapping.udmTransformerPassword . }}
+                  name: {{ tpl .Values.udmTransformer.nats.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.udmTransformer.nats.auth.existingSecret.keyMapping.udmTransformerPassword . }}
             - name: UDM_USERNAME
               value: "cn=admin"
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.cnAdmin.password.name . }}
-                  key: {{ tpl .Values.ldap.auth.cnAdmin.password.key . }}
+                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
@@ -157,8 +157,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.name . }}
-                  key: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.keyMapping.udmTransformerPassword . }}
+                  name: {{ tpl .Values.udmTransformer.nats.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.udmTransformer.nats.auth.existingSecret.keyMapping.udmTransformerPassword . }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
@@ -169,8 +169,8 @@ spec:
             - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.cnAdmin.password.name . }}
-                  key: {{ tpl .Values.ldap.auth.cnAdmin.password.key . }}
+                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
