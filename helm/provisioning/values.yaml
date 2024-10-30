@@ -51,8 +51,6 @@ global:
           name: null
           keyMapping:
             provisioningApiPassword: null
-        name: null
-        key: NATS_PASSWORD
       prefill:
         # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
         # password: null
@@ -60,8 +58,6 @@ global:
           name: null
           keyMapping:
             prefillPassword: null
-        name: null
-        key: NATS_PASSWORD
       dispatcher:
         # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
         # password: null
@@ -69,8 +65,6 @@ global:
           name: null
           keyMapping:
             dispatcherPassword: null
-        name: null
-        key: NATS_PASSWORD
       udmTransformer:
         # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
         # password: null
@@ -78,8 +72,6 @@ global:
           name: null
           keyMapping:
             udmTransformerPassword: null
-        name: null
-        key: NATS_PASSWORD
       udmListener:
         # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
         # password: null
@@ -87,8 +79,6 @@ global:
           name: null
           keyMapping:
             udmListenerPassword: null
-        name: null
-        key: NATS_PASSWORD
 
 ldap:
   auth:
