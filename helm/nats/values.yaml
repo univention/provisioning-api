@@ -427,15 +427,16 @@ config:
     # Example:
     # token: "$NATS_TOKEN"
     token: ""
-    # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users
-    # Example:
-    # users:
-    # - user: "admin"
-    #   password: "$NATS_PASSWORD"
-    #   permissions:
-    #     publish: ">"
-    #     subscribe: ">"
-    users: []
+  # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users
+  # Example:
+  # createUsers:
+  #   demoUser:
+  #     user: "admin"
+  #     password: "$NATS_PASSWORD"
+  #     permissions:
+  #       publish: ">"
+  #       subscribe: ">"
+  createUsers: {}
 
   # Ref: https://docs.nats.io/running-a-nats-service/configuration
   # Example:

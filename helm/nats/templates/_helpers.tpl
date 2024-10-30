@@ -32,13 +32,13 @@ authorization {
   {{- end }}
   {{- if .Values.config.authorization.users }}
   users: [
-    {{- range .Values.config.authorization.users }}
+    {{- range $_, $config := .Values.config.createUsers }}
     {
-      user: {{ .user }}
-      password: {{ .password }}
-      {{- if .permissions }}
+      user: {{ tpl $config.user . }}
+      password: {{ tpl $config.password . }}
+      {{- if $config.permissions }}
       permissions: {
-      {{- .permissions | toYaml | nindent 8 }}
+      {{- tpl $config.permissions . | toYaml | nindent 8 }}
       {{- end }}
       }
     }

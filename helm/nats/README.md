@@ -2,7 +2,7 @@
 
 A Helm Chart that deploys NATS
 
-- **Version**: 0.1.1
+- **Version**: 0.1.2
 - **Type**: application
 - **AppVersion**:
 - **Homepage:** <https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm>
@@ -140,15 +140,6 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>config.authorization.users</td>
-			<td>list</td>
-			<td><pre lang="json">
-[]
-</pre>
-</td>
-			<td></td>
-		</tr>
-		<tr>
 			<td>config.cluster.authorization.enabled</td>
 			<td>bool</td>
 			<td><pre lang="json">
@@ -198,6 +189,15 @@ false
 			<td>int</td>
 			<td><pre lang="json">
 1
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>config.createUsers</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
 </pre>
 </td>
 			<td></td>

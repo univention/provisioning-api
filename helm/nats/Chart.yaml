@@ -11,7 +11,7 @@ home: "https://git.knut.univention.de/univention/customers/dataport/upx/nats-hel
 keywords:
   - "nats"
 type: "application"
-version: "0.1.1"
+version: "0.1.2"
 dependencies:
   - name: "common"
     version: "^2.16.x"
