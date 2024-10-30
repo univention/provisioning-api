@@ -7,34 +7,32 @@ global:
     auth:
       admin:
         existingSecret:
-          name: nats-admin-account-secret-name
-          keyMapping:
-            adminPassword: nats-admin-account-secret-key
+          name: "{{ .Release.Name }}-provisioning-nats-credentials"
       provisioningApi:
         existingSecret:
-          name: nats-provisioning-api-account-secret-name
+          name: "{{ .Release.Name }}-provisioning-api-credentials"
           keyMapping:
-            provisioningApiPassword: nats-provisioning-api-account-secret-key
+            provisioningApiPassword: NATS_PASSWORD
       prefill:
         existingSecret:
-          name: nats-prefill-account-secret-name
+          name: "{{ .Release.Name }}-provisioning-prefill-credentials"
           keyMapping:
-            prefillPassword: nats-prefill-account-secret-key
+            prefillPassword: NATS_PASSWORD
       dispatcher:
         existingSecret:
-          name: nats-dispatcher-account-secret-name
+          name: "{{ .Release.Name }}-provisioning-dispatcher-credentials"
           keyMapping:
-            dispatcherPassword: nats-dispatcher-account-secret-key
+            dispatcherPassword: NATS_PASSWORD
       udmTransformer:
         existingSecret:
-          name: nats-udm-transformer-account-secret-name
+          name: "{{ .Release.Name }}-provisioning-udm-transformer-credentials"
           keyMapping:
-            udmTransformerPassword: nats-udm-transformer-account-secret-key
+            udmTransformerPassword: NATS_PASSWORD
       udmListener:
         existingSecret:
-          name: nats-udm-listener-account-secret-name
+          name: "{{ .Release.Name }}-provisioning-udm-listener-credentials"
           keyMapping:
-            udmListenerPassword: nats-udm-listener-account-secret-key
+            udmListenerPassword: NATS_PASSWORD
 
 resources:
   dispatcher:
@@ -77,6 +75,24 @@ ldap:
         key: "dummy-ldap-cn-admin-secret-key"
         # value: null
 
+api:
+  auth:
+    admin:
+      existingSecret:
+        name: "provisioning-api-admin-secret-name"
+        keyMapping:
+          password: "provisioning-api-admin-secret-key"
+    eventsUdm:
+      existingSecret:
+        name: "provisioning-api-events-udm-secret-name"
+        keyMapping:
+          password: "provisioning-api-events-udm-secret-key"
+    prefill:
+      existingSecret:
+        name: "provisioning-api-prefill-secret-name"
+        keyMapping:
+          password: "provisioning-api-prefill-secret-key"
+
 prefill:
   config:
     UDM_HOST: "udm-host"
@@ -88,19 +104,26 @@ udmTransformer:
     baseDn: "ldap-base-dn"
     auth:
       bindDn: "ldap-bind-dn"
+
 registerConsumers:
   provisioningApiBaseUrl: "provisioning-base-url"
-  auth:
+  createUsers:
     portalConsumer:
-      password:
-        # create: null
-        name: "dummy-provisioning-portal-consumer-secret-name"
-        key: "dummy-provisioning-portal-consumer-secret-key"
+      username: "dummy-portal-consumer-username"
+      # TODO: not yet supported
+      # password: null
+      existingSecret:
+        name: "{{ .Release.Name }}-dummy-provisioning-portal-consumer-secret-name"
+        keyMapping:
+          password: "dummy-provisioning-portal-consumer-secret-key"
         # value: null
     selfserviceConsumer:
-      password:
-        # create: null
-        name: "dummy-provisioning-selfservice-consumer-secret-name"
-        key: "dummy-provisioning-selfservice-consumer-secret-key"
+      username: "dummy-selfservice-consumer-username"
+      # TODO: not yet supported
+      # password: null
+      existingSecret:
+        name: "{{ .Release.Name }}-dummy-provisioning-selfservice-consumer-secret-name"
+        keyMapping:
+          password: "dummy-provisioning-selfservice-consumer-secret-key"
         # value: null
 ...

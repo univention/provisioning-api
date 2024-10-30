@@ -119,9 +119,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.nats.auth.prefill.name" . }}
-                  key: {{ .Values.global.nats.auth.prefill.key }}
-                {{/* name: {{ include "provisioning-prefill.credentialSecretName" . | quote }} */}}
+                  name: {{ tpl .Values.global.nats.auth.prefill.existingSecret.name . }}
+                  key: {{ tpl .Values.global.nats.auth.prefill.existingSecret.keyMapping.prefillPassword . }}
             - name: UDM_USERNAME
               value: "cn=admin"
             - name: UDM_PASSWORD

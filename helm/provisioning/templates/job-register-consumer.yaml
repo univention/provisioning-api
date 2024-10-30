@@ -45,16 +45,18 @@ spec:
       {{- end }}
       restartPolicy: Never
       volumes:
+        {{- if .Values.registerConsumers.createUsers }}
         - name: consumer-secrets
           projected:
             sources:
-              {{- range $consumer, $data := .Values.registerConsumers.auth }}
+              {{- range $consumer, $data := .Values.registerConsumers.createUsers }}
               - secret:
-                  name: {{ tpl $data.password.name $ | quote }}
+                  name: {{ tpl $data.existingSecret.name $ | quote }}
                   items:
-                    - key: {{ tpl $data.password.key $ | quote }}
+                    - key: {{ tpl $data.existingSecret.keyMapping.password $ | quote }}
                       path: {{ printf "%s.json" ( lower $consumer ) }}
               {{- end }}
+        {{- end }}
         - name: "scripts-volume"
           configMap:
             name: {{ printf "%s-wait-for-api" $fullname }}

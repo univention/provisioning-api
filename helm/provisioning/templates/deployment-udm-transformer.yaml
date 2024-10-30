@@ -117,8 +117,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.nats.auth.udmTransformer.name" . }}
-                  key: {{ .Values.global.nats.auth.udmTransformer.key }}
+                  name: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.name . }}
+                  key: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.keyMapping.udmTransformerPassword . }}
             - name: UDM_USERNAME
               value: "cn=admin"
             - name: UDM_PASSWORD
@@ -157,8 +157,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "provisioning.nats.auth.udmTransformer.name" . }}
-                  key: {{ .Values.global.nats.auth.udmTransformer.key }}
+                  name: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.name . }}
+                  key: {{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.keyMapping.udmTransformerPassword . }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM

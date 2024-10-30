@@ -1,0 +1,6 @@
+{{- if not .Values.registerConsumers.createUsers }}
+INFO[provisioning]: .Values.registerConsumers.createUsers is empty.
+No provisioning consumers will be created or modified.
+Ensure that this is your intention and not a result of a misconfiguration.
+{{- end }}
+
