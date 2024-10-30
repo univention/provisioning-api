@@ -11,7 +11,7 @@ dependencies:
     version: "^2.x.x"
     repository: "oci://registry-1.docker.io/bitnamicharts"
   - name: "nats"
-    version: "0.1.2"
+    version: "0.2.0-pre-jlohmer-secrets-refactoring"
     repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm"
     condition: "nats.enabled"
 description: "A Helm Chart that deploys the provisioning services"

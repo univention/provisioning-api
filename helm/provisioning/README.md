@@ -12,7 +12,7 @@ A Helm Chart that deploys the provisioning services
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm | nats | 0.1.2 |
+| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/helm | nats | 0.2.0-pre-jlohmer-secrets-refactoring |
 | oci://registry-1.docker.io/bitnamicharts | common | ^2.x.x |
 
 ## Values
