@@ -21,5 +21,5 @@ name: "provisioning"
 sources:
   - "https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/tree/main/helm/provisioning?ref_type=heads"
 type: "application"
-version: "0.44.1"
+version: "0.45.0"
 ...

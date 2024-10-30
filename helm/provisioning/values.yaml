@@ -42,8 +42,8 @@ global:
         # password: null
         existingSecret:
           name: null
-          keyMapping:
-            adminPassword: null
+          # keyMapping:
+          #   adminPassword: null
       provisioningApi:
         # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
         # password: null
@@ -92,12 +92,12 @@ global:
 
 ldap:
   auth:
-    cnAdmin:
-      password:
-        # create: true
-        name: null
-        key: null
-        # value: null
+    # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+    # password: null
+    existingSecret:
+      name: null
+      keyMapping:
+        password: null
 
 api:
   image:
@@ -108,21 +108,26 @@ api:
   # If specified environment variables will be set on the container
   auth:
     admin:
-      # create: null
-      name: null
-      key: ADMIN_PASSWORD
-      # value: null
+      # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+      # password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: ADMIN_PASSWORD
     eventsUdm:
-      # create: null
-      name: null
-      key: EVENTS_PASSWORD_UDM
-      # value: null
+      # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+      # password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: EVENTS_PASSWORD_UDM
     prefill:
-      # create: null
-      name: null
-      key: PREFILL_PASSWORD
-      # value: null
-
+      # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
+      # password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: PREFILL_PASSWORD
   config:
     # Python log level
     LOG_LEVEL: "INFO"
@@ -211,13 +216,14 @@ registerConsumers:
     imagePullPolicy: "IfNotPresent"
     repository: "nubus/images/wait-for-dependency"
     tag: "0.25.0@sha256:71a4d66fd67db6f92212b1936862b2b0d5a678d412213d74452a9195c2fe67f7"
-  auth: {}
+  createUsers: {}
     # demoConsumerName:
+    #   username:
     #   password:
-    #     # create: null
+    #   existingSecret:
     #     name: "demo-consumer-secret-name"
-    #     key: "demo-consumer-secret-key"
-    #     # value: null
+    #     keyMapping:
+    #       password: "custom-demo-consumer-secret-key"
 
   config:
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
@@ -274,67 +280,73 @@ nats:
       max_payload: "16MB"
     authorization:
       enabled: true
-      users:
-        - user: "admin"
-          password: "$NATS_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "api"
-          password: "$NATS_PROVISIONING_API_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "dispatcher"
-          password: "$NATS_DISPATCHER_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "udmtransformer"
-          password: "$NATS_UDM_TRANSFORMER_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "prefill"
-          password: "$NATS_PREFILL_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
-        - user: "udmlistener"
-          password: "$NATS_UDM_LISTENER_PASSWORD"
-          permissions:
-            publish: ">"
-            subscribe: ">"
+    createUsers:
+      admin:
+        user: "admin"
+        password: "$NATS_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
+      provisioningApi:
+        user: "api"
+        password: "$NATS_PROVISIONING_API_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
+      dispatcher:
+        user: "dispatcher"
+        password: "$NATS_DISPATCHER_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
+      udmTransformer:
+        user: "udmtransformer"
+        password: "$NATS_UDM_TRANSFORMER_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
+      prefill:
+        user: "prefill"
+        password: "$NATS_PREFILL_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
+      udmListener:
+        user: "udmlistener"
+        password: "$NATS_UDM_LISTENER_PASSWORD"
+        permissions:
+          publish: ">"
+          subscribe: ">"
   extraEnvVars:
     - name: NATS_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: "{{ .Values.global.nats.auth.admin.existingSecret.name }}"
+          name: "{{ tpl .Values.global.nats.auth.admin.existingSecret.name . }}"
           key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.admin.existingSecret "key" "adminPassword") }}'
     - name: NATS_PROVISIONING_API_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: "{{ .Values.global.nats.auth.provisioningApi.existingSecret.name }}"
+          name: "{{ tpl .Values.global.nats.auth.provisioningApi.existingSecret.name . }}"
           key: '{{ required ".Values.global.nats.auth.provisioningApi.existingSecret.keyMapping.provisioningApiPassword is required" (include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.provisioningApi.existingSecret "key" "provisioningApiPassword")) }}'
     - name: NATS_DISPATCHER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: "{{ .Values.global.nats.auth.dispatcher.existingSecret.name }}"
+          name: "{{ tpl .Values.global.nats.auth.dispatcher.existingSecret.name . }}"
           key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.dispatcher.existingSecret "key" "dispatcherPassword") }}'
     - name: NATS_UDM_TRANSFORMER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: "{{ .Values.global.nats.auth.udmTransformer.existingSecret.name }}"
+          name: "{{ tpl .Values.global.nats.auth.udmTransformer.existingSecret.name . }}"
           key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.udmTransformer.existingSecret "key" "udmTransformerPassword") }}'
     - name: NATS_PREFILL_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: "{{ .Values.global.nats.auth.prefill.existingSecret.name }}"
+          name: "{{ tpl .Values.global.nats.auth.prefill.existingSecret.name . }}"
           key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.prefill.existingSecret "key" "prefillPassword") }}'
     - name: NATS_UDM_LISTENER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: "{{ .Values.global.nats.auth.udmListener.existingSecret.name }}"
+          name: "{{ tpl .Values.global.nats.auth.udmListener.existingSecret.name . }}"
           key: '{{ include "common.secrets.key" (dict "existingSecret" .Values.global.nats.auth.udmListener.existingSecret "key" "udmListenerPassword") }}'
 
 # -- Additional custom annotations to add to all deployed objects.
