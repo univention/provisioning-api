@@ -5,11 +5,11 @@ import aiohttp
 
 from univention.provisioning.models.message import Message
 
-from .send_event_port import SendEventPort
+from .event_sender_port import EventSender
 
 
-class SubscriptionsRestApiAdapter(SendEventPort):
-    """Send an event through the Subscription REST API."""
+class MessagesRestApiEventSender(EventSender):
+    """Send an event through the Messages REST API."""
 
     def __init__(self, url: str, username: str, password: str):
         super().__init__(url=url, username=username, password=password)
@@ -17,6 +17,14 @@ class SubscriptionsRestApiAdapter(SendEventPort):
         self._auth = aiohttp.BasicAuth(username, password)
         self._headers = [("accept", "application/json")]
         self._session = None
+
+    async def __aenter__(self) -> EventSender:
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool:
+        await self.close()
+        return False
 
     async def connect(self):
         if not self._session:
