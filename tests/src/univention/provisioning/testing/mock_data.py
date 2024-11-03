@@ -24,8 +24,14 @@ REALM = "udm"
 GROUPS_TOPIC = "groups/group"
 USERS_TOPIC = "users/user"
 DUMMY_TOPIC = "tests/topic"
-BODY = Body(old={"old": "Old", "dn": "uid=foo,dc=bar"}, new={"new": "New", "dn": "uid=foo,dc=bar"})
-FLAT_BODY = {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}
+BODY = Body(
+    old={"old": "Old", "dn": "uid=foo,dc=bar", "objectType": "foo/bar"},
+    new={"new": "New", "dn": "uid=foo,dc=bar", "objectType": "foo/bar"},
+)
+FLAT_BODY = {
+    "old": {"old": "Old", "dn": "uid=foo,dc=bar", "objectType": "foo/bar"},
+    "new": {"new": "New", "dn": "uid=foo,dc=bar", "objectType": "foo/bar"},
+}
 PUBLISHER_NAME = PublisherName.ldif_producer
 GROUPS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=GROUPS_TOPIC)]
 GROUPS_REALMS_TOPICS_as_dicts = [r.model_dump() for r in GROUPS_REALMS_TOPICS]
@@ -155,7 +161,7 @@ MQMESSAGE_PREFILL_REDELIVERED.num_delivered = 20
 FLAT_MESSAGE_ENCODED = (
     b'{"publisher_name": "ldif-producer", "ts": "2023-11-09T11:15:52.616061", '
     b'"realm": "udm", "topic": "groups/group", '
-    b'"body": {"old": {"old": "Old", "dn": "uid=foo,dc=bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar"}}}'
+    b'"body": {"old": {"old": "Old", "dn": "uid=foo,dc=bar", "objectType": "foo/bar"}, "new": {"new": "New", "dn": "uid=foo,dc=bar", "objectType": "foo/bar"}}}'
 )
 
 BASE_KV_OBJ = KeyValue.Entry(
