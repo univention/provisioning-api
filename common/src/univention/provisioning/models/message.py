@@ -4,11 +4,20 @@ import enum
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_serializer, field_validator
-from typing_extensions import Literal
+from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
+from typing_extensions import Literal, Self
 
 from .constants import PublisherName
 from .subscription import RealmTopic
+
+LDAP_OBJECT_TYPE_FIELD = "univentionObjectType"
+UDM_OBJECT_TYPE_FIELD = "objectType"
+
+
+class EmptyBodyError(ValueError): ...
+
+
+class NoUDMTypeError(ValueError): ...
 
 
 class BaseMessage(BaseModel):
@@ -23,8 +32,8 @@ class BaseMessage(BaseModel):
 
 
 class Body(BaseModel):
-    old: Dict[str, Any] = Field(description="The UDM object before the change.")
-    new: Dict[str, Any] = Field(description="The UDM object after the change.")
+    old: Dict[str, Any] = Field(description="The LDAP/UDM object before the change.")
+    new: Dict[str, Any] = Field(description="The LDAP/UDM object after the change.")
 
     # Temporary validator due to the hardcoded image version of udm-listener.
     # This will be removed once we switch from udm-listener to ldif-producer.
@@ -32,6 +41,22 @@ class Body(BaseModel):
     @classmethod
     def set_empty_dict(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return v or {}
+
+    @model_validator(mode="after")
+    def check_not_both_empty(self) -> Self:
+        if not self.old and not self.new:
+            raise EmptyBodyError("'old' and 'new' cannot be both empty.")
+        return self
+
+    @model_validator(mode="after")
+    def check_has_udm_object_type(self) -> Self:
+        if LDAP_OBJECT_TYPE_FIELD in self.new or LDAP_OBJECT_TYPE_FIELD in self.old:
+            obj_type = LDAP_OBJECT_TYPE_FIELD
+        else:
+            obj_type = UDM_OBJECT_TYPE_FIELD
+        if not self.new.get(obj_type) and not self.old.get(obj_type):
+            raise NoUDMTypeError("No UDM type in both 'new' and 'old'.")
+        return self
 
 
 class LDIFProducerBody(Body):
