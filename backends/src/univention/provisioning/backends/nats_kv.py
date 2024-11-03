@@ -14,7 +14,7 @@ from nats.js.errors import (
 )
 from nats.js.kv import KV_DEL, KV_PURGE
 
-from univention.provisioning.models.constants import Bucket
+from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
 
 from .key_value_db import KeyValueDB, UpdateConflict
@@ -30,7 +30,7 @@ class NatsKeyValueDB(KeyValueDB):
         self._nats = NATS()
         self._js = self._nats.jetstream()
 
-    async def init(self, buckets: List[Bucket]):
+    async def init(self, buckets: List[BucketName]):
         await self._nats.connect(
             servers=self._server,
             user=self._user,
@@ -44,18 +44,18 @@ class NatsKeyValueDB(KeyValueDB):
         await self._nats.close()
 
     # TODO: Rename to ensure_kv_store()
-    async def create_kv_store(self, bucket: Bucket):
+    async def create_kv_store(self, bucket: BucketName):
         try:
             await self._js.key_value(bucket.value)
         except BucketNotFoundError:
             logger.info("Creating bucket with the name: %r", bucket)
             await self._js.create_key_value(bucket=bucket.value)
 
-    async def delete_kv_pair(self, key: str, bucket: Bucket):
+    async def delete_kv_pair(self, key: str, bucket: BucketName):
         kv_store = await self._js.key_value(bucket.value)
         await kv_store.delete(key)
 
-    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
+    async def get_value(self, key: str, bucket: BucketName) -> Optional[str]:
         """
         Retrieve value at `key` in `bucket`.
         Returns the value or None if key does not exist.
@@ -63,7 +63,7 @@ class NatsKeyValueDB(KeyValueDB):
         result = await self.get_value_with_revision(key, bucket)
         return result[0] if result else None
 
-    async def get_value_with_revision(self, key: str, bucket: Bucket) -> Optional[Tuple[str, int]]:
+    async def get_value_with_revision(self, key: str, bucket: BucketName) -> Optional[Tuple[str, int]]:
         """
         Retrieve value and latest version (revision) at `key` in `bucket`.
         Returns a tuple (value, revision) or None if key does not exist.
@@ -76,7 +76,7 @@ class NatsKeyValueDB(KeyValueDB):
             pass
 
     async def put_value(
-        self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None
+        self, key: str, value: Union[str, dict, list], bucket: BucketName, revision: Optional[int] = None
     ) -> None:
         """
         Store `value` at `key` in `bucket`.
@@ -102,7 +102,7 @@ class NatsKeyValueDB(KeyValueDB):
             await kv_store.put(key, value.encode("utf-8"))
             return
 
-    async def get_keys(self, bucket: Bucket) -> List[str]:
+    async def get_keys(self, bucket: BucketName) -> List[str]:
         kv_store = await self._js.key_value(bucket.value)
         try:
             return await kv_store.keys()
@@ -110,8 +110,8 @@ class NatsKeyValueDB(KeyValueDB):
             return []
 
     async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
-        kv_store = await self._js.key_value(Bucket.subscriptions.value)
-        for key in await self.get_keys(Bucket.subscriptions):
+        kv_store = await self._js.key_value(BucketName.subscriptions.value)
+        for key in await self.get_keys(BucketName.subscriptions):
             entry = await kv_store.get(key)
             try:
                 subscription_dict = json.loads(entry.value)
@@ -128,7 +128,7 @@ class NatsKeyValueDB(KeyValueDB):
         :param callback: Async function that accepts two arguments: the key of the changed entry (str)
             and its value (bytes). When the value is None, the key has been deleted.
         """
-        kv_store = await self._js.key_value(Bucket.subscriptions.value)
+        kv_store = await self._js.key_value(BucketName.subscriptions.value)
         watcher = await kv_store.watchall()
 
         while True:
