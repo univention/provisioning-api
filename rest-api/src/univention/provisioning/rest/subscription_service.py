@@ -9,7 +9,7 @@ from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 
-from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE, PREFILL_SUBJECT_TEMPLATE, Bucket
+from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE, PREFILL_SUBJECT_TEMPLATE, BucketName
 from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
 
 from .port import Port
@@ -48,7 +48,7 @@ class SubscriptionService:
         return subscriptions
 
     async def get_subscription_names(self):
-        return await self._port.get_bucket_keys(Bucket.credentials)
+        return await self._port.get_bucket_keys(BucketName.credentials)
 
     @staticmethod
     def hash_password(password: str) -> str:
@@ -65,7 +65,7 @@ class SubscriptionService:
         if new_sub.realms_topics != existing_sub.realms_topics:
             return False
 
-        hashed_password = await self._port.get_str_value(new_sub.name, Bucket.credentials)
+        hashed_password = await self._port.get_str_value(new_sub.name, BucketName.credentials)
         valid = password_context.verify(new_sub.password, hashed_password)
         if not valid:
             return False
@@ -91,7 +91,7 @@ class SubscriptionService:
                 new_sub.request_prefill,
             )
             encrypted_password = self.hash_password(new_sub.password)
-            await self._port.put_value(new_sub.name, encrypted_password, Bucket.credentials)
+            await self._port.put_value(new_sub.name, encrypted_password, BucketName.credentials)
             await self.prepare_and_store_subscription_info(new_sub)
             logger.info("New subscription was registered: %r", new_sub.name)
             return True
@@ -129,7 +129,7 @@ class SubscriptionService:
             raise ValueError("Subscription was not found.")
 
     async def get_subscription_info(self, name: str) -> Optional[Subscription]:
-        result = await self._port.get_dict_value(name, Bucket.subscriptions)
+        result = await self._port.get_dict_value(name, BucketName.subscriptions)
         return Subscription.model_validate(result) if result else result
 
     async def get_subscription_queue_status(self, name: str) -> FillQueueStatus:
@@ -152,7 +152,7 @@ class SubscriptionService:
         await self.set_sub_info(name, sub_info)
 
     async def set_sub_info(self, name, sub_info: Subscription):
-        await self._port.put_value(name, sub_info.model_dump(), Bucket.subscriptions)
+        await self._port.put_value(name, sub_info.model_dump(), BucketName.subscriptions)
 
     async def delete_subscription(self, name: str):
         """
@@ -163,13 +163,13 @@ class SubscriptionService:
         if not sub_info:
             raise ValueError("Subscription was not found.")
 
-        await self._port.delete_kv_pair(name, Bucket.credentials)
+        await self._port.delete_kv_pair(name, BucketName.credentials)
         await self.delete_sub_info(name)
         await self._port.delete_stream(name)
         await self._port.delete_consumer(name)
 
     async def delete_sub_info(self, name: str):
-        await self._port.delete_kv_pair(name, Bucket.subscriptions)
+        await self._port.delete_kv_pair(name, BucketName.subscriptions)
 
     @staticmethod
     def handle_authentication_error(message: str):
@@ -183,13 +183,13 @@ class SubscriptionService:
         if subscription_name and subscription_name != credentials.username:
             self.handle_authentication_error("You do not have access to this data")
 
-        hashed_password = await self._port.get_str_value(credentials.username, Bucket.credentials)
+        hashed_password = await self._port.get_str_value(credentials.username, BucketName.credentials)
         cached_func_args = (credentials.password, hashed_password, subscription_name)
         valid, new_hash = verify_and_update_password(*cached_func_args)
         if valid:
             if new_hash:
                 logger.info("Storing new password hash for user %r.", credentials.username)
-                await self._port.put_value(credentials.username, new_hash, Bucket.credentials)
+                await self._port.put_value(credentials.username, new_hash, BucketName.credentials)
         else:
             # cache only positive authentication attempts -> remove cache entry for invalid password
             cache_key = verify_and_update_password.cache_key(*cached_func_args)
