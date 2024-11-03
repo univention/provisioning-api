@@ -11,7 +11,7 @@ DISPATCHER_QUEUE_NAME = "incoming"
 PREFILL_SUBJECT_TEMPLATE = "{subscription}.prefill"
 
 
-class Bucket(str, Enum):
+class BucketName(str, Enum):
     subscriptions = "SUBSCRIPTIONS"
     credentials = "CREDENTIALS"
     cache = "CACHE"
