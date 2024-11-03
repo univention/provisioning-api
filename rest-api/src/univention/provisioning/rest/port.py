@@ -8,7 +8,7 @@ from typing import Annotated, List, Optional, Union
 from fastapi import Depends
 
 from univention.provisioning.backends import key_value_store, message_queue
-from univention.provisioning.models.constants import Bucket
+from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
 
 from .config import AppSettings, app_settings
@@ -49,7 +49,7 @@ class Port:
 
     async def connect(self):
         await self.mq_adapter.connect()
-        await self.kv_adapter.init(buckets=[Bucket.subscriptions, Bucket.credentials])
+        await self.kv_adapter.init(buckets=[BucketName.subscriptions, BucketName.credentials])
 
     async def close(self):
         await self.mq_adapter.close()
@@ -67,21 +67,23 @@ class Port:
     async def delete_stream(self, stream_name: str):
         await self.mq_adapter.delete_stream(stream_name)
 
-    async def get_dict_value(self, name: str, bucket: Bucket) -> Optional[dict]:
+    async def get_dict_value(self, name: str, bucket: BucketName) -> Optional[dict]:
         result = await self.kv_adapter.get_value(name, bucket)
         return json.loads(result) if result else None
 
-    async def get_list_value(self, key: str, bucket: Bucket) -> List[str]:
+    async def get_list_value(self, key: str, bucket: BucketName) -> List[str]:
         result = await self.kv_adapter.get_value(key, bucket)
         return json.loads(result) if result else []
 
-    async def get_str_value(self, key: str, bucket: Bucket) -> Optional[str]:
+    async def get_str_value(self, key: str, bucket: BucketName) -> Optional[str]:
         return await self.kv_adapter.get_value(key, bucket)
 
-    async def delete_kv_pair(self, key: str, bucket: Bucket):
+    async def delete_kv_pair(self, key: str, bucket: BucketName):
         await self.kv_adapter.delete_kv_pair(key, bucket)
 
-    async def put_value(self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None):
+    async def put_value(
+        self, key: str, value: Union[str, dict, list], bucket: BucketName, revision: Optional[int] = None
+    ):
         await self.kv_adapter.put_value(key, value, bucket, revision)
 
     async def ensure_stream(self, stream: str, manual_delete: bool, subjects: List[str] | None = None):
@@ -93,7 +95,7 @@ class Port:
     async def delete_consumer(self, stream_name: str):
         await self.mq_adapter.delete_consumer(stream_name)
 
-    async def get_bucket_keys(self, bucket: Bucket):
+    async def get_bucket_keys(self, bucket: BucketName):
         return await self.kv_adapter.get_keys(bucket)
 
     async def ensure_consumer(self, subject):

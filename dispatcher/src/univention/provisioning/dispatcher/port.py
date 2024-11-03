@@ -7,7 +7,7 @@ import contextlib
 from typing import Any, AsyncGenerator, Awaitable, Callable, Optional
 
 from univention.provisioning.backends import key_value_store, message_queue
-from univention.provisioning.models.constants import Bucket
+from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
 
@@ -41,7 +41,7 @@ class DispatcherPort:
 
     async def connect(self) -> None:
         await self.mq.connect()
-        await self.kv.init(buckets=[Bucket.subscriptions])
+        await self.kv.init(buckets=[BucketName.subscriptions])
 
     async def close(self) -> None:
         await self.mq.close()

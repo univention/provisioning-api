@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
-from univention.provisioning.models.constants import Bucket
+from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
 
 
@@ -20,7 +20,7 @@ class KeyValueDB(ABC):
         self._password = password
 
     @abstractmethod
-    async def init(self, buckets: List[Bucket]):
+    async def init(self, buckets: List[BucketName]):
         pass
 
     @abstractmethod
@@ -28,15 +28,15 @@ class KeyValueDB(ABC):
         pass
 
     @abstractmethod
-    async def create_kv_store(self, bucket: Bucket):
+    async def create_kv_store(self, bucket: BucketName):
         pass
 
     @abstractmethod
-    async def delete_kv_pair(self, key: str, bucket: Bucket):
+    async def delete_kv_pair(self, key: str, bucket: BucketName):
         pass
 
     @abstractmethod
-    async def get_value(self, key: str, bucket: Bucket) -> Optional[str]:
+    async def get_value(self, key: str, bucket: BucketName) -> Optional[str]:
         """
         Retrieve value at `key` in `bucket`.
         Returns the value or None if key does not exist.
@@ -44,7 +44,7 @@ class KeyValueDB(ABC):
         pass
 
     @abstractmethod
-    async def get_value_with_revision(self, key: str, bucket: Bucket) -> Optional[Tuple[str, int]]:
+    async def get_value_with_revision(self, key: str, bucket: BucketName) -> Optional[Tuple[str, int]]:
         """
         Retrieve value and latest version (revision) at `key` in `bucket`.
         Returns a tuple (value, revision) or None if key does not exist.
@@ -53,7 +53,7 @@ class KeyValueDB(ABC):
 
     @abstractmethod
     async def put_value(
-        self, key: str, value: Union[str, dict, list], bucket: Bucket, revision: Optional[int] = None
+        self, key: str, value: Union[str, dict, list], bucket: BucketName, revision: Optional[int] = None
     ) -> None:
         """
         Store `value` at `key` in `bucket`.
@@ -63,7 +63,7 @@ class KeyValueDB(ABC):
         pass
 
     @abstractmethod
-    async def get_keys(self, bucket: Bucket) -> List[str]:
+    async def get_keys(self, bucket: BucketName) -> List[str]:
         pass
 
     @abstractmethod

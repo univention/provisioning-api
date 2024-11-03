@@ -13,7 +13,7 @@ from nats.aio.msg import Msg
 from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 
-from univention.provisioning.models.constants import Bucket
+from univention.provisioning.models.constants import BucketName
 from univention.provisioning.testing.mock_data import BASE_KV_OBJ, CONSUMER_HASHED_PASSWORD, MSG, SUBSCRIPTION_NAME
 
 from .key_value_db import UpdateConflict
@@ -44,10 +44,10 @@ class FakeMessageQueue(AsyncMock):
 class FakeKvStore(AsyncMock):
     """Mock of nats.js.kv.KeyValue"""
 
-    def __init__(self, bucket: Bucket, *args: Any, **kwargs: Any):
+    def __init__(self, bucket: BucketName, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.bucket = bucket
-        if self.bucket == Bucket.credentials:
+        if self.bucket == BucketName.credentials:
             self._values = {SUBSCRIPTION_NAME: kv_password}
         else:
             self._values = {SUBSCRIPTION_NAME: kv_sub_info}
