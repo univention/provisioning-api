@@ -6,10 +6,17 @@ from datetime import datetime
 from unittest.mock import ANY, AsyncMock, call, patch
 
 import pytest
+from polyfactory.factories.pydantic_factory import ModelFactory
+from polyfactory.pytest_plugin import register_fixture
 
+from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.models.constants import PREFILL_SUBJECT_TEMPLATE, PublisherName
 from univention.provisioning.models.message import Body, Message
-from univention.provisioning.prefill.udm_prefill import UDMPreFill, match_topic
+from univention.provisioning.prefill.config import PrefillSettings
+from univention.provisioning.prefill.mq_port import MessageQueuePort
+from univention.provisioning.prefill.prefill_service import PrefillService
+from univention.provisioning.prefill.udm_port import UDMPort
+from univention.provisioning.prefill.update_sub_q_status_port import UpdateSubscriptionsQueueStatusPort
 from univention.provisioning.testing.mock_data import (
     GROUPS_TOPIC,
     MQMESSAGE_PREFILL,
@@ -23,9 +30,19 @@ from univention.provisioning.testing.mock_data import (
 class EscapeLoopException(Exception): ...
 
 
+@register_fixture
+class PrefillSettingsFactory(ModelFactory[PrefillSettings]): ...
+
+
 @pytest.fixture
-def udm_prefill() -> UDMPreFill:
-    udm_prefill = UDMPreFill(AsyncMock())
+def udm_prefill(prefill_settings_factory: ModelFactory[PrefillSettings]) -> PrefillService:
+    udm_prefill = PrefillService(
+        ack_manager=MessageAckManager(),
+        mq=AsyncMock(spec_set=MessageQueuePort),
+        udm=AsyncMock(spec_set=UDMPort),
+        update_sub_q_status=AsyncMock(spec_set=UpdateSubscriptionsQueueStatusPort),
+        settings=prefill_settings_factory.build(),
+    )
     udm_prefill.max_prefill_attempts = 5
     return udm_prefill
 
@@ -66,76 +83,70 @@ class TestUDMPreFill:
     msg2.topic = USERS_TOPIC
     msg2.body.new = obj_2
 
-    @patch("univention.provisioning.prefill.udm_prefill.datetime")
-    async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill: UDMPreFill):
+    @patch("univention.provisioning.prefill.prefill_service.datetime")
+    async def test_handle_requests_to_prefill(self, mock_datetime, udm_prefill: PrefillService):
         mock_datetime.now.return_value = self.mocked_date
         mock_acknowledgements = AsyncMock()
-        udm_prefill._port.get_one_message = AsyncMock(
+        udm_prefill.mq.get_one_message = AsyncMock(
             side_effect=[
                 (MQMESSAGE_PREFILL, mock_acknowledgements),
                 EscapeLoopException("Stop waiting for the new event"),
             ]
         )
-        udm_prefill._port.get_object_types = AsyncMock(return_value=[self.udm_modules])
-        udm_prefill._port.list_objects = AsyncMock(return_value=[self.url])
-        udm_prefill._port.get_object = AsyncMock(return_value=self.obj)
+        udm_prefill.udm.get_object_types = AsyncMock(return_value=[self.udm_modules])
+        udm_prefill.udm.list_objects = AsyncMock(return_value=[self.url])
+        udm_prefill.udm.get_object = AsyncMock(return_value=self.obj)
 
         with pytest.raises(EscapeLoopException):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", False, None)
-        udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
-            SUBSCRIPTION_NAME, self.prefill_subject
-        )
-        udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
-        udm_prefill._port.get_object_types.assert_called_once_with()
-        udm_prefill._port.list_objects.assert_called_once_with(GROUPS_TOPIC)
-        udm_prefill._port.get_object.assert_called_once_with(self.url)
+        udm_prefill.mq.initialize_subscription.assert_called_once()
+        udm_prefill.mq.purge_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        udm_prefill.mq.get_one_message.assert_has_calls([call(), call()])
+        udm_prefill.udm.get_object_types.assert_called_once_with()
+        udm_prefill.udm.list_objects.assert_called_once_with(GROUPS_TOPIC)
+        udm_prefill.udm.get_object.assert_called_once_with(self.url)
         mock_acknowledgements.acknowledge_message.assert_called_once()
-        udm_prefill._port.create_prefill_message.assert_called_once_with(
-            SUBSCRIPTION_NAME, self.prefill_subject, self.msg
-        )
-        udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
+        udm_prefill.mq.add_message_to_queue.assert_called_once_with(SUBSCRIPTION_NAME, self.msg)
+        udm_prefill.mq.add_message_to_failures_queue.assert_not_called()
 
-    @patch("univention.provisioning.prefill.udm_prefill.datetime")
-    async def test_handle_requests_to_prefill_multiple_topics(self, mock_datetime, udm_prefill: UDMPreFill):
+    @patch("univention.provisioning.prefill.prefill_service.datetime")
+    async def test_handle_requests_to_prefill_multiple_topics(self, mock_datetime, udm_prefill: PrefillService):
         mock_datetime.now.return_value = self.mocked_date
         mock_acknowledgements = AsyncMock()
-        udm_prefill._port.get_one_message = AsyncMock(
+        udm_prefill.mq.get_one_message = AsyncMock(
             side_effect=[
                 (MQMESSAGE_PREFILL_MULTIPLE_TOPICS, mock_acknowledgements),
                 EscapeLoopException("Stop waiting for the new event"),
             ]
         )
-        udm_prefill._port.get_object_types = AsyncMock(side_effect=[[self.udm_modules], [self.udm_modules_2]])
-        udm_prefill._port.list_objects = AsyncMock(side_effect=[[self.url], [self.url_2]])
-        udm_prefill._port.get_object = AsyncMock(side_effect=[self.obj, self.obj_2])
+        udm_prefill.udm.get_object_types = AsyncMock(side_effect=[[self.udm_modules], [self.udm_modules_2]])
+        udm_prefill.udm.list_objects = AsyncMock(side_effect=[[self.url], [self.url_2]])
+        udm_prefill.udm.get_object = AsyncMock(side_effect=[self.obj, self.obj_2])
 
         with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", False, None)
-        udm_prefill._port.remove_old_messages_from_prefill_subject.assert_called_once_with(
-            SUBSCRIPTION_NAME, self.prefill_subject
-        )
-        udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
-        udm_prefill._port.get_object_types.assert_has_calls([call(), call()])
-        udm_prefill._port.list_objects.assert_has_calls([call(GROUPS_TOPIC), call(USERS_TOPIC)])
-        udm_prefill._port.get_object.assert_has_calls([call(self.url), call(self.url_2)])
+        udm_prefill.mq.initialize_subscription.assert_called_once_with()
+        udm_prefill.mq.purge_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        udm_prefill.mq.get_one_message.assert_has_calls([call(), call()])
+        udm_prefill.udm.get_object_types.assert_has_calls([call(), call()])
+        udm_prefill.udm.list_objects.assert_has_calls([call(GROUPS_TOPIC), call(USERS_TOPIC)])
+        udm_prefill.udm.get_object.assert_has_calls([call(self.url), call(self.url_2)])
         mock_acknowledgements.acknowledge_message.assert_called_once()
-        udm_prefill._port.create_prefill_message.assert_has_calls(
+        udm_prefill.mq.add_message_to_queue.assert_has_calls(
             [
-                call(SUBSCRIPTION_NAME, self.prefill_subject, self.msg),
-                call(SUBSCRIPTION_NAME, self.prefill_subject, self.msg2),
+                call(SUBSCRIPTION_NAME, self.msg),
+                call(SUBSCRIPTION_NAME, self.msg2),
             ]
         )
-        udm_prefill._port.add_request_to_prefill_failures.assert_not_called()
+        udm_prefill.mq.add_message_to_failures_queue.assert_not_called()
 
-    @patch("univention.provisioning.prefill.udm_prefill.datetime")
-    async def test_handle_requests_to_prefill_moving_to_failures(self, mock_datetime, udm_prefill: UDMPreFill):
+    @patch("univention.provisioning.prefill.prefill_service.datetime")
+    async def test_handle_requests_to_prefill_moving_to_failures(self, mock_datetime, udm_prefill: PrefillService):
         mock_datetime.now.return_value = self.mocked_date
         mock_acknowledgements = AsyncMock()
-        udm_prefill._port.get_one_message = AsyncMock(
+        udm_prefill.mq.get_one_message = AsyncMock(
             side_effect=[
                 (MQMESSAGE_PREFILL_REDELIVERED, mock_acknowledgements),
                 EscapeLoopException("Stop waiting for the new event"),
@@ -145,30 +156,27 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill._port.initialize_subscription.assert_called_once_with("prefill", False, None)
-        udm_prefill._port.get_one_message.assert_has_calls([call(), call()])
-        udm_prefill._port.get_object_types.assert_not_called()
-        udm_prefill._port.list_objects.assert_not_called()
-        udm_prefill._port.get_object.assert_not_called()
-        udm_prefill._port.acknowledge_message_in_progress.assert_not_called()
+        udm_prefill.mq.initialize_subscription.assert_called_once_with()
+        udm_prefill.mq.get_one_message.assert_has_calls([call(), call()])
+        udm_prefill.udm.get_object_types.assert_not_called()
+        udm_prefill.udm.list_objects.assert_not_called()
+        udm_prefill.udm.get_object.assert_not_called()
         mock_acknowledgements.acknowledge_message.assert_called_once()
-        udm_prefill._port.create_prefill_message.assert_not_called()
-        udm_prefill._port.add_request_to_prefill_failures.assert_called_once_with(
-            "prefill-failures", "prefill-failures", ANY
-        )
+        udm_prefill.mq.add_message_to_queue.assert_not_called()
+        udm_prefill.mq.add_message_to_failures_queue.assert_called_once_with(ANY)
 
-    @patch("univention.provisioning.prefill.udm_prefill.datetime")
-    async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill: UDMPreFill):
+    @patch("univention.provisioning.prefill.prefill_service.datetime")
+    async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill: PrefillService):
         mock_datetime.now.return_value = self.mocked_date
-        udm_prefill._port.get_object_types = AsyncMock(return_value=[self.udm_modules])
+        udm_prefill.udm.get_object_types = AsyncMock(return_value=[self.udm_modules])
 
         result = await udm_prefill.fetch_udm("test-subject", "test-topic")
 
         assert result is None
-        udm_prefill._port.get_object_types.assert_called_once_with()
-        udm_prefill._port.list_objects.assert_not_called()
-        udm_prefill._port.get_object.assert_not_called()
-        udm_prefill._port.create_prefill_message.assert_not_called()
+        udm_prefill.udm.get_object_types.assert_called_once_with()
+        udm_prefill.udm.list_objects.assert_not_called()
+        udm_prefill.udm.get_object.assert_not_called()
+        udm_prefill.mq.add_message_to_queue.assert_not_called()
 
 
 class TestMatchMethod:
@@ -185,4 +193,4 @@ class TestMatchMethod:
         ]
 
         for sub_topic, target_topic, expectation in test_cases:
-            assert match_topic(sub_topic, target_topic) == expectation
+            assert PrefillService.match_topic(sub_topic, target_topic) == expectation
