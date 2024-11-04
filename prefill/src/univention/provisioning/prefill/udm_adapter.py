@@ -2,16 +2,18 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Optional
 
 import aiohttp
+
+from .udm_port import UDMPort
 
 logger = logging.getLogger(__name__)
 
 
-class UDMAdapter:
+class UDMAdapter(UDMPort):
     """
-    Client for the UDM REST API, providing the interfaces required by `UDMPreFill` and `UDMMessagingService`.
+    Client for the UDM REST API, providing the interfaces required by `PrefillService` and `UDMMessagingService`.
 
     It is intended to be used as an async context manager:
     ```
@@ -21,6 +23,7 @@ class UDMAdapter:
     """
 
     def __init__(self, url: str, username: str, password: str):
+        super().__init__(url, username, password)
         self.base_url = url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
@@ -29,16 +32,23 @@ class UDMAdapter:
         self.headers = [("accept", "application/json")]
         self._session = None
 
-    async def connect(self) -> "UDMAdapter":
+    async def __aenter__(self) -> UDMPort:
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool:
+        await self.close()
+        return False
+
+    async def connect(self) -> None:
         if not self._session:
             self._session = aiohttp.ClientSession(auth=self.auth, headers=self.headers, raise_for_status=True)
-        return self
 
     async def close(self) -> None:
         if self._session:
             await self._session.close()
 
-    async def get_object_types(self) -> List[Dict]:
+    async def get_object_types(self) -> list[dict[str, Any]]:
         """Return a list of available object types.
 
         Each entry has the keys `name`, `title` and `href`.
@@ -47,8 +57,8 @@ class UDMAdapter:
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
-    async def list_objects(self, object_type: str, position: Optional[str] = None) -> List[Dict]:
-        """Return the URLs of all objects of the given type."""
+    async def list_objects(self, object_type: str, position: Optional[str] = None) -> list[str]:
+        """Return the URLs of all objects for the given type."""
 
         params = {
             "scope": "sub",
@@ -71,7 +81,7 @@ class UDMAdapter:
             else:
                 return []
 
-    async def get_object(self, url: str) -> Dict:
+    async def get_object(self, url: str) -> dict[str, Any]:
         """Fetch the given UDM object."""
         async with self._session.get(url) as request:
             udm_obj = await request.json()
