@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import asyncio
 import json
 import logging
@@ -7,6 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Coroutine, List, NamedTuple, Optional, Tuple
 
 from nats.aio.msg import Msg
+from typing_extensions import Self
 
 from univention.provisioning.models.message import BaseMessage, MQMessage
 
@@ -31,7 +33,11 @@ class Acknowledgements(NamedTuple):
 
 
 class MessageQueue(ABC):
-    """The base class for message queueing."""
+    """
+    The base class for message queueing.
+
+    Use as an asynchronous context manager to ensure the connection gets closed after usage.
+    """
 
     def __init__(self, server: str, user: str, password: str, max_reconnect_attempts: int = 5, **connect_kwargs):
         self._server = server
@@ -39,6 +45,12 @@ class MessageQueue(ABC):
         self._password = password
         self._max_reconnect_attempts = max_reconnect_attempts
         self._connect_kwargs = connect_kwargs
+
+    @abstractmethod
+    async def __aenter__(self) -> Self: ...
+
+    @abstractmethod
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool: ...
 
     @abstractmethod
     async def connect(self):
@@ -130,6 +142,10 @@ class MessageQueue(ABC):
 
     @abstractmethod
     async def ensure_consumer(self, subject: str, deliver_subject: Optional[str] = None):
+        pass
+
+    @abstractmethod
+    async def purge_stream(self, stream: str, subject: str) -> None:
         pass
 
 

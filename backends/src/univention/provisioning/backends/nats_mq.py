@@ -10,6 +10,7 @@ from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig, RetentionPolicy, StreamConfig
 from nats.js.errors import NotFoundError, ServerError
+from typing_extensions import Self
 
 from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
 
@@ -31,7 +32,11 @@ class NatsKeys:
 
 
 class NatsMessageQueue(MessageQueue):
-    """Message queueing using NATS."""
+    """
+    Message queueing using NATS.
+
+    Use as an asynchronous context manager to ensure the connection gets closed after usage.
+    """
 
     def __init__(self, server: str, user: str, password: str, max_reconnect_attempts: int = 5, **connect_kwargs):
         super().__init__(
@@ -41,6 +46,14 @@ class NatsMessageQueue(MessageQueue):
         self._js = self._nats.jetstream()
         self._message_queue = asyncio.Queue()
         self.pull_subscription = None
+
+    async def __aenter__(self) -> Self:
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool:
+        await self.close()
+        return False
 
     async def connect(self):
         """
@@ -291,5 +304,5 @@ class NatsMessageQueue(MessageQueue):
         except (ServerError, NotFoundError) as exc:
             raise ValueError(exc.description)
 
-    async def purge_subject_from_messages(self, stream: str, subject: str):
+    async def purge_stream(self, stream: str, subject: str) -> None:
         await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
