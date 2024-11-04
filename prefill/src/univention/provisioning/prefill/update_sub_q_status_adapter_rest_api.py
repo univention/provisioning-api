@@ -18,6 +18,14 @@ class SubscriptionsRestApiAdapter(UpdateSubscriptionsQueueStatusPort):
         self._headers = [("accept", "application/json")]
         self._session = None
 
+    async def __aenter__(self) -> UpdateSubscriptionsQueueStatusPort:
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool:
+        await self.close()
+        return False
+
     async def connect(self):
         if not self._session:
             self._session = aiohttp.ClientSession(auth=self._auth, headers=self._headers, raise_for_status=True)

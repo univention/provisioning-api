@@ -3,11 +3,12 @@
 import logging
 import re
 from datetime import datetime
+from typing import Optional
 
 from pydantic import ValidationError
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import PREFILL_QUEUE_NAME, PREFILL_SUBJECT_TEMPLATE, PublisherName
+from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import (
     Body,
     Message,
@@ -17,7 +18,10 @@ from univention.provisioning.models.message import (
 )
 from univention.provisioning.models.subscription import FillQueueStatus
 
-from .port import PrefillPort
+from .config import PrefillSettings, prefill_settings
+from .mq_port import MessageQueuePort
+from .udm_port import UDMPort
+from .update_sub_q_status_port import UpdateSubscriptionsQueueStatusPort
 
 logger = logging.getLogger(__name__)
 
@@ -25,32 +29,34 @@ logger = logging.getLogger(__name__)
 class PrefillFailedError(Exception): ...
 
 
-def match_topic(sub_topic: str, module_name: str) -> bool:
-    """Determines if a UDM module name matches the specified subscription topic."""
-
-    return re.fullmatch(sub_topic, module_name) is not None
-
-
-class UDMPreFill:
-    PREFILL_FAILURES_STREAM = "prefill-failures"
-    PREFILL_DURABLE_NAME = "prefill-service"
-
-    def __init__(self, port: PrefillPort):
+class PrefillService:
+    def __init__(
+        self,
+        ack_manager: MessageAckManager,
+        mq: MessageQueuePort,
+        udm: UDMPort,
+        update_sub_q_status: UpdateSubscriptionsQueueStatusPort,
+        settings: Optional[PrefillSettings] = None,
+    ):
         super().__init__()
-        self._port = port
-        self.ack_manager = MessageAckManager()
-        self.max_prefill_attempts = port.settings.max_prefill_attempts
+        self.ack_manager = ack_manager
+        self.mq = mq
+        self.udm = udm
+        self.update_sub_q_status = update_sub_q_status
+        self.settings = settings or prefill_settings()
+
+        self.max_prefill_attempts = self.settings.max_prefill_attempts
 
     async def handle_requests_to_prefill(self):
         logger.info("Handling the requests to prefill")
 
-        await self.prepare_prefill_failures_queue()
-        await self._port.initialize_subscription(PREFILL_QUEUE_NAME, False, None)
+        await self.mq.prepare_failures_queue()
+        await self.mq.initialize_subscription()
 
         while True:
             logger.debug("Waiting for new prefill requests...")
             try:
-                message, acknowledgements = await self._port.get_one_message()
+                message, acknowledgements = await self.mq.get_one_message()
             except Empty:
                 continue
 
@@ -102,20 +108,19 @@ class UDMPreFill:
                 "To trigger the prefill again, delete and recreate the subscription."
             )
             await self.add_to_failure_queue(data)
-            await self._port.update_subscription_queue_status(
+            await self.update_sub_q_status.update_subscription_queue_status(
                 validated_message.subscription_name, FillQueueStatus.failed
             )
             return
 
         await self._handle_message(validated_message)
 
-        await self._port.update_subscription_queue_status(validated_message.subscription_name, FillQueueStatus.done)
+        await self.update_sub_q_status.update_subscription_queue_status(
+            validated_message.subscription_name, FillQueueStatus.done
+        )
 
     async def _handle_message(self, message: PrefillMessage):
-        await self._port.remove_old_messages_from_prefill_subject(
-            message.subscription_name,
-            PREFILL_SUBJECT_TEMPLATE.format(subscription=message.subscription_name),
-        )
+        await self.mq.purge_queue(message.subscription_name)
 
         for realm_topic in message.realms_topics:
             if realm_topic.realm != "udm":
@@ -128,25 +133,34 @@ class UDMPreFill:
                 message.subscription_name,
                 realm_topic.topic,
             )
-            await self._port.update_subscription_queue_status(message.subscription_name, FillQueueStatus.running)
+            await self.update_sub_q_status.update_subscription_queue_status(
+                message.subscription_name, FillQueueStatus.running
+            )
             await self.fetch_udm(message.subscription_name, realm_topic.topic)
 
-    async def fetch_udm(self, subscription_name: str, topic: str):
+    async def fetch_udm(self, subscription_name: str, topic: str) -> None:
         """
         Start fetching all data for the given topic.
-        Find all UDM object types which match the given topic.
+        Find all UDM object types that match the given topic.
         """
 
-        udm_modules = await self._port.get_object_types()
-        udm_match = [module for module in udm_modules if match_topic(topic, module["name"])]
+        udm_modules = await self.udm.get_object_types()
+        udm_match = [module for module in udm_modules if self.match_topic(topic, module["name"])]
 
-        if len(udm_match) == 0:
-            logger.warning("No UDM modules match object type %r", topic)
+        if not udm_match:
+            logger.warning("No UDM module matches topic %r", topic)
+            return
 
         for module in udm_match:
             this_topic = module["name"]
             logger.info("Grabbing %r objects.", this_topic)
             await self._fill_udm_topic(this_topic, subscription_name)
+
+    @staticmethod
+    def match_topic(sub_topic: str, module_name: str) -> bool:
+        """Determines if a UDM module name matches the specified subscription topic."""
+
+        return re.fullmatch(sub_topic, module_name) is not None
 
     async def _fill_udm_topic(self, object_type: str, subscription_name: str):
         """Find the DNs of all UDM objects for an object_type."""
@@ -155,20 +169,20 @@ class UDMPreFill:
         # by the UCR variable `directory/manager/web/sizelimit`
         # (default: 400.000 bytes).
         #
-        # We should probably use pagination to fetch the objects but the parameters
+        # We should probably use pagination to fetch the objects, but the parameters
         # `page` and `limit` are marked as "Broken/Experimental" in the UDM REST API.
         #
-        # For now, first request all users without their properties,
-        # then do one request per user to fetch the whole object.
+        # For now, first request all objects without their properties,
+        # then do one request per object-URL to fetch the whole object.
 
-        urls = await self._port.list_objects(object_type)
+        urls = await self.udm.list_objects(object_type)
         for url in urls:
             logger.info("Grabbing object from: %r", url)
             await self._fill_object(url, object_type, subscription_name)
 
     async def _fill_object(self, url: str, object_type: str, subscription_name: str):
         """Retrieve the object for the given DN."""
-        obj = await self._port.get_object(url)
+        obj = await self.udm.get_object(url)
 
         message = Message(
             publisher_name=PublisherName.udm_pre_fill,
@@ -178,12 +192,7 @@ class UDMPreFill:
             body=Body(old={}, new=obj),
         )
         logger.info("Sending to the consumer prefill queue from: %r", url)
-
-        await self._port.create_prefill_message(
-            subscription_name,
-            PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription_name),
-            message,
-        )
+        await self.mq.add_message_to_queue(subscription_name, message)
 
     async def add_to_failure_queue(self, data: dict) -> None:
         logger.info("Adding request to the prefill failures queue")
@@ -192,10 +201,4 @@ class UDMPreFill:
             ts=datetime.now(),
             body=data,
         )
-        await self._port.add_request_to_prefill_failures(
-            self.PREFILL_FAILURES_STREAM, self.PREFILL_FAILURES_STREAM, message
-        )
-
-    async def prepare_prefill_failures_queue(self):
-        await self._port.ensure_stream(self.PREFILL_FAILURES_STREAM, False)
-        await self._port.ensure_consumer(self.PREFILL_FAILURES_STREAM)
+        await self.mq.add_message_to_failures_queue(message)
