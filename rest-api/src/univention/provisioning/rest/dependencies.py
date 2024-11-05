@@ -8,11 +8,28 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from .config import AppSettings, app_settings
+from .mq_adapter_nats import NatsMessageQueue
+from .mq_port import MessageQueuePort
+from .subscriptions_db_adapter_nats import NatsSubscriptionsDB
+from .subscriptions_db_port import SubscriptionsDBPort
 
 http_basic = HTTPBasic()
 
+
+async def _kv_dependency():
+    async with NatsSubscriptionsDB() as kv:
+        yield kv
+
+
+async def _mq_dependency():
+    async with NatsMessageQueue() as mq:
+        yield mq
+
+
 AppSettingsDep = Annotated[AppSettings, Depends(app_settings)]
 HttpBasicDep = Annotated[HTTPBasicCredentials, Depends(http_basic)]
+KVDependency = Annotated[SubscriptionsDBPort, Depends(_kv_dependency)]
+MQDependency = Annotated[MessageQueuePort, Depends(_mq_dependency)]
 
 
 def authenticate_user(credentials: HTTPBasicCredentials, username: str, password: str) -> None:
