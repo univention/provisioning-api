@@ -11,9 +11,15 @@ from fastapi import Depends, HTTPException, Response
 from univention.provisioning.models.message import MessageProcessingStatusReport, ProvisioningMessage
 from univention.provisioning.models.subscription import FillQueueStatusReport, NewSubscription, Subscription
 
-from .dependencies import AppSettingsDep, HttpBasicDep, authenticate_admin, authenticate_prefill
+from .dependencies import (
+    AppSettingsDep,
+    HttpBasicDep,
+    KVDependency,
+    MQDependency,
+    authenticate_admin,
+    authenticate_prefill,
+)
 from .message_service import MessageService
-from .port import PortDependency
 from .subscription_service import SubscriptionService
 
 router = fastapi.APIRouter(prefix="/v1/subscriptions", tags=["subscriptions"])
@@ -21,18 +27,18 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("", status_code=fastapi.status.HTTP_200_OK, dependencies=[Depends(authenticate_admin)])
-async def get_subscriptions(port: PortDependency) -> list[Subscription]:
+async def get_subscriptions(kv: KVDependency, mq: MQDependency) -> list[Subscription]:
     """Return a list of all known subscriptions."""
 
-    service = SubscriptionService(port)
+    service = SubscriptionService(subscriptions_db=kv, mq=mq)
     return await service.get_subscriptions()
 
 
 @router.get("/{name}", status_code=fastapi.status.HTTP_200_OK)
-async def get_subscription(name: str, credentials: HttpBasicDep, port: PortDependency) -> Subscription:
+async def get_subscription(name: str, credentials: HttpBasicDep, kv: KVDependency, mq: MQDependency) -> Subscription:
     """Return information about a subscription."""
 
-    service = SubscriptionService(port)
+    service = SubscriptionService(subscriptions_db=kv, mq=mq)
     await service.authenticate_user(credentials, name)
 
     try:
@@ -43,10 +49,12 @@ async def get_subscription(name: str, credentials: HttpBasicDep, port: PortDepen
 
 
 @router.delete("/{name}", status_code=fastapi.status.HTTP_200_OK)
-async def delete_subscription(name: str, port: PortDependency, credentials: HttpBasicDep, settings: AppSettingsDep):
+async def delete_subscription(
+    name: str, kv: KVDependency, mq: MQDependency, credentials: HttpBasicDep, settings: AppSettingsDep
+):
     """Delete a subscription."""
 
-    service = SubscriptionService(port)
+    service = SubscriptionService(subscriptions_db=kv, mq=mq)
 
     try:
         authenticate_admin(credentials, settings)
@@ -61,30 +69,31 @@ async def delete_subscription(name: str, port: PortDependency, credentials: Http
 
 
 @router.post("", status_code=fastapi.status.HTTP_201_CREATED, dependencies=[Depends(authenticate_admin)])
-async def create_subscription(subscription: NewSubscription, port: PortDependency, response: Response):
+async def create_subscription(subscription: NewSubscription, kv: KVDependency, mq: MQDependency, response: Response):
     """Register a new subscription."""
 
-    sub_service = SubscriptionService(port)
+    sub_service = SubscriptionService(subscriptions_db=kv, mq=mq)
 
     if not await sub_service.register_subscription(subscription):
         response.status_code = fastapi.status.HTTP_200_OK
         return
 
     if subscription.request_prefill:
-        msg_service = MessageService(port)
-        await msg_service.send_request_to_prefill(subscription)
+        logger.info("Requesting a prefill for subscription: %r", subscription.name)
+        await mq.request_prefill(subscription)
 
 
 @router.patch("/{name}/prefill", status_code=fastapi.status.HTTP_200_OK)
 async def update_subscription_prefill_status(
     name: str,
     report: FillQueueStatusReport,
-    port: PortDependency,
+    kv: KVDependency,
+    mq: MQDependency,
     authentication: Annotated[None, Depends(authenticate_prefill)],
 ):
     """Update a subscription's prefill queue status"""
 
-    service = SubscriptionService(port)
+    service = SubscriptionService(subscriptions_db=kv, mq=mq)
     try:
         await service.set_subscription_queue_status(name, report.status)
     except ValueError as err:
@@ -94,17 +103,17 @@ async def update_subscription_prefill_status(
 
 @router.get("/{name}/messages/next", status_code=fastapi.status.HTTP_200_OK)
 async def get_next_message(
-    name: str, port: PortDependency, credentials: HttpBasicDep, timeout: float = 5, pop: bool = False
+    name: str, kv: KVDependency, mq: MQDependency, credentials: HttpBasicDep, timeout: float = 5, pop: bool = False
 ) -> Optional[ProvisioningMessage]:
     """Return the next pending message for the given subscription."""
 
     t0 = time.perf_counter()
-    sub_service = SubscriptionService(port)
+    sub_service = SubscriptionService(subscriptions_db=kv, mq=mq)
     await sub_service.authenticate_user(credentials, name)
     td0 = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    msg_service = MessageService(port)
+    msg_service = MessageService(subscriptions_db=kv, mq=mq)
     msg = await msg_service.get_next_message(name, timeout, pop)
     td1 = time.perf_counter() - t0
     timing = f"Auth: {td0 * 1000:.1f} ms, MQ: {td1 * 1000:.1f} ms"
@@ -120,17 +129,22 @@ async def get_next_message(
 
 @router.patch("/{name}/messages/{seq_num}/status", status_code=fastapi.status.HTTP_200_OK)
 async def update_message_status(
-    name: str, seq_num: int, report: MessageProcessingStatusReport, port: PortDependency, credentials: HttpBasicDep
+    name: str,
+    seq_num: int,
+    report: MessageProcessingStatusReport,
+    kv: KVDependency,
+    mq: MQDependency,
+    credentials: HttpBasicDep,
 ):
     """Report on the processing of the given message."""
 
-    sub_service = SubscriptionService(port)
+    sub_service = SubscriptionService(subscriptions_db=kv, mq=mq)
     await sub_service.authenticate_user(credentials, name)
 
-    msg_service = MessageService(port)
+    msg_service = MessageService(subscriptions_db=kv, mq=mq)
 
     try:
-        await msg_service.post_message_status(name, seq_num, report.status)
+        await msg_service.update_message_status(name, seq_num, report.status)
     except ValueError as err:
         logger.debug("Failed to post message status: %s", err)
         raise fastapi.HTTPException(fastapi.status.HTTP_404_NOT_FOUND, str(err))
