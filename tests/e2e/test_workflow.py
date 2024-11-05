@@ -60,7 +60,7 @@ def ldap_group(ldap_connection, subscription_name, test_settings, request):
         object_class=("posixGroup", "univentionObject", "univentionGroup"),
         attributes={"univentionObjectType": "groups/group", "gidNumber": 1},
     )
-    assert result, "No ldap change triggered, possible reasons: invalid request or test-data colision"
+    assert result, "No ldap change triggered, possible reasons: invalid request or test-data collision"
 
     yield ldap_connection, dn
 

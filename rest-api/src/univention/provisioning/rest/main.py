@@ -19,7 +19,7 @@ from univention.provisioning.utils.log import setup_logging
 
 from .config import app_settings
 from .messages import router as messages_api_router
-from .port import Port
+from .mq_adapter_nats import NatsMessageQueue
 from .subscriptions import router as subscriptions_api_router
 
 settings = app_settings()
@@ -74,11 +74,11 @@ add_exception_handlers(app)
 
 @app.on_event("startup")
 async def startup_task():
-    logger.info("Started %s version %s.", app.title, version("nubus-provisioning-rest-api"))
+    logger.info("Started %s version %r.", app.title, version("nubus-provisioning-rest-api"))
 
-    async with Port.port_context() as port:
+    async with NatsMessageQueue(settings) as mq:
         logger.info("Checking MQ connectivity...")
-        await port.ensure_stream(PREFILL_QUEUE_NAME, False)
+        await mq.create_queue(PREFILL_QUEUE_NAME, False)
 
 
 @app.exception_handler(RequestValidationError)
