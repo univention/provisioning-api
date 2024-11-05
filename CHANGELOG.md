@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.45.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.44.1...v0.45.0) (2024-11-05)
+
+
+### Features
+
+* **secrets-refactoring:** generated nubus-common artifacts ([74d8859](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/74d8859e4c69fa42891d8a61ff24e64bf8d59212))
+* **secrets-refactoring:** refactored values structure to existingSecret mechanism ([ec4d565](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ec4d5654457255d1b980799c1744850bc4859507))
+
+
+### Bug Fixes
+
+* fix chart version and track todo ([c78e0a7](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c78e0a7502c5f0b3789bb2ad7e29470826f1da62))
+* **nats:** adjust values structure to new standard ([2651b5b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2651b5bb7194448b2febf4f7b468e9cb7036b579))
+* **nats:** bump nats subchart to version 0.2.0 ([9dc57c2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9dc57c2476f04e4a54bd74f4b3317be7a2440b05))
+* refactor secrets structure to use bitnami style existingSecrets ([84eaa34](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/84eaa341c40f3a14111571798ce7c02e4b13625a))
+* **secrets-refactoring:** add provisioning consumers configurability ([4a0850e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4a0850e5cba88b9248ff67dcdb571c3f8620f304))
+* **secrets-refactoring:** all secrets migrated to new structure ([6a167c3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6a167c3ed2affae83a95bbcf0bca242b8e1462fd))
+* **secrets-refactoring:** customized the generated values to get helm template working ([ba3a792](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/ba3a792dcea0fea87fd56133f9bcfb951b6c6a03))
+* **secrets-refactoring:** fixes while integrating into the umbrella chart ([5a2a7d5](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5a2a7d55b5478f63bf02bed7faae0ca104656e52))
+
 ## [0.44.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.44.0...v0.44.1) (2024-10-04)
 
 
