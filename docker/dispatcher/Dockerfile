@@ -6,7 +6,7 @@ ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as dep_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
 
 ARG WORKDIR="/app"
 ENV POETRY_NO_INTERACTION=1
@@ -41,7 +41,7 @@ RUN poetry export --only=dev -C ${WORKDIR}/dispatcher -o ${WORKDIR}/requirements
 
 ###############################################
 # Stage 2: install dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as app_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS app_builder
 
 ARG USER=dispatcher
 ARG WORKDIR="/app"
@@ -74,7 +74,7 @@ RUN useradd -m "$USER" \
 
 ###############################################
 # Stage 3: test image
-FROM app_builder as test
+FROM app_builder AS test
 WORKDIR ${WORKDIR}
 
 COPY --from=dep_builder ${WORKDIR}/requirements_dispatcher_dev.txt /tmp
@@ -86,6 +86,6 @@ RUN grep -v 'file:///app' "/tmp/requirements_dispatcher_dev.txt" > "/tmp/require
 
 ###############################################
 # Stage 3: final image
-FROM app_builder as final
+FROM app_builder AS final
 
 ENTRYPOINT ["python3", "-m", "univention.provisioning.dispatcher.main"]
