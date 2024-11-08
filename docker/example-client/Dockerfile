@@ -6,7 +6,7 @@ ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as dep_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
 
 ARG WORKDIR="/app"
 ENV POETRY_NO_INTERACTION=1
