@@ -8,7 +8,7 @@ ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base
 # Optimized for fast rebuilds (when only tests/* is changed) #
 ##############################################################
 
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as dep_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
 
 ARG WORKDIR="/app"
 ENV POETRY_NO_INTERACTION=1 \
