@@ -57,11 +57,6 @@ RUN apt-get update \
     && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# allow image scanners like trivy to detect Python packages (additionally "pip freeze" below)
-COPY ./backends/poetry.lock ./backends/pyproject.toml ${WORKDIR}/backends/
-COPY ./common/poetry.lock ./common/pyproject.toml ${WORKDIR}/common/
-COPY ./prefill/poetry.lock ./prefill/pyproject.toml ${WORKDIR}/prefill/
-
 # install dependencies and project
 COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
 RUN useradd -m "$USER" \
@@ -70,7 +65,6 @@ RUN useradd -m "$USER" \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_prefill-*.whl \
-    && python3 -m pip freeze --all > ${WORKDIR}/requirements.txt \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ###############################################
@@ -82,7 +76,6 @@ COPY --from=dep_builder ${WORKDIR}/requirements_prefill_dev.txt /tmp
 
 RUN grep -v 'file:///app' "/tmp/requirements_prefill_dev.txt" > "/tmp/requirements_prefill_dev2.txt" \
     && python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements_prefill_dev2.txt \
-    && python3 -m pip freeze --all > "${WORKDIR}/requirements.txt" \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ###############################################
