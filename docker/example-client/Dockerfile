@@ -52,10 +52,6 @@ RUN apt-get update \
     && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# allow image scanners like trivy to detect Python packages (additionally "pip freeze" below)
-COPY ./consumer/poetry.lock ./consumer/pyproject.toml ${WORKDIR}/consumer/
-COPY ./consumer_example/poetry.lock ./consumer_example/pyproject.toml ${WORKDIR}/consumer_example/
-
 # install dependencies and project
 COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
 RUN useradd -m "$USER" \
@@ -64,7 +60,6 @@ RUN useradd -m "$USER" \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer_example-*.whl \
-    && python3 -m pip freeze --all > ${WORKDIR}/requirements.txt \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ENTRYPOINT ["python3", "-m", "univention.provisioning.consumer_example.main"]
