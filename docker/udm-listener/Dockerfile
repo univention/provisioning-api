@@ -61,11 +61,6 @@ RUN apt-get update \
     && apt-get purge --auto-remove --assume-yes patch \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# allow image scanners like trivy to detect Python packages (additionally "pip freeze" below)
-COPY ./backends/poetry.lock ./backends/pyproject.toml ${WORKDIR}/backends/
-COPY ./common/poetry.lock ./common/pyproject.toml ${WORKDIR}/common/
-COPY ./listener/poetry.lock ./listener/pyproject.toml ${WORKDIR}/listener/
-
 # install Python dependencies, and listener module
 COPY --from=builder ${WORKDIR}/*/dist/*.whl /tmp
 COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/system/
@@ -75,5 +70,4 @@ RUN useradd -m "$USER" \
     && python3 -m pip install --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
     && python3 -m pip install --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
     && python3 -m pip install --no-cache-dir -U /tmp/nubus_provisioning_listener-*.whl \
-    && python3 -m pip freeze --all > ${WORKDIR}/requirements.txt \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
