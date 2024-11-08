@@ -3,7 +3,7 @@ name = "nubus-provisioning-tests"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning common test code"
 authors = ["Univention GmbH <packages@univention.de>"]
-license = "GNU Affero General Public License v3"
+license = "AGPL-3.0-only"
 readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 

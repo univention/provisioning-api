@@ -3,7 +3,7 @@ name = "nubus-provisioning-listener"
 version = "0.1.0"
 description = "Nubus - Provisioning Listener (depricated in favor of LDIF Producer)"
 authors = ["Univention GmbH <packages@univention.de>"]
-license = "GNU Affero General Public License v3"
+license = "AGPL-3.0-only"
 readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 
