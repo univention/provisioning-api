@@ -6,7 +6,7 @@ ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/data
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as builder
+FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS builder
 
 ARG WORKDIR="/app"
 ENV POETRY_NO_INTERACTION=1
@@ -41,7 +41,7 @@ RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
 
 ###############################################
 # Stage 2: install dependencies and software, final image
-FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} as final
+FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS final
 
 ARG USER=udm_listener
 ARG WORKDIR="/app"
