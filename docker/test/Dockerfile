@@ -8,7 +8,7 @@ ARG UCS_BASE_IMAGE_TAG=0.16.2-build-2025-04-24@sha256:05c13294052879befc21d3e90c
 # Optimized for fast rebuilds (when only tests/* is changed) #
 ##############################################################
 
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} as dep_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
 
 ARG WORKDIR="/app"
 ENV POETRY_NO_INTERACTION=1 \
