@@ -10,17 +10,10 @@ packages = [{ include = "univention", from = "src" }]
 [tool.poetry.dependencies]
 aiohttp = "^3.10.9"
 jsondiff = "^2.2.1"
-nubus-provisioning-common = ">=0.1.0"
+nubus-provisioning-common = {path = "../common"}
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
-
-[tool.poetry.group.dev.dependencies]
-nubus-provisioning-tests = ">=0.1.0"
-pytest = "^8.3.3"
-pytest-asyncio = "^0.24"
-pytest-cov = "^5.0"
-pytest-env = "^1.1.5"
 
 [[tool.poetry.source]]
 name = "PyPI"
