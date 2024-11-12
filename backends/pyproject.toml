@@ -12,17 +12,10 @@ packages = [{ include = "univention", from = "src" }]
 # Python 3.7 - listener imports this #
 ######################################
 nats-py = ">=2.7.0"  # newer versions use Literal from typing which is Python 3.8+
-nubus-provisioning-common = ">=0.1.0"
+nubus-provisioning-common = {path = "../common"}
 pydantic = ">=2.5.2"  # py311: "^2.9.2"
 pydantic-settings = ">=2.0.3"  # py311: "^2.5.2"
 python = ">=3.7,<4.0"
-
-[tool.poetry.group.dev.dependencies]
-mock = ">=5.1.0"  # AsyncMock is Python 3.8+
-nubus-provisioning-tests = ">=0.1.0"
-pytest = ">=7.4.4"  # py311: "^8.3.3"
-pytest-asyncio = ">=0.21.2"  # py311: "^0.24"
-pytest-cov = ">=4.1.0"  # py311: "^5.0"
 
 [[tool.poetry.source]]
 name = "PyPI"

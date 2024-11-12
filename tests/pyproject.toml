@@ -28,11 +28,6 @@ pytest-timeout = "^2.3.1"
 requests = "^2.23.3"
 udm-rest-api-client = "^0.0.2"
 
-[tool.poetry.group.integration-tests.dependencies]
-nubus-provisioning-dispatcher = ">=0.1.0"
-nubus-provisioning-rest-api = ">=0.1.0"
-pytest-env = ">=1.0.1"  # py311: "^1.1.5"
-
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
@@ -40,8 +35,6 @@ priority = "primary"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-# The following works only with pytest-env>=1.1 (and Python 3.8+), which we'll get in the test Docker container.
 
 [tool.pytest_env]
 ADMIN_USERNAME = {value = "admin", skip_if_set = true}
