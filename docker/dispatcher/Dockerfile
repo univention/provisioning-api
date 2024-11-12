@@ -36,9 +36,6 @@ RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
     && poetry build --format=wheel -C ${WORKDIR}/backends \
     && poetry build --format=wheel -C ${WORKDIR}/dispatcher
 
-# export dev requirements
-RUN poetry export --only=dev -C ${WORKDIR}/dispatcher -o ${WORKDIR}/requirements_dispatcher_dev.txt
-
 ###############################################
 # Stage 2: install dependencies and software
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS app_builder
@@ -66,16 +63,6 @@ RUN useradd -m "$USER" \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_dispatcher-*.whl \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
-###############################################
-# Stage 3: test image
-FROM app_builder AS test
-WORKDIR ${WORKDIR}
-
-COPY --from=dep_builder ${WORKDIR}/requirements_dispatcher_dev.txt /tmp
-
-RUN grep -v 'file:///app' "/tmp/requirements_dispatcher_dev.txt" > "/tmp/requirements_dispatcher_dev2.txt" \
-    && python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements_dispatcher_dev2.txt \
-    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ###############################################
 # Stage 3: final image

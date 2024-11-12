@@ -36,9 +36,6 @@ RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
     && poetry build --format=wheel -C ${WORKDIR}/backends \
     && poetry build --format=wheel -C ${WORKDIR}/prefill
 
-# export dev requirements
-RUN poetry export --only=dev -C ${WORKDIR}/prefill -o ${WORKDIR}/requirements_prefill_dev.txt
-
 ###############################################
 # Stage 2: install dependencies and software
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS app_builder
@@ -65,17 +62,6 @@ RUN useradd -m "$USER" \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_prefill-*.whl \
-    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
-
-###############################################
-# Stage 3: test image
-FROM app_builder AS test
-WORKDIR ${WORKDIR}
-
-COPY --from=dep_builder ${WORKDIR}/requirements_prefill_dev.txt /tmp
-
-RUN grep -v 'file:///app' "/tmp/requirements_prefill_dev.txt" > "/tmp/requirements_prefill_dev2.txt" \
-    && python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements_prefill_dev2.txt \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ###############################################

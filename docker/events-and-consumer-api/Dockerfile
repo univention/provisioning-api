@@ -26,21 +26,15 @@ COPY ./CHANGELOG.md /tmp/
 COPY ./backends ${WORKDIR}/backends/
 COPY ./common ${WORKDIR}/common/
 COPY ./rest-api ${WORKDIR}/rest-api/
-COPY ./tests ${WORKDIR}/tests/
 
 # build wheels of dependencies and project
 RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
     && poetry version "$VERSION" -C ${WORKDIR}/common \
     && poetry version "$VERSION" -C ${WORKDIR}/backends \
     && poetry version "$VERSION" -C ${WORKDIR}/rest-api \
-    && poetry version "$VERSION" -C ${WORKDIR}/tests \
     && poetry build --format=wheel -C ${WORKDIR}/common \
     && poetry build --format=wheel -C ${WORKDIR}/backends \
-    && poetry build --format=wheel -C ${WORKDIR}/rest-api \
-    && poetry build --format=wheel -C ${WORKDIR}/tests
-
-# export dev requirements
-RUN poetry export --only=dev -C ${WORKDIR}/rest-api -o ${WORKDIR}/requirements_rest_dev.txt
+    && poetry build --format=wheel -C ${WORKDIR}/rest-api
 
 ###############################################
 # Stage 2: install dependencies and software
@@ -68,20 +62,6 @@ RUN useradd -m "$USER" \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
     && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_rest_api-*.whl \
-    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
-
-###############################################
-# Stage 3: test image
-FROM app_builder AS test
-WORKDIR ${WORKDIR}
-
-COPY --from=dep_builder ${WORKDIR}/tests/dist/*.whl /tmp
-COPY --from=dep_builder /app/requirements_rest_dev.txt /tmp
-COPY ./rest-api/tests ${WORKDIR}/rest-api/tests/
-
-RUN python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_tests-*.whl \
-    && grep -v 'file:///app' "/tmp/requirements_rest_dev.txt" > "/tmp/requirements_rest_dev2.txt" \
-    && python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements_rest_dev2.txt \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
 
 ###############################################
