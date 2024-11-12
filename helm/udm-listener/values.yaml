@@ -166,24 +166,6 @@ config:
         userNameKey: "EVENTS_USERNAME_UDM"
         passwordKey: "EVENTS_PASSWORD_UDM"
 
-## Container deployment probes
-probes:
-  liveness:
-    enabled: true
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
-    periodSeconds: 10
-    failureThreshold: 30
-    successThreshold: 1
-
-  readiness:
-    enabled: true
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
-    periodSeconds: 10
-    failureThreshold: 3
-    successThreshold: 1
-
 # Service account to use.
 # Ref.: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 serviceAccount:
@@ -202,11 +184,13 @@ serviceAccount:
   labels: {}
 
 ## Deployment resources
-resources: {}
-  # requests:
-  #   memory: "512Mi"
-  # limits:
-  #   memory: "4Gi"
+resources:
+  requests:
+    cpu: "1"
+    memory: "512Mi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
 
 ldap:
   tlsSecret:
@@ -223,4 +207,59 @@ nats:
     credentialSecret:
       name: ""
       key: "NATS_PASSWORD"
+
+livenessProbe:
+  # -- Number of failed executions until container is terminated.
+  failureThreshold: 10
+  # -- Delay after container start until LivenessProbe is executed.
+  initialDelaySeconds: 15
+  # -- Time between probe executions.
+  periodSeconds: 20
+  # -- Number of successful executions after failed ones until container is marked healthy.
+  successThreshold: 1
+  # -- Timeout for command return.
+  timeoutSeconds: 5
+  exec:
+    command:
+      - sh
+      - -c
+      - |
+        exit 0
+
+readinessProbe:
+  # -- Number of failed executions until container is terminated.
+  failureThreshold: 10
+  # -- Delay after container start until ReadinessProbe is executed.
+  initialDelaySeconds: 15
+  # -- Time between probe executions.
+  periodSeconds: 20
+  # -- Number of successful executions after failed ones until container is marked healthy.
+  successThreshold: 1
+  # -- Timeout for command return.
+  timeoutSeconds: 5
+  exec:
+    command:
+      - sh
+      - -c
+      - |
+        exit 0
+
+startupProbe:
+  # -- Delay after container start until StartupProbe is executed.
+  initialDelaySeconds: 15
+  # -- Number of failed executions until container is terminated.
+  failureThreshold: 10
+  # -- Time between probe executions.
+  periodSeconds: 20
+  # -- Number of successful executions after failed ones until container is marked healthy.
+  successThreshold: 1
+  # -- Timeout for command return.
+  timeoutSeconds: 5
+  exec:
+    command:
+      - sh
+      - -c
+      - |
+        exit 0
+
 ...

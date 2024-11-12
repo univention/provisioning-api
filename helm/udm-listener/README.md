@@ -59,6 +59,14 @@ A Helm chart for the Univention Portal Provisioning API
 | ldap.credentialSecret.name | string | `""` |  |
 | ldap.tlsSecret.caCertKey | string | `"ca.crt"` |  |
 | ldap.tlsSecret.name | string | `""` |  |
+| livenessProbe.exec.command[0] | string | `"sh"` |  |
+| livenessProbe.exec.command[1] | string | `"-c"` |  |
+| livenessProbe.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
+| livenessProbe.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
+| livenessProbe.periodSeconds | int | `20` | Time between probe executions. |
+| livenessProbe.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
+| livenessProbe.timeoutSeconds | int | `5` | Timeout for command return. |
 | mountSecrets | bool | `true` |  |
 | nameOverride | string | `""` |  |
 | nats.auth.credentialSecret.key | string | `"NATS_PASSWORD"` |  |
@@ -70,26 +78,33 @@ A Helm chart for the Univention Portal Provisioning API
 | podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[]` | Allow binding to ports below 1024 without root access. |
-| probes.liveness.enabled | bool | `true` |  |
-| probes.liveness.failureThreshold | int | `30` |  |
-| probes.liveness.initialDelaySeconds | int | `10` |  |
-| probes.liveness.periodSeconds | int | `10` |  |
-| probes.liveness.successThreshold | int | `1` |  |
-| probes.liveness.timeoutSeconds | int | `3` |  |
-| probes.readiness.enabled | bool | `true` |  |
-| probes.readiness.failureThreshold | int | `3` |  |
-| probes.readiness.initialDelaySeconds | int | `10` |  |
-| probes.readiness.periodSeconds | int | `10` |  |
-| probes.readiness.successThreshold | int | `1` |  |
-| probes.readiness.timeoutSeconds | int | `3` |  |
+| readinessProbe.exec.command[0] | string | `"sh"` |  |
+| readinessProbe.exec.command[1] | string | `"-c"` |  |
+| readinessProbe.exec.command[2] | string | `"exit 0\n"` |  |
+| readinessProbe.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
+| readinessProbe.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
+| readinessProbe.periodSeconds | int | `20` | Time between probe executions. |
+| readinessProbe.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
+| readinessProbe.timeoutSeconds | int | `5` | Timeout for command return. |
 | replicaCount | int | `1` |  |
-| resources | object | `{}` |  |
+| resources.limits.cpu | string | `"2"` |  |
+| resources.limits.memory | string | `"4Gi"` |  |
+| resources.requests.cpu | string | `"1"` |  |
+| resources.requests.memory | string | `"512Mi"` |  |
 | securityContext | object | `{}` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.automountServiceAccountToken | bool | `false` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.labels | object | `{}` | Additional custom labels for the ServiceAccount. |
 | serviceAccount.name | string | `""` |  |
+| startupProbe.exec.command[0] | string | `"sh"` |  |
+| startupProbe.exec.command[1] | string | `"-c"` |  |
+| startupProbe.exec.command[2] | string | `"exit 0\n"` |  |
+| startupProbe.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
+| startupProbe.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
+| startupProbe.periodSeconds | int | `20` | Time between probe executions. |
+| startupProbe.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
+| startupProbe.timeoutSeconds | int | `5` | Timeout for command return. |
 | terminationGracePeriodSeconds | string | `""` | In seconds, time the given to the pod needs to terminate gracefully. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods |
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |

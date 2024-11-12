@@ -3,11 +3,7 @@
 ---
 imagePullSecrets:
   - "kyverno-test"
-replicaCount:
-  dispatcher: 42
-  udmTransformer: 42
-  prefill: 42
-  api: 42
+replicaCount: 42
 
 nats:
   config:
