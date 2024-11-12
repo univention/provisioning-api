@@ -15,11 +15,6 @@ asgi-correlation-id = ">=4.2.0"  # py311: "^4.3.3"
 pydantic = ">=2.5.2"  # py311: "^2.9.2"
 python = ">=3.7,<4.0"
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=7.4.4"  # py311: "^8.3.3"
-pytest-asyncio = ">=0.21.2"  # py311: "^0.24"
-pytest-cov = ">=4.1.0"  # py311: "^5.0"
-
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
