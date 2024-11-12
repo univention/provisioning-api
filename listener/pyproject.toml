@@ -14,8 +14,8 @@ packages = [{ include = "univention", from = "src" }]
 daemoniker = "^0.2.3"
 msgpack = "1.0.5"  # py311: "^1.1.0"
 nats-py = "<=2.7.0"  # py311: "^2.9.0" # newer versions use Literal from typing which is Python 3.8+
-nubus-provisioning-backends = ">=0.1.0"
-nubus-provisioning-common = ">=0.1.0"
+nubus-provisioning-backends = {path = "../backends"}
+nubus-provisioning-common = {path = "../common"}
 pydantic-settings = "^2.0.3"  # py311: "^2.5.2"
 python = "^3.7"
 # univention.listener
