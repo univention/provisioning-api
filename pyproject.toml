@@ -1,3 +1,35 @@
+[tool.poetry]
+name = "nubus-provisioning-metapackage"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning meta-package to enable a streamlined development experience"
+authors = ["Univention GmbH <packages@univention.de>"]
+license = "AGPL-3.0-only"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+nubus-provisioning-backends = { path = "./backends/", develop = true }
+nubus-provisioning-common = { path = "./common/", develop = true }
+nubus-provisioning-consumer = { path = "./consumer/", develop = true }
+nubus-provisioning-consumer-example = { path = "./consumer_example/", develop = true }
+nubus-provisioning-dispatcher = { path = "./dispatcher/", develop = true }
+# Incompatible package versions because of the requirement for python 3.7 in the listener.
+# nubus-provisioning-listener = { path = "./listener/", develop = true }
+nubus-provisioning-prefill = { path = "./prefill/", develop = true }
+nubus-provisioning-rest-api = { path = "./rest-api/", develop = true }
+nubus-provisioning-udm-transformer = { path = "./udm-transformer/", develop = true }
+
+[tool.poetry.group.dev.dependencies]
+mock = ">=5.1.0"  # AsyncMock is Python 3.8+
+nubus-provisioning-tests = { path = "./tests/", develop = true }
+polyfactory = "2.17.0"
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24"
+pytest-cov = "^5.0"
+pytest-env = "^1.1.5"
+
+
 [tool.ruff]
 target-version = "py311"
 line-length = 120
@@ -8,3 +40,5 @@ extend-select = ["I"]  # activate isort
 [tool.ruff.lint.isort]
 known-first-party = ["univention"]
 known-third-party = ["difflib"]
+
+# The following works only with pytest-env>=1.1 (and Python 3.8+), which we'll get in the test Docker container.
