@@ -279,10 +279,10 @@ services:
 
 
   test:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/test:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/e2e-testrunner:${IMAGE_TAG:-latest}"
     build:
       context: .
-      dockerfile: docker/test/Dockerfile
+      dockerfile: docker/e2e-test/Dockerfile
     working_dir: /app
     profiles:
       - test
