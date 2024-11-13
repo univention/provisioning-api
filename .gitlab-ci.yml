@@ -33,17 +33,12 @@ lint-pre-commit:
   - IMAGE_NAME: "provisioning-events-and-consumer-api"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
-  - IMAGE_NAME: "provisioning-events-and-consumer-api-test"
-    KANIKO_ARGS: "--target test"
-    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
   - IMAGE_NAME: "provisioning-dispatcher"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
   - IMAGE_NAME: "provisioning-udm-transformer"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
-  - IMAGE_NAME: "test"
-    DOCKERFILE_PATH: "docker/test/Dockerfile"
   - IMAGE_NAME: "provisioning-example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
   - IMAGE_NAME: "provisioning-prefill"
@@ -52,6 +47,8 @@ lint-pre-commit:
   - IMAGE_NAME: "provisioning-udm-listener"
     KANIKO_ARGS: "--target final"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
+  - IMAGE_NAME: "testrunner"
+    DOCKERFILE_PATH: "docker/test/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
@@ -77,30 +74,17 @@ container-malware-scan:
   parallel:
     matrix: *publish-matrix
 
-test-integration:
+test-unit-and-integration:
   stage: "test"
-  extends: .dind
-  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: "never"
-    - when: "on_success"
-  before_script:
-    # Allow that the Docker API version is negotiated between client and server
-    - unset DOCKER_API_VERSION
-    - export IMAGE_TAG=${RELEASE_VERSION}
-    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
-    - echo $IMAGE_TAG
-    - docker version
-    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
-    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
-    - docker compose config test
-    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 nats1 nats2 nats3
+  image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
   script:
-    - docker compose run --quiet-pull --rm test python3 -m pytest -lvv tests/integration
-  after_script:
-    - docker compose down --volumes
+    - python3 -m pytest -lvv backends/tests/ common/tests/ consumer/tests/ dispatcher/tests/ prefill/tests/ rest-api/tests/ udm-transformer/tests/ tests/integration/ --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 test-end-to-end:
   # allow_failure: true
@@ -151,24 +135,6 @@ test-end-to-end:
     expose_as: "docker compose server logs"
 
 
-# TODO: docker compose run nats ... somehow
-test-events-and-consumer-api:
-  stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/provisioning-events-and-consumer-api-test:${RELEASE_VERSION}"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: "never"
-    - when: "on_success"
-  script:
-    - cd rest-api
-    - python3 -m pytest -lvv --cov --cov-report=term --cov-report=xml:coverage.xml --cov-branch
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-
 push-image-external:
   parallel:
     matrix: *publish-matrix
@@ -183,30 +149,11 @@ check-debian-updates:
   variables:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 
-test_provisioning_lib:
-  stage: test
-  image: docker-registry.knut.univention.de/python:3.11-slim
-  script:
-    - pip install -U pip poetry=="$POETRY_VERSION"
-    - poetry config virtualenvs.create false
-    - poetry install -C common
-    - poetry install -C tests
-    - cd consumer
-    - poetry install --with dev
-    - python3 -m pytest -lvv --cov=src/univention/provisioning/consumer --cov-report=term --cov-report=xml:coverage.xml
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-
 build_provisioning_lib:
   stage: package
   dependencies:
     - pre-semantic-release
   needs:
-    - test_provisioning_lib
     - pre-semantic-release
   artifacts:
     paths:
@@ -244,7 +191,6 @@ publish_provisioning_lib:
     - pre-semantic-release
   needs:
     - build_provisioning_lib
-    - test_provisioning_lib
     - pre-semantic-release
   script:
     - pip install -U pip poetry=="$POETRY_VERSION"
