@@ -9,8 +9,8 @@ packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
 daemoniker = "^0.2.3"
-nubus-provisioning-backends = ">=0.1.0"
-nubus-provisioning-common = {path = "../common"}
+nubus-provisioning-backends = {path ="../backends/"}
+nubus-provisioning-common = {path = "../consumer/common/"}
 pydantic-settings = "^2.5.2"
 python = "^3.11"
 backends = "^1.6.6"

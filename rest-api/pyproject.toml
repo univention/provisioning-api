@@ -14,8 +14,8 @@ cachetools = "^5.5.0"
 fastapi = {version="^0.115.0", extras=["standard"]}
 fastapi-utils = "^0.7.0"
 httptools = "^0.6.1"
-nubus-provisioning-backends = ">=0.1.0"
-nubus-provisioning-common = {path = "../common"}
+nubus-provisioning-backends = {path = "../backends"}
+nubus-provisioning-common = {path = "../consumer/common/"}
 passlib = "^1.7.4"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"

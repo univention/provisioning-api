@@ -147,13 +147,34 @@ files = [
 ]
 
 [[package]]
+name = "nats-py"
+version = "2.9.0"
+description = "NATS client for Python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "nats_py-2.9.0.tar.gz", hash = "sha256:01886eb9e0a87f0ec630652cf1fae65d2a8556378a609bc6cc07d2ea60c8d0dd"},
+]
+
+[package.extras]
+aiohttp = ["aiohttp"]
+fast-parse = ["fast-mail-parser"]
+nkeys = ["nkeys"]
+
+[[package]]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning Backends"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7,<4.0"
 files = []
-develop = true
+develop = false
+
+[package.dependencies]
+nats-py = ">=2.7.0"
+nubus-provisioning-common = {path = "../consumer/common"}
+pydantic = ">=2.5.2"
+pydantic-settings = ">=2.0.3"
 
 [package.source]
 type = "directory"
@@ -174,7 +195,7 @@ pydantic = ">=2.5.2"
 
 [package.source]
 type = "directory"
-url = "../common"
+url = "../consumer/common"
 
 [[package]]
 name = "numpy"
@@ -264,13 +285,13 @@ files = [
 
 [[package]]
 name = "plum-dispatch"
-version = "2.5.2"
+version = "2.5.3"
 description = "Multiple dispatch in Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "plum_dispatch-2.5.2-py3-none-any.whl", hash = "sha256:49f1e1487028849451454c59e330f800aac6ec520a432a0ed3ea6e04b74e2e31"},
-    {file = "plum_dispatch-2.5.2.tar.gz", hash = "sha256:1abfccc5a9c751f20dcdb1020c645968dfbc1c33ad3a9a47780834ec332cfe9e"},
+    {file = "plum_dispatch-2.5.3-py3-none-any.whl", hash = "sha256:6d097b2931d7fe7688cba92f74732e70713ccc382343d526dc2aecb373900a79"},
+    {file = "plum_dispatch-2.5.3.tar.gz", hash = "sha256:15684da4db1215405e22db9e0abba189ba0c4c663fc242d2c7c92cce2ad22fa9"},
 ]
 
 [package.dependencies]
@@ -279,7 +300,7 @@ rich = ">=10.0"
 typing-extensions = ">=4.9.0"
 
 [package.extras]
-dev = ["black (==23.9.0)", "build", "coveralls", "ghp-import", "ipython", "jupyter-book", "mypy", "numpy", "pre-commit", "pyright (>=1.1.331)", "pytest (>=6)", "pytest-cov", "ruff (==0.1.0)", "sybil", "tox", "wheel"]
+dev = ["black (==23.9.0)", "build", "coveralls", "ghp-import", "ipython", "jupyter-book", "mypy", "numpy", "pre-commit", "pyright (>=1.1.331)", "pytest (>=6)", "pytest-cov", "ruff (>=0.2.1)", "sybil", "tox", "wheel"]
 
 [[package]]
 name = "pydantic"
@@ -563,4 +584,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "8cf376ee4037a1ec9e0ea55ad7f4b41a9445dd89a44695d943d1ae6e61e7f34d"
+content-hash = "e805c8701bfe9b7a24efe61b85a49c690ea792c49573c30a43d450da659b9add"

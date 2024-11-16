@@ -282,13 +282,13 @@ files = [
 
 [[package]]
 name = "httpcore"
-version = "1.0.6"
+version = "1.0.7"
 description = "A minimal low-level HTTP client."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "httpcore-1.0.6-py3-none-any.whl", hash = "sha256:27b59625743b85577a8c0e10e55b50b5368a4f2cfe8cc7bcfa9cf00829c2682f"},
-    {file = "httpcore-1.0.6.tar.gz", hash = "sha256:73f6dbd6eb8c21bbf7ef8efad555481853f5f6acdeaff1edb0694289269ee17f"},
+    {file = "httpcore-1.0.7-py3-none-any.whl", hash = "sha256:a3fff8f43dc260d5bd363d9f9cf1830fa3a458b332856f34282de498ed420edd"},
+    {file = "httpcore-1.0.7.tar.gz", hash = "sha256:8551cb62a169ec7162ac7be8d4817d561f60e08eaa485234898414bb5a8a0b4c"},
 ]
 
 [package.dependencies]
@@ -529,13 +529,34 @@ files = [
 ]
 
 [[package]]
+name = "nats-py"
+version = "2.9.0"
+description = "NATS client for Python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "nats_py-2.9.0.tar.gz", hash = "sha256:01886eb9e0a87f0ec630652cf1fae65d2a8556378a609bc6cc07d2ea60c8d0dd"},
+]
+
+[package.extras]
+aiohttp = ["aiohttp"]
+fast-parse = ["fast-mail-parser"]
+nkeys = ["nkeys"]
+
+[[package]]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning Backends"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7,<4.0"
 files = []
-develop = true
+develop = false
+
+[package.dependencies]
+nats-py = ">=2.7.0"
+nubus-provisioning-common = {path = "../consumer/common"}
+pydantic = ">=2.5.2"
+pydantic-settings = ">=2.0.3"
 
 [package.source]
 type = "directory"
@@ -556,7 +577,7 @@ pydantic = ">=2.5.2"
 
 [package.source]
 type = "directory"
-url = "../common"
+url = "../consumer/common"
 
 [[package]]
 name = "numpy"
@@ -663,13 +684,13 @@ totp = ["cryptography"]
 
 [[package]]
 name = "plum-dispatch"
-version = "2.5.2"
+version = "2.5.3"
 description = "Multiple dispatch in Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "plum_dispatch-2.5.2-py3-none-any.whl", hash = "sha256:49f1e1487028849451454c59e330f800aac6ec520a432a0ed3ea6e04b74e2e31"},
-    {file = "plum_dispatch-2.5.2.tar.gz", hash = "sha256:1abfccc5a9c751f20dcdb1020c645968dfbc1c33ad3a9a47780834ec332cfe9e"},
+    {file = "plum_dispatch-2.5.3-py3-none-any.whl", hash = "sha256:6d097b2931d7fe7688cba92f74732e70713ccc382343d526dc2aecb373900a79"},
+    {file = "plum_dispatch-2.5.3.tar.gz", hash = "sha256:15684da4db1215405e22db9e0abba189ba0c4c663fc242d2c7c92cce2ad22fa9"},
 ]
 
 [package.dependencies]
@@ -678,7 +699,7 @@ rich = ">=10.0"
 typing-extensions = ">=4.9.0"
 
 [package.extras]
-dev = ["black (==23.9.0)", "build", "coveralls", "ghp-import", "ipython", "jupyter-book", "mypy", "numpy", "pre-commit", "pyright (>=1.1.331)", "pytest (>=6)", "pytest-cov", "ruff (==0.1.0)", "sybil", "tox", "wheel"]
+dev = ["black (==23.9.0)", "build", "coveralls", "ghp-import", "ipython", "jupyter-book", "mypy", "numpy", "pre-commit", "pyright (>=1.1.331)", "pytest (>=6)", "pytest-cov", "ruff (>=0.2.1)", "sybil", "tox", "wheel"]
 
 [[package]]
 name = "psutil"
@@ -1355,4 +1376,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "32a8b3f9937fe43cf097eaef25f90a5e93b1595da1cbc575bf88c7651e80e505"
+content-hash = "49c0e58e6add1030d58c9f765402c6e61eaaf21b8d3ed537fe62ba09a5ef1321"

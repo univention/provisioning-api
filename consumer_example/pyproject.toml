@@ -13,8 +13,9 @@ jsondiff = "^2.2.1"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.11"
-nubus-provisioning-common = ">=0.1.0"
-nubus-provisioning-consumer = ">=0.1.0"
+nubus-provisioning-consumer = {path = "../consumer"}
+# Use a non-local dependency if you are using this package as a template for your own provisioning consumer
+# nubus-provisioning-consumer = ">=0.1.0"
 
 [[tool.poetry.source]]
 name = "PyPI"
