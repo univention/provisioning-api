@@ -4,62 +4,58 @@
 ARG UCS_BASE_IMAGE_TAG=0.13.1-post-main-build-2024-09-09
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520
 
-###############################################
-# Stage 1: build dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
-
 ARG WORKDIR="/app"
-ENV POETRY_NO_INTERACTION=1
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
+ARG WORKDIR
 WORKDIR ${WORKDIR}
-
-RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install python3-pip=23.* \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.8.3 \
-    && poetry config virtualenvs.create false
-
-# copy source code
-COPY ./CHANGELOG.md /tmp/
-COPY ./common ${WORKDIR}/common/
-COPY ./consumer ${WORKDIR}/consumer/
-COPY ./consumer_example ${WORKDIR}/consumer_example/
-
-# build wheels of dependencies and project
-RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
-    && poetry version "$VERSION" -C ${WORKDIR}/common \
-    && poetry version "$VERSION" -C ${WORKDIR}/consumer \
-    && poetry version "$VERSION" -C ${WORKDIR}/consumer_example \
-    && poetry build --format=wheel -C ${WORKDIR}/common \
-    && poetry build --format=wheel -C ${WORKDIR}/consumer \
-    && poetry build --format=wheel -C ${WORKDIR}/consumer_example
-
-###############################################
-# Stage 2: install dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG}
 
 ARG USER=consumer_example
-ARG WORKDIR="/app"
-ENV WEB_CONCURRENCY=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-WORKDIR ${WORKDIR}
-
-RUN apt-get update \
+RUN useradd -m "$USER"
+RUN chown "$USER":"$USER" "$WORKDIR" \
+    && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
       python3-pip=23.* \
-    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
+USER "$USER"
+ENV \
+    PATH="/home/${USER}/.local/bin:${PATH}" \
+    PYTHONPATH="." \
+    WEB_CONCURRENCY=1 \
+    # Do not buffer `stdout`
+    PYTHONUNBUFFERED=1 \
+    # Do not create `.pyc` files
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Do not ask questions
+    POETRY_NO_INTERACTION=1 \
+    # Put .venv inside source folder
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    # Cache of poetry
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
-# install dependencies and project
-COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
-RUN useradd -m "$USER" \
-    && chown "$USER":"$USER" "$WORKDIR" \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer-*.whl \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer_example-*.whl \
-    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
+# install Poetry
+RUN pip3 install --break-system-packages --no-cache-dir poetry==1.6.1
+
+# install dependencies
+COPY --chown=${USER}:${USER} ./consumer ${WORKDIR}/consumer/
+COPY --chown=${USER}:${USER} consumer_example/poetry.lock \
+     consumer_example/pyproject.toml \
+     consumer_example/README.md \
+     ${WORKDIR}/consumer_example/
+
+WORKDIR ${WORKDIR}/consumer_example/
+RUN poetry install --no-root
+
+# copy source code
+COPY --chown=${USER}:${USER} ./consumer_example ${WORKDIR}/consumer_example/
+RUN poetry install --only main
+
+###############################################
+# Stage 2: final image
+FROM build AS final
+ARG WORKDIR
+WORKDIR ${WORKDIR}/consumer_example/
+
+COPY --from=build ${WORKDIR} ${WORKDIR}
 
 ENTRYPOINT ["python3", "-m", "univention.provisioning.consumer_example.main"]
