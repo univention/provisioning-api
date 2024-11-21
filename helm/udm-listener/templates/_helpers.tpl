@@ -32,7 +32,7 @@ cn=admin,dc=univention-organization,dc=intranet
 {{- if .Values.config.ldapHost -}}
 {{- tpl .Values.config.ldapHost . -}}
 {{- else if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.connection.host" . -}}
+{{- include "nubusTemplates.ldapServerNotifier.ldap.connection.host" . -}}
 {{- end -}}
 {{- end -}}
 

@@ -133,6 +133,8 @@ config:
   ldapPassword: ""
   # -- The path to the "ldapPasswordFile" docker secret or a plain file
   ldapPasswordFile: "/var/secrets/ldap_secret"
+  # -- The LDAP Server host, should point to the service name of the ldap-server-primary
+  # that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier"
   ldapHost: ""
   ldapHostDn: null
   ldapPort: "389"
