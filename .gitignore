@@ -4,3 +4,7 @@
 dist/
 
 tests/e2e/e2e_settings.json
+
+# kyverno test files
+helm/**/.kyverno/kyverno-test.yaml
+helm/**/.kyverno/manifest.yaml
