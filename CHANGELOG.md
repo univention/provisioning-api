@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.45.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.45.0...v0.45.1) (2024-11-27)
+
+
+### Bug Fixes
+
+* extension template ([228d22c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/228d22c4efed81e70e0f683abd4b8ce985f9409f))
+* kyverno lint for provisioning chart ([f757c68](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f757c687eb30c61b28febf6a0d317b06c221d581))
+* Kyverno lint udm-listener ([3e6d5a1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3e6d5a1f5b58b6b652243dddf983df89867aaac5))
+* make resources optional ([a566578](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a566578450903271dba071f92b94c35479a95036))
+
 ## [0.45.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.44.1...v0.45.0) (2024-11-05)
 
 
