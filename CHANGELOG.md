@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.45.1...v0.46.0) (2024-12-04)
+
+
+### Features
+
+* **udm-listener:** use ldap-server-primary coupled to ldap-notifier ([457be7c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/457be7c65b4e06cd6a290bc0a7d5582bc7762c16))
+
 ## [0.45.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.45.0...v0.45.1) (2024-11-27)
 
 
