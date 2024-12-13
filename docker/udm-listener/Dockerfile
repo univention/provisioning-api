@@ -15,8 +15,8 @@ ARG USER=udm_listener
 RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      pipx=0.12.1.0-1 \
-      python3-venv=3.7.3-1 \
+      pipx \
+      python3-venv \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 

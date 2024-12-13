@@ -16,7 +16,7 @@ RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get -qq update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip=23.* \
+      python3-pip \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
 USER "$USER"
 ENV \

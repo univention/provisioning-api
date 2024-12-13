@@ -48,6 +48,8 @@ repos:
     rev: "v2.0.0"
     hooks:
       - id: "hadolint-system"
+        args:
+          - "--ignore=DL3008"
 
   # "Helm chart linter"
   - repo: "https://github.com/gruntwork-io/pre-commit"
