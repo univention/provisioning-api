@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-ARG LISTENER_BASE_IMAGE_TAG=0.8.0
+ARG LISTENER_BASE_IMAGE_TAG=0.9.0-pre-cgarcia-ucs-base-2024-12-12
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base
 
 ARG WORKDIR="/app"
@@ -71,4 +71,4 @@ RUN apt-get update && \
 
 COPY ./provisioning-listener/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
 
-ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages
+ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.11/site-packages
