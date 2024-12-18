@@ -71,4 +71,4 @@ RUN apt-get update && \
 
 COPY ./provisioning-listener/provisioning_listener/ldap_listener.py /usr/lib/univention-directory-listener/system/
 
-ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.7/site-packages
+ENV PYTHONPATH=$PYTHONPATH:./src:./.venv/lib/python3.11/site-packages
