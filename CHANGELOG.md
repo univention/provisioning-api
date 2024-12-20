@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.47.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.46.0...v0.47.0) (2024-12-20)
+
+
+### Features
+
+* upgrade listener base ([d4f43ec](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d4f43ec05e675cc6fb6c2d8bf498b014ab046e43))
+* upgrade UCS base image to 2024-12-12 ([2e94db9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2e94db9e7c007388cdcb1f010b831fbe76f42fd4))
+
 ## [0.46.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.45.1...v0.46.0) (2024-12-04)
 
 
