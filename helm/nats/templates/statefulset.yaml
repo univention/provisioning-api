@@ -238,14 +238,12 @@ spec:
               value: {{ tpl .value $ | quote }}
           {{- end }}
           {{- end }}
-            {{- if .Values.config.authorization.enabled }}
             {{- if .Values.config.authorization.token }}
             - name: NATS_URL
               value: "{{ printf "nats://$(NATS_TOKEN)@$(SERVER_NAME).%s-headless.$(NAMESPACE).svc.cluster.local:4222" (include "common.names.fullname" .) }}"
             {{- else }}
             - name: NATS_URL
               value: "{{ printf "nats://$(SERVER_NAME).%s-headless.$(NAMESPACE).svc.cluster.local:4222" (include "common.names.fullname" .) }}"
-            {{- end }}
             {{- end }}
             {{- if .Values.config.tls.enabled }}
             - name: NATS_CERT

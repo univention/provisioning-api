@@ -25,7 +25,7 @@ These template definitions are only used in this chart.
 {{- end -}}
 
 {{- define "nats.authorization" -}}
-{{- if .Values.config.authorization.enabled -}}
+{{- if or .Values.config.authorization.token .Values.config.createUsers -}}
 authorization {
   {{- if .Values.config.authorization.token }}
   token: {{ .Values.config.authorization.token }}
@@ -34,13 +34,18 @@ authorization {
   users: [
     {{- range $_, $config := .Values.config.createUsers }}
     {
-      user: {{ tpl $config.user . }}
-      password: {{ tpl $config.password . }}
+      user: {{ tpl $config.user $ }}
+      password: {{ tpl $config.password $ }}
       {{- if $config.permissions }}
       permissions: {
-      {{- tpl $config.permissions . | toYaml | nindent 8 }}
-      {{- end }}
+        {{- if $config.permissions.publish }}
+        publish: {{ $config.permissions.publish | quote }}
+        {{- end }}
+        {{- if $config.permissions.subscribe }}
+        subscribe: {{ $config.permissions.subscribe | quote }}
+        {{- end }}
       }
+      {{- end }}
     }
     {{- end }}
   ]
