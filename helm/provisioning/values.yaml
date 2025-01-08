@@ -261,12 +261,6 @@ nats:
     authorization:
       enabled: true
     createUsers:
-      admin:
-        user: "admin"
-        password: "$NATS_PASSWORD"
-        permissions:
-          publish: ">"
-          subscribe: ">"
       provisioningApi:
         user: "api"
         password: "$NATS_PROVISIONING_API_PASSWORD"
