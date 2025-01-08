@@ -185,10 +185,37 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>config.createUsers</td>
-			<td>object</td>
+			<td>config.createUsers.adminUser.password</td>
+			<td>string</td>
 			<td><pre lang="json">
-{}
+"$NATS_PASSWORD"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>config.createUsers.adminUser.permissions.publish</td>
+			<td>string</td>
+			<td><pre lang="json">
+"\u003e"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>config.createUsers.adminUser.permissions.subscribe</td>
+			<td>string</td>
+			<td><pre lang="json">
+"\u003e"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>config.createUsers.adminUser.user</td>
+			<td>string</td>
+			<td><pre lang="json">
+"admin"
 </pre>
 </td>
 			<td></td>
