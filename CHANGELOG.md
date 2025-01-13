@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.47.0...v0.48.0) (2025-01-13)
+
+
+### Features
+
+* upgrade NATS chart ([2685c9f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2685c9f5f934f61f3bdeb4e0331030973e966a92))
+
 ## [0.47.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.46.0...v0.47.0) (2024-12-20)
 
 
