@@ -69,7 +69,7 @@ data:
         verify_and_map: {{ .Values.config.tls.verify_and_map | required ".Values.config.tls.verify_and_map is required" }}
       }
       {{- end }}
-      {{- if .Values.config.authorization.enabled }}
+      {{- if or .Values.config.authorization.token .Values.config.createUsers }}
       {{ include "nats.authorization" . | nindent 6}}
       {{- end }}
 

@@ -422,21 +422,18 @@ config:
   lame_duck_grace_period: "10s"
   # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro#authorization-map
   authorization:
-    enabled: false
     # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tokens
     # Example:
     # token: "$NATS_TOKEN"
     token: ""
   # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users
-  # Example:
-  # createUsers:
-  #   demoUser:
-  #     user: "admin"
-  #     password: "$NATS_PASSWORD"
-  #     permissions:
-  #       publish: ">"
-  #       subscribe: ">"
-  createUsers: {}
+  createUsers:
+    adminUser:
+      user: "admin"
+      password: "$NATS_PASSWORD"
+      permissions:
+        publish: ">"
+        subscribe: ">"
 
   # Ref: https://docs.nats.io/running-a-nats-service/configuration
   # Example:
