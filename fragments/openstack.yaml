@@ -1,0 +1,37 @@
+variables:
+  EC2_TOOLS_IMAGE: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/ec2-tools:latest"
+
+.run_openstack_cfg:
+  image: $EC2_TOOLS_IMAGE
+  variables:
+    OPENSTACK_CFG_FILE: "scenario.cfg"
+    REPLACE_INSTANCE: "true"
+    TERMINATE_INSTANCE: "true"
+  before_script:
+    - echo "Preparing secrets"
+    - |
+      if [[ -z "$OPENSTACK_RC_FILE" ]]; then
+        echo "Variable OPENSTACK_RC_FILE unset, cannot continue job. Abort"
+        exit 1
+      else
+        cp "$OPENSTACK_RC_FILE" clouds.rc
+      fi
+      if [[ -z "$SSH_PRIVATE_KEY" ]]; then
+        echo "Variable SSH_PRIVATE_KEY unset, not configuring any ssh key."
+      else
+        echo "Installing private ssh key"
+        mkdir -p ~/.ssh; chmod 700 ~/.ssh
+        cp "$SSH_PRIVATE_KEY" ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa
+      fi
+    - declare -a UCS_OPENSTACK_CREATE_ARGS
+    - |
+      if [[ "$REPLACE_INSTANCE" == "true" ]]; then
+        UCS_OPENSTACK_CREATE_ARGS+=("--replace")
+      fi
+      if [[ "$TERMINATE_INSTANCE" == "true" ]]; then
+       UCS_OPENSTACK_CREATE_ARGS+=("-t")
+      fi
+  script:
+    - 'echo "Running cfg file $OPENSTACK_CFG_FILE with args: ${UCS_OPENSTACK_CREATE_ARGS[@]}"'
+    - unset OS_PROJECT_NAME
+    - . clouds.rc && ucs-openstack-create "${UCS_OPENSTACK_CREATE_ARGS[@]}" -c "$OPENSTACK_CFG_FILE" | ansi2txt
