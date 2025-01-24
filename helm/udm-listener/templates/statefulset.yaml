@@ -162,8 +162,6 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
             {{- end }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: "config-files"
           configMap:
