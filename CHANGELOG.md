@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.0...v0.48.1) (2025-01-26)
+
+
+### Bug Fixes
+
+* **udm-listener:** Fix duplicate resources key ([0a26c24](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0a26c246c159c900e4af29a1aef59d00f51452d8))
+
 ## [0.48.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.47.0...v0.48.0) (2025-01-13)
 
 
