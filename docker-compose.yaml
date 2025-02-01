@@ -184,6 +184,8 @@ services:
       #   - LISTENER_BASE_IMAGE_TAG=latest
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
+    volumes:
+      - /etc/ldap/
     environment:
       NATS_HOST: "nats1"
       NATS_PORT: "4222"
