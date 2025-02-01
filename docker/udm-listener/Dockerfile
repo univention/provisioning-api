@@ -17,18 +17,18 @@ ARG USER=udm_listener
 RUN useradd -m "$USER"
 RUN chown "$USER":"$USER" "$WORKDIR" \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      pipx \
+      python3-pip \
       python3-venv \
     && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* \
-    && python3 -m pip install --no-cache-dir poetry==1.5.1 \
+    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.5.1 \
     && poetry config virtualenvs.create false
 USER "$USER"
 
 # copy source code
-COPY ./CHANGELOG.md /tmp/
-COPY ./backends ${WORKDIR}/backends/
-COPY ./common ${WORKDIR}/common/
-COPY ./listener ${WORKDIR}/listener/
+COPY --chown=$USER:$USER ./CHANGELOG.md /tmp/
+COPY --chown=$USER:$USER ./backends ${WORKDIR}/backends/
+COPY --chown=$USER:$USER ./common ${WORKDIR}/common/
+COPY --chown=$USER:$USER ./listener ${WORKDIR}/listener/
 
 # build wheels of dependencies and project
 RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
@@ -54,8 +54,8 @@ WORKDIR ${WORKDIR}
 COPY ./docker/udm-listener/*.patch /tmp/
 RUN apt-get update \
     && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip=18.1-5 \
-      patch=2.7.6-3+deb10u1 \
+      python3-pip \
+      patch \
     && patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py \
     && patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py \
     && apt-get purge --auto-remove --assume-yes patch \
@@ -66,8 +66,8 @@ COPY --from=builder ${WORKDIR}/*/dist/*.whl /tmp
 COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/system/
 RUN useradd -m "$USER" \
     && chown "$USER":"$USER" "$WORKDIR" \
-    && python3 -m pip install --no-cache-dir -U pip==24.0 \
-    && python3 -m pip install --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
-    && python3 -m pip install --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
-    && python3 -m pip install --no-cache-dir -U /tmp/nubus_provisioning_listener-*.whl \
+    # && python3 -m pip install --no-cache-dir -U pip==24.0 \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
+    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_listener-*.whl \
     && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
