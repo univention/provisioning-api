@@ -15,7 +15,9 @@ from univention.provisioning.testing.mock_data import MSG, NATS_SERVER
 _CREDENTIALS = {"username": "dev-user", "password": "dev-password"}
 
 
-pytest_plugins = ["univention.provisioning.testing.conftest"]
+@pytest.fixture(scope="session", autouse=True)
+def anyio_backend():
+    return "asyncio"
 
 
 @pytest.fixture(scope="session")
