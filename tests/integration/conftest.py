@@ -16,8 +16,6 @@ from univention.provisioning.rest.subscriptions_db_adapter_nats import NatsSubsc
 from univention.provisioning.rest.subscriptions_db_port import SubscriptionsDBPort
 from univention.provisioning.testing.mock_data import NATS_SERVER
 
-pytest_plugins = ["univention.provisioning.testing.conftest"]
-
 _CREDENTIALS = {"username": "dev-user", "password": "dev-password"}
 
 
