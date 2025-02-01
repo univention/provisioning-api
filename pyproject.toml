@@ -10,7 +10,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.11"
 nubus-provisioning-backends = { path = "./backends/", develop = true }
-nubus-provisioning-common = { path = "./common/", develop = true }
+nubus-provisioning-common = { path = "./consumer/common/", develop = true }
 nubus-provisioning-consumer = { path = "./consumer/", develop = true }
 nubus-provisioning-consumer-example = { path = "./consumer_example/", develop = true }
 nubus-provisioning-dispatcher = { path = "./dispatcher/", develop = true }
@@ -45,7 +45,7 @@ known-third-party = ["difflib"]
 [tool.pytest.ini_options]
 testpaths = [
   "backends/tests/",
-  "common/tests/",
+  "consumer/common/tests/",
   "consumer/tests/",
   "dispatcher/tests/",
   "prefill/tests/",
