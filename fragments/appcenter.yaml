@@ -3,6 +3,10 @@ variables:
 
 .create_app_version:
   rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        APP_VERSION: "$CI_COMMIT_TAG"
+        ENVIRONMENT_NAME: "release-app/$CI_COMMIT_TAG"
     - if: $CI_MERGE_REQUEST_ID
       variables:
         APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
@@ -11,7 +15,7 @@ variables:
         APP_VERSION: "0.0.0-staging"
   image: "$APPCENTER_CONTROL_IMAGE"
   environment:
-    name: "branch-app/$CI_COMMIT_REF_SLUG"
+    name: "$ENVIRONMENT_NAME"
     url: "https://provider-portal.software-univention.de/univention/management/?header=try-hide&overview=false&menu=false#module=appcenter-selfservice::0:$APP_ID:$APP_COMPONENT_ID:$APP_UCS_VERSION"
     on_stop: delete_app_version
   artifacts:
@@ -19,6 +23,7 @@ variables:
       dotenv: deploy.env
   variables:
     APP_BASE_VERSION: "0.0.0-staging"
+    ENVIRONMENT_NAME: "branch-app/$CI_COMMIT_REF_SLUG"
   script:
     - |
       if [[ -z "$APP_ID" ]]; then
@@ -44,17 +49,18 @@ variables:
 
 .delete_app_version:
   rules:
-    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_TAG
+      when: never
       variables:
-        APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
+        ENVIRONMENT_NAME: "release-app/$CI_COMMIT_TAG"
+    - if: $CI_MERGE_REQUEST_ID
       when: manual
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-      variables:
-        APP_VERSION: "0.0.0-staging"
       when: never
   image: "$APPCENTER_CONTROL_IMAGE"
   variables:
     APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
+    ENVIRONMENT_NAME: "branch-app/$CI_COMMIT_REF_SLUG"
   script:
     - |
       if [[ -z "$APP_ID" ]]; then
@@ -74,11 +80,15 @@ variables:
         echo "App version $APP_UCS_VERSION/$APP_ID=$APP_VERSION could not be found in test appcenter. Skip removal."
       fi
   environment:
-    name: "branch-app/$CI_COMMIT_REF_SLUG"
+    name: "$ENVIRONMENT_NAME"
     action: stop
 
 .update_appcenter:
   rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        APP_VERSION: "$CI_COMMIT_TAG"
+        APPCENTER_DOCKER_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
     - if: $CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:
