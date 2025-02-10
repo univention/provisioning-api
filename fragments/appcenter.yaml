@@ -1,0 +1,97 @@
+variables:
+  APPCENTER_CONTROL_IMAGE: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/univention-appcenter-control"
+
+.create_app_version:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      variables:
+        APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        APP_VERSION: "0.0.0-staging"
+  image: "$APPCENTER_CONTROL_IMAGE"
+  environment:
+    name: "branch-app/$CI_COMMIT_REF_SLUG"
+    url: "https://provider-portal.software-univention.de/univention/management/?header=try-hide&overview=false&menu=false#module=appcenter-selfservice::0:$APP_ID:$APP_COMPONENT_ID:$APP_UCS_VERSION"
+    on_stop: delete_app_version
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  variables:
+    APP_BASE_VERSION: "0.0.0-staging"
+  script:
+    - |
+      if [[ -z "$APP_ID" ]]; then
+        echo "No APP_ID was set for this job. Aborting."
+        exit 1
+      fi
+    - |
+      if [[ -z "$APP_UCS_VERSION" ]]; then
+        echo "No APP_UCS_VERSION was set for this job. Aborting."
+        exit 1
+      fi
+    - |
+      if univention-appcenter-control status --noninteractive "$APP_UCS_VERSION/$APP_ID" | grep "$APP_VERSION"; then
+        echo "App version $APP_UCS_VERSION/$APP_ID=$APP_VERSION already exists. Skip creating app."
+      else
+        echo "Creating $APP_UCS_VERSION/$APP_ID=$APP_VERSION in test appcenter."
+        univention-appcenter-control new-version --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_BASE_VERSION" "$APP_UCS_VERSION/$APP_ID=$APP_VERSION"
+      fi
+    - univention-appcenter-control get --noninteractive --json "$APP_UCS_VERSION/$APP_ID" > appinfo.json
+    - APP_COMPONENT_ID=$(cat appinfo.json | jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == $version) | .component_id')
+    - echo "APP_ID=$APP_ID" >> deploy.env; echo "APP_COMPONENT_ID=$APP_COMPONENT_ID" >> deploy.env; echo "APP_UCS_VERSION=$APP_UCS_VERSION" >> deploy.env
+    - cat appinfo.json | jq --arg version "$APP_VERSION" '.versions[] | select(.version == $version)'
+
+.delete_app_version:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      variables:
+        APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
+      when: manual
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        APP_VERSION: "0.0.0-staging"
+      when: never
+  image: "$APPCENTER_CONTROL_IMAGE"
+  variables:
+    APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
+  script:
+    - |
+      if [[ -z "$APP_ID" ]]; then
+        echo "No APP_ID was set for this job. Aborting."
+        exit 1
+    - |
+      if [[ -z "$APP_UCS_VERSION" ]]; then
+        echo "No APP_UCS_VERSION was set for this job. Aborting."
+        exit 1
+      fi
+      fi
+    - |
+      if univention-appcenter-control status "$APP_UCS_VERSION/$APP_ID" | grep "$APP_VERSION"; then
+        echo "Removing $APP_UCS_VERSION/$APP_ID=$APP_VERSION from test appcenter."
+        univention-appcenter-control remove-version --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION"
+      else
+        echo "App version $APP_UCS_VERSION/$APP_ID=$APP_VERSION could not be found in test appcenter. Skip removal."
+      fi
+  environment:
+    name: "branch-app/$CI_COMMIT_REF_SLUG"
+    action: stop
+
+.update_appcenter:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        APP_VERSION: "0.0.0-staging"
+        APPCENTER_DOCKER_IMAGE: "$CI_REGISTRY_IMAGE:latest"
+  image: "$APPCENTER_CONTROL_IMAGE"
+  variables:
+    APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
+    APPCENTER_FILE_DIR: "appcenter/"
+    APPCENTER_DOCKER_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+  script:
+    - echo "Uploading appcenter files for $APP_UCS_VERSION/$APP_ID=$APP_VERSION."
+    - crudini --set "$APPCENTER_FILE_DIR/ini" Application Version "$APP_VERSION"
+    - crudini --set --existing "$APPCENTER_FILE_DIR/ini" Application DockerImage "$APPCENTER_DOCKER_IMAGE" || echo "Does not seem to be a docker image based app. Not setting DockerImage."
+    - cd "$APPCENTER_FILE_DIR"
+    - univention-appcenter-control upload --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" *
