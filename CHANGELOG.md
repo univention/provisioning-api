@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.2...v0.48.3) (2025-02-10)
+
+
+### Bug Fixes
+
+* set plugin mounts to read-only ([2c0f91f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/2c0f91fdee5cdf182ee691d032f88fd523744221))
+
 ## [0.48.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.1...v0.48.2) (2025-02-10)
 
 
