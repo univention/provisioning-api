@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.1...v0.48.2) (2025-02-10)
+
+
+### Bug Fixes
+
+* add .kyverno to helmignore ([897d653](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/897d65360459be8e9d1ed2f06c9146c51747ed63))
+
 ## [0.48.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.0...v0.48.1) (2025-01-26)
 
 
