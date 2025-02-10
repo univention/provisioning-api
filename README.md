@@ -12,6 +12,12 @@ packages are installed in addition. See `./images/ec2-tools.Containerfile` for d
 
 This image is build daily by a scheduled pipeline with the `latest` tag. No versioning is planned at this point.
 
+### univention-appcenter-control (`gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/univention-appcenter-control')
+This image is the same as the original `docker-registry.knut.univention.de/knut/univention-appcenter-control` image, except that some
+packages are installed in addition. See `./images/univention-appcenter-control.Containerfile` for details.
+
+This image is build daily by a scheduled pipeline with the `latest` tag. No versioning is planned at this point.
+
 ## Gitlab CI fragments
 
 ### run_openstack_cfg
