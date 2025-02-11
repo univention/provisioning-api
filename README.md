@@ -54,6 +54,6 @@ The following variables are available:
 - `APPCENTER_CONTROL_IMAGE`: The image to start the job with. It is set to the univention-appcenter-control image from this repo.
 - `APP_ID`: The `id` of the app in question. This is the part without the version and without the UCS version. Needs to be set for the jobs to work.
 - `APP_UCS_VERSION`: The UCS version part of the app in question. Needs to be set for the jobs to work.
-- `APP_VERSION`: The version of the app in question. On the main branch it is set to `0.0.0-staging`, on branches it is set to `0.0.0-$CI_COMMIT_REF_SLUG
+- `APP_VERSION`: The version of the app in question. On the main branch it is set to `0.0.0-staging`, on branches it is set to `0.0.0-$CI_COMMIT_REF_SLUG`
  `APPCENTER_DOCKER_IMAGE`: The docker image to use for the `DockerImage` value in the ini file. Only relevant if this is a docker based app. It is set to `$CI_REGISTRY_IMAGE:latest` on main
   and `$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG` on feature branches by default.
