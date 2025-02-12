@@ -46,7 +46,7 @@ COPY ./server/poetry.lock \
      ./server/pyproject.toml \
      ./server/README.md \
      ${WORKDIR}/
-COPY ./consumer /app/consumer
+COPY ./common /app/common
 COPY ./backends /app/backends
 
 RUN poetry install --no-root --only main

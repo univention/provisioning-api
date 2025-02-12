@@ -43,7 +43,7 @@ COPY ./listener/poetry.lock \
      ./listener/pyproject.toml \
      ./listener/README.md \
      ${WORKDIR}/
-COPY ./consumer /app/consumer
+COPY ./common /app/common
 COPY ./backends /app/backends
 
 # install dependencies

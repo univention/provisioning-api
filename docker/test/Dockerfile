@@ -44,6 +44,7 @@ COPY ./poetry.lock \
      ${WORKDIR}/
 COPY ./backends ${WORKDIR}/backends
 COPY ./consumer ${WORKDIR}/consumer
+COPY ./common ${WORKDIR}/common
 COPY ./consumer_example ${WORKDIR}/consumer_example
 COPY ./listener ${WORKDIR}/listener
 COPY ./server ${WORKDIR}/server
