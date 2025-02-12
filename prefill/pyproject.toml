@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "nubus-provisioning-prefill"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning Prefill"
+authors = ["Univention GmbH <packages@univention.de>"]
+license = "AGPL-3.0-only"
+packages = [{ include = "univention", from = "src" }]
+
+[tool.poetry.dependencies]
+aiohttp = "^3.10.9"
+daemoniker = "^0.2.3"
+nubus-provisioning-backends = { path = "../backends/" }
+nubus-provisioning-common = {path = "../common"}
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.2"
+python = "^3.11"
+backends = "^1.6.6"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -268,15 +268,14 @@ name = "nubus-provisioning-backends"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning Backends"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "^3.11"
 files = []
 develop = false
 
 [package.dependencies]
-nats-py = ">=2.7.0"
-nubus-provisioning-common = {path = "../common"}
-pydantic = ">=2.5.2"
-pydantic-settings = ">=2.0.3"
+nats-py = "^2.9.0"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.2"
 
 [package.source]
 type = "directory"
@@ -287,13 +286,13 @@ name = "nubus-provisioning-common"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning common code"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "^3.11"
 files = []
 develop = false
 
 [package.dependencies]
-asgi-correlation-id = ">=4.2.0"
-pydantic = ">=2.5.2"
+asgi-correlation-id = "^4.3.3"
+pydantic = "^2.9.2"
 
 [package.source]
 type = "directory"

@@ -8,12 +8,9 @@ readme = "README.md"
 packages = [{ include = "univention", from = "src" }]
 
 [tool.poetry.dependencies]
-######################################
-# Python 3.7 - listener imports this #
-######################################
-asgi-correlation-id = ">=4.2.0"  # py311: "^4.3.3"
-pydantic = ">=2.5.2"  # py311: "^2.9.2"
-python = ">=3.7,<4.0"
+asgi-correlation-id = "^4.3.3"
+pydantic = "^2.9.2"
+python = "^3.11"
 
 [[tool.poetry.source]]
 name = "PyPI"
