@@ -1,22 +1,25 @@
-[tool.poetry]
+[project]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning Backends"
-authors = ["Univention GmbH <packages@univention.de>"]
-license = "AGPL-3.0-only"
-readme = "README.md"
-packages = [{ include = "univention", from = "src" }]
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
+requires-python = "==3.11.*"
 
-[tool.poetry.dependencies]
-nats-py = "^2.9.0"
-# nubus-provisioning-common = {path = "../common"}
-pydantic = "^2.9.2"
-pydantic-settings = "^2.5.2"
-python = "^3.11"
+dependencies = [
+    "nats-py<3.0.0,>=2.9.0",
+    "pydantic<3.0.0,>=2.9.2",
+    "pydantic-settings<3.0.0,>=2.5.2",
+]
 
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
+[tool.hatch.build.targets.wheel]
+packages = ["src/univention"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = [
@@ -30,7 +33,3 @@ log_cli = 0  # activate on the CLI with: "-o log_cli=true"
 log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
