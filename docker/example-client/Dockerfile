@@ -1,65 +1,64 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+# Inspired by: https://hynek.me/articles/docker-uv/
+
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-521
 ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-ARG WORKDIR="/app"
-ENV POETRY_NO_INTERACTION=1
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-WORKDIR ${WORKDIR}
+COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
-RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install python3-pip=23.* \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.8.3 \
-    && poetry config virtualenvs.create false
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11
+
+COPY ./common /app/common
+COPY ./consumer /app/consumer
+COPY ./consumer_example/uv.lock \
+     ./consumer_example/pyproject.toml \
+     /app/consumer_example/
+
+WORKDIR /app/consumer_example
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync \
+    --locked \
+    --no-dev \
+    --no-install-project && \
+  uv export -o ./requirements.txt
 
 # copy source code
-COPY ./CHANGELOG.md /tmp/
-COPY ./common ${WORKDIR}/common/
-COPY ./consumer ${WORKDIR}/consumer/
-COPY ./consumer_example ${WORKDIR}/consumer_example/
+COPY ./consumer_example/src /app/consumer_example/src
 
-# build wheels of dependencies and project
-RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
-    && poetry version "$VERSION" -C ${WORKDIR}/common \
-    && poetry version "$VERSION" -C ${WORKDIR}/consumer \
-    && poetry version "$VERSION" -C ${WORKDIR}/consumer_example \
-    && poetry build --format=wheel -C ${WORKDIR}/common \
-    && poetry build --format=wheel -C ${WORKDIR}/consumer \
-    && poetry build --format=wheel -C ${WORKDIR}/consumer_example
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync --locked --no-dev --no-editable
 
 ###############################################
-# Stage 2: install dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG}
+# Stage 2: final image
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
+
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/app/consumer_example/.venv/bin:$PATH
 
 ARG USER=consumer_example
-ARG WORKDIR="/app"
-ENV WEB_CONCURRENCY=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-WORKDIR ${WORKDIR}
+RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
+    rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+    groupadd -r ${USER} -g 1000 && \
+    useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 
-RUN apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip=23.* \
-    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
+COPY --from=build --chown=${USER}:${USER} /app/consumer_example /app/consumer_example
 
-# install dependencies and project
-COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
-RUN useradd -m "$USER" \
-    && chown "$USER":"$USER" "$WORKDIR" \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer-*.whl \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_consumer_example-*.whl \
-    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
+USER ${USER}
 
-ENTRYPOINT ["python3", "-m", "univention.provisioning.consumer_example.main"]
+CMD ["consumer_example"]
+
+RUN \
+  python3.11 -V && \
+  python3.11 -m site && \
+  python3.11 -c 'import univention.provisioning.consumer_example.main'
