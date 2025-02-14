@@ -1,42 +1,58 @@
-[tool.poetry]
+[project]
 name = "nubus-provisioning-metapackage"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning meta-package to enable a streamlined development experience"
-authors = ["Univention GmbH <packages@univention.de>"]
-license = "AGPL-3.0-only"
 readme = "README.md"
 package-mode = false
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
 
-[tool.poetry.dependencies]
-nubus-provisioning-backends = { path = "./backends/", develop = true }
-nubus-provisioning-common = { path = "./common/", develop = true }
-nubus-provisioning-consumer = { path = "./consumer/", develop = true }
-nubus-provisioning-consumer-example = { path = "./consumer_example/", develop = true }
-nubus-provisioning-listener = { path = "./listener/", develop = true }
-nubus-provisioning-dispatcher = { path = "./dispatcher/", develop = true }
-nubus-provisioning-prefill = { path = "./prefill/", develop = true }
-nubus-provisioning-rest-api = { path = "./rest-api/", develop = true }
-nubus-provisioning-udm-transformer = { path = "./udm-transformer/", develop = true }
-python = "^3.11"
+requires-python = "==3.11.*"
 
-[tool.poetry.group.dev.dependencies]
-mock = ">=5.1.0"  # AsyncMock is Python 3.8+
-polyfactory = "2.17.0"
-pytest = "^8.3.3"
-pytest-asyncio = "^0.24"
-pytest-cov = "^5.0"
-pytest-env = "^1.1.5"
+dependencies = [
+    "nubus-provisioning-backends",
+    "nubus-provisioning-common",
+    "nubus-provisioning-consumer",
+    "nubus-provisioning-consumer-example",
+    "nubus-provisioning-dispatcher",
+    "nubus-provisioning-listener",
+    "nubus-provisioning-prefill",
+    "nubus-provisioning-rest-api",
+    "nubus-provisioning-udm-transformer",
+]
 
-[tool.ruff]
-target-version = "py311"
-line-length = 120
+[dependency-groups]
+dev = [
+    "mock>=5.1.0",
+    "polyfactory==2.17.0",
+    "pytest<9.0.0,>=8.3.3",
+    "pytest-asyncio<1.0,>=0.24",
+    "pytest-cov<6.0,>=5.0",
+    "pytest-env<2.0.0,>=1.1.5",
+]
 
-[tool.ruff.lint]
-extend-select = ["I"]  # activate isort
+[tool.uv.sources]
+nubus-provisioning-backends = { path = "./backends" }
+nubus-provisioning-common = { path = "./common" }
+nubus-provisioning-consumer = { path = "./consumer" }
+nubus-provisioning-consumer-example = { path = "./consumer_example" }
+nubus-provisioning-dispatcher = { path = "./dispatcher" }
+nubus-provisioning-listener = { path = "./listener" }
+nubus-provisioning-prefill = { path = "./prefill" }
+nubus-provisioning-rest-api = { path = "./rest-api" }
+nubus-provisioning-udm-transformer = { path = "./udm-transformer" }
 
-[tool.ruff.lint.isort]
-known-first-party = ["univention"]
-known-third-party = ["difflib"]
+[project.scripts]
+prefill = "univention.provisioning.consumer_example.main:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/univention"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 # Exclude tests/e2e from execution by default
 [tool.pytest.ini_options]
@@ -44,8 +60,12 @@ testpaths = [
   "backends/tests/",
   "common/tests/",
   "consumer/tests/",
-  "server/tests/",
+  "dispatcher/tests/",
+  "listener/tests/",
+  "prefill/tests/",
+  "rest-api/tests/",
   "tests/integration/",
+  "udm-transformer/tests/",
 ]
 
 # The following works only with pytest-env>=1.1 (and Python 3.8+), which we'll get in the test Docker container.
@@ -80,3 +100,14 @@ MAX_ACKNOWLEDGEMENT_RETRIES = {value = 3, skip_if_set = true}
 DEBUG = {value = "false", skip_if_set = true}
 ROOT_PATH = {value = "/", skip_if_set = true}
 CORS_ALL = {value = "false", skip_if_set = true}
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["I"]  # activate isort
+
+[tool.ruff.lint.isort]
+known-first-party = ["univention"]
+known-third-party = ["difflib"]
