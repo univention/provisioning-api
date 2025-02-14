@@ -1,24 +1,33 @@
-[tool.poetry]
+[project]
 name = "nubus-provisioning-consumer-example"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning Consumer Example"
-authors = ["Univention GmbH <packages@univention.de>"]
-license = "AGPL-3.0-only"
-readme = "README.md"
-packages = [{ include = "univention", from = "src" }]
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
 
-[tool.poetry.dependencies]
-aiohttp = "^3.10.9"
-jsondiff = "^2.2.1"
-pydantic = "^2.9.2"
-pydantic-settings = "^2.5.2"
-python = "^3.11"
-nubus-provisioning-consumer = ">=0.1.0"
+requires-python = "==3.11.*"
 
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
+dependencies = [
+    "aiohttp<4.0.0,>=3.10.9",
+    "jsondiff<3.0.0,>=2.2.1",
+    "pydantic<3.0.0,>=2.9.2",
+    "pydantic-settings<3.0.0,>=2.5.2",
+    "nubus-provisioning-consumer>=0.1.0",
+]
+
+# Only necessary because these libraries are in the same git repo
+[tool.uv.sources]
+nubus-provisioning-consumer = { path = "../consumer" }
+nubus-provisioning-common = { path = "../common" }
+
+[project.scripts]
+consumer_example = "univention.provisioning.consumer_example.main:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/univention"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

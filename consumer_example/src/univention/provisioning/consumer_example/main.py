@@ -81,9 +81,13 @@ async def main(settings: ProvisioningConsumerClientSettings) -> None:
         await MessageHandler(client, [handle_message]).run()
 
 
-if __name__ == "__main__":
+def run():
     _settings = ProvisioningConsumerClientSettings()
     logging.basicConfig(format=LOG_FORMAT, level=_settings.log_level)
     logger.info("args: %r", sys.argv)
     logger.info("Using 'nubus-provisioning-consumer' library version %r.", version("nubus-provisioning-consumer"))
     asyncio.run(main(_settings))
+
+
+if __name__ == "__main__":
+    run()
