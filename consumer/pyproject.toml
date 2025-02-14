@@ -1,46 +1,31 @@
-[tool.poetry]
+[project]
 name = "nubus-provisioning-consumer"
 version = "0.1.0"
 description = "Univention Nubus - Provisioning Consumer"
-authors = ["Univention GmbH <packages@univention.de>"]
-license = "AGPL-3.0-only"
-readme = "README.md"
-packages = [
-  { include = "univention", from = "./src" },
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
+requires-python = "<4.0,>=3.11"
+dependencies = [
+    "aiohttp<4.0.0,>=3.10.9",
+    "jsondiff<3.0.0,>=2.2.1",
+    # TODO: Update version
+    "nubus-provisioning-common==0.1.0",
+    "pydantic<3.0.0,>=2.9.2",
+    "pydantic-settings<3.0.0,>=2.5.2",
 ]
 
-[tool.poetry.dependencies]
-aiohttp = "^3.10.9"
-jsondiff = "^2.2.1"
-nubus-provisioning-common = {path = "../common"}
-pydantic = "^2.9.2"
-pydantic-settings = "^2.5.2"
-python = "^3.11"
+[tool.uv.sources]
+nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-common = { path = "../common" }
 
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
+[project.scripts]
+prefill = "univention.provisioning.prefill.main:run"
 
-[tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib",
-    "--cov=src/univention/provisioning/consumer",
-    "--cov=tests",
-    "--cov-report=term-missing",
-]
-asyncio_mode = "auto"
-log_cli = 0  # activate on the CLI with: "-o log_cli=true"
-log_cli_level = "DEBUG"
-log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
-log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
-
-[tool.pytest_env]
-LOG_LEVEL = {value = "DEBUG", skip_if_set = true}
-MAX_ACKNOWLEDGEMENT_RETRIES = {value = 3, skip_if_set = true}
-PROVISIONING_API_BASE_URL = {value = "http://localhost:7777", skip_if_set = true}
-PROVISIONING_API_PASSWORD = {value = "bar", skip_if_set = true}
-PROVISIONING_API_USERNAME = {value = "foo", skip_if_set = true}
+[tool.hatch.build.targets.wheel]
+packages = ["src/univention"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
