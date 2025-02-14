@@ -1,77 +1,67 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+# Inspired by: https://hynek.me/articles/docker-uv/
+
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-521
 ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-ARG WORKDIR="/app"
-ENV POETRY_NO_INTERACTION=1
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-WORKDIR ${WORKDIR}
+COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
-RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install python3-pip=23.* \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.8.3 poetry-plugin-export==1.8.0 \
-    && poetry config virtualenvs.create false \
-    && poetry config warnings.export false
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11
+    # UV_PROJECT_ENVIRONMENT=/app
+
+COPY ./backends /app/backends
+COPY ./common /app/common
+COPY ./rest-api/uv.lock \
+     ./rest-api/pyproject.toml \
+     /app/rest-api/
+
+WORKDIR /app/rest-api
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync \
+    --locked \
+    --no-dev \
+    --no-install-project && \
+  uv export -o ./requirements.txt
 
 # copy source code
-COPY ./CHANGELOG.md /tmp/
-COPY ./backends ${WORKDIR}/backends/
-COPY ./common ${WORKDIR}/common/
-COPY ./rest-api ${WORKDIR}/rest-api/
+COPY ./rest-api/src /app/rest-api/src
 
-# build wheels of dependencies and project
-RUN VERSION="$(grep -o -m1 -E '^## \[.+\]' /tmp/CHANGELOG.md | tr -d '#[] ')" \
-    && poetry version "$VERSION" -C ${WORKDIR}/common \
-    && poetry version "$VERSION" -C ${WORKDIR}/backends \
-    && poetry version "$VERSION" -C ${WORKDIR}/rest-api \
-    && poetry build --format=wheel -C ${WORKDIR}/common \
-    && poetry build --format=wheel -C ${WORKDIR}/backends \
-    && poetry build --format=wheel -C ${WORKDIR}/rest-api
-
-###############################################
-# Stage 2: install dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS app_builder
-
-ARG USER=fastapi
-ARG WORKDIR="/app"
-ENV WEB_CONCURRENCY=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-WORKDIR ${WORKDIR}
-
-RUN apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip \
-      python3-univention-directory-manager-rest-client \
-    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
-
-# install dependencies and project
-COPY --from=dep_builder ${WORKDIR}/*/dist/*.whl /tmp
-RUN useradd -m "$USER" \
-    && chown "$USER":"$USER" "$WORKDIR" \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_common-*.whl \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_backends-*.whl \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U /tmp/nubus_provisioning_rest_api-*.whl \
-    && rm -fr /root/.cache /root/.config /root/.local /root/* /tmp/*
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync --locked --no-dev --no-editable
 
 ###############################################
 # Stage 3: final image
-FROM app_builder AS final
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-EXPOSE 7777
-ENTRYPOINT [ \
-    "uvicorn", \
-    "univention.provisioning.rest.main:app", \
-    "--host", "0.0.0.0", \
-    "--port", "7777" \
-]
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/app/rest-api/.venv/bin:$PATH
+
+ARG USER=rest-api
+RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
+    rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+    groupadd -r ${USER} -g 1000 && \
+    useradd -r -d /app -g ${USER} -N ${USER} -u 1000
+
+COPY --from=build --chown=${USER}:${USER} /app/rest-api /app/rest-api
+
+USER ${USER}
+
+CMD ["rest-api"]
+
+RUN \
+  python3.11 -V && \
+  python3.11 -m site && \
+  python3.11 -c 'import univention.provisioning.rest'
+  # TODO: importing main executes code
+  # python3.11 -c 'import univention.provisioning.rest.main'
