@@ -91,7 +91,7 @@ services:
       - "provisioning-api"
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/udm-transformer:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-transformer/Dockerfile
@@ -206,8 +206,6 @@ services:
       - "nats1"
       - "ldap-server"
       - "ldap-notifier"
-    volumes:
-      - /etc/ldap/
 
   ldap-notifier:
     platform: linux/amd64
@@ -286,17 +284,18 @@ services:
     restart: "on-failure"
 
 
-  test:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/e2e-testrunner:${IMAGE_TAG:-latest}"
+  e2e-test:
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/e2e-test/Dockerfile
-    working_dir: /app
+    command: ["pytest", "-lvv", "--timeout=300", "--environment", "pipeline"]
     profiles:
       - test
     platform: "linux/amd64"
     volumes:
-      - "./tests:/app/tests"
+      - "./e2e_tests/tests:/app/e2e_tests/tests:ro"
+      - "./e2e_tests/e2e_settings.json.example:/app/e2e_tests/e2e_settings.json:ro"
 
   # Environment of the pre-commit linter.
   pre-commit:

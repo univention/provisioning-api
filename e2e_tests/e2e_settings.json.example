@@ -21,7 +21,7 @@
     "udm_rest_api_base_url": "http://localhost:8000/univention/udm/"
   },
   "pipeline": {
-    "provisioning_api_base_url": "http://events-and-consumer-api:7777",
+    "provisioning_api_base_url": "http://provisioning-api:7777",
     "nats_url": "nats://nats2:4222",
     "ldap_server_uri": "ldap://ldap-server:389",
     "udm_rest_api_base_url": "http://udm-rest-api:9979/udm/"

@@ -75,7 +75,7 @@ test-unit-and-integration:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
   script:
-    - python3 -m pytest -lvv backends/tests/ common/tests/ consumer/tests/ dispatcher/tests/ prefill/tests/ rest-api/tests/ udm-transformer/tests/ tests/integration/ --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
@@ -101,16 +101,15 @@ test-end-to-end:
     - docker version
     - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
     - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
-    - docker compose config test
+    - docker compose config e2e-test
     - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 events-and-consumer-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server ldif-producer
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server ldif-producer
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
-    - cp e2e_tests/e2e_settings.json.example e2e_tests/e2e_settings.json
-    - docker compose run --quiet-pull --rm test python3 -m pytest -lvv --timeout=300 --environment pipeline tests/e2e/
+    - docker compose run --quiet-pull --rm e2e-test
   after_script:
-    - docker logs events-and-consumer-api-dev >& provisioning-api.log
+    - docker logs provisioning-api >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
     - docker logs provisioning-prefill >& prefill.log
     - docker logs provisioning-udm-transformer >& udm-transformer.log
