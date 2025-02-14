@@ -1,69 +1,52 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+# Inspired by: https://hynek.me/articles/docker-uv/
+
 ARG LISTENER_BASE_IMAGE=artifacts.software-univention.de/nubus/images/listener-base
 ARG LISTENER_BASE_IMAGE_TAG=0.11.0@sha256:cfb165acc8d021a9d61c2791f30dcb460d9425412821557b2b13d57a1add6b10
 
-ARG WORKDIR="/app/listener"
+###############################################
+# Stage 1: build dependencies and software
+FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS build
 
-FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS builder
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-ARG WORKDIR
-WORKDIR ${WORKDIR}
+COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
-ARG USER=udm_listener
-RUN useradd -m "$USER"
-RUN chown "$USER":"$USER" "$WORKDIR" \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip \
-    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
-USER "$USER"
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11
+    # UV_PROJECT_ENVIRONMENT=/app
 
-ENV \
-    PATH="/home/${USER}/.local/bin:${PATH}" \
-    PYTHONPATH="." \
-    WEB_CONCURRENCY=1 \
-    # Do not buffer `stdout`
-    PYTHONUNBUFFERED=1 \
-    # Do not create `.pyc` files
-    PYTHONDONTWRITEBYTECODE=1 \
-    # Do not ask questions
-    POETRY_NO_INTERACTION=1 \
-    # Put .venv inside source folder
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    # Cache of poetry
-    POETRY_CACHE_DIR=/tmp/poetry_cache
-
-# install Poetry
-RUN pip3 install --break-system-packages --no-cache-dir poetry==1.8.3
-
-# install dependencies
-COPY ./listener/poetry.lock \
-     ./listener/pyproject.toml \
-     ./listener/README.md \
-     ${WORKDIR}/
-COPY ./common /app/common
 COPY ./backends /app/backends
+COPY ./common /app/common
+COPY ./listener/uv.lock \
+     ./listener/pyproject.toml \
+     /app/listener/
 
-# install dependencies
-RUN poetry install --no-root --only main
+WORKDIR /app/listener
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync \
+    --locked \
+    --no-dev \
+    --no-install-project && \
+  uv export -o ./requirements.txt
 
 # copy source code
-COPY ./listener/src ${WORKDIR}/src
-RUN poetry install --only main
+COPY ./listener/src /app/listener/src
 
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync --locked --no-dev --no-editable
+
+###############################################
+# Stage 2: final image
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS final
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-ARG WORKDIR
-WORKDIR ${WORKDIR}
-
-# Copy patch files
 COPY ./docker/udm-listener/*.patch /tmp/
-
 # Install patch utility
-# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get --assume-yes --verbose-versions --no-install-recommends install \
     patch && \
@@ -72,7 +55,22 @@ RUN apt-get update && \
     apt-get purge --auto-remove --assume-yes patch && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages
+
 COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/system/
 
-COPY --from=builder ${WORKDIR} .
-ENV PYTHONPATH=./src:./.venv/lib/python3.11/site-packages
+# TODO: Fix docker compose so that it runs without root
+# ARG USER=udm-listener
+# RUN groupadd -r ${USER} -g 1000 && \
+#     useradd -r -d /app -g ${USER} -N ${USER} -u 1000
+#
+# COPY --from=build --chown=${USER}:${USER} /app/listener /app/listener
+COPY --from=build /app/listener /app/listener
+
+USER ${USER}
+#
+# RUN \
+#   python3.11 -V && \
+#   python3.11 -m site && \
+#   python3.11 -c 'import univention.provisioning.listener'
