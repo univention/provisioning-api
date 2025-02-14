@@ -1,0 +1,22 @@
+variables:
+  PRE_COMMIT_IMAGE: "docker-registry.knut.univention.de/knut/pre-commit:latest"
+
+.lint_commit_messages:
+  image: $PRE_COMMIT_IMAGE
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  variables:
+    HOOK_IDS: "conventional-pre-commit"
+  script:
+    - |
+      git fetch --depth 1 origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME:target_branch
+      COMMITS=$(git rev-list target_branch...HEAD)
+      EXIT_CODE=0
+      for COMMIT in $COMMITS; do
+        echo "Checking COMMIT message for: $COMMIT"
+        git show -s --format=%B "$COMMIT" > tmp.txt
+        for HOOK_ID in $HOOK_IDS; do
+          pre-commit run --hook-stage commit-msg --commit-msg-filename tmp.txt "$HOOK_ID" || EXIT_CODE=1
+        done
+      done
+      exit $EXIT_CODE
