@@ -1,47 +1,35 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-ARG UCS_BASE_IMAGE_TAG=0.13.1-post-main-build-2024-09-09
-ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520
+# Inspired by: https://hynek.me/articles/docker-uv/
 
-##############################################################
-# Optimized for fast rebuilds (when only tests/* is changed) #
-##############################################################
+ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-521
+ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS dep_builder
+###############################################
+# Stage 1: build dependencies and software
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-ARG WORKDIR="/app"
+COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
-ENV \
-    PYTHONPATH="." \
-    WEB_CONCURRENCY=1 \
-    # Do not buffer `stdout`
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11 \
     PYTHONUNBUFFERED=1 \
-    # Do not create `.pyc` files
-    PYTHONDONTWRITEBYTECODE=1 \
-    # Do not ask questions
-    POETRY_NO_INTERACTION=1 \
-    # Cache of poetry
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    PATH=/app/e2e_tests/.venv/bin:$PATH
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-WORKDIR ${WORKDIR}
 
-RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install python3-pip=23.* \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
-    && python3 -m pip install --break-system-packages --no-cache-dir -U pip==24.2 \
-    && python3 -m pip install --break-system-packages --no-cache-dir poetry==1.8.3 poetry-plugin-export==1.8.0 \
-    && poetry config virtualenvs.create false \
-    && poetry config warnings.export false
+COPY ./backends /app/backends
+COPY ./common /app/common
+COPY ./consumer /app/consumer
+COPY ./e2e_tests/uv.lock \
+     ./e2e_tests/pyproject.toml \
+     /app/e2e_tests/
 
-# copy dependencies source code
-COPY ./backends ${WORKDIR}/backends/
-COPY ./common ${WORKDIR}/common/
-COPY ./consumer ${WORKDIR}/consumer/
-COPY ./rest-api ${WORKDIR}/rest-api/
-COPY ./tests ${WORKDIR}/tests/
-
-WORKDIR ${WORKDIR}/tests
-RUN poetry install --with e2e-tests
+WORKDIR /app/e2e_tests
+RUN --mount=type=cache,target=/root/.cache \
+    uv sync \
+    --locked \
+    --no-install-project
