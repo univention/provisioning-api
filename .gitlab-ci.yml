@@ -1,9 +1,23 @@
 include:
   - project: univention/dist/docker-services
     file: kaniko.yml
+  - project: univention/dist/docker-services
+    file: pre-commit.yml
+  - local: fragments/misc.yaml
 
 stages:
   - build
+  - lint
+
+run_pre_commit:
+  stage: lint
+  needs: []
+  extends: .pre-commit
+
+lint_commit_messages:
+  stage: lint
+  needs: []
+  extends: .lint_commit_messages
 
 build_ec2_tools:
   stage: build
