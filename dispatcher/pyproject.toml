@@ -17,6 +17,10 @@ dependencies = [
     "nubus-provisioning-common",
 ]
 
+[project.scripts]
+dispatcher = "univention.provisioning.dispatcher.main:run"
+
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]
 
