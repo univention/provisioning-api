@@ -30,17 +30,18 @@ lint-pre-commit:
     - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 
 .build-matrix: &build-matrix
-  - IMAGE_NAME: "provisioning-server"
-    KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/server/Dockerfile"
+  - IMAGE_NAME: "provisioning-dispatcher"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+  - IMAGE_NAME: "provisioning-events-and-consumer-api"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+  - IMAGE_NAME: "provisioning-prefill"
+    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+  - IMAGE_NAME: "provisioning-udm-listener"
+    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
   - IMAGE_NAME: "provisioning-udm-transformer"
-    KANIKO_ARGS: "--target udm-transformer"
-    DOCKERFILE_PATH: "docker/server/Dockerfile"
+    DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
   - IMAGE_NAME: "provisioning-example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
-  - IMAGE_NAME: "provisioning-udm-listener"
-    KANIKO_ARGS: "--target final"
-    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
   - IMAGE_NAME: "testrunner"
     DOCKERFILE_PATH: "docker/test/Dockerfile"
   - IMAGE_NAME: "provisioning-e2e-tests"
@@ -48,11 +49,15 @@ lint-pre-commit:
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "provisioning-server"
+    - "provisioning-events-and-consumer-api"
   - IMAGE_NAME:
-    - "provisioning-udm-listener"
+    - "provisioning-dispatcher"
   - IMAGE_NAME:
     - "provisioning-udm-transformer"
+  - IMAGE_NAME:
+    - "provisioning-prefill"
+  - IMAGE_NAME:
+    - "provisioning-udm-listener"
   - IMAGE_NAME:
     - "provisioning-example-client"
 
@@ -102,7 +107,7 @@ test-end-to-end:
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
-    - cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
+    - cp e2e_tests/e2e_settings.json.example e2e_tests/e2e_settings.json
     - docker compose run --quiet-pull --rm test python3 -m pytest -lvv --timeout=300 --environment pipeline tests/e2e/
   after_script:
     - docker logs events-and-consumer-api-dev >& provisioning-api.log
