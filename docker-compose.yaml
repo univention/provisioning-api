@@ -3,14 +3,12 @@
 
 services:
   provisioning-api:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-server:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}
     build:
       context: .
-      dockerfile: docker/server/Dockerfile
-      target: final
+      dockerfile: docker/events-and-consumer-api/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
-    command: "provisioning-api"
     container_name: "provisioning-api"
     restart: "on-failure"
     environment:
@@ -19,6 +17,7 @@ services:
       NATS_PORT: "4222"
       NATS_USER: "api"
       NATS_PASSWORD: "apipass"
+      NATS_MAX_RECONNECT_ATTEMPTS: 2
       ADMIN_NATS_USER: "admin"
       ADMIN_NATS_PASSWORD: "nimda"
       UDM_HOST: "udm-rest-api"
@@ -70,14 +69,12 @@ services:
 
 
   dispatcher:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-server:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
     build:
       context: .
-      dockerfile: docker/server/Dockerfile
-      target: final
+      dockerfile: docker/dispatcher/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
-    command: "dispatcher"
     container_name: "provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -97,8 +94,7 @@ services:
     image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/udm-transformer:${IMAGE_TAG:-latest}"
     build:
       context: .
-      dockerfile: docker/server/Dockerfile
-      target: udm-transformer
+      dockerfile: docker/udm-transformer/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-udm-transformer"
@@ -128,14 +124,12 @@ services:
       - "provisioning-api"
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-server:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
     build:
       context: .
-      dockerfile: docker/server/Dockerfile
-      target: final
+      dockerfile: docker/prefill/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
-    command: "prefill"
     container_name: "provisioning-prefill"
     restart: "on-failure"
     environment:
