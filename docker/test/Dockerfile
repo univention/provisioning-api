@@ -1,54 +1,42 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+# Inspired by: https://hynek.me/articles/docker-uv/
+
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-521
 ARG UCS_BASE_IMAGE_TAG=0.17.3-build-2025-05-11
 
-##############################################################
-# Optimized for fast rebuilds (when only tests/* is changed) #
-##############################################################
+###############################################
+# Stage 1: build dependencies and software
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
+SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS test
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
-ARG WORKDIR="/app"
-
-RUN apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-pip \
-    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
-
-ENV \
-    PYTHONPATH="." \
-    WEB_CONCURRENCY=1 \
-    # Do not buffer `stdout`
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11 \
     PYTHONUNBUFFERED=1 \
-    # Do not create `.pyc` files
-    PYTHONDONTWRITEBYTECODE=1 \
-    # Do not ask questions
-    POETRY_NO_INTERACTION=1 \
-    # Put .venv inside source folder
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    # Enable the debian based udm-rest-api installation
-    POETRY_VIRTUALENVS_OPTIONS_SYSTEM_SITE_PACKAGES=1 \
-    # Cache of poetry
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    PATH=/app/.venv/bin:$PATH
 
-# install Poetry
-RUN pip3 install --break-system-packages --no-cache-dir poetry==1.8.3
+COPY ./backends /app/backends
+COPY ./common /app/common
+COPY ./consumer /app/consumer
+COPY ./consumer_example /app/consumer_example
+COPY ./dispatcher /app/dispatcher
+COPY ./listener /app/listener
+COPY ./prefill /app/prefill
+COPY ./rest-api /app/rest-api
+COPY ./udm-transformer /app/udm-transformer
+COPY ./tests/test_helpers /app/tests/test_helpers
 
-# Activate the virtualenv created by poetry
-# install dependencies
-COPY ./poetry.lock \
+COPY ./uv.lock \
      ./pyproject.toml \
      ./README.md \
-     ${WORKDIR}/
-COPY ./backends ${WORKDIR}/backends
-COPY ./consumer ${WORKDIR}/consumer
-COPY ./common ${WORKDIR}/common
-COPY ./consumer_example ${WORKDIR}/consumer_example
-COPY ./listener ${WORKDIR}/listener
-COPY ./server ${WORKDIR}/server
+     /app/
 
-WORKDIR ${WORKDIR}
-RUN poetry install
-COPY ./docker/test/activate_venv.envsh /entrypoint.d/
+WORKDIR /app
+RUN --mount=type=cache,target=/root/.cache \
+    uv sync \
+    --locked
