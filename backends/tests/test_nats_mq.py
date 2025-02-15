@@ -11,9 +11,7 @@ except ImportError:
 
 import pytest
 from nats.js.errors import NotFoundError
-
-from univention.provisioning.backends.nats_mq import NatsKeys
-from univention.provisioning.testing.mock_data import (
+from test_helpers.mock_data import (
     FLAT_MESSAGE_ENCODED,
     MESSAGE,
     MQMESSAGE,
@@ -22,6 +20,8 @@ from univention.provisioning.testing.mock_data import (
     PROVISIONING_MESSAGE,
     SUBSCRIPTION_NAME,
 )
+
+from univention.provisioning.backends.nats_mq import NatsKeys
 
 
 @pytest.mark.anyio

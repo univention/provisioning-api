@@ -4,13 +4,13 @@
 from unittest.mock import AsyncMock, call
 
 import pytest
+from test_helpers.mock_data import MESSAGE, MQMESSAGE, SUBSCRIPTION_INFO, SUBSCRIPTIONS
 
 from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.dispatcher.mq_port import MessageQueuePort
 from univention.provisioning.dispatcher.service import DispatcherService
 from univention.provisioning.dispatcher.subscriptions_port import SubscriptionsPort
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
-from univention.provisioning.testing.mock_data import MESSAGE, MQMESSAGE, SUBSCRIPTION_INFO, SUBSCRIPTIONS
 
 
 class EscapeLoopException(Exception): ...
