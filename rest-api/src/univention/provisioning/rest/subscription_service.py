@@ -5,6 +5,7 @@ import asyncio
 import logging
 from typing import Optional
 
+import bcrypt
 import cachetools.func
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
@@ -19,6 +20,12 @@ logger = logging.getLogger(__name__)
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 PASSWORD_CACHE_TTL = 30.0
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
+
+
+# Workaround for passlib bug https://github.com/pyca/bcrypt/issues/684
+# https://foss.heptapod.net/python-libs/passlib/-/issues/190
+if not hasattr(bcrypt, "__about__"):
+    bcrypt.__about__ = type("about", (object,), {"__version__": bcrypt.__version__})
 
 
 @cachetools.func.ttl_cache(maxsize=32, ttl=PASSWORD_CACHE_TTL)
