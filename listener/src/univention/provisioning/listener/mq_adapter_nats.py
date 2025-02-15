@@ -2,14 +2,14 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from datetime import datetime
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
+
 import msgpack
 
-from univention.provisioning.backends.message_queue import MessageQueue
 from univention.provisioning.backends import message_queue
+from univention.provisioning.backends.message_queue import MessageQueue
+from univention.provisioning.models.constants import LDAP_PRODUCER_QUEUE_NAME, PublisherName
 from univention.provisioning.models.message import Body, Message
-from univention.provisioning.models.constants import PublisherName, LDAP_PRODUCER_QUEUE_NAME
-
 
 from .config import LdapProducerSettings, ldap_producer_settings
 from .mq_port import MessageQueuePort

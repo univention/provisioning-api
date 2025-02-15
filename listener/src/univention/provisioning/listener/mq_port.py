@@ -2,8 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import abc
-from typing import Optional, Any, Dict
-
+from typing import Any, Dict, Optional
 
 from .config import LdapProducerSettings
 
