@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from nats.aio.msg import Msg
+from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
 from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.dispatcher.config import DispatcherSettings
@@ -12,7 +13,6 @@ from univention.provisioning.dispatcher.mq_adapter_nats import NatsMessageQueueA
 from univention.provisioning.dispatcher.service import DispatcherService
 from univention.provisioning.dispatcher.subscriptions_adapter_nats import NatsSubscriptionsAdapter
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
-from univention.provisioning.testing.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
 
 @pytest.fixture

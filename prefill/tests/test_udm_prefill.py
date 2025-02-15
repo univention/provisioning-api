@@ -8,6 +8,14 @@ from unittest.mock import ANY, AsyncMock, call, patch
 import pytest
 from polyfactory.factories.pydantic_factory import ModelFactory
 from polyfactory.pytest_plugin import register_fixture
+from test_helpers.mock_data import (
+    GROUPS_TOPIC,
+    MQMESSAGE_PREFILL,
+    MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
+    MQMESSAGE_PREFILL_REDELIVERED,
+    SUBSCRIPTION_NAME,
+    USERS_TOPIC,
+)
 
 from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.models.constants import PREFILL_SUBJECT_TEMPLATE, PublisherName
@@ -17,14 +25,6 @@ from univention.provisioning.prefill.mq_port import MessageQueuePort
 from univention.provisioning.prefill.prefill_service import PrefillService
 from univention.provisioning.prefill.udm_port import UDMPort
 from univention.provisioning.prefill.update_sub_q_status_port import UpdateSubscriptionsQueueStatusPort
-from univention.provisioning.testing.mock_data import (
-    GROUPS_TOPIC,
-    MQMESSAGE_PREFILL,
-    MQMESSAGE_PREFILL_MULTIPLE_TOPICS,
-    MQMESSAGE_PREFILL_REDELIVERED,
-    SUBSCRIPTION_NAME,
-    USERS_TOPIC,
-)
 
 
 class EscapeLoopException(Exception): ...

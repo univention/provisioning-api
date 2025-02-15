@@ -4,6 +4,7 @@
 from unittest.mock import AsyncMock, call
 
 import pytest
+from test_helpers.mock_data import MESSAGE, SUBSCRIPTION_NAME
 
 from univention.provisioning.models.constants import (
     DISPATCHER_QUEUE_NAME,
@@ -14,7 +15,6 @@ from univention.provisioning.models.message import MessageProcessingStatus
 from univention.provisioning.models.subscription import FillQueueStatus
 from univention.provisioning.rest.message_service import MessageService
 from univention.provisioning.rest.mq_adapter_nats import NatsMessageQueue
-from univention.provisioning.testing.mock_data import MESSAGE, SUBSCRIPTION_NAME
 
 MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
 MESSAGE_PROCESSING_SEQ_ID = 1

@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock, call, patch
 
 import aiohttp
 import pytest
+from test_helpers.mock_data import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
 
 from univention.provisioning.consumer.api import MessageHandler, ProvisioningConsumerClient
 from univention.provisioning.models.message import Message
-from univention.provisioning.testing.mock_data import PROVISIONING_MESSAGE, SUBSCRIPTION_NAME
 
 
 @pytest.fixture
