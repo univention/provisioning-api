@@ -5,6 +5,7 @@ from typing import Callable
 
 import httpx
 import pytest
+from test_helpers.mock_data import NATS_SERVER
 
 from univention.provisioning.backends.mocks import MockNatsKVAdapter, MockNatsMQAdapter
 from univention.provisioning.rest.config import AppSettings
@@ -14,7 +15,6 @@ from univention.provisioning.rest.mq_adapter_nats import NatsMessageQueue
 from univention.provisioning.rest.mq_port import MessageQueuePort
 from univention.provisioning.rest.subscriptions_db_adapter_nats import NatsSubscriptionsDB
 from univention.provisioning.rest.subscriptions_db_port import SubscriptionsDBPort
-from univention.provisioning.testing.mock_data import NATS_SERVER
 
 _CREDENTIALS = {"username": "dev-user", "password": "dev-password"}
 

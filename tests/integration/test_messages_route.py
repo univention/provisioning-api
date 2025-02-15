@@ -4,9 +4,9 @@
 
 import httpx
 import pytest
+from test_helpers.mock_data import FLAT_MESSAGE
 
 from univention.provisioning.rest.config import app_settings
-from univention.provisioning.testing.mock_data import FLAT_MESSAGE
 
 
 @pytest.mark.anyio

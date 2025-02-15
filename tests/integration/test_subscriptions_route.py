@@ -6,11 +6,7 @@ import uuid
 
 import httpx
 import pytest
-
-from univention.provisioning.models.message import MessageProcessingStatus
-from univention.provisioning.models.subscription import FillQueueStatus
-from univention.provisioning.rest.config import app_settings
-from univention.provisioning.testing.mock_data import (
+from test_helpers.mock_data import (
     CONSUMER_PASSWORD,
     FLAT_BODY,
     GROUPS_REALMS_TOPICS,
@@ -20,6 +16,10 @@ from univention.provisioning.testing.mock_data import (
     SUBSCRIPTION_NAME,
     GROUPS_REALMS_TOPICS_as_dicts,
 )
+
+from univention.provisioning.models.message import MessageProcessingStatus
+from univention.provisioning.models.subscription import FillQueueStatus
+from univention.provisioning.rest.config import app_settings
 
 MESSAGE_PROCESSING_STATUS = MessageProcessingStatus.ok
 MESSAGE_PROCESSING_SEQ_ID = 1

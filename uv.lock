@@ -541,7 +541,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/ba/dc/9a01dd9561b736622
 [[package]]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
-source = { directory = "backends" }
+source = { editable = "backends" }
 dependencies = [
     { name = "nats-py" },
     { name = "pydantic" },
@@ -558,7 +558,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-common"
 version = "0.1.0"
-source = { directory = "common" }
+source = { editable = "common" }
 dependencies = [
     { name = "asgi-correlation-id" },
     { name = "pydantic" },
@@ -573,7 +573,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-consumer"
 version = "0.1.0"
-source = { directory = "consumer" }
+source = { editable = "consumer" }
 dependencies = [
     { name = "aiohttp" },
     { name = "jsondiff" },
@@ -594,7 +594,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-consumer-example"
 version = "0.1.0"
-source = { directory = "consumer_example" }
+source = { editable = "consumer_example" }
 dependencies = [
     { name = "aiohttp" },
     { name = "jsondiff" },
@@ -615,7 +615,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-dispatcher"
 version = "0.1.0"
-source = { directory = "dispatcher" }
+source = { editable = "dispatcher" }
 dependencies = [
     { name = "backends" },
     { name = "daemoniker" },
@@ -636,7 +636,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-listener"
 version = "0.1.0"
-source = { directory = "listener" }
+source = { editable = "listener" }
 dependencies = [
     { name = "daemoniker" },
     { name = "msgpack" },
@@ -691,15 +691,15 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "nubus-provisioning-backends", directory = "backends" },
-    { name = "nubus-provisioning-common", directory = "common" },
-    { name = "nubus-provisioning-consumer", directory = "consumer" },
-    { name = "nubus-provisioning-consumer-example", directory = "consumer_example" },
-    { name = "nubus-provisioning-dispatcher", directory = "dispatcher" },
-    { name = "nubus-provisioning-listener", directory = "listener" },
-    { name = "nubus-provisioning-prefill", directory = "prefill" },
-    { name = "nubus-provisioning-rest-api", directory = "rest-api" },
-    { name = "nubus-provisioning-udm-transformer", directory = "udm-transformer" },
+    { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-common", editable = "common" },
+    { name = "nubus-provisioning-consumer", editable = "consumer" },
+    { name = "nubus-provisioning-consumer-example", editable = "consumer_example" },
+    { name = "nubus-provisioning-dispatcher", editable = "dispatcher" },
+    { name = "nubus-provisioning-listener", editable = "listener" },
+    { name = "nubus-provisioning-prefill", editable = "prefill" },
+    { name = "nubus-provisioning-rest-api", editable = "rest-api" },
+    { name = "nubus-provisioning-udm-transformer", editable = "udm-transformer" },
 ]
 
 [package.metadata.requires-dev]
@@ -715,7 +715,7 @@ dev = [
 [[package]]
 name = "nubus-provisioning-prefill"
 version = "0.1.0"
-source = { directory = "prefill" }
+source = { editable = "prefill" }
 dependencies = [
     { name = "aiohttp" },
     { name = "backends" },
@@ -740,7 +740,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-rest-api"
 version = "0.1.0"
-source = { directory = "rest-api" }
+source = { editable = "rest-api" }
 dependencies = [
     { name = "asgi-correlation-id" },
     { name = "backends" },
@@ -779,7 +779,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-udm-transformer"
 version = "0.1.0"
-source = { directory = "udm-transformer" }
+source = { editable = "udm-transformer" }
 dependencies = [
     { name = "aiohttp" },
     { name = "daemoniker" },
