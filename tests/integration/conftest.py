@@ -26,7 +26,8 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def client():
-    async with httpx.AsyncClient(app=app, base_url="http://testserver") as client:
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         yield client
 
 
