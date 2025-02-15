@@ -8,9 +8,9 @@ except ImportError:
 from typing import Dict
 
 import pytest
+from test_helpers.mock_data import MSG, NATS_SERVER
 
 from univention.provisioning.backends.mocks import MockNatsMQAdapter
-from univention.provisioning.testing.mock_data import MSG, NATS_SERVER
 
 _CREDENTIALS = {"username": "dev-user", "password": "dev-password"}
 
