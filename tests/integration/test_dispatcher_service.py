@@ -5,12 +5,12 @@ from copy import deepcopy
 from unittest.mock import AsyncMock, call
 
 import pytest
+from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
 from univention.provisioning.backends.nats_mq import json_decoder
 from univention.provisioning.dispatcher.config import DispatcherSettings
 from univention.provisioning.dispatcher.service import DispatcherService, MessageAckManager
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
-from univention.provisioning.testing.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
 
 @pytest.fixture

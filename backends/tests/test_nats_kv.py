@@ -12,11 +12,11 @@ except ImportError:
 
 import pytest
 from nats.js.errors import BucketNotFoundError
+from test_helpers.mock_data import SUBSCRIPTION_NAME, SUBSCRIPTION_INFO_dumpable
 
 from univention.provisioning.backends.key_value_db import UpdateConflict
 from univention.provisioning.backends.mocks import FakeKvStore, MockNatsKVAdapter, kv_sub_info
 from univention.provisioning.models.constants import BucketName
-from univention.provisioning.testing.mock_data import SUBSCRIPTION_NAME, SUBSCRIPTION_INFO_dumpable
 
 
 @pytest.fixture

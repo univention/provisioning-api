@@ -6,16 +6,7 @@ from unittest.mock import AsyncMock, call
 
 import pytest
 from fastapi import HTTPException
-
-from univention.provisioning.backends.nats_kv import NatsKeyValueDB
-from univention.provisioning.models.constants import BucketName
-from univention.provisioning.models.message import RealmTopic
-from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
-from univention.provisioning.rest.config import AppSettings
-from univention.provisioning.rest.mq_port import MessageQueuePort
-from univention.provisioning.rest.subscriptions import SubscriptionService
-from univention.provisioning.rest.subscriptions_db_adapter_nats import NatsSubscriptionsDB
-from univention.provisioning.testing.mock_data import (
+from test_helpers.mock_data import (
     CONSUMER_HASHED_PASSWORD,
     GROUPS_REALMS_TOPICS,
     GROUPS_TOPIC,
@@ -25,6 +16,15 @@ from univention.provisioning.testing.mock_data import (
     USERS_TOPIC,
     SUBSCRIPTION_INFO_dumpable,
 )
+
+from univention.provisioning.backends.nats_kv import NatsKeyValueDB
+from univention.provisioning.models.constants import BucketName
+from univention.provisioning.models.message import RealmTopic
+from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
+from univention.provisioning.rest.config import AppSettings
+from univention.provisioning.rest.mq_port import MessageQueuePort
+from univention.provisioning.rest.subscriptions import SubscriptionService
+from univention.provisioning.rest.subscriptions_db_adapter_nats import NatsSubscriptionsDB
 
 
 @pytest.fixture
