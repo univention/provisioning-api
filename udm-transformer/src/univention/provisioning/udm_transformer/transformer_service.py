@@ -4,7 +4,7 @@
 import datetime
 import json
 import logging
-from typing import Any, Coroutine, Optional
+from typing import Any, Optional
 
 from pydantic import ValidationError
 
@@ -74,29 +74,35 @@ class TransformerService:
                 logger.debug("No new LDAP messages found in the queue, continuing to wait.")
                 continue
             try:
-                validated_message = Message.model_validate(data)
-            except EmptyBodyError:
-                logger.warning("Ignoring LDAP message with empty 'new' and 'old'.")
-                continue
-            except NoUDMTypeError:
-                logger.warning("Ignoring LDAP message without UDM object type.")
-                continue
-            except ValidationError as exc:
-                logger.error("Failed to parse an LDAP message: %s", exc)
-                raise
-            # create parametrized handler function
-            message_handler = self.handle_change(
-                validated_message.body.new,
-                validated_message.body.old,
-                validated_message.ts,
-            )
-            # wrap handler in safe acknowledgement handling and start it
-            try:
-                await self.wrap_handler_in_acknowledgment_handling(message_handler, acknowledgements)
+                await self.handle_message(data, acknowledgements)
             except Exception:
-                logger.exception("Failed to transform message")
+                await acknowledgements.acknowledge_message_negatively()
                 raise
+
+    async def handle_message(self, data: dict[str, Any], acknowledgements: Acknowledgements):
+        try:
+            validated_message = Message.model_validate(data)
+        except EmptyBodyError:
+            logger.warning("Ignoring LDAP message with empty 'new' and 'old'.")
             await acknowledgements.acknowledge_message()
+            return
+        except NoUDMTypeError:
+            logger.warning("Ignoring LDAP message without UDM object type.")
+            await acknowledgements.acknowledge_message()
+            return
+        except ValidationError as exc:
+            logger.error("Failed to parse an LDAP message: %s", exc)
+            raise
+        # create parametrized handler function
+        message_handler = self.handle_change(
+            validated_message.body.new,
+            validated_message.body.old,
+            validated_message.ts,
+        )
+        await self.ack_manager.process_message_with_ack_wait_extension(
+            message_handler,
+            acknowledgements.acknowledge_message_in_progress,
+        )
 
     async def handle_change(
         self, new_ldap_obj: dict[str, Any], old_ldap_obj: dict[str, Any], ts: datetime.datetime
@@ -113,18 +119,6 @@ class TransformerService:
         logger.debug("Sending the message with body: %r", message.body)
         await self.event_sender.send_event(message)
         logger.info("Message was sent: %r", new_udm_obj.get("dn") or old_udm_obj.get("dn"))
-
-    async def wrap_handler_in_acknowledgment_handling(
-        self, message_handler: Coroutine[Any, Any, None], acknowledgements: Acknowledgements
-    ) -> None:
-        try:
-            await self.ack_manager.process_message_with_ack_wait_extension(
-                message_handler,
-                acknowledgements.acknowledge_message_in_progress,
-            )
-        except Exception:
-            await acknowledgements.acknowledge_message_negatively()
-            raise
 
     async def old_ldap_to_udm_obj(self, old_ldap_obj: dict[str, Any]) -> dict[str, Any]:
         if old_ldap_obj:
