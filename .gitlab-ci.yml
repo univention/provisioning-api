@@ -106,9 +106,11 @@ test-end-to-end:
     - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server ldif-producer
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
-    - sleep 10
+    - sleep 30
+    - docker ps -a
     - docker compose run --quiet-pull --rm e2e-test
   after_script:
+    - docker ps -a
     - docker logs provisioning-api >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
     - docker logs provisioning-prefill >& prefill.log
