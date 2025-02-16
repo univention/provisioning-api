@@ -282,7 +282,7 @@ services:
 
 
   e2e-test:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/e2e-testrunner:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/e2e-test/Dockerfile
