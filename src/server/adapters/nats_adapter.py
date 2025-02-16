@@ -204,9 +204,14 @@ class NatsMQAdapter(BaseMQAdapter):
             servers=server,
             user=user,
             password=password,
+            error_cb=self.error_callback,
             max_reconnect_attempts=max_reconnect_attempts,
             **kwargs,
         )
+
+    async def error_callback(self, e):
+        logger.error("There was an error during the connection")
+        exit(1)
 
     async def close(self):
         await self._nats.close()
