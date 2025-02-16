@@ -109,6 +109,10 @@ test-end-to-end:
     - sleep 30
     - docker ps -a
     - docker compose run --quiet-pull --rm e2e-test
+    - sleep 600
+    - sleep 600
+    - sleep 3600
+    - sleep infinity
   after_script:
     - docker ps -a
     - docker logs provisioning-api >& provisioning-api.log
