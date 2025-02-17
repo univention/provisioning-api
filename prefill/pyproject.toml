@@ -17,6 +17,7 @@ dependencies = [
     "pydantic<3.0.0,>=2.9.2",
     "pydantic-settings<3.0.0,>=2.5.2",
     "backends<2.0.0,>=1.6.6",
+    "udm-rest-api-client>=0.0.2"
 ]
 
 [tool.uv.sources]
