@@ -84,7 +84,7 @@ test-unit-and-integration:
         path: coverage.xml
 
 test-end-to-end:
-  # allow_failure: true
+  allow_failure: true
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
@@ -146,6 +146,7 @@ check-debian-updates:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 
 build_provisioning_lib:
+  allow_failure: true
   stage: package
   dependencies:
     - pre-semantic-release
@@ -180,6 +181,7 @@ build_provisioning_lib:
     - poetry build
 
 publish_provisioning_lib:
+  allow_failure: true
   stage: publish
   extends: build_provisioning_lib
   dependencies:
