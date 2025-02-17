@@ -71,7 +71,7 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-for-udm
-          command: [ "/usr/bin/python3", "/scripts/wait-for-udm.py" ]
+          command: [ "python3", "/scripts/wait-for-udm.py" ]
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.prefill.image.registry .Values.global.imageRegistry }}/{{ .Values.prefill.image.repository }}:{{ .Values.prefill.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
