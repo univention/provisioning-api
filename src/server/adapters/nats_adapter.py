@@ -205,13 +205,25 @@ class NatsMQAdapter(BaseMQAdapter):
             user=user,
             password=password,
             error_cb=self.error_callback,
+            disconnected_cb=self.disconnected_callback,
+            closed_cb=self.closed_callback,
+            reconnected_cb=self.reconnected_callback,
             max_reconnect_attempts=max_reconnect_attempts,
             **kwargs,
         )
 
     async def error_callback(self, e):
-        logger.error("There was an error during the connection")
-        exit(1)
+        logger.error("There was an error during the execution: %s", e)
+        raise (e)
+
+    async def disconnected_callback(self):
+        logger.debug("Disconnected to NATS")
+
+    async def closed_callback(self):
+        logger.debug("Closed connection to NATS.")
+
+    async def reconnected_callback(self):
+        logger.debug("Reconnected to NATS")
 
     async def close(self):
         await self._nats.close()

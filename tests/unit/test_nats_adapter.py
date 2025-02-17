@@ -173,6 +173,9 @@ class TestNatsMQAdapter:
             user=CREDENTIALS.username,
             password=CREDENTIALS.password,
             error_cb=mock_nats_mq_adapter.error_callback,
+            disconnected_cb=mock_nats_mq_adapter.disconnected_callback,
+            closed_cb=mock_nats_mq_adapter.closed_callback,
+            reconnected_cb=mock_nats_mq_adapter.reconnected_callback,
             max_reconnect_attempts=5,
         )
         assert result is None
