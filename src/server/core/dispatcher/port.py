@@ -6,7 +6,7 @@ from __future__ import annotations
 import contextlib
 from typing import Any, AsyncGenerator, Awaitable, Callable, Optional
 
-from server.adapters.nats_adapter import NatsKVAdapter, NatsMQAdapter
+from server.adapters.nats_adapter import Acknowledgements, NatsKVAdapter, NatsMQAdapter
 from univention.provisioning.models import Bucket, Message, MQMessage, Subscription
 
 from .config import DispatcherSettings, dispatcher_settings
@@ -49,11 +49,11 @@ class DispatcherPort:
     async def send_message_to_subscription(self, stream: str, subject: str, message: Message) -> None:
         await self.mq_adapter.add_message(stream, subject, message)
 
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str) -> None:
-        await self.mq_adapter.subscribe_to_queue(subject, deliver_subject)
+    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str):
+        return await self.mq_adapter.initialize_subscription(stream, manual_delete, subject)
 
-    async def wait_for_event(self) -> MQMessage:
-        return await self.mq_adapter.wait_for_event()
+    async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
+        return await self.mq_adapter.get_one_message(timeout=timeout)
 
     async def acknowledge_message(self, message: MQMessage) -> None:
         await self.mq_adapter.acknowledge_message(message)

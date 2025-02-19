@@ -3,6 +3,7 @@
 import asyncio
 import logging
 
+from server.adapters.nats_adapter import Empty
 from server.core.dispatcher.port import DispatcherPort
 from server.utils.old_message_ack_manager import MessageAckManager
 from univention.provisioning.models import (
@@ -24,23 +25,31 @@ class DispatcherService:
 
     async def dispatch_events(self):
         logger.info("Storing event in consumer queues")
-        await self._port.subscribe_to_queue(DISPATCHER_STREAM, "dispatcher-service")
+        # await self._port.subscribe_to_queue(DISPATCHER_STREAM, "dispatcher-service")
+        await self._port.initialize_subscription(DISPATCHER_STREAM, False, DISPATCHER_STREAM)
 
         # Initially fill self._subscriptions before starting to handle messages.
         await self.update_subscriptions_mapping()
 
         async with asyncio.TaskGroup() as task_group:
-            # Background task that that informs about changes to the subscription data in the KV store.
             task_group.create_task(self._port.watch_for_subscription_changes(self.update_subscriptions_mapping))
 
             while True:
                 logger.debug("Waiting for an event...")
-                message = await self._port.wait_for_event()
-                await task_group.create_task(
-                    self.ack_manager.process_message_with_ack_wait_extension(
-                        message, self.handle_message, self._port.acknowledge_message_in_progress
+                try:
+                    message, acknowledgements = await self._port.get_one_message(timeout=10)
+                except Empty:
+                    logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
+                    continue
+                try:
+                    await task_group.create_task(
+                        self.ack_manager.process_message_with_ack_wait_extension(
+                            message, self.handle_message, self._port.acknowledge_message_in_progress
+                        )
                     )
-                )
+                except Exception:
+                    await acknowledgements.acknowledge_message_negatively()
+                await acknowledgements.acknowledge_message()
 
     async def handle_message(self, message: MQMessage):
         data = message.data

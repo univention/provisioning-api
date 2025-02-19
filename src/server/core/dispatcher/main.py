@@ -3,8 +3,6 @@
 
 import asyncio
 
-from daemoniker import Daemonizer
-
 from server.core.dispatcher.config import dispatcher_settings
 from server.core.dispatcher.port import DispatcherPort
 from server.core.dispatcher.service.dispatcher import DispatcherService
@@ -18,8 +16,7 @@ async def run_dispatcher():
 
 
 def main():
-    with Daemonizer():
-        asyncio.run(run_dispatcher())
+    asyncio.run(run_dispatcher())
 
 
 if __name__ == "__main__":
