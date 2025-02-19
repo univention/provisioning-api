@@ -59,7 +59,7 @@ class FakeJs(AsyncMock):
     Msg.ack = AsyncMock()
 
     @classmethod
-    async def pull_subscribe(cls, subject: str, durable: str, stream: str, config):
+    async def pull_subscribe(cls, subject: str, durable: str, stream: str, config=None):
         return cls.sub
 
     @classmethod
