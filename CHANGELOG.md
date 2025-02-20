@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.48.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.3...v0.48.4) (2025-02-20)
+
+
+### Bug Fixes
+
+* added more callbacks ([569fa99](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/569fa9977e8bdb5d49a32203d2d3c882cfe269c1))
+* dispatcher integration test ([f1301b1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f1301b1547fa9b867c904527d136060fb88537a2))
+* dispatcher should crash if it can't connect to nats ([9237c88](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9237c880c822a17273202d110e5cd2bec089526a))
+* dispatcher unit test ([bbaf9d4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bbaf9d40fab8bbd3f9f13e79bcc569060d050ff6))
+* Migrate dispatcher from websocket to long polling to ensure the container exits if it looses connection to nats ([22f44d2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/22f44d2d5422797c0736c79ee46e4510931784d4))
+
 ## [0.48.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.2...v0.48.3) (2025-02-10)
 
 
