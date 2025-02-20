@@ -29,8 +29,9 @@ class TestDispatcherService:
     main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_INFO["name"])
 
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
-        dispatcher_service._port.wait_for_event = AsyncMock(
-            side_effect=[MQMESSAGE, EscapeLoopException("Stop waiting for the new event")]
+        fake_ack = AsyncMock()
+        dispatcher_service._port.get_one_message = AsyncMock(
+            side_effect=[(MQMESSAGE, fake_ack), EscapeLoopException("Stop waiting for the new event")]
         )
         dispatcher_service._port.get_all_subscriptions = get_all_subscriptions
 
@@ -40,11 +41,11 @@ class TestDispatcherService:
         assert isinstance(exception.value.exceptions[0], Exception)
         assert str(exception.value.exceptions[0]) == "Stop waiting for the new event"
 
-        dispatcher_service._port.subscribe_to_queue.assert_called_once_with("incoming", "dispatcher-service")
+        dispatcher_service._port.initialize_subscription.assert_called_once_with("incoming", False, "incoming")
         dispatcher_service._port.watch_for_subscription_changes.assert_called_once_with(
             dispatcher_service.update_subscriptions_mapping
         )
-        dispatcher_service._port.wait_for_event.assert_has_calls([call(), call()])
+        dispatcher_service._port.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
         dispatcher_service._port.send_message_to_subscription.assert_called_once_with(
             SUBSCRIPTION_INFO["name"], self.main_subject, MESSAGE
         )
