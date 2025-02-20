@@ -25,7 +25,6 @@ class DispatcherService:
 
     async def dispatch_events(self):
         logger.info("Storing event in consumer queues")
-        # await self._port.subscribe_to_queue(DISPATCHER_STREAM, "dispatcher-service")
         await self._port.initialize_subscription(DISPATCHER_STREAM, False, DISPATCHER_STREAM)
 
         # Initially fill self._subscriptions before starting to handle messages.
