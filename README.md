@@ -18,6 +18,12 @@ packages are installed in addition. See `./images/univention-appcenter-control.C
 
 This image is build daily by a scheduled pipeline with the `latest` tag. No versioning is planned at this point.
 
+### pre-commit (`gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/pre-commit')
+This image is the same as the original `docker-registry.knut.univention.de/knut/pre-commit:latest` image, except that some
+packages are installed in addition. See `./images/pre-commit.Containerfile` for details.
+
+This image is build daily by a scheduled pipeline with the `latest` tag. No versioning is planned at this point.
+
 ## Gitlab CI fragments
 
 ### run_openstack_cfg
