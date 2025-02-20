@@ -1,5 +1,5 @@
 variables:
-  PRE_COMMIT_IMAGE: "docker-registry.knut.univention.de/knut/pre-commit:latest"
+  PRE_COMMIT_IMAGE: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/pre-commit:latest"
 
 .lint_commit_messages:
   image: $PRE_COMMIT_IMAGE
@@ -9,8 +9,9 @@ variables:
     HOOK_IDS: "conventional-pre-commit"
   script:
     - |
-      git fetch --depth 1 origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME:target_branch
-      COMMITS=$(git rev-list target_branch...HEAD)
+      NUM_COMMITS=$(curl $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/commits | jq length)
+      echo "Checking $NUM_COMMITS commits."
+      COMMITS=$(git rev-list HEAD..."HEAD~$NUM_COMMITS")
       EXIT_CODE=0
       for COMMIT in $COMMITS; do
         echo "Checking COMMIT message for: $COMMIT"
