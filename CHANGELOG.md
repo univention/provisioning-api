@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.4...v0.49.0) (2025-02-26)
+
+
+### Features
+
+* Bump ucs-base-image to use released apt sources ([df44c76](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/df44c76a8d746ce9d11d7645efdb0229443b6791))
+
 ## [0.48.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.3...v0.48.4) (2025-02-20)
 
 
