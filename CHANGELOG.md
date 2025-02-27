@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.0...v0.49.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* Avoid prefix "nubus-common" in named templates ([646100d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/646100de287cbf9a49e7ba5a8f280994518fd2c5))
+
 ## [0.49.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.48.4...v0.49.0) (2025-02-26)
 
 
