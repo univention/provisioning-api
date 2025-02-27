@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 {{ $fullname := include "common.names.fullname" . }}
-{{ $fullnameWithRevision := include "nubus-common.names.fullnameWithRevision" (dict "localName" "register-consumers" "context" .) }}
+{{ $fullnameWithRevision := include "provisioning.names.fullnameWithRevision" (dict "localName" "register-consumers" "context" .) }}
 ---
 apiVersion: batch/v1
 kind: Job
