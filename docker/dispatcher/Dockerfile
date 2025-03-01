@@ -35,8 +35,7 @@ RUN --mount=type=cache,target=/root/.cache \
 # copy source code
 COPY ./dispatcher/src /app/dispatcher/src
 
-RUN --mount=type=cache,target=/root/.cache \
-  uv sync --locked --no-dev --no-editable
+RUN uv sync --locked --no-dev --no-editable
 
 ###############################################
 # Stage 2: final image
@@ -52,7 +51,8 @@ RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
     groupadd -r ${USER} -g 1000 && \
     useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 
-COPY --from=build --chown=${USER}:${USER} /app/dispatcher /app/dispatcher
+COPY --from=build --chown=${USER}:${USER} /app/dispatcher/.venv /app/dispatcher/.venv
+COPY --from=build --chown=${USER}:${USER} /app/dispatcher/requirements.txt /app/dispatcher/requirements.txt
 
 USER ${USER}
 

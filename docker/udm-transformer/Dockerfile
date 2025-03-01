@@ -37,8 +37,7 @@ RUN --mount=type=cache,target=/root/.cache \
 # copy source code
 COPY ./udm-transformer/src /app/udm-transformer/src
 
-RUN --mount=type=cache,target=/root/.cache \
-  uv sync --locked --no-dev --no-editable
+RUN uv sync --locked --no-dev --no-editable
 
 ###############################################
 # Stage 3: final image
@@ -58,7 +57,8 @@ ARG USER=udm-transformer
 RUN groupadd -r ${USER} -g 1000 && \
     useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 
-COPY --from=build --chown=${USER}:${USER} /app/udm-transformer /app/udm-transformer
+COPY --from=build --chown=${USER}:${USER} /app/udm-transformer/.venv /app/udm-transformer/.venv
+COPY --from=build --chown=${USER}:${USER} /app/udm-transformer/requirements.txt /app/udm-transformer/requirements.txt
 
 USER ${USER}
 

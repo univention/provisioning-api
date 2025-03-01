@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends.message_queue import Acknowledgements, Empty, MessageAckManager
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager
 from univention.provisioning.models.constants import LDAP_PRODUCER_QUEUE_NAME, LDIF_PRODUCER_QUEUE_NAME, PublisherName
 from univention.provisioning.models.message import Body, EmptyBodyError, Message, NoUDMTypeError
 
@@ -74,34 +74,32 @@ class TransformerService:
                 logger.debug("No new LDAP messages found in the queue, continuing to wait.")
                 continue
             try:
-                await self.handle_message(data, acknowledgements)
+                message_handler = self.handle_message(data)
+                await self.ack_manager.process_message_with_ack_wait_extension(
+                    message_handler,
+                    acknowledgements.acknowledge_message_in_progress,
+                )
             except Exception:
                 await acknowledgements.acknowledge_message_negatively()
                 raise
+            await acknowledgements.acknowledge_message()
 
-    async def handle_message(self, data: dict[str, Any], acknowledgements: Acknowledgements):
+    async def handle_message(self, data: dict[str, Any]):
         try:
             validated_message = Message.model_validate(data)
         except EmptyBodyError:
             logger.warning("Ignoring LDAP message with empty 'new' and 'old'.")
-            await acknowledgements.acknowledge_message()
             return
         except NoUDMTypeError:
             logger.warning("Ignoring LDAP message without UDM object type.")
-            await acknowledgements.acknowledge_message()
             return
         except ValidationError as exc:
             logger.error("Failed to parse an LDAP message: %s", exc)
             raise
-        # create parametrized handler function
-        message_handler = self.handle_change(
+        await self.handle_change(
             validated_message.body.new,
             validated_message.body.old,
             validated_message.ts,
-        )
-        await self.ack_manager.process_message_with_ack_wait_extension(
-            message_handler,
-            acknowledgements.acknowledge_message_in_progress,
         )
 
     async def handle_change(
