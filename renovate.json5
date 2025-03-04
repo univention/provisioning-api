@@ -1,0 +1,35 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+  ],
+  packageRules: [
+    {
+      matchDatasources: [
+        'docker',
+      ],
+      pinDigests: true,
+      matchPackageNames: [
+        '/.*/',
+      ],
+    },
+    {
+      matchDatasources: [
+        'docker',
+      ],
+      pinDigests: false,
+      matchPackageNames: [
+        '/^.*:latest$/',
+      ],
+    },
+    {
+      matchPackageNames: [
+        'gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-520',
+      ],
+      versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+).(?<patch>\\d+)-build-(?<build>\\d+-\\d+-\\d+)$',
+    },
+  ],
+  semanticCommits: 'enabled',
+  semanticCommitType: 'fix',
+  semanticCommitScope: 'deps',
+}
