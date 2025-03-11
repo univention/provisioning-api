@@ -36,7 +36,7 @@ variables:
         exit 1
       fi
     - |
-      if univention-appcenter-control status --noninteractive "$APP_UCS_VERSION/$APP_ID" | grep "$APP_VERSION"; then
+      if univention-appcenter-control status --noninteractive "$APP_UCS_VERSION/$APP_ID" | grep -F "$APP_VERSION"; then
         echo "App version $APP_UCS_VERSION/$APP_ID=$APP_VERSION already exists. Skip creating app."
       else
         echo "Creating $APP_UCS_VERSION/$APP_ID=$APP_VERSION in test appcenter."
@@ -74,7 +74,7 @@ variables:
       fi
       fi
     - |
-      if univention-appcenter-control status "$APP_UCS_VERSION/$APP_ID" | grep "$APP_VERSION"; then
+      if univention-appcenter-control status "$APP_UCS_VERSION/$APP_ID" | grep -F "$APP_VERSION"; then
         echo "Removing $APP_UCS_VERSION/$APP_ID=$APP_VERSION from test appcenter."
         univention-appcenter-control remove-version --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION"
       else
