@@ -22,6 +22,19 @@ variables:
       done
       exit $EXIT_CODE
 
+.send_mail:
+  variables:
+    GIT_STRATEGY: none
+    RECIPIENT: "$GITLAB_USER_EMAIL"
+    SUBJECT: "Automatic mail from gitlab pipeline"
+    MAIL_FILE: "mail.txt"
+  tags:
+    - omar
+  script:
+    - cat "$MAIL_FILE" | mail -s "$SUBJECT" "$RECIPIENT"
+
+
+
 .send_chat_message:
   image: gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/pre-commit:latest # Contains curl and jq
   variables:
