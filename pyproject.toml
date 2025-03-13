@@ -12,7 +12,7 @@ packages = [{ include = "server", from = "src" }, ]
 [tool.poetry.dependencies]
 aiohttp = "^3.8.5"
 asgi-correlation-id = "^4.3.0"
-bcrypt = "4.0.1"
+bcrypt = "4.3.0"
 cachetools = "^5.4.0"
 daemoniker = "^0.2.3"
 fastapi = "^0.103.1"
