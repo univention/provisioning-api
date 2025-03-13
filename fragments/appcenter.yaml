@@ -44,7 +44,7 @@ variables:
       fi
     - univention-appcenter-control get --noninteractive --json "$APP_UCS_VERSION/$APP_ID" > appinfo.json
     - APP_COMPONENT_ID=$(cat appinfo.json | jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == $version) | .component_id')
-    - echo "APP_ID=$APP_ID" >> deploy.env; echo "APP_COMPONENT_ID=$APP_COMPONENT_ID" >> deploy.env; echo "APP_UCS_VERSION=$APP_UCS_VERSION" >> deploy.env
+    - echo "APP_ID=$APP_ID" >> deploy.env; echo "APP_COMPONENT_ID=$APP_COMPONENT_ID" >> deploy.env; echo "APP_UCS_VERSION=$APP_UCS_VERSION" >> deploy.env; echo "APP_VERSION=$APP_VERSION" >> deploy.env
     - cat appinfo.json | jq --arg version "$APP_VERSION" '.versions[] | select(.version == $version)'
 
 .delete_app_version:
@@ -60,7 +60,6 @@ variables:
       when: never
   image: "$APPCENTER_CONTROL_IMAGE"
   variables:
-    APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
     ENVIRONMENT_NAME: "branch-app/$CI_COMMIT_REF_SLUG"
   script:
     - |
@@ -87,15 +86,10 @@ variables:
 .update_appcenter:
   rules:
     - if: $CI_COMMIT_TAG
-      variables:
-        APP_VERSION: "$CI_COMMIT_TAG"
     - if: $CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-      variables:
-        APP_VERSION: "0.0.0-staging"
   image: "$APPCENTER_CONTROL_IMAGE"
   variables:
-    APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
     APPCENTER_FILE_DIR: "appcenter/"
   script:
     - echo "Uploading appcenter files for $APP_UCS_VERSION/$APP_ID=$APP_VERSION."
