@@ -1,5 +1,6 @@
 variables:
   APPCENTER_CONTROL_IMAGE: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/univention-appcenter-control"
+  APP_BASE_VERSION: "0.0.0-staging"
 
 .create_app_version:
   rules:
@@ -12,7 +13,7 @@ variables:
         APP_VERSION: "0.0.0-$CI_COMMIT_REF_SLUG"
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:
-        APP_VERSION: "0.0.0-staging"
+        APP_VERSION: "$APP_BASE_VERSION"
   image: "$APPCENTER_CONTROL_IMAGE"
   environment:
     name: "$ENVIRONMENT_NAME"
@@ -22,7 +23,6 @@ variables:
     reports:
       dotenv: deploy.env
   variables:
-    APP_BASE_VERSION: "0.0.0-staging"
     ENVIRONMENT_NAME: "branch-app/$CI_COMMIT_REF_SLUG"
   script:
     - |
