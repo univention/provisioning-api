@@ -94,6 +94,6 @@ variables:
   script:
     - echo "Uploading appcenter files for $APP_UCS_VERSION/$APP_ID=$APP_VERSION."
     - crudini --set "$APPCENTER_FILE_DIR/ini" Application Version "$APP_VERSION"
-    - crudini --set --existing "$APPCENTER_FILE_DIR/ini" Application DockerImage "$IMAGE_TAG" || echo "Does not seem to be a docker image based app. Not setting DockerImage."
+    - if [ -n "$IMAGE_TAG" ]; then crudini --set --existing "$APPCENTER_FILE_DIR/ini" Application DockerImage "$IMAGE_TAG" || echo "Does not seem to be a docker image based app. Not setting DockerImage."; fi
     - cd "$APPCENTER_FILE_DIR"
     - univention-appcenter-control upload --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" *
