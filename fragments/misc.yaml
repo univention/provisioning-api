@@ -21,3 +21,24 @@ variables:
         done
       done
       exit $EXIT_CODE
+
+.send_chat_message:
+  image: gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/pre-commit:latest # Contains curl and jq
+  variables:
+    BASE_URL: "https://chat.univention.de"
+    DESTINATION: "@$GITLAB_USER_LOGIN"
+    ALIAS: "$GITLAB_USER_NAME"
+    ROCKETCHAT_USERNAME: "flubberbot"
+    MESSAGE: "Please tell $GITLAB_USER_NAME that their pipeline is not configured correctly."
+  script:
+    - echo "Sending message as $ALIAS to $DESTINATION"
+    - 'AUTH_RESPONSE=$(curl -H "Content-type:application/json" "$BASE_URL/api/v1/login" -d "{ \"username\": \"$ROCKETCHAT_USERNAME\", \"password\": \"$ROCKETCHAT_PASSWORD\" }")'
+    - AUTH_TOKEN=$(echo "$AUTH_RESPONSE" | jq -r '.data.authToken')
+    - USER_ID=$(echo "$AUTH_RESPONSE" | jq -r '.data.userId')
+    - |
+      curl \
+      -H "X-Auth-Token: $AUTH_TOKEN" \
+      -H "X-User-Id: $USER_ID" \
+      -H "Content-type:application/json" \
+      "$BASE_URL/api/v1/chat.postMessage" \
+      -d "{ \"channel\": \"$DESTINATION\", \"text\": \"$MESSAGE\", \"alias\": \"$ALIAS\" }"
