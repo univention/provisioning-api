@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-ARG LISTENER_BASE_IMAGE_TAG=0.10.0
+ARG LISTENER_BASE_IMAGE_TAG=0.10.1@sha256:d1f50eaaf46861d213d7f20c6cb6d2b00e60d35b15d191c8cdf316a383494fc2
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/customers/dataport/upx/container-listener-base/listener-base
 
 ARG WORKDIR="/app"
