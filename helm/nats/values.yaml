@@ -353,7 +353,7 @@ nats:
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "library/nats"
-    tag: 2.10.26@scha256:736d575e60135ce1d50fc206675d48d0e57dcaa0704f696f0cb4b5f6dadd49d7
+    tag: 2.10.26@sha256:736d575e60135ce1d50fc206675d48d0e57dcaa0704f696f0cb4b5f6dadd49d7
 
 reloader:
   # -- Enable the config reloader
