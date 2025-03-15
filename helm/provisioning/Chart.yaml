@@ -11,7 +11,7 @@ dependencies:
     version: "^2.x.x"
     repository: "oci://registry-1.docker.io/bitnamicharts"
   - name: "nats"
-    version: "0.3.0"
+    version: "0.3.2"
     repository: "oci://artifacts.software-univention.de/nubus/charts"
     condition: "nats.enabled"
 description: "A Helm Chart that deploys the provisioning services"
