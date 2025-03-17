@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.2...v0.49.3) (2025-03-17)
+
+
+### Bug Fixes
+
+* unblock pipeline by getting the bitnami common chart as a transitive dependency of the nubus-common chart ([4eff19b](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4eff19bf2ce29e30380c55f10d1a8cabd927ec6c)), closes [univention/dev-issues/dev-incidents#131](https://git.knut.univention.de/univention/dev-issues/dev-incidents/issues/131)
+
 ## [0.49.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.1...v0.49.2) (2025-03-17)
 
 
