@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.1...v0.49.2) (2025-03-17)
+
+
+### Bug Fixes
+
+* **nats:** bump nats image version ([385c424](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/385c4241c5b3e67ad736088cd290a49b84561f30)), closes [univention/dev-issues/dev-incidents#131](https://git.knut.univention.de/univention/dev-issues/dev-incidents/issues/131)
+
 ## [0.49.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.0...v0.49.1) (2025-02-27)
 
 
