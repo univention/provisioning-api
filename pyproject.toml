@@ -40,7 +40,7 @@ dev = "src.server.core.app:start_dev"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-httpx = "^0.24.0"
+httpx = "^0.28.0"
 pytest = "^7.4.2"
 pytest-asyncio = "^0.23"
 pytest-cov = "4.1"
