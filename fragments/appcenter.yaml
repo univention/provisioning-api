@@ -97,3 +97,30 @@ variables:
     - if [ -n "$IMAGE_TAG" ]; then crudini --set --existing "$APPCENTER_FILE_DIR/ini" Application DockerImage "$IMAGE_TAG" || echo "Does not seem to be a docker image based app. Not setting DockerImage."; fi
     - cd "$APPCENTER_FILE_DIR"
     - univention-appcenter-control upload --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" *
+
+.do_release:
+  image: gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/univention-appcenter-control
+  tags:
+    - omar
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: "$CI_COMMIT_TAG"
+      when: manual
+      allow_failure: false
+  manual_confirmation: "LAST WARNING: App will be made pulic NOW?"
+  script:
+    - echo "$APP_NAME will be released in $APP_VERSION"
+    - cd /mnt/omar/vmwares/mirror/appcenter
+    - sudo /mnt/omar/vmwares/mirror/appcenter/copy_from_appcenter.test.sh "$APP_UCS_VERSION" "$APP_COMPONENT_ID"
+    - sudo /usr/bin/update_mirror.sh -v appcenter
+
+.check_release:
+  image: gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/univention-appcenter-control
+  rules:
+    - if: "$CI_COMMIT_TAG"
+      allow_failure: false
+  manual_confirmation: "Did you publish the app on omar (see: https://git.knut.univention.de/univention/components/ucsschool-kelvin-rest-api#publish-packages-from-test-appcenter-to-production-appcenter)?"
+  script:
+    - echo "Checking if $APP_NAME was released in $APP_VERSION"
+    - test "$(univention-appcenter-control get --json $UCS_RELEASE/$APP_ID | jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == $version) | .in_appcenter')" == "true"
