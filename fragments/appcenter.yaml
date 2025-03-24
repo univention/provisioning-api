@@ -123,4 +123,4 @@ variables:
   manual_confirmation: "Did you publish the app on omar (see: https://git.knut.univention.de/univention/components/ucsschool-kelvin-rest-api#publish-packages-from-test-appcenter-to-production-appcenter)?"
   script:
     - echo "Checking if $APP_NAME was released in $APP_VERSION"
-    - test "$(univention-appcenter-control get --json $UCS_RELEASE/$APP_ID | jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == $version) | .in_appcenter')" == "true"
+    - curl --fail "https://appcenter.software-univention.de/meta-inf/$APP_UCS_VERSION/$APP_ID/$APP_COMPONENT_ID.ini"
