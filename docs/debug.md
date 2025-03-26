@@ -4,7 +4,7 @@
 
 `kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials`
 `kubectl -n ${NAMESPACE?} exec -it nubus-provisioning-nats-0 -c nats-box -- sh`
-`kubectl -n jlohmer-nubus-40k3 get secrets nubus-provisioning-nats-credentials -o json`
+`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials -o json`
 `nats --user admin --password <super-secret-password> stream ls`
 
 ## Recreate a provisioning subscription
