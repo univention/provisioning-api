@@ -3,7 +3,7 @@
 ## Inspect the NATS database
 
 `kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials`
-`kubectl -n jlohmer-nubus-40k3  exec -it nubus-provisioning-nats-0 -c nats-box -- sh`
+`kubectl -n ${NAMESPACE?} exec -it nubus-provisioning-nats-0 -c nats-box -- sh`
 `kubectl -n jlohmer-nubus-40k3 get secrets nubus-provisioning-nats-credentials -o json`
 `nats --user admin --password <super-secret-password> stream ls`
 
