@@ -2,7 +2,7 @@
 
 ## Inspect the NATS database
 
-`kubectl -n jlohmer-nubus-40k3 get secrets nubus-provisioning-nats-credentials`
+`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials`
 `kubectl -n jlohmer-nubus-40k3  exec -it nubus-provisioning-nats-0 -c nats-box -- sh`
 `kubectl -n jlohmer-nubus-40k3 get secrets nubus-provisioning-nats-credentials -o json`
 `nats --user admin --password <super-secret-password> stream ls`
@@ -19,19 +19,19 @@ We can add automated support in form of a helm chart flag to automate this proce
 
 First we need to get the json secret from the Kubernetes AP and save it to a file:
 
-`kubectl -n ci-jlohmer-unrevert-selfservice-consumer get secrets nubus-provisioning-register-consumers-json-secrets -o json | jq '.data | map_values(@base64d)' | jq -r '."selfservice.json"' > selfservice.json
+`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-register-consumers-json-secrets -o json | jq '.data | map_values(@base64d)' | jq -r '."selfservice.json"' > selfservice.json
 `
 Then we need to obtain the Provisioning API credentials from the API:
-`kubectl -n uv-jlohmer-1 get secrets nubus-provisioning-register-consumers-credentials -o json | jq '.data | map_values(@base64d)'`
+`PASSWORD=$(kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-register-consumers-credentials -o json | jq '.data.ADMIN_PASSWORD | @base64d' | sed -re 's/^"([^"]+)"$/\1/')`
 
 The Provisioning API is not exposed outside the cluster.
 The easiest way to access it from your laptop is a kubectl port-forward.
 To start the port-forward, execute the following command in a separate terminal window:
 
-`kubectl -n uv-jlohmer-1 port-forward nubus-provisioning-api-75b5f9d7c4-59z8v 7777`
+`kubectl -n ${NAMESPACE?} port-forward nubus-provisioning-api-* 7777`
 
 Now we can delete the old subscription:
-`curl -o - -u "admin:915f96b323e47cf1fdb98d7b2dc40a10a1f9fbf2" -X DELETE http://localhost:7777/v1/subscriptions/selfservice`
+`curl -o - -u "admin:${PASSWORD?}" -X DELETE http://localhost:7777/v1/subscriptions/selfservice`
 
 After deleting the subscription, we can recreate it with the following command:
-`curl -u "admin:915f96b323e47cf1fdb98d7b2dc40a10a1f9fbf2" -H 'Content-Type: application/json' -d @selfservice.json http://localhost:7777/v1/subscriptions`
+`curl -u "admin:${PASSWORD?}" -H 'Content-Type: application/json' -d @selfservice.json http://localhost:7777/v1/subscriptions`
