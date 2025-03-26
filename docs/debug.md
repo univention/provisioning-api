@@ -17,7 +17,7 @@ you have to delete and recreate the subscription to recover from this state.
 For the moment a few manual steps are required to achieve this.
 We can add automated support in form of a helm chart flag to automate this process if it's a common occurrence.
 
-First we need to get the json secret from the Kubernetes AP and save it to a file:
+First we need to get the json secret from the Kubernetes API and save it to a file:
 
 `kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-register-consumers-json-secrets -o json | jq '.data | map_values(@base64d)' | jq -r '."selfservice.json"' > selfservice.json
 `
