@@ -1,0 +1,9 @@
+Hello,
+
+the ${APP_NAME} has been released in version ${APP_VERSION}.
+
+For changes, see ${CHANGELOG_LINK}
+
+Best regards
+
+${AUTHOR_ALIAS}

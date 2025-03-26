@@ -1,21 +1,58 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_OPEN_MERGE_REQUESTS
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_PROTECTED == "true"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "webide"
+    - if: $CI_COMMIT_TAG
+
 include:
   - project: univention/dist/docker-services
     file: kaniko.yml
   - project: univention/dist/docker-services
     file: pre-commit.yml
   - local: fragments/misc.yaml
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/app-release@$CI_COMMIT_SHA
+    inputs:
+      job_prefix: "test-release-"
+      appcenter_file_dir: "templates/app-release/test-release-app/appcenter/"
+      changelog_link: "https://$CI_SERVER_FQDN/$CI_PROJECT_PATH/"
+      mail_sender: "ucsschool-maintainers@univention.de"
+      author_alias: "UCS@school Team"
+      release_text_file: "templates/app-release/test-release-app/release_text.txt"
+      app_id: "test-release"
+      ucs_base_version: "5.2"
+      image_app_release: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/app-release:latest"
+      app_build_job_name: "build_test_release"
 
 stages:
   - build
-  - lint
+  - release
+  - cleanup
+
+build_test_release:
+  stage: build
+  extends: .kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "templates/app-release/test-release-app/**/*"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/test-release"
+    KANIKO_BUILD_CONTEXT: "templates/app-release/test-release-app"
+    TAG_PREFIX: "release-"
 
 run_pre_commit:
-  stage: lint
+  stage: build
   needs: []
   extends: .pre-commit
 
 lint_commit_messages:
-  stage: lint
+  stage: build
   needs: []
   extends: .lint_commit_messages
 
@@ -60,3 +97,30 @@ build_univention_appcenter_control:
   variables:
     CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/univention-appcenter-control"
     DOCKERFILE_PATH: "images/univention-appcenter-control.Containerfile"
+
+build_app_release:
+  stage: build
+  extends: .kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "images/app-release/**/*"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/app-release"
+    DOCKERFILE_PATH: "images/app-release/app-release.Containerfile"
+    KANIKO_BUILD_CONTEXT: "images/app-release"
+
+release_cicd_components:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/'
+  script:
+    - echo "Releasing for $CI_COMMIT_TAG."
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "CI/CD Components: $CI_COMMIT_TAG"
+    description: "$CI_COMMIT_TAG_MESSAGE"
