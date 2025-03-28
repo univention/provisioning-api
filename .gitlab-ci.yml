@@ -12,42 +12,11 @@ include:
   - project: univention/dist/docker-services
     file: pre-commit.yml
   - local: fragments/misc.yaml
-  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/app-release@$CI_COMMIT_SHA
-    inputs:
-      job_prefix: "test-release-"
-      appcenter_file_dir: "templates/app-release/test-release-app/appcenter/"
-      changelog_link: "https://$CI_SERVER_FQDN/$CI_PROJECT_PATH/"
-      mail_sender: "ucsschool-maintainers@univention.de"
-      author_alias: "UCS@school Team"
-      release_text_file: "templates/app-release/test-release-app/release_text.txt"
-      app_id: "test-release"
-      ucs_base_version: "5.2"
-      image_app_release: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/app-release:latest"
-      app_build_job_name: "build_test_release"
 
 stages:
   - build
   - release
   - cleanup
-
-build_test_release:
-  stage: build
-  extends: .kaniko
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_COMMIT_TAG
-      variables:
-        REGISTRY: "artifacts.software-univention.de"
-        REGISTRY_IMAGE: "$REGISTRY/ucsschool/test-release"
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        paths:
-          - "templates/app-release/test-release-app/**/*"
-  variables:
-    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/test-release"
-    KANIKO_BUILD_CONTEXT: "templates/app-release/test-release-app"
-    TAG_PREFIX: "release-"
 
 run_pre_commit:
   stage: build
