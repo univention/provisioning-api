@@ -1,5 +1,11 @@
 spec:
   inputs:
+    app_id:
+      description: "The app id of the app to release."
+    changelog_link:
+      description: "Link to the changelog document. This is included in the release notes, as well as default announcement messages."
+    ucs_base_version:
+      description: "The UCS base version the app versions are scoped for."
     image_app_release:
       default: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/app-release:latest"
       description: "Image for the release jobs."
@@ -18,18 +24,19 @@ spec:
     cleanup_stage:
       default: "cleanup"
       description: "The name of the stage which contains the cleanup jobs. Needs to be after the release stage."
-    app_build_job_name:
-      default: "build_docker_image"
-      description: "The job that creates the app artifacts (e.g. docker image or debian packages)."
+    additional_update_appcenter_needs:
+      type: array
+      default: []
+      description: "Additional jobs needed for the update_appcenter job (e.g. for templating)."
     appcenter_file_dir:
       default: "appcenter/"
-      description: "Directory which stores appcenter meta files."
-    changelog_link:
-      description: "Link to the changelog document."
+      description: "Directory which stores appcenter meta files. Subdirectories are ignored."
     mail_recipient:
       default: "$GITLAB_USER_EMAIL"
+      description: "Email address to send app announcement mail to."
     mail_sender:
       default: "$GITLAB_USER_EMAIL"
+      description: "Email address to write app announcement mail as."
     mail_subject:
       default: "App Release: $APP_NAME"
       description: "Subject for the release announcement mail."
@@ -42,8 +49,6 @@ spec:
     release_text_file:
       default: "/var/lib/default_release_text.txt"
       description: "Content for the release mail and chat message."
-    app_id: {}
-    ucs_base_version: {}
     release_tag_prefix:
       default: "release-"
       description: "Required prefix for a tag to trigger the release pipeline."
@@ -112,8 +117,7 @@ spec:
   stage: "$[[ inputs.build_stage ]]"
   needs:
     - "$[[ inputs.job_prefix ]]create_app_version"
-    - job: "$[[ inputs.app_build_job_name ]]"
-      optional: true
+    - "$[[ inputs.additional_update_appcenter_needs ]]"
   rules:
     - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
     - if: $CI_MERGE_REQUEST_ID
@@ -122,11 +126,12 @@ spec:
   variables:
     APPCENTER_FILE_DIR: "$[[ inputs.appcenter_file_dir ]]"
   script:
+    - echo "Rendering all appcenter file templates."
+    - render_appcenter_files
     - echo "Uploading appcenter files for $APP_UCS_VERSION/$APP_ID=$APP_VERSION."
-    - crudini --set "$APPCENTER_FILE_DIR/ini" Application Version "$APP_VERSION"
-    - if [ -n "$IMAGE_TAG" ]; then crudini --set --existing "$APPCENTER_FILE_DIR/ini" Application DockerImage "$IMAGE_TAG" || echo "Does not seem to be a docker image based app. Not setting DockerImage."; fi
-    - cd "$APPCENTER_FILE_DIR"
-    - univention-appcenter-control upload --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" *
+    - UPLOAD_FILES=$(find "$APPCENTER_FILE_DIR" -maxdepth 1 -type f -not -name '*.jinja' | xargs)
+    - 'echo "Uploading files: $UPLOAD_FILES"'
+    - univention-appcenter-control upload --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" $UPLOAD_FILES
 
 "$[[ inputs.job_prefix ]]do_release":
   stage: "$[[ inputs.release_stage ]]"

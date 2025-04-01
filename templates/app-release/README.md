@@ -2,6 +2,8 @@
 
 This component sets up all jobs necessary to create app releases in the App center.
 
+[[_TOC_]]
+
 ## Prerequisites
 
 ### Stages
@@ -17,10 +19,38 @@ This component requires the following CI/CD variables to be set:
 - `APPCENTER_CONTROL_PASSWORD`: The password to authenticate against the appcenter with.
 - `ROCKETCHAT_PASSWORD`: The password of the `flubberbot` user for rocket chat.
 
-### App artifacts
+### Templating
+
+The `app-release` component allows for templating of the appcenter files via jinja templates.
+This feature is completely optional, except in one instance:
+The `ini` file must be templated and contain the following fragment for the version:
+
+```ini
+Version = {{ APP_VERSION }}
+```
 
 If you build a docker app you need to provide the name of the job that builds the docker image as the input `app_build_job_name`.
 This job is required to export the variable `IMAGE_TAG`, that contains the tag of the docker image for the release.
+
+## Templating
+
+The `app-release` component allows for templating of appcenter files via `jinja`.
+
+To make use of this feature, simply append `.jinja` to any appcenter file within the `appcenter_file_dir`.
+Within the template you have access to the full feature set of jinja.
+Its context is composed of all environment variables the `update_appcenter` job has access to.
+
+If you have jobs that provide important variables for your templates, make sure they are included in the `update_appcenter` jobs
+need section.
+For that you can use the input `additional_update_appcenter_needs`.
+
+Per default the following environment variables are available next to Gitlab Pipeline predefined variables:
+
+- APP_ID
+- APP_VERSION
+- APP_COMPONENT_ID
+- APP_UCS_VERSION
+- APP_NAME
 
 ## Behavior
 
