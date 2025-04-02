@@ -15,7 +15,7 @@ variables:
       EXIT_CODE=0
       for COMMIT in $COMMITS; do
         echo "Checking COMMIT message for: $COMMIT"
-        git show -s --format=%B "$COMMIT" > tmp.txt
+        git show -s --format=%B "$COMMIT" | head -n -1 > tmp.txt
         for HOOK_ID in $HOOK_IDS; do
           pre-commit run --hook-stage commit-msg --commit-msg-filename tmp.txt "$HOOK_ID" || EXIT_CODE=1
         done
