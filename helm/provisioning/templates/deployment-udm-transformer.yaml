@@ -80,10 +80,14 @@ spec:
             - sh
             - -c
             - |
-              cp -av /usr/lib/python3/dist-packages/univention/udm/modules /target/udm-modules
-              cp -av /usr/lib/python3/dist-packages/univention/admin/hooks.d /target/udm-hooks.d
-              cp -av /usr/lib/python3/dist-packages/univention/admin/syntax.d /target/udm-syntax.d
-              cp -av /usr/lib/python3/dist-packages/univention/admin/handlers /target/udm-handlers
+              mkdir -p /target/udm-modules
+              mkdir -p /target/udm-hooks.d
+              mkdir -p /target/udm-syntax.d
+              mkdir -p /target/udm-handlers
+              cp -av /usr/lib/python3/dist-packages/univention/udm/modules/* /target/udm-modules
+              cp -av /usr/lib/python3/dist-packages/univention/admin/hooks.d/* /target/udm-hooks.d
+              cp -av /usr/lib/python3/dist-packages/univention/admin/syntax.d/* /target/udm-syntax.d
+              cp -av /usr/lib/python3/dist-packages/univention/admin/handlers/* /target/udm-handlers
           volumeMounts:
             - name: plugin-targets
               mountPath: /target
