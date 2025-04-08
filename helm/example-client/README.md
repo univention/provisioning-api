@@ -10,7 +10,7 @@ A Helm chart for the example client of the UDM provisioning API
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm | ums-common(common) | ^0.2.0 |
+| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.8.x |
 
 ## Values
 

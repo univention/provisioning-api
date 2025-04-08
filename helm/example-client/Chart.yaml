@@ -14,9 +14,8 @@ home: "https://www.univention.de/"
 version: "0.1.0"
 
 dependencies:
-  - name: "common"
-    alias: "ums-common"
-    repository: "oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/common-helm/helm"
-    version: "^0.2.0"
+  - name: "nubus-common"
+    version: "^0.8.x"
+    repository: "oci://artifacts.software-univention.de/nubus/charts"
 
 ...
