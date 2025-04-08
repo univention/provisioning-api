@@ -176,7 +176,7 @@ services:
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:0.28.3"
+    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
@@ -203,6 +203,8 @@ services:
       - "nats1"
       - "ldap-server"
       - "ldap-notifier"
+    volumes:
+      - /etc/ldap/
 
   ldap-notifier:
     platform: linux/amd64
