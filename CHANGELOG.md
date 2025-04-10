@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.3...v0.49.4) (2025-04-10)
+
+
+### Bug Fixes
+
+* make copy calls in container init more robust ([dd26ec3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/dd26ec33cac85d3f77edeca9907b200bbc06fa48)), closes [univention/dev/internal/team-nubus#1079](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1079)
+* update common helm dependency to remove deprecated dependency and avoid dockerhub rate limits ([41d6166](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/41d6166ce33298928718848f19ad4259a7d2015f)), closes [univention/dev/internal/team-nubus#1079](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1079)
+
 ## [0.49.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.2...v0.49.3) (2025-03-17)
 
 
