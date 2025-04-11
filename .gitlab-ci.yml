@@ -186,7 +186,7 @@ check-debian-updates:
 
 test_provisioning_lib:
   stage: test
-  image: docker-registry.knut.univention.de/python:3.11-slim
+  image: docker-registry.knut.univention.de/python:3.12-slim@sha256:5ada6d11077457411f44a0b126462d1334942b03945ac1686aed5e2c16931380
   script:
     - pip install poetry=="$POETRY_VERSION"
     - poetry config --local virtualenvs.create false
@@ -210,7 +210,7 @@ build_provisioning_lib:
     paths:
       - src/dist/
     expire_in: 1 week
-  image: docker-registry.knut.univention.de/python:3.11-slim
+  image: docker-registry.knut.univention.de/python:3.12-slim@sha256:5ada6d11077457411f44a0b126462d1334942b03945ac1686aed5e2c16931380
   before_script:
     - |
       # Split the version string by hyphen (-) into two parts
