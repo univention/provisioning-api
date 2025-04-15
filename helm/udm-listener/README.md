@@ -10,7 +10,7 @@ A Helm chart for the Univention Portal Provisioning API
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.8.x |
+| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.12.x |
 
 ## Values
 
