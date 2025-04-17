@@ -123,5 +123,5 @@ upload_from_build_system:
   script:
     - export HOME="$CI_PROJECT_DIR"
     - echo "$APPCENTER_CONTROL_USERNAME" > "$HOME/.univention-appcenter-user"
-    - echo "$APPCENTER_CONTROL_USERNAME" > "$HOME/.univention-appcenter-pwd"
+    - echo "$APPCENTER_CONTROL_PASSWORD" > "$HOME/.univention-appcenter-pwd"
     - copy_app_binaries --yes-i-really-want-it-non-interactive --ucsversion $[[ inputs.ucs_base_version ]] --appversion "$APP_VERSION" --upload $(find doc/errata/staging/ -name "*.yaml" -not -name "0template.yaml")
