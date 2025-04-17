@@ -1,0 +1,395 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2016-2023 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+#
+# $ cd ucs-school-4.4/doc/errata/staging
+# $ /path/to/copy_app_binaries -u ucs-school-netlogon-user-logonscripts.yaml ucs-school-umc-computerroom.yaml
+#
+# $ cd oxappsuite/doc/errata/staging
+# $ /path/to/copy_app_binaries -a oxseforucs --manufacturer Open-Xchange -r 4.4 -v "7.10.2-ucs2" -u univention-ox.yaml
+#
+# Requires:
+# - univention-appcenter-control
+
+from __future__ import absolute_import, print_function
+
+try:
+    from contextlib import nullcontext  # Python 3.7+
+except ImportError:
+
+    class nullcontext:  # type: ignore[no-redef]
+        def __init__(self, enter_result=None):
+            self.enter_result = enter_result
+
+        def __enter__(self):
+            return self.enter_result
+
+        def __exit__(self, *excinfo):
+            pass
+
+
+from itertools import chain
+from pathlib import Path
+from typing import Optional
+import json
+import logging
+import argparse
+import random
+import requests
+import shutil
+import subprocess
+import sys
+import tempfile
+
+import yaml
+
+try:
+    import debian.deb822 as deb822
+except ImportError:
+    sys.exit('Please call "apt-get install python-debian" and try again!')
+
+log = logging.getLogger()
+
+REPO_MOUNTPOINT = "/var/univention/buildsystem2"
+BASEURL_REPO_SERVER = "https://omar.knut.univention.de/build2"
+
+
+class GenericError(Exception):
+    pass
+
+
+class CopyError(GenericError):
+    pass
+
+
+class NoConfigFound(GenericError):
+    pass
+
+
+class AppRootDirNotFound(Exception):
+    pass
+
+
+def download_url(url: str, destination: Path) -> bool:
+    """
+    >>> download_url('http://www.univention.de/foo.deb', Path('/foo/bar/foo.deb'))
+    """
+    if destination.is_dir():
+        raise ValueError(
+            f"destination {destination!r} is a directory. It should not exist."
+        )
+    try:
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        with open(destination, "wb") as fd:
+            # you could set an arbitrary chunk size
+            for chunk in response.iter_content(chunk_size=65536):
+                fd.write(chunk)
+    except Exception as exc:
+        log.error("Cannot download %s: %s", url, exc)
+        return False
+    return True
+
+
+def get_scope(options: argparse.Namespace) -> str:
+    LOOKUP_TABLE = {
+        "4.1/ucsschool": "ucs-school-4.1r2",
+        "4.2/ucsschool": "ucs-school-4.2",
+        "4.3/ucsschool": "ucs-school-4.3",
+        "4.4/ucsschool": "ucs-school-4.4",
+        "5.0/ucsschool": "ucs-school-5.0",
+        "5.1/ucsschool": "ucs-school-5.1",
+        "5.2/ucsschool": "ucs-school-5.2",
+        "4.1/oxseforucs": "oxse4ucs",
+        "4.2/oxseforucs": "oxse4ucs",
+        "4.3/oxseforucs": "oxse4ucs",
+        "4.4/oxseforucs": "oxse4ucs",
+    }
+    key = "%s/%s" % (options.ucs_version, options.app_name)
+    if key not in LOOKUP_TABLE:
+        log.error("Cannot find %r in LOOKUP_TABLE", key)
+        sys.exit(1)
+    return LOOKUP_TABLE[key]
+
+
+def get_scope_repo(options: argparse.Namespace) -> str:
+    scope = get_scope(options)
+    return "ucs_%s-0-%s" % (options.ucs_version, scope)
+
+
+def find_app_basedir(start_dir: Optional[Path] = None) -> Path:
+    if start_dir is None:
+        start_dir = Path.cwd()
+
+    for cur_dir in chain([start_dir], start_dir.parents):
+        if cur_dir.joinpath("doc/errata/staging").is_dir():
+            return cur_dir
+    raise AppRootDirNotFound("Start point was %r" % (start_dir,))
+
+
+def get_app_version_string(options: argparse.Namespace) -> str:
+    return "%s/%s=%s" % (options.ucs_version, options.app_name, options.app_version)
+
+
+def check_app(options: argparse.Namespace) -> None:
+    log.info("Checking config...")
+    app_version_string = get_app_version_string(options)
+
+    stdout = subprocess.check_output(["univention-appcenter-control", "list", "--json"])
+    all_apps = json.loads(stdout.decode("utf-8"))
+    try:
+        app_data = [
+            x
+            for x in all_apps.get(options.manufacturer, {})
+            if x.get("id") == options.app_name
+        ][0]
+    except IndexError:
+        log.critical(
+            "Cannot fetch app data for %r/%r!", options.manufacturer, options.app_name
+        )
+        sys.exit(1)
+
+    for version in app_data.get("versions", []):
+        if (
+            version.get("ucs_version", "") == options.ucs_version
+            and version.get("version", "") == options.app_version
+        ):
+            if version.get("in_appcenter") and not options.push_to_published_enabled:
+                log.error(
+                    "%s is already published - cannot upload packages",
+                    app_version_string,
+                )
+                sys.exit(1)
+            break
+    else:
+        log.error(
+            "App %r could not be found in appcenter - please create/fork a new version",
+            app_version_string,
+        )
+        sys.exit(1)
+    log.debug("Config is ok")
+
+
+def copy_binaries(
+    options, fn_yaml: Path, targetdir: Path, http_mode: bool = False
+) -> None:
+    log.debug("Processing %s", fn_yaml)
+    with fn_yaml.open() as fd:
+        data = yaml.safe_load(fd)
+    pkgname = data["src"]
+    pkgversion = data["fix"]
+    scope = data["scope"]
+
+    fn_control = options.appbasedir / pkgname / "debian/control"
+    if not fn_control.exists():
+        log.error(
+            "%r does not exist in git - please process %s manually", pkgname, fn_yaml
+        )
+        raise CopyError(
+            "%r does not exist in git - please process %s manually" % (pkgname, fn_yaml)
+        )
+
+    if not http_mode:
+        scope_dir = Path(REPO_MOUNTPOINT) / "apt" / get_scope_repo(options)
+        if not scope_dir.exists():
+            log.warning("%r does not exist - switching to HTTP mode", scope_dir)
+            http_mode = True
+
+    error_cnt = 0
+    with fn_control.open() as fd_control:
+        for pkg_entry in deb822.Packages.iter_paragraphs(fd_control):
+            binary_pkg = pkg_entry.get("Package")
+            if not binary_pkg:
+                continue
+
+            log.info("Found binary package: %s", binary_pkg)
+            architecture = pkg_entry.get("Architecture")
+            _epoch, _sep, pkgversion_without_epoch = pkgversion.rpartition(":")
+
+            if not http_mode:
+                search = "**/%s_%s_*.deb" % (binary_pkg, pkgversion_without_epoch)
+                files = [
+                    fn
+                    for fn in scope_dir.glob(search)
+                    if (
+                        (architecture == "all" and fn.stem.endswith("_all"))
+                        or (
+                            architecture == "any"
+                            and fn.stem.endswith(("_i386", "_amd64"))
+                        )
+                    )
+                ]
+                if not files:
+                    log.error("%s: not found %s", binary_pkg, search)
+                    error_cnt += 1
+                elif architecture == "all" and len(files) != 1:
+                    log.error("%s: found %s", binary_pkg, files)
+                    error_cnt += 1
+                elif (
+                    architecture == "any" and len(files) != 2
+                ):  # FIXME: UCS-5 is amd64 only
+                    log.error("%s: found %s", binary_pkg, files)
+                    error_cnt += 1
+                else:
+                    for fn in files:
+                        shutil.copy(fn.as_posix(), targetdir.as_posix())
+            else:
+                # download the files directly from BASEURL_REPO_SERVER
+                file_arch = (
+                    "amd64" if architecture.lower() in ("any", "amd64") else "all"
+                )
+                filename = f"{binary_pkg}_{pkgversion_without_epoch}_{file_arch}.deb"
+                url = f"{BASEURL_REPO_SERVER}/{scope}/{file_arch}/{filename}"
+
+                log.info("Loading %s ...", filename)
+                if not download_url(url, targetdir / filename):
+                    error_cnt += 1
+
+    if error_cnt:
+        raise CopyError("error_count=%d" % (error_cnt,))
+
+
+def do_upload(options: argparse.Namespace, targetdir: Path) -> None:
+    app_version_string = get_app_version_string(options)
+    cmd = ["univention-appcenter-control", "upload", "--noninteractive"]
+    if options.push_to_published_enabled:
+        cmd += ["--upload-packages-although-published"]
+    cmd += [app_version_string]
+    fn_list = list(targetdir.glob("**/*.deb"))
+    cmd += [fn.as_posix() for fn in fn_list]
+    print()
+    print("Downloaded packages:")
+    print("   " + "\n   ".join(fn.name for fn in fn_list))
+    print()
+    print(
+        "Upload the files listed above to test app center (%s)?" % (app_version_string,)
+    )
+    sys.stdout.flush()
+    while not options.noninteractive:
+        passphrase = str(random.randint(100000, 999999))
+        print(
+            "Then enter the following string in reverse order: %s" % (passphrase[::-1],)
+        )
+        answer = input("> ")
+        if answer == passphrase:
+            break
+    else:
+        log.info("Noninteractive mode... starting upload automatically...")
+    log.info("executing %r", cmd)
+    subprocess.call(cmd)
+
+
+def check_mountpoints() -> bool:
+    log.debug("Checking mountpoint %s", REPO_MOUNTPOINT)
+    exitcode = subprocess.call(["mountpoint", "-q", REPO_MOUNTPOINT])
+    if exitcode:
+        log.debug("%s not mounted", REPO_MOUNTPOINT)
+        return False
+    log.debug("Done")
+    return True
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--app-name",
+        "--app",
+        "-a",
+        default="ucsschool",
+        help='name of app (default: "%(default)s")',
+    )
+    parser.add_argument(
+        "--manufacturer",
+        default="Univention",
+        action="store",
+        help="app manufacturer (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--ucs-version",
+        "--ucsversion",
+        "-r",
+        help='UCS version (e.g. "4.2")',
+        required=True,
+    )
+    parser.add_argument(
+        "--app-version",
+        "--appversion",
+        "-v",
+        help='App version (e.g. "4.2 v3")',
+        required=True,
+    )
+    parser.add_argument(
+        "--debug", "-d", action="store_true", help="show debug log output"
+    )
+    parser.add_argument(
+        "--upload", "-u", action="store_true", help="upload packages to test app center"
+    )
+    parser.add_argument(
+        "--targetdir", "-t", help="target directory (created if missing)"
+    )
+    parser.add_argument(
+        "--yes-i-really-want-it-non-interactive",
+        dest="noninteractive",
+        action="store_true",
+        help="(for internal use only!)",
+    )
+    parser.add_argument(
+        "--yes-i-really-want-to-upload-to-published-components",
+        dest="push_to_published_enabled",
+        action="store_true",
+        help="(for internal use only!)",
+    )
+    parser.add_argument("files", nargs="+", type=Path, help="Errata YAML files")
+    options = parser.parse_args()
+
+    for fn_yaml in options.files:
+        if fn_yaml.name == "0template.yaml":
+            continue
+        if not fn_yaml.exists():
+            parser.error("the file {!r} cannot be found!".format(fn_yaml))
+
+    return options
+
+
+def setup_logging(debug: bool) -> None:
+    logging.basicConfig(
+        stream=sys.stdout,
+        format="[%(levelname)s]: %(message)s",
+    )
+    log.setLevel(logging.DEBUG if debug else logging.INFO)
+
+
+def main() -> None:
+    options = parse_args()
+    setup_logging(options.debug)
+
+    options.appbasedir = find_app_basedir()
+
+    http_mode = not check_mountpoints()
+    if http_mode:
+        log.info(f"{REPO_MOUNTPOINT} not mounted - using HTTP mode")
+
+    context = (
+        nullcontext(options.targetdir)
+        if options.targetdir
+        else tempfile.TemporaryDirectory(prefix="app_binaries.")
+    )
+    with context as dirname:  # type: ignore[attr-defined]
+        targetdir = Path(dirname)
+        if not targetdir.exists():
+            targetdir.mkdir()
+        log.info("Copying files to %s ...", targetdir)
+        try:
+            check_app(options)
+
+            for fn_yaml in options.files:
+                copy_binaries(options, fn_yaml, targetdir, http_mode)
+            if options.upload:
+                do_upload(options, targetdir)
+            log.info("Done")
+        except GenericError as ex:
+            log.error("Aborted due to previous errors: %s", ex)
+
+
+if __name__ == "__main__":
+    main()
