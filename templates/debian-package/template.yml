@@ -48,7 +48,7 @@ deb_repo_import:
         PACKAGE=$(basename "$srcdir")
         if ! repo_admin.py \
           --git "$CI_REPOSITORY_URL" \
-          --branch "$CI_COMMIT_TAG" \
+          --branch "$CI_COMMIT_REF_NAME" \
           --path "$srcdir" \
           --release $[[ inputs.ucs_base_version ]]-0-0 \
           --scope $[[ inputs.scope ]] \
