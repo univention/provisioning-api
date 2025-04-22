@@ -13,6 +13,6 @@ keywords:
 type: "application"
 version: "0.1.2"
 dependencies:
-  - name: "common"
-    version: "^2.16.x"
-    repository: "oci://registry-1.docker.io/bitnamicharts"
+  - name: "nubus-common"
+    version: "^0.12.x"
+    repository: "oci://artifacts.software-univention.de/nubus/charts"
