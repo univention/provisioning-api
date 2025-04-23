@@ -32,7 +32,7 @@ variables:
       curl --output "$VMUTILSPATH"/utils.tar.gz "https://git.knut.univention.de/univention/ucs/-/archive/$UTILS_VERSION/ucs-$UTILS_VERSION.tar.gz?path=test/utils"
       tar -xf "$VMUTILSPATH"/utils.tar.gz --strip-components=2 --directory "$VMUTILSPATH"
       rm "$VMUTILSPATH"/utils.tar.gz
-      curl --output "$VMUTILSPATH"/shared-utils.tar.gz "https://git.knut.univention.de/univention/dist/ucs-ec2-tools/-/archive/HEAD/ucs-ec2-tools-HEAD.tar.gz?path=shared-utils"
+      curl --output "$VMUTILSPATH"/shared-utils.tar.gz "https://git.knut.univention.de/univention/infrastructure/ucs-ec2-tools/-/archive/HEAD/ucs-ec2-tools-HEAD.tar.gz?path=shared-utils"
       tar -xf "$VMUTILSPATH"/shared-utils.tar.gz --strip-components=1 --directory "$VMUTILSPATH"
       rm "$VMUTILSPATH"/shared-utils.tar.gz
     - declare -a UCS_OPENSTACK_CREATE_ARGS
