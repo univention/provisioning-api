@@ -81,6 +81,7 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
           {{- end }}
           {{- if .Values.image.extraArgs }}
+          command: ["consumer_example"]
           args: {{ .Values.image.extraArgs | toYaml | nindent 12 }}
           {{- end }}
 
