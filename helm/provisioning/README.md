@@ -194,8 +194,8 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.createUsers | object | `{}` |  |
 | registerConsumers.image.imagePullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
-| registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
-| registerConsumers.image.tag | string | `"0.28.0@sha256:816ad27b76046be360398274ba3c1f1bcec8f58c2ea5a200b2fb675aab1a5ab8"` |  |
+| registerConsumers.image.repository | string | `"nubus-dev/images/wait-for-dependency"` |  |
+| registerConsumers.image.tag | string | `"0.30.0-pre-jtorres-521-upgrade"` |  |
 | registerConsumers.jsonSecretName | string | `""` |  |
 | registerConsumers.podAnnotations | object | `{}` |  |
 | registerConsumers.provisioningApiBaseUrl | string | `""` |  |
