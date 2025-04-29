@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.50.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.4...v0.50.0) (2025-04-29)
+
+
+### Features
+
+* Remove docker.io dependencies ([e63b436](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e63b4365b740e9cb0efae6265b5bde2725111b41)), closes [univention/dev/internal/team-nubus#1131](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1131)
+
+
+### Bug Fixes
+
+* Bump base image versions ([21e7738](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/21e773830f08f1235d0a2017cebd1b6379eb5e45)), closes [univention/dev/internal/team-nubus#1155](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1155)
+
 ## [0.49.4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.3...v0.49.4) (2025-04-10)
 
 
