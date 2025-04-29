@@ -194,8 +194,8 @@ registerConsumers:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
     imagePullPolicy: null
-    repository: "nubus-dev/images/wait-for-dependency"
-    tag: "0.30.0-pre-jtorres-521-upgrade"
+    repository: "nubus/images/wait-for-dependency"
+    tag: "0.30.0@sha256:fa804c2a10aa42439bf3f388007d7e55c046d6da6dc8a74c27f5a989fd422c8d"
   createUsers: {}
     # demoConsumerName:
     #   username:
