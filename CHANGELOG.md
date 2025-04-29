@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.51.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.50.0...v0.51.0) (2025-04-29)
+
+
+### Features
+
+* Bump ucs-base-image version ([b567617](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b56761753954f14f69d8bb5f1e5b508b31b7696e)), closes [univention/dev/internal/team-nubus#1155](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1155)
+
+
+### Bug Fixes
+
+* final version of wait-for-dependency ([0479143](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0479143a5dbdb2d9db81c8a12a34f247ebbeeedb)), closes [univention/dev/internal/team-nubus#1155](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1155)
+
 ## [0.50.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.49.4...v0.50.0) (2025-04-29)
 
 
