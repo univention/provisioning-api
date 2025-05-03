@@ -83,7 +83,7 @@ NATS_USER = {value = "api", skip_if_set = true}
 NATS_PASSWORD = {value = "apipass", skip_if_set = true}
 NATS_MAX_RECONNECT_ATTEMPTS = {value = 2, skip_if_set = true}
 ADMIN_NATS_USER = {value = "admin", skip_if_set = true}
-ADMIN_NATS_PASSWORD = {value = "nimda", skip_if_set = true}
+ADMIN_NATS_PASSWORD = {value = "univention", skip_if_set = true}
 PROVISIONING_API_BASE_URL = {value = "http://localhost:7777", skip_if_set = true}
 PROVISIONING_API_USERNAME = {value = "foo", skip_if_set = true}
 PROVISIONING_API_PASSWORD = {value = "bar", skip_if_set = true}

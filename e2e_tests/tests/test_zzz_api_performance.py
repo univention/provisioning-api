@@ -136,7 +136,7 @@ async def test_udm_message_timing(
 
     print("Adding udm messages to the incoming queue")
     for _ in range(test_number):
-        messages.append(create_user_via_udm_rest_api(udm))  # noqa: F841
+        messages.append(create_user_via_udm_rest_api())  # noqa: F841
 
     await asyncio.sleep(1)
 
