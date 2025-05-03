@@ -20,6 +20,11 @@ dependencies = [
 nubus-provisioning-backends = { path = "../backends" }
 nubus-provisioning-common = { path = "../common" }
 
+[[tool.uv.index]]
+name = "gitlab"
+publish-url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
+url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
+
 [project.scripts]
 prefill = "univention.provisioning.prefill.main:run"
 

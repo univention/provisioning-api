@@ -15,6 +15,7 @@ include:
       - "jobs/container-build-external.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
+      - "templates/pip-package-and-publish.yaml"
 
   - project: "univention/infrastructure/docker-services"
     ref: "master"
@@ -146,57 +147,8 @@ check-debian-updates:
   variables:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 
-build_provisioning_lib:
-  allow_failure: true
-  stage: package
-  dependencies:
-    - pre-semantic-release
-  needs:
-    - pre-semantic-release
-  artifacts:
-    paths:
-      - consumer/dist/
-    expire_in: 1 week
-  image: docker-registry.knut.univention.de/python:3.11-slim
-  before_script:
-    - |
-      # Split the version string by hyphen (-) into two parts
-      IFS='-' read -ra parts <<< "$RELEASE_VERSION"
-
-      # Extract the version number and the suffix
-      version_number="${parts[0]}"
-      suffix="${parts[*]:1}"
-
-      # Check if the suffix exists
-      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]; then
-          modified_suffix="dev0+${suffix// /-}"
-          export package_version="$version_number.$modified_suffix.${CI_COMMIT_SHORT_SHA}"
-      else
-          export package_version="$version_number"
-      fi
-  script:
-    - pip install -U pip poetry=="$POETRY_VERSION"
-    - cd consumer
-    - poetry version "$package_version"
-    - poetry config --local virtualenvs.create false
-    - poetry build
-
-publish_provisioning_lib:
-  allow_failure: true
-  stage: publish
-  extends: build_provisioning_lib
-  dependencies:
-    - build_provisioning_lib
-    - pre-semantic-release
-  needs:
-    - build_provisioning_lib
-    - pre-semantic-release
-  script:
-    - pip install -U pip poetry=="$POETRY_VERSION"
-    - cd consumer
-    - poetry version "$package_version"
-    - poetry config --local virtualenvs.create false
-    - poetry config --local repositories.project_local ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
-    - poetry publish -r project_local --username gitlab-ci-token --password ${CI_JOB_TOKEN}
-
+build-and-publish-pip:
+  extends: .build-and-publish-pip-package-with-uv
+  variables:
+    PACKAGE_ROOT: "consumer"
 ...
