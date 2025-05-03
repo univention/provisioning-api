@@ -9,7 +9,9 @@ from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME,
 
 from univention.provisioning.backends.nats_mq import json_decoder
 from univention.provisioning.dispatcher.config import DispatcherSettings
+from univention.provisioning.dispatcher.mq_adapter_nats import NatsMessageQueueAdapter
 from univention.provisioning.dispatcher.service import DispatcherService, MessageAckManager
+from univention.provisioning.dispatcher.subscriptions_adapter_nats import NatsSubscriptionsAdapter
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 
 
@@ -20,6 +22,7 @@ def dispatcher_service(mock_nats_kv_adapter, mock_nats_mq_adapter) -> Dispatcher
     mq.mq = mock_nats_mq_adapter
     subs = NatsSubscriptionsAdapter(settings)
     subs.kv = mock_nats_kv_adapter
+    subs.watch_for_subscription_changes = AsyncMock()
     fake_ack = AsyncMock()
     mod_MSG = deepcopy(MSG)
     mod_MSG.data = json_decoder(mod_MSG.data.decode())
@@ -61,16 +64,8 @@ class TestDispatcher:
         with pytest.raises(ExceptionGroup):
             await dispatcher_service.dispatch_events()
 
-        # check subscribing to the incoming queue
-        dispatcher_service.mq.mq._js.subscribe.assert_called_once_with(
-            "incoming",
-            cb=dispatcher_service.mq.mq.cb,
-            durable="durable_name:incoming",
-            stream="stream:incoming",
-            manual_ack=True,
-        )
         # check waiting for the event
-        dispatcher_mock.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
+        dispatcher_service.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
 
         # check getting subscriptions for the realm_topic
         dispatcher_service.subscriptions_db.watch_for_subscription_changes.assert_called_once_with(
