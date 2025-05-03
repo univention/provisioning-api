@@ -44,7 +44,7 @@ class TestDispatcherService:
         dispatcher_service.subscriptions_db.get_all_subscriptions = get_all_subscriptions
 
         with pytest.raises(ExceptionGroup) as exception:
-            await dispatcher_service.dispatch_events()
+            await dispatcher_service.run()
 
         assert isinstance(exception.value.exceptions[0], Exception)
         assert str(exception.value.exceptions[0]) == "Stop waiting for the new event"
