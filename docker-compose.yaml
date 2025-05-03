@@ -19,7 +19,7 @@ services:
       NATS_PASSWORD: "apipass"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       ADMIN_NATS_USER: "admin"
-      ADMIN_NATS_PASSWORD: "nimda"
+      ADMIN_NATS_PASSWORD: "univention"
       UDM_HOST: "udm-rest-api"
       UDM_PORT: 9979
       ADMIN_USERNAME: "admin"
