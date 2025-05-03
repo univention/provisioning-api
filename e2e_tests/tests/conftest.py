@@ -334,21 +334,27 @@ def create_message_via_events_api() -> Callable[[E2ETestSettings], Body]:
 
 
 @pytest.fixture(scope="session")
-def create_udm_obj() -> Callable[[UDM, str, dict, Optional[str]], UdmObject]:
-    def _create_udm_obj(udm: UDM, object_type: str, properties: dict, position: Optional[str] = None) -> UdmObject:
-        objs = udm.get(object_type)
-        assert objs
-        obj = objs.new(position=position)
-        obj.properties.update(properties)
-        obj.save()
-        return obj
+def create_udm_obj(udm) -> Callable[[str, dict, Optional[str]], UdmObject]:
+    def _create_udm_obj(object_type: str, properties: dict, position: Optional[str] = None) -> UdmObject:
+        module = udm.get(object_type)
+        assert module
+        # # Ensure that the object does not already exist
+        # try:
+        #     object = module.get(position)
+        #     object.delete()
+        # except UnprocessableEntity:
+        #     pass
+        object = module.new(position=position)
+        object.properties.update(properties)
+        object.save()
+        return object
 
     return _create_udm_obj
 
 
 @pytest.fixture(scope="session")
-def create_user_via_udm_rest_api(create_udm_obj) -> Callable[[UDM, Optional[dict]], UdmObject]:
-    def _create_user_via_udm_rest_api(udm: UDM, extended_attributes: Optional[dict] = None) -> UdmObject:
+def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict]], UdmObject]:
+    def _create_user_via_udm_rest_api(extended_attributes: Optional[dict] = None) -> UdmObject:
         base_properties = {
             "username": str(uuid.uuid1()),
             "firstname": "John",
@@ -357,34 +363,33 @@ def create_user_via_udm_rest_api(create_udm_obj) -> Callable[[UDM, Optional[dict
             "pwdChangeNextLogin": True,
         }
         properties = {**base_properties, **(extended_attributes or {})}
-        return create_udm_obj(udm, USERS_TOPIC, properties)
+        return create_udm_obj(USERS_TOPIC, properties)
 
     return _create_user_via_udm_rest_api
 
 
-@pytest.fixture(scope="session")
-def create_extended_attribute_via_udm_rest_api(create_udm_obj) -> Callable[[UDM], UdmObject]:
-    def _create_extended_attribute_via_udm_rest_api(udm: UDM):
-        properties = {
-            "name": "UniventionPasswordSelfServiceEmail",
-            "CLIName": "PasswordRecoveryEmail",
-            "module": ["users/user"],
-            "syntax": "emailAddress",
-            "default": "",
-            "ldapMapping": "univentionPasswordSelfServiceEmail",
-            "objectClass": "univentionPasswordSelfService",
-            "shortDescription": "Password recovery e-mail address",
-            "tabAdvanced": False,
-            "tabName": "Password recovery",
-            "multivalue": False,
-            "valueRequired": False,
-            "mayChange": True,
-            "doNotSearch": False,
-            "deleteObjectClass": False,
-            "overwriteTab": False,
-            "fullWidth": True,
-        }
-        position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
-        return create_udm_obj(udm, "settings/extended_attribute", properties, position)
-
-    return _create_extended_attribute_via_udm_rest_api
+@pytest.fixture()
+def create_extended_attribute(create_udm_obj, udm) -> UdmObject:
+    properties = {
+        "name": "UniventionPasswordSelfServiceEmail",
+        "CLIName": "PasswordRecoveryEmail",
+        "module": ["users/user"],
+        "syntax": "emailAddress",
+        "default": "",
+        "ldapMapping": "univentionPasswordSelfServiceEmail",
+        "objectClass": "univentionPasswordSelfService",
+        "shortDescription": "Password recovery e-mail address",
+        "tabAdvanced": False,
+        "tabName": "Password recovery",
+        "multivalue": False,
+        "valueRequired": False,
+        "mayChange": True,
+        "doNotSearch": False,
+        "deleteObjectClass": False,
+        "overwriteTab": False,
+        "fullWidth": True,
+    }
+    position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
+    extended_attribute = create_udm_obj("settings/extended_attribute", properties, position)
+    yield extended_attribute
+    extended_attribute.delete()

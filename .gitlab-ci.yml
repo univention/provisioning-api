@@ -109,6 +109,7 @@ test-end-to-end:
     - sleep 10
     - docker compose run --quiet-pull --rm e2e-test
   after_script:
+    - docker ps -a
     - docker logs provisioning-api >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
     - docker logs provisioning-prefill >& prefill.log
