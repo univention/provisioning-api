@@ -21,7 +21,7 @@ class DispatcherService:
         self.subscriptions_db = subscriptions
         self._subscriptions: dict[str, dict[str, set[Subscription]]] = {}  # {realm: {topic: {Subscription, ..}}}
 
-    async def dispatch_events(self):
+    async def run(self):
         logger.info("Storing event in consumer queues")
         await self.mq.initialize_subscription(DISPATCHER_QUEUE_NAME, False, DISPATCHER_QUEUE_NAME)
 
@@ -33,24 +33,24 @@ class DispatcherService:
             task_group.create_task(
                 self.subscriptions_db.watch_for_subscription_changes(self.update_subscriptions_mapping)
             )
+            task_group.create_task(self.dispatch_events())
 
-            while True:
-                logger.debug("Waiting for an event...")
-                try:
-                    message, acknowledgements = await task_group.create_task(self.mq.get_one_message(timeout=10))
-                except Empty:
-                    logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
-                    continue
-                message_handler = self.handle_message(message)
-                try:
-                    await task_group.create_task(
-                        self.ack_manager.process_message_with_ack_wait_extension(
-                            message_handler, acknowledgements.acknowledge_message_in_progress
-                        )
-                    )
-                except Exception:
-                    await acknowledgements.acknowledge_message_negatively()
-                await acknowledgements.acknowledge_message()
+    async def dispatch_events(self):
+        while True:
+            logger.debug("Waiting for an event...")
+            try:
+                message, acknowledgements = await self.mq.get_one_message(timeout=10)
+            except Empty:
+                logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
+                continue
+            message_handler = self.handle_message(message)
+            try:
+                await self.ack_manager.process_message_with_ack_wait_extension(
+                    message_handler, acknowledgements.acknowledge_message_in_progress
+                )
+            except Exception:
+                await acknowledgements.acknowledge_message_negatively()
+            await acknowledgements.acknowledge_message()
 
     async def handle_message(self, message: MQMessage):
         data = message.data

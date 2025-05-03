@@ -32,19 +32,6 @@ def dispatcher_service(mock_nats_kv_adapter, mock_nats_mq_adapter) -> Dispatcher
     return DispatcherService(ack_manager=MessageAckManager(), mq=mq, subscriptions=subs)
 
 
-# @pytest.fixture
-# async def dispatcher_mock(mock_nats_kv_adapter, mock_nats_mq_adapter) -> DispatcherPort:
-#     port = DispatcherPort(DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass"))
-#     port.mq = mock_nats_mq_adapter
-#     port.kv = mock_nats_kv_adapter
-#     port.mq._message_queue.get = AsyncMock(side_effect=[MSG, Exception("Stop waiting for the new event")])
-#     port.watch_for_subscription_changes = AsyncMock()
-#     Msg.in_progress = AsyncMock()
-#     Msg.ack = AsyncMock()
-#
-#     return port
-
-
 class StopLoopException(Exception): ...
 
 
@@ -61,8 +48,10 @@ class TestDispatcher:
         # trigger dispatcher to retrieve event from incoming queue
         dispatcher_service._subscriptions = SUBSCRIPTIONS
 
-        with pytest.raises(ExceptionGroup):
-            await dispatcher_service.dispatch_events()
+        with pytest.raises(ExceptionGroup) as exception_group:
+            await dispatcher_service.run()
+
+        assert any(isinstance(error, StopLoopException) for error in exception_group.value.exceptions)
 
         # check waiting for the event
         dispatcher_service.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
