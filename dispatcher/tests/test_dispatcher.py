@@ -54,7 +54,5 @@ class TestDispatcherService:
             dispatcher_service.update_subscriptions_mapping
         )
         dispatcher_service.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
-        dispatcher_service.mq.enqueue_message.assert_called_once_with(
-            SUBSCRIPTION_INFO["name"], self.main_subject, MESSAGE
-        )
-        dispatcher_service._port.acknowledge_message.assert_called_once_with(MQMESSAGE)
+        dispatcher_service.mq.enqueue_message.assert_called_once_with(SUBSCRIPTION_INFO["name"], MESSAGE)
+        fake_ack.acknowledge_message.assert_called_once_with()

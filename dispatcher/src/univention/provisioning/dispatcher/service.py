@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import DISPATCHER_QUEUE_NAME, DISPATCHER_SUBJECT_TEMPLATE
+from univention.provisioning.models.constants import DISPATCHER_QUEUE_NAME
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
 
@@ -37,11 +37,10 @@ class DispatcherService:
             while True:
                 logger.debug("Waiting for an event...")
                 try:
-                    message, acknowledgements = await self.mq.get_one_message(timeout=10)
+                    message, acknowledgements = await task_group.create_task(self.mq.get_one_message(timeout=10))
                 except Empty:
                     logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
                     continue
-                message = await self.mq.wait_for_event()
                 message_handler = self.handle_message(message)
                 try:
                     await task_group.create_task(
@@ -81,8 +80,6 @@ class DispatcherService:
             await self.mq.enqueue_message(sub.name, validated_msg)
         if not subscriptions:
             logger.info("No consumers for message with realm: %r topic: %r.", validated_msg.realm, validated_msg.topic)
-
-        await self.mq.acknowledge_message(message)
 
     async def update_subscriptions_mapping(self, *args, **kwargs) -> None:
         new_subscriptions_mapping: dict[str, dict[str, set[Subscription]]] = {}

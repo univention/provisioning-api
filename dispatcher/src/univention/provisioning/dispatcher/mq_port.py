@@ -4,6 +4,7 @@
 import abc
 from typing import Optional, Self
 
+from univention.provisioning.backends.message_queue import Acknowledgements
 from univention.provisioning.models.message import Message, MQMessage
 
 from .config import DispatcherSettings
@@ -29,13 +30,7 @@ class MessageQueuePort(abc.ABC):
     async def enqueue_message(self, queue: str, message: Message) -> None: ...
 
     @abc.abstractmethod
-    async def subscribe_to_queue(self) -> None: ...
+    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str) -> None: ...
 
     @abc.abstractmethod
-    async def wait_for_event(self) -> MQMessage: ...
-
-    @abc.abstractmethod
-    async def acknowledge_message(self, message: MQMessage) -> None: ...
-
-    @abc.abstractmethod
-    async def acknowledge_message_in_progress(self, message: MQMessage) -> None: ...
+    async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]: ...
