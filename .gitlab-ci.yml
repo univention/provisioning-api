@@ -16,7 +16,7 @@ include:
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
 
-  - project: "univention/dist/docker-services"
+  - project: "univention/infrastructure/docker-services"
     ref: "master"
     file:
       - "dind.yml"
