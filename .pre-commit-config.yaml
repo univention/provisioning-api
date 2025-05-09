@@ -76,7 +76,7 @@ repos:
           - "--chart-search-root=helm"
           - "--template-files=README.md.gotmpl"
 
-  - repo: "https://git.knut.univention.de/univention/dist/pre-commit-hooks/addlicense"
+  - repo: "https://git.knut.univention.de/univention/infrastructure/pre-commit-hooks/addlicense"
     rev: "v1.0.2"
     hooks:
       - id: "addlicense"
