@@ -227,6 +227,7 @@ services:
       LDAP_CN_ADMIN_PW: univention
       LDAP_BASEDN: "dc=univention-organization,dc=intranet"
       PYTHON_LOG_LEVEL: "DEBUG"
+      UPDATE_INDEX_ON_STARTUP: "true"
     ports:
       - 389:389
       - 636:636
