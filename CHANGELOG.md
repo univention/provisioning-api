@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.51.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.51.0...v0.51.1) (2025-05-10)
+
+
+### Bug Fixes
+
+* add missing env for ldap-server in docker-compose.yaml ([d8e0cd4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d8e0cd41816fd531413cd0b76b02fbc0e3f5a5d7))
+* move addlicense pre-commit hook ([46f1aaf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/46f1aaf965b8980b5e6cf24fb5603a57fb36f794))
+* move docker-services ([194d197](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/194d1972cb91c26c69024ec6b5985543ced65125))
+* update common-ci to main ([73ff4de](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/73ff4de40b8d3d06f275b673ae5ee0aa1788893b))
+
 ## [0.51.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.50.0...v0.51.0) (2025-04-29)
 
 
