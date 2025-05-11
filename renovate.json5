@@ -24,7 +24,7 @@
     },
     {
       matchPackageNames: [
-        'gitregistry.knut.univention.de/univention/components/ucs-base-image/ucs-base-521',
+        'gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-521',
       ],
       versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+).(?<patch>\\d+)-build-(?<build>\\d+-\\d+-\\d+)$',
     },
