@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.51.1...v0.52.0) (2025-05-11)
+
+
+### Features
+
+* move and upgrade ucs-base-image to 0.17.3-build-2025-05-11 ([a7753ca](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a7753ca06c351780128073fc5b526a9b67e80332))
+
 ## [0.51.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.51.0...v0.51.1) (2025-05-10)
 
 
