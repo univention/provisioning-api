@@ -8,6 +8,7 @@ from univention.listener.handler import ListenerModuleHandler
 from univention.provisioning.listener.config import ldap_producer_settings
 from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAdapter
 from univention.provisioning.listener.mq_port import MessageQueuePort
+from univention.provisioning.models.message import NoUDMTypeError
 
 name = "provisioning_handler"
 
@@ -51,4 +52,7 @@ class LdapListener(ListenerModuleHandler):
 
     async def _async_send_message(self, new, old) -> None:
         async with self.mq as mq:
-            await mq.enqueue_change_event(new, old)
+            try:
+                await mq.enqueue_change_event(new, old)
+            except NoUDMTypeError:
+                self.logger.debug("Ignoring non-UDM messages. new: %r, old: %r", new, old)
