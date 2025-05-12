@@ -29,7 +29,7 @@ variables:
     - |
       rm -rf "$VMUTILSPATH"
       mkdir -p "$VMUTILSPATH"
-      curl --output "$VMUTILSPATH"/utils.tar.gz "https://git.knut.univention.de/univention/ucs/-/archive/$UTILS_VERSION/ucs-$UTILS_VERSION.tar.gz?path=test/utils"
+      curl --output "$VMUTILSPATH"/utils.tar.gz "https://git.knut.univention.de/univention/dev/ucs/-/archive/$UTILS_VERSION/ucs-$UTILS_VERSION.tar.gz?path=test/utils"
       tar -xf "$VMUTILSPATH"/utils.tar.gz --strip-components=2 --directory "$VMUTILSPATH"
       rm "$VMUTILSPATH"/utils.tar.gz
       curl --output "$VMUTILSPATH"/shared-utils.tar.gz "https://git.knut.univention.de/univention/infrastructure/ucs-ec2-tools/-/archive/HEAD/ucs-ec2-tools-HEAD.tar.gz?path=shared-utils"
