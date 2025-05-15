@@ -17,7 +17,7 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"udmlistenerpass","natsPort":"4222","natsUser":"udmlistener","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApi":{"auth":{"credentialSecret":{"name":"","passwordKey":"EVENTS_PASSWORD_UDM","userNameKey":"EVENTS_USERNAME_UDM"}}},"provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"udmlistenerpass","natsPort":"4222","natsUser":"udmlistener","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.ldapHost | string | `""` | The LDAP Server host, should point to the service name of the ldap-server-primary that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier" |
@@ -55,11 +55,7 @@ A Helm chart for the Univention Portal Provisioning API
 | image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
 | image.tag | string | `"0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"` |  |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
-| ldap.credentialSecret.ldapPasswordKey | string | `"ldap.secret"` |  |
-| ldap.credentialSecret.machinePasswordKey | string | `"machine.secret"` |  |
-| ldap.credentialSecret.name | string | `""` |  |
-| ldap.tlsSecret.caCertKey | string | `"ca.crt"` |  |
-| ldap.tlsSecret.name | string | `""` |  |
+| ldap | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"ldap.secret"},"name":""}},"tlsSecret":{"caCertKey":"ca.crt","name":""}}` | LDAP client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | livenessProbe.exec.command[0] | string | `"sh"` |  |
 | livenessProbe.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.exec.command[2] | string | `"exit 0\n"` |  |
@@ -70,15 +66,14 @@ A Helm chart for the Univention Portal Provisioning API
 | livenessProbe.timeoutSeconds | int | `5` | Timeout for command return. |
 | mountSecrets | bool | `true` |  |
 | nameOverride | string | `""` |  |
-| nats.auth.credentialSecret.key | string | `"NATS_PASSWORD"` |  |
-| nats.auth.credentialSecret.name | string | `""` |  |
-| nats.bundled | bool | `true` |  |
+| nats | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"NATS_PASSWORD"},"name":null}},"bundled":true}` | NATS client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext.enabled | bool | `true` | Enable security context. |
 | podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[]` | Allow binding to ports below 1024 without root access. |
+| provisioningApi | object | `{"auth":{"existingSecret":{"keyVapping":{"password":"EVENTS_PASSWORD_UDM"},"name":""},"username":"udm"}}` | Provisioning API client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | readinessProbe.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.exec.command[2] | string | `"exit 0\n"` |  |

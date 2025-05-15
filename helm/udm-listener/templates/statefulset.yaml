@@ -99,23 +99,20 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "udm-listener.nats.auth.credentialSecret.name" . }}
-                  key: {{ .Values.nats.auth.credentialSecret.key | quote}}
+                  name: {{ tpl .Values.nats.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.nats.auth.existingSecret.keyMapping.password . }}
             {{- else if .Values.config.natsPassword }}
             - name: NATS_PASSWORD
               value: {{ .Values.config.natsPassword | quote }}
             {{- end }}
             {{- if .Values.global.nubusDeployment }}
             - name: EVENTS_USERNAME_UDM
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "udm-listener.provisioningApi.auth.credentialSecret.name" . }}
-                  key: {{ .Values.config.provisioningApi.auth.credentialSecret.userNameKey | quote}}
+              value: {{ .Values.provisioningApi.auth.username | quote }}
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "udm-listener.provisioningApi.auth.credentialSecret.name" . }}
-                  key: {{ .Values.config.provisioningApi.auth.credentialSecret.passwordKey | quote}}
+                  name: {{ tpl .Values.provisioningApi.auth.existingSecret.name . }}
+                  key: {{ tpl .Values.provisioningApi.auth.existingSecret.keyMapping.password . }}
             {{- else if .Values.config.eventsPasswordUdm }}
             - name: EVENTS_USERNAME_UDM
               value: {{ .Values.config.eventsUsernameUdm | quote }}
@@ -136,14 +133,13 @@ spec:
             - name: "secrets"
               mountPath: "{{ .Values.config.secretMountPath }}"
             {{- else }}
-            {{- if (include "udm-listener.ldap.credentialSecret.name" . ) }}
-            - name: {{ printf "%s-volume" (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+            {{- if .Values.ldap.auth.existingSecret.name  }}
+            - name: {{ printf "%s-volume" (tpl .Values.ldap.auth.existingSecret.name . ) | quote }}
+              subPath: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password") }}
               mountPath: "{{ .Values.config.secretMountPath }}/ldap_secret"
-              subPath: {{ .Values.ldap.credentialSecret.ldapPasswordKey | quote }}
-              readOnly: true
-            - name: {{ printf "%s-volume" (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+            - name: {{ printf "%s-volume" (tpl .Values.ldap.auth.existingSecret.name . ) | quote }}
               mountPath: "{{ .Values.config.secretMountPath }}/machine_secret"
-              subPath: {{ .Values.ldap.credentialSecret.machinePasswordKey | quote }}
+              subPath: {{ include "common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password") }}
               readOnly: true
             {{- end }}
             {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
@@ -171,10 +167,10 @@ spec:
           secret:
             secretName: {{ include "common.names.fullname" . | quote }}
         {{- else }}
-        {{- if (include "udm-listener.ldap.credentialSecret.name" . ) }}
-        - name: {{ printf "%s-volume" (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+        {{- if .Values.ldap.auth.existingSecret.name  }}
+        - name: {{ printf "%s-volume" (tpl .Values.ldap.auth.existingSecret.name . ) | quote }}
           secret:
-            secretName: {{ (include "udm-listener.ldap.credentialSecret.name" . ) | quote }}
+            secretName: {{ tpl .Values.ldap.auth.existingSecret.name . }}
         {{- end }}
         {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
         - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}

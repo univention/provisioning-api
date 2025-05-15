@@ -100,31 +100,8 @@ These template definitions are only used in this chart and do not relate to temp
 {{- end -}}
 {{- end -}}
 
-{{- define "udm-listener.secretTemplate" -}}
-{{- if (index . 2).Release.Name -}}
-{{- $secretName := printf "%s-%s-credentials" (index . 2).Release.Name (index . 0) -}}
-{{- if (index . 1).name -}}
-{{- (index . 1).name -}}
-{{- else if (index . 2).Values.global.nubusDeployment -}}
-{{- $secretName -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "udm-listener.ldap.credentialSecret.name" -}}
-{{- include "udm-listener.secretTemplate" (list "provisioning-udm-listener-ldap" .Values.ldap.credentialSecret .) -}}
-{{- end -}}
-
 {{- define "udm-listener.ldap.tlsSecret.name" -}}
 {{- include "udm-listener.tlsSecretTemplate" (list "provisioning-udm-listener-ldap" .Values.ldap.tlsSecret .) -}}
-{{- end -}}
-
-{{- define "udm-listener.nats.auth.credentialSecret.name" -}}
-{{- include "udm-listener.secretTemplate" (list "provisioning-udm-listener" .Values.nats.auth.credentialSecret .) -}}
-{{- end -}}
-
-{{- define "udm-listener.provisioningApi.auth.credentialSecret.name" -}}
-{{- include "udm-listener.secretTemplate" (list "provisioning-udm-listener" .Values.config.provisioningApi.auth.credentialSecret .) -}}
 {{- end -}}
 
 {{- define "udm-listener.notifierServer" -}}
