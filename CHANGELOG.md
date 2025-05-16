@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.0...v0.53.1) (2025-05-16)
+
+
+### Bug Fixes
+
+* **udm-transformer:** Update base image to include univentionObjectIdentifier changes from upstream ([cf47179](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/cf471797651a182f9fb4411128419d60300e8fa4)), closes [univention/dev/internal/team-nubus#1143](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1143)
+
 ## [0.53.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.52.0...v0.53.0) (2025-05-16)
 
 
