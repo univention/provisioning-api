@@ -268,3 +268,10 @@ startupProbe:
       - -c
       - |
         exit 0
+
+# Set PVCs size and storage class
+persistence:
+  # -- Specify storageClassName - Leave empty to use the default storage class
+  storageClass: ""
+  # -- Specify PVCs size
+  size: 1Gi

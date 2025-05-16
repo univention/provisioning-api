@@ -68,6 +68,8 @@ A Helm chart for the Univention Portal Provisioning API
 | nameOverride | string | `""` |  |
 | nats | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"NATS_PASSWORD"},"name":null}},"bundled":true}` | NATS client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | nodeSelector | object | `{}` |  |
+| persistence.size | string | `"1Gi"` | Specify PVCs size |
+| persistence.storageClass | string | `""` | Specify storageClassName - Leave empty to use the default storage class |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext.enabled | bool | `true` | Enable security context. |
 | podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
