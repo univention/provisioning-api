@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.53.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.52.0...v0.53.0) (2025-05-16)
+
+
+### Features
+
+* **udm-listener:** Refactor secret configuration to use "{client}.auth.existingSecret" ([97a66b4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/97a66b4e14d5fa15cf7c0eba332723770e387525))
+
+
+### Bug Fixes
+
+* **udm-listener:** Remove default comment from values file ([d5cd6e1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d5cd6e151fb51ef006c948bb9b205c3bd171d8a6))
+
 ## [0.52.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.51.1...v0.52.0) (2025-05-11)
 
 
