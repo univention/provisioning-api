@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import uuid
+
 import aiohttp
 import pytest
 
@@ -61,6 +63,8 @@ async def test_get_real_messages(provisioning_client: ProvisioningConsumerClient
     )
 
     assert response is not None
+    assert response.body.new["properties"]["univentionObjectIdentifier"]
+    uuid.UUID(response.body.new["properties"]["univentionObjectIdentifier"])
 
 
 async def test_get_multiple_messages(provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM):
