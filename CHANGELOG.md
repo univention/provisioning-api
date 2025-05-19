@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.1...v0.53.2) (2025-05-19)
+
+
+### Bug Fixes
+
+* **udm-listener:** add configurable storageClass and size to PVC ([80f985a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/80f985acd041b988cac4d8ad4824e588c4c1d7f0)), closes [univention/dev/internal/team-nubus#1181](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1181)
+
 ## [0.53.1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.0...v0.53.1) (2025-05-16)
 
 
