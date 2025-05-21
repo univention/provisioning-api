@@ -17,16 +17,12 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","natsHost":null,"natsPassword":"udmlistenerpass","natsPort":"4222","natsUser":"udmlistener","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.ldapHost | string | `""` | The LDAP Server host, should point to the service name of the ldap-server-primary that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier" |
 | config.ldapPassword | string | `""` | LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set. |
 | config.ldapPasswordFile | string | `"/var/secrets/ldap_secret"` | The path to the "ldapPasswordFile" docker secret or a plain file |
-| config.natsHost | string | `nil` | NATS: host (required if nats.bundled == false) |
-| config.natsPassword | string | `"udmlistenerpass"` | NATS: password |
-| config.natsPort | string | `"4222"` | NATS: port (required if nats.bundled == false) |
-| config.natsUser | string | `"udmlistener"` | NATS: user name |
 | config.nats_max_reconnect_attempts | string | `"5"` | NATS: maximum number of reconnect attempts to the NATS server |
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
 | config.provisioningApiHost | string | `"provisioning-api"` | Provisioning-API Hostname |
@@ -66,7 +62,7 @@ A Helm chart for the Univention Portal Provisioning API
 | livenessProbe.timeoutSeconds | int | `5` | Timeout for command return. |
 | mountSecrets | bool | `true` |  |
 | nameOverride | string | `""` |  |
-| nats | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"NATS_PASSWORD"},"name":null}},"bundled":true}` | NATS client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
+| nats | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"NATS_PASSWORD"},"name":null},"password":"","user":"udmlistener"},"connection":{"host":null,"port":"4222"}}` | NATS client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | nodeSelector | object | `{}` |  |
 | persistence.size | string | `"1Gi"` | Specify PVCs size |
 | persistence.storageClass | string | `""` | Specify storageClassName - Leave empty to use the default storage class |

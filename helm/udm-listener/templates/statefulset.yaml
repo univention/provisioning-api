@@ -94,7 +94,7 @@ spec:
               -y "${LDAP_PASSWORD_FILE}" -Z
           env:
             - name: NATS_USER
-              value: {{ .Values.config.natsUser | quote }}
+              value: {{ .Values.nats.auth.user | quote }}
             {{- if .Values.global.nubusDeployment }}
             - name: NATS_PASSWORD
               valueFrom:
@@ -103,7 +103,7 @@ spec:
                   key: {{ tpl .Values.nats.auth.existingSecret.keyMapping.password . }}
             {{- else if .Values.config.natsPassword }}
             - name: NATS_PASSWORD
-              value: {{ .Values.config.natsPassword | quote }}
+              value: {{ .Values.nats.auth.password | quote }}
             {{- end }}
             {{- if .Values.global.nubusDeployment }}
             - name: EVENTS_USERNAME_UDM

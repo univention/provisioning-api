@@ -44,21 +44,6 @@ cn=admin,dc=univention-organization,dc=intranet
 {{- end -}}
 {{- end -}}
 
-{{- define "udm-listener.nats.connection.host" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.nats.connection.host" . -}}
-{{- else -}}
-{{ required ".Values.config.natsHost must be defined." .Values.config.natsHost}}
-{{- end -}}
-{{- end -}}
-
-{{- define "udm-listener.nats.connection.port" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.nats.connection.port" . -}}
-{{- else -}}
-{{ required ".Values.config.natsPort must be defined." .Values.config.natsPort}}
-{{- end -}}
-{{- end -}}
 
 {{- define "udm-listener.ldapNotifier.connection.host" -}}
 {{- if .Values.global.nubusDeployment -}}
