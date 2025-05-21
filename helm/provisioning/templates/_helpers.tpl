@@ -13,14 +13,6 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- tpl (coalesce .Values.configMapUcr .Values.global.configMapUcr $nubusConfigMapUcr) . -}}
 {{- end -}}
 
-{{- define "nubusTemplates.nats.connection.host" -}}
-{{- printf "%s-provisioning-nats" .Release.Name -}}
-{{- end -}}
-
-{{- define "nubusTemplates.nats.connection.port" -}}
-4222
-{{- end -}}
-
 {{- define "nubusTemplates.provisioningApi.connection.host" -}}
 {{ printf "%s-provisioning-api" .Release.Name }}
 {{- end -}}
