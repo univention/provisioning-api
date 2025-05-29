@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.2...v0.53.3) (2025-05-29)
+
+
+### Bug Fixes
+
+* **udm-listener:** Typo in provisioningApi secret value mapping ([04e5046](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/04e50469989b62768add7b53c14a8dda9fee8657)), closes [univention/dev/internal/team-nubus#1208](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1208)
+
 ## [0.53.2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.1...v0.53.2) (2025-05-19)
 
 
