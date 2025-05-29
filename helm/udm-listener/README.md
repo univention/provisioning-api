@@ -75,7 +75,7 @@ A Helm chart for the Univention Portal Provisioning API
 | podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[]` | Allow binding to ports below 1024 without root access. |
-| provisioningApi | object | `{"auth":{"existingSecret":{"keyVapping":{"password":"EVENTS_PASSWORD_UDM"},"name":""},"username":"udm"}}` | Provisioning API client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
+| provisioningApi | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"EVENTS_PASSWORD_UDM"},"name":""},"username":"udm"}}` | Provisioning API client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | readinessProbe.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.exec.command[2] | string | `"exit 0\n"` |  |

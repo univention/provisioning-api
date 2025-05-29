@@ -212,7 +212,7 @@ provisioningApi:
     username: "udm"
     existingSecret:
       name: ""
-      keyVapping:
+      keyMapping:
         password: "EVENTS_PASSWORD_UDM"
 
 livenessProbe:
