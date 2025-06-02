@@ -12,6 +12,7 @@ repos:
     hooks:
       # "Check for added large files"
       - id: "check-added-large-files"
+        exclude: docs/architecture/sovwp-architecture-provisioning_0.11.pdf
       # "Check for merge conflicts"
       - id: "check-merge-conflict"
       # "Check Yaml"
