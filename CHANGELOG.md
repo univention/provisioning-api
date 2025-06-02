@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.3...v0.54.0) (2025-06-02)
+
+
+### Features
+
+* add ability to configure external NATS for udm-listener ([4e3ea36](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4e3ea368d919cfcdc38c841b8142448657005ca9)), closes [univention/dev/internal/team-nubus#950](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/950)
+
 ## [0.53.3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.2...v0.53.3) (2025-05-29)
 
 
