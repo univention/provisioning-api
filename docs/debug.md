@@ -23,7 +23,7 @@ Get a list of all subscriptions:
 ## Inspect the NATS database
 
 Get the NATS admin Credentials:
-`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials -o json | jq '.data'`
+`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials -o json | jq -r '.data.admin_password' | base64 -d ; echo`
 
 Exec into the nats-box container:
 `kubectl -n ${NAMESPACE?} exec -it nubus-provisioning-nats-0 -c nats-box -- sh`
