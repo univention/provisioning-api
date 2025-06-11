@@ -1,5 +1,69 @@
 # Changelog
 
+## [0.55.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.54.0...v0.55.0) (2025-06-11)
+
+
+### Features
+
+* **dispatcher:** ports and adapters ([303cf20](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/303cf20558183f5672729291479886e65fcf4378))
+* Migrate backends and common from poetry to uv ([331b657](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/331b657149d84375e19b877b743ffae795acf49c))
+* ports and adapters, split KV and MQ ([6223c7e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6223c7e87175c763367f8fa653b69e4f88e1a662))
+* **prefill:** ports and adapters ([32628f4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/32628f4cb5c8e0f6e48b06e3c090140bf4501a2c))
+* **rest-api:** ports and adapters ([e12ca4c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e12ca4cd157e0e7780986c30cc44c7fa031dd14d))
+* restructure project ([a381da9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a381da9a83c46b39eac6fb9aad3ba48853215917))
+* **udm-transformer:** ports and adapters ([5819ea2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5819ea2a44bffce997862e83a8609dfd17a58126))
+
+
+### Bug Fixes
+
+* **common:** Don't crash the udm-transformer on unknown messages like the cn=admin creation event (has no udm module) ([f708350](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f708350e0c58bc4e5d1bce8ef491d72064b8f778))
+* **common:** fix comparison ([bfae914](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bfae9149dffa55118287b35fa935608cfb323082))
+* **consumer_example:** container build ([9ebee9c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9ebee9cc8e5a175018fdf7c2aa1b1da96b05d7a1))
+* **consumer-client:** Migrate the consumer package from poetry to uv ([baab0eb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/baab0eb50bda3b54691c76d2e093b0cf5063c6b6))
+* **consumer-example:** Migrate the consumer example package from poetry to uv and update container build ([0cc9c17](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/0cc9c177db383226c81390c44b02997206cf64b4))
+* **dispatcher:** Cancel the task group if the nats message polling fails ([7b4b5e9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7b4b5e942f470842767f23c02307824d9f5abb6d)), closes [univention/dev/internal/team-nubus#930](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/930)
+* **dispatcher:** container build ([d3de9f0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d3de9f082c8ac2c508beb126ea8ecf56d0fa7f6c))
+* **dispatcher:** Migrate dispatcher from poetry to uv ([9676157](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/9676157a9ca83f934727a3775ae2084f9b827e82))
+* **dispatcher:** multi-stage dispatcher build ([8184789](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/81847893ae88091a1a2ca327d19d9494bb6a8c2e))
+* **dispatcher:** remove old MessageAckManager ([1cba115](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1cba1158aee302f58ae4e3fac8692c6eade0c650))
+* **dispatcher:** uv based single stage dispatcher container build ([6df5d8d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6df5d8da833fb591bb223f91b06e6eee9cec6288))
+* **e2e-tests:** actually execute the fixture cleanup and delete the subscriptions ([7c4cce9](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7c4cce9e6e466d203f846519429abf0b8f276693))
+* **e2e-tests:** add dedicated testrunner for the e2e tests ([d759086](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d7590863d05f12c9561c26992865da2bcc39e8de))
+* **e2e-tests:** Last e2e fixes to get a clean e2e test run after the project restructuring ([874ad1c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/874ad1c45b40ba0906e583b59d77f4b61d9d0974))
+* **e2e-tests:** Migrate the e2e tests from poetry to uv and update the container build and docker compose setup ([85a65bf](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/85a65bf255da067c726ffad9fb26dd8a6af7eb83))
+* fix e2e tests ([b61a057](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b61a057e411521f2ea7bc48418226cc76ac5e642)), closes [univention/dev/internal/team-nubus#930](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/930)
+* functioning dispatcher dockerfile ([3245838](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3245838f587e8a7e2d9862a4aa93a47ad71c83d6))
+* **listener:** container build ([3772374](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3772374a90df36dd2182d0d4bd91fbe0fed95030))
+* **listener:** Filter out non-udm messages like temporary locking objects ([82cd54d](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/82cd54d2ca0d794eac2f6994d76bbe79fdef7100))
+* **listener:** Fix udm listener container build after refactoring ([1927c89](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/1927c89e35cdfa020122ae07b95f905fb5fc0afa))
+* **listener:** Migrate the udm-listener from poetry to uv and update container build ([a776747](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a776747876cea8f91578e6a1925072c9eace108b))
+* **listener:** ports and adapters; fix imports; improve names ([3ebb7f2](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3ebb7f21e33c075425ec6f3e5595ebd590ed9ba5))
+* **listener:** remove nats client code copy ([a4e95bb](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a4e95bbc7d85be7599f0e813cdddddaf728c680f))
+* Migrate metapackage from poetry to uv ([3a3d699](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/3a3d6993f3c6226275eea19e65ee80e877c5a766))
+* move things where they belong, fix imports ([c1390d6](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/c1390d6372053ca82d090c00511055724b855e9f))
+* **prefill:** Add udm rest client library to prefill ([e1f2dec](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/e1f2dec5becf8afb6f4300ba53d1ba44a6faa992))
+* **prefill:** container build ([7c92006](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/7c920068b5d2ad6209d5677d85e65de733f6ed4d))
+* **prefill:** Migrate prefill from poetry to uv and update container build ([bd0703a](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bd0703a9c609f9854be47f6b3736f9b6a23d9ed2))
+* Remove poetry from init container run command ([243543e](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/243543e5722fce8ae2865f12d465c55b17ce6c7e))
+* **rest-api:** container build ([12faddc](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/12faddcd6b519001342495c1b6707c16ca535b4f))
+* **rest-api:** Migrate the rest-api from poetry to uv and update container build ([46c4739](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/46c4739557f0050346c137c07234690aaa7fe216))
+* **rest-api:** Workaround for a passlib bug that prints a confusing traceback into the logs ([f91d8f3](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/f91d8f3b7f87a04558159e54a0ec5fd351a5718f))
+* **server:** build consolidated server container and adapt the docker-compose setup ([69238ad](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/69238ad98b294d50ba581927d7d485348928b5e3))
+* **server:** make server services executable and remove name conflict ([26b5e95](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/26b5e9518f5d34f0acda609afb7a215ac804ba1c))
+* **server:** Remove problematic version logging and make the rest-api more easily executable ([aedda45](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/aedda457b118b97fcd2a1660e480b83b7c47ed1f))
+* **test:** container build ([3258528](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/32585280a4273872e684bf2f4911de6b7d42d47e))
+* **tests:** e2e tests ([329c281](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/329c281923cb4519190b30a1afd8be4c41eb162a))
+* **tests:** fix unittests and integration-tests ([6aefc9f](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/6aefc9f486cea28a7acbef9c0a7edc703a361935))
+* **tests:** integration tests ([5f5298c](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/5f5298c1ec242bf27ff0a592667c1853f17ef07e))
+* **tests:** Make all unit and integration tests easily executable locally ([a7c4ae1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/a7c4ae159cff3f3b4e31dc377ddbe01ccfff5c3d))
+* **tests:** make integration tests compatible with httpx 1.28.* ([14595a1](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/14595a185e57c29137653fe54a8da2a48dd9c1f6))
+* **tests:** remove test stage from dockerfiles because they are now centralized in the metapackage ([bb0fee0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/bb0fee0149e96f9b230f5e43c47efb09a4aa33bf))
+* **tests:** rename test file to avoid pytest error because of conflicting files ([d5c9c92](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/d5c9c92e29aa7052a02503131595576685ba932a))
+* **udm-transformer:** container build ([b4d2bf4](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/b4d2bf4f04036cac5cfe2f9ae2fe4b60eab0a23a))
+* **udm-transformer:** Don't retry LDAP messages that don't have the necessary UDM information ([66aef20](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/66aef2011b588a3d85959894af4d7c3b5838a6c9))
+* **udm-transformer:** explicitly nack a message if any exception is raised, to get faster redelivery by nats ([dd720fd](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/dd720fdff0bc738b4186476611c88784fef323a2)), closes [univention/dev/internal/team-nubus#930](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/930)
+* **udm-transformer:** Migrate the udm-transformer from poetry to uv and update container build ([4869689](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/commit/4869689ab36b4091f0b2d31751daa89aac83825c))
+
 ## [0.54.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.53.3...v0.54.0) (2025-06-02)
 
 
