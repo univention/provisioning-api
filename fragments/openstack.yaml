@@ -24,6 +24,9 @@ variables:
         echo "Installing private ssh key"
         mkdir -p ~/.ssh; chmod 700 ~/.ssh
         cp "$SSH_PRIVATE_KEY" ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa
+        # Commands like fetch-results expect the private key at ~/ec2/keys/tech.pem
+        mkdir -p "~/ec2/keys"; chmod 700 "~/ec2/keys"
+        cp ~/.ssh/id_rsa ~/ec2/keys/tech.pem
       fi
     - echo "Preparing utils"
     - |
