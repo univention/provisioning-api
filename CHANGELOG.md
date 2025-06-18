@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.55.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.55.0...v0.55.1) (2025-06-18)
+
+
+### Bug Fixes
+
+* update ucs image ([24cedc5](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/24cedc568541b863bb0c6afcd8f5faed74136963)), closes [#0](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/0)
+
 ## [0.55.0](https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/compare/v0.54.0...v0.55.0) (2025-06-11)
 
 
