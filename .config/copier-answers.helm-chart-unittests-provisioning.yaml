@@ -1,0 +1,5 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 36870d7
+_src_path: https://git.knut.univention.de/univention/dev/tooling/copier-templates/helm-chart-unittests.git
+helm_chart_path: helm/provisioning
+tests_chart_path: tests/chart/provisioning
