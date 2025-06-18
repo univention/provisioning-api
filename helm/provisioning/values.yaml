@@ -49,7 +49,7 @@ ldap:
 api:
   image:
     registry: ""
-    imagePullPolicy: null
+    pullPolicy: null
     repository: "nubus-dev/images/provisioning-events-and-consumer-api"
     tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
   # If specified environment variables will be set on the container
@@ -101,7 +101,7 @@ dispatcher:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
-    imagePullPolicy: null
+    pullPolicy: null
     repository: "nubus-dev/images/provisioning-dispatcher"
     tag: "0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"
   # If specified environment variables will be set on the container
@@ -124,7 +124,7 @@ dispatcher:
 udmTransformer:
   image:
     registry: ""
-    imagePullPolicy: null
+    pullPolicy: null
     repository: "nubus-dev/images/provisioning-udm-transformer"
     tag: "0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"
   nats:
@@ -163,7 +163,7 @@ udmTransformer:
 prefill:
   image:
     registry: ""
-    imagePullPolicy: null
+    pullPolicy: null
     repository: "nubus-dev/images/provisioning-prefill"
     tag: "0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"
   # If specified environment variables will be set on the container
@@ -193,7 +193,7 @@ registerConsumers:
   image:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
-    imagePullPolicy: null
+    pullPolicy: null
     repository: "nubus/images/wait-for-dependency"
     tag: "0.32.1@sha256:44d45067e1d4e7a00d3b651e56df5177087e3206368a45cd1816d78ba7b21347"
   createUsers: {}
