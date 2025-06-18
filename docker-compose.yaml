@@ -3,7 +3,7 @@
 
 services:
   provisioning-api:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
@@ -69,7 +69,7 @@ services:
 
 
   dispatcher:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
@@ -91,7 +91,7 @@ services:
       - "provisioning-api"
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-transformer/Dockerfile
@@ -124,7 +124,7 @@ services:
       - "provisioning-api"
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
@@ -155,7 +155,7 @@ services:
   ldif-producer:
     platform: linux/amd64
     container_name: "ldif-producer"
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldif-producer:latest"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest"
     # Can be uncommented to simplify local development.
     # build:
     #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
@@ -177,7 +177,7 @@ services:
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
@@ -222,7 +222,7 @@ services:
 
   ldap-server:
     platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-ldap/ldap-server:latest
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest
     container_name: "ldap-server"
     environment:
       LDAP_CN_ADMIN_PW: univention
@@ -249,7 +249,7 @@ services:
       - 8001:80
 
   udm-rest-api:
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-udm-rest/udm-rest-api:latest
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest
     container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
@@ -268,7 +268,7 @@ services:
       LDAP_CN_ADMIN_PW: univention
 
   example-client:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/example-client/Dockerfile
@@ -285,7 +285,7 @@ services:
 
 
   e2e-test:
-    image: "gitregistry.knut.univention.de/univention/customers/dataport/upx/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/e2e-test/Dockerfile
@@ -301,7 +301,7 @@ services:
   pre-commit:
     profiles:
       - test
-    image: gitregistry.knut.univention.de/univention/customers/dataport/upx/container-pre-commit/upx-pre-commit:latest
+    image: gitregistry.knut.univention.de/univention/dev/tooling/pre-commit/upx-pre-commit:latest
     volumes:
       - type: bind
         source: .
