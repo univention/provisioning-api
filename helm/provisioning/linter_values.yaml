@@ -123,6 +123,9 @@ registerConsumers:
           password: "dummy-provisioning-selfservice-consumer-secret-key"
 
 nats:
+  connection:
+    host: "linter-nats-host"
+    port: "linter-nats-port"
   extraEnvVars:
     - name: NATS_PASSWORD
       valueFrom:
