@@ -75,7 +75,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.udmTransformer.image.registry .Values.global.imageRegistry }}/{{ .Values.udmTransformer.image.repository }}:{{ .Values.udmTransformer.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.udmTransformer.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.udmTransformer.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           command:
             - sh
             - -c
@@ -102,7 +102,7 @@ spec:
           securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .image.registry $.Values.global.imageRegistry }}/{{ .image.repository }}:{{ .image.tag }}"
-          imagePullPolicy: {{ coalesce .image.imagePullPolicy $.Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .image.pullPolicy $.Values.global.imagePullPolicy | quote }}
           volumeMounts:
             - name: plugin-targets
               mountPath: /target
@@ -114,7 +114,7 @@ spec:
           command: [ "python3", "/scripts/wait-for-nats.py" ]
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.api.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.api.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
@@ -140,7 +140,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.udmTransformer.image.registry .Values.global.imageRegistry }}/{{ .Values.udmTransformer.image.repository }}:{{ .Values.udmTransformer.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.udmTransformer.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.udmTransformer.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}

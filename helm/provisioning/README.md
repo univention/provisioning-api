@@ -34,7 +34,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
 | api.config.ROOT_PATH | string | `"/"` |  |
-| api.image.imagePullPolicy | string | `nil` |  |
+| api.image.pullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
 | api.image.tag | string | `"0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"` |  |
@@ -54,7 +54,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
-| dispatcher.image.imagePullPolicy | string | `nil` |  |
+| dispatcher.image.pullPolicy | string | `nil` |  |
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"` |  |
@@ -150,7 +150,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `9979` |  |
 | prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.config.natsMaxReconnectAttempts | int | `5` |  |
-| prefill.image.imagePullPolicy | string | `nil` |  |
+| prefill.image.pullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
@@ -192,7 +192,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.createUsers | object | `{}` |  |
-| registerConsumers.image.imagePullPolicy | string | `nil` |  |
+| registerConsumers.image.pullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
 | registerConsumers.image.tag | string | `"0.30.0@sha256:fa804c2a10aa42439bf3f388007d7e55c046d6da6dc8a74c27f5a989fd422c8d"` |  |
@@ -269,7 +269,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
-| udmTransformer.image.imagePullPolicy | string | `nil` |  |
+| udmTransformer.image.pullPolicy | string | `nil` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"` |  |

@@ -77,7 +77,7 @@ spec:
           command: [ "python3", "/scripts/wait-for-nats.py" ]
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.api.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.api.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
@@ -103,7 +103,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.dispatcher.image.registry .Values.global.imageRegistry }}/{{ .Values.dispatcher.image.repository }}:{{ .Values.dispatcher.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.dispatcher.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.dispatcher.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}

@@ -74,7 +74,7 @@ spec:
         - name: wait-for-provisioning-api
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" $fullname }}
@@ -89,7 +89,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           command: ["/bin/bash", "/scripts/wait-for-data-loader.sh"]
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-register-consumers" $fullname }}
@@ -111,7 +111,7 @@ spec:
         - name: consumer-registration
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           volumeMounts:
             - name: consumer-secrets
               mountPath: "/secrets"
