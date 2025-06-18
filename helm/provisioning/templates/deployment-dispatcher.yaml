@@ -89,8 +89,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.dispatcher.nats.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.dispatcher.nats.auth.existingSecret.keyMapping.dispatcherPassword . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password") | quote }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -98,7 +98,7 @@ spec:
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.api "context" .) | nindent 12 }}
           {{- end }}
       containers:
-        - name: "dispatcher"
+        - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
@@ -115,8 +115,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.dispatcher.nats.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.dispatcher.nats.auth.existingSecret.keyMapping.dispatcherPassword . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password") | quote }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
