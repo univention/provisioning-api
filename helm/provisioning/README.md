@@ -12,8 +12,8 @@ A Helm Chart that deploys the provisioning services
 
 | Repository | Name | Version |
 |------------|------|---------|
+| oci://artifacts.software-univention.de/nubus-dev/charts | nubus-common | 0.21.0-pre-jbornhold-secrets-refactoring-tweaks-5 |
 | oci://artifacts.software-univention.de/nubus/charts | nats | 0.3.2 |
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.12.x |
 
 ## Values
 
