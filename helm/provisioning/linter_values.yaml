@@ -52,10 +52,7 @@ ldap:
 api:
   nats:
     auth:
-      existingSecret:
-        name: "dummy-nats-provisioning-api-secret-name"
-        keyMapping:
-          provisioningApiPassword: "dummy-nats-provisioning-api-secret-key"
+      password: "linter-api-nats-password"
   auth:
     admin:
       existingSecret:
