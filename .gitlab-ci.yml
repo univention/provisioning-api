@@ -5,7 +5,7 @@
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.43.0"
+    ref: "jtorres/sonarqube-w"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -16,7 +16,7 @@ include:
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/pip-package-and-publish.yaml"
-      - "jobs/sonarqube.yaml"
+      - "templates/sonarqube.yaml"
   - project: "univention/infrastructure/docker-services"
     ref: "master"
     file:
@@ -78,6 +78,8 @@ test-unit-and-integration:
   script:
     - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  after_script:
+    - docker cp test-unit-and-integration:/coverage.xml ./coverage-test.xml
   artifacts:
     reports:
       coverage_report:
@@ -151,4 +153,11 @@ build-and-publish-pip:
   extends: .build-and-publish-pip-package-with-uv
   variables:
     PACKAGE_ROOT: "consumer"
+
+sonarqube:
+  extends: .sonarqube
+  stage: test
+  needs:
+    - test-unit-and-integration
+
 ...
