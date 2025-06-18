@@ -89,8 +89,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.api.nats.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.api.nats.auth.existingSecret.keyMapping.provisioningApiPassword . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "api-nats" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password") | quote }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -140,8 +140,8 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.api.nats.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.api.nats.auth.existingSecret.keyMapping.provisioningApiPassword . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "api-nats" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password") | quote }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
