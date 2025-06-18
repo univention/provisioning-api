@@ -11,8 +11,6 @@ class TestAuthPassword(SecretUsageViaEnv, AuthPassword):
     workload_name = "release-name-provisioning-api"
     secret_name = "release-name-provisioning-api-nats"
 
-    path_container = "spec.template.spec.containers[?@.name=='api']"
-
     prefix_mapping = {
         "api.nats": "nats",
     }
