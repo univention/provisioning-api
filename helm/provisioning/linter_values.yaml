@@ -73,10 +73,7 @@ api:
 dispatcher:
   nats:
     auth:
-      existingSecret:
-        name: "dummy-nats-dispatcher-secret-name"
-        keyMapping:
-          dispatcherPassword: "dummy-nats-dispatcher-secret-key"
+      password: "linter-dispatcher-nats-password"
 
 udmTransformer:
   nats:
