@@ -78,10 +78,7 @@ dispatcher:
 udmTransformer:
   nats:
     auth:
-      existingSecret:
-        name: "dummy-nats-udm-transformer-secret-name"
-        keyMapping:
-          udmTransformerPassword: "dummy-nats-udm-transformer-secret-key"
+      password: "linter-udm-transformer-nats-password"
   ldap:
     connection:
       host: "ldap-host"
