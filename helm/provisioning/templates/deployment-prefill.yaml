@@ -74,7 +74,7 @@ spec:
           command: [ "python3", "/scripts/wait-for-udm.py" ]
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.prefill.image.registry .Values.global.imageRegistry }}/{{ .Values.prefill.image.repository }}:{{ .Values.prefill.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.prefill.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-prefill" (include "common.names.fullname" .) }}
@@ -95,7 +95,7 @@ spec:
         - name: wait-for-api-to-start
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.prefill.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
@@ -109,7 +109,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.prefill.image.registry .Values.global.imageRegistry }}/{{ .Values.prefill.image.repository }}:{{ .Values.prefill.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.prefill.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.prefill.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
