@@ -1,17 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
-from univention.testing.helm.client.provisioning_api import AuthPassword, AuthPasswordOwner, SecretViaEnv
+from univention.testing.helm.client.provisioning_api import AuthPassword, SecretViaEnv
 
 
-class TestAuth(SecretViaEnv, AuthPasswordOwner, AuthPassword):
+class TestAuth(SecretViaEnv, AuthPassword):
+
+    is_secret_owner = True
 
     secret_name = "release-name-provisioning-api-admin"
-    workload_name = "release-name-provisioning-api"
+    workload_kind = "Job"
+    workload_name = "release-name-provisioning-register-consumers-1"
 
     sub_path_env_password = "env[?@name=='ADMIN_PASSWORD']"
-
-    derived_password = "751120bf3b933a18b7d637bfba5e9389939c4bbd"
 
     prefix_mapping = {
         "api.auth.admin": "provisioningApi.auth",
