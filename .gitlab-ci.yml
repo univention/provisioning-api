@@ -7,9 +7,9 @@ workflow:
     - if: $CI_COMMIT_TAG
 
 include:
-  - project: univention/dist/docker-services
+  - project: univention/infrastructure/docker-services
     file: kaniko.yml
-  - project: univention/dist/docker-services
+  - project: univention/infrastructure/docker-services
     file: pre-commit.yml
   - local: fragments/misc.yaml
 
