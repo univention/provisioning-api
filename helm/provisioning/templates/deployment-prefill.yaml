@@ -84,8 +84,8 @@ spec:
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "defaultNameSuffix" "prefill-udm" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password") | quote }}
           volumeMounts:
             - name: wait-for-udm
               mountPath: /scripts
@@ -128,8 +128,8 @@ spec:
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "defaultNameSuffix" "prefill-udm" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password") | quote }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
