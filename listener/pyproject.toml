@@ -5,7 +5,7 @@ includes = ["src/univention"]
 [project]
 name = "nubus-provisioning-listener"
 version = "0.1.0"
-description = "Nubus - Provisioning Listener (depricated in favor of LDIF Producer)"
+description = "Nubus - Provisioning Listener (deprecated in favor of LDIF Producer)"
 authors = [
     {name = "Univention GmbH", email = "packages@univention.de"},
 ]
