@@ -193,14 +193,25 @@ registerConsumers:
     pullPolicy: null
     repository: "nubus/images/wait-for-dependency"
     tag: "0.30.0@sha256:fa804c2a10aa42439bf3f388007d7e55c046d6da6dc8a74c27f5a989fd422c8d"
+
+  # -- Allows to create users in the Provisioning API.
+  #
+  # The entries have to be in the following structure:
+  #
+  #   consumerName:
+  #     existingSecret:
+  #       name: null
+  #       keyMapping:
+  #         registration: null
+  #
+  # The entries can only be provided as existing secrets and the content of the
+  # key "registration" has to follow the correct JSON structure.
+  #
+  # This parameter shall be used as an integration point between the consumer's
+  # chart and this chart. The consumer's chart owns the Secret and has to store
+  # the correct JSON data within the Secret. This chart only receives a
+  # reference this Secret so that it can register the consumer.
   createUsers: {}
-    # demoConsumerName:
-    #   username:
-    #   password:
-    #   existingSecret:
-    #     name: "demo-consumer-secret-name"
-    #     keyMapping:
-    #       password: "custom-demo-consumer-secret-key"
 
   config:
     # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api

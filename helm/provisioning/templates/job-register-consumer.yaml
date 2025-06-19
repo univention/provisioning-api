@@ -57,9 +57,10 @@ spec:
             sources:
               {{- range $consumer, $data := .Values.registerConsumers.createUsers }}
               - secret:
-                  name: {{ tpl $data.existingSecret.name $ | quote }}
+                  {{- $_ := required "Consumer secrets can only be configured as existing secret, see registerConsumers.createUsers.*.existingSecret.name" ($data.existingSecret).name }}
+                  name: {{ include "nubus-common.secrets.name" ( dict "existingSecret" $data.existingSecret "context" $ ) | quote }}
                   items:
-                    - key: {{ tpl $data.existingSecret.keyMapping.password $ | quote }}
+                    - key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $data.existingSecret "key" "registration") | quote }}
                       path: {{ printf "%s.json" ( lower $consumer ) }}
               {{- end }}
         {{- end }}
