@@ -9,12 +9,7 @@ name: "udm-listener"
 description: "A Helm chart for the Univention Portal Provisioning API"
 home: "https://www.univention.de/"
 
-# Chart version
-# Apply Semantic Versioning (https://semver.org/)
 version: "0.1.0"
-
-# Portal Version
-appVersion: "1.16.0"
 
 dependencies:
   - name: "nubus-common"
