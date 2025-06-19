@@ -115,8 +115,8 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.api.auth.admin.existingSecret.name . }}
-                  key: {{ tpl .Values.api.auth.admin.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password") | quote }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
