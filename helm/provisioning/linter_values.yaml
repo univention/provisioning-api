@@ -109,6 +109,9 @@ registerConsumers:
         name: "{{ .Release.Name }}-dummy-provisioning-selfservice-consumer-secret-name"
         keyMapping:
           password: "dummy-provisioning-selfservice-consumer-secret-key"
+  udm:
+    auth:
+      password: "linter-register-consumers-udm-password"
 
 nats:
   bundled: false

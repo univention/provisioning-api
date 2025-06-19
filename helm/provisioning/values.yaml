@@ -211,6 +211,15 @@ registerConsumers:
     UDM_HOST: ""
     # UDM REST API: port
     UDM_PORT: 9979
+
+  udm:
+    auth:
+      password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: null
+
   jsonSecretName: ""
   provisioningApiBaseUrl: ""
   additionalLabels: {}
