@@ -48,10 +48,7 @@ api:
       password: "linter-api-nats-password"
   auth:
     admin:
-      existingSecret:
-        name: "provisioning-api-admin-secret-name"
-        keyMapping:
-          password: "provisioning-api-admin-secret-key"
+      password: "linter-api-auth-admin-password"
     eventsUdm:
       existingSecret:
         name: "provisioning-api-events-udm-secret-name"
