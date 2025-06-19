@@ -124,14 +124,9 @@ config:
   caCertFile: ""
   debugLevel: "2"
   ldapBaseDn: null
-  # -- LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set.
-  ldapPassword: ""
-  # -- The path to the "ldapPasswordFile" docker secret or a plain file
-  ldapPasswordFile: "/var/secrets/ldap_secret"
   # -- The LDAP Server host, should point to the service name of the ldap-server-primary
   # that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier"
   ldapHost: ""
-  ldapHostDn: null
   ldapPort: "389"
   # -- NATS: maximum number of reconnect attempts to the NATS server
   nats_max_reconnect_attempts: "5"
@@ -182,10 +177,12 @@ ldap:
     name: ""
     caCertKey: "ca.crt"
   auth:
+    bindDn: "cn=admin,dc=univention-organization,dc=intranet"
+    password: null
     existingSecret:
-      name: ""
+      name: null
       keyMapping:
-        password: "ldap.secret"
+        password: null
 
 # -- NATS client access configuration. This value is in a transition towards the
 # unified configuration structure for clients and secrets.
