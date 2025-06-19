@@ -93,6 +93,9 @@ prefill:
   nats:
     auth:
       password: "linter-prefill-nats-password"
+  udm:
+    auth:
+      password: "linter-prefill-udm-password"
 
 registerConsumers:
   provisioningApiBaseUrl: "provisioning-base-url"
