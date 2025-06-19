@@ -46,17 +46,6 @@ api:
   nats:
     auth:
       password: "linter-api-nats-password"
-  auth:
-    eventsUdm:
-      existingSecret:
-        name: "provisioning-api-events-udm-secret-name"
-        keyMapping:
-          password: "provisioning-api-events-udm-secret-key"
-    prefill:
-      existingSecret:
-        name: "provisioning-api-prefill-secret-name"
-        keyMapping:
-          password: "provisioning-api-prefill-secret-key"
 
 dispatcher:
   nats:

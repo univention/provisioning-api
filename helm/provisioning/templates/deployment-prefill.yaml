@@ -135,8 +135,8 @@ spec:
             - name: PREFILL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.api.auth.prefill.existingSecret.name . }}
-                  key: {{ tpl .Values.api.auth.prefill.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "defaultNameSuffix" "api-prefill" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "key" "password") | quote }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
