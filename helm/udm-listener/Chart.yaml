@@ -13,7 +13,6 @@ version: "0.1.0"
 
 dependencies:
   - name: "nubus-common"
-    version: "^0.12.x"
-    repository: "oci://artifacts.software-univention.de/nubus/charts"
-
-...
+    # TODO: Replace with released version
+    version: "0.21.0-pre-jbornhold-secrets-refactoring-tweaks-5"
+    repository: "oci://artifacts.software-univention.de/nubus-dev/charts"
