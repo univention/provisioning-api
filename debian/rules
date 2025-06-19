@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+#
+# Univention Provisioning Stack
+#  rules file for the provisioning listener debian package
+#
+# Like what you see? Join us!
+# https://www.univention.com/about-us/careers/vacancies/
+#
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+
+export DH_VERBOSE=1
+export PYBUILD_NAME=univention-provisioning-stack-listener
+export PYBUILD_SYSTEM=custom
+export PYBUILD_BUILD_ARGS=cd listener && python3 -m hatchling build && cd ../common && python3 -m hatchling build && cd ../backends && python3 -m hatchling build
+export PYBUILD_INSTALL_ARGS=\
+	mkdir -p {destdir} && \
+	python3 -m installer --destdir={destdir} listener/dist/*.whl && \
+	python3 -m installer --destdir={destdir} common/dist/*.whl && \
+	python3 -m installer --destdir={destdir} backends/dist/*.whl
+
+%:
+	dh $@ --buildsystem=pybuild --with python3,ucr
+
+override_dh_install:
+	# Let pybuild install everything
+	dh_install
+
+	# Remove __pycache__ directories
+	find debian/python3-univention-provisioning-stack-listener -type d -name '__pycache__' -exec rm -rf {} +
+
+	# Remove *.dist-info directories
+	find debian/python3-univention-provisioning-stack-listener -type d -name '*.dist-info' -exec rm -rf {} +
