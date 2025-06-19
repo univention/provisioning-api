@@ -1,1 +1,1 @@
-src/ldap_listener.py /usr/lib/univention-directory-listener/system
+src/nubus-provisioning.py /usr/lib/univention-directory-listener/system
