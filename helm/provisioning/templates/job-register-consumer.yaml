@@ -108,7 +108,7 @@ spec:
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
       containers:
-        - name: consumer-registration
+        - name: main
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
@@ -124,8 +124,8 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.api.auth.admin.existingSecret.name . }}
-                  key: {{ tpl .Values.api.auth.admin.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password") | quote }}
           command:
             - "/bin/sh"
             - "-c"
