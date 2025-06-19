@@ -4,8 +4,12 @@ import enum
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
-from typing_extensions import Literal, Self
+try:
+    from pydantic.v1 import BaseModel, Field, root_validator, validator
+except ImportError:
+    from pydantic import BaseModel, Field, root_validator, validator
+
+from typing_extensions import Literal
 
 from .constants import PublisherName
 from .subscription import RealmTopic
@@ -26,9 +30,11 @@ class BaseMessage(BaseModel):
     publisher_name: PublisherName = Field(description="The name of the publisher of the message.")
     ts: datetime = Field(description="The timestamp when the message was received by the dispatcher.")
 
-    @field_serializer("ts")
-    def serialize_dt(self, dt: datetime, _info):
-        return dt.isoformat()
+    # No need for field_serializer in v1, use property if you need custom JSON output
+    def dict(self, *args, **kwargs):
+        data = super().dict(*args, **kwargs)
+        data["ts"] = self.ts.isoformat()  # override ts serialization
+        return data
 
 
 class Body(BaseModel):
@@ -37,26 +43,27 @@ class Body(BaseModel):
 
     # Temporary validator due to the hardcoded image version of udm-listener.
     # This will be removed once we switch from udm-listener to ldif-producer.
-    @field_validator("old", "new", mode="before")
-    @classmethod
-    def set_empty_dict(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    @validator("old", "new", pre=True)
+    def set_empty_dict(cls, v):
         return v or {}
 
-    @model_validator(mode="after")
-    def check_not_both_empty(self) -> Self:
-        if not self.old and not self.new:
-            raise EmptyBodyError("'old' and 'new' cannot be both empty.")
-        return self
+    @root_validator
+    def check_not_both_empty_and_has_udm_type(cls, values):
+        old = values.get("old", {})
+        new = values.get("new", {})
 
-    @model_validator(mode="after")
-    def check_has_udm_object_type(self) -> Self:
-        if LDAP_OBJECT_TYPE_FIELD in self.new or LDAP_OBJECT_TYPE_FIELD in self.old:
+        if not old and not new:
+            raise EmptyBodyError("'old' and 'new' cannot be both empty.")
+
+        if LDAP_OBJECT_TYPE_FIELD in new or LDAP_OBJECT_TYPE_FIELD in old:
             obj_type = LDAP_OBJECT_TYPE_FIELD
         else:
             obj_type = UDM_OBJECT_TYPE_FIELD
-        if not self.new.get(obj_type) and not self.old.get(obj_type):
+
+        if not new.get(obj_type) and not old.get(obj_type):
             raise NoUDMTypeError("No UDM type in both 'new' and 'old'.")
-        return self
+
+        return values
 
 
 class LDIFProducerBody(Body):
