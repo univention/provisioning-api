@@ -168,6 +168,7 @@ prefill:
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-prefill"
     tag: "0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"
+
   # If specified environment variables will be set on the container
   nats:
     auth:
@@ -176,6 +177,14 @@ prefill:
         name: null
         keyMapping:
           prefillPassword: null
+
+  udm:
+    auth:
+      password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: null
 
   config:
     maxPrefillAttempts: 5
