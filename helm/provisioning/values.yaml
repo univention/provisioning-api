@@ -189,7 +189,6 @@ prefill:
 
 registerConsumers:
   image:
-    # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
     pullPolicy: null
     repository: "nubus/images/wait-for-dependency"
