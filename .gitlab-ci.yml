@@ -76,15 +76,22 @@ test-unit-and-integration:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
   script:
-    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  after_script:
-    - docker cp test-unit-and-integration:/coverage.xml ./coverage-test.xml
+    - cd backends && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml && mv coverage.xml ../coverage-backends.xml && cd ..
+    - cd common && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml && mv coverage.xml ../coverage-common.xml && cd ..
+    - cd consumer && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml && mv coverage.xml ../coverage-consumer.xml && cd ..
+    - cd dispatcher && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml && mv coverage.xml ../coverage-dispatcher.xml && cd ..
+    - cd prefill && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml  && mv coverage.xml ../coverage-prefill.xml && cd ..
+    - cd rest-api && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml && mv coverage.xml ../coverage-rest-api.xml && cd ..
+    - cd udm-transformer && python3 -m pytest -lvv tests/ --cov=. --cov-report=term --cov-report=xml:coverage.xml && mv coverage.xml ../coverage-udm-transformer.xml && cd ..
   artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
+    paths:
+      - coverage-backends.xml
+      - coverage-common.xml
+      - coverage-consumer.xml
+      - coverage-dispatcher.xml
+      - coverage-prefill.xml
+      - coverage-rest-api.xml
+      - coverage-udm-transformer.xml
 
 test-end-to-end:
   allow_failure: true
