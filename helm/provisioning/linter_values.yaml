@@ -47,8 +47,6 @@ api:
     auth:
       password: "linter-api-nats-password"
   auth:
-    admin:
-      password: "linter-api-auth-admin-password"
     eventsUdm:
       existingSecret:
         name: "provisioning-api-events-udm-secret-name"
