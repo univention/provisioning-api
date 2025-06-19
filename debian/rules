@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=provisioning-listener
+export PYBUILD_SYSTEM=custom
+export PYBUILD_BUILD_ARGS=cd listener && python3 -m hatchling build && cd ../common && python3 -m hatchling build && cd ../backends && python3 -m hatchling build
+export PYBUILD_INSTALL_ARGS=\
+	mkdir -p {destdir} && \
+	python3 -m installer --destdir={destdir} listener/dist/*.whl && \
+	python3 -m installer --destdir={destdir} common/dist/*.whl && \
+	python3 -m installer --destdir={destdir} backends/dist/*.whl
+
+%:
+	dh $@ --buildsystem=pybuild
+
+override_dh_install:
+	dh_install
+	find debian/ -type d -name '__pycache__' -exec rm -rf {} +
+	find debian/ -type d -name '*.dist-info' -exec rm -rf {} +

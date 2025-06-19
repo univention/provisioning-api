@@ -1,0 +1,17 @@
+Source: python3-provisioning-listener
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends:
+  debhelper-compat (= 13),
+  dh-python,
+  python3-all,
+  python3-hatchling,
+  pybuild-plugin-pyproject
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+
+Package: python3-provisioning-listener
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}
+Description: Provisioning Listener
