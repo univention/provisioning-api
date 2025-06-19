@@ -124,6 +124,7 @@ class NatsMessageQueue(MessageQueue):
             subject=subject if subject else "*",
             durable=durable_name,
             stream=stream_name,
+            config=ConsumerConfig(num_replicas=1)  # TODO: this needs to be configurable in the future  https://docs.nats.io/nats-concepts/jetstream
         )
 
     async def get_message(self, stream: str, subject: str, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:

@@ -5,7 +5,13 @@
 import asyncio
 
 from univention.listener.handler import ListenerModuleHandler
-from univention.provisioning.listener.config import ldap_producer_settings
+import os
+
+if os.getenv("READ_CONFIG_FROM_ENVIRONMENT_VARIABLES", "false").lower() == "true":
+    from univention.provisioning.listener.config_env import ldap_producer_settings
+else:
+    from univention.provisioning.listener.config_ucr import ldap_producer_settings
+
 from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAdapter
 from univention.provisioning.listener.mq_port import MessageQueuePort
 from univention.provisioning.models.message import NoUDMTypeError

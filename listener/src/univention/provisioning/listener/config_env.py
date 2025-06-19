@@ -23,6 +23,13 @@ class LdapProducerSettings(BaseSettings):
         return f"nats://{self.nats_host}:{self.nats_port}"
 
 
+class NATSMQSettings(BaseSettings):
+    """
+    Settings for the NATS message queue.
+    """
+    num_replicas: int = 1
+
+
 @lru_cache(maxsize=1)
 def ldap_producer_settings() -> LdapProducerSettings:
     return LdapProducerSettings()
