@@ -1,28 +1,9 @@
-# SPDX-License-Identifier: AGPL-3.0-only
-# SPDX-FileCopyrightText: 2024 Univention GmbH
+import os
 
-from functools import lru_cache
+if os.getenv("READ_CONFIG_FROM_ENVIRONMENT_VARIABLES", "false").lower() == "true":
+    from .config_env import LdapProducerSettings, ldap_producer_settings
+else:
+    from .config_ucr import LdapProducerSettings, ldap_producer_settings
 
-from pydantic_settings import BaseSettings
-
-
-class LdapProducerSettings(BaseSettings):
-    # Nats user name specific to UdmProducerSettings
-    nats_user: str
-    # Nats password specific to UdmProducerSettings
-    nats_password: str
-    # Nats: host
-    nats_host: str
-    # Nats: port
-    nats_port: int
-    # Maximum number of reconnect attempts to the NATS server
-    nats_max_reconnect_attempts: int
-
-    @property
-    def nats_server(self) -> str:
-        return f"nats://{self.nats_host}:{self.nats_port}"
-
-
-@lru_cache(maxsize=1)
-def ldap_producer_settings() -> LdapProducerSettings:
-    return LdapProducerSettings()
+LdapProducerSettings = LdapProducerSettings
+ldap_producer_settings = ldap_producer_settings

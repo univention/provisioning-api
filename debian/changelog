@@ -1,0 +1,5 @@
+univention-provisioning-stack-listener (0.1.0) unstable; urgency=medium
+
+  * Initial release.
+
+ -- Ivan Barbecho Delgado <ivan.delgado@univention.de>  Thu, 19 Jun 2025 11:59:47 +0200
