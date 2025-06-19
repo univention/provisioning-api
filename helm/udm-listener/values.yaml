@@ -134,8 +134,6 @@ config:
   provisioningApiHost: "provisioning-api"
   # -- Provisioning-API Port
   provisioningApiPort: "80"
-  eventsUsernameUdm: "udm"
-  eventsPasswordUdm: "udmpass"
   # -- Defaults to "ldapHost" if not set.
   notifierServer: "ldap-notifier"
   # -- Whether to start encryption and validate certificates.
@@ -203,10 +201,11 @@ nats:
 provisioningApi:
   auth:
     username: "udm"
+    password: null
     existingSecret:
-      name: ""
+      name: null
       keyMapping:
-        password: "EVENTS_PASSWORD_UDM"
+        password: null
 
 livenessProbe:
   # -- Number of failed executions until container is terminated.
