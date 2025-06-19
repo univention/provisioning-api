@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 ---
+
+ldap:
+  auth:
+    password: "linter-ldap-password"
+
 nats:
   connection:
     host: "lintme"
-...
