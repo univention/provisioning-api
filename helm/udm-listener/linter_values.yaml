@@ -9,3 +9,9 @@ ldap:
 nats:
   connection:
     host: "lintme"
+  auth:
+    password: "linter-nats-password"
+
+provisioningApi:
+  auth:
+    password: "linter-provisioning-api-password"
