@@ -37,15 +37,6 @@ global:
       host: ""
       port: ""
 
-ldap:
-  auth:
-    # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
-    # password: null
-    existingSecret:
-      name: null
-      keyMapping:
-        password: null
-
 api:
   image:
     registry: ""
