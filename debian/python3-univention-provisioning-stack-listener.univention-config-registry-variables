@@ -1,0 +1,31 @@
+[nats/user]
+Description[en]=NATS user name specific to UdmProducerSettings
+Description[de]=NATS-Benutzername, der für UdmProducerSettings spezifisch ist
+Categories=provisioning
+Type=str
+
+[nats/passwordfile]
+Description[en]=Path to a file containing the NATS password
+Description[de]=Pfad zu einer Datei, die das NATS-Passwort enthält
+Categories=provisioning
+Type=str
+
+[nats/host]
+Description[en]=NATS host name or IP address
+Description[de]=NATS-Host-Name oder IP-Adresse
+Categories=provisioning
+Type=str
+
+[nats/port]
+Description[en]=NATS port number
+Description[de]=NATS-Portnummer
+Categories=provisioning
+Type=portnumber
+Default=4222
+
+[nats/max_reconnect_attempts]
+Description[en]=Maximum number of reconnect attempts to the NATS server
+Description[de]=Maximale Anzahl von Wiederverbindungsversuchen zum NATS-Server
+Categories=provisioning
+Type=str
+Default=10
