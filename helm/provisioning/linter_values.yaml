@@ -92,10 +92,7 @@ prefill:
     UDM_HOST: "udm-host"
   nats:
     auth:
-      existingSecret:
-        name: "dummy-nats-prefill-secret-name"
-        keyMapping:
-          prefillPassword: "dummy-nats-prefill-secret-key"
+      password: "linter-prefill-nats-password"
 
 registerConsumers:
   provisioningApiBaseUrl: "provisioning-base-url"

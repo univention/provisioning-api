@@ -166,8 +166,7 @@ prefill:
   # If specified environment variables will be set on the container
   nats:
     auth:
-      # TODO: Make the password configurable by moving the secret manifest generation into the component charts.
-      # password: null
+      password: null
       existingSecret:
         name: null
         keyMapping:
