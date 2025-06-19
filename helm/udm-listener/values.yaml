@@ -190,11 +190,11 @@ nats:
     port: "4222"
   auth:
     user: "udmlistener"
-    password: ""
+    password: null
     existingSecret:
       name: null
       keyMapping:
-        password: "NATS_PASSWORD"
+        password: null
 
 # -- Provisioning API client access configuration. This value is in a transition
 # towards the unified configuration structure for clients and secrets.

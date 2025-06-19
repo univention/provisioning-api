@@ -94,17 +94,12 @@ spec:
               -y "${LDAP_PASSWORD_FILE}" -Z
           env:
             - name: NATS_USER
-              value: {{ .Values.nats.auth.user | quote }}
-            {{- if .Values.global.nubusDeployment }}
+              value: {{ tpl .Values.nats.auth.user . | quote }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.nats.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.nats.auth.existingSecret.keyMapping.password . }}
-            {{- else if .Values.config.natsPassword }}
-            - name: NATS_PASSWORD
-              value: {{ .Values.nats.auth.password | quote }}
-            {{- end }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password") | quote }}
             - name: EVENTS_USERNAME_UDM
               value: {{ tpl ( required "A Provisioning API username has to be supplied, see parameter provisioningApi.auth.username" .Values.provisioningApi.auth.username ) . | quote }}
             - name: EVENTS_PASSWORD_UDM
