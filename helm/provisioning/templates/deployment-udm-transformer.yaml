@@ -159,8 +159,8 @@ spec:
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.api.auth.eventsUdm.existingSecret.name . }}
-                  key: {{ tpl .Values.api.auth.eventsUdm.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password") | quote }}
             - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
