@@ -72,7 +72,7 @@ RUN apt-get update && \
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages
 
-COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/system/
+COPY ./listener/src/nubus-provisioning.py /usr/lib/univention-directory-listener/system/
 
 # TODO: Fix docker compose so that it runs without root
 # ARG USER=udm-listener
