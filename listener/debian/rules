@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+#
+# Like what you see? Join us!
+# https://www.univention.com/about-us/careers/vacancies/
+#
+# SPDX-FileCopyrightText: 2003-2025 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+export PYBUILD_NAME=univention-provisioning-listener
+# export PYBUILD_SYSTEM=pyproject
+# export PYBUILD_INTERPRETERS=python3.11
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild

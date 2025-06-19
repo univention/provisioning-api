@@ -1,0 +1,24 @@
+Source: univention-provisioning-listener
+Section: python
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends:
+ debhelper-compat (=13),
+ dh-python,
+ python3-debian,
+ python3-dev,
+ pybuild-plugin-pyproject,
+ python3-hatchling
+Standards-Version: 3.8.2
+
+Package: univention-provisioning-listener
+Architecture: any
+Depends:
+ ${python3:Depends},
+Description: Univention Directory Listener module for Nubus Provisioning
+ This module provides a Listener module to interface the Nubus Provisioning API
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: https://www.univention.de/

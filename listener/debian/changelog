@@ -1,0 +1,5 @@
+univention-provisioning-listener (1.0.0-1) unstable; urgency=low
+
+  * Debian package for ldap_listener.py
+
+ -- Arvid Requate <requate@univention.de>  Thu, 19 Jun 2025 14:46:31 +0200
