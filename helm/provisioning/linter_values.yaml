@@ -85,7 +85,7 @@ udmTransformer:
       port: "1234"
     baseDn: "ldap-base-dn"
     auth:
-      bindDn: "ldap-bind-dn"
+      password: "linter-udm-transformer-ldap-password"
 
 prefill:
   config:

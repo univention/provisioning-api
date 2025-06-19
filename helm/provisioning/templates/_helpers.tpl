@@ -45,14 +45,6 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- end -}}
 {{- end -}}
 
-{{- define "provisioning.udmTransformer.ldap.auth.bindDn" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.adminDn" . -}}
-{{- else -}}
-{{- required ".Values.udmTransformer.ldap.auth.bindDn must be defined." .Values.udmTransformer.ldap.auth.bindDn -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "provisioning.udmTransformer.ldap.connection.host" -}}
 {{- if .Values.global.nubusDeployment -}}
 {{- include "nubusTemplates.connections.ldap.primary.host" . -}}

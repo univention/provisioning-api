@@ -186,7 +186,7 @@ data:
   LDAP_TLS_MODE: {{ required ".Values.udmTransformer.config.LDAP_TLS_MODE is required." .Values.udmTransformer.config.LDAP_TLS_MODE | quote }}
 
   LDAP_BASE_DN: {{ include "provisioning.udmTransformer.ldap.baseDn" . | quote }}
-  LDAP_BIND_DN: {{ include "provisioning.udmTransformer.ldap.auth.bindDn" . | quote }}
+  LDAP_BIND_DN: {{ tpl ( required "The parameter \"udmTransformer.ldap.auth.bindDn\" is required." .Values.udmTransformer.ldap.auth.bindDn ) . | quote }}
 
 ...
 ---
@@ -220,4 +220,3 @@ data:
 
     echo "Success, the data loader has finished."
 ...
-
