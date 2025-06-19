@@ -105,20 +105,13 @@ spec:
             - name: NATS_PASSWORD
               value: {{ .Values.nats.auth.password | quote }}
             {{- end }}
-            {{- if .Values.global.nubusDeployment }}
             - name: EVENTS_USERNAME_UDM
-              value: {{ .Values.provisioningApi.auth.username | quote }}
+              value: {{ tpl ( required "A Provisioning API username has to be supplied, see parameter provisioningApi.auth.username" .Values.provisioningApi.auth.username ) . | quote }}
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.provisioningApi.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.provisioningApi.auth.existingSecret.keyMapping.password . }}
-            {{- else if .Values.config.eventsPasswordUdm }}
-            - name: EVENTS_USERNAME_UDM
-              value: {{ .Values.config.eventsUsernameUdm | quote }}
-            - name: EVENTS_PASSWORD_UDM
-              value: {{ .Values.config.eventsPasswordUdm | quote }}
-            {{- end }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.provisioningApi.auth.existingSecret "defaultNameSuffix" "provisioning-api" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.provisioningApi.auth.existingSecret "key" "password") | quote }}
           ports:
             - name: "http"
               containerPort: 80
