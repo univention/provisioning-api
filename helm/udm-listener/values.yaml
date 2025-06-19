@@ -26,7 +26,7 @@ global:
   #             digest, and uses that image to launch the container.
   # "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the
   #            kubelet attempts to start the container; otherwise, startup fails.
-  imagePullPolicy: "IfNotPresent"
+  imagePullPolicy: null
 
 affinity: {}
 environment: {}
@@ -99,7 +99,7 @@ imagePullSecrets: []
 image:
   registry: ""
   repository: "nubus-dev/images/provisioning-udm-listener"
-  imagePullPolicy: "Always"
+  imagePullPolicy: null
   tag: "0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"
 
 # -- In seconds, time the given to the pod needs to terminate gracefully.
