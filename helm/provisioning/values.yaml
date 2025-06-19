@@ -138,7 +138,12 @@ udmTransformer:
     baseDn: ""
     auth:
       # -- LDAP username with global read access
-      bindDn: ""
+      bindDn: "cn=admin,dc=univention-organization,dc=intranet"
+      password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: null
     connection:
       # Hostname of the LDAP Primary servers
       host: ""

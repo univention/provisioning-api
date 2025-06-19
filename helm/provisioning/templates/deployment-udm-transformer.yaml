@@ -164,8 +164,8 @@ spec:
             - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.ldap.auth.existingSecret.name . }}
-                  key: {{ tpl .Values.ldap.auth.existingSecret.keyMapping.password . }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password") | quote }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
