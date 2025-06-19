@@ -42,13 +42,6 @@ resources:
       cpu: "100m"
       memory: "32Mi"
 
-ldap:
-  auth:
-    existingSecret:
-      name: "dummy-ldap-cn-admin-secret-name"
-      keyMapping:
-        password: "dummy-ldap-cn-admin-secret-key"
-
 api:
   nats:
     auth:
