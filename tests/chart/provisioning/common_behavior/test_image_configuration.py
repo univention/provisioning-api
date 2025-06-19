@@ -13,7 +13,6 @@ class TestImageConfiguration(ImageConfiguration):
             "udmTransformer.image": "image",
             "prefill.image": "image",
             "registerConsumers.image": "image",
-            "dispatcher.image": "image",
         }
         apply_mapping(values, mapping, copy=True)
         image_configuration = values.pop("image", default={})
