@@ -77,18 +77,11 @@ prefill:
 registerConsumers:
   provisioningApiBaseUrl: "provisioning-base-url"
   createUsers:
-    portalConsumer:
-      username: "dummy-portal-consumer-username"
+    portal-consumer:
       existingSecret:
-        name: "{{ .Release.Name }}-dummy-provisioning-portal-consumer-secret-name"
+        name: "linter-portal-consumer-provisioning-api"
         keyMapping:
-          password: "dummy-provisioning-portal-consumer-secret-key"
-    selfserviceConsumer:
-      username: "dummy-selfservice-consumer-username"
-      existingSecret:
-        name: "{{ .Release.Name }}-dummy-provisioning-selfservice-consumer-secret-name"
-        keyMapping:
-          password: "dummy-provisioning-selfservice-consumer-secret-key"
+          registration: null
   udm:
     auth:
       password: "linter-register-consumers-udm-password"
