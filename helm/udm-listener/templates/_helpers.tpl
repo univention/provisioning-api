@@ -17,17 +17,6 @@ dc=univention-organization,dc=intranet
 {{- end -}}
 {{- end -}}
 
-
-{{- define "udm-listener.ldapAdminDn" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.adminDn" . -}}
-{{- else if .Values.config.ldapHostDn -}}
-{{- .Values.config.ldapHostDn -}}
-{{- else -}}
-cn=admin,dc=univention-organization,dc=intranet
-{{- end -}}
-{{- end -}}
-
 {{- define "udm-listener.ldap.connection.host" -}}
 {{- if .Values.config.ldapHost -}}
 {{- tpl .Values.config.ldapHost . -}}

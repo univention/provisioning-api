@@ -20,7 +20,6 @@ spec:
     metadata:
       annotations:
         checksum/config: '{{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}'
-        checksum/secret: '{{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}'
         {{- with .Values.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -58,10 +57,11 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       {{- if .Values.extraInitContainers }}
-      initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.extraInitContainers "context" .) | nindent 8 }}
+      initContainers:
+        {{- include "common.tplvalues.render" (dict "value" .Values.extraInitContainers "context" .) | nindent 8 }}
       {{- end }}
       containers:
-        - name: "udm-listener"
+        - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext:
             {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -129,25 +129,15 @@ spec:
             - name: "config-files"
               mountPath: "/etc/ldap/ldap.conf"
               subPath: "ldap.conf"
-            {{- if and .Values.mountSecrets (not .Values.global.nubusDeployment) }}
-            - name: "secrets"
-              mountPath: "{{ .Values.config.secretMountPath }}"
-            {{- else }}
-            {{- if .Values.ldap.auth.existingSecret.name  }}
-            - name: {{ printf "%s-volume" (tpl .Values.ldap.auth.existingSecret.name . ) | quote }}
-              subPath: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password") }}
-              mountPath: "{{ .Values.config.secretMountPath }}/ldap_secret"
-            - name: {{ printf "%s-volume" (tpl .Values.ldap.auth.existingSecret.name . ) | quote }}
-              mountPath: "{{ .Values.config.secretMountPath }}/machine_secret"
-              subPath: {{ include "common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password") }}
+            - name: secret-ldap
+              mountPath: /var/secrets/ldap_password
+              subPath: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password") | quote }}
               readOnly: true
-            {{- end }}
             {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
             - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
               mountPath: "{{ .Values.config.secretMountPath }}/ca_cert"
               subPath: {{ .Values.ldap.tlsSecret.caCertKey | quote }}
               readOnly: true
-            {{- end }}
             {{- end }}
             - name: "data"
               mountPath: "/var/lib/univention-directory-listener"
@@ -162,21 +152,14 @@ spec:
         - name: "config-files"
           configMap:
             name: {{ printf "%s-files" (include "common.names.fullname" .) | quote }}
-        {{- if and .Values.mountSecrets (not .Values.global.nubusDeployment) }}
-        - name: "secrets"
+        - name: secret-ldap
           secret:
-            secretName: {{ include "common.names.fullname" . | quote }}
-        {{- else }}
-        {{- if .Values.ldap.auth.existingSecret.name  }}
-        - name: {{ printf "%s-volume" (tpl .Values.ldap.auth.existingSecret.name . ) | quote }}
-          secret:
-            secretName: {{ tpl .Values.ldap.auth.existingSecret.name . }}
-        {{- end }}
+            defaultMode: 0400
+            secretName: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.ldap.auth.existingSecret "defaultNameSuffix" "ldap" "context" .) | quote }}
         {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
         - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
           secret:
             secretName: {{ (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
-        {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
