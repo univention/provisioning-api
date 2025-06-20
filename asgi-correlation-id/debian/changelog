@@ -1,0 +1,5 @@
+python3-asgi-correlation-id (4.3.4) unstable; urgency=medium
+
+  * Packaging asgi-correlation-id 4.3.4.
+
+ -- Ivan Barbecho Delgado <ivan.delgado@univention.de>  Thu, 19 Jun 2025 11:59:47 +0200
