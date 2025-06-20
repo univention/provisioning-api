@@ -1,0 +1,9 @@
+
+[aiohttp]
+aiohttp
+
+[fast_parse]
+fast-mail-parser
+
+[nkeys]
+nkeys

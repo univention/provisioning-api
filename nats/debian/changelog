@@ -1,0 +1,5 @@
+python3-nats (2.10.0) unstable; urgency=medium
+
+  * Packaging nats-py 2.10.0.
+
+ -- Ivan Barbecho Delgado <ivan.delgado@univention.de>  Thu, 19 Jun 2025 11:59:47 +0200

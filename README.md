@@ -220,3 +220,13 @@ Build the sphinx documentation:
 ```sh
 docker compose run docs make html
 ```
+
+
+# Import new version of `nats-py` and `asgi-correlation-id`
+
+The following steps are necessary to import and package a new version of `nats-py` or `asgi-correlation-id`:
+1. Remove all the content from `nats-py` or `asgi-correlation-id` directories except the `debian` directory.
+2. Download the new tar file from pypi.org. e.g [Downloads nats-py](https://pypi.org/project/nats-py/#files)
+3. Extract the tar file into the `nats-py` or `asgi-correlation-id` directory.
+4. Check in a UCS system if the new package can be built with `apt build-dep . && dpkg-buildpackage -b --no-sign`.
+5. Check in the UCS system if the new package can be installed with `dpkg -i ../python3-nats*.deb` or `dpkg -i ../python3-asgi-correlation-id*.deb`.
