@@ -3,8 +3,8 @@
 
 # Inspired by: https://hynek.me/articles/docker-uv/
 
-ARG LISTENER_BASE_IMAGE=artifacts.software-univention.de/nubus/images/listener-base
-ARG LISTENER_BASE_IMAGE_TAG=0.11.0@sha256:cfb165acc8d021a9d61c2791f30dcb460d9425412821557b2b13d57a1add6b10
+ARG LISTENER_BASE_IMAGE=artifacts.software-univention.de/nubus-dev/images/listener-base
+ARG LISTENER_BASE_IMAGE_TAG=0.12.1-pre-dpapoutsis-bump-ucs-base-version@sha256:f36cd0583e08719b55de44573179866443f883d194e244316b105163bdac1ade
 
 ###############################################
 # Stage 1: build dependencies and software
