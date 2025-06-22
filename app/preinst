@@ -1,0 +1,144 @@
+#!/usr/bin/python3
+
+import json
+import os
+from secrets import token_urlsafe
+import sys
+
+NATS_CONF='''{{
+  server_name: nats
+  pid_file: "/nats.pid"
+  port: 4222
+  http_port: 8222
+  lame_duck_duration: 30s
+  lame_duck_grace_period: 10s
+  jetstream {{
+    max_file_store: 1Gi
+    max_memory_store: 256Mi
+    store_dir: "/data"
+  }}
+
+  authorization {{
+    users: [
+      {{
+        user: admin
+        password: {ADMIN_NATS_PASSWORD}
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+      {{
+        user: api
+        password: {NATS_PASSWORD}
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+      {{
+        user: dispatcher
+        password: {NATS_PASSWORD}
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+      {{
+        user: udm-transformer
+        password: {EVENTS_PASSWORD_UDM}
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+      {{
+        user: prefill
+        password: {PREFILL_PASSWORD}
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+      {{
+        user: ldif-producer
+        password: ldifpassTODO
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+    ]
+  }}
+}}
+'''
+
+SECRETS_FILE = "/etc/provisioning-json.secrets"
+SECRETS_KEYS = [
+    "NATS_PASSWORD",
+    "EVENTS_PASSWORD_UDM",
+    "ADMIN_NATS_PASSWORD",
+    "PREFILL_PASSWORD"
+]
+
+def load_secrets(filepath):
+    """Load secrets from a JSON file if it exists and is valid."""
+
+    if os.path.isfile(filepath):
+
+        try:
+            with open(filepath, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            print(f"Warning: {filepath} is not valid JSON.", file=sys.stderr)
+
+    return {}
+
+def generate_missing_secrets(existing_secrets, required_keys):
+    """Generate random secrets for missing keys"""
+
+    updated = False
+    for key in required_keys:
+        if key not in existing_secrets:
+            existing_secrets[key] = token_urlsafe(32)
+            updated = True
+            print(f"Generated new secret for: {key}")
+
+    return updated, existing_secrets
+
+def save_secrets(filepath, secrets_data):
+    """Save secrets to JSON file"""
+
+    with open(filepath, "w") as f:
+        json.dump(secrets_data, f, indent=2)
+
+def secrets():
+
+    secrets_data = load_secrets(SECRETS_FILE)
+    updated, secrets_data = generate_missing_secrets(secrets_data, SECRETS_KEYS)
+
+    if updated:
+        save_secrets(SECRETS_FILE, secrets_data)
+    else:
+        print(f"All secrets already present in {SECRETS_FILE}")
+
+def nats_conf():
+
+    path = "/var/lib/univention-appcenter/apps/provisioning-stack-test/compose/"
+    os.makedirs(path, exist_ok=True)
+    secrets = load_secrets(SECRETS_FILE)
+    
+    nats_config_file = os.path.join(path, "nats.conf")
+    with open(nats_config_file, "w") as f:
+        f.write(NATS_CONF.format(
+                NATS_PASSWORD=secrets["NATS_PASSWORD"],
+                EVENTS_PASSWORD_UDM=secrets["EVENTS_PASSWORD_UDM"],
+                ADMIN_NATS_PASSWORD=secrets["ADMIN_NATS_PASSWORD"],
+                PREFILL_PASSWORD=secrets["PREFILL_PASSWORD"]
+        ))
+
+    print(f"nats.conf file writtern to {nats_config_file}")
+
+if __name__ == "__main__":
+    secrets()
+    nats_conf()
