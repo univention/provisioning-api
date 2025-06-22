@@ -1,0 +1,26 @@
+import os
+
+def remove_file(filepath):
+
+    print(f"Attempting to remove: {filepath}")
+    try:
+        #os.remove(filepath)
+        print(f"Successfully removed: {filepath}")
+    except FileNotFoundError:
+        print(f"File not found, skipping: {filepath}")
+    except PermissionError:
+        print(f"Permission denied when trying to remove: {filepath}")
+    except Exception as e:
+        print(f"An error occurred while removing {filepath}: {e}")
+
+def main():
+    files_to_remove = [
+        "/etc/provisioning-json.secrets",
+        "/var/lib/univention-appcenter/apps/provisioning-stack-test/compose/nats.conf"
+    ]
+
+    for filepath in files_to_remove:
+        remove_file(filepath)
+
+if __name__ == "__main__":
+    main()
