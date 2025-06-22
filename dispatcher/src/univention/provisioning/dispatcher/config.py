@@ -25,6 +25,8 @@ class DispatcherSettings(BaseSettings):
 
     @property
     def nats_server(self) -> str:
+        import sys
+        print("nats://{self.nats_host}:{self.nats_port}", file=sys.stderr)
         return f"nats://{self.nats_host}:{self.nats_port}"
 
 

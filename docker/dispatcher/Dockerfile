@@ -54,7 +54,9 @@ RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
 COPY --from=build --chown=${USER}:${USER} /app/dispatcher/.venv /app/dispatcher/.venv
 COPY --from=build --chown=${USER}:${USER} /app/dispatcher/requirements.txt /app/dispatcher/requirements.txt
 
-USER ${USER}
+#USER ${USER}
+RUN apt update -y
+RUN apt install vim curl -y
 
 CMD ["dispatcher"]
 
