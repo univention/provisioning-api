@@ -14,8 +14,8 @@ if [[ -n "$CI_COMMIT_TAG" ]]; then
     APP_VERSION="${CI_COMMIT_TAG#"$RELEASE_TAG_PREFIX"}"
 elif [[ "$CI_COMMIT_REF_NAME" == "$CI_DEFAULT_BRANCH" ]]; then
     APP_VERSION="$APP_STAGING_VERSION"
-elif [[ -n "$CI_MERGE_REQUEST_ID" ]]; then
-    APP_VERSION="0.0.0-$CI_COMMIT_REF_SLUG"
+elif [[ -n "$CI_MERGE_REQUEST_ID" ]] && [[ -n "$CI_MERGE_REQUEST_IID" ]]; then
+    APP_VERSION="0.0.0-MR-$CI_MERGE_REQUEST_ID-$CI_MERGE_REQUEST_PROJECT_PATH!$CI_MERGE_REQUEST_IID"
 else
     echo "Could not determine app version"
     exit 1
