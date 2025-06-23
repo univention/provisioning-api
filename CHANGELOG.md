@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.55.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.55.2...v0.55.3) (2025-06-23)
+
+
+### Bug Fixes
+
+* use default cluster ingress class if not defined ([ecf657e](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/ecf657ec019e3cab2e1c58764bb422e4bf62b025)), closes [univention/dev/internal/team-nubus#1134](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1134)
+
 ## [0.55.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.55.1...v0.55.2) (2025-06-23)
 
 
