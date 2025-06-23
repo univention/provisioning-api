@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.55.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.55.1...v0.55.2) (2025-06-23)
+
+
+### Bug Fixes
+
+* listener image bump ([bc63028](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/bc63028ee2dfa0796cb7b71e8c8d5509339b99f5)), closes [univention/dev/internal/team-nubus#1263](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1263)
+
 ## [0.55.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.55.0...v0.55.1) (2025-06-18)
 
 
