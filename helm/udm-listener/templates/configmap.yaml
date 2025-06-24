@@ -21,7 +21,7 @@ data:
   CA_CERT_FILE: "{{ .Values.config.caCertFile }}"
   DEBUG_LEVEL: "{{ .Values.config.debugLevel }}"
   LDAP_BASE_DN: {{ include "udm-listener.ldapBaseDn" . | quote }}
-  LDAP_PASSWORD_FILE: "/var/secrets/ldap_secret"
+  LDAP_PASSWORD_FILE: "/var/secrets/ldap_password"
   LDAP_HOST: {{ include "udm-listener.ldap.connection.host" . | quote }}
   LDAP_HOST_DN: {{ tpl ( required "The parameter \"ldap.auth.bindDn\" is required." .Values.ldap.auth.bindDn ) . | quote }}
   LDAP_PORT: {{ include "udm-listener.ldap.connection.port" . | quote }}
