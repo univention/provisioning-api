@@ -3,7 +3,7 @@
 from functools import lru_cache
 
 try:
-    from pydantic.v1 import BaseSettings
+    from pydantic_settings import BaseSettings
 except ImportError:
     from pydantic import BaseSettings
 from typing import Any, Callable, Dict, Tuple
