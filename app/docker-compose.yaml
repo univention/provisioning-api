@@ -121,8 +121,6 @@ services:
     image: "artifacts.software-univention.de/nubus/images/provisioning-prefill:0.48.0"
     container_name: "nubus-provisioning-prefill"
     restart: "on-failure"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     environment:
      - LOG_LEVEL=DEBUG
      - NATS_HOST=nats
