@@ -61,7 +61,7 @@ services:
       -  NATS_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
       -  NATS_MAX_RECONNECT_ATTEMPTS=2
       -  PROVISIONING_API_HOST=provisioning-api
-      -  PROVISIONING_API_PORT=7778
+      -  PROVISIONING_API_PORT=7777
     depends_on:
       - "nats"
       - "provisioning-api"
@@ -83,7 +83,7 @@ services:
         - NATS_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
         - LDAP_PUBLISHER_NAME=udm-listener
         - PROVISIONING_API_HOST=provisioning-api
-        - PROVISIONING_API_PORT=7778
+        - PROVISIONING_API_PORT=7777
         - EVENTS_USERNAME_UDM=udm
         - EVENTS_PASSWORD_UDM=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["EVENTS_PASSWORD_UDM"]);@!@
         - LDAP_HOST=@%@ldap/server/name@%@
