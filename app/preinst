@@ -46,7 +46,7 @@ NATS_CONF='''{{
       }}
       {{
         user: udm-transformer
-        password: {EVENTS_PASSWORD_UDM}
+        password: {NATS_PASSWORD}
         permissions: {{
           publish: '>'
           subscribe: '>'

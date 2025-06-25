@@ -81,7 +81,7 @@ services:
         - NATS_HOST=nats
         - NATS_PORT=4222
         - NATS_USER=udm-transformer
-        - NATS_PASSWORD=udm-transformerpass
+        - NATS_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
         - LDAP_PUBLISHER_NAME=udm-listener
         - PROVISIONING_API_HOST=provisioning-api
         - PROVISIONING_API_PORT=7778
