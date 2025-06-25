@@ -113,12 +113,10 @@ services:
       print("Starting UDM Transformer...")
       with open("/app/src/udm_transformer/main.py") as fp:
         exec(fp.read())'
-    #volumes:
-    #  - /usr/lib/python3/dist-packages/univention/udm/modules/:/usr/lib/python3/dist-packages/univention/udm/modules/
-    #  - /usr/lib/python3/dist-packages/univention/admin/hooks.d/:/usr/lib/python3/dist-packages/univention/admin/hooks.d/
-    #  - /usr/lib/python3/dist-packages/univention/admin/syntax.d/:/usr/lib/python3/dist-packages/univention/admin/syntax.d/
-    #  - /usr/lib/python3/dist-packages/univention/admin/handlers/:/usr/lib/python3/dist-packages/univention/admin/handlers/
-    
+    volumes:
+      - /usr/lib/python3/dist-packages/univention/udm/modules/:/usr/lib/python3/dist-packages/univention/udm/modules/
+      - /usr/lib/python3/dist-packages/univention/admin/:/usr/lib/python3/dist-packages/univention/admin/
+
   prefill:
     image: "artifacts.software-univention.de/nubus/images/provisioning-prefill:0.48.0"
     container_name: "nubus-provisioning-prefill"
