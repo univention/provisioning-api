@@ -4,8 +4,12 @@ import enum
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
-from typing_extensions import Literal, Self
+try:
+    from pydantic.v1 import BaseModel, Field, root_validator, validator
+except ImportError:
+    from pydantic import BaseModel, Field, root_validator, validator
+
+from typing_extensions import Literal
 
 from .constants import PublisherName
 from .subscription import RealmTopic
