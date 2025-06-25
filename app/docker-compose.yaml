@@ -130,8 +130,8 @@ services:
      - NATS_USER=prefill
      - NATS_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["PREFILL_PASSWORD"]);@!@
      - NATS_MAX_RECONNECT_ATTEMPTS=2
-     - UDM_HOST=@%@ldap/server/name@%@
-     - UDM_PORT=9979
+     - UDM_HOST=udm-proxy
+     - UDM_PORT=80
      - UDM_USERNAME=cn=admin
      - UDM_PASSWORD=@!@print(open("/etc/ldap.secret").read())@!@
      - PREFILL_USERNAME=prefill
@@ -142,6 +142,31 @@ services:
     networks:
       - "nubus-provisioning"
 
+  udm-proxy:
+    image: nginx:alpine
+    container_name: udm-proxy
+    command: >
+      /bin/sh -c "echo '
+        events {}
+        http {
+          server {
+            listen 80;
+            location /udm {
+              proxy_pass http://@%@ldap/server/name@%@/univention/udm;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            }
+            location /univention/udm {
+              proxy_pass http://@%@ldap/server/name@%@/univention/udm;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            }
+          }
+        }' > /etc/nginx/nginx.conf && cat /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+    networks:
+    - "nubus-provisioning"
 
 networks:
   nubus-provisioning:
