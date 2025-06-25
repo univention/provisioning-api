@@ -3,7 +3,10 @@
 import os
 from functools import lru_cache
 
-from pydantic import BaseSettings
+try:
+    from pydantic.v1 import BaseSettings
+except ImportError:
+    from pydantic import BaseSettings
 from typing import Any, Callable, Dict, Tuple
 
 SettingsSourceCallable = Callable[["BaseSettings"], Dict[str, Any]]
@@ -48,10 +51,10 @@ class LdapProducerSettings(BaseSettings):
     class Config:
         @classmethod
         def customise_sources(
-                cls,
-                init_settings: SettingsSourceCallable,
-                file_secret_settings: SettingsSourceCallable,
-                env_settings: SettingsSourceCallable,
+            cls,
+            init_settings: SettingsSourceCallable,
+            file_secret_settings: SettingsSourceCallable,
+            env_settings: SettingsSourceCallable,
         ) -> Tuple[SettingsSourceCallable, ...]:
             return (
                 init_settings,
@@ -89,10 +92,10 @@ class NATSMQSettings(BaseSettings):
     class Config:
         @classmethod
         def customise_sources(
-                cls,
-                init_settings: SettingsSourceCallable,
-                file_secret_settings: SettingsSourceCallable,
-                env_settings: SettingsSourceCallable,
+            cls,
+            init_settings: SettingsSourceCallable,
+            file_secret_settings: SettingsSourceCallable,
+            env_settings: SettingsSourceCallable,
         ) -> Tuple[SettingsSourceCallable, ...]:
             return (
                 init_settings,
