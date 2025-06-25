@@ -50,8 +50,7 @@ services:
       - "7778:7777"
 
   dispatcher:
-    #image: "artifacts.software-univention.de/nubus/images/provisioning-dispatcher:0.48.0"
-    image: harbor-registry.atlantishq.de/atlantishq/provisioning-dispatcher:latest
+    image: "artifacts.software-univention.de/nubus/images/provisioning-dispatcher:0.48.0"
     container_name: "nubus-provisioning-dispatcher"
     restart: "on-failure"
     environment:
