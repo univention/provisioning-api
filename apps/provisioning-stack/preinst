@@ -124,10 +124,10 @@ def secrets():
 
 def nats_conf():
 
-    path = "/var/lib/univention-appcenter/apps/provisioning-stack-test/compose/"
+    path = "/var/lib/univention-appcenter/apps/provisioning-stack/compose/"
     os.makedirs(path, exist_ok=True)
     secrets = load_secrets(SECRETS_FILE)
-    
+
     nats_config_file = os.path.join(path, "nats.conf")
     with open(nats_config_file, "w") as f:
         f.write(NATS_CONF.format(
