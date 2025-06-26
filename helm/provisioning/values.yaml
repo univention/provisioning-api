@@ -52,24 +52,15 @@ api:
         keyMapping:
           provisioningApiPassword: null
   auth:
-    admin:
-      password: null
-      existingSecret:
-        name: null
-        keyMapping:
-          password: "admin_password"
-    eventsUdm:
-      password: null
-      existingSecret:
-        name: null
-        keyMapping:
-          password: "events_udm_password"
-    prefill:
-      password: null
-      existingSecret:
-        name: null
-        keyMapping:
-          password: "prefill_password"
+    adminPassword: null
+    eventsUdmPassword: null
+    prefillPassword: null
+    existingSecret:
+      name: null
+      keyMapping:
+        admin_password: null
+        events_udm_password: null
+        prefill_password: null
   config:
     # Python log level
     LOG_LEVEL: "INFO"
