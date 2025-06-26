@@ -3,10 +3,11 @@
 
 services:
   provisioning-api:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-events-and-consumer-api-test:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
+      target: test
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-api"
@@ -36,6 +37,8 @@ services:
       - "nats2"
     ports:
       - "7777:7777"
+    volumes:
+      - coverage-data:/coverage:rw
 
   nats1:
     image: "nats:latest"
@@ -69,12 +72,13 @@ services:
 
 
   dispatcher:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher-test:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
+      target: test
     container_name: "provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -89,14 +93,17 @@ services:
     depends_on:
       - "nats3"
       - "provisioning-api"
+    volumes:
+      - coverage-data:/coverage:rw
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer-test:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-transformer/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
+      target: test
     container_name: "provisioning-udm-transformer"
     restart: "on-failure"
     environment:
@@ -122,14 +129,17 @@ services:
     depends_on:
       - "nats1"
       - "provisioning-api"
+    volumes:
+      - coverage-data:/coverage:rw
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill-test:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
+      target: test
     container_name: "provisioning-prefill"
     restart: "on-failure"
     environment:
@@ -151,6 +161,8 @@ services:
     depends_on:
       - "nats2"
       - "provisioning-api"
+    volumes:
+      - coverage-data:/coverage:rw
 
   ldif-producer:
     platform: linux/amd64
@@ -177,15 +189,17 @@ services:
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-listener-test:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
       # args:
       #   - LISTENER_BASE_IMAGE_TAG=latest
       #   - UCS_BASE_IMAGE_TAG=latest
+      target: test
     container_name: "udm-listener"
     volumes:
+      - coverage-data:/coverage:rw
       - /etc/ldap/
     environment:
       NATS_HOST: "nats1"
@@ -282,7 +296,6 @@ services:
       MAX_ACKNOWLEDGEMENT_RETRIES: 3
     restart: "on-failure"
 
-
   e2e-test:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
     build:
@@ -295,6 +308,16 @@ services:
     volumes:
       - "./e2e_tests/tests:/app/e2e_tests/tests:ro"
       - "./e2e_tests/e2e_settings.json.example:/app/e2e_tests/e2e_settings.json:ro"
+
+  coverage-reporter:
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/testrunner-coverage:${IMAGE_TAG:-latest}"
+    container_name: "coverage-reporter"
+    build:
+      context: .
+      dockerfile: docker/test/Dockerfile
+      target: coverage
+    volumes:
+      - coverage-data:/coverage:ro
 
   # Environment of the pre-commit linter.
   pre-commit:
@@ -321,6 +344,7 @@ services:
       - docs
 
 volumes:
+  coverage-data:
   ldap-shared-data:
   ldap-shared-run:
   pre-commit-cache:

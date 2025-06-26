@@ -33,18 +33,42 @@ lint-pre-commit:
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatcher"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-dispatcher-test"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-events-and-consumer-api"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-events-and-consumer-api-test"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-prefill"
     DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-prefill-test"
+    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-udm-listener"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-udm-listener-test"
+    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-udm-transformer"
     DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-udm-transformer-test"
+    DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
   - IMAGE_NAME: "testrunner"
     DOCKERFILE_PATH: "docker/test/Dockerfile"
+    KANIKO_ARGS: "--target test"
+  - IMAGE_NAME: "testrunner-coverage"
+    DOCKERFILE_PATH: "docker/test/Dockerfile"
+    KANIKO_ARGS: "--target coverage"
   - IMAGE_NAME: "provisioning-e2e-tests"
     DOCKERFILE_PATH: "docker/e2e-test/Dockerfile"
 
@@ -76,13 +100,21 @@ test-unit-and-integration:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
   script:
-    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+    - python3 -m pytest --config-file=pyproject.toml --cov-config=pyproject.toml -p no:cacheprovider --cov-report=term-missing --cov-report=xml:coverage-unit-and-integration.xml --cov=univention.provisioning
+    - sed -re 's#/app/##g' -e 's#app/##g' -e 's/\.app.+\.src\.//g'  -e 's/app.+\.src\.//g' coverage-unit-and-integration.xml > coverage-unit-and-integration_fixed.xml
+  coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
+    paths:
+      - coverage-unit-and-integration_fixed.xml
+      - pytest-junit.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage.xml
+        path: coverage-unit-and-integration_fixed.xml
+      junit: pytest-junit.xml
+    expire_in: "1 day"
+    when: "always"
+    expose_as: "logs of test-unit-and-integration job"
 
 test-end-to-end:
   allow_failure: true
@@ -108,19 +140,41 @@ test-end-to-end:
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
-    - docker compose run --quiet-pull --rm e2e-test
+    - docker ps -a
+    - docker compose run --quiet-pull --name e2e-test e2e-test
   after_script:
     - docker ps -a
-    - docker logs provisioning-api >& provisioning-api.log
+    - docker cp e2e-test:/tmp/pytest-junit.xml ./pytest-junit-e2e-test.xml
+    - docker stop -t0 e2e-test
+    - docker logs e2e-test >& e2e-test.log
+    - docker rm e2e-test
     - docker logs provisioning-dispatcher >& dispatcher.log
     - docker logs provisioning-prefill >& prefill.log
     - docker logs provisioning-udm-transformer >& udm-transformer.log
     - docker logs udm-listener>& udm-listener.log
     - docker logs ldap-server >& ldap-server.log
     - docker logs udm-rest-api >& udm-rest-api.log
+    - docker logs provisioning-api >& provisioning-api.log
+    - docker compose down
+    - unset DOCKER_API_VERSION
+    - export IMAGE_TAG=${RELEASE_VERSION}
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
+    - echo $IMAGE_TAG
+    - docker version
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
+    - docker compose config e2e-test
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
+    - docker compose run --name coverage-reporter coverage-reporter
+    - docker cp coverage-reporter:/app/combined.txt ./coverage-e2e.txt
+    - docker cp coverage-reporter:/app/combined_fixed.xml ./coverage-e2e.xml
+    - docker rm coverage-reporter
     - docker compose down --volumes
+    - cat coverage-e2e.txt
+  coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
+      - e2e-test.log
       - provisioning-api.log
       - dispatcher.log
       - prefill.log
@@ -128,10 +182,25 @@ test-end-to-end:
       - udm-listener.log
       - ldap-server.log
       - udm-rest-api.log
+      - pytest-junit-e2e-test.xml
+      - coverage-e2e.txt
+      - coverage-e2e.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage-e2e.xml
+      junit: pytest-junit-e2e-test.xml
     expire_in: "1 day"
     when: "always"
-    expose_as: "docker compose server logs"
+    expose_as: "logs of test-end-to-end job"
 
+sonarqube:
+  stage: "test"
+  needs:
+    - test-unit-and-integration
+    - test-end-to-end
+  script:
+    - sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}"
 
 push-image-external:
   parallel:

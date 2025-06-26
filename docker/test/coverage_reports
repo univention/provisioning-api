@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -ex
+
+ls -la /coverage
+
+coverage combine --rcfile=/app/listener/pyproject.toml --data-file=/app/combined --keep /coverage/*
+
+cd /app/.venv/lib/python3.11/site-packages
+coverage report --rcfile=/app/listener/pyproject.toml --data-file=/app/combined --show-missing > /app/combined.txt
+coverage xml --rcfile=/app/listener/pyproject.toml --data-file=/app/combined -o /app/combined.xml
+
+/usr/local/bin/fix_e2e_coverage_xml /app/combined.xml /app/combined_fixed.xml

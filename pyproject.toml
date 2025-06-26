@@ -25,11 +25,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "coverage>=7",
     "mock>=5.1.0",
     "polyfactory==2.17.0",
     "pytest<9.0.0,>=8.3.3",
-    "pytest-asyncio<1.0,>=0.24",
-    "pytest-cov<6.0,>=5.0",
+    "pytest-asyncio>=1.0",
+    "pytest-cov>=6.0",
     "pytest-env<2.0.0,>=1.1.5",
 ]
 
@@ -53,6 +54,14 @@ build-backend = "hatchling.build"
 
 # Exclude e2e_tests from execution by default
 [tool.pytest.ini_options]
+#addopts = "-lvv --junit-xml=/tmp/pytest-junit.xml"
+addopts = [
+    "-lvv",
+    "--cov-config=pyproject.toml",
+    "--cov-report=term-missing",
+    "--cov-report=xml:coverage-unit-and-integration.xml",
+    "--junit-xml=pytest-junit.xml",
+]
 testpaths = [
   "backends/tests/",
   "common/tests/",
@@ -65,7 +74,6 @@ testpaths = [
   "udm-transformer/tests/",
 ]
 
-# The following works only with pytest-env>=1.1 (and Python 3.8+), which we'll get in the test Docker container.
 [tool.pytest_env]
 ADMIN_USERNAME = {value = "admin", skip_if_set = true}
 ADMIN_PASSWORD = {value = "provisioning", skip_if_set = true}
@@ -107,3 +115,15 @@ extend-select = ["I"]  # activate isort
 [tool.ruff.lint.isort]
 known-first-party = ["univention"]
 known-third-party = ["difflib"]
+
+[tool.coverage.report]
+ignore_errors = true
+show_missing = true
+
+[tool.coverage.run]
+data_file = "coverage"
+relative_files = true
+source = ["univention.provisioning"]
+
+[tool.coverage.xml]
+output = "coverage-unit-and-integration.xml"

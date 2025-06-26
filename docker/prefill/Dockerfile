@@ -63,3 +63,29 @@ RUN \
   python3.11 -V && \
   python3.11 -m site && \
   python3.11 -c 'import univention.provisioning.prefill.main'
+
+############################################################
+# Stage 4: image for running tests with coverage
+
+FROM final AS test
+
+# hadolint ignore=DL3002
+USER root
+WORKDIR /app/prefill
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11
+
+RUN mkdir -pv /coverage && \
+    chmod 777 /coverage
+VOLUME /coverage
+
+COPY --from=build /usr/local/bin/uv /usr/local/bin/uv
+RUN --mount=type=cache,target=/root/.cache \
+  uv pip install coverage
+
+USER ${USER}
+WORKDIR /app/prefill/.venv/lib/python3.11/site-packages
+CMD ["coverage", "run", "--rcfile=/app/prefill/pyproject.toml", "-m", "univention.provisioning.prefill.main"]

@@ -24,9 +24,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest==7.4.4",
-    "pytest-asyncio==0.21.2",
-    "pytest-cov==4.1.0",
+    "pytest<9.0.0,>=8.3.3",
+    "pytest-asyncio>=1.0",
+    "pytest-cov>=6.0",
 ]
 
 [tool.uv.sources]
@@ -53,4 +53,9 @@ log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
 
-
+[tool.coverage.run]
+# debug = ["config", "dataio", "dataop", "lock", "multiproc", "pid", "process", "sys", "trace"]
+data_file = "/coverage/listener"
+relative_files = true
+sigterm = true
+source = ["univention.provisioning", "/usr/lib/univention-directory-listener/system/"]

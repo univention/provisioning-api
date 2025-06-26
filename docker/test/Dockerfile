@@ -8,7 +8,7 @@ ARG UCS_BASE_IMAGE_TAG=0.18.2-build-2025-06-12
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS test
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
 COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
@@ -40,3 +40,22 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache \
     uv sync \
     --locked
+
+############################################################
+# Stage 2: image for merging coverage results and reporting
+
+FROM test AS coverage
+
+RUN mkdir -pv /coverage
+VOLUME /coverage
+
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync --locked --no-editable
+
+COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/system/
+COPY ./docker/test/coverage_reports ./docker/test/fix_e2e_coverage_xml /usr/local/bin/
+RUN chmod 755 /usr/local/bin/*
+
+WORKDIR /app/.venv/lib/python3.11/site-packages
+
+CMD ["/usr/local/bin/coverage_reports"]

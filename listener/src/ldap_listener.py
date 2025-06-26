@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# SPDX-FileCopyrightText: 2024 Univention GmbH
+# SPDX-FileCopyrightText: 2025 Univention GmbH
 
 import asyncio
 
 from univention.listener.handler import ListenerModuleHandler
 from univention.provisioning.listener.config import ldap_producer_settings
+from univention.provisioning.listener.coverage import save_coverage
 from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAdapter
 from univention.provisioning.listener.mq_port import MessageQueuePort
 from univention.provisioning.models.message import NoUDMTypeError
@@ -42,6 +43,7 @@ class LdapListener(ListenerModuleHandler):
 
     def _ensure_queue_exists(self) -> None:
         asyncio.run(self._async_ensure_queue_exists())
+        save_coverage()
 
     async def _async_ensure_queue_exists(self) -> None:
         async with self.mq as mq:
@@ -49,6 +51,7 @@ class LdapListener(ListenerModuleHandler):
 
     def _send_message(self, new, old) -> None:
         asyncio.run(self._async_send_message(new, old))
+        save_coverage()
 
     async def _async_send_message(self, new, old) -> None:
         async with self.mq as mq:

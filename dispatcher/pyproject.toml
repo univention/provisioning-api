@@ -17,6 +17,11 @@ dependencies = [
     "nubus-provisioning-common",
 ]
 
+[dependency-groups]
+dev = [
+    "coverage>=7",
+]
+
 [tool.uv.sources]
 nubus-provisioning-backends = { path = "../backends" }
 nubus-provisioning-common = { path = "../common" }
@@ -30,3 +35,9 @@ packages = ["src/univention"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.coverage.run]
+data_file = "/coverage/dispatcher"
+relative_files = true
+sigterm = true
+source = ["univention.provisioning"]

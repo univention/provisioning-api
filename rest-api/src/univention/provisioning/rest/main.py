@@ -23,7 +23,6 @@ from .subscriptions import router as subscriptions_api_router
 
 logger = logging.getLogger(__name__)
 
-
 # TODO: Refactor this into functions for better testability
 settings = app_settings()
 app = FastAPI(
@@ -100,4 +99,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    run()  # pragma: no cover

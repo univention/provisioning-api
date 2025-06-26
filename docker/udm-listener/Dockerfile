@@ -74,3 +74,30 @@ USER ${USER}
 #   python3.11 -V && \
 #   python3.11 -m site && \
 #   python3.11 -c 'import univention.provisioning.listener'
+
+############################################################
+# Stage 3: image for running tests with coverage
+
+FROM final AS test
+
+WORKDIR /app/listener
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.11 \
+    COVERAGE_PROCESS_START="/app/listener/pyproject.toml"
+
+RUN mkdir -pv /coverage && \
+    chmod 777 /coverage
+VOLUME /coverage
+
+COPY --from=build /usr/local/bin/uv /usr/local/bin/uv
+RUN --mount=type=cache,target=/root/.cache \
+  uv pip install coverage
+
+RUN echo 'import coverage; coverage.process_startup()' >> /etc/python3.11/sitecustomize.py && \
+    mkdir -pv /var/secrets && \
+    echo "univention" > /var/secrets/ldap_password
+
+WORKDIR /app/listener/.venv/lib/python3.11/site-packages
