@@ -125,7 +125,7 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .) | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api" "context" .) | quote }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password") | quote }}
           command:
             - "/bin/sh"

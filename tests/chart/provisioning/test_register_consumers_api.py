@@ -8,9 +8,11 @@ class TestAuth(SecretViaEnv, AuthPassword):
 
     is_secret_owner = True
 
-    secret_name = "release-name-provisioning-api-admin"
+    secret_name = "release-name-provisioning-api"
     workload_kind = "Job"
     workload_name = "release-name-provisioning-register-consumers-1"
+
+    path_password = "stringData.admin_password"
 
     sub_path_env_password = "env[?@name=='ADMIN_PASSWORD']"
 

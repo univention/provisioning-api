@@ -57,19 +57,19 @@ api:
       existingSecret:
         name: null
         keyMapping:
-          password: null
+          password: "admin_password"
     eventsUdm:
       password: null
       existingSecret:
         name: null
         keyMapping:
-          password: null
+          password: "events_udm_password"
     prefill:
       password: null
       existingSecret:
         name: null
         keyMapping:
-          password: null
+          password: "prefill_password"
   config:
     # Python log level
     LOG_LEVEL: "INFO"
