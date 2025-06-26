@@ -5,7 +5,6 @@ from univention.testing.helm.client.provisioning_api import AuthPassword, Secret
 
 
 class TestAuth(SecretViaEnv, AuthPassword):
-
     is_secret_owner = True
 
     secret_name = "release-name-provisioning-api-prefill"

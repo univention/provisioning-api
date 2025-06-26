@@ -17,5 +17,4 @@ class TestAuthPassword(SecretUsageViaEnv, AuthPassword):
 
 
 class TestWaitForNatsAuthPassword(TestAuthPassword):
-
     path_container = "spec.template.spec.initContainers[?@.name=='wait-for-nats']"

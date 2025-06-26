@@ -5,7 +5,6 @@ from univention.testing.helm.client.ldap import Auth, SecretViaVolume
 
 
 class TestLdapClient(SecretViaVolume, Auth):
-
     config_map_name = "release-name-udm-listener"
     secret_name = "release-name-udm-listener-ldap"
     workload_kind = "StatefulSet"

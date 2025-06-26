@@ -13,6 +13,6 @@ class TestAuth(SecretViaEnv, AuthPassword):
         "prefill.udm": "udm",
     }
 
-class TestAuthWaitForUdm(TestAuth):
 
+class TestAuthWaitForUdm(TestAuth):
     path_container = "spec.template.spec.initContainers[?@.name=='wait-for-udm']"

@@ -24,12 +24,15 @@ A Helm Chart that deploys the provisioning services
 | affinity | object | `{}` | Affinity for pod assignment. Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity Note: podAffinityPreset, podAntiAffinityPreset, and nodeAffinityPreset will be ignored when it's set. |
 | api.additionalAnnotations | object | `{}` |  |
 | api.additionalLabels | object | `{}` |  |
-| api.auth.admin.existingSecret.keyMapping.password | string | `"ADMIN_PASSWORD"` |  |
+| api.auth.admin.existingSecret.keyMapping.password | string | `nil` |  |
 | api.auth.admin.existingSecret.name | string | `nil` |  |
-| api.auth.eventsUdm.existingSecret.keyMapping.password | string | `"EVENTS_PASSWORD_UDM"` |  |
+| api.auth.admin.password | string | `nil` |  |
+| api.auth.eventsUdm.existingSecret.keyMapping.password | string | `nil` |  |
 | api.auth.eventsUdm.existingSecret.name | string | `nil` |  |
-| api.auth.prefill.existingSecret.keyMapping.password | string | `"PREFILL_PASSWORD"` |  |
+| api.auth.eventsUdm.password | string | `nil` |  |
+| api.auth.prefill.existingSecret.keyMapping.password | string | `nil` |  |
 | api.auth.prefill.existingSecret.name | string | `nil` |  |
+| api.auth.prefill.password | string | `nil` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
@@ -40,6 +43,7 @@ A Helm Chart that deploys the provisioning services
 | api.image.tag | string | `"0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"` |  |
 | api.nats.auth.existingSecret.keyMapping.provisioningApiPassword | string | `nil` |  |
 | api.nats.auth.existingSecret.name | string | `nil` |  |
+| api.nats.auth.password | string | `nil` |  |
 | api.podAnnotations | object | `{}` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
@@ -58,8 +62,9 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
 | dispatcher.image.tag | string | `"0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"` |  |
-| dispatcher.nats.auth.existingSecret.keyMapping.dispatcherPassword | string | `nil` |  |
+| dispatcher.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | dispatcher.nats.auth.existingSecret.name | string | `nil` |  |
+| dispatcher.nats.auth.password | string | `nil` |  |
 | dispatcher.podAnnotations | object | `{}` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
@@ -93,8 +98,6 @@ A Helm Chart that deploys the provisioning services
 | istio.virtualService | object | `{"annotations":{},"enabled":true,"pathOverrides":[],"paths":[]}` | The hostname. This parameter has to be supplied. Example `portal.example`. host: provisioning.local |
 | istio.virtualService.pathOverrides | list | `[]` | Allows to inject deployment specific path configuration which is configured before the elements from `paths` below. This allows to redirect some paths to other services, e.g. in order to supply a file `custom.css`. |
 | istio.virtualService.paths | list | `[]` | The paths configuration. The default only grabs what is known to be part of the frontend.  `pathOverrides` is provided as a workaround so that specific sub-paths can be redirected to other services. |
-| ldap.auth.existingSecret.keyMapping.password | string | `nil` |  |
-| ldap.auth.existingSecret.name | string | `nil` |  |
 | lifecycleHooks | object | `{}` | Lifecycle to automate configuration before or after startup. |
 | livenessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
@@ -156,7 +159,11 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
 | prefill.nats.auth.existingSecret.keyMapping.prefillPassword | string | `nil` |  |
 | prefill.nats.auth.existingSecret.name | string | `nil` |  |
+| prefill.nats.auth.password | string | `nil` |  |
 | prefill.podAnnotations | object | `{}` |  |
+| prefill.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
+| prefill.udm.auth.existingSecret.name | string | `nil` |  |
+| prefill.udm.auth.password | string | `nil` |  |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
@@ -191,7 +198,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.additionalLabels | object | `{}` |  |
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
-| registerConsumers.createUsers | object | `{}` |  |
+| registerConsumers.createUsers | object | `{}` | Allows to create users in the Provisioning API.  The entries have to be in the following structure:    consumerName:     existingSecret:       name: null       keyMapping:         registration: null  The entries can only be provided as existing secrets and the content of the key "registration" has to follow the correct JSON structure.  This parameter shall be used as an integration point between the consumer's chart and this chart. The consumer's chart owns the Secret and has to store the correct JSON data within the Secret. This chart only receives a reference this Secret so that it can register the consumer. |
 | registerConsumers.image.pullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
@@ -199,6 +206,9 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.jsonSecretName | string | `""` |  |
 | registerConsumers.podAnnotations | object | `{}` |  |
 | registerConsumers.provisioningApiBaseUrl | string | `""` |  |
+| registerConsumers.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
+| registerConsumers.udm.auth.existingSecret.name | string | `nil` |  |
+| registerConsumers.udm.auth.password | string | `nil` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
 | resources.api.limits.cpu | int | `1` |  |
 | resources.api.limits.memory | string | `"1Gi"` |  |
@@ -273,11 +283,15 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"` |  |
-| udmTransformer.ldap.auth.bindDn | string | `""` | LDAP username with global read access |
+| udmTransformer.ldap.auth.bindDn | string | `"cn=admin,dc=univention-organization,dc=intranet"` | LDAP username with global read access |
+| udmTransformer.ldap.auth.existingSecret.keyMapping.password | string | `nil` |  |
+| udmTransformer.ldap.auth.existingSecret.name | string | `nil` |  |
+| udmTransformer.ldap.auth.password | string | `nil` |  |
 | udmTransformer.ldap.baseDn | string | `""` |  |
 | udmTransformer.ldap.connection.host | string | `""` |  |
 | udmTransformer.ldap.connection.port | string | `""` |  |
-| udmTransformer.nats.auth.existingSecret.keyMapping.udmTransformerPassword | string | `nil` |  |
+| udmTransformer.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | udmTransformer.nats.auth.existingSecret.name | string | `nil` |  |
+| udmTransformer.nats.auth.password | string | `nil` |  |
 | udmTransformer.podAnnotations | object | `{}` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |
