@@ -25,6 +25,7 @@ def ucr_ldap_producer_settings(settings: BaseSettings) -> Dict[str, Any]:
         "nats_host": ucr.get("nats/host", "localhost"),
         "nats_port": ucr.get("nats/port", 4222),
         "nats_max_reconnect_attempts": ucr.get("nats/max_reconnect_attempts", 10),
+        "nats_password": "univention",
     }
 
     nats_password_file = ucr.get("nats/passwordfile", "/etc/nats/provisioning-listener.secret")

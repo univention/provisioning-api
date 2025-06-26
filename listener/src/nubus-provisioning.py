@@ -22,33 +22,51 @@ class LdapListener(ListenerModuleHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.mq: MessageQueuePort = MessageQueueNatsAdapter(ldap_producer_settings())
+        self.connected = False
         self._ensure_queue_exists()
 
     def create(self, dn, new):
-        self.logger.info("[ create ] dn: %r", dn)
-        self._send_message(new, {})
+        if self.connected:
+            self.logger.info("[ create ] dn: %r", dn)
+            self._send_message(new, {})
+        else:
+            self.logger.warning("Not connected to the message queue. Skipping create event for dn: %r", dn)
 
     def modify(self, dn, old, new, old_dn):
-        if old_dn:
-            self.logger.info("[ modify & move ] dn: %r old_dn: %r", dn, old_dn)
+        if self.connected:
+            if old_dn:
+                self.logger.info("[ modify & move ] dn: %r old_dn: %r", dn, old_dn)
+            else:
+                self.logger.info("[ modify ] dn: %r", dn)
+            self.logger.debug("changed attributes: %r", self.diff(old, new))
+            self._send_message(new, old)
         else:
-            self.logger.info("[ modify ] dn: %r", dn)
-        self.logger.debug("changed attributes: %r", self.diff(old, new))
-        self._send_message(new, old)
+            self.logger.warning("Not connected to the message queue. Skipping create event for dn: %r", dn)
 
     def remove(self, dn, old):
-        self.logger.info("[ remove ] dn: %r", dn)
-        self._send_message({}, old)
+        if self.connected:
+            self.logger.info("[ remove ] dn: %r", dn)
+            self._send_message({}, old)
+        else:
+            self.logger.warning("Not connected to the message queue. Skipping create event for dn: %r", dn)
 
     def _ensure_queue_exists(self) -> None:
-        asyncio.run(self._async_ensure_queue_exists())
+        try:
+            asyncio.run(self._async_ensure_queue_exists())
+            self.connected = True
+        except OSError as exc:
+            self.logger.error("Failed to connect to the message queue: %s", exc)
 
     async def _async_ensure_queue_exists(self) -> None:
         async with self.mq as mq:
             await mq.ensure_queue_exists()
 
     def _send_message(self, new, old) -> None:
-        asyncio.run(self._async_send_message(new, old))
+        try:
+            asyncio.run(self._async_send_message(new, old))
+        except OSError as exc:
+            self.logger.error("Failed to send message to the message queue: %s", exc)
+            self.connected = False
 
     async def _async_send_message(self, new, old) -> None:
         async with self.mq as mq:
