@@ -21,7 +21,7 @@ spec:
 
 deb_build_git:
   stage: $[[ inputs.build_stage ]]
-  image: gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/deb-builder-$[[ inputs.ucs_base_version ]]:latest
+  image: gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/deb-builder-$[[ inputs.ucs_base_version ]]:latest
   rules:
     - $[[ inputs.git_build_rules ]]
   script:

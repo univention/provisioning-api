@@ -7,7 +7,7 @@ spec:
     ucs_base_version:
       description: "The UCS base version the app versions are scoped for."
     image_app_release:
-      default: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/app-release:latest"
+      default: "gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/app-release:latest"
       description: "Image for the release jobs."
     app_staging_version:
       default: "999.0.0-staging"
