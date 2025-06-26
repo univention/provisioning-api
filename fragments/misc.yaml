@@ -1,5 +1,5 @@
 variables:
-  PRE_COMMIT_IMAGE: "gitregistry.knut.univention.de/univention/internal/ucsschool-ci-utils/pre-commit:latest"
+  PRE_COMMIT_IMAGE: "gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/pre-commit:latest"
 
 .lint_commit_messages:
   image: $PRE_COMMIT_IMAGE
