@@ -60,7 +60,6 @@ udmTransformer:
     connection:
       host: "ldap-host"
       port: "1234"
-    baseDn: "ldap-base-dn"
     auth:
       password: "linter-udm-transformer-ldap-password"
 

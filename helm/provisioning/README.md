@@ -283,7 +283,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
 | udmTransformer.image.tag | string | `"0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"` |  |
-| udmTransformer.ldap.auth.bindDn | string | `"cn=admin,dc=univention-organization,dc=intranet"` | LDAP username with global read access |
+| udmTransformer.ldap.auth.bindDn | string | `"cn=admin,{{ include \"provisioning.udmTransformer.ldap.baseDn\" . }}"` | LDAP username with global read access |
 | udmTransformer.ldap.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | udmTransformer.ldap.auth.existingSecret.name | string | `nil` |  |
 | udmTransformer.ldap.auth.password | string | `nil` |  |

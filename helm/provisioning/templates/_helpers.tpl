@@ -38,11 +38,8 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- end -}}
 
 {{- define "provisioning.udmTransformer.ldap.baseDn" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.baseDn" . -}}
-{{- else -}}
-{{- required ".Values.udmTransformer.ldap.baseDn must be defined." .Values.udmTransformer.ldap.baseDn -}}
-{{- end -}}
+{{- default "dc=univention-organization,dc=intranet"
+      ( coalesce .Values.udmTransformer.ldap.baseDn (.Values.global.ldap).baseDn ) }}
 {{- end -}}
 
 {{- define "provisioning.udmTransformer.ldap.connection.host" -}}

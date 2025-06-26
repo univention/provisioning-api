@@ -126,7 +126,7 @@ udmTransformer:
     baseDn: ""
     auth:
       # -- LDAP username with global read access
-      bindDn: "cn=admin,dc=univention-organization,dc=intranet"
+      bindDn: 'cn=admin,{{ include "provisioning.udmTransformer.ldap.baseDn" . }}'
       password: null
       existingSecret:
         name: null
