@@ -9,9 +9,8 @@ UCS_VERSION="5.2"
 APP_ID="${1:-provisioning-stack}"
 VERSION="$(sed -n 's/^Version\s*=\s*//p' $APP_ID/ini)"
 APP_VERSION="${UCS_VERSION}/${APP_ID}=${VERSION}"
-FILES_TO_COPY=(
-	"$APP_ID/ini"
-)
+FILES_TO_COPY="$(ls $APP_ID/*)"
+FILES_TO_COPY=(${FILES_TO_COPY})
 
 selfservice () {
 	local uri="https://provider-portal.software-univention.de/appcenter-selfservice/univention-appcenter-control"
