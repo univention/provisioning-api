@@ -49,4 +49,5 @@ variables:
   script:
     - 'echo "Running cfg file $OPENSTACK_CFG_FILE with args: ${UCS_OPENSTACK_CREATE_ARGS[@]}"'
     - unset OS_PROJECT_NAME
+    - ls -lha ~/ec2/keys/tech.pem
     - . clouds.rc && ucs-openstack-create "${UCS_OPENSTACK_CREATE_ARGS[@]}" -c "$OPENSTACK_CFG_FILE" | ansi2txt
