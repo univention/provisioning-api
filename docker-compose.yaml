@@ -10,6 +10,7 @@ services:
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-api"
+    entrypoint: bash -c "cd /app/rest-api/.venv/lib/python3.11/site-packages/; rest-api"
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -32,6 +33,7 @@ services:
       DEBUG: "false"
       ROOT_PATH: "/"
       CORS_ALL: "false"
+      COVERAGE: "true"
     depends_on:
       - "nats2"
     ports:
