@@ -1,6 +1,6 @@
 # udm-listener
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for the Univention Portal Provisioning API
 
@@ -10,19 +10,17 @@ A Helm chart for the Univention Portal Provisioning API
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.12.x |
+| oci://artifacts.software-univention.de/nubus-dev/charts | nubus-common | 0.21.0-pre-jbornhold-secrets-refactoring-tweaks-5 |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","eventsPasswordUdm":"udmpass","eventsUsernameUdm":"udm","ldapBaseDn":null,"ldapHost":"","ldapHostDn":null,"ldapPassword":"","ldapPasswordFile":"/var/secrets/ldap_secret","ldapPort":"389","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","ldapHost":"","ldapPort":"389","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.ldapHost | string | `""` | The LDAP Server host, should point to the service name of the ldap-server-primary that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier" |
-| config.ldapPassword | string | `""` | LDAP password for `cn=admin`. Will be written to "ldapPasswordFile" if set. |
-| config.ldapPasswordFile | string | `"/var/secrets/ldap_secret"` | The path to the "ldapPasswordFile" docker secret or a plain file |
 | config.nats_max_reconnect_attempts | string | `"5"` | NATS: maximum number of reconnect attempts to the NATS server |
 | config.notifierServer | string | `"ldap-notifier"` | Defaults to "ldapHost" if not set. |
 | config.provisioningApiHost | string | `"provisioning-api"` | Provisioning-API Hostname |
@@ -42,16 +40,16 @@ A Helm chart for the Univention Portal Provisioning API
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
 | extraVolumes | list | `[]` | Optionally specify an extra list of additional volumes. |
 | fullnameOverride | string | `""` |  |
-| global.imagePullPolicy | string | `"IfNotPresent"` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
+| global.imagePullPolicy | string | `nil` | Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails. |
 | global.imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | global.imageRegistry | string | `"artifacts.software-univention.de"` | Container registry address. |
 | global.nubusDeployment | bool | `false` | Indicates wether this chart is part of a Nubus deployment. |
-| image.imagePullPolicy | string | `"Always"` |  |
+| image.imagePullPolicy | string | `nil` |  |
 | image.registry | string | `""` |  |
 | image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
 | image.tag | string | `"0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"` |  |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
-| ldap | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"ldap.secret"},"name":""}},"tlsSecret":{"caCertKey":"ca.crt","name":""}}` | LDAP client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
+| ldap | object | `{"auth":{"bindDn":"cn=admin,{{ include \"udm-listener.ldapBaseDn\" . }}","existingSecret":{"keyMapping":{"password":null},"name":null},"password":null},"tlsSecret":{"caCertKey":"ca.crt","name":""}}` | LDAP client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | livenessProbe.exec.command[0] | string | `"sh"` |  |
 | livenessProbe.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.exec.command[2] | string | `"exit 0\n"` |  |
@@ -62,7 +60,7 @@ A Helm chart for the Univention Portal Provisioning API
 | livenessProbe.timeoutSeconds | int | `5` | Timeout for command return. |
 | mountSecrets | bool | `true` |  |
 | nameOverride | string | `""` |  |
-| nats | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"NATS_PASSWORD"},"name":null},"password":"","user":"udmlistener"},"connection":{"host":null,"port":"4222"}}` | NATS client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
+| nats | object | `{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":null},"password":null,"user":"udmlistener"},"connection":{"host":null,"port":"4222"}}` | NATS client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | nodeSelector | object | `{}` |  |
 | persistence.size | string | `"1Gi"` | Specify PVCs size |
 | persistence.storageClass | string | `""` | Specify storageClassName - Leave empty to use the default storage class |
@@ -71,7 +69,7 @@ A Helm chart for the Univention Portal Provisioning API
 | podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[]` | Allow binding to ports below 1024 without root access. |
-| provisioningApi | object | `{"auth":{"existingSecret":{"keyMapping":{"password":"EVENTS_PASSWORD_UDM"},"name":""},"username":"udm"}}` | Provisioning API client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
+| provisioningApi | object | `{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":null},"password":null,"username":"udm"}}` | Provisioning API client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | readinessProbe.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.exec.command[2] | string | `"exit 0\n"` |  |

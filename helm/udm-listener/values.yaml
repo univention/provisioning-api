@@ -123,7 +123,6 @@ config:
   # caCertFile: "/var/secrets/ca_cert"
   caCertFile: ""
   debugLevel: "2"
-  ldapBaseDn: null
   # -- The LDAP Server host, should point to the service name of the ldap-server-primary
   # that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier"
   ldapHost: ""
@@ -175,7 +174,7 @@ ldap:
     name: ""
     caCertKey: "ca.crt"
   auth:
-    bindDn: "cn=admin,dc=univention-organization,dc=intranet"
+    bindDn: 'cn=admin,{{ include "udm-listener.ldapBaseDn" . }}'
     password: null
     existingSecret:
       name: null

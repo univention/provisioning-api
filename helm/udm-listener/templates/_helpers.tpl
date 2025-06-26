@@ -8,13 +8,7 @@ Templates defined in other Helm sub-charts are imported to be used to configure 
 If the value .Values.global.nubusDeployment equates to true, the defined templates are imported.
 */}}
 {{- define "udm-listener.ldapBaseDn" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.baseDn" . -}}
-{{- else if .Values.config.ldapBaseDn -}}
-{{- .Values.config.ldapBaseDn -}}
-{{- else -}}
-dc=univention-organization,dc=intranet
-{{- end -}}
+{{- default "dc=univention-organization,dc=intranet" (.Values.global.ldap).baseDn }}
 {{- end -}}
 
 {{- define "udm-listener.ldap.connection.host" -}}
