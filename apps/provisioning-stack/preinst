@@ -2,7 +2,7 @@
 
 import json
 import os
-from secrets import token_urlsafe
+import secrets
 import sys
 import stat
 import string
@@ -135,7 +135,7 @@ def generate_missing_secrets(existing_secrets, required_keys):
     updated = False
     for key in required_keys:
         if key not in existing_secrets:
-            existing_secrets[key] = token_urlsafe(32)
+            existing_secrets[key] = _alphanum_token(32)
             updated = True
             print(f"Generated new secret for: {key}")
 
@@ -147,7 +147,7 @@ def save_secrets(filepath, secrets_data):
     with open(filepath, "w") as f:
         json.dump(secrets_data, f, indent=2)
 
-def secrets():
+def create_secrets():
 
     secrets_data = load_secrets(SECRETS_FILE)
     updated, secrets_data = generate_missing_secrets(secrets_data, SECRETS_KEYS)
@@ -175,7 +175,7 @@ def nats_conf():
     print(f"nats.conf file writtern to {nats_config_file}")
 
 if __name__ == "__main__":
-    secrets()
+    create_secrets()
     nats_conf()
     set_listener_username()
     set_listener_password()
