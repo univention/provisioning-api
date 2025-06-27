@@ -1,8 +1,8 @@
-#!/bin/bash
+#! /bin/sh
 #
-# App join script
+# unjoin script
 #
-# Copyright 2021-2025 Univention GmbH
+# Copyright 2019-2025 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -29,34 +29,21 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-
 ## joinscript api: bindpwdfile
 
 VERSION=1
+
 . /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/all.sh
+
 joinscript_init
 
 SERVICE="provisioning-stack"
-ucs_addServiceToLocalhost "$SERVICE" "$@"
-
-wait_for_nats () {
-    local i=0
-    for ((i=0; i<30; i++)); do
-
-        nats_server="localhost:8222/healthz"
-        curl -sf $nats_server > /dev/null && return 0
-        echo "waiting for $nats_server ..."
-
-    done
-    return 1
-}
-
-wait_for_nats || die
 
 
-systemctl restart univention-directory-listener
+# remove service
+ucs_removeServiceFromLocalhost "$SERVICE" "$@"
 
-
-joinscript_save_current_version
+joinscript_remove_script_from_status_file $SERVICE
 
 exit 0
