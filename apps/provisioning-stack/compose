@@ -170,10 +170,4 @@ networks:
 
 secrets:
   nats-conf:
-    file: ./nats.conf
-
-volumes:
-  listener-data:
-    name: "nubus-provisioning-listener-data"
-  nats-data:
-    name: "nubus-provisioning-nats-data"
+    file: /var/lib/univention-appcenter/apps/provisioning-stack/conf/nats.conf

@@ -192,7 +192,7 @@ def create_secrets():
 
 def nats_conf():
 
-    path = "/var/lib/univention-appcenter/apps/provisioning-stack/compose/"
+    path = "/var/lib/univention-appcenter/apps/provisioning-stack/conf/"
     os.makedirs(path, exist_ok=True)
     secrets = load_secrets(SECRETS_FILE)
 
