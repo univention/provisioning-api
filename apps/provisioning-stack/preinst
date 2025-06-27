@@ -157,6 +157,10 @@ def create_secrets():
     else:
         print(f"All secrets already present in {SECRETS_FILE}")
 
+    print(f"Ensure setting permissions for {SECRETS_FILE}")
+    os.chown(SECRETS_FILE, 0, 0)
+    os.chmod(SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR)
+
 def nats_conf():
 
     path = "/var/lib/univention-appcenter/apps/provisioning-stack/compose/"
@@ -172,6 +176,8 @@ def nats_conf():
                 PREFILL_PASSWORD=secrets["PREFILL_PASSWORD"]
         ))
 
+    os.chown(nats_config_file, 0, 0)
+    os.chmod(nats_config_file, stat.S_IRUSR | stat.S_IWUSR)
     print(f"nats.conf file writtern to {nats_config_file}")
 
 if __name__ == "__main__":
