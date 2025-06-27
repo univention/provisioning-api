@@ -15,11 +15,6 @@ services:
     networks:
       - "nubus-provisioning"
 
-  debug-container:
-    image: debian:bullseye-slim
-    container_name: debug
-    command: ["sleep", "10000"]
-
   provisioning-api:
     image: "artifacts.software-univention.de/nubus/images/provisioning-events-and-consumer-api:0.48.0"
     container_name: "nubus-provisioning-api"
