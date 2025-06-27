@@ -4,6 +4,10 @@ import json
 import os
 from secrets import token_urlsafe
 import sys
+import stat
+import string
+import pwd
+import univention.config_registry
 
 NATS_CONF='''{{
   server_name: nats
@@ -80,6 +84,37 @@ SECRETS_KEYS = [
     "ADMIN_NATS_PASSWORD",
     "PREFILL_PASSWORD"
 ]
+LISTENER_SECRETS_FILE = "/etc/nats/provisioning-listener.secret"
+
+def _alphanum_token(length=32):
+
+    return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(length))
+
+def set_listener_username():
+
+    ucr = univention.config_registry.ConfigRegistry()
+    ucr.load()  # Load current UCR variables
+    ucr['nats/user'] = 'udm-transformer'
+    ucr.save()
+
+def set_listener_password():
+
+    # create directory #
+    os.makedirs(os.path.dirname(LISTENER_SECRETS_FILE), exist_ok=True)
+
+    # write secrets file #
+    with open(SECRETS_FILE) as f:
+
+        listener_password = json.load(f)["NATS_PASSWORD"]
+
+        with open(LISTENER_SECRETS_FILE, "w") as fl:
+            fl.write(listener_password)
+
+        # ensure file owned by root #
+        user_info = pwd.getpwnam("listener")
+        uid = user_info.pw_uid
+        os.chown(LISTENER_SECRETS_FILE, uid, 0)
+        os.chmod(LISTENER_SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR)
 
 def load_secrets(filepath):
     """Load secrets from a JSON file if it exists and is valid."""
@@ -142,3 +177,5 @@ def nats_conf():
 if __name__ == "__main__":
     secrets()
     nats_conf()
+    set_listener_username()
+    set_listener_password()
