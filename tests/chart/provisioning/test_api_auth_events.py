@@ -10,7 +10,7 @@ class TestAuth(SecretViaEnv, AuthPasswordOwner, AuthPassword):
 
     sub_path_env_password = "env[?@name=='EVENTS_PASSWORD_UDM']"
 
-    derived_password = "c3fc1b2cc371b5b55b77c6f2d18a7674df530c5b"
+    derived_password = "1eb76a52da9cfffbcf8eb07dbc105844c3e06c26"
 
     prefix_mapping = {
         "api.auth.eventsUdm": "provisioningApi.auth",

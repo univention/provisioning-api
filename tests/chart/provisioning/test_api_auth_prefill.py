@@ -10,7 +10,7 @@ class TestAuth(SecretViaEnv, AuthPasswordOwner, AuthPassword):
 
     sub_path_env_password = "env[?@name=='PREFILL_PASSWORD']"
 
-    derived_password = "e09fc522799483220870d968453b47bf12aa197c"
+    derived_password = "6f0bc322c483ff43630e2e73e51047748dd693d7"
 
     prefix_mapping = {
         "api.auth.prefill": "provisioningApi.auth",
