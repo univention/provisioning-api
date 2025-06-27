@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+
+import os
+
+def safe_remove_file(filepath):
+
+    print(f"Attempting to remove: {filepath}")
+    try:
+        #os.remove(filepath)
+        print(f"Successfully removed: {filepath}")
+    except FileNotFoundError:
+        print(f"File not found, skipping: {filepath}")
+    except PermissionError:
+        print(f"Permission denied when trying to remove: {filepath}")
+    except Exception as e:
+        print(f"An error occurred while removing {filepath}: {e}")
+
+def remove_files():
+    files_to_remove = [
+        "/etc/provisioning-json.secrets",
+        "/var/lib/univention-appcenter/apps/provisioning-stack/compose/nats.conf"
+    ]
+
+    for filepath in files_to_remove:
+        safe_remove_file(filepath)
+
+def remove_volumes():
+
+    volumes = [
+        "nubus-provisioning-nats-data",
+        "nubus-provisioning-listener-data"
+    ]
+
+    for v in volumes:
+        os.system(f"docker volume rm {v}")
+
+if __name__ == "__main__":
+    remove_files()
+    remove_volumes()
