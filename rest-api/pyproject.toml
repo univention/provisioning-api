@@ -13,7 +13,6 @@ dependencies = [
     "asgi-correlation-id<5.0.0,>=4.3.3",
     "bcrypt==4.2.0",
     "cachetools<6.0.0,>=5.5.0",
-    "coverage>=7",
     "fastapi[standard]<1.0.0,>=0.115.0",
     "fastapi-utils<1.0.0,>=0.7.0",
     "httptools<1.0.0,>=0.6.1",
@@ -25,6 +24,11 @@ dependencies = [
     "typing-extensions<5.0.0,>=4.12.2",
     "typing-inspect<1.0.0,>=0.9.0",
     "backends<2.0.0,>=1.6.6",
+]
+
+[dependency-groups]
+dev = [
+    "coverage>=7",
 ]
 
 [tool.uv.sources]
@@ -42,9 +46,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.coverage.run]
-data_file = "/tmp/coverage"
+data_file = "/coverage/rest-api"
 relative_files = true
+sigterm = true
 source = ["univention.provisioning"]
-
-[tool.coverage.xml]
-output = "/tmp/coverage.xml"

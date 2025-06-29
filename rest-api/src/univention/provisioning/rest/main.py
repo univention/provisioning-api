@@ -2,9 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-import os
 
-import coverage
 import uvicorn
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
@@ -22,10 +20,6 @@ from .config import app_settings
 from .messages import router as messages_api_router
 from .mq_adapter_nats import NatsMessageQueue
 from .subscriptions import router as subscriptions_api_router
-
-if os.environ.get("COVERAGE"):  # pragma: no cover
-    cov = coverage.Coverage(config_file="/app/rest-api/pyproject.toml")
-    cov.start()
 
 logger = logging.getLogger(__name__)
 
@@ -82,24 +76,6 @@ async def startup_task():
         logger.info("Checking MQ connectivity...")
         await mq.create_queue(PREFILL_QUEUE_NAME, False)
         await mq.create_queue(DISPATCHER_QUEUE_NAME, False)
-
-
-@app.on_event("shutdown")
-def shutdown_task():
-    if os.environ.get("COVERAGE"):  # pragma: no cover
-        cov.stop()
-        try:
-            logger.debug("Storing coverage data in %r...", cov.config.data_file)
-            cov.save()
-            cov_txt_path = f"{cov.config.data_file}.txt"
-            logger.debug("Creating coverage TXT report in %r...", cov_txt_path)
-            with open(cov_txt_path, "w") as cov_txt_fp:
-                cov.report(file=cov_txt_fp, show_missing=True)
-            logger.debug("Creating coverage XML report in %r...", cov.config.xml_output)
-            cov.xml_report()
-        except Exception as exc:
-            logger.warning("Error creating coverage report: %s", str(exc))
-            logger.warning("Coverage configuration: %r", cov.config)
 
 
 @app.exception_handler(RequestValidationError)

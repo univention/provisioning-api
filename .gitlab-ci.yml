@@ -33,18 +33,38 @@ lint-pre-commit:
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatcher"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-dispatcher-test"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-events-and-consumer-api"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-events-and-consumer-api-test"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-prefill"
     DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-prefill-test"
+    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-udm-listener"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
   - IMAGE_NAME: "provisioning-udm-transformer"
     DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+    KANIKO_ARGS: "--target final"
+  - IMAGE_NAME: "provisioning-udm-transformer-test"
+    DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+    KANIKO_ARGS: "--target test"
   - IMAGE_NAME: "provisioning-example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
   - IMAGE_NAME: "testrunner"
     DOCKERFILE_PATH: "docker/test/Dockerfile"
+    KANIKO_ARGS: "--target test"
+  - IMAGE_NAME: "testrunner-coverage"
+    DOCKERFILE_PATH: "docker/test/Dockerfile"
+    KANIKO_ARGS: "--target coverage"
   - IMAGE_NAME: "provisioning-e2e-tests"
     DOCKERFILE_PATH: "docker/e2e-test/Dockerfile"
 
@@ -119,24 +139,33 @@ test-end-to-end:
     - docker compose run --quiet-pull --name e2e-test e2e-test
   after_script:
     - docker ps -a
+    - docker cp e2e-test:/tmp/pytest-junit.xml ./pytest-junit-e2e-test.xml
+    - docker stop -t0 e2e-test
+    - docker logs e2e-test >& e2e-test.log
+    - docker rm e2e-test
     - docker logs provisioning-dispatcher >& dispatcher.log
     - docker logs provisioning-prefill >& prefill.log
     - docker logs provisioning-udm-transformer >& udm-transformer.log
     - docker logs udm-listener>& udm-listener.log
     - docker logs ldap-server >& ldap-server.log
     - docker logs udm-rest-api >& udm-rest-api.log
-    - docker cp e2e-test:/tmp/pytest-junit.xml ./pytest-junit-e2e-test.xml
-    - docker stop -t0 e2e-test
-    - docker logs e2e-test >& e2e-test.log
-    - docker stop -t 30 provisioning-api
     - docker logs provisioning-api >& provisioning-api.log
-    - docker cp provisioning-api:/tmp/coverage.txt ./coverage-e2e-provisioning-api.txt
-    - docker cp provisioning-api:/tmp/coverage.xml ./coverage-e2e-provisioning-api.xml
-    - apk add --no-cache python3
-    - python3 fix_e2e_coverage_xml.py coverage-e2e-provisioning-api.xml coverage-e2e-provisioning-api_fixed.xml
-    - docker rm e2e-test
+    - docker compose down
+    - unset DOCKER_API_VERSION
+    - export IMAGE_TAG=${RELEASE_VERSION}
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
+    - echo $IMAGE_TAG
+    - docker version
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
+    - docker compose config e2e-test
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
+    - docker compose run --name coverage-reporter coverage-reporter
+    - docker cp coverage-reporter:/app/combined.txt ./coverage-e2e.txt
+    - docker cp coverage-reporter:/app/combined_fixed.xml ./coverage-e2e.xml
+    - docker rm coverage-reporter
     - docker compose down --volumes
-    - cat coverage-e2e-provisioning-api.txt
+    - cat coverage-e2e.txt
   coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
@@ -149,12 +178,12 @@ test-end-to-end:
       - ldap-server.log
       - udm-rest-api.log
       - pytest-junit-e2e-test.xml
-      - coverage-e2e-provisioning-api.txt
-      - coverage-e2e-provisioning-api_fixed.xml
+      - coverage-e2e.txt
+      - coverage-e2e.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage-e2e-provisioning-api_fixed.xml
+        path: coverage-e2e.xml
       junit: pytest-junit-e2e-test.xml
     expire_in: "1 day"
     when: "always"

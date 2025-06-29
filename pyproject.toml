@@ -25,6 +25,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "coverage>=7",
     "mock>=5.1.0",
     "polyfactory==2.17.0",
     "pytest<9.0.0,>=8.3.3",
