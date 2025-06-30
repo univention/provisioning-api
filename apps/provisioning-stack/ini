@@ -2,8 +2,8 @@
 ID = provisioning-stack
 Code = 4Q
 Version = 1.0
-Name = Provisioning Stack
-Vendor = Univention
+Name = Provisioning Stack (preview)
+Vendor = Univention GmbH
 DockerScriptRestoreDataAfterSetup = 
 DockerScriptStoreData = 
 DockerScriptUpdateAvailable = 
@@ -58,3 +58,17 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning St
 	
 	# now you can again get the next message
 	</pre>
+SupportUrl = https://www.univention.com/products/support/community-support/
+Contact = sales@univention.de
+WebsiteVendor = https://univention.com/
+NotificationEmail = appcenter-reporting@univention.de
+License = free
+NotifyVendor = True
+Logo = logo.svg
+Description = preview of the upcoming "Provisioning Stack" from Nubus
+
+[de]
+SupportUrl = https://www.univention.de/produkte/support/community-support/
+WebsiteVendor = https://univention.de/
+Name = Provisioning Stack (preview)
+
