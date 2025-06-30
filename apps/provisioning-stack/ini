@@ -14,4 +14,47 @@ DockerScriptUpdateRelease =
 DockerScriptSetup = 
 DockerMainService = provisioning-api
 RequiredAppsInDomain = provisioning-stack-backend
-
+LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Stack&quot; from Nubus. The web API allows Consumers to process certain Events that other services wrote into the queue. Note that this is a tech preview that does not come with any guarantee to stability or updatability, nor a final documentation.
+	<br>
+	<br>
+	That being said, it can be used by interested software vendors to write their own consumer services against this API. A first document can be found&nbsp;<a href="https://docs.software-univention.de/nubus-kubernetes-customization/1.x/en/api/provisioning.html">here</a>.
+	<br>
+	<br>
+	An example consumer can be found in the code snippet below. Please note that the web API is naturally language agnostic.
+	<pre>
+	#!/usr/bin/python3
+	import requests
+	
+	url = "http://localhost:7778/"
+	sub_name = "example"
+	
+	def create_sub():
+	    # needs to be called at least once somewhere. please find the admin password ("XXXXX") in /etc/nats/provisioning-listener.secret
+	    create_sub_json = {
+	      "name": sub_name,
+	      "realms_topics": [
+	        {
+	          "realm": "udm",
+	          "topic": "users/user"
+	        }
+	      ],
+	      "request_prefill": True,
+	      "password": "s3cr3t"
+	    }
+	    ret = requests.post(url + "v1/subscriptions", json=create_sub_json, auth=("admin", "XXXXX"))
+	
+	# get the next message
+	ret = requests.get(url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "univention"))
+	
+	# process the message
+	print(ret.json())
+	
+	# tell the queue that you successfully processed this message
+	seq_num = ret.json()["sequence_number"]
+	stat_json = {
+	  "status": "ok"
+	}
+	ret = requests.patch(url + "v1/subscriptions/%s/messages/%s/status" % (sub_name,seq_num), json=stat_json, auth=(sub_name, "s3cr3t"))
+	
+	# now you can again get the next message
+	</pre>
