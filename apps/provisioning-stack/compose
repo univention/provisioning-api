@@ -14,6 +14,8 @@ services:
     command: -c /run/secrets/nats-conf
     networks:
       - "nubus-provisioning"
+    volumes:
+      - /var/lib/univention-appcenter/apps/provisioning-stack/data/nats-data/:/data
 
   provisioning-api:
     image: "artifacts.software-univention.de/nubus/images/provisioning-events-and-consumer-api:0.48.0"

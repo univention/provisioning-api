@@ -209,8 +209,14 @@ def nats_conf():
     os.chmod(nats_config_file, stat.S_IRUSR | stat.S_IWUSR)
     print(f"nats.conf file writtern to {nats_config_file}")
 
+def create_data_dir():
+
+    path = "/var/lib/univention-appcenter/apps/provisioning-stack/data/"
+    os.makedirs(path, exist_ok=True)
+
 if __name__ == "__main__":
     create_secrets()
     nats_conf()
     set_listener_username()
     set_listener_password()
+    create_data_dir()
