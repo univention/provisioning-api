@@ -1,0 +1,17 @@
+[Application]
+ID = provisioning-stack
+Code = 4Q
+Version = 1.0
+Name = Provisioning Stack
+Vendor = Univention
+DockerScriptRestoreDataAfterSetup = 
+DockerScriptStoreData = 
+DockerScriptUpdateAvailable = 
+DockerScriptRestoreDataBeforeSetup = 
+DockerScriptUpdatePackages = 
+DockerScriptUpdateAppVersion = 
+DockerScriptUpdateRelease = 
+DockerScriptSetup = 
+DockerMainService = provisioning-api
+RequiredAppsInDomain = provisioning-stack-backend
+
