@@ -13,6 +13,6 @@ class BaseModelWrapper(BaseModel):
     def model_dump_json(self, *args, **kwargs):
         return self.json(*args, **kwargs)
 
-    @classmethod
-    def model_validate(cls, data):
+    def model_validate(data):
+        BaseModelWrapper.parse_obj(data)
         return data
