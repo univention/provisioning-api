@@ -15,4 +15,4 @@ class BaseModelWrapper(BaseModel):
 
     @classmethod
     def model_validate(cls, data):
-        return BaseModel.parse_obj(data)
+        return data

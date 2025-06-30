@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
 #
 # Also see https://docs.software-univention.de/app-center/5.0/en/configurations.html#installation-scripts
 #
