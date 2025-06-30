@@ -1,0 +1,17 @@
+[Application]
+ID = provisioning-stack-backend
+Code = 4R
+Version = 1.0
+Name = Provisioning Stack Backend
+Vendor = Univention
+DockerScriptRestoreDataAfterSetup = 
+DockerScriptStoreData = 
+DockerScriptUpdateAvailable = 
+DockerScriptRestoreDataBeforeSetup = 
+DockerScriptUpdatePackages = 
+DockerScriptUpdateAppVersion = 
+DockerScriptUpdateRelease = 
+DockerScriptSetup = 
+DefaultPackages = python3-univention-provisioning-stack-listener
+ServerRole = domaincontroller_master
+
