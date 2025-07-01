@@ -10,7 +10,7 @@ from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAda
 from univention.provisioning.listener.mq_port import MessageQueuePort
 from univention.provisioning.models.message import NoUDMTypeError
 
-name = "provisioning_handler"
+name = "nubus-provisioning"
 
 
 class LdapListener(ListenerModuleHandler):
