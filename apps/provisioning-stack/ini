@@ -44,7 +44,7 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning St
 	    ret = requests.post(url + "v1/subscriptions", json=create_sub_json, auth=("admin", "XXXXX"))
 	
 	# get the next message
-	ret = requests.get(url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "univention"))
+	ret = requests.get(url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "s3cr3t"))
 	
 	# process the message
 	print(ret.json())
