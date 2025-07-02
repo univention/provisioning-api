@@ -38,7 +38,7 @@ VERSION=1
 
 joinscript_init
 
-SERVICE="provisioning-stack"
+SERVICE="provisioning-service"
 
 
 # remove service
