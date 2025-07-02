@@ -93,23 +93,6 @@ services:
       - "nats"
     networks:
       - "nubus-provisioning"
-    entrypoint: "/app/.venv/bin/python3"
-    command: |
-      -c '
-      import os
-      import time
-      from univention.admin.uldap import access
-      from univention.udm import UDM
-      from univention.udm.helpers import get_all_udm_module_names
-      lo = access(host=os.environ["LDAP_HOST"], port=os.environ["LDAP_PORT"], base=os.environ["LDAP_BASE_DN"], binddn=os.environ["LDAP_BIND_DN"], bindpw=os.environ["LDAP_BIND_PW"], start_tls=0)
-      user_mod = UDM(lo, 0).get("users/user")
-      group_mod = UDM(lo, 0).get("groups/group")
-      print("UDM modules:", get_all_udm_module_names())
-      print("UDM users/user properties:", sorted(user_mod.meta.mapping.ldap2udm.values()))
-      print("UDM groups/group properties:", sorted(group_mod.meta.mapping.ldap2udm.values()))
-      print("Starting UDM Transformer...")
-      with open("/app/src/udm_transformer/main.py") as fp:
-        exec(fp.read())'
     volumes:
       - /usr/lib/python3/dist-packages/univention/udm/modules/:/usr/lib/python3/dist-packages/univention/udm/modules/
       - /usr/lib/python3/dist-packages/univention/admin/:/usr/lib/python3/dist-packages/univention/admin/
