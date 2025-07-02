@@ -18,7 +18,7 @@ services:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
-    image: "artifacts.software-univention.de/nubus/images/provisioning-events-and-consumer-api:0.48.0"
+    image: "artifacts.software-univention.de/nubus/images/provisioning-events-and-consumer-api:0.56.0"
     container_name: "nubus-provisioning-api"
     restart: "on-failure"
     environment:
@@ -47,7 +47,7 @@ services:
       - "7778:7777"
 
   dispatcher:
-    image: "artifacts.software-univention.de/nubus/images/provisioning-dispatcher:0.48.0"
+    image: "artifacts.software-univention.de/nubus/images/provisioning-dispatcher:0.56.0"
     container_name: "nubus-provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -67,7 +67,7 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "artifacts.software-univention.de/nubus/images/provisioning-udm-transformer:0.48.0"
+    image: "artifacts.software-univention.de/nubus/images/provisioning-udm-transformer:0.56.0"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "on-failure"
     extra_hosts:
@@ -115,7 +115,7 @@ services:
       - /usr/lib/python3/dist-packages/univention/admin/:/usr/lib/python3/dist-packages/univention/admin/
 
   prefill:
-    image: "artifacts.software-univention.de/nubus/images/provisioning-prefill:0.48.0"
+    image: "artifacts.software-univention.de/nubus/images/provisioning-prefill:0.56.0"
     container_name: "nubus-provisioning-prefill"
     restart: "on-failure"
     environment:
