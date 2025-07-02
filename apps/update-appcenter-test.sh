@@ -6,7 +6,7 @@
 set -e
 
 UCS_VERSION="5.2"
-APP_ID="${1:-provisioning-stack}"
+APP_ID="${1:-provisioning-service}"
 VERSION="$(sed -n 's/^Version\s*=\s*//p' $APP_ID/ini)"
 APP_VERSION="${UCS_VERSION}/${APP_ID}=${VERSION}"
 FILES_TO_COPY="$(ls $APP_ID/*)"
