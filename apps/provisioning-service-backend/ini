@@ -1,5 +1,5 @@
 [Application]
-ID = provisioning-stack-backend
+ID = provisioning-service-backend
 Code = 4R
 Version = 1.0
 Name = Provisioning Stack Backend
@@ -12,6 +12,6 @@ DockerScriptUpdatePackages =
 DockerScriptUpdateAppVersion = 
 DockerScriptUpdateRelease = 
 DockerScriptSetup = 
-DefaultPackages = python3-univention-provisioning-stack-listener
+DefaultPackages = python3-univention-provisioning-service-listener
 ServerRole = domaincontroller_master
 
