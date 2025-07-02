@@ -15,7 +15,7 @@ services:
     networks:
       - "nubus-provisioning"
     volumes:
-      - /var/lib/univention-appcenter/apps/provisioning-stack/data/nats-data/:/data
+      - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
     image: "artifacts.software-univention.de/nubus/images/provisioning-events-and-consumer-api:0.48.0"
@@ -172,4 +172,4 @@ networks:
 
 secrets:
   nats-conf:
-    file: /var/lib/univention-appcenter/apps/provisioning-stack/conf/nats.conf
+    file: /var/lib/univention-appcenter/apps/provisioning-service/conf/nats.conf
