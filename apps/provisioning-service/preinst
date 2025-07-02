@@ -192,7 +192,7 @@ def create_secrets():
 
 def nats_conf():
 
-    path = "/var/lib/univention-appcenter/apps/provisioning-stack/conf/"
+    path = "/var/lib/univention-appcenter/apps/provisioning-service/conf/"
     os.makedirs(path, exist_ok=True)
     secrets = load_secrets(SECRETS_FILE)
 
@@ -211,7 +211,7 @@ def nats_conf():
 
 def create_data_dir():
 
-    path = "/var/lib/univention-appcenter/apps/provisioning-stack/data/"
+    path = "/var/lib/univention-appcenter/apps/provisioning-service/data/"
     os.makedirs(path, exist_ok=True)
 
 if __name__ == "__main__":
