@@ -4,12 +4,10 @@ import enum
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional
 
-from .basemodel_wrapper import BaseModelWrapper
-
 try:
-    from pydantic.v1 import Field, root_validator, validator
+    from pydantic.v1 import BaseModel, Field, root_validator, validator
 except ImportError:
-    from pydantic import Field, root_validator, validator
+    from pydantic import BaseModel, Field, root_validator, validator
 
 from typing_extensions import Literal
 
@@ -26,7 +24,7 @@ class EmptyBodyError(Exception): ...
 class NoUDMTypeError(Exception): ...
 
 
-class BaseMessage(BaseModelWrapper):
+class BaseMessage(BaseModel):
     """The common header properties of each message."""
 
     publisher_name: PublisherName = Field(description="The name of the publisher of the message.")
@@ -39,7 +37,7 @@ class BaseMessage(BaseModelWrapper):
         return data
 
 
-class Body(BaseModelWrapper):
+class Body(BaseModel):
     old: Dict[str, Any] = Field(description="The LDAP/UDM object before the change.")
     new: Dict[str, Any] = Field(description="The LDAP/UDM object after the change.")
 
@@ -119,7 +117,7 @@ class UDMMessage(BaseMessage):
         )
 
 
-class MQMessage(BaseModelWrapper):
+class MQMessage(BaseModel):
     subject: str
     reply: str
     data: Dict[str, Any]
@@ -143,7 +141,7 @@ class PrefillMessage(BaseMessage):
     )
 
 
-class Event(BaseModelWrapper):
+class Event(BaseModel):
     """A message as it arrives at the API."""
 
     realm: str = Field(description="The realm of the message, e.g. `udm`.")
@@ -156,7 +154,7 @@ class MessageProcessingStatus(str, enum.Enum):
     ok = "ok"
 
 
-class MessageProcessingStatusReport(BaseModelWrapper):
+class MessageProcessingStatusReport(BaseModel):
     """A subscriber reporting whether a message was processed."""
 
     status: MessageProcessingStatus = Field(description="Whether the message was processed by the subscriber.")

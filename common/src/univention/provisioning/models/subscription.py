@@ -3,12 +3,10 @@
 import enum
 from typing import List
 
-from .basemodel_wrapper import BaseModelWrapper
-
 try:
-    from pydantic.v1 import Field
+    from pydantic.v1 import BaseModel, Field
 except ImportError:
-    from pydantic import Field
+    from pydantic import BaseModel, Field
 
 
 class FillQueueStatus(str, enum.Enum):
@@ -22,14 +20,14 @@ class FillQueueStatus(str, enum.Enum):
     done = "done"
 
 
-class RealmTopic(BaseModelWrapper):
+class RealmTopic(BaseModel):
     """A message's realm and topic."""
 
     realm: str = Field(description="The realm of the message, e.g. `udm`.")
     topic: str = Field(description="The topic of the message, e.g. `users/user`.")
 
 
-class BaseSubscription(BaseModelWrapper):
+class BaseSubscription(BaseModel):
     """Common subscription fields."""
 
     name: str = Field(description="The identifier of the subscription.")
@@ -61,7 +59,7 @@ class Subscription(BaseSubscription):
         return hash(self.name)
 
 
-class FillQueueStatusReport(BaseModelWrapper):
+class FillQueueStatusReport(BaseModel):
     """Update a subscription's prefill queue status."""
 
     status: FillQueueStatus = Field(description="State of the prefill process.")
