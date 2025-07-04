@@ -4,7 +4,7 @@ import enum
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
+from pydantic import BaseModel, Field, field_serializer, model_validator
 from typing_extensions import Literal, Self
 
 from .constants import PublisherName
@@ -34,13 +34,6 @@ class BaseMessage(BaseModel):
 class Body(BaseModel):
     old: Dict[str, Any] = Field(description="The LDAP/UDM object before the change.")
     new: Dict[str, Any] = Field(description="The LDAP/UDM object after the change.")
-
-    # Temporary validator due to the hardcoded image version of udm-listener.
-    # This will be removed once we switch from udm-listener to ldif-producer.
-    @field_validator("old", "new", mode="before")
-    @classmethod
-    def set_empty_dict(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        return v or {}
 
     @model_validator(mode="after")
     def check_not_both_empty(self) -> Self:
