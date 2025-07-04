@@ -36,6 +36,8 @@ import sys
 import stat
 import string
 import pwd
+import grp
+import subprocess
 import univention.config_registry
 
 NATS_CONF='''{{
@@ -176,6 +178,29 @@ def save_secrets(filepath, secrets_data):
     with open(filepath, "w") as f:
         json.dump(secrets_data, f, indent=2)
 
+def get_secrets_from_primary():
+    """Retrieve Secrets from primary if backup"""
+
+    ucr = univention.config_registry.ConfigRegistry()
+    ucr.load()
+
+    if ucr.get("server/role") not in ["domaincontroller_backup"]:
+      return
+
+    machine_secret = "/etc/machine.secret"
+    hostname = ucr.get("hostname")
+    primary = ucr.get("ldap/master")
+
+    username = f"{hostname}$"
+    cmd = ["univention-scp", machine_secret, f"{username}@{primary}:{SECRETS_FILE} {SECRETS_FILE}"]
+    try:
+      subprocess.check_output(cmd, universal_newlines=True)
+      print(f"Successfully copied secrets from primary")
+    except subprocess.CalledProcessError as e:
+      print(f"Failed to retrieve secrets from primary: {e}")
+      sys.exit(1)
+
+
 def create_secrets():
 
     secrets_data = load_secrets(SECRETS_FILE)
@@ -186,9 +211,12 @@ def create_secrets():
     else:
         print(f"All secrets already present in {SECRETS_FILE}")
 
-    print(f"Ensure setting permissions for {SECRETS_FILE}")
-    os.chown(SECRETS_FILE, 0, 0)
-    os.chmod(SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR)
+    print(f"Setting permissions for {SECRETS_FILE}")
+
+    group_info = grp.getgrnam("DC Backup Hosts")
+    gid = group_info.gr_gid
+    os.chown(SECRETS_FILE, 0, gid)
+    os.chmod(SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
 
 def nats_conf():
 
@@ -207,7 +235,7 @@ def nats_conf():
 
     os.chown(nats_config_file, 0, 0)
     os.chmod(nats_config_file, stat.S_IRUSR | stat.S_IWUSR)
-    print(f"nats.conf file writtern to {nats_config_file}")
+    print(f"nats.conf file written to {nats_config_file}")
 
 def create_data_dir():
 
@@ -215,6 +243,8 @@ def create_data_dir():
     os.makedirs(path, exist_ok=True)
 
 if __name__ == "__main__":
+
+    get_secrets_from_primary()
     create_secrets()
     nats_conf()
     set_listener_username()
