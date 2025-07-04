@@ -16,9 +16,7 @@ dependencies = [
     "msgpack<2.0.0,>=1.1.0",
     "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
-    "nubus-provisioning-common",
-    "pydantic-settings<3.0.0,>=2.5.2",
-    "psutil<6.0.0,>=5.9.0",
+    "pydantic<2.0.0",
 ]
 
 [dependency-groups]
