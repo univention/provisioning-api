@@ -79,17 +79,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ba/dc/9a01dd9561b736622c0aa3a19f6b40f3eeb22051eaea1475ceb81d5da48d/nats_py-2.9.0.tar.gz", hash = "sha256:01886eb9e0a87f0ec630652cf1fae65d2a8556378a609bc6cc07d2ea60c8d0dd", size = 110714, upload_time = "2024-08-26T15:14:17.337Z" }
 
 [[package]]
-name = "nubus-provisioning-backends"
-version = "0.1.0"
-source = { directory = "../backends" }
-dependencies = [
-    { name = "nats-py" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "nats-py", specifier = ">=2.9.0,<3.0.0" }]
-
-[[package]]
 name = "nubus-provisioning-listener"
 version = "0.1.0"
 source = { editable = "." }
@@ -97,7 +86,6 @@ dependencies = [
     { name = "daemoniker" },
     { name = "msgpack" },
     { name = "nats-py" },
-    { name = "nubus-provisioning-backends" },
     { name = "pydantic" },
 ]
 
@@ -113,7 +101,6 @@ requires-dist = [
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
     { name = "msgpack", specifier = ">=1.1.0,<2.0.0" },
     { name = "nats-py", specifier = ">=2.9.0,<3.0.0" },
-    { name = "nubus-provisioning-backends", directory = "../backends" },
     { name = "pydantic", specifier = "<2.0.0" },
 ]
 
