@@ -4,6 +4,7 @@ Code = 4T
 Version = 1.0
 Name = Provisioning Service (preview)
 Vendor = Univention GmbH
+SupportedUcsVersions = 5.2-2
 DockerScriptRestoreDataAfterSetup = 
 DockerScriptStoreData = 
 DockerScriptUpdateAvailable = 
