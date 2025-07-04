@@ -17,7 +17,7 @@ dependencies = [
     "daemoniker<1.0.0,>=0.2.3",
     "msgpack<2.0.0,>=1.1.0",
     "nats-py<3.0.0,>=2.9.0",
-    "nubus-provisioning-backends",
+    "nats-py<3.0.0,>=2.9.0",
     "pydantic<2.0.0",
 ]
 
@@ -28,9 +28,9 @@ dev = [
     "pytest-cov==4.1.0",
 ]
 
-[tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends" }
-nubus-provisioning-common = { path = "../common" }
+# [tool.uv.sources]
+# nubus-provisioning-backends = { path = "../backends" }
+# nubus-provisioning-common = { path = "../common" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]
