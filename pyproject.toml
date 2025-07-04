@@ -13,6 +13,7 @@ requires-python = "==3.11.*"
 
 dependencies = [
     "nubus-provisioning-backends",
+    "nubus-provisioning-backends-new",
     "nubus-provisioning-common",
     "nubus-provisioning-consumer",
     "nubus-provisioning-consumer-example",
@@ -34,6 +35,7 @@ dev = [
 
 [tool.uv.sources]
 nubus-provisioning-backends = { path = "./backends", editable = true }
+nubus-provisioning-backends-new = { path = "./backends-new", editable = true }
 nubus-provisioning-common = { path = "./common", editable = true }
 nubus-provisioning-consumer = { path = "./consumer", editable = true }
 nubus-provisioning-consumer-example = { path = "./consumer_example", editable = true }

@@ -613,6 +613,17 @@ dependencies = [
 requires-dist = [{ name = "nats-py", specifier = ">=2.9.0,<3.0.0" }]
 
 [[package]]
+name = "nubus-provisioning-backends-new"
+version = "0.1.0"
+source = { editable = "backends-new" }
+dependencies = [
+    { name = "nats-py" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "nats-py", specifier = ">=2.9.0,<3.0.0" }]
+
+[[package]]
 name = "nubus-provisioning-common"
 version = "0.1.0"
 source = { editable = "common" }
@@ -696,6 +707,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "nubus-provisioning-backends" },
+    { name = "nubus-provisioning-backends-new" },
     { name = "nubus-provisioning-common" },
     { name = "nubus-provisioning-consumer" },
     { name = "nubus-provisioning-consumer-example" },
@@ -718,6 +730,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-backends-new", editable = "backends-new" },
     { name = "nubus-provisioning-common", editable = "common" },
     { name = "nubus-provisioning-consumer", editable = "consumer" },
     { name = "nubus-provisioning-consumer-example", editable = "consumer_example" },

@@ -1,0 +1,33 @@
+[project]
+name = "nubus-provisioning-backends-new"
+version = "0.1.0"
+description = "Univention Nubus - Provisioning Backends"
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
+requires-python = "==3.11.*"
+
+dependencies = [
+    "nats-py<3.0.0,>=2.9.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/univention"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+    "--cov=src/univention/provisioning/backends",
+    "--cov=tests",
+    "--cov-report=term-missing",
+]
+asyncio_mode = "auto"
+log_cli = 0  # activate on the CLI with: "-o log_cli=true"
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
