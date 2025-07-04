@@ -17,7 +17,6 @@ dependencies = [
     "nubus-provisioning-consumer",
     "nubus-provisioning-consumer-example",
     "nubus-provisioning-dispatcher",
-    "nubus-provisioning-listener",
     "nubus-provisioning-prefill",
     "nubus-provisioning-rest-api",
     "nubus-provisioning-udm-transformer",
@@ -40,7 +39,6 @@ nubus-provisioning-common = { path = "./common", editable = true }
 nubus-provisioning-consumer = { path = "./consumer", editable = true }
 nubus-provisioning-consumer-example = { path = "./consumer_example", editable = true }
 nubus-provisioning-dispatcher = { path = "./dispatcher", editable = true }
-nubus-provisioning-listener = { path = "./listener", editable = true }
 nubus-provisioning-prefill = { path = "./prefill", editable = true }
 nubus-provisioning-rest-api = { path = "./rest-api", editable = true }
 nubus-provisioning-udm-transformer = { path = "./udm-transformer", editable = true }
