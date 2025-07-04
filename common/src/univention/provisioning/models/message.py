@@ -10,6 +10,7 @@ from typing_extensions import Literal, Self
 from .constants import PublisherName
 from .subscription import RealmTopic
 
+LDAP_OBJECT_TYPE_FIELD = "univentionObjectType"
 UDM_OBJECT_TYPE_FIELD = "objectType"
 
 
@@ -42,7 +43,11 @@ class Body(BaseModel):
 
     @model_validator(mode="after")
     def check_has_udm_object_type(self) -> Self:
-        if not self.new.get(UDM_OBJECT_TYPE_FIELD) and not self.old.get(UDM_OBJECT_TYPE_FIELD):
+        if LDAP_OBJECT_TYPE_FIELD in self.new or LDAP_OBJECT_TYPE_FIELD in self.old:
+            obj_type = LDAP_OBJECT_TYPE_FIELD
+        else:
+            obj_type = UDM_OBJECT_TYPE_FIELD
+        if not self.new.get(obj_type) and not self.old.get(obj_type):
             raise NoUDMTypeError("No UDM type in both 'new' and 'old'.")
         return self
 
