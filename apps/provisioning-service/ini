@@ -2,7 +2,7 @@
 ID = provisioning-service
 Code = 4T
 Version = 1.0
-Name = Provisioning Stack (preview)
+Name = Provisioning Service (preview)
 Vendor = Univention GmbH
 DockerScriptRestoreDataAfterSetup = 
 DockerScriptStoreData = 
@@ -14,7 +14,7 @@ DockerScriptUpdateRelease =
 DockerScriptSetup = 
 DockerMainService = provisioning-api
 RequiredAppsInDomain = provisioning-service-backend
-LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Stack&quot; from Nubus. The web API allows Consumers to process certain Events that other services wrote into the queue. Note that this is a tech preview that does not come with any guarantee to stability or updatability, nor a final documentation.
+LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Service&quot; from Nubus. The web API allows Consumers to process certain Events that other services wrote into the queue. Note that this is a tech preview that does not come with any guarantee to stability or updatability, nor a final documentation.
 	<br>
 	<br>
 	That being said, it can be used by interested software vendors to write their own consumer services against this API. A first document can be found&nbsp;<a href="https://docs.software-univention.de/nubus-kubernetes-customization/1.x/en/api/provisioning.html">here</a>.
@@ -79,10 +79,10 @@ NotificationEmail = appcenter-reporting@univention.de
 License = free
 NotifyVendor = True
 Logo = logo.svg
-Description = preview of the upcoming "Provisioning Stack" from Nubus
+Description = preview of the upcoming "Provisioning Service" from Nubus
 
 [de]
 SupportUrl = https://www.univention.de/produkte/support/community-support/
 WebsiteVendor = https://univention.de/
-Name = Provisioning Stack (preview)
+Name = Provisioning Service (preview)
 
