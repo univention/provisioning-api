@@ -7,13 +7,14 @@ import os
 import signal
 import time
 import traceback
+from typing import Callable
 
 import psutil
 
 from univention.listener.handler import ListenerModuleHandler
-from univention.provisioning.listener.config import ldap_producer_settings
-from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAdapter
-from univention.provisioning.listener.mq_port import MessageQueuePort
+from univention.provisioning.listener.config import LdapProducerSettings, ldap_producer_settings
+from univention.provisioning.listener.mq_adapter_nats import message_queue_nats_adapter
+from univention.provisioning.listener.mq_port import ListenerMessageQueuePort
 
 name = "nubus-provisioning"
 
@@ -24,12 +25,17 @@ class LdapListener(ListenerModuleHandler):
         description = "Listener module that forwards LDAP changes to the UDM Transformer."
         ldap_filter = "(objectClass=*)"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        message_queue: Callable[[LdapProducerSettings], ListenerMessageQueuePort] = message_queue_nats_adapter,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.settings = ldap_producer_settings()
         self.connected = False
         try:
-            self.mq: MessageQueuePort = MessageQueueNatsAdapter(self.settings)
+            self.mq: ListenerMessageQueuePort = message_queue(self.settings)
             self._ensure_queue_exists()
         except Exception as error:
             self.logger.error("Failed to initialize the NATS queue: %r", error)
