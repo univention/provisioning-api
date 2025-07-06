@@ -21,7 +21,7 @@ class LdapBody(BaseModel):
     old: dict[str, Any] = Field(description="The LDAP/UDM object before the change.")
     new: dict[str, Any] = Field(description="The LDAP/UDM object after the change.")
 
-    @root_validator
+    @root_validator(pre=True)
     def check_not_both_empty(cls, values: dict[str, Any]) -> dict[str, Any]:
         if not values.get("old") and not values.get("new"):
             raise EmptyBodyError("'old' and 'new' cannot be both empty.")

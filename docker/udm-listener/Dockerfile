@@ -20,8 +20,8 @@ ENV UV_LINK_MODE=copy \
     UV_PYTHON=python3.11
     # UV_PROJECT_ENVIRONMENT=/app
 
-COPY ./backends /app/backends
-COPY ./common /app/common
+COPY ./backends-core /app/backends-core
+# COPY ./common /app/common
 COPY ./listener/uv.lock \
      ./listener/pyproject.toml \
      /app/listener/
@@ -59,7 +59,7 @@ RUN apt-get update && \
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages
 
-COPY ./listener/src/nubus-provisioning.py /usr/lib/univention-directory-listener/system/
+COPY ./listener/src/univention/provisioning/listener/nubus_provisioning.py /usr/lib/univention-directory-listener/system/
 
 # TODO: Fix docker compose so that it runs without root
 # ARG USER=udm-listener
@@ -70,8 +70,8 @@ COPY ./listener/src/nubus-provisioning.py /usr/lib/univention-directory-listener
 COPY --from=build /app/listener /app/listener
 
 USER ${USER}
-#
-# RUN \
-#   python3.11 -V && \
-#   python3.11 -m site && \
-#   python3.11 -c 'import univention.provisioning.listener'
+
+ RUN \
+   python3.11 -V && \
+   python3.11 -m site && \
+   python3.11 -c 'import univention.provisioning.listener'
