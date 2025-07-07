@@ -4,8 +4,9 @@
 import json
 from typing import Any, Optional
 
-from univention.provisioning.backends import key_value_store
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends_core.constants import BucketName
+from univention.provisioning.backends_core.key_value_db import KeyValueDB
+from univention.provisioning.backends_core.nats_kv import NatsKeyValueDB
 
 from .cache_port import Cache
 from .config import UDMTransformerSettings, udm_transformer_settings
@@ -24,11 +25,7 @@ class CacheNats(Cache):
     def __init__(self, settings: Optional[UDMTransformerSettings] = None):
         super().__init__(settings)
         self.settings = settings or udm_transformer_settings()
-        self._kv_store = key_value_store(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-        )
+        self._kv_store: KeyValueDB = NatsKeyValueDB(self.settings)
 
     async def __aenter__(self) -> Cache:
         await self.connect()

@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager
+from univention.provisioning.backends_core.message_queue import Empty, MessageAckManager
 from univention.provisioning.models.constants import LDAP_PRODUCER_QUEUE_NAME, LDIF_PRODUCER_QUEUE_NAME, PublisherName
 from univention.provisioning.models.message import Body, EmptyBodyError, Message, NoUDMTypeError
 

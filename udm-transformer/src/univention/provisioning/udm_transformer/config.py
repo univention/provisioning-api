@@ -23,6 +23,10 @@ class UDMTransformerSettings(BaseSettings):
     nats_host: str
     # Nats: port
     nats_port: int
+    # Maximum number of reconnect attempts to the NATS server
+    nats_max_reconnect_attempts: int
+    # Nats message replication amount. Useful values are 1, 3 and 5
+    nats_message_replicas: int
     # Enables toggling between `ldif-producer` and `udm-listener`
     ldap_publisher_name: PublisherName
 

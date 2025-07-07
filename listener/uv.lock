@@ -82,7 +82,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/83/2f/0f1b94844760a8946
 [[package]]
 name = "nubus-provisioning-backends-core"
 version = "0.1.0"
-source = { directory = "../backends-core" }
+source = { editable = "../backends-core" }
 dependencies = [
     { name = "nats-py" },
 ]
@@ -114,7 +114,7 @@ requires-dist = [
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
     { name = "msgpack", specifier = ">=1.1.0,<2.0.0" },
     { name = "nats-py", specifier = ">=2.9.0,<3.0.0" },
-    { name = "nubus-provisioning-backends-core", directory = "../backends-core" },
+    { name = "nubus-provisioning-backends-core", editable = "../backends-core" },
     { name = "pydantic", specifier = "<2.0.0" },
 ]
 

@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import Any, Optional
+from typing import Any, Optional, Self
 
 import msgpack
 
-from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements
-from univention.provisioning.models.message import MQMessage
+from univention.provisioning.backends_core.message import MQMessage
+from univention.provisioning.backends_core.message_queue import Acknowledgements
+from univention.provisioning.backends_core.nats_mq import NatsMessageQueue
 
 from .config import UDMTransformerSettings, udm_transformer_settings
 from .subscriptions_port import SubscriptionsPort
@@ -28,13 +28,9 @@ class NatsSubscriptions(SubscriptionsPort):
     def __init__(self, settings: Optional[UDMTransformerSettings] = None):
         super().__init__(settings)
         self.settings = settings or udm_transformer_settings()
-        self.mq = message_queue(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-        )
+        self.mq = NatsMessageQueue(self.settings)
 
-    async def __aenter__(self) -> SubscriptionsPort:
+    async def __aenter__(self) -> Self:
         await self.connect()
         return self
 

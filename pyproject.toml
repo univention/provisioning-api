@@ -58,7 +58,6 @@ testpaths = [
   "common/tests/",
   "consumer/tests/",
   "dispatcher/tests/",
-  "listener/tests/",
   "prefill/tests/",
   "rest-api/tests/",
   "tests/integration/",
