@@ -56,14 +56,6 @@ NATS_CONF='''{{
   authorization {{
     users: [
       {{
-        user: admin
-        password: {ADMIN_NATS_PASSWORD}
-        permissions: {{
-          publish: '>'
-          subscribe: '>'
-        }}
-      }}
-      {{
         user: api
         password: {NATS_PASSWORD}
         permissions: {{
@@ -89,15 +81,7 @@ NATS_CONF='''{{
       }}
       {{
         user: prefill
-        password: {PREFILL_PASSWORD}
-        permissions: {{
-          publish: '>'
-          subscribe: '>'
-        }}
-      }}
-      {{
-        user: ldif-producer
-        password: ldifpassTODO
+        password: {NATS_PASSWORD}
         permissions: {{
           publish: '>'
           subscribe: '>'
@@ -112,8 +96,7 @@ SECRETS_FILE = "/etc/provisioning-json.secrets"
 SECRETS_KEYS = [
     "NATS_PASSWORD",
     "EVENTS_PASSWORD_UDM",
-    "ADMIN_NATS_PASSWORD",
-    "PREFILL_PASSWORD"
+    "PROVISIONING_API_ADMIN_PASSWORD"
 ]
 LISTENER_SECRETS_FILE = "/etc/nats/provisioning-listener.secret"
 
@@ -227,10 +210,7 @@ def nats_conf():
     nats_config_file = os.path.join(path, "nats.conf")
     with open(nats_config_file, "w") as f:
         f.write(NATS_CONF.format(
-                NATS_PASSWORD=secrets["NATS_PASSWORD"],
-                EVENTS_PASSWORD_UDM=secrets["EVENTS_PASSWORD_UDM"],
-                ADMIN_NATS_PASSWORD=secrets["ADMIN_NATS_PASSWORD"],
-                PREFILL_PASSWORD=secrets["PREFILL_PASSWORD"]
+                NATS_PASSWORD=secrets["NATS_PASSWORD"]
         ))
 
     os.chown(nats_config_file, 0, 0)
