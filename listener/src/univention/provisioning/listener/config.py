@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import os
 from functools import lru_cache
+from typing import Any, Callable, Dict, Tuple
 
 from pydantic import BaseSettings
-from typing import Any, Callable, Dict, Tuple
 
 SettingsSourceCallable = Callable[["BaseSettings"], Dict[str, Any]]
 
