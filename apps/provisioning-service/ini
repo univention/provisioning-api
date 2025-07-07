@@ -5,14 +5,14 @@ Version = 1.0
 Name = Provisioning Service (preview)
 Vendor = Univention GmbH
 SupportedUcsVersions = 5.2-2
-DockerScriptRestoreDataAfterSetup = 
-DockerScriptStoreData = 
-DockerScriptUpdateAvailable = 
-DockerScriptRestoreDataBeforeSetup = 
-DockerScriptUpdatePackages = 
-DockerScriptUpdateAppVersion = 
-DockerScriptUpdateRelease = 
-DockerScriptSetup = 
+DockerScriptRestoreDataAfterSetup =
+DockerScriptStoreData =
+DockerScriptUpdateAvailable =
+DockerScriptRestoreDataBeforeSetup =
+DockerScriptUpdatePackages =
+DockerScriptUpdateAppVersion =
+DockerScriptUpdateRelease =
+DockerScriptSetup =
 DockerMainService = provisioning-api
 RequiredAppsInDomain = provisioning-service-backend
 LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Service&quot; from Nubus. The web API allows Consumers to process certain Events that other services wrote into the queue. Note that this is a tech preview that does not come with any guarantee to stability or updatability, nor a final documentation.
@@ -26,13 +26,13 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	#!/usr/bin/python3
 	import json
 	import requests
-	
+
 	provisioning_url = "http://localhost:7778/"
 	sub_name = "example"
-	
+
 	def provisioning_admin_password():
 	    return json.load(open("/etc/provisioning-json.secrets"))["ADMIN_NATS_PASSWORD"]
-	
+
 	def create_sub(provisioning_admin_username, provisioning_admin_password):
 	    create_sub_json = {
 	      "name": sub_name,
@@ -47,29 +47,29 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	    }
 	    resp = requests.post(provisioning_url + "v1/subscriptions", json=create_sub_json, auth=(provisioning_admin_username, provisioning_admin_password))
 	    return resp.status_code
-	
+
 	create_sub("admin", provisioning_admin_password())
-	
+
 	# get the next message
 	resp = requests.get(provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "s3cr3t"))
 	resp_json = resp.json()
 	while resp_json:
 	    # process the message
 	    print(resp_json)
-	
+
 	    # tell the queue that you successfully processed this message
 	    seq_num = resp.json()["sequence_number"]
 	    stat_json = {
 	      "status": "ok"
 	    }
 	    resp = requests.patch(provisioning_url + "v1/subscriptions/%s/messages/%s/status" % (sub_name, seq_num), json=stat_json, auth=(sub_name, "s3cr3t"))
-	
+
 	    # now you can again get the next message
 	    resp = requests.get(provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "s3cr3t"))
 	    resp_json = resp.json()
-	
+
 	print("Timeout, no more events")
-	
+
 	# finally we could delete the subscription again
 	# requests.delete(provisioning_url + "v1/subscriptions/%s" % sub_name, auth=("admin", provisioning_admin_password()))
 	</pre>
