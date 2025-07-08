@@ -18,6 +18,7 @@ services:
       NATS_USER: "api"
       NATS_PASSWORD: "apipass"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
+      NATS_MESSAGE_REPLICAS: 1
       ADMIN_NATS_USER: "admin"
       ADMIN_NATS_PASSWORD: "univention"
       UDM_HOST: "udm-rest-api"
@@ -83,6 +84,7 @@ services:
       NATS_USER: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
+      NATS_MESSAGE_REPLICAS: 1
       PROVISIONING_API_HOST: "provisioning-api"
       PROVISIONING_API_PORT: 7777
     depends_on:
@@ -104,6 +106,8 @@ services:
       NATS_PORT: "4222"
       NATS_USER: "udm-transformer"
       NATS_PASSWORD: "udm-transformerpass"
+      NATS_MAX_RECONNECT_ATTEMPTS: 2
+      NATS_MESSAGE_REPLICAS: 1
       # LDAP_PUBLISHER_NAME: "ldif-producer"
       LDAP_PUBLISHER_NAME: "udm-listener"
 
@@ -140,6 +144,7 @@ services:
       NATS_USER: "prefill"
       NATS_PASSWORD: "prefillpass"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
+      NATS_MESSAGE_REPLICAS: 1
       UDM_HOST: "udm-rest-api"
       UDM_PORT: 9979
       UDM_USERNAME: "cn=admin"
@@ -168,6 +173,7 @@ services:
       NATS_HOST: "nats3"
       NATS_PORT: "4222"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
+      NATS_MESSAGE_REPLICAS: 1
       MAX_IN_FLIGHT_LDAP_MESSAGES: 10
       BACKPRESSURE_WAIT_TIMEOUT: 10
       LDAP_THREADS: 5
@@ -176,6 +182,7 @@ services:
     volumes:
       - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
+    restart: "on-failure"
 
   udm-listener:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
@@ -197,6 +204,7 @@ services:
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       NATS_RETRY_DELAY: 10
       NATS_MAX_RETRY_COUNT: 3
+      NATS_MESSAGE_REPLICAS: 1
       LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
