@@ -2,10 +2,11 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import abc
-from typing import Optional, Self, Tuple
+from typing import Self
 
-from univention.provisioning.backends.message_queue import Acknowledgements
-from univention.provisioning.models.message import BaseMessage, MQMessage
+from univention.provisioning.backends_core.message import MQMessage
+from univention.provisioning.backends_core.message_queue import Acknowledgements
+from univention.provisioning.models.message import BaseMessage
 
 from .config import PrefillSettings
 
@@ -17,8 +18,8 @@ class MessageQueuePort(abc.ABC):
     Use as an async context manager.
     """
 
-    def __init__(self, settings: Optional[PrefillSettings] = None):
-        self.settings = settings
+    @abc.abstractmethod
+    def __init__(self, settings: PrefillSettings | None = None): ...
 
     @abc.abstractmethod
     async def __aenter__(self) -> Self: ...
@@ -33,7 +34,7 @@ class MessageQueuePort(abc.ABC):
     async def add_message_to_queue(self, queue: str, message: BaseMessage) -> None: ...
 
     @abc.abstractmethod
-    async def get_one_message(self) -> Tuple[MQMessage, Acknowledgements]: ...
+    async def get_one_message(self) -> tuple[MQMessage, Acknowledgements]: ...
 
     @abc.abstractmethod
     async def initialize_subscription(self) -> None: ...

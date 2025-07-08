@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from typing import Optional, Tuple
-
-from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends_core.message import MQMessage
+from univention.provisioning.backends_core.message_queue import Acknowledgements
+from univention.provisioning.backends_core.nats_mq import NatsMessageQueue as NatsMessageQueueAdapter
 from univention.provisioning.models.constants import PREFILL_QUEUE_NAME, PREFILL_SUBJECT_TEMPLATE
-from univention.provisioning.models.message import BaseMessage, MQMessage
+from univention.provisioning.models.message import BaseMessage
 
 from .config import PrefillSettings, prefill_settings
 from .mq_port import MessageQueuePort
@@ -22,14 +21,9 @@ class NatsMessageQueue(MessageQueuePort):
     Use as an async context manager.
     """
 
-    def __init__(self, settings: Optional[PrefillSettings] = None):
-        super().__init__(settings or prefill_settings())
-        self.mq = message_queue(
-            server=self.settings.nats_server,
-            user=settings.nats_user,
-            password=settings.nats_password,
-            max_reconnect_attempts=settings.nats_max_reconnect_attempts,
-        )
+    def __init__(self, settings: PrefillSettings | None = None):
+        self.settings = settings or prefill_settings()
+        self.mq = NatsMessageQueueAdapter(self.settings)
 
     async def __aenter__(self) -> MessageQueuePort:
         await self.mq.connect()
@@ -40,12 +34,12 @@ class NatsMessageQueue(MessageQueuePort):
         return False
 
     async def add_message_to_failures_queue(self, message: BaseMessage) -> None:
-        await self.mq.add_message(PREFILL_FAILURES_STREAM, PREFILL_FAILURES_STREAM, message)
+        await self.mq.add_message(PREFILL_FAILURES_STREAM, PREFILL_FAILURES_STREAM, message.binary_dump())
 
     async def add_message_to_queue(self, queue: str, message: BaseMessage) -> None:
-        await self.mq.add_message(queue, PREFILL_SUBJECT_TEMPLATE.format(subscription=queue), message)
+        await self.mq.add_message(queue, PREFILL_SUBJECT_TEMPLATE.format(subscription=queue), message.binary_dump())
 
-    async def get_one_message(self) -> Tuple[MQMessage, Acknowledgements]:
+    async def get_one_message(self) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message()
 
     async def initialize_subscription(self) -> None:

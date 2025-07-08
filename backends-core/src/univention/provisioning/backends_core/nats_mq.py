@@ -188,3 +188,6 @@ class NatsMessageQueue:
             sequence_number=sequence_number,
         )
         return message
+
+    async def purge_stream(self, stream: str, subject: str) -> None:
+        await self._js.purge_stream(stream_builder(stream), subject=subject)

@@ -6,7 +6,7 @@ import logging
 
 from daemoniker import Daemonizer
 
-from univention.provisioning.backends.message_queue import MessageAckManager
+from univention.provisioning.backends_core.message_queue import MessageAckManager
 from univention.provisioning.utils.log import setup_logging
 
 from .config import PrefillSettings, prefill_settings

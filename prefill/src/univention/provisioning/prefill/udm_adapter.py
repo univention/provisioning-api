@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -57,7 +57,7 @@ class UDMAdapter(UDMPort):
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
-    async def list_objects(self, object_type: str, position: Optional[str] = None) -> list[str]:
+    async def list_objects(self, object_type: str, position: str | None = None) -> list[str]:
         """Return the URLs of all objects for the given type."""
 
         params = {

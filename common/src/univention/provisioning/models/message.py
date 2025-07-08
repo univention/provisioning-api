@@ -30,6 +30,9 @@ class BaseMessage(BaseModel):
     def serialize_dt(self, dt: datetime, _info):
         return dt.isoformat()
 
+    def binary_dump(self) -> bytes:
+        return self.model_dump_json().encode("utf-8")
+
 
 class Body(BaseModel):
     old: Dict[str, Any] = Field(description="The LDAP/UDM object before the change.")

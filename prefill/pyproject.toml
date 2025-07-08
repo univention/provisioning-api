@@ -12,7 +12,7 @@ requires-python = "==3.11.*"
 dependencies = [
     "aiohttp<4.0.0,>=3.10.9",
     "daemoniker<1.0.0,>=0.2.3",
-    "nubus-provisioning-backends",
+    "nubus-provisioning-backends-core",
     "nubus-provisioning-common",
     "pydantic<3.0.0,>=2.9.2",
     "pydantic-settings<3.0.0,>=2.5.2",
@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-backends-core = { path = "../backends-core" }
 nubus-provisioning-common = { path = "../common" }
 
 [project.scripts]

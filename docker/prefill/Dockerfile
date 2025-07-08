@@ -19,7 +19,7 @@ ENV UV_LINK_MODE=copy \
     UV_PYTHON=python3.11
     # UV_PROJECT_ENVIRONMENT=/app
 
-COPY ./backends /app/backends
+COPY ./backends-core /app/backends-core
 COPY ./common /app/common
 COPY ./prefill/uv.lock \
      ./prefill/pyproject.toml \

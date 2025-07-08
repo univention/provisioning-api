@@ -23,6 +23,8 @@ class PrefillSettings(BaseSettings):
     nats_port: int
     # Maximum number of reconnect attempts to the NATS server
     nats_max_reconnect_attempts: conint(ge=0)
+    # Nats message replication amount. Useful values are 1, 3 and 5
+    nats_message_replicas: int
 
     # Prefill: username
     prefill_username: str
