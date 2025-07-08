@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
+
 import asyncio
 import logging
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import DISPATCHER_QUEUE_NAME
-from univention.provisioning.models.message import Message, MQMessage
+from univention.provisioning.backends_core.constants import DISPATCHER_QUEUE_NAME
+from univention.provisioning.backends_core.message import MQMessage
+from univention.provisioning.backends_core.message_queue import Empty, MessageAckManager
+from univention.provisioning.models.message import Message
 from univention.provisioning.models.subscription import Subscription
 
 from .mq_port import MessageQueuePort

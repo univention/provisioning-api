@@ -3,13 +3,16 @@
 
 import json
 import logging
+from typing import AsyncGenerator, Awaitable, Callable
 
 from nats.aio.client import Client as NATS
 from nats.js.errors import (
     BucketNotFoundError,
     KeyNotFoundError,
     KeyWrongLastSequenceError,
+    NoKeysError,
 )
+from nats.js.kv import KV_DEL, KV_PURGE
 
 from univention.provisioning.backends_core.constants import BucketName
 from univention.provisioning.backends_core.message_queue import NatsMessageQueueSettings
@@ -108,3 +111,34 @@ class NatsKeyValueDB:
         else:
             await kv_store.put(key, value.encode("utf-8"))
             return
+
+    async def get_bucket_items(self, bucket_name: BucketName) -> AsyncGenerator[tuple[str, bytes | None], None]:
+        kv_store = await self._js.key_value(bucket_name.value)
+        try:
+            keys = await kv_store.keys()
+        except NoKeysError:
+            return
+        for key in keys:
+            entry = await kv_store.get(key)
+            yield key, entry.value
+
+    async def watch_for_changes_in_bucket(
+        self, bucket_name: BucketName, callback: Callable[[str, bytes | None], Awaitable[None]]
+    ) -> None:
+        """
+        Call the `callback` function for any change in the KV bucket.
+
+        :param callback: Async function that accepts two arguments: the key of the changed entry (str)
+            and its value (bytes). When the value is None, the key has been deleted.
+        """
+        kv_store = await self._js.key_value(bucket_name.value)
+        watcher = await kv_store.watchall()
+
+        while True:
+            async for update in watcher:
+                # update is of type: nats.js.kv.KeyValue.Entry
+                # update.values is the JSON dump of the database entry or None when the key was deleted/purged
+                # update.operation is the type of operation that triggered the change
+                if not update:
+                    continue
+                await callback(update.key, None if update.operation in {KV_DEL, KV_PURGE} else update.value)

@@ -7,17 +7,17 @@ from unittest.mock import AsyncMock, call
 import pytest
 from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
-from univention.provisioning.backends.nats_mq import json_decoder
+from univention.provisioning.backends_core.constants import DISPATCHER_SUBJECT_TEMPLATE
+from univention.provisioning.backends_core.nats_mq import json_decoder
 from univention.provisioning.dispatcher.config import DispatcherSettings
 from univention.provisioning.dispatcher.mq_adapter_nats import NatsMessageQueueAdapter
 from univention.provisioning.dispatcher.service import DispatcherService, MessageAckManager
 from univention.provisioning.dispatcher.subscriptions_adapter_nats import NatsSubscriptionsAdapter
-from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 
 
 @pytest.fixture
 def dispatcher_service(mock_nats_kv_adapter, mock_nats_mq_adapter) -> DispatcherService:
-    settings = DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass")
+    settings = DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass", nats_message_replicas=1)
     mq = NatsMessageQueueAdapter(settings)
     mq.mq = mock_nats_mq_adapter
     subs = NatsSubscriptionsAdapter(settings)

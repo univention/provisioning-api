@@ -13,12 +13,12 @@ dependencies = [
     "daemoniker<1.0.0,>=0.2.3",
     "pydantic-settings<3.0.0,>=2.5.2",
     "backends<2.0.0,>=1.6.6",
-    "nubus-provisioning-backends",
+    "nubus-provisioning-backends-core",
     "nubus-provisioning-common",
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-backends-core = { path = "../backends-core" }
 nubus-provisioning-common = { path = "../common" }
 
 [project.scripts]

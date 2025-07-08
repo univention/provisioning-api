@@ -687,7 +687,7 @@ source = { editable = "dispatcher" }
 dependencies = [
     { name = "backends" },
     { name = "daemoniker" },
-    { name = "nubus-provisioning-backends" },
+    { name = "nubus-provisioning-backends-core" },
     { name = "nubus-provisioning-common" },
     { name = "pydantic-settings" },
 ]
@@ -696,7 +696,7 @@ dependencies = [
 requires-dist = [
     { name = "backends", specifier = ">=1.6.6,<2.0.0" },
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
+    { name = "nubus-provisioning-backends-core", directory = "backends-core" },
     { name = "nubus-provisioning-common", directory = "common" },
     { name = "pydantic-settings", specifier = ">=2.5.2,<3.0.0" },
 ]
@@ -758,7 +758,7 @@ dependencies = [
     { name = "aiohttp" },
     { name = "backends" },
     { name = "daemoniker" },
-    { name = "nubus-provisioning-backends" },
+    { name = "nubus-provisioning-backends-core" },
     { name = "nubus-provisioning-common" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -770,7 +770,7 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.10.9,<4.0.0" },
     { name = "backends", specifier = ">=1.6.6,<2.0.0" },
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
+    { name = "nubus-provisioning-backends-core", directory = "backends-core" },
     { name = "nubus-provisioning-common", directory = "common" },
     { name = "pydantic", specifier = ">=2.9.2,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.5.2,<3.0.0" },

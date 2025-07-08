@@ -22,6 +22,8 @@ class DispatcherSettings(BaseSettings):
     nats_port: int
     # Maximum number of reconnect attempts to the NATS server
     nats_max_reconnect_attempts: int
+    # Nats message replication amount. Useful values are 1, 3 and 5
+    nats_message_replicas: int
 
     @property
     def nats_server(self) -> str:
