@@ -6,10 +6,8 @@ includes = ["src/univention"]
 name = "nubus-provisioning-listener"
 version = "0.1.0"
 description = "Nubus - Provisioning Listener (depricated in favor of LDIF Producer)"
-authors = [
-    {name = "Univention GmbH", email = "packages@univention.de"},
-]
-license = {text = "AGPL-3.0-only"}
+authors = [{ name = "Univention GmbH", email = "packages@univention.de" }]
+license = { text = "AGPL-3.0-only" }
 
 requires-python = "==3.11.*"
 
@@ -20,14 +18,11 @@ dependencies = [
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
     "pydantic-settings<3.0.0,>=2.5.2",
+    "psutil<6.0.0,>=5.9.0",
 ]
 
 [dependency-groups]
-dev = [
-    "pytest==7.4.4",
-    "pytest-asyncio==0.21.2",
-    "pytest-cov==4.1.0",
-]
+dev = ["pytest==7.4.4", "pytest-asyncio==0.21.2", "pytest-cov==4.1.0"]
 
 [tool.uv.sources]
 nubus-provisioning-backends = { path = "../backends" }
@@ -48,9 +43,7 @@ addopts = [
     "--cov-report=term-missing",
 ]
 asyncio_mode = "auto"
-log_cli = 0  # activate on the CLI with: "-o log_cli=true"
+log_cli = 0 # activate on the CLI with: "-o log_cli=true"
 log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S:%f"
-
-

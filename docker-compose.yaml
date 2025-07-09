@@ -200,6 +200,7 @@ services:
       DEBUG_LEVEL: "3"
       TLS_MODE: "off"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_password"
+      LDAP_PASSWORD: "univention"
       LDAP_PORT: 389
     depends_on:
       - "nats1"

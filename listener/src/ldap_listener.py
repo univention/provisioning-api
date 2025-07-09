@@ -3,6 +3,11 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
+import os
+import signal
+import traceback
+
+import psutil
 
 from univention.listener.handler import ListenerModuleHandler
 from univention.provisioning.listener.config import ldap_producer_settings
@@ -21,8 +26,14 @@ class LdapListener(ListenerModuleHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.mq: MessageQueuePort = MessageQueueNatsAdapter(ldap_producer_settings())
-        self._ensure_queue_exists()
+        try:
+            self.mq: MessageQueuePort = MessageQueueNatsAdapter(ldap_producer_settings())
+            self._ensure_queue_exists()
+        except Exception as error:
+            self.logger.error("Failed to initialize the NATS queue: %r", error)
+            traceback.print_exc()
+            self.kill_listener_process()
+            raise
 
     def create(self, dn, new):
         self.logger.info("[ create ] dn: %r", dn)
@@ -48,7 +59,13 @@ class LdapListener(ListenerModuleHandler):
             await mq.ensure_queue_exists()
 
     def _send_message(self, new, old) -> None:
-        asyncio.run(self._async_send_message(new, old))
+        try:
+            asyncio.run(self._async_send_message(new, old))
+        except Exception as error:
+            self.logger.error("Failed to send the LDAP message to NATS: %r", error)
+            traceback.print_exc()
+            self.kill_listener_process()
+            raise
 
     async def _async_send_message(self, new, old) -> None:
         async with self.mq as mq:
@@ -56,3 +73,21 @@ class LdapListener(ListenerModuleHandler):
                 await mq.enqueue_change_event(new, old)
             except NoUDMTypeError:
                 self.logger.debug("Ignoring non-UDM messages. new: %r, old: %r", new, old)
+
+    def kill_listener_process(self) -> None:
+        """
+        Kill the listener parent process
+        """
+        process_name = "univention-directory-listener"
+
+        self.logger.info(
+            "Manually killing the listener parent process because the listener module encountered an exception"
+        )
+        for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+            try:
+                if process_name in proc.info["name"]:
+                    os.kill(proc.info["pid"], signal.SIGKILL)
+            except (psutil.NoSuchProcess, psutil.AccessDenied, ProcessLookupError) as error:
+                self.logger.error("Failed to kill the parent process %r", error)
+                # Process may have already terminated or we don't have permission
+                continue
