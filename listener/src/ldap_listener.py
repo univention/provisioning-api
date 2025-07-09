@@ -5,6 +5,7 @@
 import asyncio
 import os
 import signal
+import time
 import traceback
 
 import psutil
@@ -26,8 +27,10 @@ class LdapListener(ListenerModuleHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.settings = ldap_producer_settings()
+        self.logger.info("Initializing the NATS queue with settings: %r", self.settings)
         try:
-            self.mq: MessageQueuePort = MessageQueueNatsAdapter(ldap_producer_settings())
+            self.mq: MessageQueuePort = MessageQueueNatsAdapter(self.settings)
             self._ensure_queue_exists()
         except Exception as error:
             self.logger.error("Failed to initialize the NATS queue: %r", error)
@@ -55,8 +58,18 @@ class LdapListener(ListenerModuleHandler):
         asyncio.run(self._async_ensure_queue_exists())
 
     async def _async_ensure_queue_exists(self) -> None:
-        async with self.mq as mq:
-            await mq.ensure_queue_exists()
+        exception = None
+        for attempt in range(self.settings.nats_max_retry_count + 1):
+            if attempt != 0:
+                time.sleep(self.settings.nats_retry_delay)
+            try:
+                async with self.mq as mq:
+                    await mq.ensure_queue_exists()
+                return
+            except Exception as error:
+                self.logger.error("Failed to ensure the NATS queue exists: %r, retries: %d", error, attempt)
+                exception = error
+        raise exception
 
     def _send_message(self, new, old) -> None:
         try:
@@ -68,11 +81,20 @@ class LdapListener(ListenerModuleHandler):
             raise
 
     async def _async_send_message(self, new, old) -> None:
-        async with self.mq as mq:
+        exception = None
+        for attempt in range(self.settings.nats_max_retry_count + 1):
+            if attempt != 0:
+                time.sleep(self.settings.nats_retry_delay)
             try:
-                await mq.enqueue_change_event(new, old)
-            except NoUDMTypeError:
-                self.logger.debug("Ignoring non-UDM messages. new: %r, old: %r", new, old)
+                async with self.mq as mq:
+                    try:
+                        await mq.enqueue_change_event(new, old)
+                    except NoUDMTypeError:
+                        self.logger.debug("Ignoring non-UDM messages. new: %r, old: %r", new, old)
+            except Exception as error:
+                self.logger.error("Failed to send the LDAP message to NATS: %r, retries: %d", error, attempt)
+                exception = error
+        raise exception
 
     def kill_listener_process(self) -> None:
         """

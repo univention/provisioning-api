@@ -17,7 +17,7 @@ A Helm chart for the Univention Portal Provisioning API
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","ldapHost":"","ldapPort":"389","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
+| config | object | `{"caCert":"","caCertFile":"","debugLevel":"2","ldapHost":"","ldapPort":"389","natsMaxRetryCount":"3","natsRetryDelay":"10","nats_max_reconnect_attempts":"5","notifierServer":"ldap-notifier","provisioningApiHost":"provisioning-api","provisioningApiPort":"80","secretMountPath":"/var/secrets","tlsMode":"off"}` | Configuration of the UDM Listener that is notified on LDAP changes |
 | config.caCert | string | `""` | CA root certificate, base64-encoded. Optional; will be written to "caCertFile" if set. |
 | config.caCertFile | string | `""` | Where to search for the CA Certificate file. caCertFile: "/var/secrets/ca_cert" |
 | config.ldapHost | string | `""` | The LDAP Server host, should point to the service name of the ldap-server-primary that the ldap-notifier is sharing a volume with. Example: "ldap-server-notifier" |

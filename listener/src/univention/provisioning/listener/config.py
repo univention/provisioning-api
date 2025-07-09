@@ -3,6 +3,7 @@
 
 from functools import lru_cache
 
+from pydantic import conint
 from pydantic_settings import BaseSettings
 
 
@@ -17,6 +18,10 @@ class LdapProducerSettings(BaseSettings):
     nats_port: int
     # Maximum number of reconnect attempts to the NATS server
     nats_max_reconnect_attempts: int
+    # Delay between retry attempts to the NATS server (in seconds)
+    nats_retry_delay: conint(ge=0)
+    # Maximum number of retry attempts for interacting with the NATS server
+    nats_max_retry_count: conint(ge=0)
 
     @property
     def nats_server(self) -> str:

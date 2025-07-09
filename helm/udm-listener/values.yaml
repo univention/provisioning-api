@@ -143,6 +143,10 @@ config:
   ldapPort: "389"
   # -- NATS: maximum number of reconnect attempts to the NATS server
   nats_max_reconnect_attempts: "5"
+  # Delay between retry attempts to the NATS server (in seconds)
+  natsRetryDelay: "10"
+  # Maximum number of retry attempts for interacting with the NATS server
+  natsMaxRetryCount: "3"
   # -- Provisioning-API Hostname
   provisioningApiHost: "provisioning-api"
   # -- Provisioning-API Port

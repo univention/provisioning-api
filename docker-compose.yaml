@@ -67,7 +67,6 @@ services:
       - type: tmpfs
         target: /var/run
 
-
   dispatcher:
     image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
     build:
@@ -193,6 +192,8 @@ services:
       NATS_USER: ldif-producer
       NATS_PASSWORD: ldifpass
       NATS_MAX_RECONNECT_ATTEMPTS: 2
+      NATS_RETRY_DELAY: 10
+      NATS_MAX_RETRY_COUNT: 3
       LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
@@ -283,13 +284,12 @@ services:
       MAX_ACKNOWLEDGEMENT_RETRIES: 3
     restart: "on-failure"
 
-
   e2e-test:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/e2e-test/Dockerfile
-    command: ["pytest", "-lvv", "--timeout=300", "--environment", "pipeline"]
+    command: [ "pytest", "-lvv", "--timeout=300", "--environment", "pipeline" ]
     profiles:
       - test
     platform: "linux/amd64"
