@@ -102,6 +102,20 @@ image:
   imagePullPolicy: null
   tag: "0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"
 
+waitForDependency:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  image:
+    registry: null
+    pullPolicy: null
+    repository: "nubus/images/wait-for-dependency"
+    tag: "0.34.0@sha256:6ed1ae644160f0e69c00b4ea90efd4ea4aeaadeefb87e77f3454bcafaacd5e01"
+
 # -- In seconds, time the given to the pod needs to terminate gracefully.
 # Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
 terminationGracePeriodSeconds: ""

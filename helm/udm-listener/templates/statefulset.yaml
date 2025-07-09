@@ -60,6 +60,30 @@ spec:
       initContainers:
         {{- include "common.tplvalues.render" (dict "value" .Values.extraInitContainers "context" .) | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: wait-for-nats
+          command: [ "/usr/local/bin/wait-for-nats.py" ]
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext:
+            {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+            privileged: false
+          {{- end }}
+          image: "{{ coalesce .Values.waitForDependency.image.registry .Values.global.imageRegistry }}/{{ .Values.waitForDependency.image.repository }}:{{ .Values.waitForDependency.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.waitForDependency.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          {{- if .Values.waitForDependency.resources }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.waitForDependency.resources "context" .) | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: '{{ include "common.names.fullname" . }}'
+          env:
+            - name: NATS_USER
+              value: {{ tpl .Values.nats.auth.user . | quote }}
+            - name: NATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password") | quote }}
       containers:
         - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}

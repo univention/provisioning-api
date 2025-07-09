@@ -100,3 +100,11 @@ A Helm chart for the Univention Portal Provisioning API
 | terminationGracePeriodSeconds | string | `""` | In seconds, time the given to the pod needs to terminate gracefully. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods |
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
+| waitForDependency.image.pullPolicy | string | `nil` |  |
+| waitForDependency.image.registry | string | `nil` |  |
+| waitForDependency.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
+| waitForDependency.image.tag | string | `"0.34.0@sha256:6ed1ae644160f0e69c00b4ea90efd4ea4aeaadeefb87e77f3454bcafaacd5e01"` |  |
+| waitForDependency.resources.limits.cpu | string | `"500m"` |  |
+| waitForDependency.resources.limits.memory | string | `"512Mi"` |  |
+| waitForDependency.resources.requests.cpu | string | `"100m"` |  |
+| waitForDependency.resources.requests.memory | string | `"256Mi"` |  |
