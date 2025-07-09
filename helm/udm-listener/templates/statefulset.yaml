@@ -102,20 +102,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: '{{ include "common.names.fullname" . }}'
-          command:
-            - "/bin/bash"
-            - "-c"
-            - |
-              /usr/sbin/univention-directory-listener \
-              -F \
-              -x \
-              -d "${DEBUG_LEVEL}" \
-              -b "${LDAP_BASE_DN}" \
-              -D "cn=admin,${LDAP_BASE_DN}" \
-              -n "${NOTIFIER_SERVER}" \
-              -m "/usr/lib/univention-directory-listener/system" \
-              -c "/var/lib/univention-directory-listener" \
-              -y "${LDAP_PASSWORD_FILE}" -Z
           env:
             - name: NATS_USER
               value: {{ tpl .Values.nats.auth.user . | quote }}

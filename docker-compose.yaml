@@ -152,6 +152,8 @@ services:
       - "provisioning-api"
 
   ldif-producer:
+    depends_on:
+      - "nats3"
     platform: linux/amd64
     container_name: "ldif-producer"
     image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest"
@@ -186,6 +188,7 @@ services:
     container_name: "udm-listener"
     volumes:
       - /etc/ldap/
+      - ./tests/50-listener-base-entrypoint.envsh:/entrypoint.d/50-listener-base-entrypoint.envsh:ro
     environment:
       NATS_HOST: "nats1"
       NATS_PORT: "4222"

@@ -3,8 +3,8 @@
 
 # Inspired by: https://hynek.me/articles/docker-uv/
 
-ARG LISTENER_BASE_IMAGE=artifacts.software-univention.de/nubus/images/listener-base
-ARG LISTENER_BASE_IMAGE_TAG=0.12.1@sha256:73251fdc47cda8b7c4fea70b73457eab8a95d394fdab7ad3f1ffbd5bab273740
+ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/listener-base/listener-base
+ARG LISTENER_BASE_IMAGE_TAG=0.12.2@sha256:750348f6131b30ac68b229dab51c41f55afcc2e3cea9a35580551ddc39e29385
 
 ###############################################
 # Stage 1: build dependencies and software
@@ -53,7 +53,8 @@ RUN apt-get update && \
     patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
     patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
     apt-get purge --auto-remove --assume-yes patch && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+    rm /entrypoint.d/50-listener-base-entrypoint.envsh
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages

@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# abort on nonzero exitstatus
+set -o errexit
+# abort on unbound variable
+set -o nounset
+# don't hide errors within pipes
+set -o pipefail
+
+
+# Set sane dafaults for some optional variables
+# Variables used by `command.sh` need to be exported
+LDAP_HOST="${LDAP_HOST:-}"
+LDAP_PORT="${LDAP_PORT:-389}"
+LDAP_PASSWORD="${LDAP_PASSWORD:-}"
+export LDAP_PASSWORD_FILE="${LDAP_PASSWORD_FILE:-/run/secrets/ldap_secret}"
+export LDAP_BASE_DN="${LDAP_BASE_DN:-}"
+LDAP_HOST_DN="${LDAP_HOST_DN:-}"
+export NOTIFIER_SERVER="${NOTIFIER_SERVER:-}"
+CA_CERT="${CA_CERT:-}"
+CA_CERT_FILE="${CA_CERT_FILE:-/run/secrets/ca_cert}"
+TLS_MODE="${TLS_MODE:-secure}"
+export DEBUG_LEVEL="${DEBUG_LEVEL:-4}"
+export PYTHON_DIST_PACKAGES="${PYTHON_DIST_PACKAGES:-/usr/lib/python3/dist-packages}"
+
+# Test variables which should not be empty
+check_unset_variables() {
+  # Also list here the variables needed by ucr-light-filter
+  var_names=(
+    "LDAP_HOST"
+    "LDAP_BASE_DN"
+    "LDAP_HOST_DN"
+    "NOTIFIER_SERVER"
+  )
+  for var_name in "${var_names[@]}"; do
+    if [[ -z "${!var_name:-}" ]]; then
+      echo "ERROR: '${var_name}' is unset."
+      var_unset=true
+    fi
+  done
+
+  if [[ -n "${var_unset:-}" ]]; then
+    exit 1
+  fi
+}
+check_unset_variables
+
+# Handle the LDAP secret
+if [[ -s "${LDAP_PASSWORD_FILE}" ]]; then
+  echo "Using LDAP password from file"
+elif [[ -n "${LDAP_PASSWORD:-}" ]]; then
+  echo "Using LDAP password secret from env"
+  mkdir --parents "$(dirname "${LDAP_PASSWORD_FILE}")"
+  echo -n "${LDAP_PASSWORD}" > "${LDAP_PASSWORD_FILE}"
+else
+  echo "No LDAP password found in ${LDAP_PASSWORD_FILE}."
+  echo "Either set \"LDAP_PASSWORD\" or write a secret to \"LDAP_PASSWORD_FILE\"!"
+  exit 2
+fi
+
+case "${TLS_MODE}" in
+  "off")
+    TLS_START_NO=0
+    TLS_REQCERT="never"
+    ;;
+  "unvalidated")
+    TLS_START_NO=1
+    TLS_REQCERT="allow"
+    ;;
+  *)  # secure
+    TLS_START_NO=2
+    TLS_REQCERT="demand"
+    ;;
+esac
+
+if [[ "${TLS_MODE}" != "off" ]]; then
+  if [[ -s "${CA_CERT_FILE}" ]]; then
+    echo "Using CA certificate from file"
+  elif [[ -n "${CA_CERT}" ]]; then
+    echo "Using CA certificate from env"
+    mkdir --parents "$(dirname "${CA_CERT_FILE}")"
+    echo -n "${CA_CERT}" | base64 --decode --output "${CA_CERT_FILE}"
+  else
+    echo "TLS enabled but no CA certificate provided!"
+    echo "Please set \$CA_CERT and/or \$CA_CERT_FILE!."
+    exit 1
+  fi
+
+  CA_DIR="/etc/univention/ssl/ucsCA"
+  mkdir --parents "${CA_DIR}"
+  ln --symbolic --force "${CA_CERT_FILE}" "${CA_DIR}/CAcert.pem"
+
+  echo "Adding CA_CERT_FILE to system ca certificates bundle"
+  CA_CERT_DIR="/usr/local/share/ca-certificates/ucs-ca"
+  mkdir --parents "${CA_CERT_DIR}"
+  ln --symbolic --force "${CA_CERT_FILE}" "${CA_CERT_DIR}/ca_cert.crt"
+  update-ca-certificates
+else
+  echo "TLS mode is disabled!"
+fi
+
+# Adjust listener's folders' ownership
+state_dir="/var/lib/univention-directory-listener"
+current_owner="$(stat -c "%U" "${state_dir}")"
+if [ "${current_owner}" != "listener" ]
+then
+    echo "Trying to adjust owner of directory ${state_dir}"
+    chown -R listener: "${state_dir}"
+fi
+
+# Configure LDAP client
+cat <<EOF > /etc/ldap/ldap.conf
+# This file should be world readable but not world writable.
+
+${CA_DIR:+TLS_CACERT ${CA_DIR}/CAcert.pem}
+TLS_REQCERT ${TLS_REQCERT}
+
+URI ldap://${LDAP_HOST}:${LDAP_PORT}
+
+BASE ${LDAP_BASE_DN}
+EOF
+chmod 0644 /etc/ldap/ldap.conf
+
+# "listener/debug/level" is read by `univention/listener/handler_logging.py`
+/usr/sbin/ucr set \
+    server/role="memberserver" \
+    ldap/master="${LDAP_HOST}" \
+    ldap/master/port="${LDAP_PORT}" \
+    ldap/hostdn="${LDAP_HOST_DN}" \
+    ldap/base="${LDAP_BASE_DN}" \
+    directory/manager/starttls="${TLS_START_NO}" \
+    listener/debug/level="${DEBUG_LEVEL}"
+
+# Patch StartTLS mode neither controlled by arguments nor ucr nor env-vars
+sed --in-place \
+  --expression="s/access(\*\*ldap_credentials)/access(start_tls=${TLS_START_NO}, \*\*ldap_credentials)/" \
+  "${PYTHON_DIST_PACKAGES}/univention/listener/handler.py"
