@@ -15,23 +15,23 @@ SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
-    UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.11
-    # UV_PROJECT_ENVIRONMENT=/app
+  UV_COMPILE_BYTECODE=1 \
+  UV_PYTHON_DOWNLOADS=never \
+  UV_PYTHON=python3.11
+# UV_PROJECT_ENVIRONMENT=/app
 
 COPY ./backends /app/backends
 COPY ./common /app/common
 COPY ./listener/uv.lock \
-     ./listener/pyproject.toml \
-     /app/listener/
+  ./listener/pyproject.toml \
+  /app/listener/
 
 WORKDIR /app/listener
 RUN --mount=type=cache,target=/root/.cache \
   uv sync \
-    --locked \
-    --no-dev \
-    --no-install-project && \
+  --locked \
+  --no-dev \
+  --no-install-project && \
   uv export -o ./requirements.txt
 
 # copy source code
@@ -48,17 +48,19 @@ SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 COPY ./docker/udm-listener/*.patch /tmp/
 # Install patch utility
 RUN apt-get update && \
-    apt-get --assume-yes --verbose-versions --no-install-recommends install \
-    patch && \
-    patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
-    patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
-    apt-get purge --auto-remove --assume-yes patch && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+  apt-get --assume-yes --verbose-versions --no-install-recommends install \
+  patch && \
+  patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
+  patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
+  apt-get purge --auto-remove --assume-yes patch && \
+  rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+  cp /usr/sbin/univention-directory-listener /usr/bin
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages
+  PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages
 
 COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/system/
+COPY ./docker/udm-listener/univention-directory-listener /usr/sbin/univention-directory-listener
 
 # TODO: Fix docker compose so that it runs without root
 # ARG USER=udm-listener
