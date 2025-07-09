@@ -95,7 +95,7 @@ services:
       - "nubus-provisioning"
     volumes:
       - /usr/lib/python3/dist-packages/univention/udm/modules/:/usr/lib/python3/dist-packages/univention/udm/modules/
-      - /usr/lib/python3/dist-packages/univention/admin/:/usr/lib/python3/dist-packages/univention/admin/
+      - /usr/lib/python3/dist-packages/univention/:/usr/lib/python3/dist-packages/univention/
 
   prefill:
     image: "artifacts.software-univention.de/nubus/images/provisioning-prefill:0.56.0"
