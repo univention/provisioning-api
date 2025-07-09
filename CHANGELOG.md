@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.57.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.56.0...v0.57.0) (2025-07-09)
+
+
+### Features
+
+* add wait-for-nats initContainer to udm-listener ([c2ab464](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/c2ab464e2076939a8189e29356da3674cf1855e1)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
+
+### Bug Fixes
+
+* **listener:** Terminate the listener process when the listener-module encounters an exception ([0ea7e2d](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/0ea7e2d034f36fc92cda9945dcc95b39e553a999)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
 ## [0.56.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.55.3...v0.56.0) (2025-06-27)
 
 
