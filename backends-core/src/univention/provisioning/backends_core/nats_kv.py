@@ -59,7 +59,7 @@ class NatsKeyValueDB:
             logger.info("Creating bucket with the name: %r", bucket)
             await self._js.create_key_value(bucket=bucket.value)
 
-    async def _delete_kv_pair(self, key: str, bucket: BucketName):
+    async def delete_kv_pair(self, key: str, bucket: BucketName):
         kv_store = await self._js.key_value(bucket.value)
         await kv_store.delete(key)
 
@@ -97,7 +97,7 @@ class NatsKeyValueDB:
 
         if not value:
             # Avoid creating a pair with an empty value
-            await self._delete_kv_pair(key, bucket)
+            await self.delete_kv_pair(key, bucket)
             return
 
         if not isinstance(value, str):

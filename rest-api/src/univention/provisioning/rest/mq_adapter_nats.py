@@ -4,52 +4,46 @@
 from datetime import datetime
 from typing import Optional
 
-from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import MessageQueue
-from univention.provisioning.models.constants import (
+from univention.provisioning.backends_core.constants import (
     DISPATCHER_QUEUE_NAME,
     DISPATCHER_SUBJECT_TEMPLATE,
     PREFILL_QUEUE_NAME,
     PREFILL_SUBJECT_TEMPLATE,
     PublisherName,
 )
+from univention.provisioning.backends_core.message_queue import MessageQueuePort
+from univention.provisioning.backends_core.nats_mq import NatsMessageQueue
 from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
 from univention.provisioning.models.subscription import NewSubscription
 
-from .config import AppSettings, app_settings
-from .mq_port import MessageQueuePort
+from .config import AppSettings
+from .mq_port import MessageQueuePort as RestApiMessageQueuePort
 
 PREFILL_FAILURES_STREAM = "prefill-failures"
 PREFILL_DURABLE_NAME = "prefill-service"
 
 
-class NatsMessageQueue(MessageQueuePort):
+class NatsMessageQueueAdapter(RestApiMessageQueuePort):
     """
     Handle a message queue communication with NATS.
 
     Use as an async context manager.
     """
 
-    def __init__(self, settings: Optional[AppSettings] = None):
-        super().__init__(settings or app_settings())
-        self.mq: Optional[MessageQueue] = None
+    def __init__(self, settings: AppSettings):
+        self.settings = settings
+        self.mq: MessageQueuePort = NatsMessageQueue(self.settings)
 
     async def __aenter__(self) -> MessageQueuePort:
-        self.mq = message_queue(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-        )
         await self.mq.connect()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool:
         await self.mq.close()
-        self.mq = None
         return False
 
     async def enqueue_for_dispatcher(self, message: Message) -> None:
-        await self.mq.add_message(DISPATCHER_QUEUE_NAME, DISPATCHER_QUEUE_NAME, message)
+        await self.mq.add_message(DISPATCHER_QUEUE_NAME, DISPATCHER_QUEUE_NAME, message.binary_dump())
 
     async def get_messages_from_main_queue(
         self, subscription: str, timeout: float, pop: bool
@@ -93,4 +87,4 @@ class NatsMessageQueue(MessageQueuePort):
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,
         )
-        await self.mq.add_message(PREFILL_QUEUE_NAME, PREFILL_QUEUE_NAME, message)
+        await self.mq.add_message(PREFILL_QUEUE_NAME, PREFILL_QUEUE_NAME, message.binary_dump())

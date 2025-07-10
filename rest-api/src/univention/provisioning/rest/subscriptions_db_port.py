@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import abc
-from typing import Optional, Self, Union
+from typing import Self
 
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends_core.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
 
 from .config import AppSettings
@@ -20,7 +20,7 @@ class SubscriptionsDBPort(abc.ABC):
     Use as an async context manager.
     """
 
-    def __init__(self, settings: Optional[AppSettings] = None):
+    def __init__(self, settings: AppSettings):
         self.settings = settings
 
     @abc.abstractmethod
@@ -30,21 +30,19 @@ class SubscriptionsDBPort(abc.ABC):
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool: ...
 
     @abc.abstractmethod
-    async def get_dict_value(self, name: str, bucket: BucketName) -> Optional[dict]: ...
+    async def get_dict_value(self, name: str, bucket: BucketName) -> dict | None: ...
 
     @abc.abstractmethod
     async def get_list_value(self, key: str, bucket: BucketName) -> list[str]: ...
 
     @abc.abstractmethod
-    async def get_str_value(self, key: str, bucket: BucketName) -> Optional[str]: ...
+    async def get_str_value(self, key: str, bucket: BucketName) -> str | None: ...
 
     @abc.abstractmethod
     async def delete_kv_pair(self, key: str, bucket: BucketName): ...
 
     @abc.abstractmethod
-    async def put_value(
-        self, key: str, value: Union[str, dict, list], bucket: BucketName, revision: Optional[int] = None
-    ): ...
+    async def put_value(self, key: str, value: str | dict | list, bucket: BucketName, revision: int | None = None): ...
 
     @abc.abstractmethod
     async def get_bucket_keys(self, bucket: BucketName) -> list[str]: ...
@@ -56,7 +54,7 @@ class SubscriptionsDBPort(abc.ABC):
     async def load_hashed_password(self, name: str) -> str: ...
 
     @abc.abstractmethod
-    async def load_subscription(self, name: str) -> Optional[Subscription]:
+    async def load_subscription(self, name: str) -> Subscription | None:
         """
         :raises NoSubscription: if subscription was not found.
         """

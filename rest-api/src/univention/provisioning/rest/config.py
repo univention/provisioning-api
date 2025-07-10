@@ -30,6 +30,11 @@ class AppSettings(BaseSettings):
     nats_host: str
     # Nats: port
     nats_port: int
+    # Maximum number of reconnect attempts to the NATS server
+    nats_max_reconnect_attempts: int
+    # Nats message replication amount. Useful values are 1, 3 and 5
+    nats_message_replicas: int
+
     # TODO: Remove this, it's not used and a security risk
     # Admin Nats user name
     admin_nats_user: str

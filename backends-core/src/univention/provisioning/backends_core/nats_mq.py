@@ -191,3 +191,30 @@ class NatsMessageQueue:
 
     async def purge_stream(self, stream: str, subject: str) -> None:
         await self._js.purge_stream(stream_builder(stream), subject=subject)
+
+    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool) -> MQMessage | None:
+        """Retrieve multiple messages from a NATS subject."""
+
+        stream_name = stream_builder(stream)
+        # TODO: Why the stream and not the subject?
+        durable_name = durable_name_builder(stream)
+
+        try:
+            await self._js.stream_info(stream_name)
+        except NotFoundError:
+            logger.error("The stream was not found")
+            return None
+
+        consumer = await self._js.consumer_info(stream_name, durable_name)
+
+        # TODO: Why is ConsumerInfo passed in as ConsumerConfig?
+        sub = await self._js.pull_subscribe(subject, durable=durable_name, stream=stream_name, config=consumer)
+        try:
+            msgs = await sub.fetch(1, timeout)
+        except asyncio.TimeoutError:
+            return None
+
+        if pop:
+            await msgs[0].ack()
+
+        return self.mq_message_from(msgs[0])

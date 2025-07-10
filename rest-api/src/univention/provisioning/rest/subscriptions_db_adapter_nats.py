@@ -2,14 +2,13 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
-from typing import Optional, Union
 
-from univention.provisioning.backends import key_value_store
-from univention.provisioning.backends.key_value_db import KeyValueDB
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends_core.constants import BucketName
+from univention.provisioning.backends_core.key_value_db import KeyValueDB
+from univention.provisioning.backends_core.nats_kv import NatsKeyValueDB
 from univention.provisioning.models.subscription import Subscription
 
-from .config import AppSettings, app_settings
+from .config import AppSettings
 from .subscriptions_db_port import NoSubscription, SubscriptionsDBPort
 
 PREFILL_FAILURES_STREAM = "prefill-failures"
@@ -23,45 +22,37 @@ class NatsSubscriptionsDB(SubscriptionsDBPort):
     Use as an async context manager.
     """
 
-    def __init__(self, settings: Optional[AppSettings] = None):
-        super().__init__(settings or app_settings())
-        self.kv: Optional[KeyValueDB] = None
+    def __init__(self, settings: AppSettings):
+        self.settings = settings
+        self._kv_store: KeyValueDB = NatsKeyValueDB(self.settings)
 
     async def __aenter__(self) -> SubscriptionsDBPort:
-        self.kv = key_value_store(
-            server=self.settings.nats_server,
-            user=self.settings.nats_user,
-            password=self.settings.nats_password,
-        )
-        await self.kv.init(buckets=[BucketName.subscriptions, BucketName.credentials])
+        await self._kv_store.init(buckets=[BucketName.subscriptions, BucketName.credentials])
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> bool:
-        await self.kv.close()
-        self.kv = None
+        await self._kv_store.close()
         return False
 
-    async def get_dict_value(self, name: str, bucket: BucketName) -> Optional[dict]:
-        result = await self.kv.get_value(name, bucket)
+    async def get_dict_value(self, name: str, bucket: BucketName) -> dict | None:
+        result = await self._kv_store.get_value(name, bucket)
         return json.loads(result) if result else None
 
     async def get_list_value(self, key: str, bucket: BucketName) -> list[str]:
-        result = await self.kv.get_value(key, bucket)
+        result = await self._kv_store.get_value(key, bucket)
         return json.loads(result) if result else []
 
-    async def get_str_value(self, key: str, bucket: BucketName) -> Optional[str]:
-        return await self.kv.get_value(key, bucket)
+    async def get_str_value(self, key: str, bucket: BucketName) -> str | None:
+        return await self._kv_store.get_value(key, bucket)
 
     async def delete_kv_pair(self, key: str, bucket: BucketName):
-        await self.kv.delete_kv_pair(key, bucket)
+        await self._kv_store.delete_kv_pair(key, bucket)
 
-    async def put_value(
-        self, key: str, value: Union[str, dict, list], bucket: BucketName, revision: Optional[int] = None
-    ):
-        await self.kv.put_value(key, value, bucket, revision)
+    async def put_value(self, key: str, value: str | dict | list, bucket: BucketName, revision: int | None = None):
+        await self._kv_store.put_value(key, value, bucket, revision)
 
     async def get_bucket_keys(self, bucket: BucketName) -> list[str]:
-        return await self.kv.get_keys(bucket)
+        return await self._kv_store.get_keys(bucket)
 
     async def delete_subscription(self, name: str) -> None:
         await self.delete_kv_pair(name, BucketName.credentials)
@@ -70,7 +61,7 @@ class NatsSubscriptionsDB(SubscriptionsDBPort):
     async def load_hashed_password(self, name: str) -> str:
         return await self.get_str_value(name, BucketName.credentials)
 
-    async def load_subscription(self, name: str) -> Optional[Subscription]:
+    async def load_subscription(self, name: str) -> Subscription | None:
         """
         :raises NoSubscription: if subscription was not found.
         """

@@ -12,7 +12,6 @@ license = {text = "AGPL-3.0-only"}
 requires-python = "==3.11.*"
 
 dependencies = [
-    "nubus-provisioning-backends",
     "nubus-provisioning-backends-core",
     "nubus-provisioning-common",
     "nubus-provisioning-consumer",
@@ -34,7 +33,6 @@ dev = [
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "./backends", editable = true }
 nubus-provisioning-backends-core = { path = "./backends-core", editable = true }
 nubus-provisioning-common = { path = "./common", editable = true }
 nubus-provisioning-consumer = { path = "./consumer", editable = true }
@@ -80,6 +78,7 @@ NATS_PORT = {value = 1234, skip_if_set = true}
 NATS_USER = {value = "api", skip_if_set = true}
 NATS_PASSWORD = {value = "apipass", skip_if_set = true}
 NATS_MAX_RECONNECT_ATTEMPTS = {value = 2, skip_if_set = true}
+NATS_MESSAGE_REPLICAS = {value = 3, skip_if_set = true}
 ADMIN_NATS_USER = {value = "admin", skip_if_set = true}
 ADMIN_NATS_PASSWORD = {value = "univention", skip_if_set = true}
 PROVISIONING_API_BASE_URL = {value = "http://localhost:7777", skip_if_set = true}

@@ -72,6 +72,8 @@ class MessageQueuePort(Protocol):
         binary_decoder: Callable[[bytes], Any] = json_decoder,
     ) -> tuple[MQMessage, Acknowledgements]: ...
 
+    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool) -> MQMessage | None: ...
+
 
 class MessageAckManager:
     def __init__(self, ack_wait: int = 30, ack_threshold: int = 5):

@@ -604,7 +604,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/83/2f/0f1b94844760a8946
 [[package]]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
-source = { editable = "backends" }
+source = { directory = "backends" }
 dependencies = [
     { name = "nats-py" },
 ]
@@ -706,7 +706,6 @@ name = "nubus-provisioning-metapackage"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "nubus-provisioning-backends" },
     { name = "nubus-provisioning-backends-core" },
     { name = "nubus-provisioning-common" },
     { name = "nubus-provisioning-consumer" },
@@ -729,7 +728,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "nubus-provisioning-backends", editable = "backends" },
     { name = "nubus-provisioning-backends-core", editable = "backends-core" },
     { name = "nubus-provisioning-common", editable = "common" },
     { name = "nubus-provisioning-consumer", editable = "consumer" },
