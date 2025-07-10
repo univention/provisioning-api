@@ -22,6 +22,8 @@ class LdapProducerSettings(BaseSettings):
     nats_retry_delay: conint(ge=0)
     # Maximum number of retry attempts for interacting with the NATS server
     nats_max_retry_count: conint(ge=0)
+    # Enable termination on NATS failure
+    terminate_listener_on_exception: bool
 
     @property
     def nats_server(self) -> str:

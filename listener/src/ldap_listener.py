@@ -101,6 +101,11 @@ class LdapListener(ListenerModuleHandler):
         """
         Kill the listener parent process
         """
+        if not self.settings.terminate_listener_on_exception:
+            self.logger.info(
+                "Nubus provisioning listener failure is configured to not terminate the listener process. "
+            )
+            return
         process_name = "univention-directory-listener"
 
         self.logger.info(

@@ -197,6 +197,7 @@ services:
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       NATS_RETRY_DELAY: 10
       NATS_MAX_RETRY_COUNT: 3
+      TERMINATE_LISTENER_ON_EXCEPTION: true
       LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
