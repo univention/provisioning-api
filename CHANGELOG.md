@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.58.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.57.0...v0.58.0) (2025-07-10)
+
+
+### Features
+
+* **listener:** Retry nats interactions in the udm-listener to avoid loosing messages ([45d2b86](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/45d2b8675f0179c30b21a0efad30dfb94f8cbdde)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
+
+### Bug Fixes
+
+* **listener:** ensure that the listener process is not PID1 and can be terminated by the listener module ([cb189ab](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/cb189ab220612ce1a1c78faef1af10546b08be7b)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
 ## [0.57.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.56.0...v0.57.0) (2025-07-09)
 
 
