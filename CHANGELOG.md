@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.0...v0.58.1) (2025-07-11)
+
+
+### Bug Fixes
+
+* **listener:** allow disabling listener termination on NATS failures ([bac45c5](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/bac45c541a84af984583f7db5ada82ec02396291)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
 ## [0.58.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.57.0...v0.58.0) (2025-07-10)
 
 
