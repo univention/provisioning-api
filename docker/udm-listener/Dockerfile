@@ -45,6 +45,19 @@ RUN --mount=type=cache,target=/root/.cache \
 FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS final
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
+RUN \
+  mkdir /var/secrets/ /etc/ldap && \
+  echo "univention" > /var/secrets/ldap_password && \
+  echo -e "URI ldap://ldap-server:389\nBASE dc=univention-organization,dc=intranet" > /etc/ldap/ldap.conf && \
+  /usr/sbin/ucr set \
+    server/role="memberserver" \
+    ldap/master="ldap-server" \
+    ldap/master/port=389 \
+    ldap/hostdn="cn=admin,dc=univention-organization,dc=intranet" \
+    ldap/base="dc=univention-organization,dc=intranet" \
+    directory/manager/starttls=0 \
+    listener/debug/level="3"
+
 COPY ./docker/udm-listener/*.patch /tmp/
 # Install patch utility
 RUN apt-get update && \

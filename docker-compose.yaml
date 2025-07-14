@@ -182,13 +182,7 @@ services:
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
-      # args:
-      #   - LISTENER_BASE_IMAGE_TAG=latest
-      #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "udm-listener"
-    volumes:
-      - /etc/ldap/
-      - ./tests/50-listener-base-entrypoint.envsh:/entrypoint.d/50-listener-base-entrypoint.envsh:ro
     environment:
       NATS_HOST: "nats1"
       NATS_PORT: "4222"
@@ -198,15 +192,10 @@ services:
       NATS_RETRY_DELAY: 10
       NATS_MAX_RETRY_COUNT: 3
       TERMINATE_LISTENER_ON_EXCEPTION: true
-      LDAP_HOST: "ldap-server"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-      LDAP_HOST_DN: "cn=admin,dc=univention-organization,dc=intranet"
       NOTIFIER_SERVER: "ldap-notifier"
       DEBUG_LEVEL: "3"
-      TLS_MODE: "off"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_password"
-      LDAP_PASSWORD: "univention"
-      LDAP_PORT: 389
     depends_on:
       - "nats1"
       - "ldap-server"
