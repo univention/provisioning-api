@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.2...v0.58.3) (2025-07-14)
+
+
+### Bug Fixes
+
+* **listener:** Make the listener container easier to use in docker-compose test setups ([c44814c](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/c44814c53204976017382308f7c4784453ea0c4a)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
 ## [0.58.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.1...v0.58.2) (2025-07-14)
 
 
