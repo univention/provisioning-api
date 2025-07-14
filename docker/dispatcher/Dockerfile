@@ -1,10 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-# Inspired by: https://hynek.me/articles/docker-uv/
-
-ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-522
-ARG UCS_BASE_IMAGE_TAG=0.18.2-build-2025-06-12
+ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base
+ARG UCS_BASE_IMAGE_TAG=5.2.2-build.20250714
 
 ###############################################
 # Stage 1: build dependencies and software
