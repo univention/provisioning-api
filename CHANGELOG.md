@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.1...v0.58.2) (2025-07-14)
+
+
+### Bug Fixes
+
+* add waitForDependency.image to image value mapping ([b7f434a](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/b7f434a96c512bbcfe8bdcdb44597ea5fb1d84e7)), closes [univention/dev/internal/dev-issues/dev-incidents#149](https://git.knut.univention.de/univention/dev/internal/dev-issues/dev-incidents/issues/149)
+
 ## [0.58.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.0...v0.58.1) (2025-07-11)
 
 
