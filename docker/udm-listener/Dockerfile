@@ -4,7 +4,7 @@
 # Inspired by: https://hynek.me/articles/docker-uv/
 
 ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/listener-base/listener-base
-ARG LISTENER_BASE_IMAGE_TAG=0.12.2@sha256:750348f6131b30ac68b229dab51c41f55afcc2e3cea9a35580551ddc39e29385
+ARG LISTENER_BASE_IMAGE_TAG=0.13.0-pre-cgarcia-update-ucs-base-20250714
 
 ###############################################
 # Stage 1: build dependencies and software
