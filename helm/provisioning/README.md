@@ -202,7 +202,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.image.pullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
-| registerConsumers.image.tag | string | `"0.32.1@sha256:44d45067e1d4e7a00d3b651e56df5177087e3206368a45cd1816d78ba7b21347"` |  |
+| registerConsumers.image.tag | string | `"0.35.0@sha256:61dfaea28a2b150459138dfd6a554ce53850cee05ef2a72ab47bbe23f2a92d0d"` |  |
 | registerConsumers.jsonSecretName | string | `""` |  |
 | registerConsumers.podAnnotations | object | `{}` |  |
 | registerConsumers.provisioningApiBaseUrl | string | `""` |  |
