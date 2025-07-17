@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.60.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.59.0...v0.60.0) (2025-07-17)
+
+
+### Features
+
+* update UDM listener image to 0.13.0 ([558b233](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/558b2330a6a61710e91e23212a66a7c1b0f23894)), closes [univention/dev/internal/team-nubus#1320](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1320)
+* update wait-for-dependency to 0.35.0 ([3df0628](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/3df06283d2cdf373564e63059193eeb932258f38)), closes [univention/dev/internal/team-nubus#1320](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1320)
+
 ## [0.59.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.3...v0.59.0) (2025-07-17)
 
 
