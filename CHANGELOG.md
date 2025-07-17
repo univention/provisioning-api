@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.59.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.3...v0.59.0) (2025-07-17)
+
+
+### Features
+
+* update listener base image ([b861313](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/b861313a4c08cfdd2883afe8b2124a67cf3cc337)), closes [univention/dev/internal/team-nubus#1320](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1320)
+* update ucs-base to 5.2.2-build.20250714 ([22eedfe](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/22eedfe5d7df6c25877130c9fe3a24174a19ef4b)), closes [univention/dev/internal/team-nubus#1320](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1320)
+
+
+### Bug Fixes
+
+* use ucs-base-python image for docker images ([ca4141c](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/ca4141c8037a83e6f77040bfb6ef8ddc28f1b5df)), closes [univention/dev/internal/team-nubus#1320](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1320)
+
 ## [0.58.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.58.2...v0.58.3) (2025-07-14)
 
 
