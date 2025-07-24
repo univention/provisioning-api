@@ -11,7 +11,7 @@ dependencies:
     version: "0.21.1"
     repository: "oci://artifacts.software-univention.de/nubus/charts"
   - name: "nats"
-    version: "0.3.2"
+    version: "0.4.2"
     repository: "oci://artifacts.software-univention.de/nubus/charts"
     condition: "nats.bundled"
 description: "A Helm Chart that deploys the provisioning services"

@@ -12,7 +12,7 @@ A Helm Chart that deploys the provisioning services
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nats | 0.3.2 |
+| oci://artifacts.software-univention.de/nubus/charts | nats | 0.4.2 |
 | oci://artifacts.software-univention.de/nubus/charts | nubus-common | 0.21.1 |
 
 ## Values
