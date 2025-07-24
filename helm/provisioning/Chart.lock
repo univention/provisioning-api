@@ -3,7 +3,7 @@ dependencies:
   repository: oci://artifacts.software-univention.de/nubus/charts
   version: 0.21.1
 - name: nats
-  repository: oci://artifacts.software-univention.de/nubus/charts
-  version: 0.3.2
-digest: sha256:bb19e6d879137f7d127b729a46b53882b04e0695dca7cca6759857e70b91b27a
-generated: "2025-06-27T06:54:56.956724+02:00"
+  repository: oci://artifacts.software-univention.de/nubus-dev/charts
+  version: 0.4.2-pre-jtorres-nats-2-11-6
+digest: sha256:2bc26aef45242f685ccd43b554f2c4d2b9b791d97c1b078920c8487c9dc6c573
+generated: "2025-07-24T12:37:12.140722412+02:00"
