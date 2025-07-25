@@ -6,6 +6,7 @@ import inspect
 import logging
 import time
 from typing import Any, Callable, Coroutine, Optional
+import ssl
 
 import aiohttp
 from jsondiff import diff
@@ -34,7 +35,14 @@ class ProvisioningConsumerClient:
     def __init__(self, settings: Optional[ProvisioningConsumerClientSettings] = None, concurrency_limit: int = 10):
         self.settings = settings or provisioning_consumer_client_settings()
         auth = aiohttp.BasicAuth(self.settings.provisioning_api_username, self.settings.provisioning_api_password)
-        connector = aiohttp.TCPConnector(limit=concurrency_limit)
+
+        ssl_context = None
+        if self.settings.subscriptions_url.startswith("https://"):
+            ssl_context = ssl.create_default_context()
+            cacert = "/etc/ssl/certs/ca-certificates.crt"
+            ssl_context.load_verify_locations(cafile=cacert)
+
+        connector = aiohttp.TCPConnector(limit=concurrency_limit, ssl=ssl_context)
         self.session = aiohttp.ClientSession(auth=auth, connector=connector, raise_for_status=True)
 
     async def close(self):
