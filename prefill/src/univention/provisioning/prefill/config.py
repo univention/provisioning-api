@@ -36,6 +36,10 @@ class PrefillSettings(BaseSettings):
     udm_host: str
     # UDM REST API: port
     udm_port: int
+    # UDM REST API: protocol
+    udm_protocol: str = "http"
+    # UDM RESET API: url prefix
+    udm_url_prefix: str = ""
     # UDM REST API: username
     udm_username: str
     # UDM REST API: password
@@ -59,7 +63,7 @@ class PrefillSettings(BaseSettings):
 
     @property
     def udm_url(self) -> str:
-        return f"http://{self.udm_host}:{self.udm_port}/udm"
+        return f"{self.udm_protocol}://{self.udm_host}:{self.udm_port}{self.udm_url_prefix}/udm"
 
     @property
     def provisioning_api_url(self) -> str:
