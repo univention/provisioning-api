@@ -3,10 +3,7 @@
 import enum
 from typing import List
 
-try:
-    from pydantic.v1 import BaseModel, Field
-except ImportError:
-    from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 class FillQueueStatus(str, enum.Enum):

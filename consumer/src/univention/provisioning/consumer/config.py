@@ -19,14 +19,14 @@ class ProvisioningConsumerClientSettings(BaseSettings):
 
     @cached_property
     def subscriptions_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url, "/v1/subscriptions")
+        return urljoin(self.provisioning_api_base_url, "v1/subscriptions")
 
     def subscriptions_messages_url(self, name: str) -> str:
         return f"{self.subscriptions_url}/{name}/messages"
 
     @cached_property
     def messages_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url, "/v1/messages")
+        return urljoin(self.provisioning_api_base_url, "v1/messages")
 
 
 class MessageHandlerSettings(BaseSettings):
