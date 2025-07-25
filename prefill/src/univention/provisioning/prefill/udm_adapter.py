@@ -5,6 +5,7 @@ import logging
 from typing import Any, Optional
 
 import aiohttp
+import ssl
 
 from .udm_port import UDMPort
 
@@ -17,17 +18,18 @@ class UDMAdapter(UDMPort):
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMAdapter("http://localhost:9979/udm", "username", "password") as adapter:
+    async with UDMAdapter("http://localhost:9979/udm", "username", "password", "http") as adapter:
         await adapter.get_object_types()
     ```
     """
 
-    def __init__(self, url: str, username: str, password: str):
+    def __init__(self, url: str, username: str, password: str, udm_protocol: str):
         super().__init__(url, username, password)
         self.base_url = url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
+        self.udm_protocol = udm_protocol
         self.auth = aiohttp.BasicAuth(username, password)
         self.headers = [("accept", "application/json")]
         self._session = None
@@ -42,7 +44,14 @@ class UDMAdapter(UDMPort):
 
     async def connect(self) -> None:
         if not self._session:
-            self._session = aiohttp.ClientSession(auth=self.auth, headers=self.headers, raise_for_status=True)
+            ssl_context = None
+            if self.udm_protocol.startswith("https"):
+                ssl_context = ssl.create_default_context()
+                cacert = "/etc/ssl/certs/ca-certificates.crt"
+                ssl_context.load_verify_locations(cafile=cacert)
+
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            self._session = aiohttp.ClientSession(auth=self.auth, connector=connector, headers=self.headers, raise_for_status=True)
 
     async def close(self) -> None:
         if self._session:

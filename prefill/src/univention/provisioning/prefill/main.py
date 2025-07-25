@@ -22,7 +22,7 @@ async def main(settings: PrefillSettings):
     with Daemonizer():
         async with (
             NatsMessageQueue(settings) as mq,
-            UDMAdapter(settings.udm_url, settings.udm_username, settings.udm_password) as udm,
+            UDMAdapter(settings.udm_url, settings.udm_username, settings.udm_password, settings.udm_protocol) as udm,
             SubscriptionsRestApiAdapter(
                 settings.provisioning_api_url, settings.prefill_username, settings.prefill_password
             ) as update_sub_q_status,

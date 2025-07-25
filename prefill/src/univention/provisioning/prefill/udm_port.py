@@ -14,7 +14,7 @@ class UDMPort(abc.ABC):
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMAdapter("http://localhost:9979/udm", "username", "password") as adapter:
+    async with UDMAdapter("http://localhost:9979/udm", "username", "password", "http") as adapter:
         await adapter.get_object_types()
     ```
     """
