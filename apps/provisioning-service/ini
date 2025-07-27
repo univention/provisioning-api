@@ -10,6 +10,7 @@ WebInterfaceName = Provisioning Service
 WebInterfacePortHttps = 7777
 WebInterfacePortHttp = 0
 WebInterfaceProxyScheme = http
+UcsOverviewCategory=False
 DockerScriptRestoreDataAfterSetup =
 DockerScriptStoreData =
 DockerScriptUpdateAvailable =
