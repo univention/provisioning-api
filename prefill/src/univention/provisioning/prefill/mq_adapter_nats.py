@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import logging
 from typing import Optional, Tuple
 
 from univention.provisioning.backends import message_queue
@@ -10,9 +11,12 @@ from univention.provisioning.models.message import BaseMessage, MQMessage
 
 from .config import PrefillSettings, prefill_settings
 from .mq_port import MessageQueuePort
+from .retry_helper import retry
 
 PREFILL_FAILURES_STREAM = "prefill-failures"
 PREFILL_DURABLE_NAME = "prefill-service"
+
+logger = logging.getLogger(__name__)
 
 
 class NatsMessageQueue(MessageQueuePort):
@@ -39,9 +43,11 @@ class NatsMessageQueue(MessageQueuePort):
         await self.mq.close()
         return False
 
+    @retry(logger=logger)
     async def add_message_to_failures_queue(self, message: BaseMessage) -> None:
         await self.mq.add_message(PREFILL_FAILURES_STREAM, PREFILL_FAILURES_STREAM, message)
 
+    @retry(logger=logger)
     async def add_message_to_queue(self, queue: str, message: BaseMessage) -> None:
         await self.mq.add_message(queue, PREFILL_SUBJECT_TEMPLATE.format(subscription=queue), message)
 

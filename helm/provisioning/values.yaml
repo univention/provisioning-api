@@ -175,14 +175,24 @@ prefill:
           password: null
 
   config:
-    maxPrefillAttempts: 5
-    natsMaxReconnectAttempts: 5
-    # Python log level
+    # -- Python log level
     LOG_LEVEL: "INFO"
-    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
+    # -- UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
     UDM_HOST: ""
-    # UDM REST API: port
+    # -- UDM REST API: port
     UDM_PORT: 9979
+    # -- maximum number of retries of a prefill request
+    # -1 means infinite retries.
+    maxPrefillAttempts: 5
+    # -- Maximum number of reconnect attempts to the NATS server
+    natsMaxReconnectAttempts: 5
+    # -- Network: Retry request on failure after n seconds
+    networkRetryStartingInterval: 1
+    # -- Network: The retry delay will increase exponential clamped to the max delay
+    networkRetryMaxDelay: 120
+    # -- Network: Maximum number on retries of a failed network request
+    networkRetryMaxAttempts: 60
+
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}

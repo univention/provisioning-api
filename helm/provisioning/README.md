@@ -148,11 +148,14 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
 | prefill.additionalAnnotations | object | `{}` |  |
 | prefill.additionalLabels | object | `{}` |  |
-| prefill.config.LOG_LEVEL | string | `"INFO"` |  |
-| prefill.config.UDM_HOST | string | `""` |  |
-| prefill.config.UDM_PORT | int | `9979` |  |
-| prefill.config.maxPrefillAttempts | int | `5` |  |
-| prefill.config.natsMaxReconnectAttempts | int | `5` |  |
+| prefill.config.LOG_LEVEL | string | `"INFO"` | Python log level |
+| prefill.config.UDM_HOST | string | `""` | UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api |
+| prefill.config.UDM_PORT | int | `9979` | UDM REST API: port |
+| prefill.config.maxPrefillAttempts | int | `5` | maximum number of retries of a prefill request -1 means infinite retries. |
+| prefill.config.natsMaxReconnectAttempts | int | `5` | Maximum number of reconnect attempts to the NATS server |
+| prefill.config.networkRetryMaxAttempts | int | `60` | Network: Maximum number on retries of a failed network request |
+| prefill.config.networkRetryMaxDelay | int | `120` | Network: The retry delay will increase exponential clamped to the max delay |
+| prefill.config.networkRetryStartingInterval | int | `1` | Network: Retry request on failure after n seconds |
 | prefill.image.pullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
