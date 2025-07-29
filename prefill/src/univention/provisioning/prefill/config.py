@@ -46,6 +46,13 @@ class PrefillSettings(BaseSettings):
     # Provisioning REST API: port
     provisioning_api_port: int
 
+    # Network: Retry request on failure after n seconds
+    network_retry_starting_interval: int
+    # Network: The retry delay will increase exponential clamped to the max delay
+    network_retry_max_delay: int
+    # Network: Maximum number on retries of a failed network request
+    network_retry_max_attempts: int
+
     @property
     def nats_server(self) -> str:
         return f"nats://{self.nats_host}:{self.nats_port}"

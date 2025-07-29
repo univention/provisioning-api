@@ -183,6 +183,10 @@ prefill:
     UDM_HOST: ""
     # UDM REST API: port
     UDM_PORT: 9979
+    networkRetryStartingInterval: 1
+    networkRetryMaxDelay: 120
+    networkRetryMaxAttempts: 60
+
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}

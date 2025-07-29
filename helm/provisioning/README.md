@@ -153,6 +153,9 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.UDM_PORT | int | `9979` |  |
 | prefill.config.maxPrefillAttempts | int | `5` |  |
 | prefill.config.natsMaxReconnectAttempts | int | `5` |  |
+| prefill.config.networkRetryMaxAttempts | int | `60` |  |
+| prefill.config.networkRetryMaxDelay | int | `120` |  |
+| prefill.config.networkRetryStartingInterval | int | `1` |  |
 | prefill.image.pullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |

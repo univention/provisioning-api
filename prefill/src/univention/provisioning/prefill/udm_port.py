@@ -5,6 +5,8 @@ import abc
 import logging
 from typing import Any, Optional, Self
 
+from .config import PrefillSettings
+
 logger = logging.getLogger(__name__)
 
 
@@ -14,12 +16,13 @@ class UDMPort(abc.ABC):
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMAdapter("http://localhost:9979/udm", "username", "password") as adapter:
+    async with UDMAdapter(settings) as adapter:
         await adapter.get_object_types()
     ```
     """
 
-    def __init__(self, url: str, username: str, password: str): ...
+    def __init__(self, settings: Optional[PrefillSettings] = None):
+        self.settings = settings
 
     @abc.abstractmethod
     async def __aenter__(self) -> Self: ...

@@ -130,6 +130,9 @@ metadata:
 data:
   MAX_PREFILL_ATTEMPTS: {{ required ".Values.prefill.config.maxPrefillAttempts is required." .Values.prefill.config.maxPrefillAttempts | quote  }}
   NATS_MAX_RECONNECT_ATTEMPTS: {{ required ".Values.prefill.config.maxReconnectAttempts is required." .Values.prefill.config.natsMaxReconnectAttempts | quote  }}
+  NETWORK_RETRY_STARTING_INTERVAL: {{ required ".Values.prefill.config.networkRetryStartingInterval is required." .Values.prefill.config.networkRetryStartingInterval | quote  }}
+  NETWORK_RETRY_MAX_DELAY: {{ required ".Values.prefill.config.networkRetryMaxDelay is required." .Values.prefill.config.networkRetryMaxDelay | quote  }}
+  NETWORK_RETRY_MAX_ATTEMPTS: {{ required ".Values.prefill.config.networkRetryMaxAttempts is required." .Values.prefill.config.networkRetryMaxAttempts | quote  }}
   LOG_LEVEL: {{ required ".Values.prefill.config.LOG_LEVEL is required." .Values.prefill.config.LOG_LEVEL | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}

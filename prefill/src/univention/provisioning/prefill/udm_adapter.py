@@ -6,6 +6,8 @@ from typing import Any, Optional
 
 import aiohttp
 
+from .config import PrefillSettings, prefill_settings
+from .retry_helper import retry
 from .udm_port import UDMPort
 
 logger = logging.getLogger(__name__)
@@ -17,18 +19,18 @@ class UDMAdapter(UDMPort):
 
     It is intended to be used as an async context manager:
     ```
-    async with UDMAdapter("http://localhost:9979/udm", "username", "password") as adapter:
+    async with UDMAdapter(settings) as adapter:
         await adapter.get_object_types()
     ```
     """
 
-    def __init__(self, url: str, username: str, password: str):
-        super().__init__(url, username, password)
-        self.base_url = url
+    def __init__(self, settings: Optional[PrefillSettings] = None):
+        super().__init__(settings or prefill_settings())
+        self.base_url = self.settings.udm_url
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
-        self.auth = aiohttp.BasicAuth(username, password)
+        self.auth = aiohttp.BasicAuth(self.settings.udm_username, self.settings.udm_password)
         self.headers = [("accept", "application/json")]
         self._session = None
 
@@ -48,6 +50,7 @@ class UDMAdapter(UDMPort):
         if self._session:
             await self._session.close()
 
+    @retry(logger=logger)
     async def get_object_types(self) -> list[dict[str, Any]]:
         """Return a list of available object types.
 
@@ -57,6 +60,7 @@ class UDMAdapter(UDMPort):
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
+    @retry(logger=logger)
     async def list_objects(self, object_type: str, position: Optional[str] = None) -> list[str]:
         """Return the URLs of all objects for the given type."""
 
@@ -81,6 +85,7 @@ class UDMAdapter(UDMPort):
             else:
                 return []
 
+    @retry(logger=logger)
     async def get_object(self, url: str) -> dict[str, Any]:
         """Fetch the given UDM object."""
         async with self._session.get(url) as request:
