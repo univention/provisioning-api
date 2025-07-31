@@ -4,6 +4,7 @@
 import asyncio
 from typing import Any, AsyncGenerator, Callable, Coroutine
 
+import nats
 import pytest
 
 from univention.admin.rest.client import UDM, time
@@ -72,8 +73,9 @@ async def test_simple_message_timing(
     subscription: str,
     test_settings: E2ETestSettings,
     purge_stream: Callable[[str], Coroutine[Any, Any, None]],
+    nats_connection
 ):
-    test_number = 10
+    test_number = 100
     get_durations = []
     status_durations = []
     messages = []
@@ -86,12 +88,27 @@ async def test_simple_message_timing(
     for _ in range(test_number):
         messages.append(create_message_via_events_api(test_settings))
 
-    await asyncio.sleep(1)
+    max_wait_time = 10
+    wait_time = 0
+    manager = nats.js.manager.JetStreamManager(nats_connection)
+    info = await manager.stream_info(f"stream:{subscription}")
+    while info.state.messages < test_number:
+        info = await manager.stream_info(f"stream:{subscription}")
+        await asyncio.sleep(1)
+        wait_time += 1
+        assert wait_time >= max_wait_time
 
+    
     print("Starting the test run")
     for i in range(test_number):
         tic = time.perf_counter()
-        response = await provisioning_client.get_subscription_message(name=subscription)
+        response = None
+        while response is None:
+            info = await manager.stream_info(f"stream:{subscription}")
+            print(f"Messages in nats queue: {info.state.messages}")
+            print(info)
+            response = await provisioning_client.get_subscription_message(name=subscription)
+
         get_durations.append((time.perf_counter() - tic) * 1000)
 
         assert response.body == messages[i]
@@ -99,11 +116,13 @@ async def test_simple_message_timing(
         print(f"request time was {get_durations[-1]:.2f}")
 
         tic = time.perf_counter()
-        await provisioning_client.set_message_status(
+        status_response = await provisioning_client.set_message_status(
             subscription, response.sequence_number, status=MessageProcessingStatus.ok
         )
+        print(status_response)
         status_durations.append((time.perf_counter() - tic) * 1000)
 
+    print("No meessage available")
     print("get_subscription_message statistics")
     print_stats(get_durations)
     print("set_message_status statistics")

@@ -315,9 +315,10 @@ class NatsMessageQueue(MessageQueue):
     async def delete_message(self, stream: str, seq_num: int):
         logger.info("Deleting message from the stream: %r", stream)
         try:
-            await self._js.get_msg(NatsKeys.stream(stream), seq_num)
-            await self._js.delete_msg(NatsKeys.stream(stream), seq_num)
-            logger.info("Message was deleted")
+            message = await self._js.get_msg(NatsKeys.stream(stream), seq_num)
+            deleted = await self._js.delete_msg(NatsKeys.stream(stream), seq_num)
+            print(message)
+            logger.info("Message was deleted: %s", deleted)
         except (ServerError, NotFoundError) as exc:
             raise ValueError(exc.description)
 
