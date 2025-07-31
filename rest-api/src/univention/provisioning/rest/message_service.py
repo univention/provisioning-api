@@ -36,10 +36,8 @@ class MessageService:
         """
         timeout = max(timeout, 0.1)  # Timeout of 0 leads to internal server error
         t0 = time.perf_counter()
-        if self._subscription_prefill_done.get(subscription_name, False):
-            message = await self.mq.get_messages_from_main_queue(subscription_name, timeout, pop)
-            queue = "main"
-        else:
+        message = None
+        if not self._subscription_prefill_done.get(subscription_name, False):
             if (
                 await self.sub_service.check_subscription_queue_status(subscription_name, timeout)
                 != FillQueueStatus.done
@@ -50,7 +48,8 @@ class MessageService:
                 )
                 return None
 
-            message = await self.mq.get_messages_from_prefill_queue(subscription_name, timeout, pop)
+            # 
+            message = await self.mq.get_messages_from_prefill_queue(subscription_name, 0.1, pop)
             queue = "prefill"
             if message is None:
                 logger.info(
@@ -58,6 +57,11 @@ class MessageService:
                     subscription_name,
                 )
                 self._subscription_prefill_done[subscription_name] = True
+
+        if self._subscription_prefill_done.get(subscription_name, False):
+            message = await self.mq.get_messages_from_main_queue(subscription_name, timeout, pop)
+            queue = "main"
+
         logger.debug(
             "Retrieved%s message from %s queue for %r. (%.1f ms)",
             " a" if message else " no",
