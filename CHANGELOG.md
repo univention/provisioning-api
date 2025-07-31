@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.1...v0.60.2) (2025-07-31)
+
+
+### Bug Fixes
+
+* **prefill:** Retry NATS and UDM request if they fail ([55fc1a1](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/55fc1a1ad250a74c2a5ff95eba9ab4df9ae49bbd)), closes [univention/dev/internal/team-nubus#1357](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1357)
+
 ## [0.60.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.0...v0.60.1) (2025-07-28)
 
 
