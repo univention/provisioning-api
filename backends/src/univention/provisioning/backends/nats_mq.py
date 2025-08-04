@@ -136,10 +136,14 @@ class NatsMessageQueue(MessageQueue):
         try:
             await self._js.stream_info(stream_name)
         except NotFoundError:
-            logger.error("The stream was not found")
+            logger.error("The stream '%s' was not found in NATS", stream_name)
             return None
 
-        consumer = await self._js.consumer_info(stream_name, durable_name)
+        try:
+            consumer = await self._js.consumer_info(stream_name, durable_name)
+        except NotFoundError:
+            logger.error("The consumer '%s' was not found in NATS", durable_name)
+            return None
 
         # TODO: Why is ConsumerInfo passed in as ConsumerConfig?
         sub = await self._js.pull_subscribe(subject, durable=durable_name, stream=stream_name, config=consumer)
