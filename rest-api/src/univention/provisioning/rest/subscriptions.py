@@ -117,9 +117,11 @@ async def get_next_message(
     msg_service = MessageService(subscriptions_db=kv, mq=mq)
     try:
         msg = await msg_service.get_next_message(name, timeout, pop)
-    except ProvisioningBackendError as err:
-        logger.debug("Inconsistent message queue state in NATS")
-        raise fastapi.HTTPException(fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR, str(err))
+    except ProvisioningBackendError as exc:
+        logger.error("Inconsistent message queue state in NATS: %s", exc)
+        raise fastapi.HTTPException(
+            fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR, "Inconsistent message queue state in NATS"
+        )
     td1 = time.perf_counter() - t0
     timing = f"Auth: {td0 * 1000:.1f} ms, MQ: {td1 * 1000:.1f} ms"
     msg_details = (

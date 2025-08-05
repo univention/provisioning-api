@@ -61,7 +61,7 @@ class NatsMessageQueue(MessageQueuePort):
         try:
             return await self.mq.get_message(subscription, main_subject, timeout, pop)
         except NotFoundError as err:
-            raise ProvisioningBackendError(err)
+            raise ProvisioningBackendError(str(err))
 
     async def get_messages_from_prefill_queue(
         self, subscription: str, timeout: float, pop: bool
@@ -70,7 +70,7 @@ class NatsMessageQueue(MessageQueuePort):
         try:
             return await self.mq.get_message(subscription, prefill_subject, timeout, pop)
         except NotFoundError as err:
-            raise ProvisioningBackendError(err)
+            raise ProvisioningBackendError(str(err))
 
     async def delete_message(self, stream: str, seq_num: int):
         await self.mq.delete_message(stream, seq_num)
