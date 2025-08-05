@@ -67,7 +67,10 @@ class NatsMessageQueue(MessageQueuePort):
         self, subscription: str, timeout: float, pop: bool
     ) -> Optional[ProvisioningMessage]:
         prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription)
-        return await self.mq.get_message(subscription, prefill_subject, timeout, pop)
+        try:
+            return await self.mq.get_message(subscription, prefill_subject, timeout, pop)
+        except NotFoundError as err:
+            raise ProvisioningBackendError(err)
 
     async def delete_message(self, stream: str, seq_num: int):
         await self.mq.delete_message(stream, seq_num)
