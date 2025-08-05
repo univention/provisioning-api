@@ -105,14 +105,29 @@ class TestNatsMQAdapter:
         mock_nats_mq_adapter._js.stream_info = AsyncMock(side_effect=NotFoundError)
         mock_nats_mq_adapter.delete_message = AsyncMock()
 
-        result = await mock_nats_mq_adapter.get_message(SUBSCRIPTION_NAME, self.subject, timeout=5, pop=False)
+        with pytest.raises(NotFoundError):
+            await mock_nats_mq_adapter.get_message(SUBSCRIPTION_NAME, self.subject, timeout=5, pop=False)
 
         mock_nats_mq_adapter._js.stream_info.assert_called_once_with(NatsKeys.stream(SUBSCRIPTION_NAME))
         mock_nats_mq_adapter._js.pull_subscribe.assert_not_called()
         mock_nats_mq_adapter._js.consumer_info.assert_not_called()
         mock_fetch.assert_not_called()
         mock_nats_mq_adapter.delete_message.assert_not_called()
-        assert result is None
+
+    async def test_get_messages_without_consumer(self, mock_nats_mq_adapter, mock_fetch):
+        mock_nats_mq_adapter._js.consumer_info = AsyncMock(side_effect=NotFoundError)
+        mock_nats_mq_adapter.delete_message = AsyncMock()
+
+        with pytest.raises(NotFoundError):
+            await mock_nats_mq_adapter.get_message(SUBSCRIPTION_NAME, self.subject, timeout=5, pop=False)
+
+        mock_nats_mq_adapter._js.stream_info.assert_called_once_with(NatsKeys.stream(SUBSCRIPTION_NAME))
+        mock_nats_mq_adapter._js.pull_subscribe.assert_not_called()
+        mock_nats_mq_adapter._js.consumer_info.assert_called_once_with(
+            NatsKeys.stream(SUBSCRIPTION_NAME), NatsKeys.durable_name(SUBSCRIPTION_NAME)
+        )
+        mock_fetch.assert_not_called()
+        mock_nats_mq_adapter.delete_message.assert_not_called()
 
     async def test_get_messages_timeout_error(self, mock_nats_mq_adapter):
         sub = AsyncMock()

@@ -4,6 +4,8 @@
 from datetime import datetime
 from typing import Optional
 
+from nats.js.errors import NotFoundError
+
 from univention.provisioning.backends import message_queue
 from univention.provisioning.backends.message_queue import MessageQueue
 from univention.provisioning.models.constants import (
@@ -17,6 +19,7 @@ from univention.provisioning.models.message import Message, PrefillMessage, Prov
 from univention.provisioning.models.subscription import NewSubscription
 
 from .config import AppSettings, app_settings
+from .exceptions import ProvisioningBackendError
 from .mq_port import MessageQueuePort
 
 PREFILL_FAILURES_STREAM = "prefill-failures"
@@ -55,7 +58,10 @@ class NatsMessageQueue(MessageQueuePort):
         self, subscription: str, timeout: float, pop: bool
     ) -> Optional[ProvisioningMessage]:
         main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=subscription)
-        return await self.mq.get_message(subscription, main_subject, timeout, pop)
+        try:
+            return await self.mq.get_message(subscription, main_subject, timeout, pop)
+        except NotFoundError as err:
+            raise ProvisioningBackendError(err)
 
     async def get_messages_from_prefill_queue(
         self, subscription: str, timeout: float, pop: bool

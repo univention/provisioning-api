@@ -19,6 +19,7 @@ from .dependencies import (
     authenticate_admin,
     authenticate_prefill,
 )
+from .exceptions import ProvisioningBackendError
 from .message_service import MessageService
 from .subscription_service import SubscriptionService
 
@@ -114,7 +115,11 @@ async def get_next_message(
 
     t0 = time.perf_counter()
     msg_service = MessageService(subscriptions_db=kv, mq=mq)
-    msg = await msg_service.get_next_message(name, timeout, pop)
+    try:
+        msg = await msg_service.get_next_message(name, timeout, pop)
+    except ProvisioningBackendError as err:
+        logger.debug("Failed to reach NATS")
+        raise fastapi.HTTPException(fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR, str(err))
     td1 = time.perf_counter() - t0
     timing = f"Auth: {td0 * 1000:.1f} ms, MQ: {td1 * 1000:.1f} ms"
     msg_details = (
