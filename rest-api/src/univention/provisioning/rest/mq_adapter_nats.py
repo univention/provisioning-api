@@ -85,6 +85,9 @@ class NatsMessageQueue(MessageQueuePort):
     async def create_consumer(self, subject):
         await self.mq.ensure_consumer(subject)
 
+    async def delete_consumer(self, consumer_name: str):
+        await self.mq.delete_consumer(consumer_name)
+
     async def prepare_new_consumer_queue(self, consumer_name: str):
         await self.create_queue(
             consumer_name,
