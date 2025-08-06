@@ -125,9 +125,51 @@ class SubscriptionService:
             request_prefill=new_sub.request_prefill,
             prefill_queue_status=prefill_queue_status,
         )
-        await self.sub_db.store_subscription(new_sub.name, subscription)
-        await self.mq.prepare_new_consumer_queue(new_sub.name)
-        await self.mq.create_consumer(new_sub.name)
+
+        queue_created = False
+        consumer_created = False
+        subscription_stored = False
+
+        logger.info("Preparing to register new subscription: %r", new_sub)
+
+        try:
+            await self.mq.prepare_new_consumer_queue(new_sub.name)
+            logger.info("Created new queue for subscription: %r", new_sub.name)
+            queue_created = True
+
+            await self.mq.create_consumer(new_sub.name)
+            logger.info("Created new consumer for subscription: %r", new_sub.name)
+            consumer_created = True
+
+            await self.sub_db.store_subscription(new_sub.name, subscription)
+            logger.info("Stored subscription information for: %r", new_sub.name)
+            subscription_stored = True
+
+        except Exception as e:
+            logger.error(f"Error while creating subscription {new_sub.name}: {e}")
+
+            if consumer_created:
+                try:
+                    await self.mq.delete_consumer(new_sub.name)
+                except Exception as cleanup_error:
+                    logger.error(f"Rollback: Failed to delete consumer: {cleanup_error}")
+
+            if queue_created:
+                try:
+                    await self.mq.delete_queue(new_sub.name)
+                except Exception as cleanup_error:
+                    logger.error(f"Rollback: Failed to delete queue: {cleanup_error}")
+
+            if subscription_stored:
+                try:
+                    await self.sub_db.delete_subscription(new_sub.name)
+                except Exception as cleanup_error:
+                    logger.error(f"Rollback: Failed to delete subscription: {cleanup_error}")
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Subscription could not be created due to an internal error",
+            ) from e
 
     async def get_subscription_queue_status(self, name: str) -> FillQueueStatus:
         """Get the pre-fill status of the given subscription."""
@@ -182,4 +224,6 @@ class SubscriptionService:
                 return queue_status
             await asyncio.sleep(1)
 
+        return await self.get_subscription_queue_status(subscription_name)
+        return await self.get_subscription_queue_status(subscription_name)
         return await self.get_subscription_queue_status(subscription_name)
