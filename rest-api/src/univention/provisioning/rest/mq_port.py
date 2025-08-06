@@ -50,6 +50,9 @@ class MessageQueuePort(abc.ABC):
     async def create_consumer(self, subject): ...
 
     @abc.abstractmethod
+    async def delete_consumer(self, consumer_name: str): ...
+
+    @abc.abstractmethod
     async def prepare_new_consumer_queue(self, consumer_name: str): ...
 
     @abc.abstractmethod
