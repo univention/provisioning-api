@@ -50,9 +50,7 @@ A Helm chart for the Univention Portal Provisioning API
 | image.tag | string | `"0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"` |  |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ldap | object | `{"auth":{"bindDn":"cn=admin,{{ include \"udm-listener.ldapBaseDn\" . }}","existingSecret":{"keyMapping":{"password":null},"name":null},"password":null},"tlsSecret":{"caCertKey":"ca.crt","name":""}}` | LDAP client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
-| livenessProbe.exec.command[0] | string | `"sh"` |  |
-| livenessProbe.exec.command[1] | string | `"-c"` |  |
-| livenessProbe.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.exec.command | list | `["sh","-c","grep -E \"^[13]$\" /var/lib/univention-directory-listener/handlers/ldap_listener"]` | Avoid state in which the listener goes uninitialized after correctly being initialized. This scan occurs if the listener gets a 32 (LDAP_NO_SUCH_OBJECT) return value. See https://docs.software-univention.de/developer-reference/5.0/en/listener/details.html#internal-cache |
 | livenessProbe.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
 | livenessProbe.periodSeconds | int | `20` | Time between probe executions. |

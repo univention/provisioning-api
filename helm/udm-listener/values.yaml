@@ -236,11 +236,13 @@ livenessProbe:
   # -- Timeout for command return.
   timeoutSeconds: 5
   exec:
+    # -- Avoid state in which the listener goes uninitialized after correctly being initialized.
+    # This scan occurs if the listener gets a 32 (LDAP_NO_SUCH_OBJECT) return value.
+    # See https://docs.software-univention.de/developer-reference/5.0/en/listener/details.html#internal-cache
     command:
       - sh
       - -c
-      - |
-        exit 0
+      - 'grep -E "^[13]$" /var/lib/univention-directory-listener/handlers/ldap_listener'
 
 readinessProbe:
   # -- Number of failed executions until container is terminated.
