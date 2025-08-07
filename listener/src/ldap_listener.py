@@ -23,7 +23,8 @@ class LdapListener(ListenerModuleHandler):
     class Configuration(ListenerModuleHandler.Configuration):
         name = name
         description = "Listener module that forwards LDAP changes to the UDM Transformer."
-        ldap_filter = "(objectClass=*)"
+        # Do not listen to temporary objects
+        ldap_filter = "(!(objectClass=lock))"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
