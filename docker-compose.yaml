@@ -147,9 +147,9 @@ services:
       PREFILL_USERNAME: "prefill"
       PREFILL_PASSWORD: "prefillpass"
       MAX_PREFILL_ATTEMPTS: 5
-      NETWORK_RETRY_STARTING_INTERVAL: 1
-      NETWORK_RETRY_MAX_DELAY: 120
-      NETWORK_RETRY_MAX_ATTEMPTS: 20
+      NETWORK_RETRY_STARTING_INTERVAL: 0.1
+      NETWORK_RETRY_MAX_DELAY: 1
+      NETWORK_RETRY_MAX_ATTEMPTS: 5
     depends_on:
       - "nats2"
       - "provisioning-api"

@@ -47,7 +47,7 @@ class PrefillSettings(BaseSettings):
     provisioning_api_port: int
 
     # Network: Retry request on failure after n seconds
-    network_retry_starting_interval: int
+    network_retry_starting_interval: float
     # Network: The retry delay will increase exponential clamped to the max delay
     network_retry_max_delay: int
     # Network: Maximum number on retries of a failed network request
