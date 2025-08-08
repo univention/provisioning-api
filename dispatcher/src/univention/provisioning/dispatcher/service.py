@@ -43,14 +43,18 @@ class DispatcherService:
             except Empty:
                 logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
                 continue
+
             message_handler = self.handle_message(message)
             try:
                 await self.ack_manager.process_message_with_ack_wait_extension(
                     message_handler, acknowledgements.acknowledge_message_in_progress
                 )
+                await acknowledgements.acknowledge_message()
             except Exception:
-                await acknowledgements.acknowledge_message_negatively()
-            await acknowledgements.acknowledge_message()
+                try:
+                    await acknowledgements.acknowledge_message_negatively()
+                except Exception:
+                    pass
 
     async def handle_message(self, message: MQMessage):
         data = message.data
@@ -77,7 +81,11 @@ class DispatcherService:
 
         for sub in subscriptions:
             logger.info("Sending message to %r", sub.name)
-            await self.mq.enqueue_message(sub.name, validated_msg)
+            try:
+                await self.mq.enqueue_message(sub.name, validated_msg)
+            except Exception:
+                logger.error("Failed to send message to %r", sub.name)
+
         if not subscriptions:
             logger.info("No consumers for message with realm: %r topic: %r.", validated_msg.realm, validated_msg.topic)
 
