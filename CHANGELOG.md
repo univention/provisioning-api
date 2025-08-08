@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.2...v0.60.3) (2025-08-08)
+
+
+### Bug Fixes
+
+* **prefill:** Adapt the network retry timeout for the integration tests so it doesn't hang for ages in case of an error ([03107ff](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/03107ff56fca4e93eda3a047a457c6df0a085e9c)), closes [univention/dev/internal/team-nubus#1357](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1357)
+
 ## [0.60.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.1...v0.60.2) (2025-07-31)
 
 
