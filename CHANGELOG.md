@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.60.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.3...v0.60.4) (2025-08-11)
+
+
+### Bug Fixes
+
+* code cleanup and error message improvement ([5889488](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/588948821d7b8d77bc6500195962e8b9aaa224a4)), closes [univention/dev/projects/provisioning#78](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/78)
+* code cleanup and error message improvement ([604db64](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/604db647774bcee29dbed7ff1d243b38f413ad13)), closes [univention/dev/projects/provisioning#78](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/78)
+* improve error handling for 'consumer not found' ([4becbe7](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/4becbe7e75bad188afdbcc1726d5eb6cb68056c4)), closes [univention/dev/projects/provisioning#78](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/78)
+* raise exception from backend -> nats-adapter -> restapi ([664f64a](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/664f64accf0a6f97078cf0eecc0eabcc864de10b)), closes [univention/dev/projects/provisioning#78](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/78)
+
 ## [0.60.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.2...v0.60.3) (2025-08-08)
 
 
