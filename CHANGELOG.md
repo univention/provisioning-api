@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.60.5](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.4...v0.60.5) (2025-08-12)
+
+
+### Bug Fixes
+
+* **dispatcher:** catch and handle failing send or acknowledgement requests ([97fc48a](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/97fc48a4299f17abcb0ca97529b6b7ea40d628e1)), closes [univention/dev/internal/team-nubus#1349](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1349)
+* **dispatcher:** ensure docker rebuild respects changes in dispatcher files w/o need to use --no-cache ([d807856](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/d807856bc45af6cd34ee5e404cb22d4842ce6c7d)), closes [univention/dev/internal/team-nubus#1349](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1349)
+* **dispatcher:** ignore subscriptions w/o matching stream, create fatal log on send failure ([2d2eaf0](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/2d2eaf069b9665b8864e97eefc08dc5cbaffb90a)), closes [univention/dev/internal/team-nubus#1349](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1349)
+* **rest-api:** rollback any NATS related changes if creating a subscription fails ([5204ae0](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/5204ae0413966688da745ad12ea779bb5efddfe5)), closes [univention/dev/internal/team-nubus#1349](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1349)
+* **rest-api:** unit test rollback of any NATS related changes if creating a subscription fails ([37825bb](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/37825bb89501ba775e53077a929478b3dd2d75a7)), closes [univention/dev/internal/team-nubus#1349](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1349)
+
 ## [0.60.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.3...v0.60.4) (2025-08-11)
 
 
