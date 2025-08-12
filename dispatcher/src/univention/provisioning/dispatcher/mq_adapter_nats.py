@@ -44,3 +44,6 @@ class NatsMessageQueueAdapter(MessageQueuePort):
 
     async def enqueue_message(self, queue: str, message: Message) -> None:
         await self.mq.add_message(queue, DISPATCHER_SUBJECT_TEMPLATE.format(subscription=queue), message)
+
+    async def stream_exists(self, stream: str) -> bool:
+        return await self.mq.stream_exists(stream)

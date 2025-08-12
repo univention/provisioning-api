@@ -6,12 +6,7 @@ import logging
 from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
 from nats.aio.client import Client as NATS
-from nats.js.errors import (
-    BucketNotFoundError,
-    KeyNotFoundError,
-    KeyWrongLastSequenceError,
-    NoKeysError,
-)
+from nats.js.errors import BucketNotFoundError, KeyNotFoundError, KeyWrongLastSequenceError, NoKeysError
 from nats.js.kv import KV_DEL, KV_PURGE
 
 from univention.provisioning.models.constants import BucketName
@@ -132,6 +127,7 @@ class NatsKeyValueDB(KeyValueDB):
         watcher = await kv_store.watchall()
 
         while True:
+            logger.debug("Waiting for subscription changes...")
             async for update in watcher:
                 # update is of type: nats.js.kv.KeyValue.Entry
                 # update.key is the subscription's name

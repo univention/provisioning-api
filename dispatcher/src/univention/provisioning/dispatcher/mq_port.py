@@ -34,3 +34,6 @@ class MessageQueuePort(abc.ABC):
 
     @abc.abstractmethod
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]: ...
+
+    @abc.abstractmethod
+    async def stream_exists(self, stream: str) -> bool: ...
