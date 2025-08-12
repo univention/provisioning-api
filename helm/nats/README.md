@@ -775,7 +775,7 @@ true
 			<td>The volume size with unit.</td>
 		</tr>
 		<tr>
-			<td>persistence.storageClass</td>
+			<td>persistence.storageClassName</td>
 			<td>string</td>
 			<td><pre lang="json">
 ""

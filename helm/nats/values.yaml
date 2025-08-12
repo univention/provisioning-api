@@ -169,7 +169,7 @@ persistence:
   size: "10Gi"
 
   # -- The (storage) class of PV.
-  storageClass: ""
+  storageClassName: ""
 
   # -- Selector to match an existing Persistent Volume (this value is evaluated as a template).
   #
