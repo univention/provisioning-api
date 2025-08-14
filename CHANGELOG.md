@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.6](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.5...v0.60.6) (2025-08-14)
+
+
+### Bug Fixes
+
+* bump NATS chart ([a0ffb83](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/a0ffb838ad4fac0dd2b6aedb382d9a01bad70ccb)), closes [univention/dev/internal/team-nubus#1382](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1382)
+
 ## [0.60.5](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.4...v0.60.5) (2025-08-12)
 
 
