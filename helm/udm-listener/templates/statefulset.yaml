@@ -110,13 +110,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) | quote }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password") | quote }}
-            - name: EVENTS_USERNAME_UDM
-              value: {{ tpl ( required "A Provisioning API username has to be supplied, see parameter provisioningApi.auth.username" .Values.provisioningApi.auth.username ) . | quote }}
-            - name: EVENTS_PASSWORD_UDM
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.provisioningApi.auth.existingSecret "defaultNameSuffix" "provisioning-api" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.provisioningApi.auth.existingSecret "key" "password") | quote }}
           ports:
             - name: "http"
               containerPort: 80
