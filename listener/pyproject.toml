@@ -18,7 +18,7 @@ dependencies = [
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
     "pydantic-settings<3.0.0,>=2.5.2",
-    "psutil<6.0.0,>=5.9.0",
+    "psutil<7.1.0,>=7.0.0",
 ]
 
 [dependency-groups]
