@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.7](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.6...v0.60.7) (2025-08-18)
+
+
+### Bug Fixes
+
+* **udm-listener:** remove unused events_username_udm secret from helm chart to simplify secrets documentation ([87d6293](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/87d629368cafa8e2a0d30170b9c23d720382b33b)), closes [univention/dev/internal/team-nubus#989](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/989)
+
 ## [0.60.6](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.5...v0.60.6) (2025-08-14)
 
 
