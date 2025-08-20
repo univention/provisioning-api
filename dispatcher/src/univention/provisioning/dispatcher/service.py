@@ -20,7 +20,7 @@ class DispatcherService:
         self.mq = mq
         self.subscriptions_db = subscriptions
         self._subscriptions: dict[str, dict[str, set[Subscription]]] = {}  # {realm: {topic: {Subscription, ..}}}
-        self._wildcard_subscriptions = set[Subscription] = {}
+        self._wildcard_subscriptions: set[Subscription] = set()
 
     async def run(self):
         logger.info("Storing event in consumer queues")
@@ -49,8 +49,9 @@ class DispatcherService:
                 await self.ack_manager.process_message_with_ack_wait_extension(
                     message_handler, acknowledgements.acknowledge_message_in_progress
                 )
-            except Exception:
+            except Exception as e:
                 await acknowledgements.acknowledge_message_negatively()
+                raise e
             await acknowledgements.acknowledge_message()
 
     async def handle_message(self, message: MQMessage):
@@ -74,7 +75,7 @@ class DispatcherService:
 
         validated_msg = Message.model_validate(data)
 
-        subscriptions = self._subscriptions.get(validated_msg.realm, {}).get(validated_msg.topic, [])
+        subscriptions = list(self._subscriptions.get(validated_msg.realm, {}).get(validated_msg.topic, [])) + list(self._wildcard_subscriptions)
 
         for sub in subscriptions:
             logger.info("Sending message to %r", sub.name)
@@ -89,9 +90,10 @@ class DispatcherService:
                 new_subscriptions_mapping.setdefault(realm_topic.realm, {}).setdefault(realm_topic.topic, set()).add(
                     sub
                 )
+                logger.info("Adding wildcard-sub {realm_topic.topic} {realm_topic.realm}")
                 if realm_topic.realm == "*" or realm_topic.topic == "*":
                     logger.info(f"Adding wildcard-sub {sub}")
-                    self._wildcard_subscriptions += {sub}
+                    self._wildcard_subscriptions.add(sub)
 
         self._subscriptions = new_subscriptions_mapping
 

@@ -19,12 +19,14 @@ async def handle_message(
     server: str,
     user: str,
     password: str,
-    subject: str = "stream:incoming",
+    subject: str = "incoming",
 ) -> None:
     nc = NATS()
     await nc.connect(servers=[server], user=user, password=password)
+    logging.info("WTFWTF", json.dumps(msg.model_dump(), indent=2))
     try:
         js = nc.jetstream()
-        await js.publish(subject, json.dumps(msg.model_dump()))
+        bytes_encoded_payload = json.dumps(msg.model_dump()).encode("utf-8")
+        await js.publish(subject, bytes_encoded_payload)
     finally:
         await nc.drain()

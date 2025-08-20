@@ -69,7 +69,8 @@ async def main(settings: ProvisioningConsumerClientSettings) -> None:
     async with ProvisioningConsumerClient(settings) as client:
 
         async def wrapper_handle_message(message: ProvisioningMessage):
-            handle_message(message, arguments.target_nats, arguments.nats_user, arguments.nats_password)
+            logging.info("WTFWTF - LOLOLOLHANDLER WEAPPER")
+            await handle_message(message, arguments.target_nats, arguments.nats_user, arguments.nats_password)
 
         await MessageHandler(client, [wrapper_handle_message]).run()
 
@@ -78,7 +79,7 @@ def run():
 
     arguments = parse_args(sys.argv[1:])
     settings = ProvisioningConsumerClientSettings(
-        provisioning_api_username=arguments.provisioning_api_admin_user,
+        provisioning_api_username=arguments.stream_name,
         provisioning_api_password=arguments.provisioning_api_admin_user_password,
         provisioning_api_base_url=arguments.provisioning_url,
     )
