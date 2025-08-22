@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.8](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.7...v0.60.8) (2025-08-22)
+
+
+### Bug Fixes
+
+* update listener-base ([b492370](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/b49237020fdd87690095f038a59abbf4f0772283)), closes [univention/dev/internal/team-nubus#1372](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1372)
+
 ## [0.60.7](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.6...v0.60.7) (2025-08-18)
 
 
