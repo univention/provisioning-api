@@ -8,6 +8,7 @@ import logging
 import sys
 from importlib.metadata import version
 from typing import Sequence
+import os
 
 from aiohttp import ClientResponseError
 
@@ -20,6 +21,7 @@ from univention.provisioning.models.message import ProvisioningMessage, RealmTop
 
 from .forward import handle_message
 
+SERVER_ROLE_CONF = "/server_role.conf"
 LOG_FORMAT = "%(asctime)s %(levelname)-5s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,17 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--stream-name", required=True)
 
     arguments = parser.parse_args(argv)
+
+    if not os.path.isfile(SERVER_ROLE_CONF):
+        logger.error(f"Missing server role config file at {SERVER_ROLE_CONF}")
+        sys.exit(1)
+
+    with open("/server_role.conf") as f:
+        server_role = f.read().strip()
+        if server_role != "domaincontroller_backup":
+            logger.info("Server is not a backup. Not continuing.")
+            sys.exit(0)
+
     return arguments
 
 

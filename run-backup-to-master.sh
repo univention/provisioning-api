@@ -22,7 +22,7 @@ DRY_RUN="${DRY_RUN:-0}"
 
 exec > >(tee -a "$SCRIPT_LOG") 2>&1
 
-echo "=== $(date -Is) :: Starting UCS Backup→Master promotion + app reinitialize (${APP_NAME}) ==="
+echo "=== $(date -Is) :: Starting UCS Backup->Master promotion + app reinitialize (${APP_NAME}) ==="
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -73,7 +73,7 @@ fi
 echo "Refreshing App Center cache..."
 run "univention-app update"
 
-# --- Promotion: Backup → Master ---
+# --- Promotion: Backup -> Master ---
 if [[ "${SKIP_PROMOTION:-0}" != "1" ]]; then
   echo "Starting promotion using /usr/lib/univention-ldap/univention-backup2master ..."
   # The tool is interactive when it finds leftover refs; NONINTERACTIVE lets you auto-accept.
