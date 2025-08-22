@@ -135,9 +135,8 @@ services:
       --nats-user "api"
       --nats-password @!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
       --target-nats "nats://nats:4222"
-      --provisioning-url https://@%@ldap/server/name@%@/univention/provisioning/
+      --provisioning-url https://@%@ldap/master@%@/univention/provisioning/
       --stream-name "backup-4"
-      --server-role "@%@server/role@%@"
     environment:
       - PROVISIONING_API_USERNAME=admin
       - PROVISIONING_API_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@

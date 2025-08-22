@@ -82,7 +82,6 @@ async def main(settings: ProvisioningConsumerClientSettings) -> None:
     async with ProvisioningConsumerClient(settings) as client:
 
         async def wrapper_handle_message(message: ProvisioningMessage):
-            logging.info("WTFWTF - LOLOLOLHANDLER WEAPPER")
             await handle_message(message, arguments.target_nats, arguments.nats_user, arguments.nats_password)
 
         await MessageHandler(client, [wrapper_handle_message]).run()

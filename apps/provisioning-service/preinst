@@ -233,7 +233,7 @@ def server_role_config():
         )
 
     os.chown(server_role_file, 0, 0)
-    os.chmod(server_role_file, stat.S_IRUSR | stat.S_IWUSR)
+    os.chmod(server_role_file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
     print(f"server_role.conf file written to {server_role_file}")
 
 def create_data_dir():
