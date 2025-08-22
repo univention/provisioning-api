@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main(settings: DispatcherSettings):
+    logger.info("Starting Dispatcher Service with settings: %s", settings)
     async with NatsMessageQueueAdapter(settings) as mq, NatsSubscriptionsAdapter(settings) as subscriptions:
         service = DispatcherService(ack_manager=MessageAckManager(), mq=mq, subscriptions=subscriptions)
         await service.run()

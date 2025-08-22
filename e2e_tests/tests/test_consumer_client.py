@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import asyncio
 import uuid
 
 import aiohttp
@@ -51,13 +52,22 @@ async def test_send_message(
     dummy_subscription: str,
     test_settings: E2ETestSettings,
 ):
-    data = create_message_via_events_api(test_settings)
-
-    response = await provisioning_client.get_subscription_message(
-        name=dummy_subscription,
-        timeout=10,
+    # Start subscription in background BEFORE creating message.
+    # This will ensure that the subscription is ready to receive messages.
+    # Otherwise the subscription may be ready after the message has been
+    # processed and removed from the queue.
+    message_task = asyncio.create_task(
+        provisioning_client.get_subscription_message(name=dummy_subscription, timeout=10)
     )
 
+    # Small delay to ensure subscription is listening
+    await asyncio.sleep(0.1)
+
+    # Now create the message
+    data = create_message_via_events_api(test_settings)
+
+    # Wait for the message
+    response = await message_task
     assert response.body == data
 
 
@@ -71,13 +81,20 @@ async def test_pop_message(provisioning_client: ProvisioningConsumerClient, dumm
 async def test_get_real_messages(
     create_user_via_udm_rest_api, provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM
 ):
+    # Start subscription in background BEFORE creating user.
+    # This will ensure that the subscription is ready to receive messages.
+    # Otherwise the subscription may be ready after the message has been
+    # processed and removed from the queue.
+    message_task = asyncio.create_task(provisioning_client.get_subscription_message(name=real_subscription, timeout=15))
+
+    # Small delay to ensure subscription is listening
+    await asyncio.sleep(0.1)
+
+    # Now create the user
     user = create_user_via_udm_rest_api()  # noqa: F841
 
-    response = await provisioning_client.get_subscription_message(
-        name=real_subscription,
-        timeout=5,
-    )
-
+    # Wait for the message
+    response = await message_task
     assert response is not None
     assert response.body.new["properties"]["univentionObjectIdentifier"]
     uuid.UUID(response.body.new["properties"]["univentionObjectIdentifier"])
@@ -86,12 +103,29 @@ async def test_get_real_messages(
 async def test_get_multiple_messages(
     create_user_via_udm_rest_api, provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM
 ):
-    user1 = create_user_via_udm_rest_api()  # noqa: F841
-    user2 = create_user_via_udm_rest_api()  # noqa: F841
-    user3 = create_user_via_udm_rest_api()  # noqa: F841
+    users = []
+    for i in range(3):
+        # Start subscription in background BEFORE creating user.
+        # This will ensure that the subscription is ready to receive messages.
+        # Otherwise the subscription may be ready after the message has been
+        # processed and removed from the queue.
+        message_task = asyncio.create_task(
+            provisioning_client.get_subscription_message(name=real_subscription, timeout=15)
+        )
 
-    result = await pop_all_messages(provisioning_client, real_subscription, 6)
-    assert len(result) == 3
+        # Small delay to ensure subscription is listening
+        await asyncio.sleep(0.1)
+
+        # Create user
+        user = create_user_via_udm_rest_api()  # noqa: F841
+        users.append(user)
+
+        # Wait for message and acknowledge it
+        message = await message_task
+        assert message is not None
+        await provisioning_client.set_message_status(
+            real_subscription, message.sequence_number, MessageProcessingStatus.ok
+        )
 
 
 @pytest.mark.xfail()
@@ -120,12 +154,21 @@ async def test_create_user_with_extended_attribute(
     provisioning_client: ProvisioningConsumerClient,
     real_subscription: str,
 ):
+    # Start subscription in background BEFORE creating user.
+    # This will ensure that the subscription is ready to receive messages.
+    # This will ensure that the subscription is ready to receive messages.
+    # Otherwise the subscription may be ready after the message has been
+    # processed and removed from the queue.
+    message_task = asyncio.create_task(provisioning_client.get_subscription_message(name=real_subscription, timeout=5))
+
+    # Small delay to ensure subscription is listening
+    await asyncio.sleep(0.1)
+
+    # Now create the user
     user = create_user_via_udm_rest_api({"PasswordRecoveryEmail": "test@univention.de"})
 
-    message = await provisioning_client.get_subscription_message(
-        name=real_subscription,
-        timeout=5,
-    )
+    # Wait for the message
+    message = await message_task
     assert message.body.new.get("dn") == user.dn
     assert message.body.new["properties"]["PasswordRecoveryEmail"] == user.properties["PasswordRecoveryEmail"]
 
