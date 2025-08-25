@@ -18,7 +18,7 @@ services:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-events-and-consumer-api:0.59.0-pre-yschmidt-apache-dev-stuff"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:provisioning-ucs-dev"
     container_name: "nubus-provisioning-api"
     restart: "on-failure"
     environment:
@@ -47,7 +47,7 @@ services:
       - "nats"
 
   dispatcher:
-    image: "artifacts.software-univention.de/nubus/images/provisioning-dispatcher:0.56.0"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:provisioning-ucs-dev"
     container_name: "nubus-provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -67,7 +67,7 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "artifacts.software-univention.de/nubus/images/provisioning-udm-transformer:0.56.0"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:provisioning-ucs-dev"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "on-failure"
     extra_hosts:
@@ -98,7 +98,7 @@ services:
       - /usr/lib/python3/dist-packages/univention/:/usr/lib/python3/dist-packages/univention/
 
   prefill:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-prefill:0.59.0-pre-yschmidt-apache-dev-stuff"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:provisioning-ucs-dev"
     container_name: "nubus-provisioning-prefill"
     restart: "on-failure"
     environment:
@@ -125,6 +125,30 @@ services:
       - "provisioning-api"
     networks:
       - "nubus-provisioning"
+  backup-consumer:
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:provisioning-ucs-dev
+    restart: "on-failure"
+    container_name: backup-consumer
+    command: >
+      backup_consumer
+      --provisioning-api-admin-user admin
+      --provisioning-api-admin-user-password @!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["PROVISIONING_API_ADMIN_PASSWORD"]);@!@
+      --nats-user "api"
+      --nats-password @!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
+      --target-nats "nats://nats:4222"
+      --provisioning-url https://@%@ldap/master@%@/univention/provisioning/
+      --stream-name "backup"
+    environment:
+      - PROVISIONING_API_USERNAME=admin
+      - PROVISIONING_API_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
+      - LOG_LEVEL=DEBUG
+      - PROVISIONING_API_BASE_URL="http://provisioning-api:7777"
+      - MAX_ACKNOWLEDGEMENT_RETRIES=5
+    volumes:
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      - /var/lib/univention-appcenter/apps/provisioning-service/conf/server_role.conf:/server_role.conf:ro
+    networks:
+      - nubus-provisioning
 
 networks:
   nubus-provisioning:
