@@ -135,4 +135,7 @@ class NatsKeyValueDB(KeyValueDB):
                 # update.operation is the type of operation that triggered this
                 if not update:
                     continue
-                await callback(update.key, None if update.operation in {KV_DEL, KV_PURGE} else update.value)
+                try:
+                    await callback(update.key, None if update.operation in {KV_DEL, KV_PURGE} else update.value)
+                except Exception as e:
+                    logger.error("Error occurred while processing subscription change. key=%r exc=%s", update.key, e)
