@@ -78,7 +78,6 @@ class NatsMessageQueue(MessageQueue):
 
     async def error_callback(self, e):
         logger.error("There was an error during the execution: %s", e)
-        raise (e)
 
     async def disconnected_callback(self):
         logger.debug("Disconnected to NATS")
@@ -326,4 +325,5 @@ class NatsMessageQueue(MessageQueue):
             raise ValueError(exc.description)
 
     async def purge_stream(self, stream: str, subject: str) -> None:
+        await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
         await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
