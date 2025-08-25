@@ -21,7 +21,7 @@ class DispatcherSettings(BaseSettings):
     # Nats: port
     nats_port: int
     # Maximum number of reconnect attempts to the NATS server
-    nats_max_reconnect_attempts: int
+    nats_max_reconnect_attempts: int = 2
 
     @property
     def nats_server(self) -> str:
