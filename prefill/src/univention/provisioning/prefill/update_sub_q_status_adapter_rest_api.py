@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import logging
+
 import aiohttp
 
-from univention.provisioning.models.subscription import FillQueueStatus, FillQueueStatusReport
+from univention.provisioning.models.subscription import FillQueueStatusReport
 
 from .update_sub_q_status_port import UpdateSubscriptionsQueueStatusPort
+
+logger = logging.getLogger(__name__)
 
 
 class SubscriptionsRestApiAdapter(UpdateSubscriptionsQueueStatusPort):
@@ -34,9 +38,16 @@ class SubscriptionsRestApiAdapter(UpdateSubscriptionsQueueStatusPort):
         if self._session:
             await self._session.close()
 
-    async def update_subscription_queue_status(self, name: str, queue_status: FillQueueStatus) -> None:
-        async with self._session.patch(
-            f"{self._url}/v1/subscriptions/{name}/prefill",
-            json=FillQueueStatusReport(status=queue_status.value).model_dump(),
-        ):
-            pass
+    async def update_subscription_queue_status(self, subscription_name, status):
+        try:
+            async with self._session.patch(
+                f"{self._url}/v1/subscriptions/{subscription_name}/prefill",
+                json=FillQueueStatusReport(status=status.value).model_dump(),
+            ) as response:
+                response.raise_for_status()
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                # Subscription doesn't exist anymore - mark message as processed
+                logger.warning(f"Subscription {subscription_name} not found, treating as processed")
+                return
+            raise
