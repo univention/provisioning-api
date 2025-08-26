@@ -326,4 +326,3 @@ class NatsMessageQueue(MessageQueue):
 
     async def purge_stream(self, stream: str, subject: str) -> None:
         await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
-        await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
