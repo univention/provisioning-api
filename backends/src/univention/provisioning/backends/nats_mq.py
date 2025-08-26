@@ -325,5 +325,8 @@ class NatsMessageQueue(MessageQueue):
             raise ValueError(exc.description)
 
     async def purge_stream(self, stream: str, subject: str) -> None:
-        await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
-        await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
+        try:
+            await self._js.purge_stream(NatsKeys.stream(stream), subject=subject)
+        except NotFoundError:
+            logger.warning("Couldn't purge stream. Stream %r not found", stream)
+            return
