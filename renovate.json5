@@ -25,6 +25,7 @@
     {
       matchPackageNames: [
         'gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base',
+        'gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python',
       ],
       versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-build\\.(?<build>\\d+)$',
     },
