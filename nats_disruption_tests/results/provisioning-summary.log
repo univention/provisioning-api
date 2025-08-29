@@ -1,0 +1,64 @@
+./nats_disruption_tests/results/dispatcher.errors.summary.log
+Primary issue in: backends/nats_mq.py   At line: 171
+
+ERROR DETAILS 💥 nats.js.errors.ServiceUnavailableError: nats: ServiceUnavailableError: code=None err_code=None description='None'
+./nats_disruption_tests/results/prefill.errors.summary.log
+Primary issue in: backends/nats_mq.py   At line: 104
+Primary issue in: backends/nats_mq.py   At line: 171
+Primary issue in: backends/nats_mq.py   At line: 278
+Primary issue in: backends/nats_mq.py   At line: 329
+Primary issue in: prefill/update_sub_q_status_adapter_rest_api.py   At line: 43
+
+ERROR DETAILS 💥 aiohttp.client_exceptions.ClientResponseError: 500, message='Internal Server Error', url='
+ERROR DETAILS 💥 nats.errors.TimeoutError: nats: timeout
+ERROR DETAILS 💥 nats.js.errors.NoStreamResponseError: nats: no response from stream
+ERROR DETAILS 💥 nats.js.errors.ServiceUnavailableError: nats: ServiceUnavailableError: code=None err_code=None description='None'
+./nats_disruption_tests/results/provisioning-summary.log
+dispatcher.errors.summary.log
+Primary issue in: backends/nats_mq.py   At line: 171
+
+ERROR DETAILS 💥 nats.js.errors.ServiceUnavailableError: nats: ServiceUnavailableError: code=None err_code=None description='None'
+
+prefill.errors.summary.log
+Primary issue in: backends/nats_mq.py   At line: 104
+Primary issue in: backends/nats_mq.py   At line: 171
+Primary issue in: backends/nats_mq.py   At line: 278 X Startup Crash OK
+Primary issue in: backends/nats_mq.py   At line: 329
+Primary issue in: prefill/update_sub_q_status_adapter_rest_api.py   At line: 43
+
+ERROR DETAILS 💥 aiohttp.client_exceptions.ClientResponseError: 500, message='Internal Server Error', url='
+ERROR DETAILS 💥 nats.errors.TimeoutError: nats: timeout
+ERROR DETAILS 💥 nats.js.errors.NoStreamResponseError: nats: no response from stream
+ERROR DETAILS 💥 nats.js.errors.ServiceUnavailableError: nats: ServiceUnavailableError: code=None err_code=None description='None'
+
+provisioning-summary.log
+udm-listener.errors.summary.log
+Primary issue in: backends/nats_mq.py   At line: 104
+
+ERROR DETAILS 💥 nats.errors.MaxPayloadError: nats: maximum payload exceeded
+udm-transformer.errors.summary.log
+Primary issue in: backends/nats_kv.py   At line: 44 X Startup Crash OK
+Primary issue in: backends/nats_kv.py   At line: 66
+Primary issue in: backends/nats_kv.py   At line: 68
+Primary issue in: backends/nats_kv.py   At line: 81
+Primary issue in: backends/nats_mq.py   At line: 171
+Primary issue in: backends/nats_mq.py   At line: 278 X Startup Crash OK
+
+ERROR DETAILS 💥 nats.errors.ConnectionClosedError: nats: connection closed
+ERROR DETAILS 💥 nats.errors.TimeoutError: nats: timeout
+ERROR DETAILS 💥 nats.js.errors.ServiceUnavailableError: nats: ServiceUnavailableError: code=None err_code=None description='None'
+./nats_disruption_tests/results/udm-listener.errors.summary.log
+Primary issue in: backends/nats_mq.py   At line: 104
+
+ERROR DETAILS 💥 nats.errors.MaxPayloadError: nats: maximum payload exceeded
+./nats_disruption_tests/results/udm-transformer.errors.summary.log
+Primary issue in: backends/nats_kv.py   At line: 44
+Primary issue in: backends/nats_kv.py   At line: 66
+Primary issue in: backends/nats_kv.py   At line: 68
+Primary issue in: backends/nats_kv.py   At line: 81
+Primary issue in: backends/nats_mq.py   At line: 171
+Primary issue in: backends/nats_mq.py   At line: 278
+
+ERROR DETAILS 💥 nats.errors.ConnectionClosedError: nats: connection closed
+ERROR DETAILS 💥 nats.errors.TimeoutError: nats: timeout
+ERROR DETAILS 💥 nats.js.errors.ServiceUnavailableError: nats: ServiceUnavailableError: code=None err_code=None description='None'
