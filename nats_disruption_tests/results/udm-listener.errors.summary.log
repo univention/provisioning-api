@@ -1,0 +1,3 @@
+Primary issue in: backends/nats_mq.py   At line: 104 
+
+ERROR DETAILS 💥 nats.errors.MaxPayloadError: nats: maximum payload exceeded
