@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.9](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.8...v0.60.9) (2025-09-01)
+
+
+### Bug Fixes
+
+* Update base image to version 5.2.2-build.20250821 ([27ea14e](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/27ea14e0ed6542cbb21026efbe4b25333a024350)), closes [univention/dev/internal/team-nubus#1385](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1385)
+
 ## [0.60.8](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.7...v0.60.8) (2025-08-22)
 
 
