@@ -1,8 +1,8 @@
 variables:
-  PRE_COMMIT_IMAGE: "gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/pre-commit:latest"
+  PRE_COMMIT_IMAGE_COMMIT_MSG: "gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/pre-commit:latest"
 
 .lint_commit_messages:
-  image: $PRE_COMMIT_IMAGE
+  image: $PRE_COMMIT_IMAGE_COMMIT_MSG
   rules:
     - if: $CI_MERGE_REQUEST_ID
   variables:
