@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.60.12](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.11...v0.60.12) (2025-09-03)
+
+
+### Bug Fixes
+
+* **dispatcher,prefill:** don't crash on subscription handling errors ([543ec48](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/543ec485b198ade071fd242cc20ff9a38f80ea8c)), closes [univention/dev/internal/team-nubus#1383](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1383)
+* **dispatcher,transformer,prefill:** reconnect to NATS on connection loss ([715dac9](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/715dac944fae6087fdd9ad9d7267e69998ee10c2)), closes [univention/dev/internal/team-nubus#1383](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1383)
+* **natsmq:** prevent crashing on purge of non-existent streams ([010179a](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/010179a5eecbf77ed89ebb7af5c5577a519b6a1e)), closes [univention/dev/internal/team-nubus#1383](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1383)
+* **prefill:** prevent crash when updating status of deleted subscription ([8899dbc](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/8899dbc4c424ae89b3e2fe7428bb2efe1f5f90fd)), closes [univention/dev/internal/team-nubus#1383](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1383)
+
 ## [0.60.11](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.10...v0.60.11) (2025-09-03)
 
 
