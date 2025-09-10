@@ -1,5 +1,5 @@
 variables:
-  EC2_TOOLS_IMAGE: "gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/ec2-tools:latest"
+  EC2_TOOLS_IMAGE: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/ec2-tools:latest"
 
 .run_openstack_cfg:
   image: $EC2_TOOLS_IMAGE

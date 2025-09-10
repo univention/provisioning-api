@@ -1,5 +1,5 @@
 variables:
-  PRE_COMMIT_IMAGE_COMMIT_MSG: "gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/pre-commit:latest"
+  PRE_COMMIT_IMAGE_COMMIT_MSG: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/pre-commit:latest"
 
 .lint_commit_messages:
   image: $PRE_COMMIT_IMAGE_COMMIT_MSG
@@ -35,7 +35,7 @@ variables:
     - cat "$MAIL_FILE" | mail -s "$SUBJECT" -r "$SENDER" "$RECIPIENT"
 
 .send_chat_message:
-  image: gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/pre-commit:latest # Contains curl and jq
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/pre-commit:latest # Contains curl and jq
   variables:
     BASE_URL: "https://chat.univention.de"
     DESTINATION: "@$GITLAB_USER_LOGIN"

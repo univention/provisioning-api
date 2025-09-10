@@ -21,7 +21,7 @@ spec:
 
 deb_build_git:
   stage: $[[ inputs.build_stage ]]
-  image: gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/deb-builder-$[[ inputs.ucs_base_version ]]:latest
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/deb-builder-$[[ inputs.ucs_base_version ]]:latest
   rules:
     - $[[ inputs.git_build_rules ]]
   script:
@@ -95,7 +95,7 @@ deb_repo_build:
 
 upload_from_git:
   stage: $[[ inputs.build_stage ]]
-  image: gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/app-release:latest
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/app-release:latest
   rules:
     - "$[[ inputs.git_build_rules ]]"
   needs:
@@ -111,7 +111,7 @@ upload_from_git:
 
 upload_from_build_system:
   stage: $[[ inputs.build_stage ]]
-  image: gitregistry.knut.univention.de/univention/dev/internal/ucsschool-ci-utils/python:latest
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/python:latest
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_REF_PROTECTED == "true"
