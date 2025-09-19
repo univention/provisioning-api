@@ -481,6 +481,8 @@ lifecycleHooks: {}
 #  Configure extra options for containers probes.
 livenessProbe:
   dispatcher:
+    # -- Enable liveness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until LivenessProbe is executed.
@@ -498,6 +500,8 @@ livenessProbe:
         - |
           exit 0
   udmTransformer:
+    # -- Enable liveness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until LivenessProbe is executed.
@@ -515,6 +519,8 @@ livenessProbe:
         - |
           exit 0
   prefill:
+    # -- Enable liveness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until LivenessProbe is executed.
@@ -532,6 +538,8 @@ livenessProbe:
         - |
           exit 0
   api:
+    # -- Enable liveness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until LivenessProbe is executed.
@@ -581,6 +589,8 @@ podSecurityContext:
 #  Configure extra options for containers probes.
 readinessProbe:
   dispatcher:
+    # -- Enable readiness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until ReadinessProbe is executed.
@@ -598,6 +608,8 @@ readinessProbe:
         - |
           exit 0
   udmTransformer:
+    # -- Enable readiness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until ReadinessProbe is executed.
@@ -615,6 +627,8 @@ readinessProbe:
         - |
           exit 0
   prefill:
+    # -- Enable readiness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until ReadinessProbe is executed.
@@ -632,6 +646,8 @@ readinessProbe:
         - |
           exit 0
   api:
+    # -- Enable readiness probe.
+    enabled: true
     # -- Number of failed executions until container is terminated.
     failureThreshold: 10
     # -- Delay after container start until ReadinessProbe is executed.
@@ -747,6 +763,8 @@ serviceAccount:
 #  Configure extra options for containers probes.
 startupProbe:
   dispatcher:
+    # -- Enable startup probe.
+    enabled: true
     # -- Delay after container start until StartupProbe is executed.
     initialDelaySeconds: 15
     # -- Number of failed executions until container is terminated.
@@ -764,6 +782,8 @@ startupProbe:
         - |
           exit 0
   udmTransformer:
+    # -- Enable startup probe.
+    enabled: true
     # -- Delay after container start until StartupProbe is executed.
     initialDelaySeconds: 15
     # -- Number of failed executions until container is terminated.
@@ -781,6 +801,8 @@ startupProbe:
         - |
           exit 0
   prefill:
+    # -- Enable startup probe.
+    enabled: true
     # -- Delay after container start until StartupProbe is executed.
     initialDelaySeconds: 15
     # -- Number of failed executions until container is terminated.
@@ -798,6 +820,8 @@ startupProbe:
         - |
           exit 0
   api:
+    # -- Enable startup probe.
+    enabled: true
     # -- Delay after container start until StartupProbe is executed.
     initialDelaySeconds: 15
     # -- Number of failed executions until container is terminated.

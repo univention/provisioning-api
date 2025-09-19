@@ -99,12 +99,14 @@ A Helm Chart that deploys the provisioning services
 | istio.virtualService.pathOverrides | list | `[]` | Allows to inject deployment specific path configuration which is configured before the elements from `paths` below. This allows to redirect some paths to other services, e.g. in order to supply a file `custom.css`. |
 | istio.virtualService.paths | list | `[]` | The paths configuration. The default only grabs what is known to be part of the frontend.  `pathOverrides` is provided as a workaround so that specific sub-paths can be redirected to other services. |
 | lifecycleHooks | object | `{}` | Lifecycle to automate configuration before or after startup. |
+| livenessProbe.api.enabled | bool | `true` | Enable liveness probe. |
 | livenessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
 | livenessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
 | livenessProbe.api.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | livenessProbe.api.timeoutSeconds | int | `5` | Timeout for command return. |
+| livenessProbe.dispatcher.enabled | bool | `true` | Enable liveness probe. |
 | livenessProbe.dispatcher.exec.command[0] | string | `"sh"` |  |
 | livenessProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.dispatcher.exec.command[2] | string | `"exit 0\n"` |  |
@@ -113,6 +115,7 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.dispatcher.periodSeconds | int | `20` | Time between probe executions. |
 | livenessProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
+| livenessProbe.prefill.enabled | bool | `true` | Enable liveness probe. |
 | livenessProbe.prefill.exec.command[0] | string | `"sh"` |  |
 | livenessProbe.prefill.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.prefill.exec.command[2] | string | `"exit 0\n"` |  |
@@ -121,6 +124,7 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | livenessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
+| livenessProbe.udmTransformer.enabled | bool | `true` | Enable liveness probe. |
 | livenessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
 | livenessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
@@ -167,12 +171,14 @@ A Helm Chart that deploys the provisioning services
 | prefill.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | prefill.udm.auth.existingSecret.name | string | `nil` |  |
 | prefill.udm.auth.password | string | `nil` |  |
+| readinessProbe.api.enabled | bool | `true` | Enable readiness probe. |
 | readinessProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.api.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.api.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.api.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | readinessProbe.api.timeoutSeconds | int | `5` | Timeout for command return. |
+| readinessProbe.dispatcher.enabled | bool | `true` | Enable readiness probe. |
 | readinessProbe.dispatcher.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.dispatcher.exec.command[2] | string | `"exit 0\n"` |  |
@@ -181,6 +187,7 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.dispatcher.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
+| readinessProbe.prefill.enabled | bool | `true` | Enable readiness probe. |
 | readinessProbe.prefill.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.prefill.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.prefill.exec.command[2] | string | `"exit 0\n"` |  |
@@ -189,6 +196,7 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
+| readinessProbe.udmTransformer.enabled | bool | `true` | Enable readiness probe. |
 | readinessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
@@ -244,12 +252,14 @@ A Helm Chart that deploys the provisioning services
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.labels | object | `{}` | Additional custom labels for the ServiceAccount. |
 | serviceAccount.name | string | `""` |  |
+| startupProbe.api.enabled | bool | `true` | Enable startup probe. |
 | startupProbe.api.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | startupProbe.api.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
 | startupProbe.api.periodSeconds | int | `20` | Time between probe executions. |
 | startupProbe.api.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.api.tcpSocket | object | `{"port":7777}` | Timeout for command return. |
 | startupProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
+| startupProbe.dispatcher.enabled | bool | `true` | Enable startup probe. |
 | startupProbe.dispatcher.exec.command[0] | string | `"sh"` |  |
 | startupProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
 | startupProbe.dispatcher.exec.command[2] | string | `"exit 0\n"` |  |
@@ -258,6 +268,7 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.dispatcher.periodSeconds | int | `20` | Time between probe executions. |
 | startupProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
+| startupProbe.prefill.enabled | bool | `true` | Enable startup probe. |
 | startupProbe.prefill.exec.command[0] | string | `"sh"` |  |
 | startupProbe.prefill.exec.command[1] | string | `"-c"` |  |
 | startupProbe.prefill.exec.command[2] | string | `"exit 0\n"` |  |
@@ -266,6 +277,7 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
 | startupProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
+| startupProbe.udmTransformer.enabled | bool | `true` | Enable startup probe. |
 | startupProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
 | startupProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
 | startupProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |

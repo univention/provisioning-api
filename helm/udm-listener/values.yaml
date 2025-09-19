@@ -214,6 +214,8 @@ nats:
         password: null
 
 livenessProbe:
+  # -- Enable liveness probe.
+  enabled: true
   # -- Number of failed executions until container is terminated.
   failureThreshold: 10
   # -- Delay after container start until LivenessProbe is executed.
@@ -232,6 +234,8 @@ livenessProbe:
         exit 0
 
 readinessProbe:
+  # -- Enable readiness probe.
+  enabled: true
   # -- Number of failed executions until container is terminated.
   failureThreshold: 10
   # -- Delay after container start until ReadinessProbe is executed.
@@ -250,6 +254,8 @@ readinessProbe:
         exit 0
 
 startupProbe:
+  # -- Enable startup probe.
+  enabled: true
   # -- Delay after container start until StartupProbe is executed.
   initialDelaySeconds: 15
   # -- Number of failed executions until container is terminated.

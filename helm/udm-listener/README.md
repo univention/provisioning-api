@@ -50,6 +50,7 @@ A Helm chart for the Univention Portal Provisioning API
 | image.tag | string | `"0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"` |  |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ldap | object | `{"auth":{"bindDn":"cn=admin,{{ include \"udm-listener.ldapBaseDn\" . }}","existingSecret":{"keyMapping":{"password":null},"name":null},"password":null},"tlsSecret":{"caCertKey":"ca.crt","name":""}}` | LDAP client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
+| livenessProbe.enabled | bool | `true` | Enable liveness probe. |
 | livenessProbe.exec.command[0] | string | `"sh"` |  |
 | livenessProbe.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.exec.command[2] | string | `"exit 0\n"` |  |
@@ -69,6 +70,7 @@ A Helm chart for the Univention Portal Provisioning API
 | podSecurityContext.fsGroup | int | `65534` | If specified, all processes of the container are also part of the supplementary group. |
 | podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Change ownership and permission of the volume before being exposed inside a Pod. |
 | podSecurityContext.sysctls | list | `[]` | Allow binding to ports below 1024 without root access. |
+| readinessProbe.enabled | bool | `true` | Enable readiness probe. |
 | readinessProbe.exec.command[0] | string | `"sh"` |  |
 | readinessProbe.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.exec.command[2] | string | `"exit 0\n"` |  |
@@ -88,6 +90,7 @@ A Helm chart for the Univention Portal Provisioning API
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.labels | object | `{}` | Additional custom labels for the ServiceAccount. |
 | serviceAccount.name | string | `""` |  |
+| startupProbe.enabled | bool | `true` | Enable startup probe. |
 | startupProbe.exec.command[0] | string | `"sh"` |  |
 | startupProbe.exec.command[1] | string | `"-c"` |  |
 | startupProbe.exec.command[2] | string | `"exit 0\n"` |  |

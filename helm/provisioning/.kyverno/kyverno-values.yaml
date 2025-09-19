@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024-2025 Univention GmbH
+---
+replicaCount:
+  dispatcher: 42
+  udmTransformer: 42
+  prefill: 42
+  api: 42

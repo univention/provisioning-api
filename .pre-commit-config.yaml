@@ -89,9 +89,9 @@ repos:
         name: "Check or add license headers to files"
         exclude: '\.config/copier-answers\..*\.yaml'
 
-  - repo: "https://git.knut.univention.de/univention/customers/dataport/upx/kyverno-test-pre-commit"
-    rev: "v0.2.0"
+  - repo: "https://git.knut.univention.de/univention/dev/tooling/kyverno-test-pre-commit/"
+    rev: "v0.5.0"
     hooks:
-      - id: kyverno-test
+      - id: "kyverno-test"
 
 ...
