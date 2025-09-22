@@ -24,6 +24,21 @@ These template definitions are only used in this chart.
     {{ printf "%s-headless" (include "common.names.fullname" .) }}
 {{- end -}}
 
+{{- define "nats.env-passwords" -}}
+- name: "ADMINUSER"
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "nubus-common.secrets.name" (dict "existingSecret" $.Values.config.createUsers.adminUser.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
+      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $.Values.config.createUsers.adminUser.existingSecret "key" "password") | quote }}
+{{- range $passwordEnvVar, $config := omit .Values.config.createUsers "adminUser" }}
+- name: {{ $passwordEnvVar | upper }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "nubus-common.secrets.name" (dict "existingSecret" $config.existingSecret "defaultNameSuffix" "admin" "context" $) | quote }}
+      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $config.existingSecret "key" "password") | quote }}
+{{- end -}}
+{{- end -}}
+
 {{- define "nats.authorization" -}}
 {{- if or .Values.config.authorization.token .Values.config.createUsers -}}
 authorization {
@@ -32,10 +47,10 @@ authorization {
   {{- end }}
   {{- if .Values.config.createUsers }}
   users: [
-    {{- range $_, $config := .Values.config.createUsers }}
+    {{- range $passwordEnvVar, $config := .Values.config.createUsers }}
     {
-      user: {{ tpl $config.user $ }}
-      password: {{ tpl $config.password $ }}
+      user: {{ tpl $config.auth.username $ }}
+      password: ${{ $passwordEnvVar | upper }}
       {{- if $config.permissions }}
       permissions: {
         {{- if $config.permissions.publish }}

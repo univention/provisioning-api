@@ -423,14 +423,40 @@ config:
     # Example:
     # token: "$NATS_TOKEN"
     token: ""
+  # -- Create additional nats users
   # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users
+  # permissions, auth.username and auth.existingSecret.name are required.
+  # Example:
+  # createUsers:
+  #   normalUser:
+  #     permissions:
+  #       publish: ">"
+  #       subscribe: ">"
+  #     auth:
+  #       username: "admin"
+  #       existingSecret:
+  #         name: null
+  #         keyMapping:
+  #           password: null
   createUsers:
     adminUser:
-      user: "admin"
-      password: "$NATS_PASSWORD"
       permissions:
         publish: ">"
         subscribe: ">"
+      auth:
+        # -- The nats admin username
+        username: "admin"
+        # -- The password used to authenticate with nats database.
+        # Either this value or an existing Secret has to be specified.
+        password: null
+        existingSecret:
+          # -- The name of an existing Secret to use for retrieving the password
+          # for the nats admin account.
+          #
+          # "config.createUsers.adminUser.auth.password" will be ignored if this value is set.
+          name: null
+          keyMapping:
+            password: null
 
   # Ref: https://docs.nats.io/running-a-nats-service/configuration
   # Example:
