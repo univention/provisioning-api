@@ -1,25 +1,20 @@
-
-# SPDX-FileCopyrightText: 2024 Univention GmbH
 # SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 - 2025 Univention GmbH
 
-import os.path
+from pathlib import Path
 
 import pytest
 
-
-def pytest_addoption(parser):
-    parser.addoption("--chart-path", help="Path of the Helm chart to test")
+base_dir = (Path(__file__).parent / "../").resolve()
 
 
-@pytest.fixture()
-def chart_path(pytestconfig):
-    """
-    Path to the Helm chart which shall be tested.
-    """
-    chart_path = pytestconfig.option.chart_path
-    if not chart_path:
-        tests_path = os.path.dirname(os.path.abspath(__file__))
-        chart_path = os.path.normpath(
-            os.path.join(tests_path, "../helm/nats")
-        )
+@pytest.fixture
+def helm_default_values(request):
+    default_values = [base_dir / "helm/nats/linter_values.yaml"]
+    return default_values
+
+
+@pytest.fixture
+def chart_default_path():
+    chart_path = base_dir / "helm/nats"
     return chart_path
