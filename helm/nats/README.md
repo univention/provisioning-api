@@ -185,40 +185,57 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.password</td>
-			<td>string</td>
+			<td>config.createUsers</td>
+			<td>object</td>
 			<td><pre lang="json">
-"$NATS_PASSWORD"
+{
+  "adminUser": {
+    "auth": {
+      "existingSecret": {
+        "keyMapping": {
+          "password": null
+        },
+        "name": null
+      },
+      "password": null,
+      "username": "admin"
+    },
+    "permissions": {
+      "publish": "\u003e",
+      "subscribe": "\u003e"
+    }
+  }
+}
 </pre>
 </td>
-			<td></td>
+			<td>Create additional nats users Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users permissions, auth.username and auth.existingSecret.name are required. Example: createUsers:   normalUser:     permissions:       publish: ">"       subscribe: ">"     auth:       username: "admin"       existingSecret:         name: null         keyMapping:           password: null</td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.permissions.publish</td>
+			<td>config.createUsers.adminUser.auth.existingSecret.name</td>
 			<td>string</td>
 			<td><pre lang="json">
-"\u003e"
+null
 </pre>
 </td>
-			<td></td>
+			<td>The name of an existing Secret to use for retrieving the password for the nats admin account.  "config.createUsers.adminUser.auth.password" will be ignored if this value is set.</td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.permissions.subscribe</td>
+			<td>config.createUsers.adminUser.auth.password</td>
 			<td>string</td>
 			<td><pre lang="json">
-"\u003e"
+null
 </pre>
 </td>
-			<td></td>
+			<td>The password used to authenticate with nats database. Either this value or an existing Secret has to be specified.</td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.user</td>
+			<td>config.createUsers.adminUser.auth.username</td>
 			<td>string</td>
 			<td><pre lang="json">
 "admin"
 </pre>
 </td>
-			<td></td>
+			<td>The nats admin username</td>
 		</tr>
 		<tr>
 			<td>config.extraConfig</td>

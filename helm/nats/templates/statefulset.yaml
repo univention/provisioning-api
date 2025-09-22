@@ -83,6 +83,7 @@ spec:
           image: "{{ coalesce .Values.nats.image.registry .Values.global.imageRegistry }}/{{ .Values.nats.image.repository }}:{{ .Values.nats.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.nats.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
+            {{- include "nats.env-passwords" . | nindent 12 }}
             - name: SERVER_NAME
               valueFrom:
                 fieldRef:
@@ -210,7 +211,12 @@ spec:
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.namespace
+            - name: "ADMINUSER"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.existingSecret "key" "password") | quote }}
+                fieldPath: metadata.namespace
           {{- range .Values.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}
