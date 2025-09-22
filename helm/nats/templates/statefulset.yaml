@@ -9,13 +9,11 @@ metadata:
   name: {{ include "common.names.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
-    {{- include "common.labels.standard" . | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
-  {{- end }}
+    {{- include "common.labels.standard" ( dict "customLabels" .Values.additionalLabels "context" . ) | nindent 4 }}
+  {{- include "nubus-common.annotations.render" ( dict
+    "values" ( list .Values.additionalAnnotations )
+    "context" . )
+    | nindent 2 }}
 spec:
   serviceName: "{{ printf "%s-headless" (include "common.names.fullname" .) }}"
   replicas: {{ .Values.config.cluster.replicas }}
@@ -83,7 +81,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.nats.image.registry .Values.global.imageRegistry }}/{{ .Values.nats.image.repository }}:{{ .Values.nats.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.nats.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.nats.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
             - name: SERVER_NAME
               valueFrom:
@@ -173,7 +171,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.reloader.image.registry .Values.global.imageRegistry }}/{{ .Values.reloader.image.repository }}:{{ .Values.reloader.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.reloader.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.reloader.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
             - name: SERVER_NAME
               valueFrom:
@@ -202,7 +200,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.natsBox.image.registry .Values.global.imageRegistry }}/{{ .Values.natsBox.image.repository }}:{{ .Values.natsBox.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.natsBox.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.natsBox.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           workingDir: /home/nats
           env:
             - name: SERVER_NAME
