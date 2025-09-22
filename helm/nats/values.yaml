@@ -27,7 +27,7 @@ global:
   #             digest, and uses that image to launch the container.
   # "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the
   #            kubelet attempts to start the container; otherwise, startup fails.
-  imagePullPolicy: "IfNotPresent"
+  imagePullPolicy: null
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}
@@ -100,9 +100,6 @@ extraVolumeMounts: []
 # imagePullSecrets:
 #   - "docker-registry"
 imagePullSecrets: []
-
-# -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-imagePullPolicy: "IfNotPresent"
 
 # -- Lifecycle to automate configuration before or after startup.
 lifecycleHooks:
@@ -349,7 +346,7 @@ updateStrategy:
 nats:
   image:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-    imagePullPolicy: "IfNotPresent"
+    pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "library/nats"
@@ -360,7 +357,7 @@ reloader:
   enabled: true
   image:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-    imagePullPolicy: "IfNotPresent"
+    pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "natsio/nats-server-config-reloader"
@@ -376,7 +373,7 @@ natsBox:
   enabled: true
   image:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-    imagePullPolicy: "IfNotPresent"
+    pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "natsio/nats-box"

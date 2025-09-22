@@ -60,7 +60,7 @@ nats consumer next teststream testconsumer
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.12.x |
+| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.25.x |
 
 ## Values
 
@@ -434,7 +434,7 @@ true
 			<td>global.imagePullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails.</td>
@@ -465,15 +465,6 @@ false
 </pre>
 </td>
 			<td>Indicates wether this chart is part of a Nubus deployment.</td>
-		</tr>
-		<tr>
-			<td>imagePullPolicy</td>
-			<td>string</td>
-			<td><pre lang="json">
-"IfNotPresent"
-</pre>
-</td>
-			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
 		</tr>
 		<tr>
 			<td>imagePullSecrets</td>
@@ -584,10 +575,10 @@ false
 			<td>String to partially override release name.</td>
 		</tr>
 		<tr>
-			<td>nats.image.imagePullPolicy</td>
+			<td>nats.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
@@ -629,10 +620,10 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>natsBox.image.imagePullPolicy</td>
+			<td>natsBox.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
@@ -933,10 +924,10 @@ true
 			<td>Enable the config reloader</td>
 		</tr>
 		<tr>
-			<td>reloader.image.imagePullPolicy</td>
+			<td>reloader.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
