@@ -70,7 +70,7 @@ spec:
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       {{- if .Values.serviceAccount.create }}
-      serviceAccountName: {{ include "nats.serviceAccountName" . }}
+      serviceAccountName: {{ coalesce .Values.serviceAccount.name (include "common.names.fullname" .) }}
       {{- end }}
       {{- if .Values.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
@@ -129,7 +129,7 @@ spec:
             - name: ROUTES
               value: {{ "" }}
           {{- range $i, $_ := until (int .Values.config.cluster.replicas) }}
-            {{- printf "nats://%s%s-%d.%s:%d," $auth (include "nats.podNamePrefix" $) $i (include "nats.headlessServiceName" $) 6222 }}
+            {{- printf "nats://%s%s-%d.%s:%d," $auth (include "common.names.fullname" $) $i (printf "%s-headless" (include "common.names.fullname" $)) 6222 }}
           {{- end }}
           {{- end }}
           args:
