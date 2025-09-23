@@ -28,14 +28,14 @@ These template definitions are only used in this chart.
 - name: "ADMINUSER"
   valueFrom:
     secretKeyRef:
-      name: {{ include "nubus-common.secrets.name" (dict "existingSecret" $.Values.config.createUsers.adminUser.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
-      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $.Values.config.createUsers.adminUser.existingSecret "key" "password") | quote }}
+      name: {{ include "nubus-common.secrets.name" (dict "existingSecret" $.Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
+      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $.Values.config.createUsers.adminUser.auth.existingSecret "key" "password") | quote }}
 {{- range $passwordEnvVar, $config := omit .Values.config.createUsers "adminUser" }}
 - name: {{ $passwordEnvVar | upper }}
   valueFrom:
     secretKeyRef:
-      name: {{ include "nubus-common.secrets.name" (dict "existingSecret" $config.existingSecret "defaultNameSuffix" "admin" "context" $) | quote }}
-      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $config.existingSecret "key" "password") | quote }}
+      name: {{ required (printf "config.createUsers.%s.auth.existingSecret.name is required" $passwordEnvVar ) ($config.auth.existingSecret).name | quote }}
+      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $config.auth.existingSecret "key" "password") | quote }}
 {{- end -}}
 {{- end -}}
 
@@ -49,7 +49,7 @@ authorization {
   users: [
     {{- range $passwordEnvVar, $config := .Values.config.createUsers }}
     {
-      user: {{ tpl $config.auth.username $ }}
+      user: {{ tpl (required (printf "config.createUsers.%s.auth.username is required" $passwordEnvVar ) $config.auth.username) $ }}
       password: ${{ $passwordEnvVar | upper }}
       {{- if $config.permissions }}
       permissions: {

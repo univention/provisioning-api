@@ -208,7 +208,7 @@ false
 }
 </pre>
 </td>
-			<td>Create additional nats users Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users permissions, auth.username and auth.existingSecret.name are required. Example: createUsers:   normalUser:     permissions:       publish: ">"       subscribe: ">"     auth:       username: "admin"       existingSecret:         name: null         keyMapping:           password: null</td>
+			<td>Create additional nats users Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users permissions, auth.username and auth.existingSecret.name are required. Example: createUsers:   normalUser:     permissions:       publish: '>'       subscribe: '>'     auth:       username: normal-user       existingSecret:         name: "your-secret-name"         keyMapping:           password: "your-custom-secret-key"</td>
 		</tr>
 		<tr>
 			<td>config.createUsers.adminUser.auth.existingSecret.name</td>

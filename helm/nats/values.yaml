@@ -430,14 +430,14 @@ config:
   # createUsers:
   #   normalUser:
   #     permissions:
-  #       publish: ">"
-  #       subscribe: ">"
+  #       publish: '>'
+  #       subscribe: '>'
   #     auth:
-  #       username: "admin"
+  #       username: normal-user
   #       existingSecret:
-  #         name: null
+  #         name: "your-secret-name"
   #         keyMapping:
-  #           password: null
+  #           password: "your-custom-secret-key"
   createUsers:
     adminUser:
       permissions:
