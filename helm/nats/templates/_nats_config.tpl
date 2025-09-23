@@ -6,23 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 {{- /*
 These template definitions are only used in this chart.
 */}}
-{{/*
- Create the name of the service account to use
- */}}
-{{- define "nats.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
 
-{{- define "nats.podNamePrefix" -}}
-    {{ include "common.names.fullname" . }}
-{{- end -}}
-{{- define "nats.headlessServiceName" -}}
-    {{ printf "%s-headless" (include "common.names.fullname" .) }}
-{{- end -}}
 
 {{- define "nats.env-passwords" -}}
 - name: "ADMINUSER"
@@ -49,7 +33,7 @@ authorization {
   users: [
     {{- range $passwordEnvVar, $config := .Values.config.createUsers }}
     {
-      user: {{ tpl (required (printf "config.createUsers.%s.auth.username is required" $passwordEnvVar ) $config.auth.username) $ }}
+      user: {{ tpl (required (printf "config.createUsers.%s.auth.username is required" $passwordEnvVar ) ($config.auth).username) $ }}
       password: ${{ $passwordEnvVar | upper }}
       {{- if $config.permissions }}
       permissions: {
