@@ -17,6 +17,10 @@ class TestNormalUserNatsConfig(BaseTest, SecretUsageViaEnv):
     env_password = "NORMALUSER"
     sub_path_env_password = "env[?@name=='NORMALUSER']"
 
+    def get_nats_conf(self, result):
+        config_map = result.get_resource(kind="ConfigMap", name=self.config_map_name)
+        return config_map["data"]["nats.conf"]
+
     def test_user_in_nats_conf(self, chart):
         values = self.load_and_map(
             """
@@ -26,8 +30,7 @@ class TestNormalUserNatsConfig(BaseTest, SecretUsageViaEnv):
                 name: "stub-secret-name"
             """)
         result = chart.helm_template(values)
-        config_map = result.get_resource(kind="ConfigMap", name=self.config_map_name)
-        config = config_map["data"]["nats.conf"]
+        config = self.get_nats_conf(result)
         assert f"password: ${self.env_password}" in config
 
     def test_auth_existing_secret_uses_password(self, chart):
@@ -86,3 +89,32 @@ class TestNormalUserNatsConfig(BaseTest, SecretUsageViaEnv):
         with pytest.raises(subprocess.CalledProcessError) as error:
             chart.helm_template(values)
         assert "auth.username is required" in error.value.stderr
+
+    def test_auth_existing_secret_is_templated(self, chart):
+        values = self.load_and_map(
+            """
+            global:
+              test: "global-stub-value"
+            auth:
+              username: "normal-user"
+              existingSecret:
+                name: "{{ .Values.global.test | quote }}"
+
+            """)
+        result = chart.helm_template(values)
+        self.assert_correct_secret_usage(result, name="global-stub-value")
+
+    def test_auth_username_is_templated(self, chart):
+        values = self.load_and_map(
+            """
+            global:
+              test: "global-stub-value"
+            auth:
+              username: "{{ .Values.global.test | quote }}"
+              existingSecret:
+                name: "stub-secret-name"
+
+            """)
+        result = chart.helm_template(values)
+        config = self.get_nats_conf(result)
+        assert 'user: "global-stub-value"' in config
