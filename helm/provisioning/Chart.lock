@@ -3,7 +3,7 @@ dependencies:
   repository: oci://artifacts.software-univention.de/nubus/charts
   version: 0.21.1
 - name: nats
-  repository: oci://artifacts.software-univention.de/nubus-dev/charts
-  version: 0.4.3
-digest: sha256:fa23a67da8c2de7c52036468f94e52d2ba6cf7c787de04bded0ad4cfb11ac0fd
-generated: "2025-08-14T08:15:39.975914856+02:00"
+  repository: oci://artifacts.software-univention.de/nubus/charts
+  version: 0.5.0
+digest: sha256:1b41808802e70d5baa4e64079b36d73759f01415b26a26dff7900e76c99e201a
+generated: "2025-10-13T11:32:46.915815533+02:00"
