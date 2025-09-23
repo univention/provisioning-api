@@ -76,7 +76,7 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       containers:
-        - name: "nats"
+        - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
@@ -211,12 +211,14 @@ spec:
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
-            - name: "ADMINUSER"
+                  fieldPath: metadata.namespace
+            - name: "NATS_USER"
+              value: {{ .Values.config.createUsers.adminUser.auth.username | quote }}
+            - name: "NATS_PASSWORD"
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.existingSecret "key" "password") | quote }}
-                fieldPath: metadata.namespace
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password") | quote }}
           {{- range .Values.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}
