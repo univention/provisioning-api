@@ -1,21 +1,23 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
-from univention.testing.helm.client.nats import (
-    AuthPassword,
-    SecretUsageViaEnv,
-)
+from univention.testing.helm.auth_flavors.password_usage import AuthPasswordUsageViaEnv
+from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGenerationOwner
 
 
-class TestAuthPassword(SecretUsageViaEnv, AuthPassword):
-    is_secret_owner = True
+class Config:
     workload_name = "release-name-provisioning-udm-transformer"
     secret_name = "release-name-provisioning-udm-transformer-nats"
 
     prefix_mapping = {
-        "udmTransformer.nats": "nats",
+        "udmTransformer.nats.auth": "auth",
     }
+    sub_path_env_password = "env[?@name=='NATS_PASSWORD']"
+    derived_password = "9485f7aed96052a6819688dab80adbd4bc67ff64"
 
 
-class TestWaitForNatsAuthPassword(TestAuthPassword):
+class TestAuth(Config, AuthSecretGenerationOwner, AuthPasswordUsageViaEnv): ...
+
+
+class TestWaitForNatsAuthPassword(Config, AuthPasswordUsageViaEnv):
     path_container = "spec.template.spec.initContainers[?@.name=='wait-for-nats']"

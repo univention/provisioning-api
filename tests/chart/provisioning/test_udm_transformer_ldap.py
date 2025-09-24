@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
-from univention.testing.helm.client.ldap import Auth, SecretViaEnv
+from univention.testing.helm.auth_flavors.password_usage import AuthPasswordUsageViaEnv
+from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGenerationUser
 
 
-class TestLdapClient(SecretViaEnv, Auth):
+class TestAuth(AuthSecretGenerationUser, AuthPasswordUsageViaEnv):
     config_map_name = "release-name-provisioning-udm-transformer"
     secret_name = "release-name-provisioning-udm-transformer-ldap"
     workload_name = "release-name-provisioning-udm-transformer"
@@ -14,5 +15,5 @@ class TestLdapClient(SecretViaEnv, Auth):
     sub_path_env_password = "env[?@.name=='LDAP_BIND_PW']"
 
     prefix_mapping = {
-        "udmTransformer.ldap": "ldap",
+        "udmTransformer.ldap.auth": "auth",
     }
