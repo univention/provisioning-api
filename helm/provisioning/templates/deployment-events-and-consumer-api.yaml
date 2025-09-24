@@ -145,9 +145,15 @@ spec:
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.api "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.api "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.api "context" .) | nindent 12 }}
+          {{- if .Values.livenessProbe.api.enabled }}
+          livenessProbe: {{- omit .Values.livenessProbe.api "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.api.enabled }}
+          readinessProbe: {{- omit .Values.readinessProbe.api "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.startupProbe.api.enabled }}
+          startupProbe: {{- omit .Values.startupProbe.api "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           ports:
             {{- range $key, $value := .Values.service.ports }}
             - name: {{ $key }}

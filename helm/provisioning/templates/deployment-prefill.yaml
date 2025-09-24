@@ -140,9 +140,15 @@ spec:
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.prefill "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.prefill "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.prefill "context" .) | nindent 12 }}
+          {{- if .Values.livenessProbe.prefill.enabled }}
+          livenessProbe: {{- omit .Values.livenessProbe.prefill "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.prefill.enabled }}
+          readinessProbe: {{- omit .Values.readinessProbe.prefill "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.startupProbe.prefill.enabled }}
+          startupProbe: {{- omit .Values.startupProbe.prefill "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           {{- if .Values.resources.prefill }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.prefill "context" .) | nindent 12 }}
           {{- end }}
