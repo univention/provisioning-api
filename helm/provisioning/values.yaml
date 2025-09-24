@@ -44,6 +44,7 @@ api:
     repository: "nubus-dev/images/provisioning-events-and-consumer-api"
     tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
   # If specified environment variables will be set on the container
+  # Could be deduplicated.
   nats:
     auth:
       password: null
@@ -289,55 +290,55 @@ nats:
       enabled: true
     createUsers:
       provisioningApi:
-        user: "api"
-        password: "$NATS_PROVISIONING_API_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
+        auth:
+          username: "api"
+          existingSecret:
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "api-nats" "context" .) | quote }}'
+            # Make this not necessary!
+            keyMapping:
+              password:
       dispatcher:
-        user: "dispatcher"
+        username: "dispatcher"
         password: "$NATS_DISPATCHER_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
+        auth:
+          username: "dispatcher"
+          existingSecret:
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "dispatcher-nats" "context" .) | quote }}'
+            # Make this not necessary!
+            keyMapping:
+              password:
       udmTransformer:
-        user: "udmtransformer"
+        username: "udmtransformer"
         password: "$NATS_UDM_TRANSFORMER_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
+        auth:
+          username: "udmtransfrormer"
+          existingSecret:
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "udm-transfrormer-nats" "context" .) | quote }}'
+            # Make this not necessary!
+            keyMapping:
+              password:
       prefill:
-        user: "prefill"
+        username: "prefill"
         password: "$NATS_PREFILL_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
-  extraEnvVars:
-    - name: NATS_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_PROVISIONING_API_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_DISPATCHER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_UDM_TRANSFORMER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_PREFILL_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
+        auth:
+          username: "prefill"
+          existingSecret:
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "prefill-nats" "context" .) | quote }}'
+            # Make this not necessary!
+            keyMapping:
+              password:
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}

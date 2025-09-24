@@ -8,6 +8,7 @@ from univention.testing.helm.client.nats import (
 
 
 class TestAuthPassword(SecretUsageViaEnv, AuthPassword):
+    is_secret_owner = True
     workload_name = "release-name-provisioning-api"
     secret_name = "release-name-provisioning-api-nats"
 

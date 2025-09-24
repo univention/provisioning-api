@@ -10,7 +10,6 @@ replicaCount:
   api: 42
 
 nats:
-  bundled: true
   config:
     cluster:
       replicas: 42
