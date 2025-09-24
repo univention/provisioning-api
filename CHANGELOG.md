@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.61.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.12...v0.61.0) (2025-09-24)
+
+
+### Features
+
+* support disabling probes and omit 'enabled' field ([6f836db](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/6f836db24506654bcc22491061ffd8aa79c498e2)), closes [univention/dev/internal/team-nubus#1426](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1426)
+
 ## [0.60.12](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.11...v0.60.12) (2025-09-03)
 
 
