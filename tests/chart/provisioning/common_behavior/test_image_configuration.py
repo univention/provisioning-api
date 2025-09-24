@@ -29,5 +29,6 @@ class TestImageConfiguration(ImageConfiguration):
         }
         global_ = values.setdefault("global", {})
         global_["systemExtensions"] = [stub_extension]
+        values.setdefault("nats", {})["bundled"] = False
 
         return values

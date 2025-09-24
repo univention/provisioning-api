@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+---
+imagePullSecrets:
+  - "kyverno-test"
+replicaCount:
+  dispatcher: 42
+  udmTransformer: 42
+  prefill: 42
+  api: 42
+
+nats:
+  config:
+    cluster:
+      replicas: 42
+
+global:
+  imageRegistry: "my_private_registry.domain.tld"
+  imagePullSecrets:
+    - "kyverno-test"
+  imagePullPolicy: "kyverno"
+persistence:
+  storageClassNames:
+    RWX: "kyverno-test"
+    RWO: "kyverno-test"
+  size:
+    clamav: "42Gi"
+
+api:
+  image:
+    tag: "kyverno"
+
+dispatcher:
+  image:
+    tag: "kyverno"
+
+udmTransformer:
+  image:
+    tag: "kyverno"
+
+prefill:
+  image:
+    tag: "kyverno"
+...
