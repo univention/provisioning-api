@@ -295,6 +295,15 @@ services:
       - "./e2e_tests/tests:/app/e2e_tests/tests:ro"
       - "./e2e_tests/e2e_settings.json.example:/app/e2e_tests/e2e_settings.json:ro"
 
+  helm-unittests:
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.25.1-pre-jlohmer-nats-secrets
+    profiles:
+      - test
+    working_dir: /app
+    volumes:
+      - "./helm/:/app/helm/"
+      - "./tests/chart/:/app/tests/chart/"
+
   # Environment of the pre-commit linter.
   pre-commit:
     profiles:
