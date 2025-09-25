@@ -89,7 +89,7 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .)  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "nats-dispatcher" "context" .)  }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password")  }}
           volumeMounts:
             - name: wait-for-nats
@@ -115,7 +115,7 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .)  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "nats-dispatcher" "context" .)  }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password")  }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}

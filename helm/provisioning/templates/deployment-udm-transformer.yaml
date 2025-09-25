@@ -126,7 +126,7 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "udm-transformer-nats" "context" .)  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "nats-udm-transformer" "context" .)  }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password")  }}
           volumeMounts:
             - name: wait-for-nats
@@ -152,7 +152,7 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "udm-transformer-nats" "context" .)  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "nats-udm-transformer" "context" .)  }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password")  }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"

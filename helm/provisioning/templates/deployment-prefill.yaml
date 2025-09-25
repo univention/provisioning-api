@@ -121,7 +121,7 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "defaultNameSuffix" "prefill-nats" "context" .)  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "defaultNameSuffix" "nats-prefill" "context" .)  }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "key" "password")  }}
             - name: UDM_USERNAME
               value: "cn=admin"

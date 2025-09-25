@@ -100,7 +100,7 @@ image:
   registry: ""
   repository: "nubus-dev/images/provisioning-udm-listener"
   imagePullPolicy: null
-  tag: "0.28.3@sha256:b9c452e55e6716f93309bef0af7d401e218cd1e6ea9ad3d2819fb10dd631aecd"
+  tag: "0.60.13-pre-jlohmer-nats-secrets@sha256:4d9894d4ae020450777d51c9a271b1707b25206ccece1dd90b97a9fafb5787be"
 
 waitForDependency:
   resources:

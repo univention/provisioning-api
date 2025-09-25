@@ -7,7 +7,7 @@ from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGen
 
 class Config:
     workload_name = "release-name-provisioning-dispatcher"
-    secret_name = "release-name-provisioning-dispatcher-nats"
+    secret_name = "release-name-provisioning-nats-dispatcher"
 
     prefix_mapping = {
         "dispatcher.nats.auth": "auth",
