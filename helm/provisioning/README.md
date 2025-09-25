@@ -44,6 +44,7 @@ A Helm Chart that deploys the provisioning services
 | api.nats.auth.existingSecret.keyMapping.provisioningApiPassword | string | `nil` |  |
 | api.nats.auth.existingSecret.name | string | `nil` |  |
 | api.nats.auth.password | string | `nil` |  |
+| api.nats.auth.username | string | `"api"` |  |
 | api.podAnnotations | object | `{}` |  |
 | containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privileged escalation. |
 | containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Security capabilities for container. |
@@ -65,6 +66,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | dispatcher.nats.auth.existingSecret.name | string | `nil` |  |
 | dispatcher.nats.auth.password | string | `nil` |  |
+| dispatcher.nats.auth.username | string | `"dispatcher"` |  |
 | dispatcher.podAnnotations | object | `{}` |  |
 | extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
@@ -134,7 +136,7 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.udmTransformer.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | nameOverride | string | `"provisioning"` | String to partially override release name. |
-| nats | object | `{"affinity":{"enabled":true},"bundled":true,"config":{"authorization":{"enabled":true},"cluster":{"replicas":3},"createUsers":{"dispatcher":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"dispatcher-nats\" \"context\" .) | quote }}"},"username":"dispatcher"},"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"username":"dispatcher"},"prefill":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"prefill-nats\" \"context\" .) | quote }}"},"username":"prefill"},"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"username":"prefill"},"provisioningApi":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"api-nats\" \"context\" .) | quote }}"},"username":"api"},"permissions":{"publish":">","subscribe":">"}},"udmTransformer":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"udm-transfrormer-nats\" \"context\" .) | quote }}"},"username":"udmtransfrormer"},"password":"$NATS_UDM_TRANSFORMER_PASSWORD","permissions":{"publish":">","subscribe":">"},"username":"udmtransformer"}},"extraConfig":{"max_payload":"16MB"},"jetstream":{"enabled":true}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"nameOverride":"provisioning-nats","nats":{"image":{"registry":"docker.io"}},"natsBox":{"image":{"registry":"docker.io"}},"reloader":{"image":{"registry":"docker.io"}}}` | NATS server settings. |
+| nats | object | `{"affinity":{"enabled":true},"bundled":true,"config":{"authorization":{"enabled":true},"cluster":{"replicas":3},"createUsers":{"dispatcher":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"dispatcher-nats\" \"context\" .)  }}"},"username":"dispatcher"},"password":"$NATS_DISPATCHER_PASSWORD","permissions":{"publish":">","subscribe":">"},"username":"dispatcher"},"prefill":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"prefill-nats\" \"context\" .)  }}"},"username":"prefill"},"password":"$NATS_PREFILL_PASSWORD","permissions":{"publish":">","subscribe":">"},"username":"prefill"},"provisioningApi":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"api-nats\" \"context\" .)  }}"},"username":"api"},"permissions":{"publish":">","subscribe":">"}},"udmTransformer":{"auth":{"existingSecret":{"keyMapping":{"password":null},"name":"{{ include \"nubus-common.secrets.name\" (dict \"defaultNameSuffix\" \"udm-transfrormer-nats\" \"context\" .)  }}"},"username":"udmtransfrormer"},"password":"$NATS_UDM_TRANSFORMER_PASSWORD","permissions":{"publish":">","subscribe":">"},"username":"udm-transformer"}},"extraConfig":{"max_payload":"16MB"},"jetstream":{"enabled":true}},"connection":{"host":"","port":"","tls":{"caFile":"/certificates/ca.crt","certFile":"/certificates/tls.crt","enabled":false,"keyFile":"/certificates/tls.key"}},"nameOverride":"provisioning-nats","nats":{"image":{"registry":"docker.io"}},"natsBox":{"image":{"registry":"docker.io"}},"reloader":{"image":{"registry":"docker.io"}}}` | NATS server settings. |
 | nats.bundled | bool | `true` | Set to `true` if you want NATS to be installed as well. |
 | nats.config.cluster.replicas | int | `3` | Has to be set to at least 3, the minimum for nats clustering |
 | nats.connection.host | string | `""` | The NATS service to connect to. |
@@ -167,6 +169,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.nats.auth.existingSecret.keyMapping.prefillPassword | string | `nil` |  |
 | prefill.nats.auth.existingSecret.name | string | `nil` |  |
 | prefill.nats.auth.password | string | `nil` |  |
+| prefill.nats.auth.username | string | `"prefill"` |  |
 | prefill.podAnnotations | object | `{}` |  |
 | prefill.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | prefill.udm.auth.existingSecret.name | string | `nil` |  |
@@ -308,5 +311,6 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | udmTransformer.nats.auth.existingSecret.name | string | `nil` |  |
 | udmTransformer.nats.auth.password | string | `nil` |  |
+| udmTransformer.nats.auth.username | string | `"udm-transformer"` |  |
 | udmTransformer.podAnnotations | object | `{}` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |

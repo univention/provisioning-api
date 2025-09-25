@@ -122,12 +122,12 @@ spec:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
           env:
             - name: NATS_USER
-              value: "udmtransformer"
+              value: {{ tpl (required "udmTransformer.nats.auth.username is required" .Values.udmTransformer.nats.auth.username) . }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "udm-transformer-nats" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "udm-transformer-nats" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password")  }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -148,24 +148,24 @@ spec:
                 name: {{ printf "%s-udm-transformer" (include "common.names.fullname" .) }}
           env:
             - name: NATS_USER
-              value: "udmtransformer"
+              value: {{ tpl (required "udmTransformer.nats.auth.username is required" .Values.udmTransformer.nats.auth.username) . }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "udm-transformer-nats" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "udm-transformer-nats" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password")  }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password")  }}
             - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password")  }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

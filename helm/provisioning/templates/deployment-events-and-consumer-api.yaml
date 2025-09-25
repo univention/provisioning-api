@@ -6,7 +6,7 @@ apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
   name: {{ printf "%s-api" (include "common.names.fullname" .) }}
-  namespace: {{ include "common.names.namespace" . | quote }}
+  namespace: {{ include "common.names.namespace" . }}
   labels:
       {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
       {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-api" (include "common.names.fullname" .)) }}
@@ -85,12 +85,12 @@ spec:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
           env:
             - name: NATS_USER
-              value: "api"
+              value: {{ tpl (required "api.nats.auth.username is required" .Values.api.nats.auth.username) . }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "api-nats" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "api-nats" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password") }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -115,33 +115,33 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password") }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password") }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "defaultNameSuffix" "api-prefill" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "defaultNameSuffix" "api-prefill" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "key" "password") }}
             - name: ADMIN_NATS_USER
               value: "placeholder"
             - name: ADMIN_NATS_PASSWORD
               value: "placeholder"
             - name: NATS_USER
-              value: "api"
+              value: {{ tpl (required "api.nats.auth.username is required" .Values.api.nats.auth.username) . }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "api-nats" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "api-nats" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password") }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -183,7 +183,7 @@ spec:
         {{- if .Values.nats.connection.tls.enabled }}
         - name: certificates-volume
           secret:
-            secretName: {{ .Values.nats.connection.tls.secretName  | default (printf "%s-api-tls" (include "common.names.fullname" .) ) | quote }}
+            secretName: {{ .Values.nats.connection.tls.secretName  | default (printf "%s-api-tls" (include "common.names.fullname" .) ) }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}

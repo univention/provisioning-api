@@ -58,9 +58,9 @@ spec:
               {{- range $consumer, $data := .Values.registerConsumers.createUsers }}
               - secret:
                   {{- $_ := required "Consumer secrets can only be configured as existing secret, see registerConsumers.createUsers.*.existingSecret.name" ($data.existingSecret).name }}
-                  name: {{ include "nubus-common.secrets.name" ( dict "existingSecret" $data.existingSecret "context" $ ) | quote }}
+                  name: {{ include "nubus-common.secrets.name" ( dict "existingSecret" $data.existingSecret "context" $ )  }}
                   items:
-                    - key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $data.existingSecret "key" "registration") | quote }}
+                    - key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $data.existingSecret "key" "registration")  }}
                       path: {{ printf "%s.json" ( lower $consumer ) }}
               {{- end }}
         {{- end }}
@@ -100,8 +100,8 @@ spec:
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.registerConsumers.udm.auth.existingSecret "defaultNameSuffix" "register-consumers-udm" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.registerConsumers.udm.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.registerConsumers.udm.auth.existingSecret "defaultNameSuffix" "register-consumers-udm" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.registerConsumers.udm.auth.existingSecret "key" "password")  }}
           volumeMounts:
             - name: wait-for-data-loader
               mountPath: /scripts
@@ -125,8 +125,8 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.admin.existingSecret "defaultNameSuffix" "api-admin" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.admin.existingSecret "key" "password")  }}
           command:
             - "/bin/sh"
             - "-c"

@@ -85,12 +85,12 @@ spec:
                 name: {{ printf "%s-api" (include "common.names.fullname" .) }}
           env:
             - name: NATS_USER
-              value: "dispatcher"
+              value: {{ tpl (required "dispatcher.nats.auth.username is required" .Values.dispatcher.nats.auth.username) . }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password")  }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -111,12 +111,12 @@ spec:
                 name: {{ printf "%s-dispatcher" (include "common.names.fullname" .) }}
           env:
             - name: NATS_USER
-              value: "dispatcher"
+              value: {{ tpl (required "dispatcher.nats.auth.username is required" .Values.dispatcher.nats.auth.username) . }}
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password") | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "defaultNameSuffix" "dispatcher-nats" "context" .)  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.dispatcher.nats.auth.existingSecret "key" "password")  }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

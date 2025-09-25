@@ -47,6 +47,7 @@ api:
   # Could be deduplicated.
   nats:
     auth:
+      username: "api"
       password: null
       existingSecret:
         name: null
@@ -95,6 +96,7 @@ dispatcher:
   # If specified environment variables will be set on the container
   nats:
     auth:
+      username: "dispatcher"
       password: null
       existingSecret:
         name: null
@@ -116,6 +118,7 @@ udmTransformer:
     tag: "0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"
   nats:
     auth:
+      username: "udm-transformer"
       password: null
       existingSecret:
         name: null
@@ -161,6 +164,7 @@ prefill:
   # If specified environment variables will be set on the container
   nats:
     auth:
+      username: "prefill"
       password: null
       existingSecret:
         name: null
@@ -296,7 +300,7 @@ nats:
         auth:
           username: "api"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "api-nats" "context" .) | quote }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "api-nats" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
@@ -309,12 +313,12 @@ nats:
         auth:
           username: "dispatcher"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "dispatcher-nats" "context" .) | quote }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "dispatcher-nats" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
       udmTransformer:
-        username: "udmtransformer"
+        username: "udm-transformer"
         password: "$NATS_UDM_TRANSFORMER_PASSWORD"
         permissions:
           publish: ">"
@@ -322,7 +326,7 @@ nats:
         auth:
           username: "udmtransfrormer"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "udm-transfrormer-nats" "context" .) | quote }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "udm-transfrormer-nats" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
@@ -335,7 +339,7 @@ nats:
         auth:
           username: "prefill"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "prefill-nats" "context" .) | quote }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "prefill-nats" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
