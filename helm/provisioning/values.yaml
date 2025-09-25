@@ -300,46 +300,40 @@ nats:
         auth:
           username: "api"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "api-nats" "context" .)  }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "api" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
       dispatcher:
-        username: "dispatcher"
-        password: "$NATS_DISPATCHER_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
         auth:
           username: "dispatcher"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "dispatcher-nats" "context" .)  }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "dispatcher" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
       udmTransformer:
-        username: "udm-transformer"
-        password: "$NATS_UDM_TRANSFORMER_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
         auth:
-          username: "udmtransfrormer"
+          username: "udm-transformer"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "udm-transfrormer-nats" "context" .)  }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "udm-transformer" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:
       prefill:
-        username: "prefill"
-        password: "$NATS_PREFILL_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
         auth:
           username: "prefill"
           existingSecret:
-            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "prefill-nats" "context" .)  }}'
+            name: '{{ include "nubus-common.secrets.name" (dict "defaultNameSuffix" "prefill" "context" .)  }}'
             # Make this not necessary!
             keyMapping:
               password:

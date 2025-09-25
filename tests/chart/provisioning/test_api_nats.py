@@ -9,7 +9,7 @@ from univention.testing.helm.auth_flavors.username import AuthUsername, AuthUser
 
 class Config:
     workload_name = "release-name-provisioning-api"
-    secret_name = "release-name-provisioning-api-nats"
+    secret_name = "release-name-provisioning-nats-api"
 
     prefix_mapping = {
         "api.nats.auth": "auth",
