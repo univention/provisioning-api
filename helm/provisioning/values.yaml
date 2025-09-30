@@ -289,55 +289,45 @@ nats:
       enabled: true
     createUsers:
       provisioningApi:
-        user: "api"
-        password: "$NATS_PROVISIONING_API_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
-      dispatcher:
-        user: "dispatcher"
-        password: "$NATS_DISPATCHER_PASSWORD"
-        permissions:
-          publish: ">"
-          subscribe: ">"
-      udmTransformer:
-        user: "udmtransformer"
-        password: "$NATS_UDM_TRANSFORMER_PASSWORD"
-        permissions:
-          publish: ">"
-          subscribe: ">"
+        auth:
+          username: "api"
+          existingSecret:
+            name: "{{ .Release.Name }}-udm-listener-nats"
+            keyMapping:
+              password: "password"
       prefill:
-        user: "prefill"
-        password: "$NATS_PREFILL_PASSWORD"
         permissions:
           publish: ">"
           subscribe: ">"
-  extraEnvVars:
-    - name: NATS_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_PROVISIONING_API_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_DISPATCHER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_UDM_TRANSFORMER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
-    - name: NATS_PREFILL_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: null
-          key: null
+        auth:
+          username: "prefill"
+          existingSecret:
+            name: "{{ .Release.Name }}-provisioning-prefill-nats"
+            keyMapping:
+              password: "password"
+      dispatcher:
+        permissions:
+          publish: ">"
+          subscribe: ">"
+        auth:
+          username: "dispatcher"
+          existingSecret:
+            name: "{{ .Release.Name }}-provisioning-dispatcher-nats"
+            keyMapping:
+              password: "password"
+      udmTransformer:
+        permissions:
+          publish: ">"
+          subscribe: ">"
+        auth:
+          username: "udmtransformer"
+          existingSecret:
+            name: "{{ .Release.Name }}-provisioning-udm-transformer-nats"
+            keyMapping:
+              password: "password"
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}

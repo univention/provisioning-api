@@ -8,7 +8,8 @@ global:
       image:
         repository: "nubus/images/portal-extension"
         tag: "0.44.3@sha256:734efc0adda680526dde09387db964612f9e0ab020382580984488cc993c68f0"
-
+  secrets:
+    masterPassword: "nubus"
 
 resources:
   dispatcher:
@@ -42,20 +43,7 @@ resources:
       cpu: "100m"
       memory: "32Mi"
 
-api:
-  nats:
-    auth:
-      password: "linter-api-nats-password"
-
-dispatcher:
-  nats:
-    auth:
-      password: "linter-dispatcher-nats-password"
-
 udmTransformer:
-  nats:
-    auth:
-      password: "linter-udm-transformer-nats-password"
   ldap:
     connection:
       host: "ldap-host"
@@ -66,9 +54,6 @@ udmTransformer:
 prefill:
   config:
     UDM_HOST: "udm-host"
-  nats:
-    auth:
-      password: "linter-prefill-nats-password"
   udm:
     auth:
       password: "linter-prefill-udm-password"
@@ -86,34 +71,8 @@ registerConsumers:
       password: "linter-register-consumers-udm-password"
 
 nats:
-  bundled: false
+  bundled: true
   connection:
     host: "linter-nats-host"
     port: "linter-nats-port"
-  extraEnvVars:
-    - name: NATS_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "dummy-nats-admin-secret-name"
-          key: "dummy-nats-admin-secret-key"
-    - name: NATS_PROVISIONING_API_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "dummy-nats-provisioning-api-secret-name"
-          key: "dummy-nats-provisioning-api-secret-key"
-    - name: NATS_DISPATCHER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "dummy-nats-dispatcher-secret-name"
-          key: "dummy-nats-dispatcher-secret-key"
-    - name: NATS_UDM_TRANSFORMER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "dummy-nats-udm-transformer-secret-name"
-          key: "dummy-nats-udm-transformer-secret-key"
-    - name: NATS_PREFILL_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "dummy-nats-prefill-secret-name"
-          key: "dummy-nats-prefill-secret-key"
 ...

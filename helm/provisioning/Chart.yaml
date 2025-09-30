@@ -11,7 +11,7 @@ dependencies:
     version: "0.21.1"
     repository: "oci://artifacts.software-univention.de/nubus/charts"
   - name: "nats"
-    version: "0.4.3"
+    version: "0.5.0-pre-jlohmer-nats-secrets"
     repository: "oci://artifacts.software-univention.de/nubus-dev/charts"
     condition: "nats.bundled"
 description: "A Helm Chart that deploys the provisioning services"
