@@ -6,3 +6,14 @@ replicaCount:
   udmTransformer: 42
   prefill: 42
   api: 42
+
+nats:
+  config:
+    cluster:
+      replicas: 42
+  nats:
+    image:
+      registry: "registry.kyverno.test"
+  natsBox:
+    image:
+      registry: "registry.kyverno.test"
