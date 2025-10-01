@@ -74,6 +74,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   # -- Run container as a user.
   runAsNonRoot: true
+  privileged: false
 
 # -- Array with extra environment variables to add to containers.
 #
@@ -111,20 +112,55 @@ lifecycleHooks:
 
 #  Configure extra options for containers probes.
 livenessProbe:
-  # -- Number of failed executions until container is terminated.
-  failureThreshold: 3
-  # -- Delay after container start until LivenessProbe is executed.
-  initialDelaySeconds: 10
-  # -- Time between probe executions.
-  periodSeconds: 30
-  # -- Number of successful executions after failed ones until container is marked healthy.
-  successThreshold: 1
-  # -- Timeout for command return.
-  timeoutSeconds: 5
-  httpGet:
-    path: /healthz?js-enabled-only=true
-    port: monitor
-    scheme: HTTP
+  nats:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Time between probe executions.
+    periodSeconds: 30
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    httpGet:
+      path: /healthz?js-enabled-only=true
+      port: monitor
+      scheme: HTTP
+  natsBox:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Time between probe executions.
+    periodSeconds: 30
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  reloader:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Time between probe executions.
+    periodSeconds: 30
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
 
 # -- String to partially override release name.
 nameOverride: ""
@@ -207,20 +243,55 @@ podManagementPolicy: "Parallel"
 
 #  Configure extra options for containers probes.
 readinessProbe:
-  # -- Delay after container start until ReadinessProbe is executed.
-  initialDelaySeconds: 10
-  # -- Number of failed executions until container is terminated.
-  failureThreshold: 3
-  # -- Time between probe executions.
-  periodSeconds: 10
-  # -- Number of successful executions after failed ones until container is marked healthy.
-  successThreshold: 1
-  # -- Timeout for command return.
-  timeoutSeconds: 5
-  httpGet:
-    path: /healthz?js-enabled-only=true
-    port: monitor
-    scheme: HTTP
+  nats:
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    httpGet:
+      path: /healthz?js-enabled-only=true
+      port: monitor
+      scheme: HTTP
+  natsBox:
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  reloader:
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
 
 # Configure resource requests and limits.
 #
@@ -295,20 +366,55 @@ serviceAccount:
 
 #  Configure extra options for containers probes.
 startupProbe:
-  # -- Delay after container start until StartupProbe is executed.
-  initialDelaySeconds: 10
-  # -- Number of failed executions until container is terminated.
-  failureThreshold: 90
-  # -- Time between probe executions.
-  periodSeconds: 10
-  # -- Number of successful executions after failed ones until container is marked healthy.
-  successThreshold: 1
-  # -- Timeout for command return.
-  timeoutSeconds: 5
-  httpGet:
-    path: /healthz?js-enabled-only=true
-    port: monitor
-    scheme: HTTP
+  nats:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 90
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    httpGet:
+      path: /healthz?js-enabled-only=true
+      port: monitor
+      scheme: HTTP
+  natsBox:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 90
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  reloader:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 90
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
 
 # -- In seconds, time the given to the pod needs to terminate gracefully.
 # Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods

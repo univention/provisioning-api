@@ -135,9 +135,9 @@ spec:
           args:
             - --config
             - /etc/nats-config/nats.conf
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe "context" .) | nindent 12 }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.nats "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.nats "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.nats "context" .) | nindent 12 }}
           ports:
             {{- range $key, $value := .Values.service.ports }}
             - name: {{ $key }}
@@ -183,6 +183,9 @@ spec:
             - /var/run/nats.pid
             - -config
             - /etc/nats-config/nats.conf
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.reloader "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.reloader "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.reloader "context" .) | nindent 12 }}
           {{- if .Values.reloader.resources }}
           resources:
           {{- with .Values.reloader.resources }}
@@ -263,6 +266,9 @@ spec:
             - sh
             - -c
             - 'trap true INT TERM; sleep infinity & wait'
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.natsBox "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.natsBox "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.natsBox "context" .) | nindent 12 }}
           {{- if .Values.reloader.resources }}
           resources:
           {{- with .Values.natsBox.resources }}
