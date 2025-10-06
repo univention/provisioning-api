@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 ---
+global:
+  secrets:
+    masterPassword: "nubus"
 
 ldap:
   auth:
@@ -9,8 +12,6 @@ ldap:
 nats:
   connection:
     host: "lintme"
-  auth:
-    password: "linter-nats-password"
 
 provisioningApi:
   auth:
