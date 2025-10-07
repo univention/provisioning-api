@@ -295,14 +295,25 @@ services:
       - "./e2e_tests/tests:/app/e2e_tests/tests:ro"
       - "./e2e_tests/e2e_settings.json.example:/app/e2e_tests/e2e_settings.json:ro"
 
-  helm-unittests:
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.25.1-pre-jlohmer-nats-secrets
+  test-chart-provisioning:
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.27.0"
+    pull_policy: "if_not_present"
+    command: "pytest tests/helm/chart"
     profiles:
-      - test
-    working_dir: /app
+      - "test"
     volumes:
       - "./helm/:/app/helm/"
-      - "./tests/chart/:/app/tests/chart/"
+      - "./tests/chart/provisioning/:/app/tests/helm/chart"
+
+  test-chart-udm-listener:
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.27.0"
+    pull_policy: "if_not_present"
+    command: "pytest tests/helm/chart"
+    profiles:
+      - "test"
+    volumes:
+      - "./helm/:/app/helm/"
+      - "./tests/chart/udm-listener/:/app/tests/helm/chart"
 
   # Environment of the pre-commit linter.
   pre-commit:

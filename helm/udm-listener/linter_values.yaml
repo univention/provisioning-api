@@ -12,6 +12,9 @@ ldap:
 nats:
   connection:
     host: "lintme"
+  auth:
+    user: "stub-username"
+    password: "linter-nats-password"
 
 provisioningApi:
   auth:

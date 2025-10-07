@@ -23,7 +23,7 @@ data:
   LDAP_BASE_DN: {{ include "udm-listener.ldapBaseDn" . | quote }}
   LDAP_PASSWORD_FILE: "/var/secrets/ldap_password"
   LDAP_HOST: {{ include "udm-listener.ldap.connection.host" . | quote }}
-  LDAP_HOST_DN: {{ tpl ( required "The parameter \"ldap.auth.bindDn\" is required." .Values.ldap.auth.bindDn ) . | quote }}
+  LDAP_HOST_DN: {{ tpl ( required "The parameter \"ldap.auth.bindDn\" as username is required." .Values.ldap.auth.bindDn ) . | quote }}
   LDAP_PORT: {{ include "udm-listener.ldap.connection.port" . | quote }}
   NATS_HOST: {{ required ".Values.nats.connection.host is required." ( tpl .Values.nats.connection.host . ) | quote }}
   NATS_PORT: {{ required ".Values.nats.connection.port is required." ( tpl .Values.nats.connection.port . ) | quote }}

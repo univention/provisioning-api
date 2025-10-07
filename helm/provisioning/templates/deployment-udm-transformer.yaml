@@ -127,7 +127,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "nats-udm-transformer" "context" .)  }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password")  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password") }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -153,19 +153,19 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "nats-udm-transformer" "context" .)  }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password")  }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password") }}
             - name: EVENTS_USERNAME_UDM
               value: "udm"
             - name: EVENTS_PASSWORD_UDM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .)  }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password")  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password") }}
             - name: LDAP_BIND_PW
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .)  }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password")  }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password") }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

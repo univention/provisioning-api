@@ -132,6 +132,21 @@ test-end-to-end:
     when: "always"
     expose_as: "docker compose server logs"
 
+test-chart-provisioning:
+  stage: test
+  needs: []
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.27.0"
+  script:
+    - helm dep build helm/provisioning
+    - pytest tests/chart/provisioning
+
+test-chart-udm-listener:
+  stage: test
+  needs: []
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.27.0"
+  script:
+    - helm dep build helm/udm-listener
+    - pytest tests/chart/udm-listener
 
 push-image-external:
   parallel:
