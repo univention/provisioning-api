@@ -6,7 +6,7 @@ from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGen
 
 
 class SettingsTestDispatcherNatsSecret:
-    secret_name = "release-name-provisioning-dispatcher-nats"
+    secret_name = "release-name-provisioning-nats-dispatcher"
     prefix_mapping = {"dispatcher.nats.auth": "auth"}
 
     # for AuthPasswordUsageViaEnv

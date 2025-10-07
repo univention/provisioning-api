@@ -1,6 +1,6 @@
 dependencies:
 - name: nubus-common
-  repository: oci://artifacts.software-univention.de/nubus/charts
-  version: 0.21.1
-digest: sha256:a68ae31b02981bf141e407e82874eb28b64d45743da1982cde8812886c46ddb2
-generated: "2025-06-27T06:39:01.085035+02:00"
+  repository: oci://artifacts.software-univention.de/nubus-dev/charts
+  version: 0.28.0-pre-dpapoutsis-nubus-common-templated-keymapping
+digest: sha256:dbee36b3f59d16f1ba53025e9bdf19d445199f5068d00c58f22acf88ae2e61a1
+generated: "2025-10-07T15:59:11.219475658+02:00"

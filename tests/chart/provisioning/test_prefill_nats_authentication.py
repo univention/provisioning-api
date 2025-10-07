@@ -6,7 +6,7 @@ from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGen
 
 
 class SettingsPrefillNatsSecret:
-    secret_name = "release-name-provisioning-prefill-nats"
+    secret_name = "release-name-provisioning-nats-prefill"
     prefix_mapping = {"prefill.nats.auth": "auth"}
 
     # for AuthPasswordUsageViaEnv

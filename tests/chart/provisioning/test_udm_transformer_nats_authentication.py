@@ -6,7 +6,7 @@ from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGen
 
 
 class SettingsTestUdmTransformerNatsSecret:
-    secret_name = "release-name-provisioning-udm-transformer-nats"
+    secret_name = "release-name-provisioning-nats-udm-transformer"
     prefix_mapping = {"udmTransformer.nats.auth": "auth"}
 
     # for AuthPasswordUsageViaEnv

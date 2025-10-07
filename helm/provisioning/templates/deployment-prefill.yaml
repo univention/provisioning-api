@@ -85,7 +85,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "defaultNameSuffix" "prefill-udm" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password") }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password" "context" .) }}
           volumeMounts:
             - name: wait-for-udm
               mountPath: /scripts
@@ -121,22 +121,22 @@ spec:
             - name: NATS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "defaultNameSuffix" "nats-prefill" "context" .)  }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "key" "password") }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "defaultNameSuffix" "nats-prefill" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.nats.auth.existingSecret "key" "password" "context" .) }}
             - name: UDM_USERNAME
               value: "cn=admin"
             - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "defaultNameSuffix" "prefill-udm" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password") }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password" "context" .) }}
             - name: PREFILL_USERNAME
               value: "prefill"
             - name: PREFILL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "defaultNameSuffix" "api-prefill" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "key" "password") }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "key" "password" "context" .) }}
           {{- with .Values.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

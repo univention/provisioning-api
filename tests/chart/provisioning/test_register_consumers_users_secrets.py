@@ -18,3 +18,6 @@ class TestDispatcherApiUsesProvisioningApiNatsSecretByEnv(AuthPasswordUsageViaPr
 
     @pytest.mark.skip(reason="Consumer secrets can only be configured as existing secret.")
     def test_auth_disabling_existing_secret_by_setting_it_to_null(self): ...
+
+    @pytest.mark.skip(reason="Won't work because of helm context mismatch.")
+    def test_keymapping_is_templated(self): ...

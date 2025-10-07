@@ -51,6 +51,9 @@ udmTransformer:
       port: "1234"
     auth:
       password: "linter-udm-transformer-ldap-password"
+  nats:
+    auth:
+      password: "stub-value"
 
 prefill:
   config:
@@ -58,6 +61,19 @@ prefill:
   udm:
     auth:
       password: "linter-prefill-udm-password"
+  nats:
+    auth:
+      password: "stub-value"
+
+dispatcher:
+  nats:
+    auth:
+      password: "stub-value"
+
+api:
+  nats:
+    auth:
+      password: "stub-value"
 
 registerConsumers:
   provisioningApiBaseUrl: "provisioning-base-url"

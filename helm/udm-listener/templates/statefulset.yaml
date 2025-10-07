@@ -83,7 +83,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password") }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password" "context" .) }}
       containers:
         - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
@@ -115,7 +115,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password") }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password" "context" .) }}
           ports:
             - name: "http"
               containerPort: 80
@@ -128,7 +128,7 @@ spec:
               subPath: "ldap.conf"
             - name: secret-ldap
               mountPath: /var/secrets/ldap_password
-              subPath: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password") }}
+              subPath: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.ldap.auth.existingSecret "key" "password" "context" .) }}
               readOnly: true
             {{- if (include "udm-listener.ldap.tlsSecret.name" . ) }}
             - name: {{ printf "%s-volume" (include "udm-listener.ldap.tlsSecret.name" . ) | quote }}
