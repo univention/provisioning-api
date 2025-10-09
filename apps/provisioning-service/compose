@@ -18,7 +18,7 @@ services:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:provisioning-ucs-dev"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:0.59.0-pre-feat-provisioning-stack-listener-cleanup"
     container_name: "nubus-provisioning-api"
     restart: "on-failure"
     environment:
