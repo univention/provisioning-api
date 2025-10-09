@@ -33,7 +33,7 @@ lint-pre-commit:
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatcher"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
-  - IMAGE_NAME: "provisioning-events-and-consumer-api"
+  - IMAGE_NAME: "provisioning-api"
     DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
   - IMAGE_NAME: "provisioning-prefill"
     DOCKERFILE_PATH: "docker/prefill/Dockerfile"
@@ -50,7 +50,7 @@ lint-pre-commit:
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "provisioning-events-and-consumer-api"
+    - "provisioning-api"
   - IMAGE_NAME:
     - "provisioning-dispatcher"
   - IMAGE_NAME:
