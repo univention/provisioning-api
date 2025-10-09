@@ -5,7 +5,7 @@
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.43.0"
+    ref: "idelgado/retag-development-images-without-semantic-version"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -16,7 +16,6 @@ include:
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/pip-package-and-publish.yaml"
-      - "jobs/sonarqube.yaml"
   - project: "univention/infrastructure/docker-services"
     ref: "master"
     file:
