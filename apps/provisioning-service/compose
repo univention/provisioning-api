@@ -47,7 +47,7 @@ services:
       - "nats"
 
   dispatcher:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:provisioning-ucs-dev"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:0.59.0-pre-feat-provisioning-stack-listener-cleanup"
     container_name: "nubus-provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -67,7 +67,7 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:provisioning-ucs-dev"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:0.59.0-pre-feat-provisioning-stack-listener-cleanup"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "on-failure"
     extra_hosts:
@@ -98,7 +98,7 @@ services:
       - /usr/lib/python3/dist-packages/univention/:/usr/lib/python3/dist-packages/univention/
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:provisioning-ucs-dev"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:0.59.0-pre-feat-provisioning-stack-listener-cleanup"
     container_name: "nubus-provisioning-prefill"
     restart: "on-failure"
     environment:
@@ -126,7 +126,7 @@ services:
     networks:
       - "nubus-provisioning"
   backup-consumer:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:provisioning-ucs-dev
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:provisioning-ucs-dev"
     restart: "on-failure"
     container_name: backup-consumer
     command: >
