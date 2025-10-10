@@ -5,7 +5,7 @@ set -e
 docker system prune -f
 export PROVISIONING_API_ADMIN_PASSWORD=$(jq -r '.PROVISIONING_API_ADMIN_PASSWORD' /etc/provisioning-json.secrets)
 export PROVISIONING_API_ADMIN_USER=admin
-export PROVISIONING_API_URL=https://master.ucs.test/univention/provisioning/v1/subscriptions
+export PROVISIONING_API_URL=https://$(ucr get ldap/master)/univention/provisioning/v1/subscriptions
 
 mkdir -p secrets
 
@@ -38,7 +38,7 @@ services:
         LOG_LEVEL: DEBUG
         PROVISIONING_API_USERNAME: "example-client"
         PROVISIONING_API_PASSWORD: "password"
-        PROVISIONING_API_BASE_URL: "http://provisioning-api:7777"
+        PROVISIONING_API_BASE_URL: "http://nubus-provisioning-api:7777"
         LOG_LEVEL: "DEBUG"
         MAX_ACKNOWLEDGEMENT_RETRIES: 3
     restart: "on-failure"
