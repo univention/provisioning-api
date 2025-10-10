@@ -5,11 +5,11 @@ set -e
 docker system prune -f
 export PROVISIONING_API_ADMIN_PASSWORD=$(jq -r '.PROVISIONING_API_ADMIN_PASSWORD' /etc/provisioning-json.secrets)
 export PROVISIONING_API_ADMIN_USER=admin
-export PROVISIONING_API_URL=https://master.ucs.test/univention/provisioning/
+export PROVISIONING_API_URL=https://$(ucr get ldap/master)/univention/provisioning/
 export NATS_USER=api
 export NATS_PASSWORD=$(jq -r '.NATS_PASSWORD' /etc/provisioning-json.secrets)
 export TARGET_NATS=nats://nats:4222
-export PROVISIONING_API_BASE_URL="http://provisioning-api:7777"
+export PROVISIONING_API_BASE_URL="http://nubus-provisioning-api:7777"
 
 mkdir -p secrets
 
