@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.62.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.61.0...v0.62.0) (2025-10-13)
+
+
+### Features
+
+* **nats:** Integrate improved nats user configuration ([8203ef9](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/8203ef9e4db505c56ad37addfcfea942f4d16572)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+
+
+### Bug Fixes
+
+* adjust kyverno-values ([93bfeee](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/93bfeee56ce90f469650f384dcca25833cc1ae6f)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+* **helm-unittests:** Ensure that existing secrets can be templated and usernames are required ([4315381](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/43153812b2a5d53d1313cb494f2e084b88175b36)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+* **helm-unittests:** Update nats secrets tests and migrate helm unittests to flavor-based helm test harness ([21a1f4b](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/21a1f4b68d6e02a1dcdcb2f904eb0efeb9590960)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+* **helm:** Fix secret name mismatches between this chart and the nats subchart ([0b19bf0](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/0b19bf00a50a71123dfd22c38d4760a9d4231bcc)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+* **nats:** Integrate improved nats user configuration and migrate helm unittests to flavor-based helm test harness ([37b4001](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/37b40018b606fe488092d0ceb9bfa31dc3aee0b1)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+* **nats:** Update nats chart version ([99499ea](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/99499eae4f4ee2e6b86fc2054faf6071c0e501db)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+* prefix generated NATS password with 'nbs_' ([b0f0da1](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/b0f0da19b4398bd32946a87bc912c27f8c1abeeb)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+
 ## [0.61.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.60.12...v0.61.0) (2025-09-24)
 
 
