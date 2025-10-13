@@ -23,7 +23,7 @@ async def handle_message(
 ) -> None:
     nc = NATS()
     await nc.connect(servers=[server], user=user, password=password)
-    logging.info("WTFWTF", json.dumps(msg.model_dump(), indent=2))
+    logging.info("forwarding: %s", json.dumps(msg.model_dump(), indent=2))  ## FIXME - temporary dev log message
     try:
         js = nc.jetstream()
         bytes_encoded_payload = json.dumps(msg.model_dump()).encode("utf-8")
