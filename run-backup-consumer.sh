@@ -35,6 +35,7 @@ services:
       MAX_ACKNOWLEDGEMENT_RETRIES: 5
     volumes:
       - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      - /var/lib/univention-appcenter/apps/provisioning-service/conf/server_role.conf:/server_role.conf:ro
     networks:
       nubus-provisioning:
 networks:
