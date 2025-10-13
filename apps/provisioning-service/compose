@@ -126,7 +126,7 @@ services:
     networks:
       - "nubus-provisioning"
   backup-consumer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:provisioning-ucs-dev"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:feat-provisioning-stack-listener-cleanup"
     restart: "on-failure"
     container_name: backup-consumer
     command: >
