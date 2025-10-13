@@ -1,0 +1,51 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+# Abort on nonzero exitstatus [-e]
+set -o errexit
+# Don't hide errors within pipes
+set -o pipefail
+
+download_univention-appcenter-control() {
+  if ! [[ -x univention-appcenter-control ]]; then
+    curl -s -o univention-appcenter-control https://provider-portal.software-univention.de/appcenter-selfservice/univention-appcenter-control
+    chmod +x univention-appcenter-control
+    trap 'rm -f "univention-appcenter-control"' EXIT
+  fi
+}
+
+upload_appcenter_scripts() {
+    local ini_file="$1/ini"
+    local app_id="$(awk '/^ID/ {print $3}' "$ini_file")"
+    local app_name="$(grep -m 1 '^Name = ' "$ini_file" | cut -d'=' -f2-)"
+    local app_version="$(awk '/^Version/ {print $3}' "$ini_file")"
+    local app_version_string="5.2/${app_id}=${app_version}"
+
+    echo "---------------------------------------------------------------------"
+    echo "Preparing file upload for:${app_name}"
+    echo -e "\nID:		${app_id}"
+    echo "VERSION:	${app_version}"
+    echo -e "Upload target:	${app_version_string}\n"
+
+    echo -e "\nThe following files will be uploaded:\n"
+    find "$1/" -type f | sort
+    echo "---------------------------------------------------------------------"
+    echo ""
+
+    read -n1 -r -p "Press any key to continue or Ctrl-C to abort."
+    echo
+
+    ./univention-appcenter-control upload "${app_version_string}" $(find "$1/" -type f | sort)
+    echo ""
+}
+
+if ! [[ -e "${HOME}/.univention-appcenter-user" ]] || ! [[ -e "${HOME}/.univention-appcenter-pwd" ]]; then
+  echo -e "\nTo upload the appcenter files to the test-appcenter you will be asked for your username and password."
+  echo "Hint: create ~/.univention-appcenter-user and ~/.univention-appcenter-pwd for automatic authentication."
+  echo ""
+fi
+
+download_univention-appcenter-control
+upload_appcenter_scripts "provisioning-service"
+#upload_appcenter_scripts "provisioning-service-backend"
