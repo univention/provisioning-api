@@ -43,13 +43,16 @@ ucs_addServiceToLocalhost "$SERVICE" "$@"
 
 wait_for_nats () {
     local i=0
+    nats_server="localhost:8222/healthz"
     for ((i=0; i<30; i++)); do
-
-        nats_server="localhost:8222/healthz"
-        curl -sf $nats_server > /dev/null && return 0
-        echo "waiting for $nats_server ..."
-
+        if curl -sf $nats_server > /dev/null; then
+            echo "[wait_for_nats]: NATS at $nats_server is responsive."
+            return 0
+        fi
+        echo "[wait_for_nats]: Waiting for NATS at $nats_server ..."
+        sleep 1
     done
+    echo "[wait_for_nats]: Timeout after 30s - could not reach $nats_server."
     return 1
 }
 
