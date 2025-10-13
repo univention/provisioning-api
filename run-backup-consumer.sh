@@ -16,8 +16,8 @@ mkdir -p secrets
 echo "
 services:
   test:
-    image: harbor-registry.atlantishq.de/atlantishq/backup-consumer:latest
-    container_name: backup-consumer-test
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:feat-provisioning-stack-listener-cleanup
+    container_name: backup-consumer
     command: >
       backup_consumer
       --provisioning-api-admin-user "${PROVISIONING_API_ADMIN_USER}"
