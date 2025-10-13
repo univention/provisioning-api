@@ -46,6 +46,8 @@ lint-pre-commit:
     DOCKERFILE_PATH: "docker/test/Dockerfile"
   - IMAGE_NAME: "provisioning-e2e-tests"
     DOCKERFILE_PATH: "docker/e2e-test/Dockerfile"
+  - IMAGE_NAME: "backup-consumer"
+    DOCKERFILE_PATH: "docker/backup-consumer/Dockerfile"
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
@@ -60,6 +62,8 @@ lint-pre-commit:
     - "provisioning-udm-listener"
   - IMAGE_NAME:
     - "provisioning-example-client"
+  - IMAGE_NAME:
+    - "backup-consumer"
 
 container-build:
   parallel:
