@@ -60,7 +60,7 @@ nats consumer next teststream testconsumer
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.12.x |
+| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.25.x |
 
 ## Values
 
@@ -185,40 +185,57 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.password</td>
-			<td>string</td>
+			<td>config.createUsers</td>
+			<td>object</td>
 			<td><pre lang="json">
-"$NATS_PASSWORD"
+{
+  "adminUser": {
+    "auth": {
+      "existingSecret": {
+        "keyMapping": {
+          "password": null
+        },
+        "name": null
+      },
+      "password": null,
+      "username": "admin"
+    },
+    "permissions": {
+      "publish": "\u003e",
+      "subscribe": "\u003e"
+    }
+  }
+}
 </pre>
 </td>
-			<td></td>
+			<td>Create additional nats users Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users permissions, auth.username and auth.existingSecret.name are required. Example: createUsers:   normalUser:     permissions:       publish: '>'       subscribe: '>'     auth:       username: normal-user       existingSecret:         name: "your-secret-name"         keyMapping:           password: "your-custom-secret-key"</td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.permissions.publish</td>
+			<td>config.createUsers.adminUser.auth.existingSecret.name</td>
 			<td>string</td>
 			<td><pre lang="json">
-"\u003e"
+null
 </pre>
 </td>
-			<td></td>
+			<td>The name of an existing Secret to use for retrieving the password for the nats admin account.  "config.createUsers.adminUser.auth.password" will be ignored if this value is set.</td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.permissions.subscribe</td>
+			<td>config.createUsers.adminUser.auth.password</td>
 			<td>string</td>
 			<td><pre lang="json">
-"\u003e"
+null
 </pre>
 </td>
-			<td></td>
+			<td>The password used to authenticate with nats database. Either this value or an existing Secret has to be specified.</td>
 		</tr>
 		<tr>
-			<td>config.createUsers.adminUser.user</td>
+			<td>config.createUsers.adminUser.auth.username</td>
 			<td>string</td>
 			<td><pre lang="json">
 "admin"
 </pre>
 </td>
-			<td></td>
+			<td>The nats admin username</td>
 		</tr>
 		<tr>
 			<td>config.extraConfig</td>
@@ -350,6 +367,15 @@ true
 			<td>Enable security context.</td>
 		</tr>
 		<tr>
+			<td>containerSecurityContext.privileged</td>
+			<td>bool</td>
+			<td><pre lang="json">
+false
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
 			<td>containerSecurityContext.readOnlyRootFilesystem</td>
 			<td>bool</td>
 			<td><pre lang="json">
@@ -434,7 +460,7 @@ true
 			<td>global.imagePullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Define an ImagePullPolicy.  Ref.: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  "IfNotPresent" => The image is pulled only if it is not already present locally. "Always" => Every time the kubelet launches a container, the kubelet queries the container image registry to             resolve the name to an image digest. If the kubelet has a container image with that exact digest cached             locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved             digest, and uses that image to launch the container. "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the            kubelet attempts to start the container; otherwise, startup fails.</td>
@@ -467,15 +493,6 @@ false
 			<td>Indicates wether this chart is part of a Nubus deployment.</td>
 		</tr>
 		<tr>
-			<td>imagePullPolicy</td>
-			<td>string</td>
-			<td><pre lang="json">
-"IfNotPresent"
-</pre>
-</td>
-			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
-		</tr>
-		<tr>
 			<td>imagePullSecrets</td>
 			<td>list</td>
 			<td><pre lang="json">
@@ -503,7 +520,7 @@ false
 			<td>Lifecycle to automate configuration before or after startup.</td>
 		</tr>
 		<tr>
-			<td>livenessProbe.failureThreshold</td>
+			<td>livenessProbe.nats.failureThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
 3
@@ -512,7 +529,7 @@ false
 			<td>Number of failed executions until container is terminated.</td>
 		</tr>
 		<tr>
-			<td>livenessProbe.httpGet.path</td>
+			<td>livenessProbe.nats.httpGet.path</td>
 			<td>string</td>
 			<td><pre lang="json">
 "/healthz?js-enabled-only=true"
@@ -521,7 +538,7 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>livenessProbe.httpGet.port</td>
+			<td>livenessProbe.nats.httpGet.port</td>
 			<td>string</td>
 			<td><pre lang="json">
 "monitor"
@@ -530,7 +547,7 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>livenessProbe.httpGet.scheme</td>
+			<td>livenessProbe.nats.httpGet.scheme</td>
 			<td>string</td>
 			<td><pre lang="json">
 "HTTP"
@@ -539,7 +556,7 @@ false
 			<td></td>
 		</tr>
 		<tr>
-			<td>livenessProbe.initialDelaySeconds</td>
+			<td>livenessProbe.nats.initialDelaySeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 10
@@ -548,7 +565,7 @@ false
 			<td>Delay after container start until LivenessProbe is executed.</td>
 		</tr>
 		<tr>
-			<td>livenessProbe.periodSeconds</td>
+			<td>livenessProbe.nats.periodSeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 30
@@ -557,7 +574,7 @@ false
 			<td>Time between probe executions.</td>
 		</tr>
 		<tr>
-			<td>livenessProbe.successThreshold</td>
+			<td>livenessProbe.nats.successThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
 1
@@ -566,7 +583,151 @@ false
 			<td>Number of successful executions after failed ones until container is marked healthy.</td>
 		</tr>
 		<tr>
-			<td>livenessProbe.timeoutSeconds</td>
+			<td>livenessProbe.nats.timeoutSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+5
+</pre>
+</td>
+			<td>Timeout for command return.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.exec.command[0]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"sh"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.exec.command[1]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"-c"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.exec.command[2]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"exit 0\n"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.failureThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+3
+</pre>
+</td>
+			<td>Number of failed executions until container is terminated.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.initialDelaySeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Delay after container start until LivenessProbe is executed.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.periodSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+30
+</pre>
+</td>
+			<td>Time between probe executions.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.successThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of successful executions after failed ones until container is marked healthy.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.natsBox.timeoutSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+5
+</pre>
+</td>
+			<td>Timeout for command return.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.exec.command[0]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"sh"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.exec.command[1]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"-c"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.exec.command[2]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"exit 0\n"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.failureThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+3
+</pre>
+</td>
+			<td>Number of failed executions until container is terminated.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.initialDelaySeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Delay after container start until LivenessProbe is executed.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.periodSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+30
+</pre>
+</td>
+			<td>Time between probe executions.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.successThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of successful executions after failed ones until container is marked healthy.</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.reloader.timeoutSeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 5
@@ -584,10 +745,10 @@ false
 			<td>String to partially override release name.</td>
 		</tr>
 		<tr>
-			<td>nats.image.imagePullPolicy</td>
+			<td>nats.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
@@ -614,7 +775,7 @@ null
 			<td>nats.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"2.11.6@sha256:ba50652d7781b9707997e5c0cb7ffacb88919e689594c65be580037e1f2468d7"
+"2.11.9@sha256:4e97bea2e69ffe4449cdc9b4c7fa707984aa9a4c090bf2faf5441cb6c97c99a4"
 </pre>
 </td>
 			<td></td>
@@ -629,10 +790,10 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>natsBox.image.imagePullPolicy</td>
+			<td>natsBox.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
@@ -659,7 +820,7 @@ null
 			<td>natsBox.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.18.0-nonroot@sha256:eea818c6e5248aabbcabd41fa1496a618aab0377352c3b66a43f5ed3fa49e30b"
+"0.18.1-nonroot@sha256:ec2f58b953916b4804d6636bf6a625bab7894d1b71319bc7865b3e70ab5e3f6f"
 </pre>
 </td>
 			<td></td>
@@ -852,7 +1013,7 @@ true
 			<td>Allow binding to ports below 1024 without root access.</td>
 		</tr>
 		<tr>
-			<td>readinessProbe.failureThreshold</td>
+			<td>readinessProbe.nats.failureThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
 3
@@ -861,7 +1022,7 @@ true
 			<td>Number of failed executions until container is terminated.</td>
 		</tr>
 		<tr>
-			<td>readinessProbe.httpGet.path</td>
+			<td>readinessProbe.nats.httpGet.path</td>
 			<td>string</td>
 			<td><pre lang="json">
 "/healthz?js-enabled-only=true"
@@ -870,7 +1031,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>readinessProbe.httpGet.port</td>
+			<td>readinessProbe.nats.httpGet.port</td>
 			<td>string</td>
 			<td><pre lang="json">
 "monitor"
@@ -879,7 +1040,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>readinessProbe.httpGet.scheme</td>
+			<td>readinessProbe.nats.httpGet.scheme</td>
 			<td>string</td>
 			<td><pre lang="json">
 "HTTP"
@@ -888,7 +1049,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>readinessProbe.initialDelaySeconds</td>
+			<td>readinessProbe.nats.initialDelaySeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 10
@@ -897,7 +1058,7 @@ true
 			<td>Delay after container start until ReadinessProbe is executed.</td>
 		</tr>
 		<tr>
-			<td>readinessProbe.periodSeconds</td>
+			<td>readinessProbe.nats.periodSeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 10
@@ -906,7 +1067,7 @@ true
 			<td>Time between probe executions.</td>
 		</tr>
 		<tr>
-			<td>readinessProbe.successThreshold</td>
+			<td>readinessProbe.nats.successThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
 1
@@ -915,7 +1076,151 @@ true
 			<td>Number of successful executions after failed ones until container is marked healthy.</td>
 		</tr>
 		<tr>
-			<td>readinessProbe.timeoutSeconds</td>
+			<td>readinessProbe.nats.timeoutSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+5
+</pre>
+</td>
+			<td>Timeout for command return.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.exec.command[0]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"sh"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.exec.command[1]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"-c"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.exec.command[2]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"exit 0\n"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.failureThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+3
+</pre>
+</td>
+			<td>Number of failed executions until container is terminated.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.initialDelaySeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Delay after container start until ReadinessProbe is executed.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.periodSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Time between probe executions.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.successThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of successful executions after failed ones until container is marked healthy.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.natsBox.timeoutSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+5
+</pre>
+</td>
+			<td>Timeout for command return.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.exec.command[0]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"sh"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.exec.command[1]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"-c"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.exec.command[2]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"exit 0\n"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.failureThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+3
+</pre>
+</td>
+			<td>Number of failed executions until container is terminated.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.initialDelaySeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Delay after container start until ReadinessProbe is executed.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.periodSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Time between probe executions.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.successThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of successful executions after failed ones until container is marked healthy.</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.reloader.timeoutSeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 5
@@ -927,16 +1232,16 @@ true
 			<td>reloader.enabled</td>
 			<td>bool</td>
 			<td><pre lang="json">
-true
+false
 </pre>
 </td>
 			<td>Enable the config reloader</td>
 		</tr>
 		<tr>
-			<td>reloader.image.imagePullPolicy</td>
+			<td>reloader.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
-"IfNotPresent"
+null
 </pre>
 </td>
 			<td>Image pull policy. This setting has higher precedence than global.imagePullPolicy.</td>
@@ -1176,7 +1481,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>startupProbe.failureThreshold</td>
+			<td>startupProbe.nats.failureThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
 90
@@ -1185,7 +1490,7 @@ true
 			<td>Number of failed executions until container is terminated.</td>
 		</tr>
 		<tr>
-			<td>startupProbe.httpGet.path</td>
+			<td>startupProbe.nats.httpGet.path</td>
 			<td>string</td>
 			<td><pre lang="json">
 "/healthz?js-enabled-only=true"
@@ -1194,7 +1499,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>startupProbe.httpGet.port</td>
+			<td>startupProbe.nats.httpGet.port</td>
 			<td>string</td>
 			<td><pre lang="json">
 "monitor"
@@ -1203,7 +1508,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>startupProbe.httpGet.scheme</td>
+			<td>startupProbe.nats.httpGet.scheme</td>
 			<td>string</td>
 			<td><pre lang="json">
 "HTTP"
@@ -1212,7 +1517,7 @@ true
 			<td></td>
 		</tr>
 		<tr>
-			<td>startupProbe.initialDelaySeconds</td>
+			<td>startupProbe.nats.initialDelaySeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 10
@@ -1221,7 +1526,7 @@ true
 			<td>Delay after container start until StartupProbe is executed.</td>
 		</tr>
 		<tr>
-			<td>startupProbe.periodSeconds</td>
+			<td>startupProbe.nats.periodSeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 10
@@ -1230,7 +1535,7 @@ true
 			<td>Time between probe executions.</td>
 		</tr>
 		<tr>
-			<td>startupProbe.successThreshold</td>
+			<td>startupProbe.nats.successThreshold</td>
 			<td>int</td>
 			<td><pre lang="json">
 1
@@ -1239,7 +1544,151 @@ true
 			<td>Number of successful executions after failed ones until container is marked healthy.</td>
 		</tr>
 		<tr>
-			<td>startupProbe.timeoutSeconds</td>
+			<td>startupProbe.nats.timeoutSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+5
+</pre>
+</td>
+			<td>Timeout for command return.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.exec.command[0]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"sh"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.exec.command[1]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"-c"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.exec.command[2]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"exit 0\n"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.failureThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+90
+</pre>
+</td>
+			<td>Number of failed executions until container is terminated.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.initialDelaySeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Delay after container start until StartupProbe is executed.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.periodSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Time between probe executions.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.successThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of successful executions after failed ones until container is marked healthy.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.natsBox.timeoutSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+5
+</pre>
+</td>
+			<td>Timeout for command return.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.exec.command[0]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"sh"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.exec.command[1]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"-c"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.exec.command[2]</td>
+			<td>string</td>
+			<td><pre lang="json">
+"exit 0\n"
+</pre>
+</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.failureThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+90
+</pre>
+</td>
+			<td>Number of failed executions until container is terminated.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.initialDelaySeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Delay after container start until StartupProbe is executed.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.periodSeconds</td>
+			<td>int</td>
+			<td><pre lang="json">
+10
+</pre>
+</td>
+			<td>Time between probe executions.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.successThreshold</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of successful executions after failed ones until container is marked healthy.</td>
+		</tr>
+		<tr>
+			<td>startupProbe.reloader.timeoutSeconds</td>
 			<td>int</td>
 			<td><pre lang="json">
 5

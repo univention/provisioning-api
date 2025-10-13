@@ -9,13 +9,11 @@ metadata:
   name: {{ include "common.names.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
-    {{- include "common.labels.standard" . | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
-  {{- end }}
+    {{- include "common.labels.standard" ( dict "customLabels" .Values.additionalLabels "context" . ) | nindent 4 }}
+  {{- include "nubus-common.annotations.render" ( dict
+    "values" ( list .Values.additionalAnnotations )
+    "context" . )
+    | nindent 2 }}
 spec:
   serviceName: "{{ printf "%s-headless" (include "common.names.fullname" .) }}"
   replicas: {{ .Values.config.cluster.replicas }}
@@ -72,19 +70,20 @@ spec:
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       {{- if .Values.serviceAccount.create }}
-      serviceAccountName: {{ include "nats.serviceAccountName" . }}
+      serviceAccountName: {{ coalesce .Values.serviceAccount.name (include "common.names.fullname" .) }}
       {{- end }}
       {{- if .Values.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       containers:
-        - name: "nats"
+        - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.nats.image.registry .Values.global.imageRegistry }}/{{ .Values.nats.image.repository }}:{{ .Values.nats.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.nats.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.nats.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
+            {{- include "nats.env-passwords" . | nindent 12 }}
             - name: SERVER_NAME
               valueFrom:
                 fieldRef:
@@ -130,15 +129,15 @@ spec:
             - name: ROUTES
               value: {{ "" }}
           {{- range $i, $_ := until (int .Values.config.cluster.replicas) }}
-            {{- printf "nats://%s%s-%d.%s:%d," $auth (include "nats.podNamePrefix" $) $i (include "nats.headlessServiceName" $) 6222 }}
+            {{- printf "nats://%s%s-%d.%s:%d," $auth (include "common.names.fullname" $) $i (printf "%s-headless" (include "common.names.fullname" $)) 6222 }}
           {{- end }}
           {{- end }}
           args:
             - --config
             - /etc/nats-config/nats.conf
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe "context" .) | nindent 12 }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.nats "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.nats "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.nats "context" .) | nindent 12 }}
           ports:
             {{- range $key, $value := .Values.service.ports }}
             - name: {{ $key }}
@@ -173,7 +172,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.reloader.image.registry .Values.global.imageRegistry }}/{{ .Values.reloader.image.repository }}:{{ .Values.reloader.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.reloader.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.reloader.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
             - name: SERVER_NAME
               valueFrom:
@@ -184,6 +183,9 @@ spec:
             - /var/run/nats.pid
             - -config
             - /etc/nats-config/nats.conf
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.reloader "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.reloader "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.reloader "context" .) | nindent 12 }}
           {{- if .Values.reloader.resources }}
           resources:
           {{- with .Values.reloader.resources }}
@@ -202,7 +204,7 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.natsBox.image.registry .Values.global.imageRegistry }}/{{ .Values.natsBox.image.repository }}:{{ .Values.natsBox.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.natsBox.image.imagePullPolicy .Values.global.imagePullPolicy | quote }}
+          imagePullPolicy: {{ coalesce .Values.natsBox.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           workingDir: /home/nats
           env:
             - name: SERVER_NAME
@@ -213,6 +215,13 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: "NATS_USER"
+              value: {{ .Values.config.createUsers.adminUser.auth.username | quote }}
+            - name: "NATS_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password") | quote }}
           {{- range .Values.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}
@@ -257,6 +266,9 @@ spec:
             - sh
             - -c
             - 'trap true INT TERM; sleep infinity & wait'
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.natsBox "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.natsBox "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.natsBox "context" .) | nindent 12 }}
           {{- if .Values.reloader.resources }}
           resources:
           {{- with .Values.natsBox.resources }}

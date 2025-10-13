@@ -27,7 +27,7 @@ global:
   #             digest, and uses that image to launch the container.
   # "Never" => The kubelet does not try fetching the image. If the image is somehow already present locally, the
   #            kubelet attempts to start the container; otherwise, startup fails.
-  imagePullPolicy: "IfNotPresent"
+  imagePullPolicy: null
 
 # -- Additional custom annotations to add to all deployed objects.
 additionalAnnotations: {}
@@ -74,6 +74,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   # -- Run container as a user.
   runAsNonRoot: true
+  privileged: false
 
 # -- Array with extra environment variables to add to containers.
 #
@@ -101,9 +102,6 @@ extraVolumeMounts: []
 #   - "docker-registry"
 imagePullSecrets: []
 
-# -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-imagePullPolicy: "IfNotPresent"
-
 # -- Lifecycle to automate configuration before or after startup.
 lifecycleHooks:
   preStop:
@@ -114,20 +112,55 @@ lifecycleHooks:
 
 #  Configure extra options for containers probes.
 livenessProbe:
-  # -- Number of failed executions until container is terminated.
-  failureThreshold: 3
-  # -- Delay after container start until LivenessProbe is executed.
-  initialDelaySeconds: 10
-  # -- Time between probe executions.
-  periodSeconds: 30
-  # -- Number of successful executions after failed ones until container is marked healthy.
-  successThreshold: 1
-  # -- Timeout for command return.
-  timeoutSeconds: 5
-  httpGet:
-    path: /healthz?js-enabled-only=true
-    port: monitor
-    scheme: HTTP
+  nats:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Time between probe executions.
+    periodSeconds: 30
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    httpGet:
+      path: /healthz?js-enabled-only=true
+      port: monitor
+      scheme: HTTP
+  natsBox:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Time between probe executions.
+    periodSeconds: 30
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  reloader:
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Delay after container start until LivenessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Time between probe executions.
+    periodSeconds: 30
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
 
 # -- String to partially override release name.
 nameOverride: ""
@@ -210,20 +243,55 @@ podManagementPolicy: "Parallel"
 
 #  Configure extra options for containers probes.
 readinessProbe:
-  # -- Delay after container start until ReadinessProbe is executed.
-  initialDelaySeconds: 10
-  # -- Number of failed executions until container is terminated.
-  failureThreshold: 3
-  # -- Time between probe executions.
-  periodSeconds: 10
-  # -- Number of successful executions after failed ones until container is marked healthy.
-  successThreshold: 1
-  # -- Timeout for command return.
-  timeoutSeconds: 5
-  httpGet:
-    path: /healthz?js-enabled-only=true
-    port: monitor
-    scheme: HTTP
+  nats:
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    httpGet:
+      path: /healthz?js-enabled-only=true
+      port: monitor
+      scheme: HTTP
+  natsBox:
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  reloader:
+    # -- Delay after container start until ReadinessProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 3
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
 
 # Configure resource requests and limits.
 #
@@ -298,20 +366,55 @@ serviceAccount:
 
 #  Configure extra options for containers probes.
 startupProbe:
-  # -- Delay after container start until StartupProbe is executed.
-  initialDelaySeconds: 10
-  # -- Number of failed executions until container is terminated.
-  failureThreshold: 90
-  # -- Time between probe executions.
-  periodSeconds: 10
-  # -- Number of successful executions after failed ones until container is marked healthy.
-  successThreshold: 1
-  # -- Timeout for command return.
-  timeoutSeconds: 5
-  httpGet:
-    path: /healthz?js-enabled-only=true
-    port: monitor
-    scheme: HTTP
+  nats:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 90
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    httpGet:
+      path: /healthz?js-enabled-only=true
+      port: monitor
+      scheme: HTTP
+  natsBox:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 90
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
+  reloader:
+    # -- Delay after container start until StartupProbe is executed.
+    initialDelaySeconds: 10
+    # -- Number of failed executions until container is terminated.
+    failureThreshold: 90
+    # -- Time between probe executions.
+    periodSeconds: 10
+    # -- Number of successful executions after failed ones until container is marked healthy.
+    successThreshold: 1
+    # -- Timeout for command return.
+    timeoutSeconds: 5
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          exit 0
 
 # -- In seconds, time the given to the pod needs to terminate gracefully.
 # Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
@@ -349,18 +452,18 @@ updateStrategy:
 nats:
   image:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-    imagePullPolicy: "IfNotPresent"
+    pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "library/nats"
-    tag: "2.11.6@sha256:ba50652d7781b9707997e5c0cb7ffacb88919e689594c65be580037e1f2468d7"
+    tag: "2.11.9@sha256:4e97bea2e69ffe4449cdc9b4c7fa707984aa9a4c090bf2faf5441cb6c97c99a4"
 
 reloader:
   # -- Enable the config reloader
-  enabled: true
+  enabled: false
   image:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-    imagePullPolicy: "IfNotPresent"
+    pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "natsio/nats-server-config-reloader"
@@ -376,11 +479,11 @@ natsBox:
   enabled: true
   image:
     # -- Image pull policy. This setting has higher precedence than global.imagePullPolicy.
-    imagePullPolicy: "IfNotPresent"
+    pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "natsio/nats-box"
-    tag: "0.18.0-nonroot@sha256:eea818c6e5248aabbcabd41fa1496a618aab0377352c3b66a43f5ed3fa49e30b"
+    tag: "0.18.1-nonroot@sha256:ec2f58b953916b4804d6636bf6a625bab7894d1b71319bc7865b3e70ab5e3f6f"
   resources:
     limits:
       memory: "256Mi"
@@ -426,14 +529,40 @@ config:
     # Example:
     # token: "$NATS_TOKEN"
     token: ""
+  # -- Create additional nats users
   # Ref: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/username_password#multiple-users
+  # permissions, auth.username and auth.existingSecret.name are required.
+  # Example:
+  # createUsers:
+  #   normalUser:
+  #     permissions:
+  #       publish: '>'
+  #       subscribe: '>'
+  #     auth:
+  #       username: normal-user
+  #       existingSecret:
+  #         name: "your-secret-name"
+  #         keyMapping:
+  #           password: "your-custom-secret-key"
   createUsers:
     adminUser:
-      user: "admin"
-      password: "$NATS_PASSWORD"
       permissions:
         publish: ">"
         subscribe: ">"
+      auth:
+        # -- The nats admin username
+        username: "admin"
+        # -- The password used to authenticate with nats database.
+        # Either this value or an existing Secret has to be specified.
+        password: null
+        existingSecret:
+          # -- The name of an existing Secret to use for retrieving the password
+          # for the nats admin account.
+          #
+          # "config.createUsers.adminUser.auth.password" will be ignored if this value is set.
+          name: null
+          keyMapping:
+            password: null
 
   # Ref: https://docs.nats.io/running-a-nats-service/configuration
   # Example:
