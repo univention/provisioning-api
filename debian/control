@@ -1,4 +1,4 @@
-Source: univention-provisioning-stack-listener
+Source: univention-provisioning-service-listener
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
@@ -16,7 +16,7 @@ Build-Depends:
  python3-setuptools,
 Standards-Version: 3.9.5
 
-Package: python3-univention-provisioning-stack-listener
+Package: python3-univention-provisioning-service-listener
 Architecture: all
 Depends:
  python3-nats,
