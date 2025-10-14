@@ -52,7 +52,7 @@ api:
       existingSecret:
         name: null
         keyMapping:
-          provisioningApiPassword: null
+          password: null
   auth:
     admin:
       password: null
