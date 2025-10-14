@@ -166,7 +166,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
 | prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
-| prefill.nats.auth.existingSecret.keyMapping.prefillPassword | string | `nil` |  |
+| prefill.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | prefill.nats.auth.existingSecret.name | string | `nil` |  |
 | prefill.nats.auth.password | string | `nil` |  |
 | prefill.nats.auth.username | string | `"prefill"` |  |

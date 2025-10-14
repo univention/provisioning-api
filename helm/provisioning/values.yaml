@@ -169,7 +169,7 @@ prefill:
       existingSecret:
         name: null
         keyMapping:
-          prefillPassword: null
+          password: null
 
   udm:
     auth:
