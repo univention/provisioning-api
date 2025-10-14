@@ -1,17 +1,18 @@
 [Application]
 ID = provisioning-service-backend
-Code = 4R
+Code = 4U
 Version = 1.0
-Name = Provisioning Stack Backend
+Name = Provisioning Service Backend (Preview)
 Vendor = Univention
-DockerScriptRestoreDataAfterSetup =
-DockerScriptStoreData =
-DockerScriptUpdateAvailable =
-DockerScriptRestoreDataBeforeSetup =
-DockerScriptUpdatePackages =
-DockerScriptUpdateAppVersion =
-DockerScriptUpdateRelease =
-DockerScriptSetup =
-DefaultPackages = python3-univention-provisioning-service-listener
+DockerScriptRestoreDataAfterSetup = 
+DockerScriptStoreData = 
+DockerScriptUpdateAvailable = 
+DockerScriptRestoreDataBeforeSetup = 
+DockerScriptUpdatePackages = 
+DockerScriptUpdateAppVersion = 
+DockerScriptUpdateRelease = 
+DockerScriptSetup = 
+DefaultPackages = python3-univention-provisioning-stack-listener
 ServerRole = domaincontroller_master
+Logo = logo.svg
 
