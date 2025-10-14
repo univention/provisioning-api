@@ -12,7 +12,7 @@ DockerScriptUpdatePackages =
 DockerScriptUpdateAppVersion = 
 DockerScriptUpdateRelease = 
 DockerScriptSetup = 
-DefaultPackages = python3-univention-provisioning-stack-listener
+DefaultPackages = python3-univention-provisioning-service-listener
 ServerRole = domaincontroller_master
 Logo = logo.svg
 
