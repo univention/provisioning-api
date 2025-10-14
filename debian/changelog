@@ -1,11 +1,5 @@
-univention-provisioning-stack-listener (1.0.1) unstable; urgency=medium
-
-  * Control traceback during the connection to the nats server.
-
- -- Ivan Barbecho Delgado <ivan.delgado@univention.de>  Thu, 26 Jun 2025 12:33:59 +0200
-
-univention-provisioning-stack-listener (1.0.0) unstable; urgency=medium
+univention-provisioning-service-listener (1.0.0) unstable; urgency=medium
 
   * Initial release.
 
- -- Ivan Barbecho Delgado <ivan.delgado@univention.de>  Thu, 19 Jun 2025 11:59:47 +0200
+ -- Christian Castens <castens@univention.de>  Tue, 14 Oct 2025 10:01:47 +0200
