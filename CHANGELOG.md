@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.0...v0.62.1) (2025-10-14)
+
+
+### Bug Fixes
+
+* adjust keyMapping in values for api.nats.auth.existingSecret ([e2f1be1](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/e2f1be11e7733abd45f6cd6f6f9ae1fd00573584)), closes [univention/dev/internal/team-nubus#1399](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1399)
+
 ## [0.62.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.61.0...v0.62.0) (2025-10-13)
 
 
