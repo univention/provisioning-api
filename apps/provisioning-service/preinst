@@ -94,7 +94,7 @@ NATS_CONF='''{{
 }}
 '''
 
-SECRETS_FILE = "/etc/provisioning-json.secrets"
+SECRETS_FILE = "/etc/provisioning-secrets.json"
 SECRETS_KEYS = [
     "NATS_PASSWORD",
     "EVENTS_PASSWORD_UDM",
