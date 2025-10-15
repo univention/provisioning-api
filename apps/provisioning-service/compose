@@ -139,6 +139,7 @@ services:
       --provisioning-url https://@%@ldap/master@%@/univention/provisioning/
       --stream-name "primary2backup-@%@hostname@%@"
     environment:
+      @!@print(f"- HOST_SERVER_ROLE={configRegistry.get('server/role').lower()}")@!@
       - PROVISIONING_API_USERNAME=admin
       - PROVISIONING_API_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-secrets.json"))["NATS_PASSWORD"]);@!@
       - LOG_LEVEL=DEBUG
@@ -146,7 +147,6 @@ services:
       - MAX_ACKNOWLEDGEMENT_RETRIES=5
     volumes:
       - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
-      - /var/lib/univention-appcenter/apps/provisioning-service/conf/server_role.conf:/server_role.conf:ro
     networks:
       - nubus-provisioning
 

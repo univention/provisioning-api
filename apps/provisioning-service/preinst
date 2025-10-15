@@ -219,23 +219,6 @@ def nats_conf():
     os.chmod(nats_config_file, stat.S_IRUSR | stat.S_IWUSR)
     print(f"nats.conf file written to {nats_config_file}")
 
-def server_role_config():
-
-    ucr = univention.config_registry.ConfigRegistry()
-    ucr.load()
-
-    os.makedirs(os.path.join(APPCENTER_PATH, "conf/"), exist_ok=True)
-
-    server_role_file = os.path.join(APPCENTER_PATH, "conf/", "server_role.conf")
-    with open(server_role_file, "w") as f:
-        f.write(
-            ucr.get("server/role")
-        )
-
-    os.chown(server_role_file, 0, 0)
-    os.chmod(server_role_file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-    print(f"server_role.conf file written to {server_role_file}")
-
 def create_data_dir():
 
     path = os.path.join(APPCENTER_PATH, "data/")
@@ -246,7 +229,6 @@ if __name__ == "__main__":
     get_secrets_from_primary()
     create_secrets()
     nats_conf()
-    server_role_config()
     set_listener_username()
     set_listener_password()
     create_data_dir()
