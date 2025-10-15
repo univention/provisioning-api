@@ -5,6 +5,7 @@ Version = 1.0
 Name = Provisioning Service (preview)
 Vendor = Univention GmbH
 SupportedUcsVersions = 5.2-2
+ServerRole = domaincontroller_master, domaincontroller_backup
 WebInterface = /univention/provisioning
 WebInterfaceName = Provisioning Service
 WebInterfacePortHttps = 7777
