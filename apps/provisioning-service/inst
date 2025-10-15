@@ -58,27 +58,6 @@ wait_for_nats () {
 
 wait_for_nats || die
 
-python3 - <<'PY'
-import os
-import stat
-from univention.config_registry import ConfigRegistry
-
-APPCENTER_PATH = "/var/lib/univention-appcenter/apps/provisioning-service/"
-
-ucr = ConfigRegistry()
-ucr.load()
-
-os.makedirs(os.path.join(APPCENTER_PATH, "conf"), exist_ok=True)
-
-server_role_file = os.path.join(APPCENTER_PATH, "conf", "server_role.conf")
-with open(server_role_file, "w") as f:
-    f.write(ucr.get("server/role") or "")
-
-os.chown(server_role_file, 0, 0)
-os.chmod(server_role_file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-print(f"server_role.conf file written to {server_role_file}")
-PY
-
 systemctl restart univention-directory-listener
 
 
