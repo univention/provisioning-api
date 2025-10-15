@@ -60,7 +60,7 @@ nats consumer next teststream testconsumer
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.25.x |
+| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.28.0 |
 
 ## Values
 
