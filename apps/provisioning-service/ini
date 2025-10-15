@@ -37,7 +37,7 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	sub_name = "example"
 
 	def provisioning_admin_password():
-	    return json.load(open("/etc/provisioning-json.secrets"))["ADMIN_NATS_PASSWORD"]
+	    return json.load(open("/etc/provisioning-secrets.json"))["ADMIN_NATS_PASSWORD"]
 
 	def create_sub(provisioning_admin_username, provisioning_admin_password):
 	    create_sub_json = {
