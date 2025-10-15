@@ -128,7 +128,7 @@ services:
   backup-consumer:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/backup-consumer:feat-provisioning-stack-listener-cleanup"
     restart: "on-failure"
-    container_name: backup-consumer
+    container_name: "nubus-primary2backup-consumer"
     command: >
       backup_consumer
       --provisioning-api-admin-user admin
@@ -137,7 +137,7 @@ services:
       --nats-password @!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
       --target-nats "nats://nats:4222"
       --provisioning-url https://@%@ldap/master@%@/univention/provisioning/
-      --stream-name "backup"
+      --stream-name "primary2backup-@%@hostname@%@"
     environment:
       - PROVISIONING_API_USERNAME=admin
       - PROVISIONING_API_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-json.secrets"))["NATS_PASSWORD"]);@!@
