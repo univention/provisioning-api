@@ -1,48 +1,23 @@
 #!/usr/bin/python3
-#
-# App preinst script
-#
-# Copyright 2021-2025 Univention GmbH
-#
-# http://www.univention.de/
-#
-# All rights reserved.
-#
-# The source code of this program is made available
-# under the terms of the GNU Affero General Public License version 3
-# (GNU AGPL V3) as published by the Free Software Foundation.
-#
-# Binary versions of this program provided by Univention to you as
-# well as other copyrighted, protected or trademarked materials like
-# Logos, graphics, fonts, specific documentations and configurations,
-# cryptographic keys etc. are subject to a license agreement between
-# you and Univention and not subject to the GNU AGPL V3.
-#
-# In the case you use this program under the terms of the GNU AGPL V3,
-# the program is provided in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License with the Debian GNU/Linux or Univention distribution in file
-# /usr/share/common-licenses/AGPL-3; if not, see
-# <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
 
+import grp
 import json
 import os
+import pwd
 import secrets
-import sys
 import stat
 import string
-import pwd
-import grp
 import subprocess
-import univention.config_registry
+import sys
+
+from univention.config_registry import ConfigRegistry
+from univention.config_registry.frontend import ucr_update
 
 APPCENTER_PATH = "/var/lib/univention-appcenter/apps/provisioning-service/"
 
-NATS_CONF='''{{
+NATS_CONF = """{{
   server_name: nats
   pid_file: "/nats.pid"
   port: 4222
@@ -92,107 +67,77 @@ NATS_CONF='''{{
     ]
   }}
 }}
-'''
+"""
 
 SECRETS_FILE = "/etc/provisioning-secrets.json"
-SECRETS_KEYS = [
-    "NATS_PASSWORD",
-    "EVENTS_PASSWORD_UDM",
-    "PROVISIONING_API_ADMIN_PASSWORD"
-]
+SECRETS_KEYS = ["NATS_PASSWORD", "EVENTS_PASSWORD_UDM", "PROVISIONING_API_ADMIN_PASSWORD"]
 LISTENER_SECRETS_FILE = "/etc/nats/provisioning-listener.secret"
 
+ucr = ConfigRegistry()
+ucr.load()
+
+
 def _alphanum_token(length=32):
+    return "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(length))
 
-    return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(length))
 
-def set_listener_username():
-
-    ucr = univention.config_registry.ConfigRegistry()
-    ucr.load()  # Load current UCR variables
-    ucr['nats/user'] = 'udm-transformer'
-    ucr.save()
-
-def set_listener_password():
-
-    # create directory #
-    os.makedirs(os.path.dirname(LISTENER_SECRETS_FILE), exist_ok=True)
-
-    # write secrets file #
-    with open(SECRETS_FILE) as f:
-
-        listener_password = json.load(f)["NATS_PASSWORD"]
-
-        with open(LISTENER_SECRETS_FILE, "w") as fl:
-            fl.write(listener_password)
-
-        # ensure file owned by root #
-        user_info = pwd.getpwnam("listener")
-        uid = user_info.pw_uid
-        os.chown(LISTENER_SECRETS_FILE, uid, 0)
-        os.chmod(LISTENER_SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR)
-
-def load_secrets(filepath):
-    """Load secrets from a JSON file if it exists and is valid."""
-
+def _load_secrets(filepath):
     if os.path.isfile(filepath):
-
         try:
             with open(filepath, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError:
             print(f"Warning: {filepath} is not valid JSON.", file=sys.stderr)
-
     return {}
 
-def generate_missing_secrets(existing_secrets, required_keys):
-    """Generate random secrets for missing keys"""
 
+def _generate_missing_secrets(existing_secrets, required_keys):
+    """Generate random secrets for missing keys"""
     updated = False
     for key in required_keys:
         if key not in existing_secrets:
             existing_secrets[key] = _alphanum_token(32)
             updated = True
             print(f"Generated new secret for: {key}")
-
     return updated, existing_secrets
 
-def save_secrets(filepath, secrets_data):
-    """Save secrets to JSON file"""
 
-    with open(filepath, "w") as f:
-        json.dump(secrets_data, f, indent=2)
+def setup_listener():
+    ucr_update(ucr, {"nats/user": "udm-transformer"})
 
-def get_secrets_from_primary():
-    """Retrieve Secrets from primary if backup"""
+    os.makedirs(os.path.dirname(LISTENER_SECRETS_FILE), exist_ok=True)
+    with open(SECRETS_FILE) as f:
+        listener_password = json.load(f)["NATS_PASSWORD"]
 
-    ucr = univention.config_registry.ConfigRegistry()
-    ucr.load()
+        with open(LISTENER_SECRETS_FILE, "w") as fl:
+            fl.write(listener_password)
 
-    if ucr.get("server/role") not in ["domaincontroller_backup"]:
-      return
+        user_info = pwd.getpwnam("listener")
+        uid = user_info.pw_uid
+        os.chown(LISTENER_SECRETS_FILE, uid, 0)
+        os.chmod(LISTENER_SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR)
 
-    machine_secret = "/etc/machine.secret"
-    hostname = ucr.get("hostname")
-    primary = ucr.get("ldap/master")
 
-    username = f"{hostname}$"
-    cmd = ["univention-scp", machine_secret, f"{username}@{primary}:{SECRETS_FILE} {SECRETS_FILE}"]
-    try:
-      subprocess.check_output(cmd, universal_newlines=True)
-      print(f"Successfully copied secrets from primary")
-    except subprocess.CalledProcessError as e:
-      print(f"Failed to retrieve secrets from primary: {e}")
-      sys.exit(1)
+def create_nats_conf():
+    os.makedirs(os.path.join(APPCENTER_PATH, "conf/"), exist_ok=True)
+    secrets = _load_secrets(SECRETS_FILE)
+    nats_config_file = os.path.join(APPCENTER_PATH, "conf/", "nats.conf")
+
+    with open(nats_config_file, "w") as f:
+        f.write(NATS_CONF.format(NATS_PASSWORD=secrets["NATS_PASSWORD"]))
+
+    os.chown(nats_config_file, 0, 0)
+    os.chmod(nats_config_file, stat.S_IRUSR | stat.S_IWUSR)
+    print(f"nats.conf file written to {nats_config_file}")
 
 
 def create_secrets():
-
-    secrets_data = load_secrets(SECRETS_FILE)
-    updated, secrets_data = generate_missing_secrets(secrets_data, SECRETS_KEYS)
+    secrets_data = _load_secrets(SECRETS_FILE)
+    updated, secrets_data = _generate_missing_secrets(secrets_data, SECRETS_KEYS)
 
     if updated:
-        save_secrets(SECRETS_FILE, secrets_data)
+        with open(SECRETS_FILE, "w") as f:
+            json.dump(secrets_data, f, indent=2)
     else:
         print(f"All secrets already present in {SECRETS_FILE}")
 
@@ -203,32 +148,53 @@ def create_secrets():
     os.chown(SECRETS_FILE, 0, gid)
     os.chmod(SECRETS_FILE, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
 
-def nats_conf():
+
+def get_secrets_from_primary():
+    """
+    For now, we decided to simply sync the secrets file from the Primary to the Backup.
+    """
+    machine_secret = "/etc/machine.secret"
+    hostname = ucr.get("hostname")
+    primary = ucr.get("ldap/master")
+
+    username = f"{hostname}$"
+    cmd = ["univention-scp", machine_secret, f"{username}@{primary}:{SECRETS_FILE} {SECRETS_FILE}"]
+    try:
+        subprocess.check_output(cmd, universal_newlines=True)
+        print("Successfully copied secrets from primary")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to retrieve secrets from primary: {e}")
+        sys.exit(1)
 
 
-    os.makedirs(os.path.join(APPCENTER_PATH, "conf/"), exist_ok=True)
-    secrets = load_secrets(SECRETS_FILE)
+def check_app_installed_on_primary():
+    """
+    The app must be installed on the Primary Directory Node first.
+    """
+    try:
+        p = subprocess.run(["univention-app", "domain"], capture_output=True, check=True, text=True, timeout=20)
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: `univention-app domain` command failed (exit {e.returncode}).\n{e.stderr}")
+        sys.exit(1)
+    except subprocess.TimeoutExpired as e:
+        print(
+            "ERROR: `univention-app domain` did not return within 20 seconds. Could not verify that "
+            f"Provisioning Service app is installed on Primary Directory Node. Aborting..\n{e}"
+        )
+        sys.exit(1)
 
-    nats_config_file = os.path.join(APPCENTER_PATH, "conf/", "nats.conf")
-    with open(nats_config_file, "w") as f:
-        f.write(NATS_CONF.format(
-                NATS_PASSWORD=secrets["NATS_PASSWORD"]
-        ))
+    for line in p.stdout.splitlines():
+        if "provisioning-service=" in line and "provisioning-service-backend=" in line:
+            return
 
-    os.chown(nats_config_file, 0, 0)
-    os.chmod(nats_config_file, stat.S_IRUSR | stat.S_IWUSR)
-    print(f"nats.conf file written to {nats_config_file}")
+    print("ERROR: Provisioning Service app not installed on Primary Directory Node. Aborting..")
+    sys.exit(1)
 
-def create_data_dir():
-
-    path = os.path.join(APPCENTER_PATH, "data/")
-    os.makedirs(path, exist_ok=True)
 
 if __name__ == "__main__":
-
-    get_secrets_from_primary()
+    if ucr.get("server/role") == "domaincontroller_backup":
+        check_app_installed_on_primary()
+        get_secrets_from_primary()
     create_secrets()
-    nats_conf()
-    set_listener_username()
-    set_listener_password()
-    create_data_dir()
+    create_nats_conf()
+    setup_listener()
