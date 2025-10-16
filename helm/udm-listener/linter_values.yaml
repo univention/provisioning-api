@@ -3,7 +3,7 @@
 ---
 global:
   secrets:
-    masterPassword: "nubus"
+    masterPassword: ""
 
 ldap:
   auth:
