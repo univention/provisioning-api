@@ -13,8 +13,8 @@ def test_empty_body_error():
         "realm": "ldap",
         "topic": "ldap",
         "body": {
-            "new": None,
-            "old": None,
+            "new": dict(),
+            "old": dict(),
         },
     }
     with pytest.raises(EmptyBodyError) as err:
@@ -46,7 +46,7 @@ def test_no_udm_type_error():
                 "subschemaSubentry": [b"cn=Subschema"],
                 "hasSubordinates": [b"FALSE"],
             },
-            "old": None,
+            "old": dict(),
         },
     }
     with pytest.raises(NoUDMTypeError) as err:

@@ -39,7 +39,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.ROOT_PATH | string | `"/"` |  |
 | api.image.pullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
-| api.image.repository | string | `"nubus-dev/images/provisioning-events-and-consumer-api"` |  |
+| api.image.repository | string | `"nubus-dev/images/provisioning-api"` |  |
 | api.image.tag | string | `"0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"` |  |
 | api.nats.auth.existingSecret.keyMapping.provisioningApiPassword | string | `nil` |  |
 | api.nats.auth.existingSecret.name | string | `nil` |  |
