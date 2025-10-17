@@ -41,7 +41,7 @@ api:
   image:
     registry: ""
     pullPolicy: null
-    repository: "nubus-dev/images/provisioning-events-and-consumer-api"
+    repository: "nubus-dev/images/provisioning-api"
     tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
   # If specified environment variables will be set on the container
   nats:

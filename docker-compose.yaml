@@ -3,7 +3,7 @@
 
 services:
   provisioning-api:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-events-and-consumer-api:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
