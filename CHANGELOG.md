@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.62.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.2...v0.62.3) (2025-10-17)
+
+
+### Bug Fixes
+
+* **charts:** also use master password for NATS secrets ([90e503c](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/90e503c1d765b0ea4a37d82e20a32dbc31488210)), closes [univention/dev/internal/team-nubus#1441](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1441)
+* make all helm tests pass with helm test version 0.27.0 ([f62cb35](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/f62cb358313a1b33255c8d7f71b23ebc17a44c19)), closes [univention/dev/internal/team-nubus#1441](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1441)
+
 ## [0.62.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.1...v0.62.2) (2025-10-14)
 
 
