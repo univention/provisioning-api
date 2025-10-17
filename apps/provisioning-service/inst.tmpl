@@ -32,6 +32,14 @@ wait_for_nats || die
 
 systemctl restart univention-directory-listener
 
+# install backup2master script
+mkdir -p /usr/lib/univention-backup2master/post
+backup2master_path=/usr/lib/univention-backup2master/pre/provisioning-service-backup2master.sh
+echo "Installing provisioning backup2master script at $backup2master_path"
+	cat <<%EOF >"backup2master_path"
+%PROVISIONING-BACKUP2MASTER-POST%
+%EOF
+chmod +x "$backup2master_path
 
 joinscript_save_current_version
 
