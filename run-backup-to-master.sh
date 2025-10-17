@@ -12,9 +12,10 @@
 #   SKIP_PROMOTION=1        # only (re)initialize the app, do not promote
 #   DRY_RUN=1               # show what would run
 #
-set -euo pipefail
+set -euo pipefail -x
 
-APP_NAME="${APP_NAME:-provisioning}"
+APP_NAME="${APP_NAME:-provisioning-service}"
+APP_BACKEND_NAME="${APP_BACKEND_NAME:-provisioning-service-backend}"
 LOG_DIR="/var/log/univention"
 SCRIPT_LOG="${LOG_DIR}/backup2master_and_${APP_NAME}.log"
 PROMOTE_LOG="${LOG_DIR}/backup2master.log"
@@ -45,6 +46,16 @@ require_cmd ucr
 require_cmd univention-app
 require_cmd univention-run-join-scripts
 
+# --- Check installed apps ---
+
+# --- Check APP_NAME is installed and backend not yet installed ---
+if ! univention-app info | grep -P '^(?=.*\bprovisioning-service=[^ ]+\b)(?!.*\bprovisioning-service-backend=[^ ]+\b).*' > /dev/null; then
+  echo "ERROR: App '${APP_NAME}' not installed or backend '${APP_BACKEND_NAME}' already installed." >&2
+  exit 1
+fi
+
+
+# --- Check current server role ---
 ROLE="$(ucr get server/role || true)"
 if [[ -z "$ROLE" ]]; then
   echo "ERROR: Could not determine UCS server role via UCR." >&2
@@ -53,8 +64,8 @@ fi
 echo "Detected server role: ${ROLE}"
 
 if [[ "${SKIP_PROMOTION:-0}" != "1" ]]; then
-  if [[ "$ROLE" != "domaincontroller_backup" ]]; then
-    echo "ERROR: This system is not a Backup Directory Node (found: ${ROLE}). Aborting."
+  if [[ "$ROLE" != "domaincontroller_master" ]]; then
+    echo "ERROR: This system is not a Master Directory Node (found: ${ROLE}). Aborting."
     exit 1
   fi
 
@@ -63,46 +74,16 @@ if [[ "${SKIP_PROMOTION:-0}" != "1" ]]; then
   sleep 2
 fi
 
-# --- Optional: sanity info for DNS and repository reachability (best-effort) ---
-MASTER_HOST="$(ucr get ldap/master || true)"
-if [[ -n "$MASTER_HOST" ]]; then
-  echo "Current ldap/master in UCR: ${MASTER_HOST}"
-fi
 
 # --- App Center cache refresh (harmless) ---
 echo "Refreshing App Center cache..."
 run "univention-app update"
 
-# --- Promotion: Backup -> Master ---
-if [[ "${SKIP_PROMOTION:-0}" != "1" ]]; then
-  echo "Starting promotion using /usr/lib/univention-ldap/univention-backup2master ..."
-  # The tool is interactive when it finds leftover refs; NONINTERACTIVE lets you auto-accept.
-  if [[ "${NONINTERACTIVE:-0}" == "1" ]]; then
-    # Feed 'yes' to suggested fixes step
-    run "yes | /usr/lib/univention-ldap/univention-backup2master"
-  else
-    run "/usr/lib/univention-ldap/univention-backup2master"
-  fi
-
-  echo "Promotion finished. Details logged to ${PROMOTE_LOG}."
-  echo "Rebooting is required by the official procedure. Rebooting now..."
-  if [[ "$DRY_RUN" == "1" ]]; then
-    echo "[DRY-RUN] Reboot skipped."
-  else
-    sleep 2
-    systemctl reboot
-    # The script will stop here due to reboot. If you want to auto-continue after reboot,
-    # place the app reinit part in a systemd oneshot or cron @reboot hook.
-  fi
-fi
-
-# If we’re here, either SKIP_PROMOTION=1 or DRY_RUN=1. Continue with app reinitialize.
-echo "Proceeding to reinitialize app: ${APP_NAME}"
-
-# --- Verify app is installed / known ---
-if ! univention-app info | grep -q -E "^\s*${APP_NAME}\s"; then
-  echo "WARNING: App '${APP_NAME}' not found in 'univention-app info'. Attempting anyway..."
-fi
+# --- Install backend app ---
+univention-app install --noninteractive "${APP_BACKEND_NAME}" || {
+  echo "ERROR: Failed to install backend app '${APP_BACKEND_NAME}'." >&2
+  exit 1
+}
 
 # Reinitialize: this recreates the app container with current settings.
 # This is supported by the App Center and is commonly used by several UCS apps
@@ -110,12 +91,5 @@ fi
 echo "Reinitializing ${APP_NAME}..."
 run "univention-app reinitialize ${APP_NAME}"
 
-# Optionally, ensure services are up
-echo "Restarting ${APP_NAME} to be safe..."
-run "univention-app restart ${APP_NAME}"
-
-# Post-join scripts (often needed after role changes / app operations)
-echo "Running univention join scripts (best-effort)..."
-run "univention-run-join-scripts || true"
 
 echo "=== $(date -Is) :: Completed. Log: ${SCRIPT_LOG} ==="
