@@ -103,7 +103,7 @@ class NatsMessageQueue(MessageQueue):
 
         await self._js.publish(
             subject,
-            binary_encoder(message.model_dump()),
+            binary_encoder(message.dict()),
             stream=stream_name,
         )
         logger.debug(

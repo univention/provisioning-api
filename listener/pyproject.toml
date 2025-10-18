@@ -17,7 +17,7 @@ dependencies = [
     "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
-    "pydantic-settings<3.0.0,>=2.5.2",
+    "pydantic<2",
     "psutil<6.0.0,>=5.9.0",
 ]
 
@@ -25,8 +25,8 @@ dependencies = [
 dev = ["pytest==7.4.4", "pytest-asyncio==0.21.2", "pytest-cov==4.1.0"]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends" }
-nubus-provisioning-common = { path = "../common" }
+nubus-provisioning-backends = { path = "../backends", editable = true }
+nubus-provisioning-common = { path = "../common", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]

@@ -110,7 +110,7 @@ class NatsKeyValueDB(KeyValueDB):
             entry = await kv_store.get(key)
             try:
                 subscription_dict = json.loads(entry.value)
-                subscription = Subscription.model_validate(subscription_dict)
+                subscription = Subscription(**subscription_dict)
             except ValueError as exc:
                 logger.error("Bad subscription data in KV store. key=%r entry=%r exc=%s", key, entry, exc)
                 raise

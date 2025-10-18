@@ -12,24 +12,24 @@ SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
-    UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.11
-    # UV_PROJECT_ENVIRONMENT=/app
+  UV_COMPILE_BYTECODE=1 \
+  UV_PYTHON_DOWNLOADS=never \
+  UV_PYTHON=python3.11
 
+# copy dependencies
 COPY ./backends /app/backends
 COPY ./common /app/common
 COPY ./udm-transformer/uv.lock \
-     ./udm-transformer/pyproject.toml \
-     /app/udm-transformer/
+  ./udm-transformer/pyproject.toml \
+  /app/udm-transformer/
 
 WORKDIR /app/udm-transformer
 RUN --mount=type=cache,target=/root/.cache \
   uv venv --system-site-packages && \
   uv sync \
-    --locked \
-    --no-dev \
-    --no-install-project && \
+  --locked \
+  --no-dev \
+  --no-install-project && \
   uv export -o ./requirements.txt
 
 # copy source code
@@ -38,7 +38,7 @@ COPY ./udm-transformer/src /app/udm-transformer/src
 RUN uv sync --locked --no-dev --no-editable
 
 ###############################################
-# Stage 3: final image
+# Stage 2: final image
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
@@ -62,7 +62,9 @@ USER ${USER}
 
 CMD ["udm-transformer"]
 
- RUN \
-   python3.11 -V && \
-   python3.11 -m site && \
-   python3.11 -c 'import univention.provisioning.udm_transformer.main'
+RUN \
+  python3 -V && \
+  python3 -m site && \
+  python3 -c 'import univention.provisioning.backends' && \
+  python3 -c 'import univention.provisioning.models' && \
+  python3 -c 'import univention.provisioning.udm_transformer.main'

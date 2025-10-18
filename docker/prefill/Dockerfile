@@ -12,11 +12,11 @@ SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
-    UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.11
-    # UV_PROJECT_ENVIRONMENT=/app
+  UV_COMPILE_BYTECODE=1 \
+  UV_PYTHON_DOWNLOADS=never \
+  UV_PYTHON=python3.11
 
+# copy dependencies
 COPY ./backends /app/backends
 COPY ./common /app/common
 COPY ./prefill/uv.lock \
@@ -26,38 +26,46 @@ COPY ./prefill/uv.lock \
 WORKDIR /app/prefill
 RUN --mount=type=cache,target=/root/.cache \
   uv sync \
-    --locked \
-    --no-dev \
-    --no-install-project && \
+  --locked \
+  --no-dev \
+  --no-install-package nubus-provisioning-backends \
+  --no-install-package nubus-provisioning-common \
+  --no-install-project && \
   uv export -o ./requirements.txt
 
 # copy source code
 COPY ./prefill/src /app/prefill/src
 
+# Install the project in editable mode so that changes to source files in
+# dispatcher/src are immediately reflected in the container.
+# This avoids issues with Docker build cache and ensures the venv always
+# uses the latest source code.
 RUN --mount=type=cache,target=/root/.cache \
-  uv sync --locked --no-dev --no-editable
+  uv sync --locked --no-dev
 
 ###############################################
-# Stage 3: final image
+# Stage 2: final image
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/app/prefill/.venv/bin:$PATH
+  PATH=/app/prefill/.venv/bin:$PATH
 
 ARG USER=prefill
 RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
-    rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-    groupadd -r ${USER} -g 1000 && \
-    useradd -r -d /app -g ${USER} -N ${USER} -u 1000
+  rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+  groupadd -r ${USER} -g 1000 && \
+  useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 
-COPY --from=build --chown=${USER}:${USER} /app/prefill /app/prefill
+COPY --from=build --chown=${USER}:${USER} /app /app
 
 USER ${USER}
 
 CMD ["prefill"]
 
 RUN \
-  python3.11 -V && \
-  python3.11 -m site && \
-  python3.11 -c 'import univention.provisioning.prefill.main'
+  python3 -V && \
+  python3 -m site && \
+  python3 -c 'import univention.provisioning.backends' && \
+  python3 -c 'import univention.provisioning.models' && \
+  python3 -c 'import univention.provisioning.prefill.main'

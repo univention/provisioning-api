@@ -34,7 +34,7 @@ FLAT_BODY = {
 }
 PUBLISHER_NAME = PublisherName.ldif_producer
 GROUPS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=GROUPS_TOPIC)]
-GROUPS_REALMS_TOPICS_as_dicts = [r.model_dump() for r in GROUPS_REALMS_TOPICS]
+GROUPS_REALMS_TOPICS_as_dicts = [r.dict() for r in GROUPS_REALMS_TOPICS]
 USERS_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=USERS_TOPIC)]
 DUMMY_REALMS_TOPICS = [RealmTopic(realm=REALM, topic=DUMMY_TOPIC)]
 SUBSCRIPTION_NAME = "0f084f8c-1093-4024-b215-55fe8631ddf6"
@@ -50,7 +50,7 @@ SUBSCRIPTION_INFO = {
     "prefill_queue_status": "done",
 }
 SUBSCRIPTION_INFO_dumpable = deepcopy(SUBSCRIPTION_INFO)
-SUBSCRIPTION_INFO_dumpable["realms_topics"] = [r.model_dump() for r in SUBSCRIPTION_INFO_dumpable["realms_topics"]]
+SUBSCRIPTION_INFO_dumpable["realms_topics"] = [r.dict() for r in SUBSCRIPTION_INFO_dumpable["realms_topics"]]
 MESSAGE = Message(
     publisher_name=PUBLISHER_NAME,
     ts=datetime(2023, 11, 9, 11, 15, 52, 616061),
@@ -108,9 +108,7 @@ MSG = Msg(
     ),
 )
 _FLAT_PREFILL_MESSAGE_dumpable = deepcopy(FLAT_PREFILL_MESSAGE)
-_FLAT_PREFILL_MESSAGE_dumpable["realms_topics"] = [
-    r.model_dump() for r in _FLAT_PREFILL_MESSAGE_dumpable["realms_topics"]
-]
+_FLAT_PREFILL_MESSAGE_dumpable["realms_topics"] = [r.dict() for r in _FLAT_PREFILL_MESSAGE_dumpable["realms_topics"]]
 MSG_PREFILL = Msg(
     _client="nats",
     reply=REPLY,
@@ -168,4 +166,4 @@ BASE_KV_OBJ = KeyValue.Entry(
     bucket="KV_bucket", key="", value=None, revision=1, delta=None, created=None, operation=None
 )
 
-SUBSCRIPTIONS = {REALM: {GROUPS_TOPIC: {Subscription.model_validate(SUBSCRIPTION_INFO)}}}
+SUBSCRIPTIONS = {REALM: {GROUPS_TOPIC: {Subscription(**SUBSCRIPTION_INFO)}}}

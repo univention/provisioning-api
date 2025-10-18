@@ -35,5 +35,5 @@ class MessagesRestApiEventSender(EventSender):
             await self._session.close()
 
     async def send_event(self, message: Message):
-        async with self._session.post(f"{self._url}/v1/messages", json=message.model_dump()):
+        async with self._session.post(f"{self._url}/v1/messages", json=message.dict()):
             pass

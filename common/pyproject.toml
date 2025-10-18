@@ -10,7 +10,7 @@ requires-python = "==3.11.*"
 
 dependencies = [
     "asgi-correlation-id<5.0.0,>=4.3.3",
-    "pydantic<3.0.0,>=2.9.2",
+    "pydantic<2",
 ]
 
 [tool.hatch.build.targets.wheel]

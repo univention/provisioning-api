@@ -15,11 +15,11 @@ SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
-    UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.11
-    # UV_PROJECT_ENVIRONMENT=/app
+  UV_COMPILE_BYTECODE=1 \
+  UV_PYTHON_DOWNLOADS=never \
+  UV_PYTHON=python3.11
 
+# copy dependencies
 COPY ./backends /app/backends
 COPY ./common /app/common
 COPY ./listener/uv.lock \
@@ -29,9 +29,9 @@ COPY ./listener/uv.lock \
 WORKDIR /app/listener
 RUN --mount=type=cache,target=/root/.cache \
   uv sync \
-    --locked \
-    --no-dev \
-    --no-install-project && \
+  --locked \
+  --no-dev \
+  --no-install-project && \
   uv export -o ./requirements.txt
 
 # copy source code
@@ -80,11 +80,11 @@ COPY ./listener/src/ldap_listener.py /usr/lib/univention-directory-listener/syst
 #     useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 #
 # COPY --from=build --chown=${USER}:${USER} /app/listener /app/listener
-COPY --from=build /app/listener /app/listener
+COPY --from=build /app /app
 
-USER ${USER}
-#
-# RUN \
-#   python3.11 -V && \
-#   python3.11 -m site && \
-#   python3.11 -c 'import univention.provisioning.listener'
+RUN \
+  python3 -V && \
+  python3 -m site && \
+  python3 -c 'import univention.provisioning.backends' && \
+  python3 -c 'import univention.provisioning.models' && \
+  python3 -c 'import univention.provisioning.listener'

@@ -42,7 +42,7 @@ class SubscriptionsRestApiAdapter(UpdateSubscriptionsQueueStatusPort):
         try:
             async with self._session.patch(
                 f"{self._url}/v1/subscriptions/{subscription_name}/prefill",
-                json=FillQueueStatusReport(status=status.value).model_dump(),
+                json=FillQueueStatusReport(status=status.value).dict(),
             ) as response:
                 response.raise_for_status()
         except aiohttp.ClientResponseError as e:

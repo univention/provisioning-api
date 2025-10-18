@@ -52,7 +52,7 @@ class TestSubscriptionsRoute:
             self.subscriptions_url,
             json={
                 "name": SUBSCRIPTION_NAME,
-                "realms_topics": [t.model_dump() for t in GROUPS_REALMS_TOPICS],
+                "realms_topics": [t.dict() for t in GROUPS_REALMS_TOPICS],
                 "request_prefill": True,
                 "password": "password",
             },

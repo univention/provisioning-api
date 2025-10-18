@@ -4,7 +4,7 @@ import enum
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
+from pydantic import BaseModel, Field, root_validator, validator
 from typing_extensions import Literal, Self
 
 from .constants import PublisherName
@@ -26,9 +26,10 @@ class BaseMessage(BaseModel):
     publisher_name: PublisherName = Field(description="The name of the publisher of the message.")
     ts: datetime = Field(description="The timestamp when the message was received by the dispatcher.")
 
-    @field_serializer("ts")
-    def serialize_dt(self, dt: datetime, _info):
-        return dt.isoformat()
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
 
 
 class Body(BaseModel):
@@ -37,26 +38,26 @@ class Body(BaseModel):
 
     # Temporary validator due to the hardcoded image version of udm-listener.
     # This will be removed once we switch from udm-listener to ldif-producer.
-    @field_validator("old", "new", mode="before")
+    @validator("old", "new", pre=True)
     @classmethod
     def set_empty_dict(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return v or {}
 
-    @model_validator(mode="after")
-    def check_not_both_empty(self) -> Self:
-        if not self.old and not self.new:
+    @root_validator()
+    def check_not_both_empty(cls, values) -> Self:
+        if not values.get("old") and not values.get("new"):
             raise EmptyBodyError("'old' and 'new' cannot be both empty.")
-        return self
+        return values
 
-    @model_validator(mode="after")
-    def check_has_udm_object_type(self) -> Self:
-        if LDAP_OBJECT_TYPE_FIELD in self.new or LDAP_OBJECT_TYPE_FIELD in self.old:
+    @root_validator()
+    def check_has_udm_object_type(cls, values) -> Self:
+        if LDAP_OBJECT_TYPE_FIELD in values.get("new") or LDAP_OBJECT_TYPE_FIELD in values.get("old"):
             obj_type = LDAP_OBJECT_TYPE_FIELD
         else:
             obj_type = UDM_OBJECT_TYPE_FIELD
-        if not self.new.get(obj_type) and not self.old.get(obj_type):
+        if not values.get("new").get(obj_type) and not values.get("old").get(obj_type):
             raise NoUDMTypeError("No UDM type in both 'new' and 'old'.")
-        return self
+        return values
 
 
 class LDIFProducerBody(Body):

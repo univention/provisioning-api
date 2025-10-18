@@ -76,7 +76,7 @@ test-unit-and-integration:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
   script:
-    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv --cov=/app/backends/src/ --cov=/app/common/src/ --cov=/app/consumer/src/ --cov dispatcher/src/ --cov=/app/prefill/src/ --cov=/app/rest-api/src/ --cov=/app/udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
