@@ -3,8 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import conint
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings, conint
 
 Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 

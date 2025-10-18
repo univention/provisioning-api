@@ -86,7 +86,7 @@ class TransformerService:
 
     async def handle_message(self, data: dict[str, Any]):
         try:
-            validated_message = Message.model_validate(data)
+            validated_message = Message(**data)
         except EmptyBodyError:
             logger.warning("Ignoring LDAP message with empty 'new' and 'old'.")
             return

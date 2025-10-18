@@ -18,7 +18,7 @@ def test_empty_body_error():
         },
     }
     with pytest.raises(EmptyBodyError) as err:
-        Message.model_validate(data)
+        Message(**data)
 
     assert err
 
@@ -50,6 +50,6 @@ def test_no_udm_type_error():
         },
     }
     with pytest.raises(NoUDMTypeError) as err:
-        Message.model_validate(data)
+        Message(**data)
 
     assert err

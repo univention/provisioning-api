@@ -15,13 +15,12 @@ dependencies = [
     "msgpack<2.0.0,>=1.1.0",
     "nubus-provisioning-common",
     "nubus-provisioning-backends",
-    "pydantic<3.0.0,>=2.9.2",
-    "pydantic-settings<3.0.0,>=2.5.2",
+    "pydantic<2",
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends" }
-nubus-provisioning-common = { path = "../common" }
+nubus-provisioning-backends = { path = "../backends", editable = true }
+nubus-provisioning-common = { path = "../common", editable = true }
 
 [project.scripts]
 udm-transformer = "univention.provisioning.udm_transformer.main:run"

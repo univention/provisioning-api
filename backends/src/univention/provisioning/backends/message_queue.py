@@ -2,12 +2,14 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import asyncio
+import datetime
 import json
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Coroutine, List, NamedTuple, Optional, Tuple
 
 from nats.aio.msg import Msg
+from pydantic import BaseModel
 from typing_extensions import Self
 
 from univention.provisioning.models.message import BaseMessage, MQMessage
@@ -18,11 +20,19 @@ logger = logging.getLogger(__name__)
 class Empty(Exception): ...
 
 
+def _json_encode(data: Any) -> str:
+    if isinstance(data, BaseModel):
+        return data.dict()
+    if isinstance(data, datetime.datetime):
+        return data.isoformat()
+    return json.dumps(data)
+
+
 def json_encoder(data: Any) -> bytes:
-    return json.dumps(data).encode("utf-8")
+    return json.dumps(data, default=_json_encode).encode("utf-8")
 
 
-def json_decoder(data: Any) -> bytes:
+def json_decoder(data: Any) -> Any:
     return json.loads(data)
 
 

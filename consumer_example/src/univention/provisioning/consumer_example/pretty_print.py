@@ -39,7 +39,7 @@ def handle_udm_message(msg: ProvisioningMessage):
 
 def handle_any_message(msg: ProvisioningMessage):
     print_header(msg)
-    logger.debug(msg.model_dump_json(indent=2))
+    logger.debug(msg.json(indent=2))
 
 
 def _cprint(text: str, fg: Optional[str] = None, bg: Optional[str] = None, **kwargs):

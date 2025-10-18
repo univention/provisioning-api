@@ -93,7 +93,7 @@ class PrefillService:
         )
         logger.debug("Message content: %r", data)
         try:
-            validated_message = PrefillMessage.model_validate(data)
+            validated_message = PrefillMessage(**data)
         except ValidationError:
             logger.exception(
                 "failed to parse message with sequence_number: %r",

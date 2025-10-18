@@ -12,10 +12,11 @@ SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
-    UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.11
+  UV_COMPILE_BYTECODE=1 \
+  UV_PYTHON_DOWNLOADS=never \
+  UV_PYTHON=python3.11
 
+# copy dependencies
 COPY ./common /app/common
 COPY ./consumer /app/consumer
 COPY ./consumer_example/uv.lock \
@@ -23,18 +24,25 @@ COPY ./consumer_example/uv.lock \
      /app/consumer_example/
 
 WORKDIR /app/consumer_example
+# install dependencies except univention.provisioning.*
+# as mixing namespace packages editable and non-editable causes issues
 RUN --mount=type=cache,target=/root/.cache \
   uv sync \
-    --locked \
-    --no-dev \
-    --no-install-project && \
+  --locked \
+  --no-dev \
+  --no-install-package nubus-provisioning-common \
+  --no-install-project && \
   uv export -o ./requirements.txt
 
 # copy source code
 COPY ./consumer_example/src /app/consumer_example/src
 
+# Install the project in editable mode so that changes to source files in
+# dispatcher/src are immediately reflected in the container.
+# This avoids issues with Docker build cache and ensures the venv always
+# uses the latest source code.
 RUN --mount=type=cache,target=/root/.cache \
-  uv sync --locked --no-dev --no-editable
+  uv sync --locked --no-dev
 
 ###############################################
 # Stage 2: final image
@@ -46,17 +54,18 @@ ENV PYTHONUNBUFFERED=1 \
 
 ARG USER=consumer_example
 RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
-    rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-    groupadd -r ${USER} -g 1000 && \
-    useradd -r -d /app -g ${USER} -N ${USER} -u 1000
+  rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+  groupadd -r ${USER} -g 1000 && \
+  useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 
-COPY --from=build --chown=${USER}:${USER} /app/consumer_example /app/consumer_example
+COPY --from=build --chown=${USER}:${USER} /app /app
 
 USER ${USER}
 
 CMD ["consumer_example"]
 
 RUN \
-  python3.11 -V && \
-  python3.11 -m site && \
-  python3.11 -c 'import univention.provisioning.consumer_example.main'
+  python3 -V && \
+  python3 -m site && \
+  python3 -c 'import univention.provisioning.models' && \
+  python3 -c 'import univention.provisioning.consumer_example.main'

@@ -12,13 +12,12 @@ dependencies = [
     "jsondiff<3.0.0,>=2.2.1",
     # TODO: Update version
     "nubus-provisioning-common==0.1.0",
-    "pydantic<3.0.0,>=2.9.2",
-    "pydantic-settings<3.0.0,>=2.5.2",
+    "pydantic<2",
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends" }
-nubus-provisioning-common = { path = "../common" }
+nubus-provisioning-backends = { path = "../backends", editable = true }
+nubus-provisioning-common = { path = "../common", editable = true }
 
 [[tool.uv.index]]
 name = "gitlab"

@@ -62,8 +62,8 @@ class ProvisioningConsumerClient:
             password=password,
         )
 
-        logger.debug(subscription.model_dump())
-        return await self.session.post(self.settings.subscriptions_url, json=subscription.model_dump())
+        logger.debug(subscription.dict())
+        return await self.session.post(self.settings.subscriptions_url, json=subscription.dict())
 
     async def cancel_subscription(self, name: str):
         return await self.session.delete(f"{self.settings.subscriptions_url}/{name}")
@@ -71,7 +71,7 @@ class ProvisioningConsumerClient:
     async def get_subscription(self, name: str) -> Subscription:
         response = await self.session.get(f"{self.settings.subscriptions_url}/{name}")
         data = await response.json()
-        return Subscription.model_validate(data)
+        return Subscription(**data)
 
     async def get_subscription_message(
         self,
@@ -84,7 +84,7 @@ class ProvisioningConsumerClient:
 
         response = await self.session.get(f"{self.settings.subscriptions_messages_url(name)}/next", params=params)
         msg = await response.json()
-        return ProvisioningMessage.model_validate(msg) if msg else msg
+        return ProvisioningMessage(**msg) if msg else msg
 
     async def set_message_status(self, name: str, seq_num: int, status: MessageProcessingStatus):
         return await self.session.patch(
@@ -96,12 +96,12 @@ class ProvisioningConsumerClient:
         response = await self.session.get(self.settings.subscriptions_url)
         data = await response.json()
         # TODO: parse a list of subscriptions instead
-        return [Subscription.model_validate(data)]
+        return [Subscription(**data)]
 
     # FIXME: What is the purpose of this method? It looks like it wants to publish_event via Event API
     async def submit_message(self, realm: str, topic: str, body: dict[str, Any], name: str):
         message = Event(realm=realm, topic=topic, body=body)
-        return await self.session.post(self.settings.messages_url, json=message.model_dump())
+        return await self.session.post(self.settings.messages_url, json=message.dict())
 
 
 class MessageHandler:

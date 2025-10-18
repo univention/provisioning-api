@@ -116,7 +116,7 @@ def ldap_message():
 
 @pytest.fixture
 def serialized_ldap_message(ldap_message):
-    return messagepack_encoder(ldap_message.model_dump())
+    return messagepack_encoder(ldap_message.dict())
 
 
 @pytest.fixture

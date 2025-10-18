@@ -75,7 +75,7 @@ class NatsSubscriptionsDB(SubscriptionsDBPort):
         :raises NoSubscription: if subscription was not found.
         """
         if result := await self.get_dict_value(name, BucketName.subscriptions):
-            return Subscription.model_validate(result)
+            return Subscription(**result)
         else:
             raise NoSubscription(f"Subscription not found: {name!r}")
 
@@ -86,4 +86,4 @@ class NatsSubscriptionsDB(SubscriptionsDBPort):
         await self.put_value(name, password, BucketName.credentials)
 
     async def store_subscription(self, name: str, subscription: Subscription) -> None:
-        await self.put_value(name, subscription.model_dump(), BucketName.subscriptions)
+        await self.put_value(name, subscription.dict(), BucketName.subscriptions)

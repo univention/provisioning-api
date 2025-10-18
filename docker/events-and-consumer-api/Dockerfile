@@ -15,8 +15,8 @@ ENV UV_LINK_MODE=copy \
   UV_COMPILE_BYTECODE=1 \
   UV_PYTHON_DOWNLOADS=never \
   UV_PYTHON=python3.11
-# UV_PROJECT_ENVIRONMENT=/app
 
+# copy dependencies
 COPY ./backends /app/backends
 COPY ./common /app/common
 COPY ./rest-api/uv.lock \
@@ -24,10 +24,14 @@ COPY ./rest-api/uv.lock \
   /app/rest-api/
 
 WORKDIR /app/rest-api
+# install dependencies except univention.provisioning.*
+# as mixing namespace packages editable and non-editable causes issues
 RUN --mount=type=cache,target=/root/.cache \
   uv sync \
   --locked \
   --no-dev \
+  --no-install-package nubus-provisioning-backends \
+  --no-install-package nubus-provisioning-common \
   --no-install-project && \
   uv export -o ./requirements.txt
 
@@ -39,8 +43,7 @@ COPY ./rest-api/src /app/rest-api/src
 # This avoids issues with Docker build cache and ensures the venv always
 # uses the latest source code.
 RUN --mount=type=cache,target=/root/.cache \
-  uv sync --locked --no-dev && \
-  uv pip install -e .
+  uv sync --locked --no-dev
 
 ###############################################
 # Stage 3: final image
@@ -56,15 +59,15 @@ RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
   groupadd -r ${USER} -g 1000 && \
   useradd -r -d /app -g ${USER} -N ${USER} -u 1000
 
-COPY --from=build --chown=${USER}:${USER} /app/rest-api /app/rest-api
+COPY --from=build --chown=${USER}:${USER} /app /app
 
 USER ${USER}
 
 CMD ["rest-api"]
 
 RUN \
-  python3.11 -V && \
-  python3.11 -m site && \
-  python3.11 -c 'import univention.provisioning.rest'
-# TODO: importing main executes code
-# python3.11 -c 'import univention.provisioning.rest.main'
+  python3 -V && \
+  python3 -m site && \
+  python3 -c 'import univention.provisioning.backends' && \
+  python3 -c 'import univention.provisioning.models' && \
+  python3 -c 'import univention.provisioning.rest.exceptions'

@@ -328,7 +328,7 @@ def create_message_via_events_api() -> Callable[[E2ETestSettings], Body]:
         print(response.json())
         assert response.status_code == 202, "Failed to post message to queue"
 
-        return Body.model_validate(body)
+        return Body(**body)
 
     return _create_message_via_events_api
 

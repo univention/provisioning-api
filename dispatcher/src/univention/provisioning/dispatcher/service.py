@@ -75,7 +75,7 @@ class DispatcherService:
         )
         logger.debug("Message content: %r", data)
 
-        validated_msg = Message.model_validate(data)
+        validated_msg = Message(**data)
 
         subscriptions = self._subscriptions.get(validated_msg.realm, {}).get(validated_msg.topic, [])
 
