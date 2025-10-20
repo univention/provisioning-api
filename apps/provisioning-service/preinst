@@ -57,6 +57,14 @@ NATS_CONF = """{{
         }}
       }}
       {{
+        user: listener-module
+        password: {NATS_PASSWORD}
+        permissions: {{
+          publish: '>'
+          subscribe: '>'
+        }}
+      }}
+      {{
         user: prefill
         password: {NATS_PASSWORD}
         permissions: {{
@@ -103,7 +111,7 @@ def _generate_missing_secrets(existing_secrets, required_keys):
 
 
 def setup_listener():
-    ucr_update(ucr, {"nats/user": "udm-transformer"})
+    ucr_update(ucr, {"nats/user": "listener-module"})
 
     os.makedirs(os.path.dirname(LISTENER_SECRETS_FILE), exist_ok=True)
     with open(SECRETS_FILE) as f:
