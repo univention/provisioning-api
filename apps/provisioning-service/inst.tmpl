@@ -39,7 +39,7 @@ if [[ "$ROLE" = "domaincontroller_backup" ]]; then
   mkdir -p /usr/lib/univention-backup2master/post
   backup2master_path=/usr/lib/univention-backup2master/post/provisioning-service-backup2master.sh
   echo "Installing provisioning backup2master script at $backup2master_path"
-  cat <<%EOF >"backup2master_path"
+  cat <<'%EOF' >"$backup2master_path"
 %PROVISIONING-BACKUP2MASTER-POST%
 %EOF
   chmod +x "$backup2master_path"
