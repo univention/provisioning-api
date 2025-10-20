@@ -5,7 +5,7 @@ set -e
 docker system prune -f
 export PROVISIONING_API_ADMIN_PASSWORD=$(jq -r '.PROVISIONING_API_ADMIN_PASSWORD' /etc/provisioning-secrets.json)
 export PROVISIONING_API_ADMIN_USER=admin
-export PROVISIONING_API_URL=https://$(ucr get ldap)/univention/provisioning/v1/subscriptions
+export PROVISIONING_API_URL=https://$(ucr get ldap/master)/univention/provisioning/v1/subscriptions
 
 mkdir -p secrets
 
