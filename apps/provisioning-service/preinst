@@ -180,7 +180,7 @@ def check_app_installed_on_primary():
     The app must be installed on the Primary Directory Node first.
     """
     try:
-        p = subprocess.run(["univention-app", "domain"], capture_output=True, check=True, text=True, timeout=20)
+        p = subprocess.run(["univention-app", "domain"], capture_output=True, check=True, text=True, timeout=300)
     except subprocess.CalledProcessError as e:
         print(f"ERROR: `univention-app domain` command failed (exit {e.returncode}).\n{e.stderr}")
         sys.exit(1)
