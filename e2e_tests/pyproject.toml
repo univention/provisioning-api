@@ -22,9 +22,9 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends", editable = true }
-nubus-provisioning-common = { path = "../common", editable = true }
-nubus-provisioning-consumer = { path = "../consumer", editable = true }
+nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-common = { path = "../common" }
+nubus-provisioning-consumer = { path = "../consumer" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["tests"]
