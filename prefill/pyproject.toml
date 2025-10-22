@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends", editable = true }
-nubus-provisioning-common = { path = "../common", editable = true }
+nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-common = { path = "../common" }
 
 [project.scripts]
 prefill = "univention.provisioning.prefill.main:run"
