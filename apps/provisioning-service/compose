@@ -119,6 +119,9 @@ services:
      - PREFILL_USERNAME=prefill
      - PREFILL_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-secrets.json"))["NATS_PASSWORD"]);@!@
      - MAX_PREFILL_ATTEMPTS=5
+     - NETWORK_RETRY_STARTING_INTERVAL=1
+     - NETWORK_RETRY_MAX_DELAY=120
+     - NETWORK_RETRY_MAX_ATTEMPTS=60
     volumes:
       - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     depends_on:
