@@ -19,8 +19,8 @@ dependencies = [
 
 # Only necessary because these libraries are in the same git repo
 [tool.uv.sources]
-nubus-provisioning-consumer = { path = "../consumer" }
-nubus-provisioning-common = { path = "../common" }
+nubus-provisioning-consumer = { path = "../consumer", editable = true }
+nubus-provisioning-common = { path = "../common", editable = true }
 
 [project.scripts]
 consumer_example = "univention.provisioning.consumer_example.main:run"
