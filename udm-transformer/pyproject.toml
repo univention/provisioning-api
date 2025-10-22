@@ -20,8 +20,8 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-nubus-provisioning-backends = { path = "../backends", editable = true }
-nubus-provisioning-common = { path = "../common", editable = true }
+nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-common = { path = "../common" }
 
 [project.scripts]
 udm-transformer = "univention.provisioning.udm_transformer.main:run"

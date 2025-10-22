@@ -288,7 +288,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/65/be/757c8af63596453da
 [[package]]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
-source = { editable = "../backends" }
+source = { directory = "../backends" }
 dependencies = [
     { name = "nats-py" },
 ]
@@ -299,7 +299,7 @@ requires-dist = [{ name = "nats-py", specifier = ">=2.9.0,<3.0.0" }]
 [[package]]
 name = "nubus-provisioning-common"
 version = "0.1.0"
-source = { editable = "../common" }
+source = { directory = "../common" }
 dependencies = [
     { name = "asgi-correlation-id" },
     { name = "pydantic" },
@@ -332,8 +332,8 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.10.9,<4.0.0" },
     { name = "backends", specifier = ">=1.6.6,<2.0.0" },
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
-    { name = "nubus-provisioning-backends", editable = "../backends" },
-    { name = "nubus-provisioning-common", editable = "../common" },
+    { name = "nubus-provisioning-backends", directory = "../backends" },
+    { name = "nubus-provisioning-common", directory = "../common" },
     { name = "pydantic", specifier = ">=2.9.2,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.5.2,<3.0.0" },
     { name = "tenacity", specifier = ">=9.1.2" },
