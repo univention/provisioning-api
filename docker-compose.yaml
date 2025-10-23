@@ -223,6 +223,10 @@ services:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest
     container_name: "ldap-server"
+    ulimits:
+      nofile:
+        soft: "1024"
+        hard: "4096"
     environment:
       LDAP_CN_ADMIN_PW: univention
       LDAP_BASEDN: "dc=univention-organization,dc=intranet"
