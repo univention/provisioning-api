@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import ConfigDict, ValidationError
 from pydantic_settings import BaseSettings
 
 Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -27,6 +28,29 @@ class DispatcherSettings(BaseSettings):
     def nats_server(self) -> str:
         return f"nats://{self.nats_host}:{self.nats_port}"
 
+
+class DispatcherSettingsPull(DispatcherSettings):
+    model_config = ConfigDict(env_prefix="", env_suffix="_PULL")
+
+
+class DispatcherSettingsPush(DispatcherSettings):
+    model_config = ConfigDict(env_prefix="", env_suffix="_PUSH")
+
+
+@lru_cache(maxsize=1)
+def dispatcher_settings_pull() -> DispatcherSettings:
+    try:
+        return DispatcherSettingsPull()
+    except ValidationError:
+        return DispatcherSettings()
+
+
+@lru_cache(maxsize=1)
+def dispatcher_settings_push() -> DispatcherSettings:
+    try:
+        return DispatcherSettingsPush()
+    except ValidationError:
+        return DispatcherSettings()
 
 @lru_cache(maxsize=1)
 def dispatcher_settings() -> DispatcherSettings:
