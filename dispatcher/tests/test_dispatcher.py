@@ -20,7 +20,8 @@ class EscapeLoopException(Exception): ...
 def dispatcher_service() -> DispatcherService:
     return DispatcherService(
         ack_manager=MessageAckManager(),
-        mq=AsyncMock(spec_set=MessageQueuePort),
+        mq_push=AsyncMock(spec_set=MessageQueuePort),
+        mq_pull=AsyncMock(spec_set=MessageQueuePort),
         subscriptions=AsyncMock(spec_set=SubscriptionsPort),
     )
 
@@ -38,7 +39,7 @@ class TestDispatcherService:
 
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
         fake_ack = AsyncMock()
-        dispatcher_service.mq.get_one_message = AsyncMock(
+        dispatcher_service.mq_pull.get_one_message = AsyncMock(
             side_effect=[(MQMESSAGE, fake_ack), EscapeLoopException("Stop waiting for the new event")]
         )
         dispatcher_service.subscriptions_db.get_all_subscriptions = get_all_subscriptions
@@ -49,10 +50,10 @@ class TestDispatcherService:
         assert isinstance(exception.value.exceptions[0], Exception)
         assert str(exception.value.exceptions[0]) == "Stop waiting for the new event"
 
-        dispatcher_service.mq.initialize_subscription.assert_called_once_with("incoming", False, "incoming")
+        dispatcher_service.mq_pull.initialize_subscription.assert_called_once_with("incoming", False, "incoming")
         dispatcher_service.subscriptions_db.watch_for_subscription_changes.assert_called_once_with(
             dispatcher_service.update_subscriptions_mapping
         )
-        dispatcher_service.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
-        dispatcher_service.mq.enqueue_message.assert_called_once_with(SUBSCRIPTION_INFO["name"], MESSAGE)
+        dispatcher_service.mq_pull.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
+        dispatcher_service.mq_push.enqueue_message.assert_called_once_with(SUBSCRIPTION_INFO["name"], MESSAGE)
         fake_ack.acknowledge_message.assert_called_once_with()

@@ -15,16 +15,17 @@ logger = logging.getLogger(__name__)
 
 
 class DispatcherService:
-    def __init__(self, ack_manager: MessageAckManager, mq: MessageQueuePort, subscriptions: SubscriptionsPort):
+    def __init__(self, ack_manager: MessageAckManager, mq_pull: MessageQueuePort,  mq_push: MessageQueuePort, subscriptions: SubscriptionsPort):
         self.ack_manager = ack_manager
-        self.mq = mq
+        self.mq_pull = mq_pull
+        self.mq_push = mq_push
         self.subscriptions_db = subscriptions
         self._subscriptions: dict[str, dict[str, set[Subscription]]] = {}  # {realm: {topic: {Subscription, ..}}}
         self._wildcard_subscriptions: set[Subscription] = set()
 
     async def run(self):
         logger.info("Storing event in consumer queues")
-        await self.mq.initialize_subscription(DISPATCHER_QUEUE_NAME, False, DISPATCHER_QUEUE_NAME)
+        await self.mq_pull.initialize_subscription(DISPATCHER_QUEUE_NAME, False, DISPATCHER_QUEUE_NAME)
 
         # Initially fill self._subscriptions before starting to handle messages.
         await self.update_subscriptions_mapping()
@@ -40,7 +41,7 @@ class DispatcherService:
         while True:
             logger.debug("Waiting for an event...")
             try:
-                message, acknowledgements = await self.mq.get_one_message(timeout=10)
+                message, acknowledgements = await self.mq_pull.get_one_message(timeout=10)
             except Empty:
                 logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
                 continue
@@ -85,7 +86,7 @@ class DispatcherService:
         for sub in subscriptions:
             logger.info("Sending message to %r", sub.name)
             try:
-                await self.mq.enqueue_message(sub.name, validated_msg)
+                await self.mq_push.enqueue_message(sub.name, validated_msg)
             except Exception:
                 logger.fatal("Failed to send message to %r", sub.name)
                 await asyncio.sleep(1)
@@ -100,7 +101,7 @@ class DispatcherService:
         new_subscriptions_mapping: dict[str, dict[str, set[Subscription]]] = {}
         async for sub in self.subscriptions_db.get_all_subscriptions():
             logger.debug("Processing subscription: %r", sub.name)
-            if not await self.mq.stream_exists(sub.name):
+            if not await self.mq_push.stream_exists(sub.name):
                 logger.debug("Stream does not exist for subscription %r. Ignoring subscription", sub.name)
                 continue
             for realm_topic in sub.realms_topics:
