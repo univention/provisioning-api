@@ -17,6 +17,7 @@ dependencies = [
     "nats-py<3.0.0,>=2.9.0",
     "nats-py<3.0.0,>=2.9.0",
     "pydantic<2.0.0",
+    "psutil<6.0.0,>=5.9.0"
 ]
 
 [dependency-groups]
