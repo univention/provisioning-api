@@ -29,7 +29,7 @@ def dispatcher_service(mock_nats_kv_adapter, mock_nats_mq_adapter) -> Dispatcher
     mq.get_one_message = AsyncMock(
         side_effect=[(mod_MSG, fake_ack), StopLoopException("Stop waiting for the new event")]
     )
-    return DispatcherService(ack_manager=MessageAckManager(), mq=mq, subscriptions=subs)
+    return DispatcherService(ack_manager=MessageAckManager(), mq_push=mq, mq_pull=mq, subscriptions=subs)
 
 
 class StopLoopException(Exception): ...
@@ -54,7 +54,7 @@ class TestDispatcher:
         assert any(isinstance(error, StopLoopException) for error in exception_group.value.exceptions)
 
         # check waiting for the event
-        dispatcher_service.mq.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
+        dispatcher_service.mq_pull.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
 
         # check getting subscriptions for the realm_topic
         dispatcher_service.subscriptions_db.watch_for_subscription_changes.assert_called_once_with(
@@ -62,7 +62,7 @@ class TestDispatcher:
         )
 
         # check storing event in the consumer queue
-        dispatcher_service.mq.mq._js.publish.assert_called_once_with(
+        dispatcher_service.mq_push.mq._js.publish.assert_called_once_with(
             self.main_subject,
             FLAT_MESSAGE_ENCODED,
             stream=f"stream:{SUBSCRIPTION_NAME}",

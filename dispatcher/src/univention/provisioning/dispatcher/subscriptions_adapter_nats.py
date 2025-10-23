@@ -7,13 +7,13 @@ from univention.provisioning.backends import key_value_store
 from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
 
-from .config import DispatcherSettings, dispatcher_settings
+from .config import DispatcherSettings, dispatcher_settings_push
 from .subscriptions_port import SubscriptionsPort
 
 
 class NatsSubscriptionsAdapter(SubscriptionsPort):
     def __init__(self, settings: Optional[DispatcherSettings] = None):
-        super().__init__(settings or dispatcher_settings())
+        super().__init__(settings or dispatcher_settings_push())
         self.kv = key_value_store(
             server=self.settings.nats_server,
             user=self.settings.nats_user,
