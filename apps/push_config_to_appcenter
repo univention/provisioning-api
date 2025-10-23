@@ -16,11 +16,12 @@ download_univention-appcenter-control() {
 }
 
 upload_appcenter_scripts() {
+    local ucs_version="5.2"
     local ini_file="$1/ini"
     local app_id="$(awk '/^ID/ {print $3}' "$ini_file")"
     local app_name="$(grep -m 1 '^Name = ' "$ini_file" | cut -d'=' -f2-)"
     local app_version="$(awk '/^Version/ {print $3}' "$ini_file")"
-    local app_version_string="5.2/${app_id}=${app_version}"
+    local app_version_string="${ucs_version}/${app_id}=${app_version}"
     local files=$(find "$1/" -type f ! -name "*.tmpl" | sort)
 
     echo "---------------------------------------------------------------------"
@@ -36,7 +37,17 @@ upload_appcenter_scripts() {
 
     read -n1 -r -p "Press any key to continue or Ctrl-C to abort."
     echo
-
+    echo "Checking if app version exists..."
+    if ! ./univention-appcenter-control get "${app_version_string}" --json >/dev/null 2>&1; then
+        echo "App version ${app_version_string} does not exist. Creating a new version..."
+        read -n1 -r -p "Press any key to create it or Ctrl-C to abort."
+        ./univention-appcenter-control new-version "${ucs_version}/${app_id}" "${app_version_string}"
+        echo ""
+        echo "App version ${app_version_string} created."
+    else
+        echo "App version ${app_version_string} already exists."
+    fi
+    echo "Uploading files..."
     ./univention-appcenter-control upload "${app_version_string}" $files
     echo ""
 }
