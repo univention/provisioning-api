@@ -119,9 +119,15 @@ class TransformerService:
         logger.info("Message was sent: %r", new_udm_obj.get("dn") or old_udm_obj.get("dn"))
 
     async def old_ldap_to_udm_obj(self, old_ldap_obj: dict[str, Any]) -> dict[str, Any]:
-        if old_ldap_obj:
-            return await self.cache.retrieve(old_ldap_obj["entryUUID"][0].decode())
-        return {}
+        if not old_ldap_obj:
+            return {}
+        result = await self.cache.retrieve(old_ldap_obj["entryUUID"][0].decode())
+        if not result:
+            logger.info("Did not find old_ldap_object in the cache. Falling back to new ldap object.")
+            result = self.ldap2udm.ldap_to_udm(old_ldap_obj)
+        if not result:
+            raise RuntimeError("Cannot live transform old ldap object")
+        return result
 
     async def new_ldap_to_udm_obj(self, new_ldap_obj: dict[str, Any]) -> dict[str, Any]:
         if new_ldap_obj:
