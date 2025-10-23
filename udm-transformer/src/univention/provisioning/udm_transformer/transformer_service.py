@@ -123,7 +123,7 @@ class TransformerService:
             return {}
         result = await self.cache.retrieve(old_ldap_obj["entryUUID"][0].decode())
         if not result:
-            logger.info("Did not find old_ldap_object in the cache. Transforming old LDAP object to UDM format.")
+            logger.info("Did not find old_ldap_object in the cache. Falling back to new ldap object.")
             result = self.ldap2udm.ldap_to_udm(old_ldap_obj)
         if not result:
             raise RuntimeError("Cannot live transform old ldap object")
