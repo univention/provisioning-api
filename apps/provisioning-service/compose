@@ -116,7 +116,7 @@ services:
      - NATS_MAX_RECONNECT_ATTEMPTS=2
      - UDM_HOST=@%@ldap/server/name@%@
      - UDM_PORT=443
-     - UDM_URL_PREFIX=/univention
+     - UDM_URL_PATH_PREFIX=/univention
      - UDM_PROTOCOL=https
      - UDM_USERNAME=cn=admin
      - UDM_PASSWORD=@!@print(open("/etc/ldap.secret").read())@!@
