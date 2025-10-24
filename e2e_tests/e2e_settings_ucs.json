@@ -1,0 +1,19 @@
+{
+  "local": {
+    "provisioning_api_base_url": "http://nubus-provisioning-api:7777",
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "1wEpYffPqD6jBOkzLMGOY8FaN1g8KcCZ",
+    "provisioning_events_username": "udm",
+    "provisioning_events_password": "reCKqbUAGfPZDG2SWzjD8oDhv5cHSJKE",
+    "nats_url": "nats://provisioning-service_nats_1:4222",
+    "nats_user": "api",
+    "nats_password": "RgbwqxGDUKk4OFrPohgIwfhWgziRIHsu",
+    "ldap_server_uri": "ldap://localhost:389",
+    "ldap_base": "dc=univention-organization,dc=intranet",
+    "ldap_bind_dn": "cn=admin,dc=univention-organization,dc=intranet",
+    "ldap_bind_password": "univention",
+    "udm_rest_api_base_url": "http://localhost:9979/udm/",
+    "udm_rest_api_username": "cn=admin",
+    "udm_rest_api_password": "univention"
+  }
+}
