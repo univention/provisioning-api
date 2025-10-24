@@ -144,6 +144,8 @@ services:
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       UDM_HOST: "udm-rest-api"
       UDM_PORT: 9979
+      UDM_PROTOCOL: "http"
+      UDM_URL_PATH_PREFIX: ""
       UDM_USERNAME: "cn=admin"
       UDM_PASSWORD: "univention"
       PREFILL_USERNAME: "prefill"

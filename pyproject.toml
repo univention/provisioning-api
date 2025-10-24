@@ -70,6 +70,8 @@ ADMIN_USERNAME = {value = "admin", skip_if_set = true}
 ADMIN_PASSWORD = {value = "provisioning", skip_if_set = true}
 UDM_USERNAME = {value = "cn=admin", skip_if_set = true}
 UDM_PASSWORD = {value = "univention", skip_if_set = true}
+UDM_PROTOCOL = {value = "http", skip_if_set = true}
+UDM_URL_PATH_PREFIX = {value = "", skip_if_set = true}
 LDAP_PORT = {value = 389, skip_if_set = true}
 LDAP_HOST = {value = "ldap-server", skip_if_set = true}
 TLS_MODE = {value = "off", skip_if_set = true}
