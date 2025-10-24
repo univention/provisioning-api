@@ -123,7 +123,6 @@ class NatsMessageQueue:
 
     async def error_callback(self, e):
         logger.error("There was an error during the execution: %s", e)
-        raise (e)
 
     async def disconnected_callback(self):
         logger.debug("Disconnected to NATS")
