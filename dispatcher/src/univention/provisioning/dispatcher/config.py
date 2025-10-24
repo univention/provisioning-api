@@ -13,7 +13,7 @@ class BaseDispatcherSettings(BaseSettings):
     # Python log level
     log_level: Loglevel
     # Maximum number of reconnect attempts to the NATS server
-    nats_max_reconnect_attempts: int = 2
+    nats_max_reconnect_attempts: int
 
 
 class DispatcherSettings(BaseDispatcherSettings):
@@ -42,8 +42,6 @@ class DispatcherSettingsPull(BaseDispatcherSettings):
     nats_host_pull: str
     # Nats: port
     nats_port_pull: int
-    # Maximum number of reconnect attempts to the NATS server
-    nats_max_reconnect_attempts: int = 2
 
     @property
     def nats_server(self) -> str:
