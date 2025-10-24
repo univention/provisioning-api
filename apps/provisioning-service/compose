@@ -18,7 +18,7 @@ services:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:idelgado-remove-backup-consumer"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:provisioning-in-ucs"
     container_name: "nubus-provisioning-api"
     restart: "on-failure"
     environment:
@@ -47,7 +47,7 @@ services:
       - "nats"
 
   dispatcher:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:idelgado-remove-backup-consumer"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:provisioning-in-ucs"
     container_name: "nubus-provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -71,7 +71,7 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:idelgado-remove-backup-consumer"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:provisioning-in-ucs"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "on-failure"
     extra_hosts:
@@ -102,7 +102,7 @@ services:
       - /usr/lib/python3/dist-packages/univention/:/usr/lib/python3/dist-packages/univention/
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:idelgado-remove-backup-consumer"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:provisioning-in-ucs"
     container_name: "nubus-provisioning-prefill"
     restart: "on-failure"
     environment:
