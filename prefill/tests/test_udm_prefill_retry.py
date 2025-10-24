@@ -39,6 +39,8 @@ async def udm_prefill(httpserver, prefill_settings_factory: ModelFactory[Prefill
     settings = prefill_settings_factory.build()
     settings.udm_host = httpserver.host
     settings.udm_port = httpserver.port
+    settings.udm_protocol = "http"
+    settings.udm_url_path_prefix = ""
     settings.network_retry_starting_interval = 1
     settings.network_retry_max_delay = 120
     settings.network_retry_max_attempts = 4
