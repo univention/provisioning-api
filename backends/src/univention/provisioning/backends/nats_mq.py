@@ -14,7 +14,6 @@ from typing_extensions import Self
 
 from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
 
-from .config import nats_mq_settings
 from .message_queue import Acknowledgements, Empty, MessageQueue, json_decoder, json_encoder
 
 logger = logging.getLogger(__name__)
@@ -124,9 +123,6 @@ class NatsMessageQueue(MessageQueue):
             subject=subject if subject else "*",
             durable=durable_name,
             stream=stream_name,
-            config=ConsumerConfig(
-                num_replicas=nats_mq_settings().num_replicas,
-            ),
         )
 
     async def get_message(self, stream: str, subject: str, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
