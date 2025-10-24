@@ -33,3 +33,5 @@ RUN --mount=type=cache,target=/root/.cache \
     uv sync \
     --locked \
     --no-install-project
+
+COPY ./e2e_tests/tests /app/e2e_tests/tests
