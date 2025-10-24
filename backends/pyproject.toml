@@ -10,6 +10,8 @@ requires-python = "==3.11.*"
 
 dependencies = [
     "nats-py<3.0.0,>=2.9.0",
+    "pydantic<3.0.0,>=2.9.2",
+    "pydantic-settings<3.0.0,>=2.5.2",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -15,17 +15,18 @@ dependencies = [
     "daemoniker<1.0.0,>=0.2.3",
     "msgpack<2.0.0,>=1.1.0",
     "nats-py<3.0.0,>=2.9.0",
-    "nats-py<3.0.0,>=2.9.0",
-    "pydantic<2.0.0",
-    "psutil<6.0.0,>=5.9.0"
+    "nubus-provisioning-backends",
+    "nubus-provisioning-common",
+    "pydantic-settings<3.0.0,>=2.5.2",
+    "psutil<6.0.0,>=5.9.0",
 ]
 
 [dependency-groups]
 dev = ["pytest==7.4.4", "pytest-asyncio==0.21.2", "pytest-cov==4.1.0"]
 
-# [tool.uv.sources]
-# nubus-provisioning-backends = { path = "../backends" }
-# nubus-provisioning-common = { path = "../common" }
+[tool.uv.sources]
+nubus-provisioning-backends = { path = "../backends" }
+nubus-provisioning-common = { path = "../common" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]
