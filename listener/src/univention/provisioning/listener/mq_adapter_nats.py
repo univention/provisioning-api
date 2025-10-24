@@ -21,9 +21,12 @@ logger = logging.getLogger(__name__)
 LDAP_SUBJECT = "ldap-producer-subject"
 LDAP_PRODUCER_QUEUE_NAME = "ldap-producer"
 
+LDAP_OBJECT_TYPE_FIELD = "univentionObjectType"
+UDM_OBJECT_TYPE_FIELD = "objectType"
 
 class EmptyBodyError(Exception): ...
 
+class NoUDMTypeError(Exception): ...
 
 class PublisherName(str, Enum):
     udm_listener = "udm-listener"
@@ -40,10 +43,21 @@ class Body(BaseModel):
     @root_validator
     def check_not_both_empty(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if not values.get("old") and not values.get("new"):
-            raise EmptyBodyError("'old' and 'new' cannot be both empty.")
+            raise EmptyBodyError("old' and 'new' cannot be both empty.")
+        return values
+
+    @root_validator
+    def check_has_udm_object_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if LDAP_OBJECT_TYPE_FIELD in values.get("new") or LDAP_OBJECT_TYPE_FIELD in values.get("old"):
+            obj_type = LDAP_OBJECT_TYPE_FIELD
+        else:
+            obj_type = UDM_OBJECT_TYPE_FIELD
+        if not values.get("new").get(obj_type) and not values.get("old").get(obj_type):
+            raise NoUDMTypeError("No UDM type in both 'new' and 'old'.")
         return values
 
 
+# copy of Message and BaseMessage from models.message
 class LdapMessage(BaseModel):
     """Must be compatible with both pydantic v1 and v2"""
 
@@ -76,6 +90,7 @@ class NatsKeys:
         return f"durable_name:{subject}"
 
 
+# copy of NatsMessageQueue from backends.nats_mq
 class NatsMessageQueue:
     """
     Message queueing using NATS.
