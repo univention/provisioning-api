@@ -2,10 +2,10 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
+import ssl
 from typing import Any, Optional
 
 import aiohttp
-import ssl
 
 from .config import PrefillSettings, prefill_settings
 from .retry_helper import retry
@@ -53,7 +53,9 @@ class UDMAdapter(UDMPort):
                 ssl_context.load_verify_locations(cafile=cacert)
 
             connector = aiohttp.TCPConnector(ssl=ssl_context)
-            self._session = aiohttp.ClientSession(auth=self.auth, connector=connector, headers=self.headers, raise_for_status=True)
+            self._session = aiohttp.ClientSession(
+                auth=self.auth, connector=connector, headers=self.headers, raise_for_status=True
+            )
 
     async def close(self) -> None:
         if self._session:
