@@ -74,6 +74,7 @@ services:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:provisioning-in-ucs"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "on-failure"
+    @!@if configRegistry.get('server/role').lower() == "domaincontroller_backup": print("profiles: [donotstart]\n")@!@
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
