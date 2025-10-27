@@ -29,3 +29,10 @@ Description[de]=Maximale Anzahl von Wiederverbindungsversuchen zum NATS-Server
 Categories=provisioning
 Type=str
 Default=10
+
+[nats/terminate_listener_on_exception]
+Description[en]=Terminate listener on exception
+Description[de]=Listener bei Ausnahme beenden
+Categories=provisioning
+Type=bool
+Default=false
