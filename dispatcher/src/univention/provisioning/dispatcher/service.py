@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 class DispatcherService:
-    def __init__(self, ack_manager: MessageAckManager, mq_pull: MessageQueuePort,  mq_push: MessageQueuePort, subscriptions: SubscriptionsPort):
+    def __init__(
+        self,
+        ack_manager: MessageAckManager,
+        mq_pull: MessageQueuePort,
+        mq_push: MessageQueuePort,
+        subscriptions: SubscriptionsPort,
+    ):
         self.ack_manager = ack_manager
         self.mq_pull = mq_pull
         self.mq_push = mq_push
@@ -107,7 +113,6 @@ class DispatcherService:
                 new_subscriptions_mapping.setdefault(realm_topic.realm, {}).setdefault(realm_topic.topic, set()).add(
                     sub
                 )
-
 
         self._subscriptions = new_subscriptions_mapping
 

@@ -4,9 +4,9 @@
 import asyncio
 import inspect
 import logging
+import ssl
 import time
 from typing import Any, Callable, Coroutine, Optional
-import ssl
 
 import aiohttp
 from jsondiff import diff
