@@ -4,7 +4,7 @@ import os
 from functools import lru_cache
 from typing import Any, Callable, Dict, Tuple
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, conint
 
 SettingsSourceCallable = Callable[["BaseSettings"], Dict[str, Any]]
 
@@ -17,14 +17,17 @@ def ucr_ldap_producer_settings(settings: BaseSettings) -> Dict[str, Any]:
     ucr = ConfigRegistry()
     ucr.load()
 
+    if "nats/user" not in ucr:
+        return {}
+
     conf = {
-        "nats_user": ucr.get("nats/user", "univention"),
+        "nats_user": ucr.get("nats/user"),
         "nats_host": ucr.get("nats/host", "localhost"),
         "nats_port": ucr.get("nats/port", 4222),
         "nats_max_reconnect_attempts": ucr.get("nats/max_reconnect_attempts", 10),
         "nats_retry_delay": ucr.get("nats/retry_delay", 10),
         "nats_max_retry_count": ucr.get("nats/max_retry_count", 3),
-        "nats_password": "univention",
+        "terminate_listener_on_exception": ucr.get("nats/terminate_listener_on_exception", False),
     }
 
     nats_password_file = ucr.get("nats/passwordfile", "/etc/nats/provisioning-listener.secret")
@@ -47,9 +50,12 @@ class LdapProducerSettings(BaseSettings):
     nats_port: int
     # Maximum number of reconnect attempts to the NATS server
     nats_max_reconnect_attempts: int
-    nats_retry_delay: int
+    # Delay between retry attempts to the NATS server (in seconds)
+    nats_retry_delay: conint(ge=0)
     # Maximum number of retry attempts for interacting with the NATS server
-    nats_max_retry_count: int
+    nats_max_retry_count: conint(ge=0)
+    # Enable termination on NATS failure
+    terminate_listener_on_exception: bool
 
     class Config:
         @classmethod
