@@ -16,8 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 async def main(settings_pull: DispatcherSettings, settings_push: DispatcherSettings):
-    async with NatsMessageQueueAdapter(settings_pull) as mq_pull, NatsMessageQueueAdapter(settings_push) as mq_push, NatsSubscriptionsAdapter(settings_push) as subscriptions:
-        service = DispatcherService(ack_manager=MessageAckManager(), mq_pull=mq_pull, mq_push=mq_push, subscriptions=subscriptions)
+    async with (
+        NatsMessageQueueAdapter(settings_pull) as mq_pull,
+        NatsMessageQueueAdapter(settings_push) as mq_push,
+        NatsSubscriptionsAdapter(settings_push) as subscriptions,
+    ):
+        service = DispatcherService(
+            ack_manager=MessageAckManager(), mq_pull=mq_pull, mq_push=mq_push, subscriptions=subscriptions
+        )
         await service.run()
 
 

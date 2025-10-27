@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import ConfigDict, ValidationError
+from pydantic import ValidationError
 from pydantic_settings import BaseSettings
 
 Loglevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -17,7 +17,6 @@ class BaseDispatcherSettings(BaseSettings):
 
 
 class DispatcherSettings(BaseDispatcherSettings):
-
     # Nats user name specific to Dispatcher
     nats_user: str
     # Nats password specific to Dispatcher
@@ -33,7 +32,6 @@ class DispatcherSettings(BaseDispatcherSettings):
 
 
 class DispatcherSettingsPull(BaseDispatcherSettings):
-
     # Nats user name specific to Dispatcher
     nats_user_pull: str
     # Nats password specific to Dispatcher
@@ -65,7 +63,6 @@ class DispatcherSettingsPull(BaseDispatcherSettings):
 
 
 class DispatcherSettingsPush(BaseDispatcherSettings):
-
     # Nats user name specific to Dispatcher
     nats_user_push: str
     # Nats password specific to Dispatcher

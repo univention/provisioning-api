@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
 
 set -e
 
@@ -25,7 +28,7 @@ echo '
   "request_prefill": true,
   "password": "password"
 }
-' > secrets/example-client-registration-payload.json 
+' > secrets/example-client-registration-payload.json
 
 curl -v -X POST --user "${PROVISIONING_API_ADMIN_USER}:${PROVISIONING_API_ADMIN_PASSWORD}" -H "Content-Type: application/json" --data @./secrets/example-client-registration-payload.json $PROVISIONING_API_URL
 

@@ -157,6 +157,8 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.LOG_LEVEL | string | `"INFO"` | Python log level |
 | prefill.config.UDM_HOST | string | `""` | UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api |
 | prefill.config.UDM_PORT | int | `9979` | UDM REST API: port |
+| prefill.config.UDM_PROTOCOL | string | `"http"` | UDM REST API: protocol |
+| prefill.config.UDM_URL_PATH_PREFIX | string | `""` | UDM REST API: URL path prefix |
 | prefill.config.maxPrefillAttempts | int | `5` | maximum number of retries of a prefill request -1 means infinite retries. |
 | prefill.config.natsMaxReconnectAttempts | int | `5` | Maximum number of reconnect attempts to the NATS server |
 | prefill.config.networkRetryMaxAttempts | int | `60` | Network: Maximum number on retries of a failed network request |

@@ -24,9 +24,12 @@ LDAP_PRODUCER_QUEUE_NAME = "ldap-producer"
 LDAP_OBJECT_TYPE_FIELD = "univentionObjectType"
 UDM_OBJECT_TYPE_FIELD = "objectType"
 
+
 class EmptyBodyError(Exception): ...
 
+
 class NoUDMTypeError(Exception): ...
+
 
 class PublisherName(str, Enum):
     udm_listener = "udm-listener"

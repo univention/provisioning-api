@@ -1,4 +1,7 @@
 #!bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
 #
 # Temporary helper script to run e2e tests on a UCS host which has the Provisioning Service app
 # already installed.
