@@ -198,7 +198,7 @@ services:
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       NATS_RETRY_DELAY: 10
       NATS_MAX_RETRY_COUNT: 3
-      TERMINATE_LISTENER_ON_EXCEPTION: true
+      TERMINATE_LISTENER_ON_EXCEPTION: "true"
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       NOTIFIER_SERVER: "ldap-notifier"
       DEBUG_LEVEL: "3"
@@ -225,6 +225,10 @@ services:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest
     container_name: "ldap-server"
+    ulimits:
+      nofile:
+        soft: "2048"
+        hard: "10240"
     environment:
       LDAP_CN_ADMIN_PW: univention
       LDAP_BASEDN: "dc=univention-organization,dc=intranet"
