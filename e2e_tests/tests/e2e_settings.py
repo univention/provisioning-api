@@ -27,11 +27,11 @@ class E2ETestSettings(NamedTuple):
 
     @property
     def subscriptions_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url, "/v1/subscriptions")
+        return urljoin(self.provisioning_api_base_url.rstrip("/") + "/", "v1/subscriptions")
 
     def subscriptions_messages_url(self, name: str) -> str:
         return f"{self.subscriptions_url}/{name}/messages"
 
     @property
     def messages_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url, "/v1/messages")
+        return urljoin(self.provisioning_api_base_url.rstrip("/") + "/", "v1/messages")
