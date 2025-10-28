@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
@@ -20,11 +20,37 @@
 #  - run this script from the directory where your `e2e_settings_ucs.json` is located.
 #
 
-
+provisioning_admin_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.PROVISIONING_API_ADMIN_PASSWORD')
+provisioning_events_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.EVENTS_PASSWORD_UDM')
+nats_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.NATS_PASSWORD')
+host=$(ucr get ldap/server/name)
+cat <<EOF > e2e_settings_ucs.json
+{
+  "local": {
+    "provisioning_api_base_url": "http://${host}/univention/provisioning",
+    "provisioning_admin_username": "admin",
+    "provisioning_admin_password": "$provisioning_admin_password",
+    "provisioning_events_username": "udm",
+    "provisioning_events_password": "$provisioning_events_password",
+    "nats_url": "nats://${host}:4222",
+    "nats_user": "api",
+    "nats_password": "$nats_password",
+    "ldap_server_uri": "ldap://${host}:389",
+    "ldap_base": "$(ucr get ldap/base)",
+    "ldap_bind_dn": "uid=Administrator,cn=users,$(ucr get ldap/base)",
+    "ldap_bind_password": "univention",
+    "udm_rest_api_base_url": "http://${host}/univention/udm/",
+    "udm_rest_api_username": "Administrator",
+    "udm_rest_api_password": "univention"
+  }
+}
+EOF
 docker run \
     --rm \
     -it \
-    --volume=e2e_settings_ucs.json:/app/e2e_tests/e2e_settings.json \
+    --volume=$(pwd)/e2e_settings_ucs.json:/app/e2e_tests/e2e_settings.json \
+    --volume=/var/www/ucs-root-ca.crt:/etc/ssl/certs/ucs-root-ca.crt:ro \
     --network=nubus-provisioning \
+    --env=REQUESTS_CA_BUNDLE=/etc/ssl/certs/ucs-root-ca.crt \
     gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-e2e-tests:0.63.0-pre-provisioning-in-ucs \
-    pytest
+    pytest -v
