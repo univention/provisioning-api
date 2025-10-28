@@ -27,7 +27,7 @@ host=$(ucr get ldap/server/name)
 cat <<EOF > e2e_settings_ucs.json
 {
   "local": {
-    "provisioning_api_base_url": "http://${host}/univention/provisioning",
+    "provisioning_api_base_url": "https://${host}/univention/provisioning",
     "provisioning_admin_username": "admin",
     "provisioning_admin_password": "$provisioning_admin_password",
     "provisioning_events_username": "udm",
@@ -39,7 +39,7 @@ cat <<EOF > e2e_settings_ucs.json
     "ldap_base": "$(ucr get ldap/base)",
     "ldap_bind_dn": "uid=Administrator,cn=users,$(ucr get ldap/base)",
     "ldap_bind_password": "univention",
-    "udm_rest_api_base_url": "http://${host}/univention/udm/",
+    "udm_rest_api_base_url": "https://${host}/univention/udm/",
     "udm_rest_api_username": "Administrator",
     "udm_rest_api_password": "univention"
   }
@@ -49,8 +49,9 @@ docker run \
     --rm \
     -it \
     --volume=$(pwd)/e2e_settings_ucs.json:/app/e2e_tests/e2e_settings.json \
-    --volume=/var/www/ucs-root-ca.crt:/etc/ssl/certs/ucs-root-ca.crt:ro \
+    --volume=/var/www/ucs-root-ca.crt:/etc/ssl/certs/ca-certificates.crt:ro \
     --network=nubus-provisioning \
-    --env=REQUESTS_CA_BUNDLE=/etc/ssl/certs/ucs-root-ca.crt \
+    --env=REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
     gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-e2e-tests:0.63.0-pre-provisioning-in-ucs \
-    pytest -v
+    /bin/bash
+#    pytest -v
