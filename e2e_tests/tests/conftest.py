@@ -371,16 +371,16 @@ def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict
 @pytest.fixture()
 def create_extended_attribute(create_udm_obj, udm) -> UdmObject:
     properties = {
-        "name": "UniventionPasswordSelfServiceEmail",
-        "CLIName": "PasswordRecoveryEmail",
+        "name": "UniventionProvisioningServiceExtendedAttributeEmail",
+        "CLIName": "ProvisioningServiceEmail",
         "module": ["users/user"],
         "syntax": "emailAddress",
         "default": "",
-        "ldapMapping": "univentionPasswordSelfServiceEmail",
-        "objectClass": "univentionPasswordSelfService",
-        "shortDescription": "Password recovery e-mail address",
+        "ldapMapping": "univentionFreeAttribute20",
+        "objectClass": "univentionFreeAttributes",
+        "shortDescription": "Extended attribute for provisioning service tests",
         "tabAdvanced": False,
-        "tabName": "Password recovery",
+        "tabName": "Custom Attributes",
         "multivalue": False,
         "valueRequired": False,
         "mayChange": True,
