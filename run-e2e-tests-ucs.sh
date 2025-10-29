@@ -19,6 +19,8 @@
 #
 #  - run this script from the directory where your `e2e_settings_ucs.json` is located.
 #
+apt update
+apt install -y jq
 
 provisioning_admin_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.PROVISIONING_API_ADMIN_PASSWORD')
 provisioning_events_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.EVENTS_PASSWORD_UDM')
@@ -32,7 +34,7 @@ cat <<EOF > e2e_settings_ucs.json
     "provisioning_admin_password": "$provisioning_admin_password",
     "provisioning_events_username": "udm",
     "provisioning_events_password": "$provisioning_events_password",
-    "nats_url": "nats://${host}:4222",
+    "nats_url": "nats://nats:4222",
     "nats_user": "api",
     "nats_password": "$nats_password",
     "ldap_server_uri": "ldap://${host}:389",
