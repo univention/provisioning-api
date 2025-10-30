@@ -125,7 +125,7 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
+    async def subscribe_to_queue(self, subject: str, deliver_subject: str, stream_name: str, consumer_name: str):
         pass
 
     @abstractmethod
@@ -141,7 +141,7 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def ensure_consumer(self, subject: str, deliver_subject: Optional[str] = None):
+    async def ensure_consumer(self, stream_name: str, consumer_name: str, deliver_subject: Optional[str] = None):
         pass
 
     @abstractmethod

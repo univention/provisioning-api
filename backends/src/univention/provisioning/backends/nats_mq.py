@@ -8,10 +8,11 @@ from typing import Any, Callable, List, Optional, Tuple
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
-from nats.js.api import ConsumerConfig, RetentionPolicy, StreamConfig
+from nats.js.api import ConsumerConfig, DeliverPolicy, RetentionPolicy, StreamConfig
 from nats.js.errors import NotFoundError, ServerError
 from typing_extensions import Self
 
+from common.src.univention.provisioning.models.constants import DISPATCHER_QUEUE_NAME
 from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
 
 from .message_queue import Acknowledgements, Empty, MessageQueue, json_decoder, json_encoder
@@ -235,15 +236,15 @@ class NatsMessageQueue(MessageQueue):
     async def cb(self, msg):
         await self._message_queue.put(msg)
 
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
-        await self.ensure_stream(subject, False)
-        await self.ensure_consumer(subject, deliver_subject)
+    async def subscribe_to_queue(self, subject: str, deliver_subject: str, stream_name: str, consumer_name: str):
+        await self.ensure_stream(stream_name, False)
+        await self.ensure_consumer(stream_name, consumer_name, deliver_subject)
 
         await self._js.subscribe(
             subject,
             cb=self.cb,
-            durable=NatsKeys.durable_name(subject),
-            stream=NatsKeys.stream(subject),
+            durable=NatsKeys.durable_name(consumer_name),
+            stream=NatsKeys.stream(stream_name),
             manual_ack=True,
         )
 
@@ -261,10 +262,13 @@ class NatsMessageQueue(MessageQueue):
 
     async def ensure_stream(self, stream: str, manual_delete: bool, subjects: Optional[List[str]] = None):
         stream_name = NatsKeys.stream(stream)
+        retention_policy = RetentionPolicy.LIMITS if manual_delete else RetentionPolicy.WORK_QUEUE
+        if DISPATCHER_QUEUE_NAME == stream:
+            retention_policy = RetentionPolicy.INTEREST
         stream_config = StreamConfig(
             name=stream_name,
             subjects=subjects or [stream],
-            retention=RetentionPolicy.LIMITS if manual_delete else RetentionPolicy.WORK_QUEUE,
+            retention=retention_policy,
             # TODO: set to 3 after nats clustering is stable.
             num_replicas=1,
         )
@@ -278,20 +282,21 @@ class NatsMessageQueue(MessageQueue):
             await self._js.update_stream(stream_config)
             logger.info("A stream with the name %r was updated", stream_name)
 
-    async def ensure_consumer(self, stream: str, deliver_subject: Optional[str] = None):
-        stream_name = NatsKeys.stream(stream)
-        durable_name = NatsKeys.durable_name(stream)
+    async def ensure_consumer(self, stream_name: str, consumer_name: str, deliver_subject: Optional[str] = None):
+        _stream_name = NatsKeys.stream(stream_name)
+        durable_name = NatsKeys.durable_name(consumer_name)
 
         try:
-            await self._js.consumer_info(stream_name, durable_name)
+            await self._js.consumer_info(_stream_name, durable_name)
             logger.info("A consumer with the name %r already exists", durable_name)
         except NotFoundError:
             await self._js.add_consumer(
-                stream_name,
+                _stream_name,
                 ConsumerConfig(
                     durable_name=durable_name,
                     deliver_subject=deliver_subject,
                     max_ack_pending=1,
+                    deliver_policy=DeliverPolicy.NEW,
                 ),
             )
             logger.info("A consumer with the name %r was created", durable_name)
