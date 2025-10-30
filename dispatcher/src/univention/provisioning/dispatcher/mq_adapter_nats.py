@@ -5,6 +5,7 @@ from typing import Optional
 
 from univention.provisioning.backends import message_queue
 from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 from univention.provisioning.models.message import Message, MQMessage
 
@@ -37,7 +38,7 @@ class NatsMessageQueueAdapter(MessageQueuePort):
         await self.mq.close()
 
     async def initialize_subscription(self, queue: BaseQueue):
-        return await self.mq.initialize_subscription(stream, manual_delete, subject)
+        return await self.mq.initialize_subscription(queue)
 
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message(timeout=timeout)

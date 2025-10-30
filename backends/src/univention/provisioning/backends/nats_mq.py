@@ -50,7 +50,7 @@ class BaseQueue:
     def stream_config(self) -> StreamConfig:
         return StreamConfig(
             name=self.queue_name,
-            subjects=[self.subject] if self.subject else [self.name],
+            subjects=[self.message_subject] if self.message_subject else [self.name],
             retention=self.retention_policy,
             # TODO: set to 3 after nats clustering is stable.
             num_replicas=self.replicas,
@@ -205,7 +205,7 @@ class NatsMessageQueue(MessageQueue):
         await self.ensure_consumer(queue)
 
         self.pull_subscription = await self._js.pull_subscribe(
-            subject=queue.subject,
+            subject=queue.message_subject,
             durable=queue.consumer_name,
             stream=queue.queue_name,
         )

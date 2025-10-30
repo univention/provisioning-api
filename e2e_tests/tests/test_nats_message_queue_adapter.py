@@ -6,7 +6,7 @@ import uuid
 import pytest
 from nats.js.errors import BadRequestError, ServerError
 
-from univention.provisioning.backends.nats_mq import NatsKeys, NatsMessageQueue
+from univention.provisioning.backends.nats_mq import ConsumerQueue, NatsMessageQueue
 
 from .e2e_settings import E2ETestSettings
 
@@ -60,7 +60,8 @@ async def test_ensure_stream_with_conflicting_filters(nats_mq_adapter: NatsMessa
 
 async def test_update_stream_subject(nats_mq_adapter: NatsMessageQueue, test_stream):
     await nats_mq_adapter.ensure_stream(test_stream, False, [str(uuid.uuid4)[:8]])
-    stream_info = await nats_mq_adapter._js.stream_info(NatsKeys.stream(test_stream))
+    queue = ConsumerQueue(test_stream)
+    stream_info = await nats_mq_adapter._js.stream_info(queue.queue_name)
     assert stream_info.config.subjects != [test_stream]
 
 
