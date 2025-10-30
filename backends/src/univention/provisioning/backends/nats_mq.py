@@ -24,7 +24,7 @@ class BaseQueue:
     # Used to construct the nats stream name and default subject
     name: str
     # nats durable consumer name
-    consumer_name: str
+    _consumer_name: str | None = None
     # nats stream retention policy
     retention_policy: RetentionPolicy = RetentionPolicy.WORK_QUEUE
     deliver_policy: DeliverPolicy = DeliverPolicy.ALL
@@ -40,12 +40,12 @@ class BaseQueue:
         return f"stream:{self.name}"
 
     @property
+    def consumer_name(self) -> str:
+        return f"durable_name:{self._consumer_name or self.name}"
+
+    @property
     def message_subject(self) -> str:
         return self.name
-
-    @staticmethod
-    def durable_name(consumer_name: str) -> str:
-        return f"durable_name:{consumer_name}"
 
     def stream_config(self) -> StreamConfig:
         return StreamConfig(
@@ -91,7 +91,6 @@ class LdapQueue(BaseQueue):
 
     def __init__(self):
         self.name = "ldap-producer"
-        self.consumer_name = self.durable_name("ldap-producer")
 
 
 class IncomingQueue(BaseQueue):
@@ -106,7 +105,7 @@ class IncomingQueue(BaseQueue):
 
     def __init__(self, consumer_name: str):
         self.name = "incoming"
-        self.consumer_name = self.durable_name(consumer_name)
+        self._consumer_name = consumer_name
 
 
 class PrefillQueue(BaseQueue):
