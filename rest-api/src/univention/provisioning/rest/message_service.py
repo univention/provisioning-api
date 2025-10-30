@@ -8,6 +8,7 @@ from typing import Optional
 from univention.provisioning.models.message import MessageProcessingStatus, ProvisioningMessage
 from univention.provisioning.models.subscription import FillQueueStatus
 
+from ..backends.nats_mq import ConsumerQueue
 from .mq_port import MessageQueuePort
 from .subscription_service import SubscriptionService
 from .subscriptions_db_port import SubscriptionsDBPort
@@ -69,4 +70,4 @@ class MessageService:
 
     async def update_message_status(self, subscription_name: str, seq_num: int, status: MessageProcessingStatus):
         if status == MessageProcessingStatus.ok:
-            await self.mq.delete_message(subscription_name, seq_num)
+            await self.mq.delete_message(ConsumerQueue(subscription_name), seq_num)

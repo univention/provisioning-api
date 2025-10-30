@@ -13,6 +13,7 @@ from passlib.context import CryptContext
 
 from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
 
+from ..backends.nats_mq import ConsumerQueue
 from .mq_port import MessageQueuePort
 from .subscriptions_db_port import NoSubscription, SubscriptionsDBPort
 
@@ -114,6 +115,7 @@ class SubscriptionService:
             return True
 
     async def prepare_and_store_subscription_info(self, new_sub: NewSubscription):
+        queue = ConsumerQueue(new_sub.name)
         if new_sub.request_prefill:
             prefill_queue_status = FillQueueStatus.pending
         else:
@@ -150,19 +152,19 @@ class SubscriptionService:
 
             if consumer_created:
                 try:
-                    await self.mq.delete_consumer(new_sub.name)
+                    await self.mq.delete_consumer(queue)
                 except Exception as cleanup_error:
                     logger.error(f"Rollback: Failed to delete consumer: {cleanup_error}")
 
             if queue_created:
                 try:
-                    await self.mq.delete_queue(new_sub.name)
+                    await self.mq.delete_queue(queue)
                 except Exception as cleanup_error:
                     logger.error(f"Rollback: Failed to delete queue: {cleanup_error}")
 
             if subscription_stored:
                 try:
-                    await self.sub_db.delete_subscription(new_sub.name)
+                    await self.sub_db.delete_subscription(queue)
                 except Exception as cleanup_error:
                     logger.error(f"Rollback: Failed to delete subscription: {cleanup_error}")
 
