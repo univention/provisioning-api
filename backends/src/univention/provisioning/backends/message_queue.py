@@ -5,9 +5,8 @@ import asyncio
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Coroutine, List, NamedTuple, Optional, Tuple
+from typing import Any, Callable, Coroutine, NamedTuple, Tuple
 
-from nats.aio.msg import Msg
 from typing_extensions import Self
 
 from univention.provisioning.models.message import BaseMessage, MQMessage
@@ -71,8 +70,7 @@ class MessageQueue(ABC):
     @abstractmethod
     async def add_message(
         self,
-        stream: str,
-        subject: str,
+        queue,
         message: BaseMessage,
         binary_encoder: Callable[[Any], bytes] = json_encoder,
     ):
@@ -80,11 +78,11 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: Optional[str]) -> None:
+    async def initialize_subscription(self, queue) -> None:
         pass
 
     @abstractmethod
-    async def get_message(self, stream: str, subject: str, timeout: float, pop: bool):
+    async def get_message(self, queue, timeout: float, pop: bool):
         """Retrieve multiple messages from a NATS subject."""
         pass
 
@@ -97,11 +95,11 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def delete_message(self, stream: str, seq_num: int):
+    async def delete_message(self, queue, seq_num: int):
         pass
 
     @abstractmethod
-    async def delete_stream(self, stream_name: str):
+    async def delete_stream(self, queue):
         pass
 
     @abstractmethod
@@ -117,35 +115,23 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def delete_consumer(self, subject: str):
+    async def delete_consumer(self, queue):
         pass
 
     @abstractmethod
-    async def cb(self, msg):
+    async def stream_exists(self, queue):
         pass
 
     @abstractmethod
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str):
+    async def ensure_stream(self, queue):
         pass
 
     @abstractmethod
-    async def wait_for_event(self) -> Msg:
+    async def ensure_consumer(self, queue):
         pass
 
     @abstractmethod
-    async def stream_exists(self, subject: str):
-        pass
-
-    @abstractmethod
-    async def ensure_stream(self, stream: str, manual_delete: bool, subjects: Optional[List[str]] = None):
-        pass
-
-    @abstractmethod
-    async def ensure_consumer(self, subject: str, deliver_subject: Optional[str] = None):
-        pass
-
-    @abstractmethod
-    async def purge_stream(self, stream: str, subject: str) -> None:
+    async def purge_stream(self, queue) -> None:
         pass
 
 

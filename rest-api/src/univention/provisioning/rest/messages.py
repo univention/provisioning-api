@@ -7,6 +7,7 @@ import fastapi
 from fastapi import Depends
 from fastapi.security import HTTPBasic
 
+from univention.provisioning.backends.nats_mq import IncomingQueue
 from univention.provisioning.models.message import Message
 
 from .dependencies import MQDependency, authenticate_events_endpoint
@@ -25,4 +26,4 @@ async def create_new_message(
 
     # TODO: set publisher_name from authentication data
 
-    await mq.enqueue_for_dispatcher(msg)
+    await mq.add_message(IncomingQueue(""), msg)

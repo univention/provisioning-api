@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 
 from univention.provisioning.backends import message_queue
 from univention.provisioning.backends.message_queue import Acknowledgements
-from univention.provisioning.models.constants import PREFILL_QUEUE_NAME, PREFILL_SUBJECT_TEMPLATE
+from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import BaseMessage, MQMessage
 
 from .config import PrefillSettings, prefill_settings
@@ -44,22 +44,18 @@ class NatsMessageQueue(MessageQueuePort):
         return False
 
     @retry(logger=logger)
-    async def add_message_to_failures_queue(self, message: BaseMessage) -> None:
-        await self.mq.add_message(PREFILL_FAILURES_STREAM, PREFILL_FAILURES_STREAM, message)
-
-    @retry(logger=logger)
-    async def add_message_to_queue(self, queue: str, message: BaseMessage) -> None:
-        await self.mq.add_message(queue, PREFILL_SUBJECT_TEMPLATE.format(subscription=queue), message)
+    async def add_message(self, queue: BaseQueue, message: BaseMessage) -> None:
+        await self.mq.add_message(queue, message)
 
     async def get_one_message(self) -> Tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message()
 
-    async def initialize_subscription(self) -> None:
-        await self.mq.initialize_subscription(PREFILL_QUEUE_NAME, False, None)
+    async def initialize_subscription(self, queue: BaseQueue) -> None:
+        await self.mq.initialize_subscription(queue)
 
-    async def prepare_failures_queue(self) -> None:
-        await self.mq.ensure_stream(PREFILL_FAILURES_STREAM, False)
-        await self.mq.ensure_consumer(PREFILL_FAILURES_STREAM)
+    async def prepare_failures_queue(self, queue: BaseQueue) -> None:
+        await self.mq.ensure_stream(queue)
+        await self.mq.ensure_consumer(queue)
 
-    async def purge_queue(self, name: str) -> None:
-        await self.mq.purge_stream(name, PREFILL_SUBJECT_TEMPLATE.format(subscription=name))
+    async def purge_queue(self, queue: BaseQueue) -> None:
+        await self.mq.purge_stream(queue)

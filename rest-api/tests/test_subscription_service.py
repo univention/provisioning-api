@@ -18,6 +18,7 @@ from test_helpers.mock_data import (
 )
 
 from univention.provisioning.backends.nats_kv import NatsKeyValueDB
+from univention.provisioning.backends.nats_mq import ConsumerQueue
 from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.message import RealmTopic
 from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
@@ -192,7 +193,7 @@ class TestSubscriptionService:
         )
 
     async def test_prepare_and_store_subscription_info_success_with_prefill(self, sub_service: SubscriptionService):
-        sub_service.mq.prepare_new_consumer_queue = AsyncMock()
+        sub_service.mq.create_queue = AsyncMock()
         sub_service.mq.create_consumer = AsyncMock()
         sub_service.sub_db.store_subscription = AsyncMock()
 
@@ -205,8 +206,8 @@ class TestSubscriptionService:
 
         await sub_service.prepare_and_store_subscription_info(new_sub)
 
-        sub_service.mq.prepare_new_consumer_queue.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.create_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.create_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.create_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.sub_db.store_subscription.assert_called_once()
 
         # Verify the subscription object passed to store_subscription
@@ -219,7 +220,7 @@ class TestSubscriptionService:
         assert stored_subscription.prefill_queue_status == FillQueueStatus.pending
 
     async def test_prepare_and_store_subscription_info_success_without_prefill(self, sub_service: SubscriptionService):
-        sub_service.mq.prepare_new_consumer_queue = AsyncMock()
+        sub_service.mq.create_queue = AsyncMock()
         sub_service.mq.create_consumer = AsyncMock()
         sub_service.sub_db.store_subscription = AsyncMock()
 
@@ -232,8 +233,8 @@ class TestSubscriptionService:
 
         await sub_service.prepare_and_store_subscription_info(new_sub)
 
-        sub_service.mq.prepare_new_consumer_queue.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.create_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.create_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.create_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.sub_db.store_subscription.assert_called_once()
 
         # Verify the subscription object has correct prefill status
@@ -242,7 +243,7 @@ class TestSubscriptionService:
         assert stored_subscription.prefill_queue_status == FillQueueStatus.done
 
     async def test_prepare_and_store_subscription_info_queue_creation_fails(self, sub_service: SubscriptionService):
-        sub_service.mq.prepare_new_consumer_queue = AsyncMock(side_effect=Exception("Queue creation failed"))
+        sub_service.mq.create_queue = AsyncMock(side_effect=Exception("Queue creation failed"))
         sub_service.mq.create_consumer = AsyncMock()
         sub_service.mq.delete_queue = AsyncMock()
         sub_service.mq.delete_consumer = AsyncMock()
@@ -262,7 +263,7 @@ class TestSubscriptionService:
         assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert "internal error" in exc_info.value.detail
 
-        sub_service.mq.prepare_new_consumer_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.create_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.mq.create_consumer.assert_not_called()
         sub_service.sub_db.store_subscription.assert_not_called()
 
@@ -272,7 +273,7 @@ class TestSubscriptionService:
         sub_service.sub_db.delete_subscription.assert_not_called()
 
     async def test_prepare_and_store_subscription_info_consumer_creation_fails(self, sub_service: SubscriptionService):
-        sub_service.mq.prepare_new_consumer_queue = AsyncMock()
+        sub_service.mq.create_queue = AsyncMock()
         sub_service.mq.create_consumer = AsyncMock(side_effect=Exception("Consumer creation failed"))
         sub_service.mq.delete_queue = AsyncMock()
         sub_service.mq.delete_consumer = AsyncMock()
@@ -291,19 +292,19 @@ class TestSubscriptionService:
 
         assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        sub_service.mq.prepare_new_consumer_queue.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.create_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.create_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.create_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.sub_db.store_subscription.assert_not_called()
 
         # Queue should be rolled back
-        sub_service.mq.delete_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.delete_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.mq.delete_consumer.assert_not_called()  # Consumer wasn't created
         sub_service.sub_db.delete_subscription.assert_not_called()
 
     async def test_prepare_and_store_subscription_info_subscription_storage_fails(
         self, sub_service: SubscriptionService
     ):
-        sub_service.mq.prepare_new_consumer_queue = AsyncMock()
+        sub_service.mq.create_queue = AsyncMock()
         sub_service.mq.create_consumer = AsyncMock()
         sub_service.mq.delete_queue = AsyncMock()
         sub_service.mq.delete_consumer = AsyncMock()
@@ -322,17 +323,17 @@ class TestSubscriptionService:
 
         assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        sub_service.mq.prepare_new_consumer_queue.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.create_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.create_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.create_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.sub_db.store_subscription.assert_called_once()
 
         # Both queue and consumer should be rolled back
-        sub_service.mq.delete_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.delete_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.delete_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.delete_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.sub_db.delete_subscription.assert_not_called()  # Storage failed, so nothing to delete
 
     async def test_prepare_and_store_subscription_info_rollback_failures(self, sub_service: SubscriptionService):
-        sub_service.mq.prepare_new_consumer_queue = AsyncMock()
+        sub_service.mq.create_queue = AsyncMock()
         sub_service.mq.create_consumer = AsyncMock()
         sub_service.mq.delete_queue = AsyncMock(side_effect=Exception("Rollback failed"))
         sub_service.mq.delete_consumer = AsyncMock(side_effect=Exception("Rollback failed"))
@@ -354,10 +355,10 @@ class TestSubscriptionService:
         assert "internal error" in exc_info.value.detail
 
         # Verify all operations were attempted
-        sub_service.mq.prepare_new_consumer_queue.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.create_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.create_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.create_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
         sub_service.sub_db.store_subscription.assert_called_once()
 
         # Verify rollback was attempted despite failures
-        sub_service.mq.delete_consumer.assert_called_once_with(SUBSCRIPTION_NAME)
-        sub_service.mq.delete_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        sub_service.mq.delete_consumer.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))
+        sub_service.mq.delete_queue.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME))

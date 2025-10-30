@@ -26,6 +26,8 @@ provisioning_admin_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.
 provisioning_events_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.EVENTS_PASSWORD_UDM')
 nats_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.NATS_PASSWORD')
 host=$(ucr get ldap/server/name)
+master_host=$(ucr get ldap/master)
+
 cat <<EOF > e2e_settings_ucs.json
 {
   "local": {
@@ -41,7 +43,7 @@ cat <<EOF > e2e_settings_ucs.json
     "ldap_base": "$(ucr get ldap/base)",
     "ldap_bind_dn": "uid=Administrator,cn=users,$(ucr get ldap/base)",
     "ldap_bind_password": "univention",
-    "udm_rest_api_base_url": "https://${host}/univention/udm/",
+    "udm_rest_api_base_url": "https://${master_host}/univention/udm/",
     "udm_rest_api_username": "Administrator",
     "udm_rest_api_password": "univention"
   }

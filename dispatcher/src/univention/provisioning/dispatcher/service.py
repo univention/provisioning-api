@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import DISPATCHER_QUEUE_NAME
+from univention.provisioning.backends.nats_mq import ConsumerQueue, IncomingQueue
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
 
@@ -30,7 +30,8 @@ class DispatcherService:
 
     async def run(self):
         logger.info("Storing event in consumer queues")
-        await self.mq_pull.initialize_subscription(DISPATCHER_QUEUE_NAME, False, DISPATCHER_QUEUE_NAME)
+        queue_type = IncomingQueue(self.mq_pull.settings.nats_consumer_name)
+        await self.mq_pull.initialize_subscription(queue_type)
 
         # Initially fill self._subscriptions before starting to handle messages.
         await self.update_subscriptions_mapping()
@@ -91,7 +92,7 @@ class DispatcherService:
         for sub in subscriptions:
             logger.info("Sending message to %r", sub.name)
             try:
-                await self.mq_push.enqueue_message(sub.name, validated_msg)
+                await self.mq_push.enqueue_message(ConsumerQueue(sub.name), validated_msg)
             except Exception:
                 logger.fatal("Failed to send message to %r", sub.name)
                 await asyncio.sleep(1)
@@ -106,7 +107,7 @@ class DispatcherService:
         new_subscriptions_mapping: dict[str, dict[str, set[Subscription]]] = {}
         async for sub in self.subscriptions_db.get_all_subscriptions():
             logger.debug("Processing subscription: %r", sub.name)
-            if not await self.mq_push.stream_exists(sub.name):
+            if not await self.mq_push.stream_exists(ConsumerQueue(sub.name)):
                 logger.debug("Stream does not exist for subscription %r. Ignoring subscription", sub.name)
                 continue
             for realm_topic in sub.realms_topics:

@@ -7,17 +7,18 @@ from unittest.mock import AsyncMock, call
 import pytest
 from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
-from univention.provisioning.backends.nats_mq import json_decoder
+from univention.provisioning.backends.nats_mq import ConsumerQueue, json_decoder
 from univention.provisioning.dispatcher.config import DispatcherSettings
 from univention.provisioning.dispatcher.mq_adapter_nats import NatsMessageQueueAdapter
 from univention.provisioning.dispatcher.service import DispatcherService, MessageAckManager
 from univention.provisioning.dispatcher.subscriptions_adapter_nats import NatsSubscriptionsAdapter
-from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 
 
 @pytest.fixture
 def dispatcher_service(mock_nats_kv_adapter, mock_nats_mq_adapter) -> DispatcherService:
-    settings = DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass")
+    settings = DispatcherSettings(
+        nats_user="dispatcher", nats_password="dispatcherpass", nats_consumer_name="dispatcher_consumer_name"
+    )
     mq = NatsMessageQueueAdapter(settings)
     mq.mq = mock_nats_mq_adapter
     subs = NatsSubscriptionsAdapter(settings)
@@ -37,8 +38,6 @@ class StopLoopException(Exception): ...
 
 @pytest.mark.anyio
 class TestDispatcher:
-    main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
-
     async def test_dispatch_events(self, dispatcher_service: DispatcherService):
         """
         This abstract test focuses on checking the interaction between the Dispatcher Service and the Nats,
@@ -62,8 +61,9 @@ class TestDispatcher:
         )
 
         # check storing event in the consumer queue
+        queue = ConsumerQueue(SUBSCRIPTION_NAME)
         dispatcher_service.mq_push.mq._js.publish.assert_called_once_with(
-            self.main_subject,
-            FLAT_MESSAGE_ENCODED,
-            stream=f"stream:{SUBSCRIPTION_NAME}",
+            subject=queue.message_subject,
+            payload=FLAT_MESSAGE_ENCODED,
+            stream=queue.queue_name,
         )

@@ -9,7 +9,7 @@ from typing import Any, Optional
 from pydantic import ValidationError
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import LDAP_PRODUCER_QUEUE_NAME, LDIF_PRODUCER_QUEUE_NAME, PublisherName
+from univention.provisioning.backends.nats_mq import LdapQueue
 from univention.provisioning.models.message import Body, EmptyBodyError, Message, NoUDMTypeError
 
 from .cache_port import Cache
@@ -18,17 +18,7 @@ from .event_sender_port import EventSender
 from .ldap2udm_port import Ldap2Udm
 from .subscriptions_port import SubscriptionsPort
 
-LDAP_SUBJECT = "ldap-producer-subject"
-LDIF_SUBJECT = "ldif-producer-subject"
 UDM_OBJECT_TYPE_FIELD = "objectType"
-STREAM = {
-    PublisherName.ldif_producer: LDIF_PRODUCER_QUEUE_NAME,
-    PublisherName.udm_listener: LDAP_PRODUCER_QUEUE_NAME,
-}
-SUBJECT = {
-    PublisherName.ldif_producer: LDIF_SUBJECT,
-    PublisherName.udm_listener: LDAP_SUBJECT,
-}
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +41,7 @@ class TransformerService:
         self.settings = settings or udm_transformer_settings()
 
     async def listen_for_ldap_events(self) -> None:
-        await self.subscriptions.initialize_subscription(
-            STREAM[self.settings.ldap_publisher_name],
-            False,
-            SUBJECT[self.settings.ldap_publisher_name],
-        )
+        await self.subscriptions.initialize_subscription(LdapQueue())
 
         while True:
             logger.debug("Listening for new LDAP messages.")

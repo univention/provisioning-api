@@ -7,7 +7,7 @@ from typing import Any, AsyncGenerator, Callable, Coroutine
 import pytest
 
 from univention.admin.rest.client import UDM, time
-from univention.provisioning.backends.nats_mq import NatsKeys
+from univention.provisioning.backends.nats_mq import ConsumerQueue
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.models.message import MessageProcessingStatus
 from univention.provisioning.models.subscription import FillQueueStatus, RealmTopic
@@ -78,9 +78,9 @@ async def test_simple_message_timing(
     status_durations = []
     messages = []
     responses = []
-
+    queue = ConsumerQueue(subscription)
     print("Cleaning up consumer stream")
-    await purge_stream(NatsKeys.stream(subscription))
+    await purge_stream(queue.queue_name)
 
     print("Adding simple messages to the incoming queue")
     for _ in range(test_number):
@@ -130,9 +130,9 @@ async def test_udm_message_timing(
     status_durations = []
     messages = []
     responses = []
-
+    queue = ConsumerQueue(subscription)
     print("Cleaning up consumer stream")
-    await purge_stream(NatsKeys.stream(subscription))
+    await purge_stream(queue.queue_name)
 
     print("Adding udm messages to the incoming queue")
     for _ in range(test_number):

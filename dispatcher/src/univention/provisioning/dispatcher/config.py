@@ -14,6 +14,8 @@ class BaseDispatcherSettings(BaseSettings):
     log_level: Loglevel
     # Maximum number of reconnect attempts to the NATS server
     nats_max_reconnect_attempts: int
+    # Nats consumer name. Needs to be unique for every UCS host.
+    nats_consumer_name: str
 
 
 class DispatcherSettings(BaseDispatcherSettings):

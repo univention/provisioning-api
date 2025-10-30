@@ -8,13 +8,8 @@ from nats.js.errors import NotFoundError
 
 from univention.provisioning.backends import message_queue
 from univention.provisioning.backends.message_queue import MessageQueue
-from univention.provisioning.models.constants import (
-    DISPATCHER_QUEUE_NAME,
-    DISPATCHER_SUBJECT_TEMPLATE,
-    PREFILL_QUEUE_NAME,
-    PREFILL_SUBJECT_TEMPLATE,
-    PublisherName,
-)
+from univention.provisioning.backends.nats_mq import BaseQueue, PrefillQueue
+from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
 from univention.provisioning.models.subscription import NewSubscription
 
@@ -51,52 +46,30 @@ class NatsMessageQueue(MessageQueuePort):
         self.mq = None
         return False
 
-    async def enqueue_for_dispatcher(self, message: Message) -> None:
-        await self.mq.add_message(DISPATCHER_QUEUE_NAME, DISPATCHER_QUEUE_NAME, message)
+    async def add_message(self, queue: BaseQueue, message: Message) -> None:
+        await self.mq.add_message(queue, message)
 
-    async def get_messages_from_main_queue(
-        self, subscription: str, timeout: float, pop: bool
-    ) -> Optional[ProvisioningMessage]:
-        main_subject = DISPATCHER_SUBJECT_TEMPLATE.format(subscription=subscription)
+    async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         try:
-            return await self.mq.get_message(subscription, main_subject, timeout, pop)
+            return await self.mq.get_message(queue, timeout, pop)
         except NotFoundError as err:
             raise ProvisioningBackendError(str(err))
 
-    async def get_messages_from_prefill_queue(
-        self, subscription: str, timeout: float, pop: bool
-    ) -> Optional[ProvisioningMessage]:
-        prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=subscription)
-        try:
-            return await self.mq.get_message(subscription, prefill_subject, timeout, pop)
-        except NotFoundError as err:
-            raise ProvisioningBackendError(str(err))
+    async def delete_message(self, queue: BaseQueue, seq_num: int):
+        await self.mq.delete_message(queue, seq_num)
 
-    async def delete_message(self, stream: str, seq_num: int):
-        await self.mq.delete_message(stream, seq_num)
+    async def create_queue(self, queue: BaseQueue):
+        await self.mq.ensure_stream(queue)
 
-    async def create_queue(self, stream: str, manual_delete: bool, subjects: list[str] | None = None):
-        await self.mq.ensure_stream(stream, manual_delete, subjects)
+    async def delete_queue(self, queue: BaseQueue) -> None:
+        await self.mq.delete_stream(queue)
+        await self.mq.delete_consumer(queue)
 
-    async def delete_queue(self, name: str) -> None:
-        await self.mq.delete_stream(name)
-        await self.mq.delete_consumer(name)
+    async def create_consumer(self, queue: BaseQueue):
+        await self.mq.ensure_consumer(queue)
 
-    async def create_consumer(self, subject):
-        await self.mq.ensure_consumer(subject)
-
-    async def delete_consumer(self, consumer_name: str):
-        await self.mq.delete_consumer(consumer_name)
-
-    async def prepare_new_consumer_queue(self, consumer_name: str):
-        await self.create_queue(
-            consumer_name,
-            True,
-            [
-                DISPATCHER_SUBJECT_TEMPLATE.format(subscription=consumer_name),
-                PREFILL_SUBJECT_TEMPLATE.format(subscription=consumer_name),
-            ],
-        )
+    async def delete_consumer(self, queue: BaseQueue):
+        await self.mq.delete_consumer(queue)
 
     async def request_prefill(self, subscription: NewSubscription):
         message = PrefillMessage(
@@ -105,4 +78,4 @@ class NatsMessageQueue(MessageQueuePort):
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,
         )
-        await self.mq.add_message(PREFILL_QUEUE_NAME, PREFILL_QUEUE_NAME, message)
+        await self.mq.add_message(PrefillQueue(), message)
