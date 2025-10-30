@@ -18,7 +18,8 @@ from test_helpers.mock_data import (
 )
 
 from univention.provisioning.backends.message_queue import MessageAckManager
-from univention.provisioning.models.constants import PREFILL_SUBJECT_TEMPLATE, PublisherName
+from univention.provisioning.backends.nats_mq import PrefillConsumerQueue, PrefillFailuresQueue, PrefillQueue
+from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import Body, Message
 from univention.provisioning.prefill.config import PrefillSettings
 from univention.provisioning.prefill.mq_port import MessageQueuePort
@@ -49,7 +50,6 @@ def udm_prefill(prefill_settings_factory: ModelFactory[PrefillSettings]) -> Pref
 
 @pytest.mark.anyio
 class TestUDMPreFill:
-    prefill_subject = PREFILL_SUBJECT_TEMPLATE.format(subscription=SUBSCRIPTION_NAME)
     mocked_date = datetime(2023, 11, 9, 11, 15, 52, 616061)
     url = f"http://udm-rest-api:9979/udm/{GROUPS_TOPIC}/..."
     url_2 = f"http://udm-rest-api:9979/udm/{USERS_TOPIC}/..."
@@ -100,15 +100,15 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill.mq.initialize_subscription.assert_called_once()
-        udm_prefill.mq.purge_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        udm_prefill.mq.initialize_subscription.assert_called_once_with(PrefillQueue())
+        udm_prefill.mq.purge_queue.assert_called_once_with(PrefillConsumerQueue(SUBSCRIPTION_NAME))
         udm_prefill.mq.get_one_message.assert_has_calls([call(), call()])
         udm_prefill.udm.get_object_types.assert_called_once_with()
         udm_prefill.udm.list_objects.assert_called_once_with(GROUPS_TOPIC)
         udm_prefill.udm.get_object.assert_called_once_with(self.url)
         mock_acknowledgements.acknowledge_message.assert_called_once()
-        udm_prefill.mq.add_message_to_queue.assert_called_once_with(SUBSCRIPTION_NAME, self.msg)
-        udm_prefill.mq.add_message_to_failures_queue.assert_not_called()
+        udm_prefill.mq.add_message.assert_called_once_with(PrefillConsumerQueue(SUBSCRIPTION_NAME), self.msg)
+        udm_prefill.mq.add_message.assert_called_once()
 
     @patch("univention.provisioning.prefill.prefill_service.datetime")
     async def test_handle_requests_to_prefill_multiple_topics(self, mock_datetime, udm_prefill: PrefillService):
@@ -127,20 +127,19 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill.mq.initialize_subscription.assert_called_once_with()
-        udm_prefill.mq.purge_queue.assert_called_once_with(SUBSCRIPTION_NAME)
+        udm_prefill.mq.initialize_subscription.assert_called_once_with(PrefillQueue())
+        udm_prefill.mq.purge_queue.assert_called_once_with(PrefillConsumerQueue(SUBSCRIPTION_NAME))
         udm_prefill.mq.get_one_message.assert_has_calls([call(), call()])
         udm_prefill.udm.get_object_types.assert_has_calls([call(), call()])
         udm_prefill.udm.list_objects.assert_has_calls([call(GROUPS_TOPIC), call(USERS_TOPIC)])
         udm_prefill.udm.get_object.assert_has_calls([call(self.url), call(self.url_2)])
         mock_acknowledgements.acknowledge_message.assert_called_once()
-        udm_prefill.mq.add_message_to_queue.assert_has_calls(
+        udm_prefill.mq.add_message.assert_has_calls(
             [
-                call(SUBSCRIPTION_NAME, self.msg),
-                call(SUBSCRIPTION_NAME, self.msg2),
+                call(PrefillConsumerQueue(SUBSCRIPTION_NAME), self.msg),
+                call(PrefillConsumerQueue(SUBSCRIPTION_NAME), self.msg2),
             ]
         )
-        udm_prefill.mq.add_message_to_failures_queue.assert_not_called()
 
     @patch("univention.provisioning.prefill.prefill_service.datetime")
     async def test_handle_requests_to_prefill_moving_to_failures(self, mock_datetime, udm_prefill: PrefillService):
@@ -156,14 +155,13 @@ class TestUDMPreFill:
         with pytest.raises(EscapeLoopException, match="Stop waiting for the new event"):
             await udm_prefill.handle_requests_to_prefill()
 
-        udm_prefill.mq.initialize_subscription.assert_called_once_with()
+        udm_prefill.mq.initialize_subscription.assert_called_once_with(PrefillQueue())
         udm_prefill.mq.get_one_message.assert_has_calls([call(), call()])
         udm_prefill.udm.get_object_types.assert_not_called()
         udm_prefill.udm.list_objects.assert_not_called()
         udm_prefill.udm.get_object.assert_not_called()
         mock_acknowledgements.acknowledge_message.assert_called_once()
-        udm_prefill.mq.add_message_to_queue.assert_not_called()
-        udm_prefill.mq.add_message_to_failures_queue.assert_called_once_with(ANY)
+        udm_prefill.mq.add_message.assert_called_once_with(PrefillFailuresQueue(), ANY)
 
     @patch("univention.provisioning.prefill.prefill_service.datetime")
     async def test_fetch_no_udm_module(self, mock_datetime, udm_prefill: PrefillService):
@@ -176,7 +174,7 @@ class TestUDMPreFill:
         udm_prefill.udm.get_object_types.assert_called_once_with()
         udm_prefill.udm.list_objects.assert_not_called()
         udm_prefill.udm.get_object.assert_not_called()
-        udm_prefill.mq.add_message_to_queue.assert_not_called()
+        udm_prefill.mq.add_message.assert_not_called()
 
 
 class TestMatchMethod:

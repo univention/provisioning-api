@@ -8,6 +8,7 @@ from typing import Optional
 from pydantic import ValidationError
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
+from univention.provisioning.backends.nats_mq import PrefillConsumerQueue, PrefillFailuresQueue, PrefillQueue
 from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import (
     Body,
@@ -50,8 +51,8 @@ class PrefillService:
     async def handle_requests_to_prefill(self):
         logger.info("Handling the requests to prefill")
 
-        await self.mq.prepare_failures_queue()
-        await self.mq.initialize_subscription()
+        await self.mq.prepare_failures_queue(PrefillFailuresQueue())
+        await self.mq.initialize_subscription(PrefillQueue())
 
         while True:
             logger.debug("Waiting for new prefill requests...")
@@ -120,7 +121,7 @@ class PrefillService:
         )
 
     async def _handle_message(self, message: PrefillMessage):
-        await self.mq.purge_queue(message.subscription_name)
+        await self.mq.purge_queue(PrefillConsumerQueue(message.subscription_name))
 
         for realm_topic in message.realms_topics:
             if realm_topic.realm != "udm":
@@ -192,7 +193,7 @@ class PrefillService:
             body=Body(old={}, new=obj),
         )
         logger.info("Sending to the consumer prefill queue from: %r", url)
-        await self.mq.add_message_to_queue(subscription_name, message)
+        await self.mq.add_message(PrefillConsumerQueue(subscription_name), message)
 
     async def add_to_failure_queue(self, data: dict) -> None:
         logger.info("Adding request to the prefill failures queue")
@@ -201,4 +202,4 @@ class PrefillService:
             ts=datetime.now(),
             body=data,
         )
-        await self.mq.add_message_to_failures_queue(message)
+        await self.mq.add_message(PrefillFailuresQueue(), message)

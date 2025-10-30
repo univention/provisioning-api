@@ -5,6 +5,7 @@ import abc
 from typing import Optional, Self
 
 from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import MQMessage
 
 from .config import UDMTransformerSettings
@@ -32,7 +33,7 @@ class SubscriptionsPort(abc.ABC):
     async def close(self): ...
 
     @abc.abstractmethod
-    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str): ...
+    async def initialize_subscription(self, queue: BaseQueue): ...
 
     @abc.abstractmethod
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]: ...
