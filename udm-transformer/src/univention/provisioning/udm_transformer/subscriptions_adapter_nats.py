@@ -7,6 +7,7 @@ import msgpack
 
 from univention.provisioning.backends import message_queue
 from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import MQMessage
 
 from .config import UDMTransformerSettings, udm_transformer_settings
@@ -48,8 +49,8 @@ class NatsSubscriptions(SubscriptionsPort):
     async def close(self):
         await self.mq.close()
 
-    async def initialize_subscription(self, stream: str, manual_delete: bool, subject: str):
-        return await self.mq.initialize_subscription(stream, manual_delete, subject)
+    async def initialize_subscription(self, queue: BaseQueue):
+        return await self.mq.initialize_subscription(queue)
 
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message(timeout=timeout, binary_decoder=messagepack_decoder)
