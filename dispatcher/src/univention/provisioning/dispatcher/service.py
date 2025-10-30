@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager
-from univention.provisioning.models.constants import DISPATCHER_QUEUE_NAME
+from univention.provisioning.backends.nats_mq import IncomingQueue
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
 
@@ -30,7 +30,8 @@ class DispatcherService:
 
     async def run(self):
         logger.info("Storing event in consumer queues")
-        await self.mq_pull.initialize_subscription(DISPATCHER_QUEUE_NAME, False, DISPATCHER_QUEUE_NAME)
+        queue_type = IncomingQueue(self.mq_pull.settings.nats_consumer_name)
+        await self.mq_pull.initialize_subscription(queue_type)
 
         # Initially fill self._subscriptions before starting to handle messages.
         await self.update_subscriptions_mapping()
