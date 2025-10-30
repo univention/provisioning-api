@@ -63,6 +63,9 @@ class BaseQueue:
             deliver_policy=self.deliver_policy,
         )
 
+    def __eq__(self, other) -> bool:
+        return self.name == other.name and self.consumer_name == other.consumer_name
+
 
 class ConsumerQueue(BaseQueue):
     """

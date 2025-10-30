@@ -17,7 +17,9 @@ from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 
 @pytest.fixture
 def dispatcher_service(mock_nats_kv_adapter, mock_nats_mq_adapter) -> DispatcherService:
-    settings = DispatcherSettings(nats_user="dispatcher", nats_password="dispatcherpass")
+    settings = DispatcherSettings(
+        nats_user="dispatcher", nats_password="dispatcherpass", nats_consumer_name="dispatcher_consumer_name"
+    )
     mq = NatsMessageQueueAdapter(settings)
     mq.mq = mock_nats_mq_adapter
     subs = NatsSubscriptionsAdapter(settings)
