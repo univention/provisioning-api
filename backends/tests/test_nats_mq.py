@@ -14,7 +14,6 @@ from nats.js.errors import NotFoundError
 from test_helpers.mock_data import (
     FLAT_MESSAGE_ENCODED,
     MESSAGE,
-    MQMESSAGE,
     MSG,
     NATS_SERVER,
     PROVISIONING_MESSAGE,
@@ -184,26 +183,3 @@ class TestNatsMQAdapter:
 
         mock_nats_mq_adapter._js.delete_stream.assert_called_once_with(NatsKeys.stream(SUBSCRIPTION_NAME))
         assert result is None
-
-    async def test_cb(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.cb(MSG)
-
-        mock_nats_mq_adapter._message_queue.put.assert_called_once_with(MSG)
-        assert result is None
-
-    async def test_subscribe_to_queue(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.subscribe_to_queue("incoming", "dispatcher-service")
-
-        mock_nats_mq_adapter._js.subscribe.assert_called_once_with(
-            "incoming",
-            cb=mock_nats_mq_adapter.cb,
-            durable=NatsKeys.durable_name("incoming"),
-            stream=NatsKeys.stream("incoming"),
-            manual_ack=True,
-        )
-        assert result is None
-
-    async def test_wait_for_event(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.wait_for_event()
-
-        assert result == MQMESSAGE

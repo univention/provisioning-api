@@ -45,7 +45,6 @@ class NatsMessageQueue(MessageQueue):
         )
         self._nats = NATS()
         self._js = self._nats.jetstream()
-        self._message_queue = asyncio.Queue()
         self.pull_subscription = None
 
     async def __aenter__(self) -> Self:
@@ -232,26 +231,6 @@ class NatsMessageQueue(MessageQueue):
             await self._js.delete_consumer(NatsKeys.stream(subject), NatsKeys.durable_name(subject))
         except NotFoundError:
             return None
-
-    async def cb(self, msg):
-        await self._message_queue.put(msg)
-
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str, stream_name: str, consumer_name: str):
-        await self.ensure_stream(stream_name, False)
-        await self.ensure_consumer(stream_name, consumer_name, deliver_subject)
-
-        await self._js.subscribe(
-            subject,
-            cb=self.cb,
-            durable=NatsKeys.durable_name(consumer_name),
-            stream=NatsKeys.stream(stream_name),
-            manual_ack=True,
-        )
-
-    async def wait_for_event(self) -> MQMessage:
-        msg = await self._message_queue.get()
-        message = self.mq_message_from(msg)
-        return message
 
     async def stream_exists(self, subject: str) -> bool:
         try:

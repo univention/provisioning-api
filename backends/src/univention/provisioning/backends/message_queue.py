@@ -125,10 +125,6 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def subscribe_to_queue(self, subject: str, deliver_subject: str, stream_name: str, consumer_name: str):
-        pass
-
-    @abstractmethod
     async def wait_for_event(self) -> Msg:
         pass
 
