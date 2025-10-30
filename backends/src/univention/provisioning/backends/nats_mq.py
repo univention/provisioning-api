@@ -116,7 +116,6 @@ class PrefillQueue(BaseQueue):
 
     def __init__(self):
         self.name = "prefill"
-        self.consumer_name = self.durable_name("prefill")
 
     @property
     def message_subject(self) -> str:
