@@ -66,7 +66,7 @@ class NatsMessageQueue(MessageQueuePort):
         self, subscription: str, timeout: float, pop: bool
     ) -> Optional[ProvisioningMessage]:
         try:
-            return await self.mq.get_message(PrefillQueue(subscription), timeout, pop)
+            return await self.mq.get_message(ConsumerQueue(subscription), timeout, pop)
         except NotFoundError as err:
             raise ProvisioningBackendError(str(err))
 
