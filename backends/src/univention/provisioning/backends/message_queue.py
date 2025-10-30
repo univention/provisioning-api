@@ -95,11 +95,11 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def delete_message(self, stream: str, seq_num: int):
+    async def delete_message(self, queue, seq_num: int):
         pass
 
     @abstractmethod
-    async def delete_stream(self, stream_name: str):
+    async def delete_stream(self, queue):
         pass
 
     @abstractmethod
@@ -115,11 +115,11 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def delete_consumer(self, subject: str):
+    async def delete_consumer(self, queue):
         pass
 
     @abstractmethod
-    async def stream_exists(self, subject: str):
+    async def stream_exists(self, queue):
         pass
 
     @abstractmethod

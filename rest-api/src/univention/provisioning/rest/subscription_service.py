@@ -135,11 +135,11 @@ class SubscriptionService:
         logger.info("Preparing to register new subscription: %r", new_sub)
 
         try:
-            await self.mq.prepare_new_consumer_queue(new_sub.name)
+            await self.mq.create_queue(queue)
             logger.info("Created new queue for subscription: %r", new_sub.name)
             queue_created = True
 
-            await self.mq.create_consumer(new_sub.name)
+            await self.mq.create_consumer(queue)
             logger.info("Created new consumer for subscription: %r", new_sub.name)
             consumer_created = True
 
@@ -190,7 +190,7 @@ class SubscriptionService:
         """
         _ = await self.get_subscription(name)
         await self.sub_db.delete_subscription(name)
-        await self.mq.delete_queue(name)
+        await self.mq.delete_queue(ConsumerQueue(name))
 
     @staticmethod
     def handle_authentication_error(message: str):
@@ -226,6 +226,4 @@ class SubscriptionService:
                 return queue_status
             await asyncio.sleep(1)
 
-        return await self.get_subscription_queue_status(subscription_name)
-        return await self.get_subscription_queue_status(subscription_name)
         return await self.get_subscription_queue_status(subscription_name)

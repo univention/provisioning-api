@@ -6,7 +6,6 @@ from typing import Optional
 from univention.provisioning.backends import message_queue
 from univention.provisioning.backends.message_queue import Acknowledgements
 from univention.provisioning.backends.nats_mq import BaseQueue
-from univention.provisioning.models.constants import DISPATCHER_SUBJECT_TEMPLATE
 from univention.provisioning.models.message import Message, MQMessage
 
 from .config import DispatcherSettings, dispatcher_settings
@@ -43,8 +42,8 @@ class NatsMessageQueueAdapter(MessageQueuePort):
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message(timeout=timeout)
 
-    async def enqueue_message(self, queue: str, message: Message) -> None:
-        await self.mq.add_message(queue, DISPATCHER_SUBJECT_TEMPLATE.format(subscription=queue), message)
+    async def enqueue_message(self, queue: BaseQueue, message: Message) -> None:
+        await self.mq.add_message(queue, message)
 
-    async def stream_exists(self, stream: str) -> bool:
-        return await self.mq.stream_exists(stream)
+    async def stream_exists(self, queue: BaseQueue) -> bool:
+        return await self.mq.stream_exists(queue)

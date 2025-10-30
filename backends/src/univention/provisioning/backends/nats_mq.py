@@ -31,9 +31,9 @@ class BaseQueue:
     # Nats stream replicas
     # Configures to how many nats instances the messages in a stream are replicated.
     replicas: int = 1
-    # Nats stream subject
-    # Nats allows the configuration of multiple subjects
-    # but the provisioning stack only needs one subject per queue.
+    # Nats stream subjects.
+    # Nats allows the configuration of multiple subjects on one stream.
+    subjects: list[str] | None = None
 
     @property
     def queue_name(self) -> str:
@@ -50,7 +50,7 @@ class BaseQueue:
     def stream_config(self) -> StreamConfig:
         return StreamConfig(
             name=self.queue_name,
-            subjects=[self.message_subject] if self.message_subject else [self.name],
+            subjects=self.subjects or [self.message_subject],
             retention=self.retention_policy,
             # TODO: set to 3 after nats clustering is stable.
             num_replicas=self.replicas,
@@ -77,10 +77,25 @@ class ConsumerQueue(BaseQueue):
 
     def __init__(self, subscription_name: str):
         self.name = subscription_name
+        self.subjects = [
+            f"{self.name}.main",
+            f"{self.name}.prefill",
+        ]
 
     @property
     def message_subject(self) -> str:
         return f"{self.name}.main"
+
+
+class PrefillConsumerQueue(ConsumerQueue):
+    """
+    Writer: prefill
+    Reader: provisioning consumers via the Provisioning API
+    """
+
+    @property
+    def message_subject(self) -> str:
+        return f"{self.name}.prefill"
 
 
 class LdapQueue(BaseQueue):
@@ -89,8 +104,7 @@ class LdapQueue(BaseQueue):
     Reader: udm-transformer
     """
 
-    def __init__(self):
-        self.name = "ldap-producer"
+    name = "ldap-producer"
 
 
 class IncomingQueue(BaseQueue):
@@ -114,12 +128,17 @@ class PrefillQueue(BaseQueue):
     Reader: prefill
     """
 
-    def __init__(self):
-        self.name = "prefill"
+    name = "prefill"
 
-    @property
-    def message_subject(self) -> str:
-        return f"{self.name}.prefill"
+
+class PrefillFailuresQueue(BaseQueue):
+    """
+    Writer: prefill
+    Reader: manual intervention/debugging
+    """
+
+    name = "prefill-failures"
+    retention_policy = RetentionPolicy.LIMITS
 
 
 class NatsMessageQueue(MessageQueue):

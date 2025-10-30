@@ -5,10 +5,10 @@ import logging
 import time
 from typing import Optional
 
+from univention.provisioning.backends.nats_mq import ConsumerQueue, PrefillConsumerQueue
 from univention.provisioning.models.message import MessageProcessingStatus, ProvisioningMessage
 from univention.provisioning.models.subscription import FillQueueStatus
 
-from ..backends.nats_mq import ConsumerQueue
 from .mq_port import MessageQueuePort
 from .subscription_service import SubscriptionService
 from .subscriptions_db_port import SubscriptionsDBPort
@@ -38,7 +38,7 @@ class MessageService:
         timeout = max(timeout, 0.1)  # Timeout of 0 leads to internal server error
         t0 = time.perf_counter()
         if self._subscription_prefill_done.get(subscription_name, False):
-            message = await self.mq.get_messages_from_main_queue(subscription_name, timeout, pop)
+            message = await self.mq.get_message(ConsumerQueue(subscription_name), timeout, pop)
             queue = "main"
         else:
             if (
@@ -51,7 +51,7 @@ class MessageService:
                 )
                 return None
 
-            message = await self.mq.get_messages_from_prefill_queue(subscription_name, timeout, pop)
+            message = await self.mq.get_message(PrefillConsumerQueue(subscription_name), timeout, pop)
             queue = "prefill"
             if message is None:
                 logger.info(
