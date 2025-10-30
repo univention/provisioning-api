@@ -11,7 +11,6 @@ from univention.provisioning.backends.message_queue import MessageQueue
 from univention.provisioning.models.constants import (
     DISPATCHER_QUEUE_NAME,
     DISPATCHER_SUBJECT_TEMPLATE,
-    PREFILL_QUEUE_NAME,
     PREFILL_SUBJECT_TEMPLATE,
     PublisherName,
 )
@@ -104,5 +103,4 @@ class NatsMessageQueue(MessageQueuePort):
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,
         )
-        PrefillQueue(PREFILL_QUEUE_NAME)
-        await self.mq.add_message(PrefillQueue(PREFILL_QUEUE_NAME), message)
+        await self.mq.add_message(PrefillQueue(), message)
