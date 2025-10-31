@@ -1,5 +1,6 @@
 {
   "local": {
+    "provisioning_api_base_url_primary": null,
     "provisioning_api_base_url": "http://localhost:7777",
     "provisioning_admin_username": "admin",
     "provisioning_admin_password": "provisioning",
