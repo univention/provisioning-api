@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 
 
 class E2ETestSettings(NamedTuple):
+    provisioning_api_base_url_primary: str
     provisioning_api_base_url: str
     provisioning_admin_username: str
     provisioning_admin_password: str
@@ -34,4 +35,5 @@ class E2ETestSettings(NamedTuple):
 
     @property
     def messages_url(self) -> str:
-        return urljoin(self.provisioning_api_base_url.rstrip("/") + "/", "v1/messages")
+        base_url = self.provisioning_api_base_url_primary or self.provisioning_api_base_url
+        return urljoin(base_url.rstrip("/") + "/", "v1/messages")
