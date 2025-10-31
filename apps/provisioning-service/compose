@@ -60,6 +60,7 @@ services:
       -  NATS_PORT_PUSH=4222
       -  NATS_USER_PULL=dispatcher
       -  NATS_USER_PUSH=dispatcher
+      -  NATS_CONSUMER_NAME=provisioning-dispatcher-@%@hostname@%@
       -  NATS_PASSWORD_PULL=@!@import json; print(json.load(open("/etc/provisioning-secrets.json"))["NATS_PASSWORD"]);@!@
       -  NATS_PASSWORD_PUSH=@!@import json; print(json.load(open("/etc/provisioning-secrets.json"))["NATS_PASSWORD"]);@!@
       -  NATS_MAX_RECONNECT_ATTEMPTS=2

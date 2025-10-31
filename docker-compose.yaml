@@ -83,6 +83,7 @@ services:
       NATS_HOST: "nats3"
       NATS_PORT: "4222"
       NATS_USER: "dispatcher"
+      NATS_CONSUMER_NAME: "dispatcher"
       NATS_PASSWORD: "dispatcherpass"
       NATS_MAX_RECONNECT_ATTEMPTS: 2
       PROVISIONING_API_HOST: "provisioning-api"
