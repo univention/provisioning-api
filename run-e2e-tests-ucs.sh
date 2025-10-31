@@ -31,6 +31,7 @@ master_host=$(ucr get ldap/master)
 cat <<EOF > e2e_settings_ucs.json
 {
   "local": {
+    "provisioning_api_base_url_primary": "https://${master_host}/univention/provisioning",,
     "provisioning_api_base_url": "https://${host}/univention/provisioning",
     "provisioning_admin_username": "admin",
     "provisioning_admin_password": "$provisioning_admin_password",
