@@ -138,7 +138,6 @@ class PrefillFailuresQueue(BaseQueue):
     """
 
     name = "prefill-failures"
-    retention_policy = RetentionPolicy.LIMITS
 
 
 class NatsMessageQueue(MessageQueue):
