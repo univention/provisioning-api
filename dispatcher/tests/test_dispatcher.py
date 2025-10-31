@@ -7,7 +7,7 @@ import pytest
 from test_helpers.mock_data import MESSAGE, MQMESSAGE, SUBSCRIPTION_INFO, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
 from univention.provisioning.backends.message_queue import MessageAckManager
-from univention.provisioning.backends.nats_mq import IncomingQueue
+from univention.provisioning.backends.nats_mq import ConsumerQueue, IncomingQueue
 from univention.provisioning.dispatcher.mq_adapter_nats import NatsMessageQueueAdapter
 from univention.provisioning.dispatcher.service import DispatcherService
 from univention.provisioning.dispatcher.subscriptions_port import SubscriptionsPort
@@ -66,5 +66,5 @@ class TestDispatcherService:
         )
         dispatcher_service.mq_pull.get_one_message.assert_has_calls([call(timeout=10), call(timeout=10)])
 
-        dispatcher_service.mq_push.enqueue_message.assert_called_once_with(IncomingQueue(SUBSCRIPTION_NAME), MESSAGE)
+        dispatcher_service.mq_push.enqueue_message.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME), MESSAGE)
         fake_ack.acknowledge_message.assert_called_once_with()

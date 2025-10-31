@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, call
 import pytest
 from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MSG, SUBSCRIPTION_NAME, SUBSCRIPTIONS
 
-from univention.provisioning.backends.nats_mq import IncomingQueue, json_decoder
+from univention.provisioning.backends.nats_mq import ConsumerQueue, json_decoder
 from univention.provisioning.dispatcher.config import DispatcherSettings
 from univention.provisioning.dispatcher.mq_adapter_nats import NatsMessageQueueAdapter
 from univention.provisioning.dispatcher.service import DispatcherService, MessageAckManager
@@ -61,7 +61,7 @@ class TestDispatcher:
         )
 
         # check storing event in the consumer queue
-        queue = IncomingQueue(SUBSCRIPTION_NAME)
+        queue = ConsumerQueue(SUBSCRIPTION_NAME)
         dispatcher_service.mq_push.mq._js.publish.assert_called_once_with(
             subject=queue.message_subject,
             payload=FLAT_MESSAGE_ENCODED,
