@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.3...v0.62.4) (2025-11-03)
+
+
+### Bug Fixes
+
+* Handle cache miss in old_ldap_to_udm_obj ([fde1343](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/fde1343bbcee14dad9e551153b2ecef420e5b598)), closes [univention/dev/internal/team-nubus#1502](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1502)
+
 ## [0.62.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.2...v0.62.3) (2025-10-17)
 
 
