@@ -17,7 +17,7 @@ from test_helpers.mock_data import (
 )
 from werkzeug.wrappers.response import Response
 
-from univention.provisioning.backends.message_queue import MessageAckManager
+from univention.provisioning.backends.message_queue import MessageAckManager, QueueStatus
 from univention.provisioning.prefill.config import PrefillSettings
 from univention.provisioning.prefill.mq_port import MessageQueuePort
 from univention.provisioning.prefill.prefill_service import PrefillService
@@ -96,9 +96,11 @@ async def udm_prefill(httpserver, prefill_settings_factory: ModelFactory[Prefill
     )
 
     async with UDMAdapter(settings) as udm:
+        mq_mock = AsyncMock(spec_set=MessageQueuePort)
+        mq_mock.initialize_subscription.return_value = QueueStatus.READY
         udm_prefill = PrefillService(
             ack_manager=MessageAckManager(),
-            mq=AsyncMock(spec_set=MessageQueuePort),
+            mq=mq_mock,
             udm=udm,
             update_sub_q_status=AsyncMock(spec_set=UpdateSubscriptionsQueueStatusPort),
             settings=settings,

@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
 from univention.provisioning.backends.nats_mq import LdapQueue
 from univention.provisioning.models.message import Body, EmptyBodyError, Message, NoUDMTypeError
 
@@ -41,7 +41,9 @@ class TransformerService:
         self.settings = settings or udm_transformer_settings()
 
     async def listen_for_ldap_events(self) -> None:
-        await self.subscriptions.initialize_subscription(LdapQueue())
+        status = await self.subscriptions.initialize_subscription(LdapQueue())
+        if status != QueueStatus.READY:
+            raise NotImplementedError(f"Migration not supported in udm-transformer. Status: {status}")
 
         while True:
             logger.debug("Listening for new LDAP messages.")
