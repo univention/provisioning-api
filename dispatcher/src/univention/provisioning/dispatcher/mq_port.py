@@ -4,7 +4,7 @@
 import abc
 from typing import Optional, Self
 
-from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus
 from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import Message, MQMessage
 
@@ -31,7 +31,7 @@ class MessageQueuePort(abc.ABC):
     async def enqueue_message(self, queue: BaseQueue, message: Message) -> None: ...
 
     @abc.abstractmethod
-    async def initialize_subscription(self, queue: BaseQueue) -> None: ...
+    async def initialize_subscription(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus: ...
 
     @abc.abstractmethod
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]: ...

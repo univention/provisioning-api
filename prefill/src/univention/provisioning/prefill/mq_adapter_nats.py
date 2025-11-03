@@ -5,7 +5,7 @@ import logging
 from typing import Optional, Tuple
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus
 from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import BaseMessage, MQMessage
 
@@ -50,8 +50,8 @@ class NatsMessageQueue(MessageQueuePort):
     async def get_one_message(self) -> Tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message()
 
-    async def initialize_subscription(self, queue: BaseQueue) -> None:
-        await self.mq.initialize_subscription(queue)
+    async def initialize_subscription(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus:
+        return await self.mq.initialize_subscription(queue, migrate_stream=migrate_stream)
 
     async def prepare_failures_queue(self, queue: BaseQueue) -> None:
         await self.mq.ensure_stream(queue)

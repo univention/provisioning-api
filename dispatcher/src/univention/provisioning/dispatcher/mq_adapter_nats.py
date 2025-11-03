@@ -36,8 +36,8 @@ class NatsMessageQueueAdapter(MessageQueuePort):
     async def close(self) -> None:
         await self.mq.close()
 
-    async def initialize_subscription(self, queue: BaseQueue):
-        return await self.mq.initialize_subscription(queue)
+    async def initialize_subscription(self, queue: BaseQueue, migrate_stream: bool = False):
+        return await self.mq.initialize_subscription(queue, migrate_stream=migrate_stream)
 
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message(timeout=timeout)

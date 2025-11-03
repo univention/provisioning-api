@@ -59,7 +59,7 @@ class TestDispatcherService:
         assert str(exception.value.exceptions[0]) == "Stop waiting for the new event"
 
         dispatcher_service.mq_pull.initialize_subscription.assert_called_once_with(
-            IncomingQueue("dispatcher_consumer_name")
+            IncomingQueue("dispatcher_consumer_name"), migrate_stream=True
         )
         dispatcher_service.subscriptions_db.watch_for_subscription_changes.assert_called_once_with(
             dispatcher_service.update_subscriptions_mapping

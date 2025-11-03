@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, Callable, Coroutine, NamedTuple, Tuple
 
 from typing_extensions import Self
@@ -15,6 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class Empty(Exception): ...
+
+
+class QueueStatus(Enum):
+    """Status returned by queue initialization and migration operations."""
+
+    READY = "ready"
+    SEALED_FOR_MIGRATION = "sealed_for_migration"
 
 
 def json_encoder(data: Any) -> bytes:
@@ -78,7 +86,16 @@ class MessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def initialize_subscription(self, queue) -> None:
+    async def initialize_subscription(self, queue, migrate_stream: bool = False) -> QueueStatus:
+        """Initialize a subscription to a queue.
+
+        Args:
+            queue: The queue configuration
+            migrate_stream: If True, migrate stream when configuration differs
+
+        Returns:
+            QueueStatus
+        """
         pass
 
     @abstractmethod

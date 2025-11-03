@@ -7,7 +7,7 @@ from typing import Optional
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
 from univention.provisioning.backends.nats_mq import PrefillConsumerQueue, PrefillFailuresQueue, PrefillQueue
 from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import (
@@ -52,7 +52,9 @@ class PrefillService:
         logger.info("Handling the requests to prefill")
 
         await self.mq.prepare_failures_queue(PrefillFailuresQueue())
-        await self.mq.initialize_subscription(PrefillQueue())
+        status = await self.mq.initialize_subscription(PrefillQueue())
+        if status != QueueStatus.READY:
+            raise NotImplementedError(f"Migration not supported in prefill. Status: {status}")
 
         while True:
             logger.debug("Waiting for new prefill requests...")
