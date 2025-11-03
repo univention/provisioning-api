@@ -17,7 +17,7 @@ from test_helpers.mock_data import (
     USERS_TOPIC,
 )
 
-from univention.provisioning.backends.message_queue import MessageAckManager
+from univention.provisioning.backends.message_queue import MessageAckManager, QueueStatus
 from univention.provisioning.backends.nats_mq import PrefillConsumerQueue, PrefillFailuresQueue, PrefillQueue
 from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import Body, Message
@@ -37,9 +37,11 @@ class PrefillSettingsFactory(ModelFactory[PrefillSettings]): ...
 
 @pytest.fixture
 def udm_prefill(prefill_settings_factory: ModelFactory[PrefillSettings]) -> PrefillService:
+    mq_mock = AsyncMock(spec_set=MessageQueuePort)
+    mq_mock.initialize_subscription.return_value = QueueStatus.READY
     udm_prefill = PrefillService(
         ack_manager=MessageAckManager(),
-        mq=AsyncMock(spec_set=MessageQueuePort),
+        mq=mq_mock,
         udm=AsyncMock(spec_set=UDMPort),
         update_sub_q_status=AsyncMock(spec_set=UpdateSubscriptionsQueueStatusPort),
         settings=prefill_settings_factory.build(),

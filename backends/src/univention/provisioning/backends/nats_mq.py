@@ -14,7 +14,7 @@ from typing_extensions import Self
 
 from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
 
-from .message_queue import Acknowledgements, Empty, MessageQueue, json_decoder, json_encoder
+from .message_queue import Acknowledgements, Empty, MessageQueue, QueueStatus, json_decoder, json_encoder
 
 logger = logging.getLogger(__name__)
 
@@ -218,9 +218,17 @@ class NatsMessageQueue(MessageQueue):
             queue.message_subject,
         )
 
-    async def initialize_subscription(self, queue: BaseQueue) -> None:
-        """Initializes a stream for a pull consumer, pull consumers can't define a deliver subject"""
-        await self.ensure_stream(queue)
+    async def initialize_subscription(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus:
+        """Initializes a stream for a pull consumer.
+
+        Args:
+            queue: The queue configuration
+            migrate_stream: If True, migrate stream when configuration differs (consumer-side only)
+
+        Returns:
+            QueueStatus
+        """
+        status = await self.ensure_stream(queue, migrate_stream=migrate_stream)
         await self.ensure_consumer(queue)
 
         self.pull_subscription = await self._js.pull_subscribe(
@@ -228,6 +236,8 @@ class NatsMessageQueue(MessageQueue):
             durable=queue.consumer_name,
             stream=queue.queue_name,
         )
+
+        return status
 
     async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         """Retrieve messages from a NATS subject."""
@@ -341,16 +351,78 @@ class NatsMessageQueue(MessageQueue):
             return False
         return True
 
-    async def ensure_stream(self, queue: BaseQueue):
+    async def ensure_stream(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus:
+        """Ensure stream exists with correct configuration.
+
+        Args:
+            queue: The queue configuration
+            migrate_stream: If True, migrate stream when update fails (consumer-side only)
+
+        Returns:
+            QueueStatus
+        """
+        # If stream doesn't exist, create it
         try:
-            await self._js.stream_info(queue.queue_name)
+            existing_stream = await self._js.stream_info(queue.queue_name)
             logger.info("A stream with the name %r already exists", queue.queue_name)
         except NotFoundError:
             await self._js.add_stream(queue.stream_config())
             logger.info("A stream with the name %r was created", queue.queue_name)
-        else:
+            return QueueStatus.READY
+
+        # Try to update existing stream
+        try:
             await self._js.update_stream(queue.stream_config())
             logger.info("A stream with the name %r was updated", queue.queue_name)
+            return QueueStatus.READY
+        except ServerError as e:
+            if not migrate_stream:
+                logger.error(
+                    "Stream %r update failed but migration not enabled. " "See docs/queue-migration.md. Error: %s",
+                    queue.queue_name,
+                    str(e),
+                )
+                raise
+
+            logger.warning(
+                "Stream %r update failed: %s. Attempting migration.",
+                queue.queue_name,
+                str(e),
+            )
+            return await self.migrate_stream(queue, existing_stream)
+
+    async def migrate_stream(self, queue: BaseQueue, existing_stream) -> QueueStatus:
+        """Seal stream and migrate if empty.
+
+        Args:
+            queue: The queue configuration with desired settings
+            existing_stream: The existing stream info from stream_info()
+
+        Returns:
+            QueueStatus
+        """
+        # Seal the stream (idempotent - safe to call multiple times)
+        sealed_config = existing_stream.config
+        sealed_config.sealed = True
+        await self._js.update_stream(sealed_config)
+        logger.info("Stream %r sealed for migration", queue.queue_name)
+
+        # Check if stream has messages that need draining
+        stream_info = await self._js.stream_info(queue.queue_name)
+        if stream_info.state.messages > 0:
+            logger.info(
+                "Stream %r sealed with %d messages remaining to drain",
+                queue.queue_name,
+                stream_info.state.messages,
+            )
+            return QueueStatus.SEALED_FOR_MIGRATION
+
+        # Stream is empty, complete migration
+        logger.info("Sealed stream %r is empty, completing migration", queue.queue_name)
+        await self._js.delete_stream(queue.queue_name)
+        await self._js.add_stream(queue.stream_config())
+        logger.info("Migration completed for %r", queue.queue_name)
+        return QueueStatus.READY
 
     async def ensure_consumer(self, queue: BaseQueue):
         try:

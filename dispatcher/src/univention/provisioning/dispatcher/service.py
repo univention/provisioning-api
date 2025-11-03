@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
 from univention.provisioning.backends.nats_mq import ConsumerQueue, IncomingQueue
 from univention.provisioning.models.message import Message, MQMessage
 from univention.provisioning.models.subscription import Subscription
@@ -31,7 +31,7 @@ class DispatcherService:
     async def run(self):
         logger.info("Storing event in consumer queues")
         queue_type = IncomingQueue(self.mq_pull.settings.nats_consumer_name)
-        await self.mq_pull.initialize_subscription(queue_type)
+        status = await self.mq_pull.initialize_subscription(queue_type, migrate_stream=True)
 
         # Initially fill self._subscriptions before starting to handle messages.
         await self.update_subscriptions_mapping()
@@ -41,15 +41,23 @@ class DispatcherService:
             task_group.create_task(
                 self.subscriptions_db.watch_for_subscription_changes(self.update_subscriptions_mapping)
             )
-            task_group.create_task(self.dispatch_events())
+            task_group.create_task(self.dispatch_events(queue_type, status))
 
-    async def dispatch_events(self):
+    async def dispatch_events(self, queue_type: IncomingQueue, migration_status: QueueStatus):
         while True:
             logger.debug("Waiting for an event...")
             try:
                 message, acknowledgements = await self.mq_pull.get_one_message(timeout=10)
             except Empty:
-                logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
+                if migration_status == QueueStatus.READY:
+                    logger.debug("No new dispatcher messages found in the incoming queue, continuing to wait.")
+                    continue
+
+                # Stream is sealed for migration - attempt to complete
+                logger.info("No messages in sealed stream, completing migration")
+                migration_status = await self.mq_pull.initialize_subscription(queue_type, migrate_stream=True)
+                if migration_status == QueueStatus.READY:
+                    logger.info("Stream migration completed, resuming normal operation")
                 continue
 
             message_handler = self.handle_message(message)

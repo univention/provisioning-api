@@ -6,7 +6,7 @@ from typing import Any, Optional
 import msgpack
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus
 from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import MQMessage
 
@@ -49,8 +49,8 @@ class NatsSubscriptions(SubscriptionsPort):
     async def close(self):
         await self.mq.close()
 
-    async def initialize_subscription(self, queue: BaseQueue):
-        return await self.mq.initialize_subscription(queue)
+    async def initialize_subscription(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus:
+        return await self.mq.initialize_subscription(queue, migrate_stream=migrate_stream)
 
     async def get_one_message(self, timeout: float) -> tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message(timeout=timeout, binary_decoder=messagepack_decoder)
