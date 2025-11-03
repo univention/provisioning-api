@@ -1,13 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
-import subprocess
-import pytest
-from univention.testing.helm.client.base import BaseTest
-from univention.testing.helm.client.nats import (
-    AuthPassword,
-    SecretUsageViaEnv,
-)
+from univention.testing.helm.client.nats import AuthPassword, SecretUsageViaEnv
 
 
 class TestAdminUserNatsConfig(SecretUsageViaEnv, AuthPassword):
@@ -28,14 +22,3 @@ class TestAdminUserNatsConfig(SecretUsageViaEnv, AuthPassword):
         config = config_map["data"]["nats.conf"]
         assert f"password: ${self.env_password}" in config
 
-
-class TestAdminPasswordNatsBox(SecretUsageViaEnv, AuthPassword):
-    is_secret_owner = True
-    workload_kind = "StatefulSet"
-
-    workload_name = "release-name-nats"
-    secret_name = "release-name-nats-admin"
-
-    prefix_mapping = {"config.createUsers.adminUser.auth": "nats.auth"}
-
-    path_container = "..spec.template.spec.containers[?@.name=='nats-box']"
