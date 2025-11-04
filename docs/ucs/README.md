@@ -18,12 +18,13 @@ provisioning service on UCS.
 ## Backup to Primary failover (univention-backup2master)
 The provisioning service supports backup to primary failover.
 
-The backup-to-primary scenario is automatically handled via `apps/run-backup-to-master.sh`, which
-is executed during `univention-backup2master`. It installs the `provisioning-service-backend` app
-on the new Primary Directory Node and reinitializes the `provisioning-service` app.
+The backup-to-primary scenario is automatically handled via
+`apps/50provisioning-service-backup2master`, which is executed during `univention-backup2master`.
+It installs the `provisioning-service-backend` app on the new Primary Directory Node and
+reinitializes the `provisioning-service` app.
 
 Location of the script on a UCS system:
-> /usr/lib/univention-backup2master/post/provisioning-service-backup2master.sh
+> /usr/lib/univention-backup2master/post/50provisioning-service-backup2master
 
 ##### Manual steps after univention-backup2master
 
