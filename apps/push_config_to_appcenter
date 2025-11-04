@@ -61,7 +61,7 @@ fi
 download_univention-appcenter-control
 
 cp provisioning-service/inst.tmpl provisioning-service/inst
-sed -i -e "/%PROVISIONING-BACKUP2MASTER-POST%/r run-backup-to-master.sh" -e "/%PROVISIONING-BACKUP2MASTER-POST%/d" provisioning-service/inst
+sed -i -e "/%PROVISIONING-BACKUP2MASTER-POST%/r 50provisioning-service-backup2master" -e "/%PROVISIONING-BACKUP2MASTER-POST%/d" provisioning-service/inst
 
 upload_appcenter_scripts "provisioning-service"
 
