@@ -13,9 +13,9 @@ joinscript_init
 
 SERVICE="provisioning-service"
 
-backup2master_path=/usr/lib/univention-backup2master/post/provisioning-service-backup2master.sh
+backup2master_path=/usr/lib/univention-backup2master/post/50provisioning-service-backup2master
 if [ -f "$backup2master_path" ]; then
-    echo "Removing provisioning backup2master script at $backup2master_path"
+    echo "Removing $backup2master_path"
     rm -f "$backup2master_path"
 fi
 
