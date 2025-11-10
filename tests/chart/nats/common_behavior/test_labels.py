@@ -5,4 +5,10 @@ from univention.testing.helm.best_practice.labels import Labels
 
 
 class TestLabels(Labels):
-    pass
+
+    def adjust_values(self, values: dict):
+
+        values.setdefault("natsBox", {})["enabled"] = True
+        values.setdefault("reloader", {})["enabled"] = True
+
+        return values

@@ -135,9 +135,9 @@ spec:
           args:
             - --config
             - /etc/nats-config/nats.conf
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.nats "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.nats "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.nats "context" .) | nindent 12 }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" .) | nindent 12 }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" .) | nindent 12 }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe "context" .) | nindent 12 }}
           ports:
             {{- range $key, $value := .Values.service.ports }}
             - name: {{ $key }}
@@ -183,9 +183,6 @@ spec:
             - /var/run/nats.pid
             - -config
             - /etc/nats-config/nats.conf
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.reloader "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.reloader "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.reloader "context" .) | nindent 12 }}
           {{- if .Values.reloader.resources }}
           resources:
           {{- with .Values.reloader.resources }}
@@ -220,8 +217,8 @@ spec:
             - name: "NATS_PASSWORD"
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password" "context" .) | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password" "context" .) }}
           {{- range .Values.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}
@@ -266,9 +263,6 @@ spec:
             - sh
             - -c
             - 'trap true INT TERM; sleep infinity & wait'
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe.natsBox "context" .) | nindent 12 }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe.natsBox "context" .) | nindent 12 }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe.natsBox "context" .) | nindent 12 }}
           {{- if .Values.reloader.resources }}
           resources:
           {{- with .Values.natsBox.resources }}
