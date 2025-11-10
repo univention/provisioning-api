@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.4...v0.63.0) (2025-11-10)
+
+
+### Features
+
+* use nats with natsBox disabled by default ([f236ee8](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/f236ee86da0ef96e13be1c4ab7c13a99da6a8e9b)), closes [univention/dev/internal/team-nubus#1514](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1514)
+
 ## [0.62.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.3...v0.62.4) (2025-11-03)
 
 
