@@ -217,8 +217,8 @@ spec:
             - name: "NATS_PASSWORD"
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) | quote }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password" "context" .) | quote }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password" "context" .) }}
           {{- range .Values.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}

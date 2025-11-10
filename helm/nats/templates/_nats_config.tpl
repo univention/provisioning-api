@@ -19,7 +19,7 @@ These template definitions are only used in this chart.
   valueFrom:
     secretKeyRef:
       name: {{ tpl (required (printf "config.createUsers.%s.auth.existingSecret.name is required" $passwordEnvVar ) ($config.auth.existingSecret).name ) $ }}
-      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $config.auth.existingSecret "key" "password" "context" .) }}
+      key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $config.auth.existingSecret "key" "password" "context" $) }}
 {{- end -}}
 {{- end -}}
 
