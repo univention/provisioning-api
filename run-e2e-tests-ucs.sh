@@ -28,6 +28,11 @@ nats_password=$(sudo cat /etc/provisioning-secrets.json | jq -r '.NATS_PASSWORD'
 host=$(ucr get ldap/server/name)
 master_host=$(ucr get ldap/master)
 
+nast_url_primary="nats://${master_host}:4222"
+if [ "$(ucr get server/role)" = "domaincontroller_master" ]; then
+    nast_url_primary="nats://nats:4222"
+fi
+
 cat <<EOF > e2e_settings_ucs.json
 {
   "local": {
@@ -37,6 +42,7 @@ cat <<EOF > e2e_settings_ucs.json
     "provisioning_admin_password": "$provisioning_admin_password",
     "provisioning_events_username": "udm",
     "provisioning_events_password": "$provisioning_events_password",
+    "nats_url_primary": "${nast_url_primary}",
     "nats_url": "nats://nats:4222",
     "nats_user": "api",
     "nats_password": "$nats_password",

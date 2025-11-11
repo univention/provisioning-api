@@ -13,6 +13,7 @@ class E2ETestSettings(NamedTuple):
     provisioning_events_username: str
     provisioning_events_password: str
 
+    nats_url_primary: str
     nats_url: str
     nats_user: str
     nats_password: str

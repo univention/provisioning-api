@@ -6,6 +6,7 @@
     "provisioning_admin_password": "provisioning",
     "provisioning_events_username": "udm",
     "provisioning_events_password": "udmpass",
+    "nats_url_primary": null,
     "nats_url": "nats://localhost:4222",
     "nats_user": "admin",
     "nats_password": "univention",

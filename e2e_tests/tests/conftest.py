@@ -193,6 +193,21 @@ async def nats_connection(test_settings: E2ETestSettings) -> AsyncGenerator[Nats
     await nc.close()
 
 
+@pytest.fixture()
+async def nats_connection_cache(test_settings: E2ETestSettings) -> AsyncGenerator[NatsClient, Any]:
+    nc = NatsClient()
+    await nc.connect(
+        servers=test_settings.nats_url_primary or test_settings.nats_url,
+        user=test_settings.nats_user,
+        password=test_settings.nats_password,
+        max_reconnect_attempts=1,
+        connect_timeout=5,
+    )
+    yield nc
+
+    await nc.close()
+
+
 @pytest.fixture(scope="session")
 def ldif_producer_stream_name() -> str:
     return "stream:ldif-producer"
