@@ -15,8 +15,8 @@ from .mock_data import GROUPS_TOPIC, REALM
 
 
 @pytest.fixture
-async def nats_kv_manager(nats_connection):
-    js = nats_connection.jetstream()
+async def nats_kv_manager(nats_connection_cache):
+    js = nats_connection_cache.jetstream()
     kv = await js.key_value(bucket=BucketName.cache.value)
     yield kv
 
