@@ -121,7 +121,7 @@ services:
      - NATS_USER=prefill
      - NATS_PASSWORD=@!@import json; print(json.load(open("/etc/provisioning-secrets.json"))["NATS_PASSWORD"]);@!@
      - NATS_MAX_RECONNECT_ATTEMPTS=2
-     - UDM_HOST=@%@ldap/server/name@%@
+     - UDM_HOST=@%@ldap/master@%@
      - UDM_PORT=443
      - UDM_URL_PATH_PREFIX=/univention
      - UDM_PROTOCOL=https
