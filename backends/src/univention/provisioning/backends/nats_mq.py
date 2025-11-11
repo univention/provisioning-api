@@ -114,9 +114,6 @@ class IncomingQueue(BaseQueue):
     Reader: dispatcher
     """
 
-    deliver_policy = DeliverPolicy.NEW
-    # Nats stream replicas
-
     def __init__(self, consumer_name: str):
         self.name = "incoming"
         self._consumer_name = consumer_name
@@ -132,6 +129,7 @@ class IncomingQueue(BaseQueue):
         # https://git.knut.univention.de/univention/dev/projects/provisioning/-/issues/96#note_563273
         if os.getenv("PLATFORM_UCS", "").lower() == "true":
             self.retention_policy = RetentionPolicy.INTEREST
+            self.deliver_policy = DeliverPolicy.NEW
 
 
 class PrefillQueue(BaseQueue):
