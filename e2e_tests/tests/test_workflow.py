@@ -125,6 +125,7 @@ async def test_workflow(test_settings, ldap_group, subscription_name):
     assert message["body"]["old"]["dn"] == dn
 
 
+@pytest.mark.timeout(120)
 async def test_prefill_with_multiple_topics(test_settings):
     name = str(uuid.uuid4())
 
@@ -141,7 +142,7 @@ async def test_prefill_with_multiple_topics(test_settings):
     assert response.status_code == 201
 
     # ensure that the pre-fill process is finished successfully
-    while True:
+    for _ in range(20):
         response = requests.get(f"{test_settings.subscriptions_url}/{name}", auth=(name, PASSWORD))
         assert response.status_code == 200
         prefill_queue_status = response.json()["prefill_queue_status"]
@@ -150,6 +151,8 @@ async def test_prefill_with_multiple_topics(test_settings):
         elif prefill_queue_status == FillQueueStatus.done:
             break
         await asyncio.sleep(1)
+    else:
+        assert False, "Prefill process did not finish in time"
 
     topics = []
     while True:

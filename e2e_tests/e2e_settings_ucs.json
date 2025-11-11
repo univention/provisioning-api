@@ -1,10 +1,12 @@
 {
   "local": {
+    "provisioning_api_base_url_primary": null,
     "provisioning_api_base_url": "http://nubus-provisioning-api:7777",
     "provisioning_admin_username": "admin",
     "provisioning_admin_password": "1wEpYffPqD6jBOkzLMGOY8FaN1g8KcCZ",
     "provisioning_events_username": "udm",
     "provisioning_events_password": "reCKqbUAGfPZDG2SWzjD8oDhv5cHSJKE",
+    "nats_url_primary": null,
     "nats_url": "nats://provisioning-service_nats_1:4222",
     "nats_user": "api",
     "nats_password": "RgbwqxGDUKk4OFrPohgIwfhWgziRIHsu",
