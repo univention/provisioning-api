@@ -5,7 +5,7 @@
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.43.0"
+    ref: "v1.50.0"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -16,7 +16,7 @@ include:
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/pip-package-and-publish.yaml"
-      - "jobs/sonarqube.yaml"
+      - "templates/sonarqube.yaml"
   - project: "univention/infrastructure/docker-services"
     ref: "master"
     file:
@@ -156,11 +156,19 @@ container-sign-external:
   parallel:
     matrix: *publish-matrix
 
+container-release-attestation:
+  parallel:
+    matrix: *publish-matrix
+
 check-debian-updates:
   parallel:
     matrix: *publish-matrix
   variables:
     TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+
+sonarqube:
+  extends: .sonarqube
+  needs: []
 
 build-and-publish-pip:
   extends: .build-and-publish-pip-package-with-uv
