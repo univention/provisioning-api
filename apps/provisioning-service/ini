@@ -11,6 +11,7 @@ WebInterfaceName = Provisioning Service
 WebInterfacePortHttps = 7777
 WebInterfacePortHttp = 0
 WebInterfaceProxyScheme = http
+DockerServerRole = domaincontroller_slave
 UcsOverviewCategory=False
 DockerScriptRestoreDataAfterSetup =
 DockerScriptStoreData =
