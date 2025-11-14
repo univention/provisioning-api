@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.63.0...v0.63.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* bump NATS chart to use mirrored images ([8c44919](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/8c4491931b575d2a3879b5024fb0490cf9013afe)), closes [univention/dev/internal/team-nubus#1515](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1515)
+
 ## [0.63.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.62.4...v0.63.0) (2025-11-10)
 
 
