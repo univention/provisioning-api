@@ -21,8 +21,10 @@ Get a list of all subscriptions: \
 
 ## Inspect the NATS database
 
+Since Nubus v1.15.0 the natsBox debug container of the bundled NATS isn’t deployed by default. To explicitly activate the debug container, set `nubusProvisioning.nats.natsBox.enabled` to `true`.
+
 Get the NATS admin Credentials: \
-`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-credentials -o json | jq -r '.data.admin_password' | base64 -d ; echo`
+`kubectl -n ${NAMESPACE?} get secrets nubus-provisioning-nats-admin -o json | jq -r '.data.password' | base64 -d ; echo`
 
 Exec into the nats-box container: \
 `kubectl -n ${NAMESPACE?} exec -it nubus-provisioning-nats-0 -c nats-box -- sh` \
