@@ -185,7 +185,8 @@ class MessageHandler:
             )
             if not message:
                 continue
-            logger.debug(self.debug_msg(message))
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(self.debug_msg(message))
             for callback in self.callbacks:
                 t0 = time.perf_counter()
                 await callback(message)
@@ -209,7 +210,19 @@ class MessageHandler:
             old = message.body.old
             new = message.body.new
             if old and new:
+                old_users = None
+                new_users = None
+                if message.topic == "groups/group":
+                    old_users = old.get("properties", {}).pop("users", None)
+                    new_users = new.get("properties", {}).pop("users", None)
+
                 change = diff(message.body.old, message.body.new, syntax="rightonly")
+
+                if message.topic == "groups/group" and old_users is not None and new_users is not None:
+                    old["properties"]["users"] = old_users
+                    new["properties"]["users"] = new_users
+                    change.setdefault("properties", {})["users"] = set(old_users).symmetric_difference(set(new_users))
+
                 if old["dn"] != new["dn"]:
                     msg += " action: move"
                     msg += f" old_dn: {old['dn']}"
