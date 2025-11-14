@@ -478,7 +478,7 @@ null
 			<td>global.imageRegistry</td>
 			<td>string</td>
 			<td><pre lang="json">
-"docker.io"
+"artifacts.software-univention.de"
 </pre>
 </td>
 			<td>Container registry address.</td>
@@ -631,7 +631,7 @@ null
 			<td>nats.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"2.11.9@sha256:4e97bea2e69ffe4449cdc9b4c7fa707984aa9a4c090bf2faf5441cb6c97c99a4"
+"2.11.9@sha256:56d2d7a521692fc8933e74e188c66a374478b3f556c88da92fbf1a7427c8192f"
 </pre>
 </td>
 			<td></td>
@@ -667,7 +667,7 @@ null
 			<td>natsBox.image.repository</td>
 			<td>string</td>
 			<td><pre lang="json">
-"natsio/nats-box"
+"library/nats-box"
 </pre>
 </td>
 			<td></td>
@@ -676,7 +676,7 @@ null
 			<td>natsBox.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.18.1-nonroot@sha256:ec2f58b953916b4804d6636bf6a625bab7894d1b71319bc7865b3e70ab5e3f6f"
+"0.18.1-nonroot@sha256:625ce82a0b6398ec84362a3f7cd3b354600412431f39fea1fc3291f5d62d2bfc"
 </pre>
 </td>
 			<td></td>
@@ -971,7 +971,7 @@ null
 			<td>reloader.image.repository</td>
 			<td>string</td>
 			<td><pre lang="json">
-"natsio/nats-server-config-reloader"
+"library/nats-server-config-reloader"
 </pre>
 </td>
 			<td></td>
@@ -980,7 +980,7 @@ null
 			<td>reloader.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.18.3@sha256:41271dc1b9e1027867ee0e63aa2866c89ca8272a4f88991f6ebec34eb12dee3b"
+"0.18.3@sha256:a247d25e874a5e4457a88982e8e828a4da05213ec6d07ede1bf7b20e606b4d1a"
 </pre>
 </td>
 			<td></td>
