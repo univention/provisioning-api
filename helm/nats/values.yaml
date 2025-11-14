@@ -7,7 +7,7 @@ global:
   # -- Indicates wether this chart is part of a Nubus deployment.
   nubusDeployment: false
   # -- Container registry address.
-  imageRegistry: "docker.io"
+  imageRegistry: "artifacts.software-univention.de"
 
   # -- Credentials to fetch images from private registry.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -351,7 +351,7 @@ nats:
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "library/nats"
-    tag: "2.11.9@sha256:4e97bea2e69ffe4449cdc9b4c7fa707984aa9a4c090bf2faf5441cb6c97c99a4"
+    tag: "2.11.9@sha256:56d2d7a521692fc8933e74e188c66a374478b3f556c88da92fbf1a7427c8192f"
 
 reloader:
   # -- Enable the config reloader
@@ -361,8 +361,8 @@ reloader:
     pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
-    repository: "natsio/nats-server-config-reloader"
-    tag: "0.18.3@sha256:41271dc1b9e1027867ee0e63aa2866c89ca8272a4f88991f6ebec34eb12dee3b"
+    repository: "library/nats-server-config-reloader"
+    tag: "0.18.3@sha256:a247d25e874a5e4457a88982e8e828a4da05213ec6d07ede1bf7b20e606b4d1a"
   resources:
     limits:
       memory: "256Mi"
@@ -377,8 +377,8 @@ natsBox:
     pullPolicy: null
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
-    repository: "natsio/nats-box"
-    tag: "0.18.1-nonroot@sha256:ec2f58b953916b4804d6636bf6a625bab7894d1b71319bc7865b3e70ab5e3f6f"
+    repository: "library/nats-box"
+    tag: "0.18.1-nonroot@sha256:625ce82a0b6398ec84362a3f7cd3b354600412431f39fea1fc3291f5d62d2bfc"
   resources:
     limits:
       memory: "256Mi"
