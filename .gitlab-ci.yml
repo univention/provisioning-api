@@ -172,6 +172,8 @@ sonarqube:
 
 build-and-publish-pip:
   extends: .build-and-publish-pip-package-with-uv
-  variables:
-    PACKAGE_ROOT: "consumer"
+  parallel:
+    matrix:
+      - PACKAGE_ROOT: "common"
+      - PACKAGE_ROOT: "consumer"
 ...

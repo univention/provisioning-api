@@ -13,6 +13,11 @@ dependencies = [
     "pydantic<3.0.0,>=2.9.2",
 ]
 
+[[tool.uv.index]]
+name = "gitlab"
+publish-url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
+url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]
 
