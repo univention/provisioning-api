@@ -252,13 +252,13 @@ registerConsumers:
 nats:
   nats:
     image:
-      registry: "docker.io"
+      registry: "artifacts.software-univention.de"
   reloader:
     image:
-      registry: "docker.io"
+      registry: "artifacts.software-univention.de"
   natsBox:
     image:
-      registry: "docker.io"
+      registry: "artifacts.software-univention.de"
   # -- Set to `true` if you want NATS to be installed as well.
   bundled: true
   nameOverride: "provisioning-nats"
