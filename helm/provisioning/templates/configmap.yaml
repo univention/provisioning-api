@@ -112,6 +112,7 @@ data:
   NATS_MAX_RECONNECT_ATTEMPTS: {{ required ".Values.dispatcher.config.natsMaxReconnectAttempts is required." .Values.dispatcher.config.natsMaxReconnectAttempts | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
+  NATS_CONSUMER_NAME: "incoming"
 ...
 ---
 kind: "ConfigMap"
@@ -136,6 +137,8 @@ data:
   LOG_LEVEL: {{ required ".Values.prefill.config.LOG_LEVEL is required." .Values.prefill.config.LOG_LEVEL | quote  }}
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
+  UDM_PROTOCOL: "http"
+  UDM_URL_PATH_PREFIX: ""
   wait-for-udm.py: |
     #!/bin/python3
     import os

@@ -186,10 +186,6 @@ prefill:
     UDM_HOST: ""
     # -- UDM REST API: port
     UDM_PORT: 9979
-    # -- UDM REST API: protocol
-    UDM_PROTOCOL: "http"
-    # -- UDM REST API: URL path prefix
-    UDM_URL_PATH_PREFIX: ""
     # -- maximum number of retries of a prefill request
     # -1 means infinite retries.
     maxPrefillAttempts: 5
