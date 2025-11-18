@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
+import random
 import time
 from datetime import datetime
 
@@ -13,6 +14,7 @@ from univention.provisioning.models.message import Body, Message
 @pytest.fixture
 def large_group_message():
     users = [f"uid=user{i},cn=users,dc=example,dc=com" for i in range(10000)]
+    random.shuffle(users)
     old_body = {
         "dn": "cn=testgroup,cn=groups,dc=example,dc=com",
         "objectType": "groups/group",
@@ -21,12 +23,14 @@ def large_group_message():
             "users": users[:],
         },
     }
+    new_users = users[:] + ["uid=newuser,cn=users,dc=example,dc=com"]
+    random.shuffle(new_users)
     new_body = {
         "dn": "cn=testgroup,cn=groups,dc=example,dc=com",
         "objectType": "groups/group",
         "properties": {
             "name": "testgroup",
-            "users": users[:] + ["uid=newuser,cn=users,dc=example,dc=com"],
+            "users": new_users,
         },
     }
     return Message(
@@ -40,12 +44,14 @@ def large_group_message():
 
 @pytest.fixture
 def small_group_message():
+    users = ["uid=user1,cn=users,dc=example,dc=com", "uid=user2,cn=users,dc=example,dc=com"]
+    random.shuffle(users)
     old_body = {
         "dn": "cn=testgroup,cn=groups,dc=example,dc=com",
         "objectType": "groups/group",
         "properties": {
             "name": "testgroup",
-            "users": ["uid=user1,cn=users,dc=example,dc=com"],
+            "users": [users[0]],
         },
     }
     new_body = {
@@ -53,7 +59,7 @@ def small_group_message():
         "objectType": "groups/group",
         "properties": {
             "name": "testgroup",
-            "users": ["uid=user1,cn=users,dc=example,dc=com", "uid=user2,cn=users,dc=example,dc=com"],
+            "users": users[:],
         },
     }
     return Message(
