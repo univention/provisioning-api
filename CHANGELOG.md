@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.63.1...v0.63.2) (2025-11-18)
+
+
+### Bug Fixes
+
+* Updated base image tag ([6e64859](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/6e648590f62dcb47c1a1ab8e9259b4c47649fa5f)), closes [univention/dev/internal/team-nubus#1519](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1519)
+
 ## [0.63.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.63.0...v0.63.1) (2025-11-14)
 
 
