@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.64.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.63.2...v0.64.0) (2025-11-19)
+
+
+### Features
+
+* Optimize debug message generation for large group changes ([3fbdb6e](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/3fbdb6e8017b73451b9845517aac1271e7530548)), closes [univention/dev/projects/open-xchange/connector#143](https://git.knut.univention.de/univention/dev/projects/open-xchange/connector/issues/143)
+* update nubus-provisioning-common dependency version ([4d739f1](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/4d739f1a8fa86f71658631744aef945f197665a7)), closes [univention/dev/projects/open-xchange/connector#143](https://git.knut.univention.de/univention/dev/projects/open-xchange/connector/issues/143)
+
 ## [0.63.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.63.1...v0.63.2) (2025-11-18)
 
 
