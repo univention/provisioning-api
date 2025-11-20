@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+[project]
+name = "test-queue"
+version = "0.1.0"
+description = "Univention Nubus - Queue test tool"
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
+
+requires-python = ">=3.11"
+
+dependencies = [
+    "nubus-provisioning-consumer",
+    "pydantic-settings<3.0.0,>=2.5.2",
+    "udm-rest-api-client<1.0.0,>=0.0.2",
+]
+
+[tool.uv.sources]
+nubus-provisioning-consumer = { path = "../consumer" }
+
+[project.scripts]
+test_queue = "src.test_queue:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
