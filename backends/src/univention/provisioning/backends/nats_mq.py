@@ -9,7 +9,6 @@
 import asyncio
 import json
 import logging
-import os
 from typing import Any, Callable, Optional, Tuple
 
 from nats.aio.client import Client as NATS
@@ -119,22 +118,14 @@ class IncomingQueue(BaseQueue):
     Reader: dispatcher
     """
 
+    # Use INTEREST mode to support multiple dispatcher instances
+    # (e.g., on UCS primary and backup nodes)
+    retention_policy = RetentionPolicy.INTEREST
+    deliver_policy = DeliverPolicy.NEW
+
     def __init__(self, consumer_name: str):
         self.name = "incoming"
         self._consumer_name = consumer_name
-
-        # In UCS, the retention policy for the incoming queue must be set to INTEREST
-        # because multiple dispatchers (master and backups) can connect to the same
-        # NATS instance.
-        #
-        # This is a temporary workaround until an upgrade path is implemented in N4K
-        # to migrate the incoming queue from WORK_QUEUE to INTEREST.
-        # Once that migration is available, the retention_policy = RetentionPolicy.INTEREST
-        # can be defined at the class level.
-        # https://git.knut.univention.de/univention/dev/projects/provisioning/-/issues/96#note_563273
-        if os.getenv("PLATFORM_UCS", "").lower() == "true":
-            self.retention_policy = RetentionPolicy.INTEREST
-            self.deliver_policy = DeliverPolicy.NEW
 
 
 class PrefillQueue(BaseQueue):
