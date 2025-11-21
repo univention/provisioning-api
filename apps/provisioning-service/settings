@@ -1,0 +1,13 @@
+[provisioning-service/udm/rest/api/url]
+Type = String
+Show = Install, Settings
+InitialValue = @%@ldap/master@%@
+Scope = outside
+Description = Configures the URL where the provisioning service will connect to the UDM REST API.
+
+[provisioning-service/primary/url]
+Type = String
+Show = Install, Settings
+InitialValue = @%@ldap/master@%@
+Scope = outside
+Description = Configures the URL where the provisioning service will connect to the primary server.

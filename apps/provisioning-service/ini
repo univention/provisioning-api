@@ -53,13 +53,20 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	      "request_prefill": True,
 	      "password": "s3cr3t"
 	    }
-	    resp = requests.post(provisioning_url + "v1/subscriptions", json=create_sub_json, auth=(provisioning_admin_username, provisioning_admin_password))
+	    resp = requests.post(
+	        provisioning_url + "v1/subscriptions",
+	        json=create_sub_json,
+	        auth=(provisioning_admin_username, provisioning_admin_password)
+	    )
 	    return resp.status_code
 
 	create_sub("admin", provisioning_admin_password())
 
 	# get the next message
-	resp = requests.get(provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "s3cr3t"))
+	resp = requests.get(
+	    provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name,
+	    auth=(sub_name, "s3cr3t")
+    )
 	resp_json = resp.json()
 	while resp_json:
 	    # process the message
@@ -70,16 +77,26 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	    stat_json = {
 	      "status": "ok"
 	    }
-	    resp = requests.patch(provisioning_url + "v1/subscriptions/%s/messages/%s/status" % (sub_name, seq_num), json=stat_json, auth=(sub_name, "s3cr3t"))
+	    resp = requests.patch(
+	        provisioning_url + "v1/subscriptions/%s/messages/%s/status" % (sub_name, seq_num),
+	        json=stat_json,
+	        auth=(sub_name, "s3cr3t")
+        )
 
 	    # now you can again get the next message
-	    resp = requests.get(provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name, auth=(sub_name, "s3cr3t"))
+	    resp = requests.get(
+	        provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name,
+	        auth=(sub_name, "s3cr3t")
+        )
 	    resp_json = resp.json()
 
 	print("Timeout, no more events")
 
 	# finally we could delete the subscription again
-	# requests.delete(provisioning_url + "v1/subscriptions/%s" % sub_name, auth=("admin", provisioning_admin_password()))
+	# requests.delete(
+	#   provisioning_url + "v1/subscriptions/%s" % sub_name,
+	#   auth=("admin", provisioning_admin_password())
+	# )
 	</pre>
 SupportUrl = https://www.univention.com/products/support/community-support/
 Contact = sales@univention.de
