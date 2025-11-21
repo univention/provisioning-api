@@ -36,8 +36,6 @@ Location of the script on a UCS system:
 * Restart all provisioning consumers (they usually just terminate and in k8s that's enough to
   trigger the automatic restart, but not in UCS).
 
-[TODO: link to the jenkins job that tests backup2master]
-
 ## Automatic Tests
 
-- [5.2-3 provisioning Product Tests](https://jenkins2022.knut.univention.de/job/UCS-5.2/job/UCS-5.2-3/view/Product%20Tests/job/product-test-component-provisioning-primary/)
+- [5.2-3 provisioning Product Tests](https://jenkins2022.knut.univention.de/job/UCS-5.2/job/UCS-5.2-3/view/Product%20Tests/job/product-test-base-provisioning/)
