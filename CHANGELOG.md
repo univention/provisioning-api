@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.64.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.64.0...v0.64.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* bump images in the values ([2b96f5d](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/2b96f5da1013171fa1bc46a4b307a5a488fdef99)), closes [univention/dev/internal/team-nubus#1476](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1476)
+
 ## [0.64.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.63.2...v0.64.0) (2025-11-19)
 
 
