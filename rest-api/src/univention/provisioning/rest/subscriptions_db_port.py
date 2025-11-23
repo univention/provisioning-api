@@ -4,7 +4,7 @@
 import abc
 from typing import Optional, Self, Union
 
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends.key_value_db import BucketName
 from univention.provisioning.models.subscription import Subscription
 
 from .config import AppSettings

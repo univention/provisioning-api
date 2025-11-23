@@ -4,7 +4,7 @@
 from typing import AsyncGenerator, Awaitable, Callable, Optional
 
 from univention.provisioning.backends import key_value_store
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends.key_value_db import BucketName
 from univention.provisioning.models.subscription import Subscription
 
 from .config import DispatcherSettings, dispatcher_settings_push

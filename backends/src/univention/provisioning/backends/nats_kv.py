@@ -9,10 +9,9 @@ from nats.aio.client import Client as NATS
 from nats.js.errors import BucketNotFoundError, KeyNotFoundError, KeyWrongLastSequenceError, NoKeysError
 from nats.js.kv import KV_DEL, KV_PURGE
 
-from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
 
-from .key_value_db import KeyValueDB, UpdateConflict
+from .key_value_db import BucketName, KeyValueDB, UpdateConflict
 
 logger = logging.getLogger(__name__)
 

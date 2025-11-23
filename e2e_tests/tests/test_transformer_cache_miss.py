@@ -6,8 +6,8 @@ import uuid
 import pytest
 
 from univention.admin.rest.client import UDM
+from univention.provisioning.backends.key_value_db import BucketName
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
-from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.message import MessageProcessingStatus
 from univention.provisioning.models.subscription import RealmTopic
 
