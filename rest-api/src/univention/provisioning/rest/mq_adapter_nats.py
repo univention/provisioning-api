@@ -52,7 +52,10 @@ class NatsMessageQueue(MessageQueuePort):
 
     async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         try:
-            return await self.mq.get_message(queue, timeout, pop)
+            mq_message = await self.mq.get_message(queue, timeout, pop)
+            if mq_message is None:
+                return None
+            return ProvisioningMessage.from_mq_message(mq_message)
         except NotFoundError as err:
             raise ProvisioningBackendError(str(err))
 

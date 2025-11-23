@@ -15,9 +15,9 @@ import pytest
 from nats.js.errors import NotFoundError
 from test_helpers.mock_data import (
     FLAT_MESSAGE_ENCODED,
+    MQMESSAGE,
     MSG,
     NATS_SERVER,
-    PROVISIONING_MESSAGE,
     SUBSCRIPTION_NAME,
 )
 
@@ -79,7 +79,7 @@ class TestNatsMQAdapter:
         )
         mock_fetch.assert_called_once_with(1, 5)
         mock_nats_mq_adapter.delete_message.assert_not_called()
-        assert result == PROVISIONING_MESSAGE
+        assert result == MQMESSAGE
 
     async def test_get_messages_with_removing(self, mock_nats_mq_adapter, mock_fetch):
         consumer_mock = Mock()
@@ -100,7 +100,7 @@ class TestNatsMQAdapter:
         )
         mock_fetch.assert_called_once_with(1, 5)
         MSG.ack.assert_called_with()
-        assert result == PROVISIONING_MESSAGE
+        assert result == MQMESSAGE
 
     async def test_get_messages_without_stream(self, mock_nats_mq_adapter, mock_fetch):
         mock_nats_mq_adapter._js.stream_info = AsyncMock(side_effect=NotFoundError)
