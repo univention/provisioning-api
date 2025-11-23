@@ -3,9 +3,7 @@
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
-
-from univention.provisioning.models.subscription import Subscription
+from typing import Any, AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
 
 class BucketName(str, Enum):
@@ -73,7 +71,7 @@ class KeyValueDB(ABC):
         pass
 
     @abstractmethod
-    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
+    async def get_all_bucket_items(self, bucket: str) -> AsyncGenerator[dict[str, Any], None]:
         pass
 
     @abstractmethod

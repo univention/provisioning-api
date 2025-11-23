@@ -3,13 +3,11 @@
 
 import json
 import logging
-from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
+from typing import Any, AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
 from nats.aio.client import Client as NATS
 from nats.js.errors import BucketNotFoundError, KeyNotFoundError, KeyWrongLastSequenceError, NoKeysError
 from nats.js.kv import KV_DEL, KV_PURGE
-
-from univention.provisioning.models.subscription import Subscription
 
 from .key_value_db import BucketName, KeyValueDB, UpdateConflict
 
@@ -103,17 +101,12 @@ class NatsKeyValueDB(KeyValueDB):
         except NoKeysError:
             return []
 
-    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
-        kv_store = await self._js.key_value(BucketName.subscriptions.value)
-        for key in await self.get_keys(BucketName.subscriptions):
+    async def get_all_bucket_items(self, bucket: str) -> AsyncGenerator[dict[str, Any], None]:
+        kv_store = await self._js.key_value(bucket)
+        for key in await self.get_keys(BucketName(bucket)):
             entry = await kv_store.get(key)
-            try:
-                subscription_dict = json.loads(entry.value)
-                subscription = Subscription.model_validate(subscription_dict)
-            except ValueError as exc:
-                logger.error("Bad subscription data in KV store. key=%r entry=%r exc=%s", key, entry, exc)
-                raise
-            yield subscription
+            item_dict = json.loads(entry.value)
+            yield item_dict
 
     async def watch_for_subscription_changes(self, callback: Callable[[str, Optional[bytes]], Awaitable[None]]) -> None:
         """

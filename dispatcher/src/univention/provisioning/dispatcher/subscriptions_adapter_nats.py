@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import logging
 from typing import AsyncGenerator, Awaitable, Callable, Optional
 
 from univention.provisioning.backends import key_value_store
@@ -9,6 +10,8 @@ from univention.provisioning.models.subscription import Subscription
 
 from .config import DispatcherSettings, dispatcher_settings_push
 from .subscriptions_port import SubscriptionsPort
+
+logger = logging.getLogger(__name__)
 
 
 class NatsSubscriptionsAdapter(SubscriptionsPort):
@@ -35,8 +38,13 @@ class NatsSubscriptionsAdapter(SubscriptionsPort):
         await self.kv.close()
 
     async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
-        async for sub in self.kv.get_all_subscriptions():
-            yield sub
+        async for sub_dict in self.kv.get_all_bucket_items(BucketName.subscriptions.value):
+            try:
+                subscription = Subscription.model_validate(sub_dict)
+            except ValueError as exc:
+                logger.error("Bad subscription data in KV store. data=%r exc=%s", sub_dict, exc)
+                raise
+            yield subscription
 
     async def watch_for_subscription_changes(self, callback: Callable[[str, Optional[bytes]], Awaitable[None]]) -> None:
         await self.kv.watch_for_subscription_changes(callback)
