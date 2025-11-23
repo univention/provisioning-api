@@ -14,9 +14,7 @@ from nats.js.errors import KeyNotFoundError
 from nats.js.kv import KeyValue
 from test_helpers.mock_data import BASE_KV_OBJ, CONSUMER_HASHED_PASSWORD, MSG, SUBSCRIPTION_NAME
 
-from univention.provisioning.models.constants import BucketName
-
-from .key_value_db import UpdateConflict
+from .key_value_db import BucketName, UpdateConflict
 from .nats_kv import NatsKeyValueDB
 from .nats_mq import NatsMessageQueue
 

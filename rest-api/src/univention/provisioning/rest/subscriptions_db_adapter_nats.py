@@ -5,8 +5,7 @@ import json
 from typing import Optional, Union
 
 from univention.provisioning.backends import key_value_store
-from univention.provisioning.backends.key_value_db import KeyValueDB
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends.key_value_db import BucketName, KeyValueDB
 from univention.provisioning.models.subscription import Subscription
 
 from .config import AppSettings, app_settings

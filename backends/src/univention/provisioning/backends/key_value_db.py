@@ -2,10 +2,16 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
-from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
+
+
+class BucketName(str, Enum):
+    subscriptions = "SUBSCRIPTIONS"
+    credentials = "CREDENTIALS"
+    cache = "CACHE"
 
 
 class UpdateConflict(Exception): ...

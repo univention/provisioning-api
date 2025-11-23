@@ -17,9 +17,9 @@ from test_helpers.mock_data import (
     SUBSCRIPTION_INFO_dumpable,
 )
 
+from univention.provisioning.backends.key_value_db import BucketName
 from univention.provisioning.backends.nats_kv import NatsKeyValueDB
 from univention.provisioning.backends.nats_mq import ConsumerQueue
-from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.message import RealmTopic
 from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
 from univention.provisioning.rest.config import AppSettings

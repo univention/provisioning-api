@@ -5,7 +5,7 @@ import json
 from typing import Any, Optional
 
 from univention.provisioning.backends import key_value_store
-from univention.provisioning.models.constants import BucketName
+from univention.provisioning.backends.key_value_db import BucketName
 
 from .cache_port import Cache
 from .config import UDMTransformerSettings, udm_transformer_settings
