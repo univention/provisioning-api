@@ -4,9 +4,9 @@
 import abc
 from typing import Optional, Self
 
-from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.message_queue import Acknowledgements, MQMessage
 from univention.provisioning.backends.nats_mq import BaseQueue
-from univention.provisioning.models.message import Message, MQMessage
+from univention.provisioning.models.message import Message
 
 from .config import DispatcherSettings
 
