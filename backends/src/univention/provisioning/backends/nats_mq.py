@@ -9,15 +9,13 @@
 import asyncio
 import json
 import logging
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Tuple
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.js.api import ConsumerConfig, DeliverPolicy, RetentionPolicy, StreamConfig
 from nats.js.errors import NotFoundError, ServerError
 from typing_extensions import Self
-
-from univention.provisioning.models.message import ProvisioningMessage
 
 from .message_queue import Acknowledgements, Empty, MessageQueue, MQMessage, QueueStatus, json_decoder
 
@@ -244,7 +242,7 @@ class NatsMessageQueue(MessageQueue):
 
         return status
 
-    async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
+    async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> MQMessage | None:
         """Retrieve messages from a NATS subject."""
 
         try:
@@ -271,7 +269,7 @@ class NatsMessageQueue(MessageQueue):
         if pop:
             await msgs[0].ack()
 
-        return self.provisioning_message_from(msgs[0])
+        return self.mq_message_from(msgs[0])
 
     async def get_one_message(
         self,
@@ -295,21 +293,6 @@ class NatsMessageQueue(MessageQueue):
             self.mq_message_from(messages[0], binary_decoder=binary_decoder),
             acknowledgements,
         )
-
-    @staticmethod
-    def provisioning_message_from(msg: Msg) -> ProvisioningMessage:
-        data = json.loads(msg.data)
-        sequence_number = int(msg.reply.split(".")[-4])
-        message = ProvisioningMessage(
-            sequence_number=sequence_number,
-            num_delivered=msg.metadata.num_delivered,
-            publisher_name=data["publisher_name"],
-            ts=data["ts"],
-            realm=data["realm"],
-            topic=data["topic"],
-            body=data["body"],
-        )
-        return message
 
     def nats_message_from(self, message: MQMessage) -> Msg:
         data = message.data
