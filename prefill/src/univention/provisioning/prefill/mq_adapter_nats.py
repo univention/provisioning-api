@@ -5,7 +5,7 @@ import logging
 from typing import Optional, Tuple
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus
+from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus, json_encoder
 from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import BaseMessage, MQMessage
 
@@ -45,7 +45,8 @@ class NatsMessageQueue(MessageQueuePort):
 
     @retry(logger=logger)
     async def add_message(self, queue: BaseQueue, message: BaseMessage) -> None:
-        await self.mq.add_message(queue, message)
+        encoded_message = json_encoder(message.model_dump())
+        await self.mq.add_message(queue, encoded_message)
 
     async def get_one_message(self) -> Tuple[MQMessage, Acknowledgements]:
         return await self.mq.get_one_message()

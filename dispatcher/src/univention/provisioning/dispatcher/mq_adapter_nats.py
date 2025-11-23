@@ -4,7 +4,7 @@
 from typing import Optional
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements
+from univention.provisioning.backends.message_queue import Acknowledgements, json_encoder
 from univention.provisioning.backends.nats_mq import BaseQueue
 from univention.provisioning.models.message import Message, MQMessage
 
@@ -43,7 +43,8 @@ class NatsMessageQueueAdapter(MessageQueuePort):
         return await self.mq.get_one_message(timeout=timeout)
 
     async def enqueue_message(self, queue: BaseQueue, message: Message) -> None:
-        await self.mq.add_message(queue, message)
+        encoded_message = json_encoder(message.model_dump())
+        await self.mq.add_message(queue, encoded_message)
 
     async def stream_exists(self, queue: BaseQueue) -> bool:
         return await self.mq.stream_exists(queue)

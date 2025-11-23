@@ -4,7 +4,7 @@
 from unittest.mock import AsyncMock, call
 
 import pytest
-from test_helpers.mock_data import MESSAGE, SUBSCRIPTION_NAME
+from test_helpers.mock_data import FLAT_MESSAGE_ENCODED, MESSAGE, SUBSCRIPTION_NAME
 
 from univention.provisioning.backends.nats_mq import ConsumerQueue, IncomingQueue, PrefillConsumerQueue
 from univention.provisioning.models.message import MessageProcessingStatus
@@ -74,4 +74,4 @@ class TestMessageService:
 
         await message_service.mq.add_message(IncomingQueue(""), MESSAGE)
 
-        message_service.mq.mq.add_message.assert_called_once_with(IncomingQueue(""), MESSAGE)
+        message_service.mq.mq.add_message.assert_called_once_with(IncomingQueue(""), FLAT_MESSAGE_ENCODED)

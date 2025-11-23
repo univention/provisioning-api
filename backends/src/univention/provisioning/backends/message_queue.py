@@ -10,7 +10,7 @@ from typing import Any, Callable, Coroutine, NamedTuple, Tuple
 
 from typing_extensions import Self
 
-from univention.provisioning.models.message import BaseMessage, MQMessage
+from univention.provisioning.models.message import MQMessage
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +79,7 @@ class MessageQueue(ABC):
     async def add_message(
         self,
         queue,
-        message: BaseMessage,
-        binary_encoder: Callable[[Any], bytes] = json_encoder,
+        message: bytes,
     ):
         """Publish a message to a NATS subject."""
         pass

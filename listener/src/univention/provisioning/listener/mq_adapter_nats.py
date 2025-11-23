@@ -9,7 +9,7 @@
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, Optional, Self
+from typing import Any, Dict, Optional, Self
 
 import msgpack
 from nats.aio.client import Client as NATS
@@ -163,15 +163,14 @@ class NatsMessageQueue:
         self,
         stream: str,
         subject: str,
-        message: LdapMessage,
-        binary_encoder: Callable[[Any], bytes] = messagepack_encoder,
+        message: bytes,
     ):
         """Publish a message to a NATS subject."""
         stream_name = NatsKeys.stream(stream)
 
         await self._js.publish(
             subject,
-            binary_encoder(message.dict()),
+            message,
             stream=stream_name,
         )
         logger.debug(
@@ -228,7 +227,8 @@ class MessageQueueNatsAdapter(MessageQueuePort):
             topic="ldap",
             body=Body(new=new, old=old),
         )
-        await self.mq.add_message(LDAP_PRODUCER_QUEUE_NAME, LDAP_SUBJECT, message, binary_encoder=messagepack_encoder)
+        encoded_message = messagepack_encoder(message.dict())
+        await self.mq.add_message(LDAP_PRODUCER_QUEUE_NAME, LDAP_SUBJECT, encoded_message)
 
     async def ensure_queue_exists(self) -> None:
         await self.mq.ensure_stream(LDAP_PRODUCER_QUEUE_NAME, False, [LDAP_SUBJECT])

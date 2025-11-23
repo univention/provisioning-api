@@ -17,9 +17,9 @@ from nats.js.api import ConsumerConfig, DeliverPolicy, RetentionPolicy, StreamCo
 from nats.js.errors import NotFoundError, ServerError
 from typing_extensions import Self
 
-from univention.provisioning.models.message import BaseMessage, MQMessage, ProvisioningMessage
+from univention.provisioning.models.message import MQMessage, ProvisioningMessage
 
-from .message_queue import Acknowledgements, Empty, MessageQueue, QueueStatus, json_decoder, json_encoder
+from .message_queue import Acknowledgements, Empty, MessageQueue, QueueStatus, json_decoder
 
 logger = logging.getLogger(__name__)
 
@@ -208,14 +208,13 @@ class NatsMessageQueue(MessageQueue):
     async def add_message(
         self,
         queue: BaseQueue,
-        message: BaseMessage,
-        binary_encoder: Callable[[Any], bytes] = json_encoder,
+        message: bytes,
     ):
         """Publish a message to a NATS subject."""
 
         await self._js.publish(
             subject=queue.message_subject,
-            payload=binary_encoder(message.model_dump()),
+            payload=message,
             stream=queue.queue_name,
         )
         logger.debug(

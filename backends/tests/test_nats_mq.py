@@ -15,7 +15,6 @@ import pytest
 from nats.js.errors import NotFoundError
 from test_helpers.mock_data import (
     FLAT_MESSAGE_ENCODED,
-    MESSAGE,
     MSG,
     NATS_SERVER,
     PROVISIONING_MESSAGE,
@@ -52,7 +51,7 @@ class TestNatsMQAdapter:
         assert result is None
 
     async def test_add_message_new_stream(self, mock_nats_mq_adapter):
-        result = await mock_nats_mq_adapter.add_message(self.consumer_queue, MESSAGE)
+        result = await mock_nats_mq_adapter.add_message(self.consumer_queue, FLAT_MESSAGE_ENCODED)
 
         mock_nats_mq_adapter._js.publish.assert_called_once_with(
             subject=self.consumer_queue.message_subject,
