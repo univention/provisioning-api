@@ -7,7 +7,7 @@ from typing import Optional
 from nats.js.errors import NotFoundError
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import MessageQueue
+from univention.provisioning.backends.message_queue import MessageQueue, json_encoder
 from univention.provisioning.backends.nats_mq import BaseQueue, PrefillQueue
 from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import Message, PrefillMessage, ProvisioningMessage
@@ -47,7 +47,8 @@ class NatsMessageQueue(MessageQueuePort):
         return False
 
     async def add_message(self, queue: BaseQueue, message: Message) -> None:
-        await self.mq.add_message(queue, message)
+        encoded_message = json_encoder(message.model_dump())
+        await self.mq.add_message(queue, encoded_message)
 
     async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         try:
@@ -78,4 +79,5 @@ class NatsMessageQueue(MessageQueuePort):
             realms_topics=subscription.realms_topics,
             subscription_name=subscription.name,
         )
-        await self.mq.add_message(PrefillQueue(), message)
+        encoded_message = json_encoder(message.model_dump())
+        await self.mq.add_message(PrefillQueue(), encoded_message)
