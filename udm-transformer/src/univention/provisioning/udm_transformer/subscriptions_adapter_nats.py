@@ -6,9 +6,8 @@ from typing import Any, Optional
 import msgpack
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus
+from univention.provisioning.backends.message_queue import Acknowledgements, MQMessage, QueueStatus
 from univention.provisioning.backends.nats_mq import BaseQueue
-from univention.provisioning.models.message import MQMessage
 
 from .config import UDMTransformerSettings, udm_transformer_settings
 from .subscriptions_port import SubscriptionsPort

@@ -5,9 +5,9 @@ import logging
 from typing import Optional, Tuple
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements, QueueStatus, json_encoder
+from univention.provisioning.backends.message_queue import Acknowledgements, MQMessage, QueueStatus, json_encoder
 from univention.provisioning.backends.nats_mq import BaseQueue
-from univention.provisioning.models.message import BaseMessage, MQMessage
+from univention.provisioning.models.message import BaseMessage
 
 from .config import PrefillSettings, prefill_settings
 from .mq_port import MessageQueuePort

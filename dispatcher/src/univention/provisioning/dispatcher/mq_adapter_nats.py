@@ -4,9 +4,9 @@
 from typing import Optional
 
 from univention.provisioning.backends import message_queue
-from univention.provisioning.backends.message_queue import Acknowledgements, json_encoder
+from univention.provisioning.backends.message_queue import Acknowledgements, MQMessage, json_encoder
 from univention.provisioning.backends.nats_mq import BaseQueue
-from univention.provisioning.models.message import Message, MQMessage
+from univention.provisioning.models.message import Message
 
 from .config import DispatcherSettings, dispatcher_settings
 from .mq_port import MessageQueuePort

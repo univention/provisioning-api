@@ -3,9 +3,9 @@
 import asyncio
 import logging
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager, MQMessage, QueueStatus
 from univention.provisioning.backends.nats_mq import ConsumerQueue, IncomingQueue
-from univention.provisioning.models.message import Message, MQMessage
+from univention.provisioning.models.message import Message
 from univention.provisioning.models.subscription import Subscription
 
 from .mq_port import MessageQueuePort

@@ -17,9 +17,9 @@ from nats.js.api import ConsumerConfig, DeliverPolicy, RetentionPolicy, StreamCo
 from nats.js.errors import NotFoundError, ServerError
 from typing_extensions import Self
 
-from univention.provisioning.models.message import MQMessage, ProvisioningMessage
+from univention.provisioning.models.message import ProvisioningMessage
 
-from .message_queue import Acknowledgements, Empty, MessageQueue, QueueStatus, json_decoder
+from .message_queue import Acknowledgements, Empty, MessageQueue, MQMessage, QueueStatus, json_decoder
 
 logger = logging.getLogger(__name__)
 

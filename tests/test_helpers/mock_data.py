@@ -8,10 +8,10 @@ from datetime import datetime
 from nats.aio.msg import Msg
 from nats.js.kv import KeyValue
 
+from univention.provisioning.backends.message_queue import MQMessage
 from univention.provisioning.models.message import (
     Body,
     Message,
-    MQMessage,
     PrefillMessage,
     ProvisioningMessage,
     PublisherName,

@@ -6,13 +6,23 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Coroutine, NamedTuple, Tuple
+from typing import Any, Callable, Coroutine, NamedTuple
 
+from pydantic import BaseModel
 from typing_extensions import Self
 
-from univention.provisioning.models.message import MQMessage
-
 logger = logging.getLogger(__name__)
+
+
+class MQMessage(BaseModel):
+    """Raw message queue message."""
+
+    subject: str
+    reply: str
+    data: dict[str, Any]
+    num_delivered: int
+    sequence_number: int
+    headers: dict[str, str] | None = None
 
 
 class Empty(Exception): ...
@@ -107,7 +117,7 @@ class MessageQueue(ABC):
         self,
         timeout: float = 10,
         binary_decoder: Callable[[bytes], Any] = json_decoder,
-    ) -> Tuple[MQMessage, Acknowledgements]:
+    ) -> tuple[MQMessage, Acknowledgements]:
         pass
 
     @abstractmethod

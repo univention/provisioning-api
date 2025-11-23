@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 import enum
 from datetime import datetime
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 
 from pydantic import BaseModel, Field, field_serializer, model_validator
 from typing_extensions import Literal, Self
@@ -103,18 +103,22 @@ class UDMMessage(BaseMessage):
         )
 
 
-class MQMessage(BaseModel):
-    subject: str
-    reply: str
-    data: Dict[str, Any]
-    num_delivered: int
-    sequence_number: int
-    headers: Optional[Dict[str, str]] = None
-
-
 class ProvisioningMessage(Message):
     sequence_number: int = Field(description="The sequence number associated with the message.")
     num_delivered: int = Field(description="The number of times that this message has been delivered.")
+
+    @classmethod
+    def from_mq_message(cls, mq_msg) -> "ProvisioningMessage":
+        """Create a ProvisioningMessage from an MQMessage."""
+        return cls(
+            sequence_number=mq_msg.sequence_number,
+            num_delivered=mq_msg.num_delivered,
+            publisher_name=mq_msg.data["publisher_name"],
+            ts=mq_msg.data["ts"],
+            realm=mq_msg.data["realm"],
+            topic=mq_msg.data["topic"],
+            body=mq_msg.data["body"],
+        )
 
 
 class PrefillMessage(BaseMessage):

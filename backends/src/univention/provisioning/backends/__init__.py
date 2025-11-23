@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 from .key_value_db import KeyValueDB
-from .message_queue import MessageQueue
+from .message_queue import MessageQueue, MQMessage  # noqa: F401
 from .nats_kv import NatsKeyValueDB
 from .nats_mq import NatsMessageQueue
 

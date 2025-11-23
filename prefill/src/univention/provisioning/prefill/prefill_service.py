@@ -7,13 +7,12 @@ from typing import Optional
 
 from pydantic import ValidationError
 
-from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
+from univention.provisioning.backends.message_queue import Empty, MessageAckManager, MQMessage, QueueStatus
 from univention.provisioning.backends.nats_mq import PrefillConsumerQueue, PrefillFailuresQueue, PrefillQueue
 from univention.provisioning.models.constants import PublisherName
 from univention.provisioning.models.message import (
     Body,
     Message,
-    MQMessage,
     PrefillMessage,
     SimpleMessage,
 )
