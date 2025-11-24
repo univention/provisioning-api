@@ -94,7 +94,6 @@ async def test_get_multiple_messages(
     assert len(result) == 3
 
 
-@pytest.mark.xfail()
 async def test_get_messages_zero_timeout(provisioning_client: ProvisioningConsumerClient, dummy_subscription: str):
     response = await provisioning_client.get_subscription_message(
         name=dummy_subscription,
