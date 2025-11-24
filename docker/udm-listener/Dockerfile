@@ -21,7 +21,6 @@ ENV UV_LINK_MODE=copy \
     # UV_PROJECT_ENVIRONMENT=/app
 
 COPY ./backends /app/backends
-COPY ./common /app/common
 COPY ./listener/uv.lock \
      ./listener/pyproject.toml \
      /app/listener/
@@ -74,17 +73,17 @@ ENV PYTHONUNBUFFERED=1 \
 
 COPY ./listener/src/nubus-provisioning.py /usr/lib/univention-directory-listener/system/
 
-# TODO: Fix docker compose so that it runs without root
 # ARG USER=udm-listener
-# RUN groupadd -r ${USER} -g 1000 && \
-#     useradd -r -d /app -g ${USER} -N ${USER} -u 1000
-#
+# ARG USER_UID=102
+# ARG GROUP_GID=65534
+# RUN useradd -r -d /app -g ${GROUP_GID} -N ${USER} -u ${USER_UID}
+
 # COPY --from=build --chown=${USER}:${USER} /app/listener /app/listener
 COPY --from=build /app/listener /app/listener
 
-USER ${USER}
-#
-# RUN \
-#   python3.11 -V && \
-#   python3.11 -m site && \
-#   python3.11 -c 'import univention.provisioning.listener'
+RUN \
+  python3.11 -V && \
+  python3.11 -m site && \
+  python3.11 -c 'import univention.provisioning.listener'
+
+# USER ${USER_UID}:${GROUP_GID}
