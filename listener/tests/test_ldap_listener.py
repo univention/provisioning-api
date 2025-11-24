@@ -1,18 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from datetime import datetime
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import AsyncMock, patch
 
 import msgpack
 import pytest
 
-from univention.provisioning.listener.config import ldap_producer_settings
-from univention.provisioning.listener.message_queue import LDAP_SUBJECT
-from univention.provisioning.listener.mq_adapter_nats import messagepack_encoder
-from univention.provisioning.listener.service import ensure_stream, handle_changes
-from univention.provisioning.models.constants import LDAP_PRODUCER_QUEUE_NAME, PublisherName
-from univention.provisioning.models.message import Body, Message
+from univention.provisioning.backends.nats_mq import LdapQueue
+from univention.provisioning.listener.config import LdapProducerSettings
+from univention.provisioning.listener.mq_adapter_nats import MessageQueueNatsAdapter, is_udm_message
 
 user_entry = {
     "krb5MaxLife": [b"86400"],
@@ -104,61 +100,84 @@ user_entry = {
 
 
 @pytest.fixture
-def ldap_message():
-    return Message(
-        publisher_name=PublisherName.ldif_producer,
-        ts=datetime.now(),
-        realm="ldap",
-        topic="ldap",
-        body=Body(old=user_entry, new={}),
+def mock_settings():
+    return LdapProducerSettings(
+        nats_user="test_user",
+        nats_password="test_password",
+        nats_host="localhost",
+        nats_port=4222,
+        nats_max_reconnect_attempts=5,
+        nats_retry_delay=10,
+        nats_max_retry_count=3,
+        terminate_listener_on_exception=False,
     )
 
 
 @pytest.fixture
-def serialized_ldap_message(ldap_message):
-    return messagepack_encoder(ldap_message.model_dump())
-
-
-@pytest.fixture
-def mock_nats_adapter():
-    with patch("univention.provisioning.backends.nats_mq.NatsMessageQueue", autospec=True) as mock:
+def mock_nats_mq():
+    with patch("univention.provisioning.listener.mq_adapter_nats.NatsMessageQueue", autospec=True) as mock:
         adapter = mock.return_value
         adapter.connect = AsyncMock()
         adapter.close = AsyncMock()
         adapter.add_message = AsyncMock()
-        adapter.ensure_queue_exists = AsyncMock()
-
+        adapter.ensure_stream = AsyncMock()
         yield adapter
 
 
-def test_settings():
-    assert ldap_producer_settings()
+def test_is_udm_message_with_new():
+    new = {"univentionObjectType": [b"users/user"]}
+    old = {}
+    assert is_udm_message(new, old) is True
 
 
-def test_messagepack(serialized_ldap_message):
-    assert serialized_ldap_message
+def test_is_udm_message_with_old():
+    new = {}
+    old = {"univentionObjectType": [b"users/user"]}
+    assert is_udm_message(new, old) is True
 
 
-def test_unpack_messagepack(serialized_ldap_message):
-    result = msgpack.unpackb(serialized_ldap_message)
-    message = Message(**result)
-
-    assert message
-
-
-async def test_ensure_stream(mock_nats_adapter):
-    await ensure_stream()
-
-    mock_nats_adapter.connect.assert_awaited_once()
-    mock_nats_adapter.close.assert_awaited_once()
-    mock_nats_adapter.ensure_queue_exists.assert_awaited_once_with(LDAP_PRODUCER_QUEUE_NAME, False, [LDAP_SUBJECT])
+def test_is_udm_message_without_type():
+    new = {"someField": "value"}
+    old = {}
+    assert is_udm_message(new, old) is False
 
 
-async def test_handle_changes(mock_nats_adapter):
-    await handle_changes(None, user_entry)
+async def test_ensure_queue_exists(mock_settings, mock_nats_mq):
+    async with MessageQueueNatsAdapter(mock_settings) as adapter:
+        await adapter.ensure_queue_exists()
 
-    mock_nats_adapter.connect.assert_awaited_once()
-    mock_nats_adapter.close.assert_awaited_once()
-    mock_nats_adapter.add_message.assert_awaited_once_with(
-        LDAP_PRODUCER_QUEUE_NAME, LDAP_SUBJECT, ANY, binary_encoder=messagepack_encoder
-    )
+    mock_nats_mq.connect.assert_awaited_once()
+    mock_nats_mq.ensure_stream.assert_awaited_once_with(LdapQueue())
+    mock_nats_mq.close.assert_awaited_once()
+
+
+async def test_enqueue_change_event(mock_settings, mock_nats_mq):
+    async with MessageQueueNatsAdapter(mock_settings) as adapter:
+        await adapter.enqueue_change_event(user_entry, {})
+
+    mock_nats_mq.connect.assert_awaited_once()
+    mock_nats_mq.add_message.assert_awaited_once()
+
+    call_args = mock_nats_mq.add_message.call_args
+    assert call_args[0][0] == LdapQueue()
+
+    encoded_message = call_args[0][1]
+    decoded = msgpack.unpackb(encoded_message)
+    assert decoded["publisher_name"] == "ldif-producer"
+    assert decoded["realm"] == "ldap"
+    assert decoded["topic"] == "ldap"
+    assert decoded["body"]["new"] == user_entry
+    assert decoded["body"]["old"] == {}
+
+    mock_nats_mq.close.assert_awaited_once()
+
+
+async def test_enqueue_skips_non_udm_messages(mock_settings, mock_nats_mq):
+    non_udm_entry = {"someField": "value"}
+
+    async with MessageQueueNatsAdapter(mock_settings) as adapter:
+        await adapter.enqueue_change_event(non_udm_entry, {})
+
+    mock_nats_mq.connect.assert_awaited_once()
+    mock_nats_mq.add_message.assert_not_awaited()
+    mock_nats_mq.close.assert_awaited_once()

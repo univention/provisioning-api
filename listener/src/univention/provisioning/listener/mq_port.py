@@ -2,14 +2,15 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import abc
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from .config import LdapProducerSettings
 
 
 class MessageQueuePort(abc.ABC):
-    def __init__(self, settings: Optional[LdapProducerSettings] = None):
-        self.settings = settings
+    @abc.abstractmethod
+    def __init__(self, settings: LdapProducerSettings):
+        pass
 
     @abc.abstractmethod
     async def __aenter__(self):

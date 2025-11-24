@@ -210,7 +210,7 @@ services:
 
   ldap-notifier:
     platform: linux/amd64
-    image: artifacts.software-univention.de/nubus-dev/images/ldap-notifier:0.16.1-pre-jlohmer-bump-to-508
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-notifier:latest
     container_name: "ldap-notifier"
     depends_on:
       ldap-server:
