@@ -3,8 +3,8 @@
 
 # Inspired by: https://hynek.me/articles/docker-uv/
 
-ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python-523
-ARG UCS_BASE_IMAGE_TAG=latest
+ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
+ARG UCS_BASE_IMAGE_TAG=5.2.3-build.20251120@sha256:c98a6f7bca99f3282952be7e64673a04b77b3b247ef15dc47c5c86ce40ac9887
 
 ###############################################
 # Stage 1: build dependencies and software
