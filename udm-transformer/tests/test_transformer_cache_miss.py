@@ -28,7 +28,6 @@ def mock_ldap2udm():
             "properties": {"name": "test-group"},
         }
     )
-    ldap2udm.reload_udm_if_required = Mock()
     return ldap2udm
 
 

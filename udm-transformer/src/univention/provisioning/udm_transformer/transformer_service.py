@@ -97,8 +97,6 @@ class TransformerService:
         if not new_udm_obj and not old_udm_obj:
             raise RuntimeError("Both 'new' and 'old' UDM objects empty.")
 
-        self.ldap2udm.reload_udm_if_required(new_udm_obj or old_udm_obj)
-
         message = self.objects_to_message(new_udm_obj, old_udm_obj, ts)
         logger.debug("Sending the message with body: %r", message.body)
         await self.event_sender.send_event(message)
