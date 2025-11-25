@@ -1,3 +1,9 @@
+univention-provisioning-service-listener (1.0.1) unstable; urgency=medium
+
+  * Clean up dangerous `self.connect` logic that silent fail
+
+ -- Ivan Barbecho Delgado <ivan.delgado@univention.de>  Tue, 25 Nov 2025 11:53:06 +0100
+
 univention-provisioning-service-listener (1.0.0) unstable; urgency=medium
 
   * Initial release.

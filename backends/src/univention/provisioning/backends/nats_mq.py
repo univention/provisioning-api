@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+# NOTE: This is the canonical implementation of the NATS message queue.
+# A copy of this file exists at 'listener/src/univention/provisioning/listener/mq_adapter_nats.py'
+# for UCS compatibility (pydantic v1).
+# If changes are made here, consider whether they need to be ported to the listener version.
+
 import asyncio
 import json
 import logging
