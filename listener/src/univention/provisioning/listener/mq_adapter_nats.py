@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+# NOTE: This file is a copy of 'backends/src/univention/provisioning/backends/nats_mq.py'.
+# It is required to keep this duplicate here because UCS does not yet support pydantic v2.
+# This version is adapted for compatibility with pydantic v1.
+# Any changes to the backend implementation should be reviewed and synchronized here as needed.
+
 import logging
 from datetime import datetime
 from enum import Enum
