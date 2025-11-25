@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.65.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.64.1...v0.65.0) (2025-11-25)
+
+
+### Features
+
+* **provisioning:** Add script to manually test provisioning ([7bc0d57](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/7bc0d57c61daa29db2be96cbd7fa814a2709b09c)), closes [univention/dev/internal/team-nubus#1527](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1527)
+
 ## [0.64.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.64.0...v0.64.1) (2025-11-21)
 
 
