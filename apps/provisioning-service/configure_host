@@ -1,0 +1,52 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+# Example calls:
+# ./configure_host upgrade --version 2.0 --error-file /tmp/... --locale de
+# ./configure_host install --version 1.0 --error-file /tmp/... --locale de
+# ./configure_host remove --version 1.0 --error-file /tmp/... --locale de
+
+action=""
+version=""
+error_file=""
+locale=""
+
+parse() {
+    # First argument must be the action
+    action="$1"
+    shift
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --version)
+                version="$2"
+                shift 2
+                ;;
+            --error-file)
+                error_file="$2"
+                shift 2
+                ;;
+            --locale)
+                locale="$2"
+                shift 2
+                ;;
+            *)
+                echo "Unknown argument: $1" >&2
+                exit 1
+                ;;
+        esac
+    done
+}
+
+parse "$@"
+
+echo "Action:      $action"
+echo "Version:     $version"
+echo "Error-file:  $error_file"
+echo "Locale:      $locale"
+
+# Example action check
+if [[ "$action" == "settings" ]]; then
+    univention-app reinitialize provisioning-service
+fi
