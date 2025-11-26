@@ -12,7 +12,7 @@ For other backups follow this article (specifically `ldap/master` need to be cor
 * https://help.univention.com/t/how-to-backup2master/19514
 
 * On all remaing backup directory nodes run
-`univention-app reinitialize provisioning-service`
+`univention-app configure provisioning-service`
 
 
 * All provisioning consumers need to be restarted as well (they usually just terminate and in k8s that's enough to trigger the automatic restart, but not in UCS).
