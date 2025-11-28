@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.66.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.66.0...v0.66.1) (2025-11-28)
+
+
+### Bug Fixes
+
+* clean up IncomingQueue migration logic and add tests ([25ad953](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/25ad9536f2f150740378318cabe13ccb04310701)), closes [univention/dev/internal/team-nubus#1520](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1520)
+* Finish implementing queue migration options in initialize_subscription ([0354f4b](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/0354f4b4e67a544d852a4844245e7266ed2b89bb)), closes [univention/dev/internal/team-nubus#1520](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1520)
+
 ## [0.66.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.65.0...v0.66.0) (2025-11-27)
 
 
