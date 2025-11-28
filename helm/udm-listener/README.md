@@ -104,8 +104,8 @@ A Helm chart for the Univention Portal Provisioning API
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
 | waitForDependency.image.pullPolicy | string | `nil` |  |
 | waitForDependency.image.registry | string | `nil` |  |
-| waitForDependency.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
-| waitForDependency.image.tag | string | `"0.35.27@sha256:3f9f37e224a7a8e268ee2cdf1ca8d18826d2d0d5b356a2a5a3cbfa4968a2a281"` |  |
+| waitForDependency.image.repository | string | `"nubus-dev/images/wait-for-dependency"` |  |
+| waitForDependency.image.tag | string | `"0.35.32-pre-jtorres-bump-version-errata298"` |  |
 | waitForDependency.resources.limits.cpu | string | `"500m"` |  |
 | waitForDependency.resources.limits.memory | string | `"512Mi"` |  |
 | waitForDependency.resources.requests.cpu | string | `"100m"` |  |
