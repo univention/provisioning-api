@@ -207,7 +207,7 @@ registerConsumers:
     registry: ""
     pullPolicy: null
     repository: "nubus/images/wait-for-dependency"
-    tag: "0.35.27@sha256:3f9f37e224a7a8e268ee2cdf1ca8d18826d2d0d5b356a2a5a3cbfa4968a2a281"
+    tag: "0.35.33@sha256:0570b6e8f57d27fe3c856d53c324b2e0457ad83ead442d54a3af806ea0f6a626"
 
   # -- Allows to create users in the Provisioning API.
   #
