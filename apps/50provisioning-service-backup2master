@@ -97,9 +97,9 @@ run "univention-app install --noninteractive '${APP_BACKEND_NAME}' || {
 # to apply updated configuration. (See docs and forum references.)
 echo "Reinitializing ${APP_NAME}..."
 
-run "univention-app configure ${APP_NAME} --set provisioning-service/udm/rest/api/url=\"$ldap_master\" --set provisioning-service/primary/url=\"$ldap_master\""
+run "univention-app configure ${APP_NAME} --set provisioning-service/udm-rest-api-host=\"$ldap_master\" --set provisioning-service/primary=\"$ldap_master\""
 
 echo-warning "WARNING: Please update the following app settings on all other backups where the provisioning-service app is installed."
-echo-warning "    univention-app configure ${APP_NAME} --set provisioning-service/udm/rest/api/url=<REPLACE_ME> --set provisioning-service/primary/url=<REPLACE_ME>"
+echo-warning "    univention-app configure ${APP_NAME} --set provisioning-service/udm-rest-api-host=<REPLACE_ME> --set provisioning-service/primary=<REPLACE_ME>"
 
 echo "=== $(date -Is) :: Completed. Log: ${SCRIPT_LOG} ==="

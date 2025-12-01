@@ -1,13 +1,13 @@
-[provisioning-service/udm/rest/api/url]
+[provisioning-service/udm-rest-api-host]
 Type = String
 Show = Install, Settings
 InitialValue = @%@ldap/master@%@
 Scope = outside
-Description = Configures the URL where the provisioning service will connect to the UDM REST API.
+Description = Fully qualified domain name (FQDN) of the UDM REST API host.
 
-[provisioning-service/primary/url]
+[provisioning-service/primary]
 Type = String
 Show = Install, Settings
 InitialValue = @%@ldap/master@%@
 Scope = outside
-Description = Configures the URL where the provisioning service will connect to the primary server.
+Description = Fully qualified domain name (FQDN) of the Primary Directory Node

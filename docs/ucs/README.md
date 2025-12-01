@@ -31,7 +31,7 @@ Location of the script on a UCS system:
 * On all remaining Backup Directoy Nodes:
   * follow this article (specifically `ldap/master` needs to be correct):
     https://help.univention.com/t/how-to-backup2master/19514
-  * execute `univention-app configure provisioning-service --set provisioning-service/udm/rest/api/url=<REPLACE_ME> --set provisioning-service/primary/url=<REPLACE_ME>"`
+  * execute `univention-app configure provisioning-service --set provisioning-service/udm-rest-api-host=<REPLACE_ME> --set provisioning-service/primary/url=<REPLACE_ME>"`
 
 * Restart all provisioning consumers (they usually just terminate and in k8s that's enough to
   trigger the automatic restart, but not in UCS).
