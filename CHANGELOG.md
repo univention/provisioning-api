@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.66.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.66.1...v0.66.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* bump image to errata 298 ([79010ff](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/79010ff8396bd21b548a1452cd0e86435bebdd26)), closes [univention/dev/internal/team-nubus#1543](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1543)
+
 ## [0.66.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.66.0...v0.66.1) (2025-11-28)
 
 
