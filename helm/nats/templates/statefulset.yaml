@@ -96,7 +96,7 @@ spec:
               value: $(SERVER_NAME).nats.$(NAMESPACE).svc.cluster.local
             - name: CLUSTER_NAME
               value: {{ include "common.names.fullname" . | quote }}
-          {{- range .Values.extraEnvVars }}
+          {{- range .Values.nats.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}
               valueFrom:
@@ -178,6 +178,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+          {{- with .Values.nats.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           args:
             - -pid
             - /var/run/nats.pid
@@ -219,7 +222,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "defaultNameSuffix" "admin" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.config.createUsers.adminUser.auth.existingSecret "key" "password" "context" .) }}
-          {{- range .Values.extraEnvVars }}
+          {{- range .Values.nats.extraEnvVars }}
           {{- if .valueFrom }}
             - name: {{ .name }}
               valueFrom:

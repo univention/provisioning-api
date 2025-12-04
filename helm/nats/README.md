@@ -601,6 +601,15 @@ false
 			<td>String to partially override release name.</td>
 		</tr>
 		<tr>
+			<td>nats.extraEnvVars</td>
+			<td>list</td>
+			<td><pre lang="json">
+[]
+</pre>
+</td>
+			<td>Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar"</td>
+		</tr>
+		<tr>
 			<td>nats.image.pullPolicy</td>
 			<td>string</td>
 			<td><pre lang="json">
