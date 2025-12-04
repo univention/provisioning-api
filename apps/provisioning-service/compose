@@ -5,7 +5,7 @@
 services:
 
   nats:
-    image: docker.software-univention.de/nats:latest
+    image: "artifacts.software-univention.de/library/nats:2.12.2@sha256:ce420d07f6d70c5b06cf78029aac726fe8c74f4465fe65f5ed9d14b9d6302d3c"
     ports:
       - "4222:4222"   # Client connections
       - "8222:8222"   # Monitoring endpoint (optional)
