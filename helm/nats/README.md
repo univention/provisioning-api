@@ -631,7 +631,7 @@ null
 			<td>nats.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"2.11.9@sha256:56d2d7a521692fc8933e74e188c66a374478b3f556c88da92fbf1a7427c8192f"
+"2.12.2@sha256:ce420d07f6d70c5b06cf78029aac726fe8c74f4465fe65f5ed9d14b9d6302d3c"
 </pre>
 </td>
 			<td></td>
@@ -676,7 +676,7 @@ null
 			<td>natsBox.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.18.1-nonroot@sha256:625ce82a0b6398ec84362a3f7cd3b354600412431f39fea1fc3291f5d62d2bfc"
+"0.19.2-nonroot@sha256:0da9473a3328e5b4c94df41c21f7a62d876467709c03efc1a886336328e3f49b"
 </pre>
 </td>
 			<td></td>
@@ -980,7 +980,7 @@ null
 			<td>reloader.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.18.3@sha256:a247d25e874a5e4457a88982e8e828a4da05213ec6d07ede1bf7b20e606b4d1a"
+"0.21.0@sha256:82c6dbc8b71a0879f9badc5a43e5cdd16013c228cbb68a0e3b0d01c8e6185791"
 </pre>
 </td>
 			<td></td>
