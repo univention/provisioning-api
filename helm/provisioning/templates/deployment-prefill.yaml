@@ -86,6 +86,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "defaultNameSuffix" "prefill-udm" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.prefill.udm.auth.existingSecret "key" "password" "context" .) }}
+          {{- with .Values.prefill.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: wait-for-udm
               mountPath: /scripts
@@ -102,6 +105,10 @@ spec:
           command: [ "bash", "-c", "set -euo pipefail; until curl -s http://${PROVISIONING_API_HOST}:${PROVISIONING_API_PORT}/v1/subscriptions > /dev/null || [ $? -ne 0 ]; do echo Waiting for api; sleep 2; done;" ]
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.prefill.extraEnvVars }}
+          env:
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
       containers:
         - name: "main"
@@ -137,7 +144,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "defaultNameSuffix" "api-prefill" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.prefill.existingSecret "key" "password" "context" .) }}
-          {{- with .Values.extraEnvVars }}
+          {{- with .Values.prefill.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.prefill.enabled }}

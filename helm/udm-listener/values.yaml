@@ -89,6 +89,13 @@ extraVolumes: []
 # -- Optionally specify an extra list of additional volumeMounts.
 extraVolumeMounts: []
 
+# -- Array with extra environment variables to add to containers.
+#
+# extraEnvVars:
+#   - name: FOO
+#     value: "bar"
+extraEnvVars: []
+
 # -- Credentials to fetch images from private registry.
 # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 #

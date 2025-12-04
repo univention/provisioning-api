@@ -91,6 +91,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "nats-api" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password" "context" .) }}
+          {{- with .Values.api.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -142,7 +145,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.nats.auth.existingSecret "defaultNameSuffix" "nats-api" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.nats.auth.existingSecret "key" "password" "context" .) }}
-          {{- with .Values.extraEnvVars }}
+          {{- with .Values.api.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.api.enabled }}

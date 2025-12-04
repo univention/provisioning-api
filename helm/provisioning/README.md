@@ -37,6 +37,7 @@ A Helm Chart that deploys the provisioning services
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
 | api.config.ROOT_PATH | string | `"/"` |  |
+| api.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | api.image.pullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-api"` |  |
@@ -59,6 +60,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.additionalLabels | object | `{}` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
+| dispatcher.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | dispatcher.image.pullPolicy | string | `nil` |  |
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
@@ -68,7 +70,6 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.nats.auth.password | string | `nil` |  |
 | dispatcher.nats.auth.username | string | `"dispatcher"` |  |
 | dispatcher.podAnnotations | object | `{}` |  |
-| extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraSecrets | list | `[]` | Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates) |
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
 | extraVolumes | list | `[]` | Optionally specify an extra list of additional volumes. |
@@ -162,6 +163,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.config.networkRetryMaxAttempts | int | `60` | Network: Maximum number on retries of a failed network request |
 | prefill.config.networkRetryMaxDelay | int | `120` | Network: The retry delay will increase exponential clamped to the max delay |
 | prefill.config.networkRetryStartingInterval | int | `1` | Network: Retry request on failure after n seconds |
+| prefill.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | prefill.image.pullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
@@ -213,6 +215,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.config.UDM_HOST | string | `""` |  |
 | registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.createUsers | object | `{}` | Allows to create users in the Provisioning API.  The entries have to be in the following structure:    consumerName:     existingSecret:       name: null       keyMapping:         registration: null  The entries can only be provided as existing secrets and the content of the key "registration" has to follow the correct JSON structure.  This parameter shall be used as an integration point between the consumer's chart and this chart. The consumer's chart owns the Secret and has to store the correct JSON data within the Secret. This chart only receives a reference this Secret so that it can register the consumer. |
+| registerConsumers.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | registerConsumers.image.pullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
 | registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
@@ -297,6 +300,7 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
+| udmTransformer.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | udmTransformer.image.pullPolicy | string | `nil` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |

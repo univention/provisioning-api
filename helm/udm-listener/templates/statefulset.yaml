@@ -84,6 +84,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password" "context" .) }}
+          {{- with .Values.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
       containers:
         - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
@@ -116,6 +119,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.nats.auth.existingSecret "defaultNameSuffix" "nats" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.nats.auth.existingSecret "key" "password" "context" .) }}
+          {{- with .Values.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           ports:
             - name: "http"
               containerPort: 80

@@ -36,6 +36,7 @@ A Helm chart for the Univention Portal Provisioning API
 | containerSecurityContext.runAsUser | int | `102` | Process user id. |
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
 | environment | object | `{}` |  |
+| extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | extraInitContainers | list | `[]` |  |
 | extraVolumeMounts | list | `[]` | Optionally specify an extra list of additional volumeMounts. |
 | extraVolumes | list | `[]` | Optionally specify an extra list of additional volumes. |

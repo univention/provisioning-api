@@ -85,6 +85,12 @@ api:
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
+  # -- Array with extra environment variables to add to containers.
+  #
+  # extraEnvVars:
+  #   - name: FOO
+  #     value: "bar"
+  extraEnvVars: []
 
 dispatcher:
   image:
@@ -109,6 +115,12 @@ dispatcher:
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
+  # -- Array with extra environment variables to add to containers.
+  #
+  # extraEnvVars:
+  #   - name: FOO
+  #     value: "bar"
+  extraEnvVars: []
 
 udmTransformer:
   image:
@@ -153,6 +165,12 @@ udmTransformer:
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
+  # -- Array with extra environment variables to add to containers.
+  #
+  # extraEnvVars:
+  #   - name: FOO
+  #     value: "bar"
+  extraEnvVars: []
 
 prefill:
   image:
@@ -201,6 +219,12 @@ prefill:
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
+  # -- Array with extra environment variables to add to containers.
+  #
+  # extraEnvVars:
+  #   - name: FOO
+  #     value: "bar"
+  extraEnvVars: []
 
 registerConsumers:
   image:
@@ -247,6 +271,12 @@ registerConsumers:
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
+  # -- Array with extra environment variables to add to containers.
+  #
+  # extraEnvVars:
+  #   - name: FOO
+  #     value: "bar"
+  extraEnvVars: []
 
 # -- NATS server settings.
 nats:
@@ -373,13 +403,6 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   # -- Run container as a user.
   runAsNonRoot: true
-
-# -- Array with extra environment variables to add to containers.
-#
-# extraEnvVars:
-#   - name: FOO
-#     value: "bar"
-extraEnvVars: []
 
 # -- Optionally specify a secret to create (primarily intended to be used in development environments to provide custom certificates)
 extraSecrets: []

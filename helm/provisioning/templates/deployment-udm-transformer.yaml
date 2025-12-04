@@ -88,6 +88,10 @@ spec:
               cp -av /usr/lib/python3/dist-packages/univention/admin/hooks.d/* /target/udm-hooks.d
               cp -av /usr/lib/python3/dist-packages/univention/admin/syntax.d/* /target/udm-syntax.d
               cp -av /usr/lib/python3/dist-packages/univention/admin/handlers/* /target/udm-handlers
+          {{- with .Values.udmTransformer.extraEnvVars }}
+          env:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: plugin-targets
               mountPath: /target
@@ -103,6 +107,10 @@ spec:
           {{- end }}
           image: "{{ coalesce .image.registry $.Values.global.imageRegistry }}/{{ .image.repository }}:{{ .image.tag }}"
           imagePullPolicy: {{ coalesce .image.pullPolicy $.Values.global.imagePullPolicy | quote }}
+          {{- with $.Values.udmTransformer.extraEnvVars }}
+          env:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: plugin-targets
               mountPath: /target
@@ -128,6 +136,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "defaultNameSuffix" "nats-udm-transformer" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.nats.auth.existingSecret "key" "password" "context" .) }}
+          {{- with .Values.udmTransformer.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: wait-for-nats
               mountPath: /scripts
@@ -166,7 +177,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password" "context" .) }}
-          {{- with .Values.extraEnvVars }}
+          {{- with .Values.udmTransformer.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.udmTransformer.enabled }}
