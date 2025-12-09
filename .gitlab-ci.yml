@@ -56,6 +56,21 @@ build_pre_commit:
     CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/pre-commit"
     DOCKERFILE_PATH: "images/pre-commit.Containerfile"
 
+build_prek:
+  stage: build
+  extends: .kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "images/prek.Containerfile"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/prek"
+    DOCKERFILE_PATH: "images/prek.Containerfile"
+
+
 build_univention_appcenter_control:
   stage: build
   extends: .kaniko
