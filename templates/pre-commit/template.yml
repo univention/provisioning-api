@@ -1,0 +1,47 @@
+spec:
+  inputs:
+    job_prefix:
+      default: ""
+      description: "Optional job prefix, for example the app name."
+    pipeline_stage:
+      default: "build"
+      description: "The name of the stage which contains the pre-commit jobs."
+    commit_msg_hooks:
+      default: ""
+      description: "Space separated list of hooks to run on each commit message."
+
+---
+
+include:
+  - project: univention/infrastructure/docker-services
+    file: prek.yml
+    ref: 8facdd18b397cd9ee1d80342c730e1c17d3124d1
+
+"$[[ inputs.job_prefix ]]run_pre_commit":
+  stage: "$[[ inputs.pipeline_stage ]]"
+  image: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/prek:latest"
+  needs: []
+  extends: .prek
+
+"$[[ inputs.job_prefix ]]lint_commit_messages":
+  stage: "$[[ inputs.pipeline_stage ]]"
+  image: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/prek:latest"
+  needs: []
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  script:
+    - |
+      HOOK_IDS="$[[ inputs.commit_msg_hooks ]]"
+      NUM_COMMITS=$(curl $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/commits | jq length)
+      echo "Checking $NUM_COMMITS commits."
+      COMMITS=$(git rev-list HEAD..."HEAD~$NUM_COMMITS")
+      EXIT_CODE=0
+      for COMMIT in $COMMITS; do
+        echo "Checking COMMIT message for: $COMMIT"
+        git show -s --format=%B "$COMMIT" | head -n -1 > tmp.txt
+        for HOOK_ID in $HOOK_IDS; do
+          prek run --hook-stage commit-msg --commit-msg-filename tmp.txt "$HOOK_ID" || EXIT_CODE=1
+        done
+      done
+      exit $EXIT_CODE
+
