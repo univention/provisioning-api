@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.67.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.66.3...v0.67.0) (2025-12-10)
+
+
+### Features
+
+* **helm:** Add component-specific extraEnvVars support ([6ab0853](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/6ab085387b23f178e31c422a2d83ec4cbab79c4d)), closes [univention/dev/internal/team-nubus#977](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/977)
+
 ## [0.66.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.66.2...v0.66.3) (2025-12-05)
 
 
