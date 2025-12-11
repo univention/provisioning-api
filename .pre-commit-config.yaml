@@ -68,7 +68,7 @@ repos:
 
   # "Helm chart linter"
   - repo: "https://github.com/gruntwork-io/pre-commit"
-    rev: "v0.1.23"
+    rev: "v0.1.30"
     hooks:
       - id: "helmlint"
 

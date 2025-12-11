@@ -31,18 +31,14 @@ class UDMTransformerSettings(BaseSettings):
     # Events API: password
     events_password_udm: str
 
-    # LDAP: host
-    ldap_host: str
-    # LDAP: port
-    ldap_port: int
-    # LDAP: tls_mode
-    ldap_tls_mode: str
-    # LDAP: base_dn
-    ldap_base_dn: str
-    # LDAP: host_dn
-    ldap_bind_dn: str
-    # LDAP: password
-    ldap_bind_pw: str
+    # UDM: host - example: https://primary.ucs.test/univention/udm/
+    udm_url: str
+    # UDM: username - ATTENTION: has to be allowed to use UDM REST API
+    udm_username: str
+    # UDM: password
+    udm_password: str
+    # UDM: needs reload - meaning: should reload UDM REST API on each extended_attributes change, used for Kubernetes only
+    udm_needs_reload: bool
 
     # Provisioning REST API: host
     provisioning_api_host: str
@@ -52,10 +48,6 @@ class UDMTransformerSettings(BaseSettings):
     @property
     def nats_server(self) -> str:
         return f"nats://{self.nats_host}:{self.nats_port}"
-
-    @property
-    def ldap_server_uri(self) -> str:
-        return f"ldap://{self.ldap_host}:{self.ldap_port}"
 
     @property
     def provisioning_api_url(self) -> str:
