@@ -303,7 +303,7 @@ services:
       - "./e2e_tests/e2e_settings.json.example:/app/e2e_tests/e2e_settings.json:ro"
 
   test-chart-provisioning:
-    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.0"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.3@sha256:58ce052c04324d76f3635d2f1783a491be7aaaacd59a5f71d28d79ea82ad3a14"
     pull_policy: "if_not_present"
     command: "pytest tests/helm/chart"
     profiles:
@@ -313,7 +313,7 @@ services:
       - "./tests/chart/provisioning/:/app/tests/helm/chart"
 
   test-chart-udm-listener:
-    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.0"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.3@sha256:58ce052c04324d76f3635d2f1783a491be7aaaacd59a5f71d28d79ea82ad3a14"
     pull_policy: "if_not_present"
     command: "pytest tests/helm/chart"
     profiles:
