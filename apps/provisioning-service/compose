@@ -93,19 +93,17 @@ services:
         - PROVISIONING_API_PORT=7777
         - EVENTS_USERNAME_UDM=udm
         - EVENTS_PASSWORD_UDM=@!@import json; print(json.load(open("/etc/provisioning-secrets.json"))["EVENTS_PASSWORD_UDM"]);@!@
-        - LDAP_HOST=@%@ldap/server/name@%@
-        - LDAP_PORT=@%@ldap/server/port@%@
-        - LDAP_TLS_MODE=off
-        - LDAP_BASE_DN=@%@ldap/base@%@
-        - LDAP_BIND_DN=cn=admin,@%@ldap/base@%@
-        - LDAP_BIND_PW=@!@print(open("/etc/ldap.secret").read())@!@
+        - UDM_URL=https://@%@ldap/master@%@/univention/udm/
+        - UDM_USERNAME=cn=admin
+        - UDM_PASSWORD=@!@print(open("/etc/ldap.secret").read())@!@
+        - UDM_NEEDS_RELOAD=False
+        - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     depends_on:
       - "nats"
     networks:
       - "nubus-provisioning"
     volumes:
-      - /usr/lib/python3/dist-packages/univention/udm/modules/:/usr/lib/python3/dist-packages/univention/udm/modules/
-      - /usr/lib/python3/dist-packages/univention/:/usr/lib/python3/dist-packages/univention/
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
 
   prefill:
     image: "artifacts.software-univention.de/nubus-dev/images/provisioning-prefill:0.66.0"
