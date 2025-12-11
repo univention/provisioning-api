@@ -817,22 +817,26 @@ source = { directory = "udm-transformer" }
 dependencies = [
     { name = "aiohttp" },
     { name = "daemoniker" },
+    { name = "dnspython" },
     { name = "msgpack" },
     { name = "nubus-provisioning-backends" },
     { name = "nubus-provisioning-common" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "udm-rest-api-client" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.10.9,<4.0.0" },
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
+    { name = "dnspython", specifier = ">=2.3,<3.0" },
     { name = "msgpack", specifier = ">=1.1.0,<2.0.0" },
     { name = "nubus-provisioning-backends", directory = "backends" },
     { name = "nubus-provisioning-common", directory = "common" },
     { name = "pydantic", specifier = ">=2.9.2,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.5.2,<3.0.0" },
+    { name = "udm-rest-api-client", specifier = ">=0.0.2" },
 ]
 
 [[package]]

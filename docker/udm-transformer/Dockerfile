@@ -44,12 +44,6 @@ RUN uv sync --locked --no-dev --no-editable
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-RUN apt-get update \
-    && apt-get --assume-yes --verbose-versions --no-install-recommends install \
-      python3-univention-directory-manager-rest \
-    && rm -fv /usr/lib/python*/EXTERNALLY-MANAGED \
-    && rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/*
-
 ENV PYTHONUNBUFFERED=1 \
     PATH=/app/udm-transformer/.venv/bin:$PATH
 
