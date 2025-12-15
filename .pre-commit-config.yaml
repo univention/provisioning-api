@@ -88,7 +88,7 @@ repos:
     hooks:
       - id: "addlicense"
         name: "Check or add license headers to files"
-        exclude: '\.config/copier-answers\..*\.yaml'
+        exclude: '(^go/|\.config/copier-answers\..*\.yaml)'
 
   - repo: "https://git.knut.univention.de/univention/dev/tooling/kyverno-test-pre-commit/"
     rev: "v0.5.0"
