@@ -16,22 +16,22 @@ import (
 type Integrationtest struct {
 	suite.Suite
 	logBuf    bytes.Buffer
-	oldLogger *slog.Logger
 
-	adminClient   *Client
-	baseURL       string
-	adminUsername string
-	adminPassword string
+	adminClient  *Client
+	eventsClient *Client
 }
 
 func (s *Integrationtest) SetupSuite() {
-	// Configure base URL and admin credentials from env vars.
-	s.baseURL = getenv("PROVISIONING_API_BASE_URL", "http://localhost:7777")
-	s.adminUsername = getenv("PROVISIONING_ADMIN_USERNAME", "admin")
-	s.adminPassword = getenv("PROVISIONING_ADMIN_PASSWORD", "provisioning")
+	// Configure base URL and credentials from env vars.
+	baseURL := getenv("PROVISIONING_API_BASE_URL", "http://localhost:7777")
+	adminUsername := getenv("PROVISIONING_ADMIN_USERNAME", "admin")
+	adminPassword := getenv("PROVISIONING_ADMIN_PASSWORD", "provisioning")
+	eventsUsername := getenv("PROVISIONING_EVENTS_USERNAME", "udm")
+	eventsPassword := getenv("PROVISIONING_EVENTS_PASSWORD", "udmpass")
 
-	// Initialize API client.
-	s.adminClient = New(s.baseURL, s.adminUsername, s.adminPassword, nil)
+	// Initialize admin client and fork an events client to share transport.
+	s.adminClient = New(baseURL, adminUsername, adminPassword, nil)
+	s.eventsClient = s.adminClient.Fork(eventsUsername, eventsPassword)
 }
 
 func (s *Integrationtest) SetupTest() {
@@ -60,23 +60,29 @@ func TestIntegrationSuite(t *testing.T) {
 // createTestSubscription creates a unique subscription and returns a client bound
 // to this subscription's credentials, plus a deferrable cleanup callback that
 // deletes the subscription.
-func (s *Integrationtest) createTestSubscription(ctx context.Context, realmsTopics []RealmTopic, requestPrefill bool) (*Client, func()) {
-	name := "it-" + randHex(8)
-	password := randHex(16)
+// createTestSubscription returns a subscription-scoped client and a deferrable
+// cleanup callback to remove the subscription.
+func createTestSubscription(ctx context.Context, adminClient *Client, realmsTopics []RealmTopic, requestPrefill bool) (*Client, func()) {
+    name := "it-" + randHex(8)
+    password := randHex(16)
 
-	s.Require().NoError(s.adminClient.CreateSubscription(ctx, NewSubscription{
-		Name:           name,
-		Password:       password,
-		RealmsTopics:   realmsTopics,
-		RequestPrefill: requestPrefill,
-	}))
+    if err := adminClient.CreateSubscription(ctx, NewSubscription{
+        Name:           name,
+        Password:       password,
+        RealmsTopics:   realmsTopics,
+        RequestPrefill: requestPrefill,
+    }); err != nil {
+        // The caller uses testify; we keep helpers generic and return errors via cleanup when possible.
+        // Here we choose to panic to fail fast during setup, which matches test expectations.
+        panic(err)
+    }
 
-	cleanup := func() {
-		ctx2, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		_ = s.adminClient.DeleteSubscription(ctx2, name)
-	}
-	return s.adminClient.Fork(name, password), cleanup
+    cleanup := func() {
+        ctx2, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+        defer cancel()
+        _ = adminClient.DeleteSubscription(ctx2, name)
+    }
+    return adminClient.Fork(name, password), cleanup
 }
 
 func randHex(n int) string {

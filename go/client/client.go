@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -103,14 +102,7 @@ func (c *Client) CreateSubscription(ctx context.Context, sub NewSubscription) er
 		return err
 	}
 	// 201 created or 200 ok (already exists) are both fine
-	err = c.doJSON(ctx, req, nil)
-	var httpErr *url.Error
-	if err != nil && !errors.As(err, &httpErr) {
-		// For idempotency: accept HTTP 200 as non-error, but doJSON
-		// already returns nil on non-4xx/5xx. Just return err.
-		return err
-	}
-	return err
+	return c.doJSON(ctx, req, nil)
 }
 
 // DeleteSubscription deletes a subscription.
@@ -136,11 +128,11 @@ func (c *Client) GetSubscription(ctx context.Context, name string) (*Subscriptio
 }
 
 // GetNextMessage returns the next message or nil if none available.
-// timeout controls server long-polling (nil to omit). pop is optional (nil to omit).
-func (c *Client) GetNextMessage(ctx context.Context, name string, timeout *time.Duration, pop *bool) (*ProvisioningMessage, error) {
+// timeout controls server long-polling; pass a negative duration to omit and use the server default.
+// pop is optional; when provided, true requests pop semantics, false disables it.
+func (c *Client) GetNextMessage(ctx context.Context, timeout time.Duration, pop *bool) (*ProvisioningMessage, error) {
 	q := url.Values{}
-	if timeout != nil {
-		// API expects seconds (float). Use milliseconds precision.
+	if timeout >= 0 {
 		q.Set("timeout", fmt.Sprintf("%.3f", timeout.Seconds()))
 	}
 	if pop != nil {
@@ -150,7 +142,7 @@ func (c *Client) GetNextMessage(ctx context.Context, name string, timeout *time.
 			q.Set("pop", "false")
 		}
 	}
-	path := fmt.Sprintf("/v1/subscriptions/%s/messages/next", url.PathEscape(name))
+	path := fmt.Sprintf("/v1/subscriptions/%s/messages/next", url.PathEscape(c.username))
 	if len(q) > 0 {
 		path += "?" + q.Encode()
 	}
@@ -171,7 +163,7 @@ func (c *Client) GetNextMessage(ctx context.Context, name string, timeout *time.
 }
 
 // AckMessage updates the message processing status (subscriber auth).
-func (c *Client) AckMessage(ctx context.Context, name string, seq int64, status MessageStatus) error {
+func (c *Client) MessageStatus(ctx context.Context, name string, seq int64, status MessageStatus) error {
 	report := MessageStatusReport{Status: status}
 	body, err := json.Marshal(report)
 	if err != nil {
