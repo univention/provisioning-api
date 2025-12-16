@@ -3,19 +3,26 @@ package client
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 )
 
+func basicAuth(username, password string) string {
+	return "Basic " + base64.StdEncoding.EncodeToString([]byte(username+":"+password))
+}
+
 // Client is a minimal HTTP client for the Provisioning API.
 type Client struct {
-	baseURL    string
-	username   string
-	password   string
+	url        *url.URL
+	name       string
+	authHeader string
 	httpClient *http.Client
 }
 
@@ -32,51 +39,57 @@ func New(baseURL, username, password string, httpClient *http.Client) *Client {
 		}
 		httpClient = &http.Client{Transport: tr}
 	}
-	return &Client{baseURL: trimTrailingSlash(baseURL), username: username, password: password, httpClient: httpClient}
-}
-
-func trimTrailingSlash(s string) string {
-	for len(s) > 0 && s[len(s)-1] == '/' {
-		s = s[:len(s)-1]
+	u, err := url.Parse(strings.TrimRight(baseURL, "/"))
+	if err != nil {
+		panic(err)
 	}
-	return s
+	return &Client{
+		url:        u,
+		name:       username,
+		authHeader: basicAuth(username, password),
+		httpClient: httpClient,
+	}
 }
 
-func (c *Client) url(path string) string { return c.baseURL + path }
-
-func (c *Client) doJSON(ctx context.Context, req *http.Request, v any) error {
+func (c *Client) doBody(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	req.Header.Set("Accept", "application/json")
 	if req.Method == http.MethodPost || req.Method == http.MethodPatch {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	// Apply BasicAuth for this client instance
-	req.SetBasicAuth(c.username, c.password)
+	req.Header.Set("Authorization", c.authHeader)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer resp.Body.Close()
 	if resp.StatusCode >= 400 {
+		defer resp.Body.Close()
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 8<<10))
-		return fmt.Errorf("http %s %s: %d: %s", req.Method, req.URL.Path, resp.StatusCode, string(b))
+		return nil, fmt.Errorf("http %s %s: %d: %s", req.Method, req.URL.Path, resp.StatusCode, string(b))
 	}
-	if v == nil {
-		// caller doesn't want a body
-		io.Copy(io.Discard, resp.Body)
-		return nil
-	}
-	data, err := io.ReadAll(resp.Body)
+	return resp, nil
+}
+
+func (c *Client) do(ctx context.Context, req *http.Request) error {
+	resp, err := c.doBody(ctx, req)
 	if err != nil {
 		return err
 	}
-	// empty body or explicit null indicates no content
-	trimmed := bytes.TrimSpace(data)
-	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
-		return nil
+	resp.Body.Close()
+	return nil
+}
+
+func decodeJSON[T any](resp *http.Response) (*T, error) {
+	defer resp.Body.Close()
+	var result *T
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		if err == io.EOF {
+			return nil, nil
+		}
+		return nil, err
 	}
-	return json.Unmarshal(trimmed, v)
+	return result, nil
 }
 
 // Fork creates a new Client that shares the same underlying HTTP transport
@@ -84,10 +97,10 @@ func (c *Client) doJSON(ctx context.Context, req *http.Request, v any) error {
 // per-subscription clients while preserving connection pooling.
 func (c *Client) Fork(username, password string) *Client {
 	return &Client{
-		baseURL:    c.baseURL,
+		url:        c.url,
+		name:       username,
+		authHeader: basicAuth(username, password),
 		httpClient: c.httpClient,
-		username:   username,
-		password:   password,
 	}
 }
 
@@ -97,83 +110,81 @@ func (c *Client) CreateSubscription(ctx context.Context, sub NewSubscription) er
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodPost, c.url("/v1/subscriptions"), bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, c.url.JoinPath("/v1/subscriptions").String(), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
-	// 201 created or 200 ok (already exists) are both fine
-	return c.doJSON(ctx, req, nil)
+	return c.do(ctx, req)
 }
 
 // DeleteSubscription deletes a subscription.
 func (c *Client) DeleteSubscription(ctx context.Context, name string) error {
-	req, err := http.NewRequest(http.MethodDelete, c.url("/v1/subscriptions/"+url.PathEscape(name)), nil)
+	req, err := http.NewRequest(http.MethodDelete, c.url.JoinPath("/v1/subscriptions", name).String(), nil)
 	if err != nil {
 		return err
 	}
-	return c.doJSON(ctx, req, nil)
+	return c.do(ctx, req)
 }
 
 // GetSubscription retrieves subscription information.
 func (c *Client) GetSubscription(ctx context.Context, name string) (*Subscription, error) {
-	req, err := http.NewRequest(http.MethodGet, c.url("/v1/subscriptions/"+url.PathEscape(name)), nil)
+	req, err := http.NewRequest(http.MethodGet, c.url.JoinPath("/v1/subscriptions", name).String(), nil)
 	if err != nil {
 		return nil, err
 	}
-	var sub Subscription
-	if err := c.doJSON(ctx, req, &sub); err != nil {
-		return nil, err
-	}
-	return &sub, nil
-}
-
-// GetNextMessage returns the next message or nil if none available.
-// timeout controls server long-polling; pass a negative duration to omit and use the server default.
-// pop is optional; when provided, true requests pop semantics, false disables it.
-func (c *Client) GetNextMessage(ctx context.Context, timeout time.Duration, pop *bool) (*ProvisioningMessage, error) {
-	q := url.Values{}
-	if timeout >= 0 {
-		q.Set("timeout", fmt.Sprintf("%.3f", timeout.Seconds()))
-	}
-	if pop != nil {
-		if *pop {
-			q.Set("pop", "true")
-		} else {
-			q.Set("pop", "false")
-		}
-	}
-	path := fmt.Sprintf("/v1/subscriptions/%s/messages/next", url.PathEscape(c.username))
-	if len(q) > 0 {
-		path += "?" + q.Encode()
-	}
-	req, err := http.NewRequest(http.MethodGet, c.url(path), nil)
+	resp, err := c.doBody(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	var msg ProvisioningMessage
-	if err := c.doJSON(ctx, req, &msg); err != nil {
-		return nil, err
-	}
-	// If no body was returned, doJSON leaves msg zero-value. Distinguish using Ts/Realm?
-	// The server sends `null` for no message, handled above -> returns nil error and msg untouched.
-	if msg.SequenceNumber == 0 && msg.Realm == "" && msg.Topic == "" && msg.NumDelivered == 0 && msg.Ts.IsZero() {
-		return nil, nil
-	}
-	return &msg, nil
+	return decodeJSON[Subscription](resp)
 }
 
-// AckMessage updates the message processing status (subscriber auth).
+func (c *Client) nextUrl(timeout time.Duration, pop bool) string {
+	u := c.url.JoinPath("/v1/subscriptions", c.name, "messages", "next")
+	u.RawQuery = url.Values{
+		"timeout": []string{strconv.Itoa(int(timeout.Seconds()))},
+		"pop":     []string{strconv.FormatBool(pop)},
+	}.Encode()
+	return u.String()
+}
+
+func (c *Client) Next(ctx context.Context, timeout time.Duration) (*ProvisioningMessage, func() error, error) {
+	req, err := http.NewRequest(http.MethodGet, c.nextUrl(timeout, false), nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	resp, err := c.doBody(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+	msg, err := decodeJSON[ProvisioningMessage](resp)
+	if err != nil {
+		return nil, nil, err
+	}
+	if msg == nil {
+		return nil, nil, nil
+	}
+
+	ack := func() error {
+		return c.MessageStatus(ctx, c.name, msg.SequenceNumber, Ok)
+	}
+
+	return msg, ack, nil
+}
+
+// MessageStatus updates the message processing status (subscriber auth).
 func (c *Client) MessageStatus(ctx context.Context, name string, seq int64, status MessageStatus) error {
 	report := MessageStatusReport{Status: status}
 	body, err := json.Marshal(report)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodPatch, c.url(fmt.Sprintf("/v1/subscriptions/%s/messages/%d/status", url.PathEscape(name), seq)), bytes.NewReader(body))
+	url := c.url.JoinPath("/v1/subscriptions", name, "messages", strconv.FormatInt(seq, 10), "status").String()
+	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
-	return c.doJSON(ctx, req, nil)
+	return c.do(ctx, req)
 }
 
 // PublishMessage posts a new message to the incoming queue (events auth).
@@ -182,9 +193,9 @@ func (c *Client) PublishMessage(ctx context.Context, msg Message) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodPost, c.url("/v1/messages"), bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, c.url.JoinPath("/v1/messages").String(), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
-	return c.doJSON(ctx, req, nil)
+	return c.do(ctx, req)
 }
