@@ -63,6 +63,7 @@ def mock_settings():
         ldap_publisher_name=PublisherName.udm_listener,
         events_username_udm="test_events",
         events_password_udm="test_events_pw",
+        udm_url="http://localhost:9979/udm",
         udm_username="cn=admin",
         udm_password="test_ldap_pw",
         udm_needs_reload=True,

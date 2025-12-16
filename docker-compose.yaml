@@ -115,15 +115,14 @@ services:
       EVENTS_USERNAME_UDM: "udm"
       EVENTS_PASSWORD_UDM: "udmpass"
 
-      LDAP_HOST: "ldap-server"
-      LDAP_PORT: 389
-      LDAP_TLS_MODE: "off"
-      LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
-      LDAP_BIND_DN: "cn=admin,dc=univention-organization,dc=intranet"
-      LDAP_BIND_PW: "univention"
+      UDM_URL: "http://udm-rest-api:9979/udm"
+      UDM_USERNAME: "cn=admin"
+      UDM_PASSWORD: "univention"
+      UDM_NEEDS_RELOAD: "false"
     depends_on:
       - "nats1"
       - "provisioning-api"
+      - "udm-rest-api"
 
   prefill:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
