@@ -41,7 +41,7 @@ A Helm Chart that deploys the provisioning services
 | api.image.pullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
 | api.image.repository | string | `"nubus-dev/images/provisioning-api"` |  |
-| api.image.tag | string | `"0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"` |  |
+| api.image.tag | string | `"latest"` |  |
 | api.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | api.nats.auth.existingSecret.name | string | `nil` |  |
 | api.nats.auth.password | string | `nil` |  |
@@ -64,7 +64,7 @@ A Helm Chart that deploys the provisioning services
 | dispatcher.image.pullPolicy | string | `nil` |  |
 | dispatcher.image.registry | string | `""` |  |
 | dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
-| dispatcher.image.tag | string | `"0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"` |  |
+| dispatcher.image.tag | string | `"latest"` |  |
 | dispatcher.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | dispatcher.nats.auth.existingSecret.name | string | `nil` |  |
 | dispatcher.nats.auth.password | string | `nil` |  |
@@ -167,7 +167,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.image.pullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
 | prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
-| prefill.image.tag | string | `"0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"` |  |
+| prefill.image.tag | string | `"latest"` |  |
 | prefill.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | prefill.nats.auth.existingSecret.name | string | `nil` |  |
 | prefill.nats.auth.password | string | `nil` |  |
@@ -297,24 +297,20 @@ A Helm Chart that deploys the provisioning services
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
 | udmTransformer.additionalAnnotations | object | `{}` |  |
 | udmTransformer.additionalLabels | object | `{}` |  |
-| udmTransformer.config.LDAP_TLS_MODE | string | `"off"` | Whether to start ldap encryption and validate certificates. Chose from "off", "unvalidated" and "secure". |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
 | udmTransformer.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | udmTransformer.image.pullPolicy | string | `nil` |  |
 | udmTransformer.image.registry | string | `""` |  |
 | udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
-| udmTransformer.image.tag | string | `"0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"` |  |
-| udmTransformer.ldap.auth.bindDn | string | `"cn=admin,{{ include \"provisioning.udmTransformer.ldap.baseDn\" . }}"` | LDAP username with global read access |
-| udmTransformer.ldap.auth.existingSecret.keyMapping.password | string | `nil` |  |
-| udmTransformer.ldap.auth.existingSecret.name | string | `nil` |  |
-| udmTransformer.ldap.auth.password | string | `nil` |  |
+| udmTransformer.image.tag | string | `"latest"` |  |
 | udmTransformer.ldap.baseDn | string | `""` |  |
-| udmTransformer.ldap.connection.host | string | `""` |  |
-| udmTransformer.ldap.connection.port | string | `""` |  |
 | udmTransformer.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | udmTransformer.nats.auth.existingSecret.name | string | `nil` |  |
 | udmTransformer.nats.auth.password | string | `nil` |  |
 | udmTransformer.nats.auth.username | string | `"udm-transformer"` |  |
 | udmTransformer.podAnnotations | object | `{}` |  |
+| udmTransformer.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
+| udmTransformer.udm.auth.existingSecret.name | string | `nil` |  |
+| udmTransformer.udm.auth.password | string | `nil` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |

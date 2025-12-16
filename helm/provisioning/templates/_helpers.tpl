@@ -42,23 +42,6 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
       ( coalesce .Values.udmTransformer.ldap.baseDn (.Values.global.ldap).baseDn ) }}
 {{- end -}}
 
-{{- define "provisioning.udmTransformer.ldap.connection.host" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.connections.ldap.primary.host" . -}}
-{{- else -}}
-{{- required ".Values.udmTransformer.ldap.connection.host must be defined." .Values.udmTransformer.ldap.connection.host -}}
-{{- end -}}
-{{- end -}}
-
-
-{{- define "provisioning.udmTransformer.ldap.connection.port" -}}
-{{- if .Values.global.nubusDeployment -}}
-{{- include "nubusTemplates.ldapServer.ldap.connection.port" . -}}
-{{- else -}}
-{{- required ".Values.udmTransformer.ldap.connection.port must be defined." .Values.udmTransformer.ldap.connection.port -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "provisioning-register-consumers.provisioningApiBaseUrl" -}}
 {{- if .Values.global.nubusDeployment -}}
 {{ printf "http://%s-provisioning-api" .Release.Name }}

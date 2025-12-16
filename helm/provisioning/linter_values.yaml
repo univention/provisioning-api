@@ -45,15 +45,12 @@ resources:
       memory: "32Mi"
 
 udmTransformer:
-  ldap:
-    connection:
-      host: "ldap-host"
-      port: "1234"
-    auth:
-      password: "linter-udm-transformer-ldap-password"
   nats:
     auth:
       password: "stub-value"
+  udm:
+    auth:
+      password: "linter-udm-transformer-udm-password"
 
 prefill:
   config:
