@@ -24,7 +24,7 @@ from univention.provisioning.models.message import RealmTopic
 from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
 from univention.provisioning.rest.config import AppSettings
 from univention.provisioning.rest.mq_port import MessageQueuePort
-from univention.provisioning.rest.subscriptions import SubscriptionService
+from univention.provisioning.rest.subscription_service import SubscriptionService
 from univention.provisioning.rest.subscriptions_db_adapter_nats import NatsSubscriptionsDB
 
 

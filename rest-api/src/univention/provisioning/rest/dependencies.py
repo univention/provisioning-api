@@ -7,14 +7,16 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
+from univention.provisioning.rest.message_service import MessageService
+from univention.provisioning.rest.mq_port import MessageQueuePort
+from univention.provisioning.rest.subscription_service import SubscriptionService
+from univention.provisioning.rest.subscriptions_db_port import SubscriptionsDBPort
+
 from .config import AppSettings, app_settings
-from .main import singleton_clients
-from .message_service import MessageService
-from .mq_port import MessageQueuePort
-from .subscription_service import SubscriptionService
-from .subscriptions_db_port import SubscriptionsDBPort
 
 http_basic = HTTPBasic()
+
+singleton_clients = {}
 
 
 def _kv_dependency() -> SubscriptionsDBPort:
@@ -27,12 +29,12 @@ def _mq_dependency() -> MessageQueuePort:
     return singleton_clients["mq"]
 
 
-def _sub_service_dependency() -> "SubscriptionService":
+def _sub_service_dependency() -> SubscriptionService:
     """Dependency to get the singleton SubscriptionService instance."""
     return singleton_clients["sub_service"]
 
 
-def _msg_service_dependency() -> "MessageService":
+def _msg_service_dependency() -> MessageService:
     """Dependency to get the singleton MessageService instance."""
     return singleton_clients["msg_service"]
 

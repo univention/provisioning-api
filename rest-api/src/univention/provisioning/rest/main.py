@@ -18,6 +18,7 @@ from univention.provisioning.backends.nats_mq import IncomingQueue, PrefillQueue
 from univention.provisioning.utils.log import setup_logging
 
 from .config import app_settings
+from .dependencies import singleton_clients
 from .message_service import MessageService
 from .messages import router as messages_api_router
 from .mq_adapter_nats import NatsMessageQueue
@@ -28,45 +29,33 @@ from .subscriptions_db_adapter_nats import NatsSubscriptionsDB
 logger = logging.getLogger(__name__)
 
 
-singleton_clients = {}
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- Startup ---
-    logger.info("Starting up...")
+    logger.info("Setting up singleton clients...")
     settings = app_settings()
 
-    # 1. Create and connect the persistent NATS message queue client
-    mq = NatsMessageQueue(settings)
-    await mq.connect()
-    singleton_clients["mq"] = mq
+    async with (
+        NatsMessageQueue(settings) as mq,
+        NatsSubscriptionsDB(settings) as db,
+    ):
+        singleton_clients["mq"] = mq
+        singleton_clients["db"] = db
 
-    # 2. Create and connect the persistent Subscriptions DB client
-    db = NatsSubscriptionsDB(settings)
-    await db.connect()
-    singleton_clients["db"] = db
+        sub_service = SubscriptionService(subscriptions_db=db, mq=mq)
+        singleton_clients["sub_service"] = sub_service
+        msg_service = MessageService(subscriptions_db=db, mq=mq)
+        singleton_clients["msg_service"] = msg_service
 
-    # 3. Create singleton services
-    sub_service = SubscriptionService(subscriptions_db=db, mq=mq)
-    singleton_clients["sub_service"] = sub_service
-    msg_service = MessageService(subscriptions_db=db, mq=mq)
-    singleton_clients["msg_service"] = msg_service
+        logger.info("Checking MQ connectivity and ensuring queues exist...")
+        await mq.create_queue(PrefillQueue())
+        await mq.create_queue(IncomingQueue("provisioning-dispatcher"))  # Using a default name
 
-    # 4. Ensure necessary queues exist on startup
-    logger.info("Checking MQ connectivity and ensuring queues exist...")
-    await mq.create_queue(PrefillQueue())
-    await mq.create_queue(IncomingQueue("provisioning-dispatcher"))  # Using a default name
-
-    logger.info("Startup complete. Singleton services are running.")
-    yield
+        logger.info("Startup complete. Singleton services are running.")
+        yield
 
     # --- Shutdown ---
-    logger.info("Shutting down...")
-    await singleton_clients["mq"].close()
-    await singleton_clients["db"].close()
-    singleton_clients.clear()
-    logger.info("Shutdown complete.")
+    logger.info("Shutting down singleton clients...")
 
 
 # TODO: Refactor this into functions for better testability
