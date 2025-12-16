@@ -8,28 +8,41 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from .config import AppSettings, app_settings
-from .mq_adapter_nats import NatsMessageQueue
+from .main import singleton_clients
+from .message_service import MessageService
 from .mq_port import MessageQueuePort
-from .subscriptions_db_adapter_nats import NatsSubscriptionsDB
+from .subscription_service import SubscriptionService
 from .subscriptions_db_port import SubscriptionsDBPort
 
 http_basic = HTTPBasic()
 
 
-async def _kv_dependency():
-    async with NatsSubscriptionsDB() as kv:
-        yield kv
+def _kv_dependency() -> SubscriptionsDBPort:
+    """Dependency to get the singleton SubscriptionsDBPort instance."""
+    return singleton_clients["db"]
 
 
-async def _mq_dependency():
-    async with NatsMessageQueue() as mq:
-        yield mq
+def _mq_dependency() -> MessageQueuePort:
+    """Dependency to get the singleton MessageQueuePort instance."""
+    return singleton_clients["mq"]
+
+
+def _sub_service_dependency() -> "SubscriptionService":
+    """Dependency to get the singleton SubscriptionService instance."""
+    return singleton_clients["sub_service"]
+
+
+def _msg_service_dependency() -> "MessageService":
+    """Dependency to get the singleton MessageService instance."""
+    return singleton_clients["msg_service"]
 
 
 AppSettingsDep = Annotated[AppSettings, Depends(app_settings)]
 HttpBasicDep = Annotated[HTTPBasicCredentials, Depends(http_basic)]
 KVDependency = Annotated[SubscriptionsDBPort, Depends(_kv_dependency)]
 MQDependency = Annotated[MessageQueuePort, Depends(_mq_dependency)]
+SubServiceDependency = Annotated["SubscriptionService", Depends(_sub_service_dependency)]
+MsgServiceDependency = Annotated["MessageService", Depends(_msg_service_dependency)]
 
 
 def authenticate_user(credentials: HTTPBasicCredentials, username: str, password: str) -> None:

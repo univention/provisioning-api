@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
 from asgi_correlation_id import CorrelationIdMiddleware
@@ -17,11 +18,55 @@ from univention.provisioning.backends.nats_mq import IncomingQueue, PrefillQueue
 from univention.provisioning.utils.log import setup_logging
 
 from .config import app_settings
+from .message_service import MessageService
 from .messages import router as messages_api_router
 from .mq_adapter_nats import NatsMessageQueue
+from .subscription_service import SubscriptionService
 from .subscriptions import router as subscriptions_api_router
+from .subscriptions_db_adapter_nats import NatsSubscriptionsDB
 
 logger = logging.getLogger(__name__)
+
+
+singleton_clients = {}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- Startup ---
+    logger.info("Starting up...")
+    settings = app_settings()
+
+    # 1. Create and connect the persistent NATS message queue client
+    mq = NatsMessageQueue(settings)
+    await mq.connect()
+    singleton_clients["mq"] = mq
+
+    # 2. Create and connect the persistent Subscriptions DB client
+    db = NatsSubscriptionsDB(settings)
+    await db.connect()
+    singleton_clients["db"] = db
+
+    # 3. Create singleton services
+    sub_service = SubscriptionService(subscriptions_db=db, mq=mq)
+    singleton_clients["sub_service"] = sub_service
+    msg_service = MessageService(subscriptions_db=db, mq=mq)
+    singleton_clients["msg_service"] = msg_service
+
+    # 4. Ensure necessary queues exist on startup
+    logger.info("Checking MQ connectivity and ensuring queues exist...")
+    await mq.create_queue(PrefillQueue())
+    await mq.create_queue(IncomingQueue("provisioning-dispatcher"))  # Using a default name
+
+    logger.info("Startup complete. Singleton services are running.")
+    yield
+
+    # --- Shutdown ---
+    logger.info("Shutting down...")
+    await singleton_clients["mq"].close()
+    await singleton_clients["db"].close()
+    singleton_clients.clear()
+    logger.info("Shutdown complete.")
 
 
 # TODO: Refactor this into functions for better testability
@@ -31,6 +76,7 @@ app = FastAPI(
     description="APIs for subscription and message handling.",
     root_path=settings.root_path,
     title="Provisioning REST APIs",
+    lifespan=lifespan,
 )
 add_timing_middleware(app, record=logger.info)
 app.add_middleware(CorrelationIdMiddleware)
@@ -68,15 +114,6 @@ def add_exception_handlers(_app: FastAPI):
 
 
 add_exception_handlers(app)
-
-
-@app.on_event("startup")
-async def startup_task():
-    settings = app_settings()
-    async with NatsMessageQueue(settings) as mq:
-        logger.info("Checking MQ connectivity...")
-        await mq.create_queue(PrefillQueue())
-        await mq.create_queue(IncomingQueue(""))
 
 
 @app.exception_handler(RequestValidationError)

@@ -9,11 +9,17 @@
 import asyncio
 import json
 import logging
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
-from nats.js.api import ConsumerConfig, DeliverPolicy, RetentionPolicy, StreamConfig
+from nats.js import JetStreamContext
+from nats.js.api import (
+    ConsumerConfig,
+    DeliverPolicy,
+    RetentionPolicy,
+    StreamConfig,
+)
 from nats.js.errors import NotFoundError, ServerError
 from typing_extensions import Self
 
@@ -66,6 +72,7 @@ class BaseQueue:
             durable_name=self.consumer_name,
             max_ack_pending=1,
             deliver_policy=self.deliver_policy,
+            ack_wait=5,
         )
 
     def __eq__(self, other) -> bool:
@@ -160,6 +167,8 @@ class NatsMessageQueue(MessageQueue):
         self._nats = NATS()
         self._js = self._nats.jetstream()
         self.pull_subscription = None
+        self._subscription_cache: Dict[Tuple[str, str], JetStreamContext.PullSubscription] = {}  # New
+        self._cache_lock = asyncio.Lock()  # New
 
     async def __aenter__(self) -> Self:
         await self.connect()
@@ -246,7 +255,38 @@ class NatsMessageQueue(MessageQueue):
         return status
 
     async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
-        """Retrieve messages from a NATS subject."""
+        """
+        Retrieve a message from a NATS subject, using an instance-level cache
+        for the pull subscription to enhance performance.
+        If the cached subscription fails, it falls back to creating a new one.
+        """
+        sub_key = (queue.queue_name, queue.consumer_name)
+
+        async with self._cache_lock:
+            sub = self._subscription_cache.get(sub_key)
+
+        if sub:
+            try:
+                msgs = await sub.fetch(1, timeout=timeout)
+                if pop:
+                    await msgs[0].ack()
+                logger.debug("Got message from cached subscription")
+                return self.provisioning_message_from(msgs[0])
+            except asyncio.TimeoutError:
+                return None
+            except Exception as e:
+                logger.error(f"Unexpected error with cached subscription for {sub_key}: {e}", exc_info=True)
+                async with self._cache_lock:
+                    self._subscription_cache.pop(sub_key, None)
+
+        # Fallback to creating a new subscription on cache miss or failure
+        return await self._get_message(queue, timeout, pop)
+
+    async def _get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
+        """
+        Retrieve messages from a NATS subject by creating a new subscription.
+        This is the fallback path when the cache fails.
+        """
 
         try:
             await self._js.stream_info(queue.queue_name)
@@ -262,8 +302,15 @@ class NatsMessageQueue(MessageQueue):
 
         # TODO: Why is ConsumerInfo passed in as ConsumerConfig?
         sub = await self._js.pull_subscribe(
-            queue.message_subject, durable=queue.consumer_name, stream=queue.queue_name, config=consumer
+            queue.message_subject,
+            durable=queue.consumer_name,
+            stream=queue.queue_name,
+            config=consumer.config,
         )
+        sub_key = (queue.queue_name, queue.consumer_name)
+        async with self._cache_lock:
+            self._subscription_cache[sub_key] = sub
+
         try:
             msgs = await sub.fetch(1, timeout)
         except asyncio.TimeoutError:
@@ -463,7 +510,7 @@ class NatsMessageQueue(MessageQueue):
     async def delete_message(self, queue: BaseQueue, seq_num: int):
         logger.info("Deleting message from the stream: %r", queue.queue_name)
         try:
-            await self._js.get_msg(queue.queue_name, seq_num)
+            # await self._js.get_msg(queue.queue_name, seq_num)
             await self._js.delete_msg(queue.queue_name, seq_num)
             logger.info("Message was deleted")
         except (ServerError, NotFoundError) as exc:
