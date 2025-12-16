@@ -19,7 +19,7 @@ services:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-api:0.66.0"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-api"
     restart: "on-failure"
     environment:
@@ -49,7 +49,7 @@ services:
       - "nats"
 
   dispatcher:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-dispatcher:0.66.0"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-dispatcher"
     restart: "on-failure"
     environment:
@@ -75,7 +75,7 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-udm-transformer:0.66.0"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "on-failure"
     @!@if configRegistry.get('server/role').lower() == "domaincontroller_backup": print("profiles: [donotstart]\n")@!@
@@ -106,7 +106,7 @@ services:
       - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
 
   prefill:
-    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-prefill:0.66.0"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-prefill"
     restart: "on-failure"
     environment:
