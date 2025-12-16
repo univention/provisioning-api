@@ -29,7 +29,33 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	That being said, it can be used by interested software vendors to write their own consumer services against this API. A first document can be found&nbsp;<a href="https://docs.software-univention.de/nubus-kubernetes-customization/1.x/en/api/provisioning.html">here</a>.
 	<br>
 	<br>
+	<b>This is a preview App. Not all use cases are supported yet!</b>
+	The App should not be installed in production systems, only in internal test systems for security reasons.
+	Some working use cases are:
+	<br>
+	The App can be installed on a primary DC and a backup DC server. The queues are connected between them.
+	<br>
+	Consumers can be registered against any of the DCs where the provisioning is installed.
+	<br>
+	The provisioning reacts to all UDM objects. All create, modify, move and delete operations can be observed.
+	<br>
+	Some limitations are:
+	<br>
+	The UDM REST API has to be manually reloaded when new UDM extensions are created, e.g after a new package/App has been installed.
+	<br>
+	This is done using `systemctl reload univention-directory-manager-rest.service`
+	<br>
+	The listener module pushing the transactions into the provisioning-service can not reconnect to NATS yet.
+	<br>
+	If connection to NATS is lost, the listener must be restarted using `systemctl restart univention-directory-listener.service`.
+	<br>
+	The connection between primary DC and backup DC servers is not encrypted yet. No sensitive information should be used.
+	<br>
+	The App should only be used in internal test systems.
+	<br>
 	An example consumer can be found in the code snippet below. Please note that the web API is naturally language agnostic.
+	<br>
+	<br>
 	<pre>
 	#!/usr/bin/python3
 	import json
