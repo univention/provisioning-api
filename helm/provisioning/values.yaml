@@ -37,12 +37,28 @@ global:
       host: ""
       port: ""
 
+waitForDependency:
+  image:
+    registry: ""
+    pullPolicy: null
+    repository: "nubus/images/wait-for-dependency"
+    tag: "0.35.33@sha256:0570b6e8f57d27fe3c856d53c324b2e0457ad83ead442d54a3af806ea0f6a626"
+
+  # -- Array with extra environment variables to add to containers.
+  extraEnvVars: []
+
+  # -- Optionally specify an extra list of additional volumes.
+  extraVolumes: []
+
+  # -- Optionally specify an extra list of additional volumeMounts.
+  extraVolumeMounts: []
+
 api:
   image:
     registry: ""
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-api"
-    tag: "0.44.1@sha256:c34020a9c402e204948df782e161329bc4644442d680397d2736024881b9d766"
+    tag: "latest"
   # If specified environment variables will be set on the container
   # Could be deduplicated.
   nats:
@@ -98,7 +114,7 @@ dispatcher:
     registry: ""
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-dispatcher"
-    tag: "0.44.1@sha256:67289856a73701fae780f305cc86d627452812e86cd1e6abdb2893a5b74a6eb7"
+    tag: "latest"
   # If specified environment variables will be set on the container
   nats:
     auth:
@@ -127,7 +143,8 @@ udmTransformer:
     registry: ""
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-udm-transformer"
-    tag: "0.44.1@sha256:2209558b3a544739b982637d57480951044247e3baae242d30e8e6437e9925c8"
+    tag: "latest"
+
   nats:
     auth:
       username: "udm-transformer"
@@ -136,32 +153,25 @@ udmTransformer:
         name: null
         keyMapping:
           password: null
-  # If specified environment variables will be set on the container
+
   ldap:
     # LDAP BASE DN of the LDAP domain.
     baseDn: ""
+
+  udm:
     auth:
-      # -- LDAP username with global read access
-      bindDn: 'cn=admin,{{ include "provisioning.udmTransformer.ldap.baseDn" . }}'
       password: null
       existingSecret:
         name: null
         keyMapping:
           password: null
-    connection:
-      # Hostname of the LDAP Primary servers
-      host: ""
-      # LDAP server port
-      port: ""
+
   config:
     # Enables toggling between `ldif-producer` and `udm-listener`.
     # Beware: `ldif-producer` is experimental and unsupported.
     ldapPublisherName: "udm-listener"
     # Python log level
     LOG_LEVEL: "INFO"
-    # -- Whether to start ldap encryption and validate certificates.
-    # Chose from "off", "unvalidated" and "secure".
-    LDAP_TLS_MODE: "off"
   additionalLabels: {}
   additionalAnnotations: {}
   podAnnotations: {}
@@ -177,7 +187,7 @@ prefill:
     registry: ""
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-prefill"
-    tag: "0.44.1@sha256:79a87775aa23fef2716203b2e38048ef75afe5d7ff3eb25c992bc6ec1041ea86"
+    tag: "latest"
 
   # If specified environment variables will be set on the container
   nats:

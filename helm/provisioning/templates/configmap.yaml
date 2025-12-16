@@ -69,29 +69,6 @@ data:
   DEBUG: {{ required ".Values.api.config.DEBUG is required." .Values.api.config.DEBUG | quote  }}
   ROOT_PATH: {{ required ".Values.api.config.ROOT_PATH is required." .Values.api.config.ROOT_PATH | quote  }}
   CORS_ALL: {{ required ".Values.api.config.CORS_ALL is required." .Values.api.config.CORS_ALL | quote  }}
-  wait-for-nats.py: |
-    #!/usr/bin/env python3
-    import os
-    import asyncio
-    from nats.aio.client import Client as NATS
-
-    async def error_cb(e):
-        print(f"Unavailable, waiting 2 seconds. Error: {e}")
-        await asyncio.sleep(2)
-
-    async def check_nats():
-        nc = NATS()
-        print("Checking if NATS server can be reached...")
-        await nc.connect(
-            servers=[f"nats://{os.environ['NATS_HOST']}:{os.environ['NATS_PORT']}"],
-            error_cb=error_cb,
-            user=os.environ['NATS_USER'],
-            password=os.environ['NATS_PASSWORD'],
-        )
-        print("Success, the NATS server is available")
-        await nc.close()
-
-    asyncio.run(check_nats())
 ...
 ---
 kind: "ConfigMap"
@@ -139,35 +116,24 @@ data:
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
   UDM_PROTOCOL: "http"
   UDM_URL_PATH_PREFIX: ""
-  wait-for-udm.py: |
-    #!/bin/python3
-    import os
-    import time
-    import sys
-    from univention.admin.rest.client import UDM
-
-    udm = UDM.http(
-        f"http://{os.environ['UDM_HOST']}:{os.environ['UDM_PORT']}/udm/",
-        os.environ["UDM_USERNAME"],
-        os.environ["UDM_PASSWORD"],
-    )
-
-    timeout = int(os.environ.get("TIMEOUT", "600"))
-    start_time = time.time()
-
-    while time.time() - start_time < timeout:
-        print("Checking if UDM Rest API can be reached...")
-        try:
-            udm.get_ldap_base()
-            print("Success, UDM Rest API is available")
-            sys.exit(0)
-        except Exception as e:
-            print(f"Unavailable, waiting 2 seconds. Error: {e}")
-            time.sleep(2)
-
-    print("Timeout reached, giving up")
-    sys.exit(1)
 ...
+---
+kind: "ConfigMap"
+apiVersion: "v1"
+metadata:
+  name: {{ printf "%s-wait-for-dependencies" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.additionalAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  UDM_API_URL: {{ printf "http://%s:%s/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
+
 ---
 kind: "ConfigMap"
 apiVersion: "v1"
@@ -185,15 +151,9 @@ metadata:
 data:
   LDAP_PUBLISHER_NAME: {{ required ".Values.udmTransformer.config.ldapPublisherName is required." .Values.udmTransformer.config.ldapPublisherName | quote  }}
   LOG_LEVEL: {{ required ".Values.udmTransformer.config.LOG_LEVEL is required." .Values.udmTransformer.config.LOG_LEVEL | quote  }}
-  UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
-  UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
-  LDAP_HOST: {{ include "provisioning.udmTransformer.ldap.connection.host" . | quote }}
-  LDAP_PORT: {{ include "provisioning.udmTransformer.ldap.connection.port" . | quote }}
-  LDAP_TLS_MODE: {{ required ".Values.udmTransformer.config.LDAP_TLS_MODE is required." .Values.udmTransformer.config.LDAP_TLS_MODE | quote }}
 
-  LDAP_BASE_DN: {{ include "provisioning.udmTransformer.ldap.baseDn" . | quote }}
-  LDAP_BIND_DN: {{ tpl ( required "The parameter \"udmTransformer.ldap.auth.bindDn\" as username is required." .Values.udmTransformer.ldap.auth.bindDn ) . | quote }}
-
+  UDM_URL: {{ printf "http://%s:%s/udm" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
+  UDM_NEEDS_RELOAD: "false"
 ...
 ---
 kind: "ConfigMap"

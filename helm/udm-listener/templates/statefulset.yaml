@@ -62,11 +62,11 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-for-nats
-          command: [ "/usr/local/bin/wait-for-nats.py" ]
+          command: [ "wait-for-nats.py" ]
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext:
             {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-            privileged: false
+            privileged: false  # Explicitly set privileged to false
           {{- end }}
           image: "{{ coalesce .Values.waitForDependency.image.registry .Values.global.imageRegistry }}/{{ .Values.waitForDependency.image.repository }}:{{ .Values.waitForDependency.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.waitForDependency.image.pullPolicy .Values.global.imagePullPolicy | quote }}

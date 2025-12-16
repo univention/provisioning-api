@@ -3,15 +3,14 @@
 
 from univention.testing.helm.auth_flavors.password_usage import AuthPasswordUsageViaEnv
 from univention.testing.helm.auth_flavors.secret_generation import AuthSecretGenerationUser
-from univention.testing.helm.auth_flavors.username import AuthUsernameViaConfigMap
 
 
 class SettingsUdmTransformerLdapSecret:
-    secret_name = "release-name-provisioning-udm-transformer-ldap"
-    prefix_mapping = {"auth.bindDn": "auth.username", "udmTransformer.ldap.auth": "auth"}
+    secret_name = "release-name-provisioning-udm-rest-api-udm-transformer"
+    prefix_mapping = {"udmTransformer.udm.auth": "auth"}
 
     # for AuthPasswordUsageViaEnv
-    sub_path_env_password = "env[?@name=='LDAP_BIND_PW']"
+    sub_path_env_password = "env[?@name=='UDM_PASSWORD']"
     workload_name = "release-name-provisioning-udm-transformer"
 
 
@@ -23,7 +22,8 @@ class TestUdmTransformerUsesLdapSecretViaEnv(SettingsUdmTransformerLdapSecret, A
     pass
 
 
-class TestUdmTransformerUsesLdapUsernameViaConfigMap(SettingsUdmTransformerLdapSecret, AuthUsernameViaConfigMap):
-    config_map_name = "release-name-provisioning-udm-transformer"
-    path_username = "data.LDAP_BIND_DN"
-    default_username = "cn=admin,dc=univention-organization,dc=intranet"
+class TestUdmTransformerInitContainerUsesUdmSecretViaEnv_WaitForUdm(
+    SettingsUdmTransformerLdapSecret, AuthPasswordUsageViaEnv
+):
+    sub_path_env_password = "env[?@name=='UDM_API_PASSWORD']"
+    path_container = "..spec.template.spec.initContainers[?@.name=='wait-for-udm']"

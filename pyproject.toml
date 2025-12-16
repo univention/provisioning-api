@@ -78,8 +78,7 @@ UDM_URL_PATH_PREFIX = {value = "", skip_if_set = true}
 LDAP_PORT = {value = 389, skip_if_set = true}
 LDAP_HOST = {value = "ldap-server", skip_if_set = true}
 TLS_MODE = {value = "off", skip_if_set = true}
-LDAP_BASE_DN = {value = "dc=univention-organization,dc=intranet", skip_if_set = true}
-LDAP_HOST_DN = {value = "cn=admin,{LDAP_BASE_DN}", transform = true}
+UDM_URL = {value = "http://localhost:9979/udm", skip_if_set = true}
 NATS_HOST = {value = "foo", skip_if_set = true}
 NATS_PORT = {value = 1234, skip_if_set = true}
 NATS_USER = {value = "api", skip_if_set = true}
