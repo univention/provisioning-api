@@ -74,15 +74,13 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-for-nats
-          command: [ "python3", "/scripts/wait-for-nats.py" ]
+          command: [ "wait-for-nats.py" ]
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.api.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
-            - configMapRef:
-                name: {{ printf "%s-api" (include "common.names.fullname" .) }}
           env:
             - name: NATS_USER
               value: {{ tpl (required "dispatcher.nats.auth.username is required" .Values.dispatcher.nats.auth.username) . }}
@@ -94,9 +92,6 @@ spec:
           {{- with .Values.dispatcher.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          volumeMounts:
-            - name: wait-for-nats
-              mountPath: /scripts
           {{- if .Values.resources.api }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.api "context" .) | nindent 12 }}
           {{- end }}
@@ -149,9 +144,6 @@ spec:
             {{- end }}
           {{- end }}
       volumes:
-        - name: wait-for-nats
-          configMap:
-            name: {{ printf "%s-api" (include "common.names.fullname" .) }}
         {{- if .Values.nats.connection.tls.enabled }}
         - name: certificates-volume
           secret:

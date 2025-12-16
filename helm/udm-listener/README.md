@@ -48,7 +48,7 @@ A Helm chart for the Univention Portal Provisioning API
 | image.imagePullPolicy | string | `nil` |  |
 | image.registry | string | `""` |  |
 | image.repository | string | `"nubus-dev/images/provisioning-udm-listener"` |  |
-| image.tag | string | `"0.60.13-pre-jlohmer-nats-secrets@sha256:4d9894d4ae020450777d51c9a271b1707b25206ccece1dd90b97a9fafb5787be"` |  |
+| image.tag | string | `"latest"` |  |
 | imagePullSecrets | list | `[]` | Credentials to fetch images from private registry. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/  imagePullSecrets:   - "docker-registry" |
 | ldap | object | `{"auth":{"bindDn":"cn=admin,{{ include \"udm-listener.ldapBaseDn\" . }}","existingSecret":{"keyMapping":{"password":null},"name":null},"password":null},"tlsSecret":{"caCertKey":"ca.crt","name":""}}` | LDAP client access configuration. This value is in a transition towards the unified configuration structure for clients and secrets. |
 | livenessProbe.enabled | bool | `true` | Enable liveness probe. |
