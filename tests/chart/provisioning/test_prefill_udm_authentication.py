@@ -23,4 +23,5 @@ class TestPrefillUsesPrefillUdmSecretByEnv(SettingsPrefillUdmSecret, AuthPasswor
 
 
 class TestPrefillInitContainerUsesUdmSecretViaEnv_WaitForUdm(SettingsPrefillUdmSecret, AuthPasswordUsageViaEnv):
+    sub_path_env_password = "env[?@name=='UDM_API_PASSWORD']"
     path_container = "..spec.template.spec.initContainers[?@.name=='wait-for-udm']"

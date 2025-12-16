@@ -70,59 +70,11 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
-        - name: "load-internal-plugins"
-          {{- if .Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
-          image: "{{ coalesce .Values.udmTransformer.image.registry .Values.global.imageRegistry }}/{{ .Values.udmTransformer.image.repository }}:{{ .Values.udmTransformer.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.udmTransformer.image.pullPolicy .Values.global.imagePullPolicy | quote }}
-          command:
-            - sh
-            - -c
-            - |
-              mkdir -p /target/udm-modules
-              mkdir -p /target/udm-hooks.d
-              mkdir -p /target/udm-syntax.d
-              mkdir -p /target/udm-handlers
-              cp -av /usr/lib/python3/dist-packages/univention/udm/modules/* /target/udm-modules
-              cp -av /usr/lib/python3/dist-packages/univention/admin/hooks.d/* /target/udm-hooks.d
-              cp -av /usr/lib/python3/dist-packages/univention/admin/syntax.d/* /target/udm-syntax.d
-              cp -av /usr/lib/python3/dist-packages/univention/admin/handlers/* /target/udm-handlers
-          {{- with .Values.udmTransformer.extraEnvVars }}
-          env:
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: plugin-targets
-              mountPath: /target
-          {{- if .Values.resources.udmTransformer }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.udmTransformer "context" .) | nindent 12 }}
-          {{- end }}
-        {{- $systemExtensions := default (list) (coalesce .Values.systemExtensions .Values.global.systemExtensions) -}}
-        {{- $extensions := default (list) (coalesce .Values.extensions .Values.global.extensions) -}}
-        {{- range (concat $systemExtensions $extensions) }}
-        - name: "load-{{ .name }}-extension"
-          {{- if $.Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
-          image: "{{ coalesce .image.registry $.Values.global.imageRegistry }}/{{ .image.repository }}:{{ .image.tag }}"
-          imagePullPolicy: {{ coalesce .image.pullPolicy $.Values.global.imagePullPolicy | quote }}
-          {{- with $.Values.udmTransformer.extraEnvVars }}
-          env:
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: plugin-targets
-              mountPath: /target
-          {{- if $.Values.resources.udmTransformer }}
-          resources: {{- include "common.tplvalues.render" (dict "value" $.Values.resources.udmTransformer "context" $) | nindent 12 }}
-          {{- end }}
-        {{- end }}
         - name: wait-for-nats
-          command: [ "python3", "/scripts/wait-for-nats.py" ]
+          command: [ "wait-for-nats.py" ]
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.api.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
@@ -139,9 +91,28 @@ spec:
           {{- with .Values.udmTransformer.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          volumeMounts:
-            - name: wait-for-nats
-              mountPath: /scripts
+          {{- if .Values.resources.api }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.api "context" .) | nindent 12 }}
+          {{- end }}
+        - name: wait-for-udm
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          command: ["wait-for-udm.sh"]
+          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-wait-for-dependencies" (include "common.names.fullname" .) }}
+          env:
+            - name: UDM_API_USERNAME
+              value: "cn=admin"
+            - name: UDM_API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.udm.auth.existingSecret "defaultNameSuffix" "udm-rest-api-udm-transformer" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.udm.auth.existingSecret "key" "password" "context" .) }}
+          {{- with .Values.udmTransformer.extraEnvVars }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           {{- if .Values.resources.api }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.api "context" .) | nindent 12 }}
           {{- end }}
@@ -172,11 +143,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "defaultNameSuffix" "api-events" "context" .) }}
                   key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.api.auth.eventsUdm.existingSecret "key" "password" "context" .) }}
-            - name: LDAP_BIND_PW
+            - name: UDM_USERNAME
+              value: "cn=admin"
+            - name: UDM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "defaultNameSuffix" "udm-transformer-ldap" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.ldap.auth.existingSecret "key" "password" "context" .) }}
+                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.udmTransformer.udm.auth.existingSecret "defaultNameSuffix" "udm-rest-api-udm-transformer" "context" .) }}
+                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.udmTransformer.udm.auth.existingSecret "key" "password" "context" .) }}
           {{- with .Values.udmTransformer.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -209,26 +182,7 @@ spec:
             - name: "config-map-ucr"
               mountPath: "/etc/univention/base-defaults.conf"
               subPath: "base-defaults.conf"
-            - name: plugin-targets
-              mountPath: /usr/lib/python3/dist-packages/univention/udm/modules
-              subPath: udm-modules
-              readOnly: true
-            - name: plugin-targets
-              mountPath: /usr/lib/python3/dist-packages/univention/admin/hooks.d
-              subPath: udm-hooks.d
-              readOnly: true
-            - name: plugin-targets
-              mountPath: /usr/lib/python3/dist-packages/univention/admin/syntax.d
-              subPath: udm-syntax.d
-              readOnly: true
-            - name: plugin-targets
-              mountPath: /usr/lib/python3/dist-packages/univention/admin/handlers
-              subPath: udm-handlers
-              readOnly: true
       volumes:
-        - name: wait-for-nats
-          configMap:
-            name: {{ printf "%s-api" (include "common.names.fullname" .) }}
         {{- if .Values.nats.connection.tls.enabled }}
         - name: certificates-volume
           secret:
@@ -237,8 +191,6 @@ spec:
         - name: "config-map-ucr"
           configMap:
             name: {{ include "udm-transformer.configMapUcr" . | quote }}
-        - name: "plugin-targets"
-          emptyDir: {}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
         {{- end }}
