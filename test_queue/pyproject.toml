@@ -23,6 +23,7 @@ nubus-provisioning-consumer = { path = "../consumer" }
 
 [project.scripts]
 test_queue = "src.test_queue:main"
+test_extended_attributes = "src.test_extended_attributes:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]

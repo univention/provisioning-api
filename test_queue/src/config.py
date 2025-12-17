@@ -20,6 +20,8 @@ class Settings(BaseSettings):
 
     kubernetes_namespace: str
 
+    ldap_base_dn: str
+
 
 @lru_cache(maxsize=1)
 def settings() -> Settings:
