@@ -211,8 +211,6 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | registerConsumers.additionalAnnotations | object | `{}` |  |
 | registerConsumers.additionalLabels | object | `{}` |  |
-| registerConsumers.config.UDM_HOST | string | `""` |  |
-| registerConsumers.config.UDM_PORT | int | `9979` |  |
 | registerConsumers.createUsers | object | `{}` | Allows to create users in the Provisioning API.  The entries have to be in the following structure:    consumerName:     existingSecret:       name: null       keyMapping:         registration: null  The entries can only be provided as existing secrets and the content of the key "registration" has to follow the correct JSON structure.  This parameter shall be used as an integration point between the consumer's chart and this chart. The consumer's chart owns the Secret and has to store the correct JSON data within the Secret. This chart only receives a reference this Secret so that it can register the consumer. |
 | registerConsumers.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | registerConsumers.image.pullPolicy | string | `nil` |  |
@@ -222,9 +220,6 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.jsonSecretName | string | `""` |  |
 | registerConsumers.podAnnotations | object | `{}` |  |
 | registerConsumers.provisioningApiBaseUrl | string | `""` |  |
-| registerConsumers.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
-| registerConsumers.udm.auth.existingSecret.name | string | `nil` |  |
-| registerConsumers.udm.auth.password | string | `nil` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
 | resources.api.limits.cpu | int | `1` |  |
 | resources.api.limits.memory | string | `"1Gi"` |  |
