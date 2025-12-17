@@ -244,20 +244,6 @@ registerConsumers:
   # reference this Secret so that it can register the consumer.
   createUsers: {}
 
-  config:
-    # UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api
-    UDM_HOST: ""
-    # UDM REST API: port
-    UDM_PORT: 9979
-
-  udm:
-    auth:
-      password: null
-      existingSecret:
-        name: null
-        keyMapping:
-          password: null
-
   jsonSecretName: ""
   provisioningApiBaseUrl: ""
   additionalLabels: {}
