@@ -68,9 +68,6 @@ spec:
           configMap:
             name: {{ printf "%s-wait-for-api" $fullname }}
             defaultMode: 0555
-        - name: wait-for-data-loader
-          configMap:
-            name: {{ printf "%s-register-consumers" $fullname }}
       initContainers:
         - name: wait-for-provisioning-api
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -90,31 +87,6 @@ spec:
           volumeMounts:
             - name: scripts-volume
               mountPath: /scripts
-        - name: wait-for-data-loader
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          command: ["/bin/bash", "/scripts/wait-for-data-loader.sh"]
-          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
-          envFrom:
-            - configMapRef:
-                name: {{ printf "%s-register-consumers" $fullname }}
-          env:
-            - name: UDM_USERNAME
-              value: "cn=admin"
-            - name: UDM_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nubus-common.secrets.name" (dict "existingSecret" .Values.registerConsumers.udm.auth.existingSecret "defaultNameSuffix" "register-consumers-udm" "context" .) }}
-                  key: {{ include "nubus-common.secrets.key" (dict "existingSecret" .Values.registerConsumers.udm.auth.existingSecret "key" "password" "context" .) }}
-          {{- with .Values.registerConsumers.extraEnvVars }}
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: wait-for-data-loader
-              mountPath: /scripts
-          {{- if .Values.resources.registerConsumers }}
-          resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
-          {{- end }}
       containers:
         - name: main
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
