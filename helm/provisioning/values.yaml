@@ -29,8 +29,6 @@ global:
   #            kubelet attempts to start the container; otherwise, startup fails.
   imagePullPolicy: null
 
-  configMapUcr: null
-
   # -- Define configuration regarding nats connectivity.
   nats:
     connection:
