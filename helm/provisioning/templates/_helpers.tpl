@@ -20,7 +20,7 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- if .Values.global.nubusDeployment -}}
 {{- include "nubusTemplates.udmRestApi.host" . -}}
 {{- else -}}
-{{- required "Either .Values.registerConsumers.config.UDM_HOST or .Values.prefill.config.UDM_HOST must be defined." (coalesce .Values.registerConsumers.config.UDM_HOST .Values.prefill.config.UDM_HOST) -}}
+{{- required ".Values.prefill.config.UDM_HOST must be defined." .Values.prefill.config.UDM_HOST -}}
 {{- end -}}
 {{- end -}}
 
@@ -28,7 +28,7 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- if .Values.global.nubusDeployment -}}
 {{- include "nubusTemplates.udmRestApi.port" . -}}
 {{- else -}}
-{{- required "Either .Values.dispatcher.config.UDM_PORT or .Values.prefill.config.UDM_PORT must be defined." (coalesce .Values.dispatcher.config.UDM_PORT .Values.prefill.config.UDM_PORT) -}}
+{{- required ".Values.prefill.config.UDM_PORT must be defined." .Values.prefill.config.UDM_PORT -}}
 {{- end -}}
 {{- end -}}
 
