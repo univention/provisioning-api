@@ -176,21 +176,12 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
             {{- end }}
-            - name: "config-map-ucr"
-              mountPath: "/etc/univention/base.conf"
-              subPath: "base.conf"
-            - name: "config-map-ucr"
-              mountPath: "/etc/univention/base-defaults.conf"
-              subPath: "base-defaults.conf"
       volumes:
         {{- if .Values.nats.connection.tls.enabled }}
         - name: certificates-volume
           secret:
             secretName: {{ .Values.nats.connection.tls.secretName  | default (printf "%s-udm-transformer-tls" (include "common.names.fullname" .) ) | quote }}
         {{- end }}
-        - name: "config-map-ucr"
-          configMap:
-            name: {{ include "udm-transformer.configMapUcr" . | quote }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes  "context" .) | nindent 8 }}
         {{- end }}
