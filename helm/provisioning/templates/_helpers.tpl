@@ -8,11 +8,6 @@ They are defined so other sub-charts can read information that otherwise would b
 If compatible Helm charts set .Values.global.nubusDeployment to true, the templates defined here will be imported.
 */}}
 
-{{- define "udm-transformer.configMapUcr" -}}
-{{- $nubusConfigMapUcr := printf "%s-stack-data-ums-ucr" .Release.Name -}}
-{{- tpl (coalesce .Values.configMapUcr .Values.global.configMapUcr $nubusConfigMapUcr) . -}}
-{{- end -}}
-
 {{- define "nubusTemplates.provisioningApi.connection.host" -}}
 {{ printf "%s-provisioning-api" .Release.Name }}
 {{- end -}}
