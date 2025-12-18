@@ -62,12 +62,16 @@ COPY ./docker/udm-listener/*.patch /tmp/
 # Install patch utility
 RUN apt-get update && \
     apt-get --assume-yes --verbose-versions --no-install-recommends install \
-    patch && \
+    patch coreutils && \
     patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
     patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
     apt-get purge --auto-remove --assume-yes patch && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-    rm /entrypoint.d/50-listener-base-entrypoint.envsh
+    rm -f /entrypoint.d/50-listener-base-entrypoint.envsh && \
+    install -m 700 -o listener -g nogroup -d /var/lib/univention-directory-listener/handlers && \
+    echo -n "3" >> /tmp/nubus-provisioning-status && \
+    install -m 644 -o listener -g nogroup /tmp/nubus-provisioning-status /var/lib/univention-directory-listener/handlers/nubus-provisioning && \
+    rm -f /tmp/nubus-provisioning-status
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages

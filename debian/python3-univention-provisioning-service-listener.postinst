@@ -8,7 +8,11 @@
 create_logfile /var/log/univention/provisioning-service-listener.log "root:adm" 640
 
 if [ "$1" = "configure" ]; then
-	systemctl restart univention-directory-listener
+    install -m 700 -o listener -g nogroup -d /var/lib/univention-directory-listener/handlers && \
+    echo -n "3" >> /tmp/nubus-provisioning-status && \
+    install -m 644 -o listener -g nogroup /tmp/nubus-provisioning-status /var/lib/univention-directory-listener/handlers/nubus-provisioning && \
+    rm -f /tmp/nubus-provisioning-status && \
+    systemctl restart univention-directory-listener
 fi
 
 exit 0

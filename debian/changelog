@@ -1,3 +1,9 @@
+univention-provisioning-service-listener (1.0.2) unstable; urgency=medium
+
+  * Skip full initialization of listener module
+
+ -- Arvid Requate <requate@univention.de>  Thu, 18 Dec 2025 17:40:44 +0100
+
 univention-provisioning-service-listener (1.0.1) unstable; urgency=medium
 
   * Clean up dangerous `self.connect` logic that silent fail
