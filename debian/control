@@ -19,6 +19,7 @@ Standards-Version: 3.9.5
 Package: python3-univention-provisioning-service-listener
 Architecture: all
 Depends:
+ coreutils,
  python3-nats,
  python3-msgpack,
  univention-config-registry,
