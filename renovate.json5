@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>univention/dev/nubus-for-k8s/common-renovate#v0.3.0"
+    "local>univention/dev/nubus-for-k8s/common-renovate#v1.2.1"
   ]
 }
