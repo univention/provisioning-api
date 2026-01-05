@@ -99,10 +99,9 @@ spec:
           command: ["wait-for-udm.sh"]
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
-          envFrom:
-            - configMapRef:
-                name: {{ printf "%s-wait-for-dependencies" (include "common.names.fullname" .) }}
           env:
+            - name: UDM_API_URL
+              value: {{ printf "http://%s:%s/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
             - name: UDM_API_USERNAME
               value: "cn=admin"
             - name: UDM_API_PASSWORD

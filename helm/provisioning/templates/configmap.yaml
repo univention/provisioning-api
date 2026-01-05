@@ -121,23 +121,6 @@ data:
 kind: "ConfigMap"
 apiVersion: "v1"
 metadata:
-  name: {{ printf "%s-wait-for-dependencies" (include "common.names.fullname" .) }}
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels:
-    {{- include "common.labels.standard" . | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
-  {{- end }}
-data:
-  UDM_API_URL: {{ printf "http://%s:%s/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
-
----
-kind: "ConfigMap"
-apiVersion: "v1"
-metadata:
   name: {{ printf "%s-udm-transformer" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
@@ -154,21 +137,4 @@ data:
 
   UDM_URL: {{ printf "http://%s:%s/udm" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
   UDM_NEEDS_RELOAD: "false"
-...
----
-kind: "ConfigMap"
-apiVersion: "v1"
-metadata:
-  name: {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels:
-    {{- include "common.labels.standard" . | nindent 4 }}
-    {{- if .Values.additionalLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.additionalLabels "context" . ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.additionalAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.additionalAnnotations "context" . ) | nindent 4 }}
-  {{- end }}
-data:
-  PROVISIONING_API_BASE_URL: {{ printf "%s/v1/subscriptions" (include "provisioning-register-consumers.provisioningApiBaseUrl" .) | quote  }}
 ...

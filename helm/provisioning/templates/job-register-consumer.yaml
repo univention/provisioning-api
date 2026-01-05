@@ -73,15 +73,14 @@ spec:
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
-          envFrom:
-            - configMapRef:
-                name: {{ printf "%s-register-consumers" $fullname }}
           command: ["/bin/bash", "-c", "/scripts/wait-for-api.sh ${PROVISIONING_API_BASE_URL}"]
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
-          {{- with .Values.registerConsumers.extraEnvVars }}
           env:
+            - name: PROVISIONING_API_BASE_URL
+              value: {{ printf "%s/v1/subscriptions" (include "provisioning-register-consumers.provisioningApiBaseUrl" .) | quote  }}
+          {{- with .Values.registerConsumers.extraEnvVars }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
@@ -95,10 +94,9 @@ spec:
           volumeMounts:
             - name: consumer-secrets
               mountPath: "/secrets"
-          envFrom:
-            - configMapRef:
-                name: {{ printf "%s-register-consumers" $fullname }}
           env:
+            - name: PROVISIONING_API_BASE_URL
+              value: {{ printf "%s/v1/subscriptions" (include "provisioning-register-consumers.provisioningApiBaseUrl" .) | quote  }}
             - name: ADMIN_USERNAME
               value: "admin"
             - name: ADMIN_PASSWORD
