@@ -11,3 +11,24 @@ Show = Install, Settings
 InitialValue = @%@ldap/master@%@
 Scope = outside
 Description = Fully qualified domain name (FQDN) of the Primary Directory Node
+
+[nats/max_retry_count]
+Type = String
+Show = Install, Settings
+InitialValue = 3
+Scope = outside,inside
+Description = Number of times the provisioning listener will try to synchronize each transaction to the provisioning NATS service. After changing this setting the univention-directory-listener must be restarted.
+
+[nats/retry_delay]
+Type = String
+Show = Install, Settings
+InitialValue = 1
+Scope = outside,inside
+Description = The number of seconds waited between each attempt to synchronize a transaction to the provisioning NATS service. After changing this setting the univention-directory-listener must be restarted.
+
+[nats/max_reconnect_attempts]
+Type = String
+Show = Install, Settings
+InitialValue = 3
+Scope = outside,inside
+Description = The maximum number of times a reconnection to the provisioning NATS service is attempted. After changing this setting the univention-directory-listener must be restarted.
