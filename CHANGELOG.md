@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.67.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.67.0...v0.67.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* **nubus-provisioning-listener:** Add reconnection settings to the UCS app. Set defaults low to not block the listener. ([dd55cd6](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/dd55cd6980977e4226a050b227d496791197d2ec)), closes [univention/dev/projects/provisioning#114](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/114)
+
 ## [0.67.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.66.3...v0.67.0) (2025-12-10)
 
 
