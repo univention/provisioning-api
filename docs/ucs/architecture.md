@@ -92,6 +92,10 @@ flowchart LR
     B1_ProvisioningAPI --> |B1's events| B1_RegularConsumer
 ```
 
+Alternative drawing:
+
+![Provisioning on UCS](Provisioning_on_UCS.png "Provisioning on UCS")
+
 ## Differences to N4K Provisioning Service
 
 There are a few differences between the implementation on UCS and N4K:
