@@ -68,8 +68,8 @@ class Ldap2UdmAdapter(Ldap2Udm):
                 "POST", self.udm.uri + "/directory/unmap-ldap-attributes", data=payload, expect_json=True
             )
         except UnprocessableEntity as exc:
-            logger.error(str(exc))
+            logger.error("Could not unmap LDAP attributes: %s ", exc)
             raise UdmRestApiError("ReadControl response suggests that UDM does not recognize the object!")
         except ServerError as exc:
-            logger.error(str(exc))
+            logger.error("Server error during unmapping LDAP attributes: %s ", exc)
             raise UdmRestApiError("ReadControl response points to a server error!")
