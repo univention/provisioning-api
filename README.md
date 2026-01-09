@@ -1,6 +1,19 @@
 # Provisioning
 
-Nubus component for provisioning LDAP objects to external services.
+The *Nubus Provisioning* service is a general purpose event system.
+
+Its first use case is a replacement for the Listener/Notifier system:
+allowing software to react to changes in the LDAP directory
+so they can for example provision 3rd-party services.
+LDAP event data is transformed to UDM data.
+
+That's where the name *Provisioning* comes from.
+But it was designed to handle any kind of event.
+Every event object carries a tuple *realm* and *topic*.
+LDAP/UDM events have `{"realm": "udm", "topic": "<UDM module>"}`,
+with `"<UDM module>"` being for example `"users/user"` or `"groups/group"`.
+Future event use cases can for example be `{"realm": "school", "topic": "teacher"}`
+or `{"realm": "security", "topic": "SSH-login"}`.
 
 See [Nubus for Kubernetes - Architecture Manual](https://docs.software-univention.de/nubus-kubernetes-architecture/latest/en/components/provisioning-service.html) for an in-depth explanation.
 
@@ -47,6 +60,7 @@ for DIR in backends common consumer consumer_example dispatcher listener prefill
 ```
 
 ### Create a Subscription
+
 To create a subscription, open http://localhost:7777/docs and find the method called 'Create Subscription'.
 Enter the following data into the request body:
 
@@ -63,8 +77,9 @@ Enter the following data into the request body:
 To make a change in the LDAP, open http://localhost:8001.
 
 Enter with:
-  - **Login DN:** cn=admin,dc=univention-organization,dc=intranet
-  - **Password:** univention
+
+- **Login DN:** cn=admin,dc=univention-organization,dc=intranet
+- **Password:** univention
 
 Find an entry with `univentionObjectType` = 'groups/group' and modify it.
 
@@ -80,11 +95,13 @@ Now, you see the messages, that the subscriber received from the udm-pre-fill pr
 Ensure that you have [`poetry`](https://python-poetry.org/docs/) installed.
 
 If desired, set poetry to create a virtualenv in the project directory:
+
 ```sh
 poetry config virtualenvs.in-project true
 ```
 
 Install the dependencies:
+
 ```sh
 poetry install --with dev
 ```
@@ -95,7 +112,6 @@ poetry install --with dev
 docker compose up example-client
 ```
 
-
 ## Tests
 
 ### Unit tests
@@ -103,7 +119,9 @@ docker compose up example-client
 ```sh
 poetry run pytest tests/unit
 ```
+
 or
+
 ```shell
 python3 -m pytest tests/unit
 ```
@@ -115,9 +133,11 @@ docker compose run --quiet-pull --rm test /app/.venv/bin/python3 -m pytest tests
 ```
 
 ### E2E tests
+
 #### Setup
 
-Copy the example e2e test settings json file:
+Copy the example e2e test settings JSON file:
+
 ```sh
 cp tests/e2e/e2e_settings.json.example tests/e2e/e2e_settings.json
 ```
@@ -169,7 +189,6 @@ and in case you can't or don't want to install the test dependencies locally,
 
 #### Using the Tilt dev-env
 
-
 Start the necessary services via tilt:
 
 ```sh
@@ -207,10 +226,10 @@ pytest -v -p no:cacheprovider tests/e2e/ --environment dev-env
 
 ```
 
-
 ### Pre-commit
 
 Run the pre-commit checks before committing:
+
 ```sh
 docker compose run --rm pre-commit run
 ```
@@ -218,6 +237,7 @@ docker compose run --rm pre-commit run
 ### Sphinx Documentation
 
 Build the sphinx documentation:
+
 ```sh
 docker compose run docs make html
 ```

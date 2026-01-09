@@ -95,4 +95,12 @@ repos:
     hooks:
       - id: "kyverno-test"
 
+  - repo: https://github.com/jackdewinter/pymarkdown
+    rev: v0.9.34
+    hooks:
+      - id: pymarkdown
+        args:
+          - -d line-length,no-bare-urls,no-duplicate-heading,no-duplicate-header
+          - scan
+        files: "^README.md|^docs/ucs/README.md|^docs/ucs/architecture.md"
 ...
