@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.68.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.67.2...v0.68.0) (2026-01-09)
+
+
+### Features
+
+* **helm:** Update udm-transformer helm to use UDM-REST-API for transforming attributes ([a72b004](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/a72b004f57d27370d65834678b1aa2daeaf5d0ed)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **udm-transformer:** Use UDM REST API to transform instead of a local library ([f8fd3ae](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/f8fd3ae09468a45ca47aa16b21b714e708a30288)), closes [univention/dev/projects/provisioning#97](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/97)
+
+
+### Bug Fixes
+
+* **helm:** Re-add wait-for-data-loader ([5d60cec](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/5d60cec5f4160586ac6514afd13e6451bcef7b8d)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **helm:** Remove ucr settings mapping from udm-transfomer ([3e485b0](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/3e485b0a2d6dcf1a893edb3a2bc750aedb99d247)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **helm:** Remove wait-for-data-loader ([edadf20](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/edadf20fe401814d846c54da498d33692a755874)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* Set correct python version requirements in provisioning-common ([ec03699](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/ec03699400c389e17a80218022f169e09241a72f)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **tests:** Fix e2e tests running via docker-compose ([18f6dba](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/18f6dba74dd7231120026f07e729cfa264bb2071)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+
 ## [0.67.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.67.1...v0.67.2) (2026-01-09)
 
 
