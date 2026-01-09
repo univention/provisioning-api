@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.67.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.67.1...v0.67.2) (2026-01-09)
+
+
+### Bug Fixes
+
+* **nubus-provisioning-listener:** Skip full initialization of listener module ([48aceda](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/48aceda6b3ad10472efe936eb86c3298aea24e52)), closes [univention/dev/projects/provisioning#112](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/112)
+
 ## [0.67.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.67.0...v0.67.1) (2026-01-06)
 
 
