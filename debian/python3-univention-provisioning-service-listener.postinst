@@ -8,6 +8,10 @@
 create_logfile /var/log/univention/provisioning-service-listener.log "root:adm" 640
 
 if [ "$1" = "configure" ]; then
+    # listener will be installed on backup but inactive
+    if [ $(ucr get server/role) = "domaincontroller_backup" ]; then
+        ucr set listener/module/nubus-provisioning/deactivate=yes
+    fi
     install -m 700 -o listener -g nogroup -d /var/lib/univention-directory-listener/handlers && \
     echo -n "3" >> /tmp/nubus-provisioning-status && \
     install -m 644 -o listener -g nogroup /tmp/nubus-provisioning-status /var/lib/univention-directory-listener/handlers/nubus-provisioning && \

@@ -1,0 +1,34 @@
+[nats/stunnel/accept/port]
+Description[en]=Listening portnumber of the stunnel securing the NATS connection
+Description[de]=Portnummer auf den der stunnel zur Sicherung der NATS-Verbindung horcht
+Categories=provisioning
+Type=portnumber
+Default=4230
+
+[nats/stunnel/connect/port]
+Description[en]=Connection port of the stunnel securing the NATS connection between a backup dispatcher and primary NATS
+Description[de]=Portnummer mit dem sich der stunnel zur Sicherung der NATS-Verbindung zwischen dem Backup Dispatcher und dem NATS-Dienst des Primarys verbindet
+Categories=provisioning
+Type=portnumber
+Default=4230
+
+[nats/stunnel/cert]
+Description[en]=Certificate used for the stunnel NATS connection between a backup dispatcher and primary NATS
+Description[de]=Verwendetes Zertifikat der stunnel NATS-Verbindung des Backup Dispatchers zum NATS-Dienst des Primarys.
+Categories=provisioning
+Type=str
+Default=/etc/univention/ssl/@%@ldap/master@%@/cert.pem
+
+[nats/stunnel/key]
+Description[en]=Certificate key used for the stunnel NATS connection between a backup dispatcher and primary NATS
+Description[de]=Verwendeter Zertifikatsschlüssel der stunnel NATS-Verbindung des Backup Dispatchers zum NATS-Dienst des Primarys
+Categories=provisioning
+Type=str
+Default=/etc/univention/ssl/@%@ldap/master@%@/private.key
+
+[nats/stunnel/cacert]
+Description[en]=The CA certificate used for the stunnel NATS connection between a backup dispatcher and primary NATS
+Description[de]=Das CA-Zertifikat für die stunnel NATS-Verbindung vom Backup Dispatcher zum NATS-Dienst des Primarys
+Categories=provisioning
+Type=str
+Default=/etc/univention/ssl/ucsCA/CAcert.pem

@@ -1,0 +1,18 @@
+#! /bin/sh
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+#DEBHELPER#
+# shellcheck source=/dev/null
+. /usr/share/univention-lib/all.sh
+
+if [ "$1" = "configure" ]; then
+    univention-config-registry set \
+        security/packetfilter/package/univention-provisioning-service-config/tcp/4230/all?ACCEPT \
+        security/packetfilter/package/univention-provisioning-service-config/tcp/4230/all/en?"NATSSTUNNEL"
+    systemctl restart univention-firewall.service stunnel4.service
+    systemctl enable stunnel4.service
+fi
+
+
+

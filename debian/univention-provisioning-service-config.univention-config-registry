@@ -1,0 +1,5 @@
+Type: file
+File: etc/stunnel/univention-provisioning-stunnel.conf
+Variables: nats/stunnel/.*
+Variables: nats/port
+

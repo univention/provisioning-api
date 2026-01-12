@@ -55,9 +55,9 @@ services:
     environment:
       - PLATFORM_UCS=true
       -  LOG_LEVEL=DEBUG
-      @!@print("-  NATS_HOST_PULL=nats" if configRegistry.get('server/role').lower() == "domaincontroller_master" else f"-  NATS_HOST_PULL={configRegistry.get('provisioning-service/primary')}")@!@
+      @!@print("-  NATS_HOST_PULL=nats" if configRegistry.get('server/role').lower() == "domaincontroller_master" else f"-  NATS_HOST_PULL={configRegistry.get('hostname')}.{configRegistry.get('domainname')}")@!@
+      @!@print("-  NATS_PORT_PULL=4222" if configRegistry.get('server/role').lower() == "domaincontroller_master" else f"-  NATS_PORT_PULL={configRegistry.get('nats/stunnel/accept/port', 4230)}")@!@
       -  NATS_HOST_PUSH=nats
-      -  NATS_PORT_PULL=4222
       -  NATS_PORT_PUSH=4222
       -  NATS_USER_PULL=dispatcher
       -  NATS_USER_PUSH=dispatcher

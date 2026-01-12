@@ -1,4 +1,4 @@
-Source: univention-provisioning-service-listener
+Source: univention-provisioning-service
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
@@ -15,6 +15,32 @@ Build-Depends:
  python3-venv,
  python3-setuptools,
 Standards-Version: 3.9.5
+
+Package: univention-provisioning-service
+Architecture: all
+Depends:
+ python3-univention-provisioning-service-listener,
+ univention-provisioning-service-config,
+Description: Univention meta package for Nubus Provisioning
+ This module provides packages for the Nubus Provisioning API
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: https://www.univention.de/
+
+Package: univention-provisioning-service-config
+Architecture: all
+Depends:
+ stunnel4,
+ univention-config-registry,
+Description: Univention config package for Nubus Provisioning
+ This module provides host configuration for the Nubus Provisioning API
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: https://www.univention.de/
 
 Package: python3-univention-provisioning-service-listener
 Architecture: all
