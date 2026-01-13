@@ -22,10 +22,6 @@ UDM_MODULES_RELOAD_TRIGGER = {
 }
 
 
-class UdmRestApiError(Exception):
-    pass
-
-
 class Ldap2UdmAdapter(Ldap2Udm):
     def __init__(self, settings: Optional[UDMTransformerSettings] = None):
         Ldap2Udm.__init__(self, settings)
@@ -69,7 +65,7 @@ class Ldap2UdmAdapter(Ldap2Udm):
             )
         except UnprocessableEntity as exc:
             logger.error("Could not unmap LDAP attributes: %s ", exc)
-            raise UdmRestApiError("ReadControl response suggests that UDM does not recognize the object!")
+            raise
         except ServerError as exc:
             logger.error("Server error during unmapping LDAP attributes: %s ", exc)
-            raise UdmRestApiError("ReadControl response points to a server error!")
+            raise

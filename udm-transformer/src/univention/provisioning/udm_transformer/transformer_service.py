@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 from pydantic import ValidationError
 
+from univention.admin.rest.client import UnprocessableEntity
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
 from univention.provisioning.backends.nats_mq import LdapQueue
 from univention.provisioning.models.message import Body, EmptyBodyError, Message, NoUDMTypeError
@@ -84,11 +85,15 @@ class TransformerService:
         except ValidationError as exc:
             logger.error("Failed to parse an LDAP message: %s", exc)
             raise
-        await self.handle_change(
-            validated_message.body.new,
-            validated_message.body.old,
-            validated_message.ts,
-        )
+        try:
+            await self.handle_change(
+                validated_message.body.new,
+                validated_message.body.old,
+                validated_message.ts,
+            )
+        except UnprocessableEntity:
+            logger.warning("Ignoring unprocessed UDM object")
+            return
 
     async def handle_change(
         self, new_ldap_obj: dict[str, Any], old_ldap_obj: dict[str, Any], ts: datetime.datetime
@@ -97,7 +102,7 @@ class TransformerService:
         new_udm_obj = await self.new_ldap_to_udm_obj(new_ldap_obj)
 
         if not new_udm_obj and not old_udm_obj:
-            raise RuntimeError("Both 'new' and 'old' UDM objects empty.")
+            raise EmptyBodyError("Both 'new' and 'old' UDM objects empty.")
 
         self.ldap2udm.reload_udm_if_required(new_udm_obj or old_udm_obj)
 
