@@ -46,7 +46,7 @@ class Ldap2UdmAdapter(Ldap2Udm):
             # ATTENTION: credentials via HTTP. okay as this is meant to be done only inside "kubernetes VPN"
             (
                 requests.get(
-                    "http://%s/univention/udm/-/reload" % ip, auth=self.udm_auth, headers={"Accept": "application/json"}
+                    "http://%s:9979/udm/-/reload" % ip, auth=self.udm_auth, headers={"Accept": "application/json"}
                 ),
             )
 
