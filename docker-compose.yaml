@@ -115,14 +115,14 @@ services:
       EVENTS_USERNAME_UDM: "udm"
       EVENTS_PASSWORD_UDM: "udmpass"
 
-      UDM_URL: "http://udm-rest-api:9979/udm"
+      UDM_URL: "http://udm-rest-api-1:9979/udm"
       UDM_USERNAME: "cn=admin"
       UDM_PASSWORD: "univention"
-      UDM_NEEDS_RELOAD: "false"
+      UDM_NEEDS_RELOAD: "true"
     depends_on:
       - "nats1"
       - "provisioning-api"
-      - "udm-rest-api"
+      - "udm-rest-api-1"
 
   prefill:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
@@ -253,7 +253,7 @@ services:
     ports:
       - 8001:80
 
-  udm-rest-api:
+  udm-rest-api: &udm-rest-api
     image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest
     container_name: "udm-rest-api"
     platform: "linux/amd64"
@@ -271,6 +271,12 @@ services:
       TLS_MODE: "off"
       MACHINE_SECRET: univention
       LDAP_CN_ADMIN_PW: univention
+
+  udm-rest-api-1:
+    <<: *udm-rest-api
+    container_name: "udm-rest-api-1"
+    ports:
+      - 9980:9979
 
   example-client:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
