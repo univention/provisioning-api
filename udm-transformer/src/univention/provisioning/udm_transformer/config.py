@@ -38,7 +38,7 @@ class UDMTransformerSettings(BaseSettings):
     # UDM: password
     udm_password: str
     # UDM: needs reload - meaning: should reload UDM REST API on each extended_attributes change, used for Kubernetes only
-    udm_needs_reload: bool
+    udm_needs_reload: bool = True
 
     # Provisioning REST API: host
     provisioning_api_host: str
