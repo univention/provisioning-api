@@ -136,5 +136,5 @@ data:
   LOG_LEVEL: {{ required ".Values.udmTransformer.config.LOG_LEVEL is required." .Values.udmTransformer.config.LOG_LEVEL | quote  }}
 
   UDM_URL: {{ printf "http://%s:%s/udm" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
-  UDM_NEEDS_RELOAD: "false"
+  UDM_NEEDS_RELOAD: "true"
 ...
