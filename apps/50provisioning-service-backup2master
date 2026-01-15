@@ -91,7 +91,6 @@ run "univention-app update"
 # --- Listener activation ---
 echo "Activating ${APP_NAME} listener module"
 ucr unset listener/module/nubus-provisioning/deactivate
-ucr commit /etc/stunnel/univention-provisioning-stunnel.conf
 systemctl restart univention-directory-listener.service
 systemctl restart stunnel4.service
 
@@ -104,7 +103,7 @@ echo "Reinitializing ${APP_NAME}..."
 run "univention-app configure ${APP_NAME} --set provisioning-service/udm-rest-api-host=\"$ldap_master\" --set provisioning-service/primary=\"$ldap_master\""
 
 echo-warning "WARNING: Please do the following on all other backups where the provisioning-service app is installed."
-echo-warning "    ucr commit /etc/stunnel/univention-provisioning-stunnel.conf; systemctl restart stunnel4.service"
 echo-warning "    univention-app configure ${APP_NAME} --set provisioning-service/udm-rest-api-host=<REPLACE_ME> --set provisioning-service/primary=<REPLACE_ME>"
+echo-warning "    systemctl restart stunnel4.service"
 
 echo "=== $(date -Is) :: Completed. Log: ${SCRIPT_LOG} ==="
