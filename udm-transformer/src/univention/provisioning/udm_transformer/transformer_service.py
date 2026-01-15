@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from pydantic import ValidationError
 
-from univention.admin.rest.client import UnprocessableEntity
+from univention.admin.rest.client import ServiceUnavailable, UnprocessableEntity
 from univention.provisioning.backends.message_queue import Empty, MessageAckManager, QueueStatus
 from univention.provisioning.backends.nats_mq import LdapQueue
 from univention.provisioning.models.message import Body, EmptyBodyError, Message, NoUDMTypeError
@@ -46,7 +46,8 @@ class TransformerService:
         if status != QueueStatus.READY:
             raise NotImplementedError(f"Migration not supported in udm-transformer. Status: {status}")
 
-        while True:
+        loop = True
+        while loop:
             logger.debug("Listening for new LDAP messages.")
             try:
                 message, acknowledgements = await self.subscriptions.get_one_message(timeout=10)
@@ -68,10 +69,14 @@ class TransformerService:
                     message_handler,
                     acknowledgements.acknowledge_message_in_progress,
                 )
-            except Exception:
+            except* ServiceUnavailable:
+                await acknowledgements.acknowledge_message_negatively()
+                loop = False  # don't raise excepton for temporary unavailable service, just exit loop
+            except* Exception:  # output tracebacks for unexcpected/unknown situations like ServerError
                 await acknowledgements.acknowledge_message_negatively()
                 raise
-            await acknowledgements.acknowledge_message()
+            else:
+                await acknowledgements.acknowledge_message()
 
     async def handle_message(self, data: dict[str, Any]):
         try:

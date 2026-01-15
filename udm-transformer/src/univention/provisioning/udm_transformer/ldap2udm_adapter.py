@@ -9,7 +9,7 @@ from typing import Optional
 import dns.resolver
 import requests
 
-from univention.admin.rest.client import UDM, ServerError, UnprocessableEntity
+from univention.admin.rest.client import UDM, ServerError, ServiceUnavailable, UnprocessableEntity
 
 from .config import UDMTransformerSettings
 from .ldap2udm_port import Ldap2Udm
@@ -66,6 +66,9 @@ class Ldap2UdmAdapter(Ldap2Udm):
         except UnprocessableEntity as exc:
             logger.error("Could not unmap LDAP attributes: %s ", exc)
             raise
+        except ServiceUnavailable as exc:
+            logger.error("UDM REST service not available to unmap LDAP attributes: %s ", exc)
+            raise
         except ServerError as exc:
-            logger.error("Server error during unmapping LDAP attributes: %s ", exc)
+            logger.error("UDM REST Server error while unmapping LDAP attributes: %s ", exc)
             raise
