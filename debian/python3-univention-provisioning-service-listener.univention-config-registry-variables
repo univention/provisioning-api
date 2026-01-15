@@ -28,7 +28,6 @@ Description[en]=Maximum number of reconnect attempts to the NATS server
 Description[de]=Maximale Anzahl von Wiederverbindungsversuchen zum NATS-Server
 Categories=provisioning
 Type=str
-Default=10
 
 [nats/terminate_listener_on_exception]
 Description[en]=Terminate listener on exception
