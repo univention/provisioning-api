@@ -59,10 +59,10 @@ class LdapListener(ListenerModuleHandler):
             self.logger.error("Failed to connect to the message queue: %s", exc)
             raise
 
-    async def _async_ensure_queue_exists(self) -> None:
+    async def _async_ensure_queue_exists(self, retry=True) -> None:
         exception = None
-        for attempt in range(self.settings.nats_max_retry_count + 1):
-            if attempt != 0:
+        for attempt in range(self.settings.nats_max_retry_count + 1 if retry else 1):
+            if attempt != 0 and retry:
                 time.sleep(self.settings.nats_retry_delay)
             try:
                 async with self.mq as mq:
@@ -97,6 +97,7 @@ class LdapListener(ListenerModuleHandler):
             except Exception as error:
                 self.logger.error("Failed to send the LDAP message to NATS: %r, retries: %d", error, attempt)
                 exception = error
+                await self._async_ensure_queue_exists(retry=False)
         raise exception
 
     def kill_listener_process(self) -> None:
