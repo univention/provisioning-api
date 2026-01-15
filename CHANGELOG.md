@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.1...v0.68.2) (2026-01-15)
+
+
+### Bug Fixes
+
+* failing pipeline job ([4c4e256](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/4c4e256af9661802d30df3195890d1cd5ef69be5)), closes [univention/dev/internal/team-nubus#1518](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1518)
+
 ## [0.68.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.0...v0.68.1) (2026-01-14)
 
 
