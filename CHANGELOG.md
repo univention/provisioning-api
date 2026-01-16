@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.3...v0.68.4) (2026-01-16)
+
+
+### Bug Fixes
+
+* **provisioning:** Add SSL protection configuration for UCS base ([913a446](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/913a446282c7fedd86a7743ce919a794ee83aa40)), closes [univention/dev/projects/provisioning#113](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/113)
+
 ## [0.68.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.2...v0.68.3) (2026-01-16)
 
 
