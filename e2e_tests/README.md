@@ -1,3 +1,17 @@
+# Debugging the UDM REST API
+
+```sh
+
+# Start the stack
+docker compose down -v && docker compose up --build provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-rest-api udm-rest-api-1 ldap-server udm-listener ldap-notifier ldif-producer
+
+# Create e2e test environment
+cd e2e_tests
+uv sync
+. .venv/bin/activate
+
+pytest --count=3 tests/test_consumer_client.py::test_create_user_with_extended_attribute -v
+
 # Testing
 
 ### Local manual testing
