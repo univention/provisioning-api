@@ -1,0 +1,17 @@
+#! /bin/sh
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+#DEBHELPER#
+# shellcheck source=/dev/null
+. /usr/share/univention-lib/all.sh
+
+if [ "$1" = "remove" ]; then
+    univention-config-registry unset \
+        security/packetfilter/package/univention-provisioning-service-config/tcp/4230/all \
+        security/packetfilter/package/univention-provisioning-service-config/tcp/4230/all/en
+    systemctl restart univention-firewall.service stunnel4.service
+fi
+
+
+

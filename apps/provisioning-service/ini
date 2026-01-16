@@ -1,7 +1,7 @@
 [Application]
 ID = provisioning-service
 Code = 4T
-Version = 1.0
+Version = 2.0
 Name = Provisioning Service (preview)
 Vendor = Univention GmbH
 SupportedUcsVersions = 5.2-2
@@ -22,7 +22,8 @@ DockerScriptUpdateAppVersion =
 DockerScriptUpdateRelease =
 DockerScriptSetup =
 DockerMainService = provisioning-api
-RequiredAppsInDomain = provisioning-service-backend
+RequiredAppsInDomain =
+RequiredApps = provisioning-service-backend
 LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Service&quot; from Nubus. The web API allows Consumers to process certain Events that other services wrote into the queue. Note that this is a tech preview that does not come with any guarantee to stability or updatability, nor a final documentation.
 	<br>
 	<br>
