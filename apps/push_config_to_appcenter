@@ -66,4 +66,4 @@ sed -i -e "/%PROVISIONING-BACKUP2MASTER-POST%/r 50provisioning-service-backup2ma
 upload_appcenter_scripts "provisioning-service"
 
 rm -f provisioning-service/inst
-#upload_appcenter_scripts "provisioning-service-backend"
+upload_appcenter_scripts "provisioning-service-backend"
