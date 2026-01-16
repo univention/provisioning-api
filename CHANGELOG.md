@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.68.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.2...v0.68.3) (2026-01-16)
+
+
+### Bug Fixes
+
+* **udm-transformer:** Improve exception handling ([942cfbe](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/942cfbeb2f023a05c117e9ca9b3ff38ba09327e4)), closes [univention/dev/projects/provisioning#119](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/119)
+* **udm-transformer:** Improve exception handling ([7245114](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/72451148768940595c799e3efdef47a62da7ee2a)), closes [univention/dev/projects/provisioning#119](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/119)
+
 ## [0.68.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.1...v0.68.2) (2026-01-15)
 
 
