@@ -254,7 +254,7 @@ services:
       - 8001:80
 
   udm-rest-api: &udm-rest-api
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:0.41.10-pre-jlohmer-udm-reload@sha256:d4770d314a132eacf1c713a85c21186ee10178c8962119923df165ba0887e978
     container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
@@ -271,6 +271,7 @@ services:
       TLS_MODE: "off"
       MACHINE_SECRET: univention
       LDAP_CN_ADMIN_PW: univention
+    command: [ "python3", "-m", "univention.admin.rest.server", "--debug", "99", "--port", "9979", "--interface", "0.0.0.0", "--processes", "1" ]
 
   udm-rest-api-1:
     <<: *udm-rest-api
