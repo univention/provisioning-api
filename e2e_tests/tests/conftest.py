@@ -384,14 +384,16 @@ def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict
 
 
 @pytest.fixture()
-def create_extended_attribute(create_udm_obj, udm) -> UdmObject:
+def create_extended_attribute(create_udm_obj, udm) -> tuple[UdmObject, str]:
+    suffix = str(uuid.uuid4())[:8]
+    cli_name = f"ProvisioningServiceEmail_{suffix}"
     properties = {
-        "name": "UniventionProvisioningServiceExtendedAttributeEmail",
-        "CLIName": "ProvisioningServiceEmail",
+        "name": f"UniventionProvisioningServiceExtendedAttributeEmail_{suffix}",
+        "CLIName": cli_name,
         "module": ["users/user"],
         "syntax": "emailAddress",
         "default": "",
-        "ldapMapping": "univentionFreeAttribute20",
+        "ldapMapping": "univentionFreeAttribute5",
         "objectClass": "univentionFreeAttributes",
         "shortDescription": "Extended attribute for provisioning service tests",
         "tabAdvanced": False,
@@ -406,5 +408,5 @@ def create_extended_attribute(create_udm_obj, udm) -> UdmObject:
     }
     position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
     extended_attribute = create_udm_obj("settings/extended_attribute", properties, position)
-    yield extended_attribute
+    yield extended_attribute, cli_name
     extended_attribute.delete()
