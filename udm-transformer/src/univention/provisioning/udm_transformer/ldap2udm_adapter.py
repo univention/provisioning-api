@@ -60,9 +60,13 @@ class Ldap2UdmAdapter(Ldap2Udm):
         }
 
         try:
-            return self.udm.client.request(
+            data = self.udm.client.request(
                 "POST", self.udm.uri + "/directory/unmap-ldap-attributes", data=payload, expect_json=True
             )
+            # TODO: remove if we use the new UDM REST endpoint with id==univentionObjectIdentifier
+            data["id"] = data["properties"].get("univentionObjectIdentifier", "")
+            del data["uuid"]
+            return data
         except UnprocessableEntity as exc:
             logger.error("Could not unmap LDAP attributes: %s ", exc)
             raise

@@ -123,6 +123,16 @@ class TransformerService:
         if not result:
             logger.info("Did not find old_ldap_object in the cache. Falling back to new ldap object.")
             result = self.ldap2udm.ldap_to_udm(old_ldap_obj)
+        else:
+            # TODO: we changed the udm representation (id=univentionObjectIdentifier, removed uuid)
+            # What about the old udm cache?
+            # A simple fix would be just to do the same here for the old udm object,
+            # but maybe we should store the LDAP representation in the cache to always get an
+            # up-do-date udm representation for the old object?
+            if "uuid" in result:
+                # cache is still udm v1, convert to v2
+                del result["uuid"]
+                result["id"] = result["properties"].get("univentionObjectIdentifier", "")
         if not result:
             raise RuntimeError("Cannot live transform old ldap object")
         return result
@@ -131,7 +141,7 @@ class TransformerService:
         if new_ldap_obj:
             new_udm_obj = self.ldap2udm.ldap_to_udm(new_ldap_obj)
             if new_udm_obj:
-                await self.cache.store(new_udm_obj["uuid"], json.dumps(new_udm_obj))
+                await self.cache.store(new_ldap_obj["entryUUID"][0].decode(), json.dumps(new_udm_obj))
             return new_udm_obj
         return {}
 

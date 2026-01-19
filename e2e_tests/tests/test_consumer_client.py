@@ -83,6 +83,26 @@ async def test_get_real_messages(
     uuid.UUID(response.body.new["properties"]["univentionObjectIdentifier"])
 
 
+async def test_id_is_univention_object_identifier(
+    create_user_via_udm_rest_api,
+    provisioning_client: ProvisioningConsumerClient,
+    real_subscription: str,
+):
+    univention_object_identifier = str(uuid.uuid4())
+    user = create_user_via_udm_rest_api({"univentionObjectIdentifier": univention_object_identifier})  # noqa: F841
+    assert univention_object_identifier == user.properties["univentionObjectIdentifier"]
+
+    response = await provisioning_client.get_subscription_message(
+        name=real_subscription,
+        timeout=5,
+    )
+
+    assert response is not None
+    assert univention_object_identifier == response.body.new["id"]
+    assert "uuid" not in response.body.new
+    assert response.body.new["properties"]["univentionObjectIdentifier"]
+
+
 async def test_get_multiple_messages(
     create_user_via_udm_rest_api, provisioning_client: ProvisioningConsumerClient, real_subscription: str, udm: UDM
 ):
