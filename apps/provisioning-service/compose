@@ -14,14 +14,14 @@ services:
     command: -c /run/secrets/nats-conf
     networks:
       - "nubus-provisioning"
-    restart: "always"
+    restart: "unless-stopped"
     volumes:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-api"
-    restart: "on-failure"
+    restart: "unless-stopped"
     environment:
       - PLATFORM_UCS=true
       -  LOG_LEVEL=DEBUG
@@ -51,7 +51,7 @@ services:
   dispatcher:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-dispatcher"
-    restart: "on-failure"
+    restart: "unless-stopped"
     environment:
       - PLATFORM_UCS=true
       -  LOG_LEVEL=DEBUG
@@ -77,7 +77,7 @@ services:
   udm-transformer:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-udm-transformer"
-    restart: "on-failure"
+    restart: "unless-stopped"
     @!@if configRegistry.get('server/role').lower() == "domaincontroller_backup": print("profiles: [donotstart]\n")@!@
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -108,7 +108,7 @@ services:
   prefill:
     image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:0.68.0-pre-dwiesent-transformer-udm-rest-97-2"
     container_name: "nubus-provisioning-prefill"
-    restart: "on-failure"
+    restart: "unless-stopped"
     environment:
      - PLATFORM_UCS=true
      - LOG_LEVEL=DEBUG
