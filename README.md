@@ -114,16 +114,27 @@ docker compose up example-client
 
 ## Tests
 
+E2E tests and unit tests are automatically executed in gitlab pipelines.
+But you also can run them locally on your machine while developing.
+
+### Setup for local unit tests
+
+Requirements:
+- `uv` - An extremely fast Python package manager.
+
+Setup: Go to the component, setup a `venv` and install python packages
+- `cd udm-transformer`
+- `uv venv`
+- `source .venv/bin/activate`
+- `uv sync`
+
 ### Unit tests
 
 ```sh
-poetry run pytest tests/unit
-```
-
-or
-
-```shell
-python3 -m pytest tests/unit
+cd udm-transformer # or another component
+uv add pytest # if not already added to pyproject.toml
+source .venv/bin/activate
+pytest -x -v  tests # or tests/unit
 ```
 
 ### Integration tests
@@ -171,14 +182,9 @@ Wait for up to 1 minute for the default LDAP changes to be processed by the disp
 Then run the e2e tests.
 
 ```sh
-poetry run pytest tests/e2e/
-```
-
-optimized command:
-
-```sh
-poetry shell
-pytest -v -p no:cacheprovider tests/e2e/
+cd e2e_tests
+source .venv/bin/activate
+pytest -x -v tests/
 ```
 
 There is a test container designed to run the e2e tests in docker-compose in a gitlab pipeline.
@@ -186,6 +192,14 @@ But this can also be executed locally to debug pipeline problems
 and in case you can't or don't want to install the test dependencies locally,
 
 `docker compose run --quiet-pull --rm test /app/.venv/bin/pytest tests/e2e -v --environment pipeline`
+
+#### Making a local change and test with docker compose in local setup
+
+- Stop all containers
+- Make change
+- Build new image `docker compose build` (builds image if sources changed)
+- Start new provisioning service `docker compose up`
+- Run e2e tests
 
 #### Using the Tilt dev-env
 
