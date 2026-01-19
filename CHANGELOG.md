@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.5](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.4...v0.68.5) (2026-01-19)
+
+
+### Bug Fixes
+
+* **app:** restart all containers always unless-stopped ([d203ddb](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/d203ddb2be91b3a0f293a4a820c41d2abd5492ca)), closes [univention/dev/projects/provisioning#119](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/119)
+
 ## [0.68.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.3...v0.68.4) (2026-01-16)
 
 
