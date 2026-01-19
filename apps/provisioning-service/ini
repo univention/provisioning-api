@@ -34,25 +34,11 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	The App should not be installed in production systems, only in internal test systems for security reasons.
 	Some working use cases are:
 	<br>
-	The App can be installed on a primary DC and a backup DC server. The queues are connected between them.
+	The App can be installed on a Primary Directory Node and Backup Directory Nodes. The queues are connected between them.
 	<br>
-	Consumers can be registered against any of the DCs where the provisioning is installed.
+	Consumers can be registered against any of the Directory Nodes where the provisioning is installed.
 	<br>
 	The provisioning reacts to all UDM objects. All create, modify, move and delete operations can be observed.
-	<br>
-	Some limitations are:
-	<br>
-	The UDM REST API has to be manually reloaded when new UDM extensions are created, e.g after a new package/App has been installed.
-	<br>
-	This is done using `systemctl reload univention-directory-manager-rest.service`
-	<br>
-	The listener module pushing the transactions into the provisioning-service can not reconnect to NATS yet.
-	<br>
-	If connection to NATS is lost, the listener must be restarted using `systemctl restart univention-directory-listener.service`.
-	<br>
-	The connection between primary DC and backup DC servers is not encrypted yet. No sensitive information should be used.
-	<br>
-	The App should only be used in internal test systems.
 	<br>
 	An example consumer can be found in the code snippet below. Please note that the web API is naturally language agnostic.
 	<br>
@@ -62,7 +48,7 @@ LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Se
 	import json
 	import requests
 
-	provisioning_url = "http://localhost:7778/"
+	provisioning_url = "http://localhost:7777/"
 	sub_name = "example"
 
 	def provisioning_admin_password():
