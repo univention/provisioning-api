@@ -61,14 +61,14 @@ async def test_cache_miss_during_modification(
         assert create_message is not None
         assert create_message.body.new["dn"] == group_dn
 
-        group_uuid = create_message.body.new["uuid"]
+        group_uoid = create_message.body.new["id"]
 
         await provisioning_client.set_message_status(
             groups_subscription, create_message.sequence_number, MessageProcessingStatus.ok
         )
 
-        await nats_kv_manager.delete(group_uuid)
-        print(f"Deleted cache entry for UUID {group_uuid}")
+        await nats_kv_manager.delete(group_uoid)
+        print(f"Deleted cache entry for UUID {group_uoid}")
 
         group.reload()
         group.properties["description"] = "modified description after cache deletion"

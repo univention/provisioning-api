@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
+import copy
 import datetime
 from unittest.mock import AsyncMock, Mock
 
@@ -23,7 +24,7 @@ def mock_ldap2udm():
     ldap2udm.ldap_to_udm = Mock(
         return_value={
             "dn": "cn=test-group,cn=groups,dc=example,dc=com",
-            "uuid": "test-uuid-123",
+            "id": "1234-uoid",
             "objectType": "groups/group",
             "properties": {"name": "test-group"},
         }
@@ -97,6 +98,7 @@ async def test_old_ldap_to_udm_obj_cache_miss(transformer_service, mock_cache, m
         "entryDN": [b"cn=test-group,cn=groups,dc=example,dc=com"],
         "univentionObjectType": [b"groups/group"],
         "cn": [b"test-group"],
+        "univentionObjectIdentifier": [b"1234-uoid"],
     }
 
     mock_cache.retrieve.return_value = {}
@@ -108,7 +110,7 @@ async def test_old_ldap_to_udm_obj_cache_miss(transformer_service, mock_cache, m
 
     assert result == {
         "dn": "cn=test-group,cn=groups,dc=example,dc=com",
-        "uuid": "test-uuid-123",
+        "id": "1234-uoid",
         "objectType": "groups/group",
         "properties": {"name": "test-group"},
     }
@@ -121,11 +123,12 @@ async def test_old_ldap_to_udm_obj_cache_hit(transformer_service, mock_cache, mo
     old_ldap_obj = {
         "entryUUID": [b"test-uuid-456"],
         "entryDN": [b"cn=cached-group,cn=groups,dc=example,dc=com"],
+        "univentionObjectIdentifier": [b"11234-uoid"],
     }
 
     cached_obj = {
         "dn": "cn=cached-group,cn=groups,dc=example,dc=com",
-        "uuid": "test-uuid-456",
+        "id": "11234-uoid",
         "objectType": "groups/group",
         "properties": {"name": "cached-group"},
     }
@@ -151,6 +154,32 @@ async def test_old_ldap_to_udm_obj_cache_miss_and_transform_fails(transformer_se
 
     with pytest.raises(RuntimeError, match="Cannot live transform old ldap object"):
         await transformer_service.old_ldap_to_udm_obj(old_ldap_obj)
+
+
+@pytest.mark.anyio
+async def test_existig_udm_v1_cache_object_converted_to_udm_v2(transformer_service, mock_cache, mock_ldap2udm):
+    old_ldap_obj = {
+        "entryUUID": [b"entryUUID"],
+        "entryDN": [b"cn=cached-group,cn=groups,dc=example,dc=com"],
+        "univentionObjectIdentifier": [b"some-uoid"],
+    }
+
+    cached_obj = {
+        "dn": "cn=cached-group,cn=groups,dc=example,dc=com",
+        "id": "username",
+        "uuid": "some-uuid",
+        "objectType": "groups/group",
+        "properties": {"name": "cached-group", "univentionObjectIdentifier": "some-uoid"},
+    }
+    mock_cache.retrieve.return_value = copy.deepcopy(cached_obj)
+
+    result = await transformer_service.old_ldap_to_udm_obj(old_ldap_obj)
+
+    mock_cache.retrieve.assert_called_once_with("entryUUID")
+    mock_ldap2udm.ldap_to_udm.assert_not_called()
+    assert not result == cached_obj
+    assert "uuid" not in result
+    assert result["id"] == "some-uoid"
 
 
 @pytest.mark.anyio
