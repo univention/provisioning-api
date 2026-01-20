@@ -120,14 +120,15 @@ async def test_create_user_with_extended_attribute(
     provisioning_client: ProvisioningConsumerClient,
     real_subscription: str,
 ):
-    user = create_user_via_udm_rest_api({"ProvisioningServiceEmail": "test@univention.de"})
+    extended_attribute, cli_name = create_extended_attribute
+    user = create_user_via_udm_rest_api({cli_name: "test@univention.de"})
 
     message = await provisioning_client.get_subscription_message(
         name=real_subscription,
         timeout=5,
     )
     assert message.body.new.get("dn") == user.dn
-    assert message.body.new["properties"]["ProvisioningServiceEmail"] == user.properties["ProvisioningServiceEmail"]
+    assert message.body.new["properties"][cli_name] == user.properties[cli_name]
 
 
 async def test_create_user_with_missing_extended_attribute(
