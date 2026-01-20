@@ -71,7 +71,7 @@ class TransformerService:
                 )
             except* ServiceUnavailable:
                 await acknowledgements.acknowledge_message_negatively()
-                loop = False  # don't raise excepton for temporary unavailable service, just exit loop
+                loop = False  # don't raise exception for temporary unavailable service, just exit loop
             except* Exception:  # output tracebacks for unexcpected/unknown situations like ServerError
                 await acknowledgements.acknowledge_message_negatively()
                 raise
