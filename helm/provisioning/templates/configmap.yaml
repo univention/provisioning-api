@@ -115,7 +115,7 @@ data:
   UDM_HOST: {{ include "provisioning.udmRestApi.host" . | quote }}
   UDM_PORT: {{ include "provisioning.udmRestApi.port" . | quote }}
   UDM_PROTOCOL: "http"
-  UDM_URL_PATH_PREFIX: ""
+  UDM_URL_PATH_PREFIX: "/univention"
 ...
 ---
 kind: "ConfigMap"
@@ -134,7 +134,7 @@ metadata:
 data:
   LDAP_PUBLISHER_NAME: {{ required ".Values.udmTransformer.config.ldapPublisherName is required." .Values.udmTransformer.config.ldapPublisherName | quote  }}
   LOG_LEVEL: {{ required ".Values.udmTransformer.config.LOG_LEVEL is required." .Values.udmTransformer.config.LOG_LEVEL | quote  }}
-
-  UDM_URL: {{ printf "http://%s:%s/udm" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
   UDM_NEEDS_RELOAD: "true"
+  UDM_PATH_PREFIX: "/univention"
+  UDM_URL: {{ printf "http://%s:%s/univention/udm" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
 ...

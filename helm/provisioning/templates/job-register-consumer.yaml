@@ -93,7 +93,7 @@ spec:
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
             - name: UDM_API_URL
-              value: {{ printf "http://%s:%s/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
+              value: {{ printf "http://%s:%s/univention/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
             - name: UDM_API_PATH
               value: {{ printf "settings/data/cn=stack-data-ums.done,cn=data,cn=univention,%s" (include "provisioning.udmTransformer.ldap.baseDn" .) }}
             - name: UDM_API_USERNAME

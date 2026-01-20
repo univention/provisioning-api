@@ -101,7 +101,7 @@ spec:
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
             - name: UDM_API_URL
-              value: {{ printf "http://%s:%s/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
+              value: {{ printf "http://%s:%s/univention/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
             - name: UDM_API_USERNAME
               value: "cn=admin"
             - name: UDM_API_PASSWORD

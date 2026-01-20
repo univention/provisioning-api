@@ -28,6 +28,7 @@ class Ldap2UdmAdapter(Ldap2Udm):
         self.udm_url = settings.udm_url
         self.udm_auth = (settings.udm_username, settings.udm_password)
         self.udm_needs_reload = settings.udm_needs_reload
+        self.udm_path_prefix = settings.udm_path_prefix
         self.udm = UDM.http(self.udm_url, *self.udm_auth)
 
     def discover_pods_ips(self):
@@ -46,7 +47,9 @@ class Ldap2UdmAdapter(Ldap2Udm):
             # ATTENTION: credentials via HTTP. okay as this is meant to be done only inside "kubernetes VPN"
             (
                 requests.get(
-                    "http://%s:9979/udm/-/reload" % ip, auth=self.udm_auth, headers={"Accept": "application/json"}
+                    "http://%s:9979%s/udm/-/reload" % (ip, self.udm_path_prefix),
+                    auth=self.udm_auth,
+                    headers={"Accept": "application/json"},
                 ),
             )
 

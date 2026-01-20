@@ -37,6 +37,8 @@ class UDMTransformerSettings(BaseSettings):
     udm_username: str
     # UDM: password
     udm_password: str
+    # UDM: path prefix - example: /univention
+    udm_path_prefix: str = "/univention"
     # UDM: needs reload - meaning: should reload UDM REST API on each extended_attributes change, used for Kubernetes only
     udm_needs_reload: bool = True
 
