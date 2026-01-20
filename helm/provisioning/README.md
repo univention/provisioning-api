@@ -220,6 +220,9 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.jsonSecretName | string | `""` |  |
 | registerConsumers.podAnnotations | object | `{}` |  |
 | registerConsumers.provisioningApiBaseUrl | string | `""` |  |
+| registerConsumers.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
+| registerConsumers.udm.auth.existingSecret.name | string | `nil` |  |
+| registerConsumers.udm.auth.password | string | `nil` |  |
 | replicaCount | object | `{"api":1,"dispatcher":1,"prefill":1,"udmTransformer":1}` | Set the amount of replicas of deployment. |
 | resources.api.limits.cpu | int | `1` |  |
 | resources.api.limits.memory | string | `"1Gi"` |  |

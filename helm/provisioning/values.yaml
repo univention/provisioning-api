@@ -244,6 +244,14 @@ registerConsumers:
   # reference this Secret so that it can register the consumer.
   createUsers: {}
 
+  udm:
+    auth:
+      password: null
+      existingSecret:
+        name: null
+        keyMapping:
+          password: null
+
   jsonSecretName: ""
   provisioningApiBaseUrl: ""
   additionalLabels: {}
