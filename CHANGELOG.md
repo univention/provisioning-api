@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.68.6](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.5...v0.68.6) (2026-01-22)
+
+
+### Bug Fixes
+
+* **e2e-tests:** Add new required UCR variables for the ldap server ([2433c9c](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/2433c9cd6902c6bfe8d00ee20f1dc401215d7cd1)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **e2e-tests:** Fix the extended-attribute test by adding a separate udm-rest-api for the udm-transformer ([f4ec696](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/f4ec6960980b742914d5c5f4ac5468a5737ed315)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **e2e-tests:** Randomize the extended attribute name for more reliable test reruns ([4629360](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/46293608cb2fd7b8fe1b80e84ce56131a6defa50)), closes [univention/dev/internal/team-nubus#1590](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1590)
+* **helm:** Fix values.yaml documentation ([2fc5bf0](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/2fc5bf0c9756d6fc5f65208b4dda5f6811866444)), closes [univention/dev/internal/team-nubus#1590](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1590)
+* **udm-transformer:** Activate udm-rest-api reloads after extended-attribute operations ([eb7026b](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/eb7026b0d55254fa30dc871c9d0f4f35e4607402)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **udm-transformer:** Fix the udm-rest-api path for extended attribute reload ([4988f45](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/4988f45d9a24dde87a76c0462a1fec3e7ecafd0c)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+* **udm-transformer:** Set the udm_needs_reload configuration to True by default ([38fdc95](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/38fdc959d894242d86150a1c9199e152ddade865)), closes [univention/dev/internal/team-nubus#1530](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1530)
+
 ## [0.68.5](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.4...v0.68.5) (2026-01-19)
 
 
