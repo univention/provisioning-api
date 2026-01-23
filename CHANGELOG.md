@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.8](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.7...v0.68.8) (2026-01-23)
+
+
+### Bug Fixes
+
+* **provisioning-listener:** Recreate subscription if NATS connection failed ([8394af6](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/8394af6cc3b96e1c9c6c7c00af5c1501d28bcce6))
+
 ## [0.68.7](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.6...v0.68.7) (2026-01-22)
 
 
