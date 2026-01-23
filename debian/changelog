@@ -1,3 +1,9 @@
+univention-provisioning-service (2.0.1) unstable; urgency=medium
+
+  * Fix listener reconnection to NATS
+
+ -- Julia Bremer <bremer@univention.de>  Fri, 23 Jan 2026 10:02:35 +0100
+
 univention-provisioning-service (2.0.0) unstable; urgency=medium
 
   * Add meta package, add configuration package, add stunnel config, adapt backup2master
