@@ -21,6 +21,7 @@ def ucr_ldap_producer_settings(settings: BaseSettings) -> Dict[str, Any]:
         return {}
 
     conf = {
+        "log_level": ucr.get("provisioning-service/log/level", "INFO"),
         "nats_user": ucr.get("nats/user"),
         "nats_host": ucr.get("nats/host", "localhost"),
         "nats_port": ucr.get("nats/port", 4222),

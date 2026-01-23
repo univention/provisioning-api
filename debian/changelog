@@ -1,3 +1,9 @@
+univention-provisioning-service (2.0.2) unstable; urgency=medium
+
+  * New UCR-Variable provisioning-service/log/level
+
+ -- Arvid Requate <requate@univention.de>  Fri, 23 Jan 2026 18:51:24 +0100
+
 univention-provisioning-service (2.0.1) unstable; urgency=medium
 
   * Fix listener reconnection to NATS

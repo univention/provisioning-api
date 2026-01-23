@@ -1,17 +1,3 @@
-[provisioning-service/udm-rest-api-host]
-Type = String
-Show = Install, Settings
-InitialValue = @%@ldap/master@%@
-Scope = outside
-Description = Fully qualified domain name (FQDN) of the UDM REST API host.
-
-[provisioning-service/primary]
-Type = String
-Show = Install, Settings
-InitialValue = @%@ldap/master@%@
-Scope = outside
-Description = Fully qualified domain name (FQDN) of the Primary Directory Node
-
 [nats/max_retry_count]
 Type = String
 Show = Install, Settings
@@ -32,3 +18,24 @@ Show = Install, Settings
 InitialValue = 3
 Scope = outside,inside
 Description = The maximum number of times a reconnection to the provisioning NATS service is attempted. After changing this setting the univention-directory-listener must be restarted.
+
+[provisioning-service/udm-rest-api-host]
+Type = String
+Show = Install, Settings
+InitialValue = @%@ldap/master@%@
+Scope = outside
+Description = Fully qualified domain name (FQDN) of the UDM REST API host.
+
+[provisioning-service/primary]
+Type = String
+Show = Install, Settings
+InitialValue = @%@ldap/master@%@
+Scope = outside
+Description = Fully qualified domain name (FQDN) of the Primary Directory Node
+
+[provisioning-service/log/level]
+Type = String
+Show = Install, Settings
+InitialValue = INFO
+Scope = outside,inside
+Description = The log level of the Provisioning Service
