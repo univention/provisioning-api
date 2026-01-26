@@ -5,6 +5,8 @@ from functools import lru_cache
 from typing import Any, Callable, Dict, Tuple
 
 from pydantic import BaseSettings, conint
+from univention.listener.handler_logging import \
+    calculate_loglevel  # used to consider listener/module/nubus-provisioning/debug/level and listener/debug/level as default
 
 SettingsSourceCallable = Callable[["BaseSettings"], Dict[str, Any]]
 
@@ -21,7 +23,7 @@ def ucr_ldap_producer_settings(settings: BaseSettings) -> Dict[str, Any]:
         return {}
 
     conf = {
-        "log_level": ucr.get("provisioning-service/log/level", "INFO"),
+        "log_level": ucr.get("provisioning-service/log/level", calculate_loglevel("nubus-provisioning")),  # defaults to config for listener module "nubus-provisioning"
         "nats_user": ucr.get("nats/user"),
         "nats_host": ucr.get("nats/host", "localhost"),
         "nats_port": ucr.get("nats/port", 4222),
@@ -41,6 +43,8 @@ def ucr_ldap_producer_settings(settings: BaseSettings) -> Dict[str, Any]:
 
 
 class LdapProducerSettings(BaseSettings):
+    # Log level
+    log_level: str
     # Nats user name specific to UdmProducerSettings
     nats_user: str
     # Nats password specific to UdmProducerSettings
