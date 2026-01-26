@@ -35,11 +35,3 @@ Description[de]=Listener bei Ausnahme beenden
 Categories=provisioning
 Type=bool
 Default=false
-
-[provisioning-service/log/level]
-Description[en]=Log level for the Provisioning Service
-Description[de]=Log level für den Provisioning Service
-Categories=provisioning
-Type=str
-Regex=^(ERROR|WARNING|PROCESS|INFO|DEBUG|TRACE)$
-Default=WARNING

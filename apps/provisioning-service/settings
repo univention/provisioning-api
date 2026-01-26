@@ -36,6 +36,7 @@ Description = Fully qualified domain name (FQDN) of the Primary Directory Node
 [provisioning-service/log/level]
 Type = String
 Show = Install, Settings
+Values = CRITICAL, ERROR, WARNING, INFO, DEBUG
 InitialValue = WARNING
-Scope = outside,inside
+Scope = outside
 Description = The log level of the Provisioning Service
