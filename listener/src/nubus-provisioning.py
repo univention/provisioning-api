@@ -97,7 +97,10 @@ class LdapListener(ListenerModuleHandler):
             except Exception as error:
                 self.logger.error("Failed to send the LDAP message to NATS: %r, retries: %d", error, attempt)
                 exception = error
-                await self._async_ensure_queue_exists(retry=False)
+                try:
+                    await self._async_ensure_queue_exists(retry=False)
+                except Exception:
+                    pass
         raise exception
 
     def kill_listener_process(self) -> None:
