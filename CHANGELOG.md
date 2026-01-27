@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.0](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.8...v0.69.0) (2026-01-27)
+
+
+### Features
+
+* **app:** UCR provisioning-service/log/level=INFO ([1ef3146](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/1ef31464a939e2d005cb2a9659853bb7007ce539)), closes [univention/dev/projects/provisioning#116](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/116)
+
 ## [0.68.8](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.68.7...v0.68.8) (2026-01-23)
 
 
