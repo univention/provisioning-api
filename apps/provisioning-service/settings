@@ -34,9 +34,10 @@ Scope = outside
 Description = Fully qualified domain name (FQDN) of the Primary Directory Node
 
 [provisioning-service/log/level]
-Type = String
+Type = List
 Show = Install, Settings
 Values = CRITICAL, ERROR, WARNING, INFO, DEBUG
+Labels = CRITICAL, ERROR, WARNING, INFO, DEBUG
 InitialValue = WARNING
 Scope = outside
 Description = The log level of the Provisioning Service
