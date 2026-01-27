@@ -2,8 +2,11 @@
 ID = provisioning-service-backend
 Code = 4U
 Version = 2.0
-Name = Provisioning Service Backend (Preview)
-Vendor = Univention
+Name = Provisioning Service Backend
+Vendor = Univention GmbH
+SupportedUcsVersions = 5.2-4 errata346
+ServerRole = domaincontroller_master, domaincontroller_backup
+DefaultPackages = univention-provisioning-service
 WithoutRepository = True
 DockerScriptRestoreDataAfterSetup =
 DockerScriptStoreData =
@@ -13,7 +16,26 @@ DockerScriptUpdatePackages =
 DockerScriptUpdateAppVersion =
 DockerScriptUpdateRelease =
 DockerScriptSetup =
-DefaultPackages = univention-provisioning-service
-ServerRole = domaincontroller_master, domaincontroller_backup
+LongDescription = The Provisioning Service Backend app is a package based app
+    that installs integration packages for the Provisioning Service in UCS.
+    The App Center automatically installs it as a dependency of the Provisioning Service.
+    The packages include a listener module and host configuration for TLS encryption between multiple installations.
+    <br>
+    </br>
+    <br>
+    For more details refer to the official <a href="https://docs.software-univention.de/manual/5.2/en/domain-ldap/nubus-provisioning-service.html">UCS Provisioning Service documentation</a> and the <a href="https://docs.software-univention.de/nubus-kubernetes-customization/1.x/en/index.html">Nubus Customization and Modification Manual</a>.
+    </br>
+SupportUrl = https://www.univention.com/products/support/community-support/
+Contact = sales@univention.de
+WebsiteVendor = https://univention.com/
+NotificationEmail = appcenter-reporting@univention.de
+License = free
+NotifyVendor = True
 Logo = logo.svg
+Description = Provisioning Service Backend
+
+[de]
+SupportUrl = https://www.univention.de/produkte/support/community-support/
+WebsiteVendor = https://univention.de/
+Name = Provisioning Service Backend
 

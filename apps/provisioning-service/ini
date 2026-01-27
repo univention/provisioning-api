@@ -2,9 +2,9 @@
 ID = provisioning-service
 Code = 4T
 Version = 2.0
-Name = Provisioning Service (preview)
+Name = Provisioning Service
 Vendor = Univention GmbH
-SupportedUcsVersions = 5.2-2
+SupportedUcsVersions = 5.2-4 errata346
 ServerRole = domaincontroller_master, domaincontroller_backup
 WebInterface = /univention/provisioning
 WebInterfaceName = Provisioning Service
@@ -24,107 +24,16 @@ DockerScriptSetup =
 DockerMainService = provisioning-api
 RequiredAppsInDomain =
 RequiredApps = provisioning-service-backend
-LongDescription = <b>This is a preview</b> of the upcoming &quot;Provisioning Service&quot; from Nubus. The web API allows Consumers to process certain Events that other services wrote into the queue. Note that this is a tech preview that does not come with any guarantee to stability or updatability, nor a final documentation.
-	<br>
-	<br>
-	That being said, it can be used by interested software vendors to write their own consumer services against this API. A first document can be found&nbsp;<a href="https://docs.software-univention.de/nubus-kubernetes-customization/1.x/en/api/provisioning.html">here</a>.
-	<br>
-	<br>
-	<b>This is a preview App. Not all use cases are supported yet!</b>
-	The App should not be installed in production systems, only in internal test systems for security reasons.
-	Some working use cases are:
-	<br>
-	The App can be installed on a primary DC and a backup DC server. The queues are connected between them.
-	<br>
-	Consumers can be registered against any of the DCs where the provisioning is installed.
-	<br>
-	The provisioning reacts to all UDM objects. All create, modify, move and delete operations can be observed.
-	<br>
-	Some limitations are:
-	<br>
-	The UDM REST API has to be manually reloaded when new UDM extensions are created, e.g after a new package/App has been installed.
-	<br>
-	This is done using `systemctl reload univention-directory-manager-rest.service`
-	<br>
-	The listener module pushing the transactions into the provisioning-service can not reconnect to NATS yet.
-	<br>
-	If connection to NATS is lost, the listener must be restarted using `systemctl restart univention-directory-listener.service`.
-	<br>
-	The connection between primary DC and backup DC servers is not encrypted yet. No sensitive information should be used.
-	<br>
-	The App should only be used in internal test systems.
-	<br>
-	An example consumer can be found in the code snippet below. Please note that the web API is naturally language agnostic.
-	<br>
-	<br>
-	<pre>
-	#!/usr/bin/python3
-	import json
-	import requests
-
-	provisioning_url = "http://localhost:7778/"
-	sub_name = "example"
-
-	def provisioning_admin_password():
-	    return json.load(open("/etc/provisioning-secrets.json"))["ADMIN_NATS_PASSWORD"]
-
-	def create_sub(provisioning_admin_username, provisioning_admin_password):
-	    create_sub_json = {
-	      "name": sub_name,
-	      "realms_topics": [
-	        {
-	          "realm": "udm",
-	          "topic": "users/user"
-	        }
-	      ],
-	      "request_prefill": True,
-	      "password": "s3cr3t"
-	    }
-	    resp = requests.post(
-	        provisioning_url + "v1/subscriptions",
-	        json=create_sub_json,
-	        auth=(provisioning_admin_username, provisioning_admin_password)
-	    )
-	    return resp.status_code
-
-	create_sub("admin", provisioning_admin_password())
-
-	# get the next message
-	resp = requests.get(
-	    provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name,
-	    auth=(sub_name, "s3cr3t")
-    )
-	resp_json = resp.json()
-	while resp_json:
-	    # process the message
-	    print(resp_json)
-
-	    # tell the queue that you successfully processed this message
-	    seq_num = resp.json()["sequence_number"]
-	    stat_json = {
-	      "status": "ok"
-	    }
-	    resp = requests.patch(
-	        provisioning_url + "v1/subscriptions/%s/messages/%s/status" % (sub_name, seq_num),
-	        json=stat_json,
-	        auth=(sub_name, "s3cr3t")
-        )
-
-	    # now you can again get the next message
-	    resp = requests.get(
-	        provisioning_url + "v1/subscriptions/%s/messages/next" % sub_name,
-	        auth=(sub_name, "s3cr3t")
-        )
-	    resp_json = resp.json()
-
-	print("Timeout, no more events")
-
-	# finally we could delete the subscription again
-	# requests.delete(
-	#   provisioning_url + "v1/subscriptions/%s" % sub_name,
-	#   auth=("admin", provisioning_admin_password())
-	# )
-	</pre>
+LongDescription = The Provisioning Service is an event and messaging service that can notify interested services about
+    events in the LDAP directory service. When data changes in the LDAP directory on the Primary
+    Directory Node, the Provisioning Service receives a notification about the change and notifies any
+    subscribed services about the change. In contrast to the Univention Directory Listener, it provides
+    the UDM representation of the change objects instead of the LDAP representation.
+    <br>
+    </br>
+    <br>
+    For more details refer to the official <a href="https://docs.software-univention.de/manual/5.2/en/domain-ldap/nubus-provisioning-service.html">UCS Provisioning Service documentation</a> and the <a href="https://docs.software-univention.de/nubus-kubernetes-customization/1.x/en/index.html">Nubus Customization and Modification Manual</a>.
+    </br>
 SupportUrl = https://www.univention.com/products/support/community-support/
 Contact = sales@univention.de
 WebsiteVendor = https://univention.com/
@@ -132,10 +41,10 @@ NotificationEmail = appcenter-reporting@univention.de
 License = free
 NotifyVendor = True
 Logo = logo.svg
-Description = preview of the upcoming "Provisioning Service" from Nubus
+Description = Provisioning Service
 
 [de]
 SupportUrl = https://www.univention.de/produkte/support/community-support/
 WebsiteVendor = https://univention.de/
-Name = Provisioning Service (preview)
+Name = Provisioning Service
 
