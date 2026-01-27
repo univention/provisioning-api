@@ -24,7 +24,7 @@ services:
     restart: "unless-stopped"
     environment:
       - PLATFORM_UCS=true
-      -  LOG_LEVEL=DEBUG
+      - LOG_LEVEL=@!@print(configRegistry.get("provisioning-service/log/level", "WARNING"), end="")@!@
       -  NATS_HOST=nats
       -  NATS_PORT=4222
       -  NATS_USER=api
@@ -54,7 +54,7 @@ services:
     restart: "unless-stopped"
     environment:
       - PLATFORM_UCS=true
-      -  LOG_LEVEL=DEBUG
+      - LOG_LEVEL=@!@print(configRegistry.get("provisioning-service/log/level", "WARNING"), end="")@!@
       @!@print("-  NATS_HOST_PULL=nats" if configRegistry.get('server/role').lower() == "domaincontroller_master" else f"-  NATS_HOST_PULL={configRegistry.get('hostname')}.{configRegistry.get('domainname')}")@!@
       @!@print("-  NATS_PORT_PULL=4222" if configRegistry.get('server/role').lower() == "domaincontroller_master" else f"-  NATS_PORT_PULL={configRegistry.get('nats/stunnel/accept/port', 4230)}")@!@
       -  NATS_HOST_PUSH=nats
@@ -83,7 +83,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
         - PLATFORM_UCS=true
-        - LOG_LEVEL=DEBUG
+        - LOG_LEVEL=@!@print(configRegistry.get("provisioning-service/log/level", "WARNING"), end="")@!@
         - NATS_HOST=nats
         - NATS_PORT=4222
         - NATS_USER=udm-transformer
@@ -111,7 +111,7 @@ services:
     restart: "unless-stopped"
     environment:
      - PLATFORM_UCS=true
-     - LOG_LEVEL=DEBUG
+     - LOG_LEVEL=@!@print(configRegistry.get("provisioning-service/log/level", "WARNING"), end="")@!@
      - NATS_HOST=nats
      - NATS_PORT=4222
      - PROVISIONING_API_HOST=provisioning-api
