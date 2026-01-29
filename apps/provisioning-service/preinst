@@ -34,7 +34,7 @@ NATS_CONF = """{{
     users: [
       {{
         user: api
-        password: {NATS_PASSWORD}
+        password: "{NATS_PASSWORD}"
         permissions: {{
           publish: '>'
           subscribe: '>'
@@ -42,7 +42,7 @@ NATS_CONF = """{{
       }}
       {{
         user: dispatcher
-        password: {NATS_PASSWORD}
+        password: "{NATS_PASSWORD}"
         permissions: {{
           publish: '>'
           subscribe: '>'
@@ -50,7 +50,7 @@ NATS_CONF = """{{
       }}
       {{
         user: udm-transformer
-        password: {NATS_PASSWORD}
+        password: "{NATS_PASSWORD}"
         permissions: {{
           publish: '>'
           subscribe: '>'
@@ -58,7 +58,7 @@ NATS_CONF = """{{
       }}
       {{
         user: listener-module
-        password: {NATS_PASSWORD}
+        password: "{NATS_PASSWORD}"
         permissions: {{
           publish: '>'
           subscribe: '>'
@@ -66,7 +66,7 @@ NATS_CONF = """{{
       }}
       {{
         user: prefill
-        password: {NATS_PASSWORD}
+        password: "{NATS_PASSWORD}"
         permissions: {{
           publish: '>'
           subscribe: '>'
