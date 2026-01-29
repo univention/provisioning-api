@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.1...v0.70.2) (2026-01-29)
+
+
+### Bug Fixes
+
+* **nats-conf:** Quote NATS Password. ([984e49b](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/984e49bc57f9606c6e2839efbc943ea7c6b21e45)), closes [univention/dev/projects/provisioning#120](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/120)
+
 ## [0.70.1](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.0...v0.70.1) (2026-01-27)
 
 
