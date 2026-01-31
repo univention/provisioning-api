@@ -15,7 +15,7 @@ requires-python = "==3.11.*"
 dependencies = [
     "asgi-correlation-id<5.0.0,>=4.3.3",
     "bcrypt==4.2.0",
-    "cachetools<6.0.0,>=5.5.0",
+    "cachetools<6.3.0,>=6.2.6",
     "fastapi[standard]<1.0.0,>=0.115.0",
     "fastapi-utils<1.0.0,>=0.7.0",
     "httptools<1.0.0,>=0.6.1",
