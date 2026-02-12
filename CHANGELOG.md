@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.2...v0.70.3) (2026-02-12)
+
+
+### Bug Fixes
+
+* Configure UDM REST API root path ([5721d02](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/5721d021add4f0c6b9ab874b5f2c82163def1a05)), closes [univention/dev/internal/team-nubus#1553](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1553)
+
 ## [0.70.2](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.1...v0.70.2) (2026-01-29)
 
 
