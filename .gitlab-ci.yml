@@ -135,7 +135,7 @@ test-end-to-end:
 test-chart-provisioning:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.0"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.9@sha256:1de1a4b4eb089d93b43987f5db30ca37887ff79863510276a8230a3f2c41faa1"
   script:
     - helm dep build helm/provisioning
     - pytest tests/chart/provisioning
@@ -143,7 +143,7 @@ test-chart-provisioning:
 test-chart-udm-listener:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.0"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.9@sha256:1de1a4b4eb089d93b43987f5db30ca37887ff79863510276a8230a3f2c41faa1"
   script:
     - helm dep build helm/udm-listener
     - pytest tests/chart/udm-listener
