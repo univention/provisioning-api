@@ -33,7 +33,7 @@ deb_build_git:
 deb_repo_import:
   stage: $[[ inputs.build_stage ]]
   variables:
-    GIT_STRATEGY: none
+    GIT_DEPTH: "1"
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_REF_PROTECTED == "true"
@@ -44,7 +44,7 @@ deb_repo_import:
       echo "DEBIAN_SOURCE_DIRECTORIES=$DEBIAN_SOURCE_DIRECTORIES" > .dotenv
       declare -a FAILED_IMPORTS
       for srcdir in $DEBIAN_SOURCE_DIRECTORIES; do
-        PACKAGE=$(basename "$srcdir")
+        PACKAGE="$(dpkg-parsechangelog -S Source -l $srcdir/debian/changelog)"
         if ! repo_admin.py \
           --git "$CI_REPOSITORY_URL" \
           --force \
@@ -69,7 +69,7 @@ deb_repo_build:
   needs:
     - job: deb_repo_import
   variables:
-    GIT_STRATEGY: none
+    GIT_DEPTH: "1"
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_REF_PROTECTED == "true"
@@ -79,7 +79,7 @@ deb_repo_build:
     - |
       declare -a FAILED_BUILDS
       for srcdir in $DEBIAN_SOURCE_DIRECTORIES; do
-        PACKAGE=$(basename "$srcdir")
+        PACKAGE="$(dpkg-parsechangelog -S Source -l $srcdir/debian/changelog)"
         if ! build-package-ng \
           --no-pbuilder-update \
           --release $[[ inputs.ucs_base_version ]]-0-0 \
