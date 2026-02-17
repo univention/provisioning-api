@@ -7,6 +7,10 @@ spec:
       description: "The UCS base version the app versions are scoped for."
     scope:
       description: "The scope to import the package into."
+    yaml_based_upload:
+      default: true
+      type: boolean
+      description: "Upload packages from yaml files in doc/errata/staging/. If set to false upload from /var/univention/buildsystem2/apt/ucs_${UCS_RELEASE}-0-${SCOPE}/*/*.deb"
     additional_upload_needs:
       type: array
       default:
@@ -92,6 +96,12 @@ deb_repo_build:
         echo "The following packages could not be built: " "${FAILED_BUILDS[@]}"
         exit 1
       fi
+    - rm artifacts/* || true
+    - install -d -m 755 artifacts || true
+    - cp /var/univention/buildsystem2/apt/ucs_$[[ inputs.ucs_base_version ]]-0-$[[ inputs.scope ]]/*/*.deb artifacts/
+  artifacts:
+    paths:
+      - artifacts
 
 upload_from_git:
   stage: $[[ inputs.build_stage ]]
@@ -122,8 +132,12 @@ upload_from_build_system:
     - export HOME="$CI_PROJECT_DIR"
     - echo "$APPCENTER_CONTROL_USERNAME" > "$HOME/.univention-appcenter-user"
     - echo "$APPCENTER_CONTROL_PASSWORD" > "$HOME/.univention-appcenter-pwd"
-    - staging_yamls="$(find doc/errata/staging/ -name "*.yaml" -not -name "0template.yaml")"
     - |
-      if [ -n "$staging_yamls" ]; then
-        copy_app_binaries --yes-i-really-want-it-non-interactive --ucsversion $[[ inputs.ucs_base_version ]] --appversion "$APP_VERSION" --upload $(find doc/errata/staging/ -name "*.yaml" -not -name "0template.yaml")
+      if [ "$[[ inputs.yaml_based_upload ]]" == "false" ]; then
+        univention-appcenter-control upload --noninteractive --upload-packages-although-published "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" $(find artifacts/ -name '*.deb')
+      else
+        staging_yamls="$(find doc/errata/staging/ -name "*.yaml" -not -name "0template.yaml")"
+        if [ -n "$staging_yamls" ]; then
+          copy_app_binaries --yes-i-really-want-it-non-interactive --ucsversion $[[ inputs.ucs_base_version ]] --appversion "$APP_VERSION" --upload $(find doc/errata/staging/ -name "*.yaml" -not -name "0template.yaml")
+        fi
       fi
