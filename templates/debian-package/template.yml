@@ -86,6 +86,7 @@ deb_repo_build:
         PACKAGE="$(dpkg-parsechangelog -S Source -l $srcdir/debian/changelog)"
         if ! build-package-ng \
           --no-pbuilder-update \
+          --force rebuild \
           --release $[[ inputs.ucs_base_version ]]-0-0 \
           --scope $[[ inputs.scope ]] \
           --package "$PACKAGE"; then
