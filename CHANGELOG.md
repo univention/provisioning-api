@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.5](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.4...v0.70.5) (2026-02-25)
+
+
+### Bug Fixes
+
+* **deps:** Update nubus/images/wait-for-dependency Docker tag to v0.36.6 ([17fdf93](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/17fdf93be52cdff6025720c78ee9a25b63fe9f3e)), closes [#0](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/0)
+
 ## [0.70.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.3...v0.70.4) (2026-02-25)
 
 
