@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.4](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.3...v0.70.4) (2026-02-25)
+
+
+### Bug Fixes
+
+* **deps:** Update gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python Docker tag to v5.2.4-build.20260224 ([84695a0](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/84695a0fe676edc0d56051b02966d46233bb1f3c)), closes [#0](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/0)
+
 ## [0.70.3](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.2...v0.70.3) (2026-02-12)
 
 
