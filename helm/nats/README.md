@@ -685,7 +685,7 @@ null
 			<td>natsBox.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.19.2-nonroot@sha256:0da9473a3328e5b4c94df41c21f7a62d876467709c03efc1a886336328e3f49b"
+"0.19.3-nonroot@sha256:c9ea3192977338d7b562ab4c21c234a09ed217a1ce4ec812cec2b20b17defb51"
 </pre>
 </td>
 			<td></td>
