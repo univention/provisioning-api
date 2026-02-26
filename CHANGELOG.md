@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.7](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.6...v0.70.7) (2026-02-26)
+
+
+### Bug Fixes
+
+* Bump nats container images ([77fe1e6](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/77fe1e6c7b08046c3b2956836b663c3097945fa2)), closes [univention/dev/projects/provisioning#123](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/123)
+
 ## [0.70.6](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.5...v0.70.6) (2026-02-26)
 
 
