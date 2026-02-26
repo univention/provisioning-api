@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.6](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.5...v0.70.6) (2026-02-26)
+
+
+### Bug Fixes
+
+* bump nats helm chart ([5d3ddcf](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/5d3ddcf0da7d6568858333dd9e9cff2085d83797)), closes [univention/dev/internal/team-horizon#10](https://git.knut.univention.de/univention/dev/internal/team-horizon/issues/10)
+
 ## [0.70.5](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.4...v0.70.5) (2026-02-25)
 
 
