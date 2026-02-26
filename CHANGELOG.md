@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.8](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.7...v0.70.8) (2026-02-26)
+
+
+### Bug Fixes
+
+* **deps:** Update gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/listener-base/listener-base Docker tag to v0.14.8 ([012920a](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/012920a54e4347215719a1e6f3e18f30f1dd322d)), closes [#0](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/0)
+
 ## [0.70.7](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.6...v0.70.7) (2026-02-26)
 
 
