@@ -129,7 +129,7 @@ spec:
     - echo "Rendering all appcenter file templates."
     - render_appcenter_files
     - echo "Uploading appcenter files for $APP_UCS_VERSION/$APP_ID=$APP_VERSION."
-    - UPLOAD_FILES=$(find "$APPCENTER_FILE_DIR" -maxdepth 1 -type f -not -name '*.jinja' | xargs)
+    - UPLOAD_FILES=$(find "$APPCENTER_FILE_DIR" -maxdepth 1 -type f,l -not -name '*.jinja' | xargs)
     - 'echo "Uploading files: $UPLOAD_FILES"'
     - univention-appcenter-control upload --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_VERSION" $UPLOAD_FILES
 
