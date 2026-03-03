@@ -16,7 +16,7 @@ dependencies = [
     "asgi-correlation-id<5.0.0,>=4.3.3",
     "bcrypt==4.2.0",
     "cachetools<6.0.0,>=5.5.0",
-    "fastapi[standard]<1.0.0,>=0.115.0",
+    "fastapi[standard]<1.0.0,>=0.120.0",
     "fastapi-utils<1.0.0,>=0.7.0",
     "httptools<1.0.0,>=0.6.1",
     "nubus-provisioning-backends",
