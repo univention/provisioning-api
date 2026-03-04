@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import json
+import time
 import uuid
 from typing import Any, AsyncGenerator, Callable, Coroutine, Optional
 
@@ -384,7 +385,7 @@ def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict
 
 
 @pytest.fixture()
-def create_extended_attribute(create_udm_obj, udm) -> tuple[UdmObject, str]:
+def create_extended_attribute(create_udm_obj, udm, test_settings: E2ETestSettings) -> tuple[UdmObject, str]:
     suffix = str(uuid.uuid4())[:8]
     cli_name = f"ProvisioningServiceEmail_{suffix}"
     properties = {
@@ -408,5 +409,22 @@ def create_extended_attribute(create_udm_obj, udm) -> tuple[UdmObject, str]:
     }
     position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
     extended_attribute = create_udm_obj("settings/extended_attribute", properties, position)
+    # Poll the UDM REST API until the new extended attribute appears in the
+    # users/user schema. This ensures the UDM REST API has reloaded its module
+    # definitions before the test creates a user with it. Without this wait, the
+    # UDM Transformer may call /directory/unmap-ldap-attributes before the reload
+    # triggered by the settings/extended_attribute LDAP event has completed,
+    # causing the extended attribute to be silently dropped from the properties.
+    deadline = time.monotonic() + 30
+    while time.monotonic() < deadline:
+        response = requests.get(
+            f"{test_settings.udm_rest_api_base_url}/users/user/add",
+            auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
+        )
+        if cli_name in response.text:
+            break
+        time.sleep(1)
+    else:
+        raise TimeoutError(f"Extended attribute {cli_name!r} did not appear in UDM REST API schema within 30s")
     yield extended_attribute, cli_name
     extended_attribute.delete()

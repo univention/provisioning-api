@@ -83,10 +83,17 @@ async def test_simple_message_timing(
     await purge_stream(queue.queue_name)
 
     print("Adding simple messages to the incoming queue")
-    for _ in range(test_number):
+    for _ in range(test_number + 1):
         messages.append(create_message_via_events_api(test_settings))
 
     await asyncio.sleep(1)
+
+    print("Running warmup request")
+    warmup_response = await provisioning_client.get_subscription_message(name=subscription)
+    assert warmup_response.body == messages[0]
+    await provisioning_client.set_message_status(
+        subscription, warmup_response.sequence_number, status=MessageProcessingStatus.ok
+    )
 
     print("Starting the test run")
     for i in range(test_number):
@@ -94,7 +101,7 @@ async def test_simple_message_timing(
         response = await provisioning_client.get_subscription_message(name=subscription)
         get_durations.append((time.perf_counter() - tic) * 1000)
 
-        assert response.body == messages[i]
+        assert response.body == messages[i + 1]
         responses.append(response)
         print(f"request time was {get_durations[-1]:.2f}")
 
@@ -135,16 +142,23 @@ async def test_udm_message_timing(
     await purge_stream(queue.queue_name)
 
     print("Adding udm messages to the incoming queue")
-    for _ in range(test_number):
+    for _ in range(test_number + 1):
         messages.append(create_user_via_udm_rest_api())  # noqa: F841
 
     await asyncio.sleep(1)
+
+    print("Running warmup request")
+    warmup_response = await provisioning_client.get_subscription_message(name=subscription)
+    assert warmup_response.body.new["dn"] == messages[0].dn
+    await provisioning_client.set_message_status(
+        subscription, warmup_response.sequence_number, MessageProcessingStatus.ok
+    )
 
     print("Starting the test run")
     for i in range(test_number):
         tic = time.perf_counter()
         response = await provisioning_client.get_subscription_message(name=subscription)
-        assert response.body.new["dn"] == messages[i].dn
+        assert response.body.new["dn"] == messages[i + 1].dn
         responses.append(response)
         get_durations.append((time.perf_counter() - tic) * 1000)
         print(f"request time was {get_durations[-1]:.2f}")
