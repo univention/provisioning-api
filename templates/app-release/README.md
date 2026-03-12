@@ -32,10 +32,6 @@ Version = {{ APP_VERSION }}
 If you build a docker app you need to provide the name of the job that builds the docker image as the input `app_build_job_name`.
 This job is required to export the variable `IMAGE_TAG`, that contains the tag of the docker image for the release.
 
-## Templating
-
-The `app-release` component allows for templating of appcenter files via `jinja`.
-
 To make use of this feature, simply append `.jinja` to any appcenter file within the `appcenter_file_dir`.
 Within the template you have access to the full feature set of jinja.
 Its context is composed of all environment variables the `update_appcenter` job has access to.
@@ -51,6 +47,12 @@ Per default the following environment variables are available next to Gitlab Pip
 - APP_COMPONENT_ID
 - APP_UCS_VERSION
 - APP_NAME
+
+You can include raw files by using a filter suplied by this componet:
+
+```jinja
+{{ '<path_to_your_file>' | source }}
+```
 
 ## Behavior
 

@@ -6,3 +6,4 @@ COPY create_app_version.sh /usr/bin/create_app_version
 COPY delete_app_version.sh /usr/bin/delete_app_version
 COPY render_appcenter_files.sh /usr/bin/render_appcenter_files
 COPY default_release_text.txt /var/lib/default_release_text.txt
+COPY jinja_source_file.py /var/lib/jinja_source_file.py
