@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.9](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.8...v0.70.9) (2026-03-12)
+
+
+### Bug Fixes
+
+* Dependency updates ([01bcb05](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/01bcb058d89f9ab72a8189ee2561e835551a5026)), closes [univention/dev/internal/team-nubus#1477](https://git.knut.univention.de/univention/dev/internal/team-nubus/issues/1477)
+
 ## [0.70.8](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.7...v0.70.8) (2026-02-26)
 
 
