@@ -8,7 +8,7 @@ annotations:
 apiVersion: "v2"
 dependencies:
   - name: "nubus-common"
-    version: "0.28.0"
+    version: "0.29.12"
     repository: "oci://artifacts.software-univention.de/nubus/charts"
   - name: "nats"
     version: "0.7.13"
