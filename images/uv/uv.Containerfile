@@ -1,6 +1,6 @@
 ARG DOCKER_PROXY
-FROM ${DOCKER_PROXY}python:3.7-slim-bullseye AS python3.7
-FROM ghcr.io/astral-sh/uv:python3.14-trixie
+FROM ${DOCKER_PROXY}python:3.7-slim-bookworm AS python3.7
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm
 
 # python3.7 is not available through uv, but we need it for UCS 5.0
 # For a list of python version in uv, see `uv python list --managed-python`
