@@ -100,6 +100,36 @@ build_python:
     DOCKERFILE_PATH: "images/python/python.Containerfile"
     KANIKO_BUILD_CONTEXT: "images/python"
 
+build_uv:
+  stage: build
+  extends: .kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "images/uv/**/*"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/uv"
+    DOCKERFILE_PATH: "images/uv/uv.Containerfile"
+    KANIKO_BUILD_CONTEXT: "images/uv"
+
+build_allure:
+  stage: build
+  extends: .kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "images/allure/**/*"
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/allure"
+    DOCKERFILE_PATH: "images/allure/allure.Containerfile"
+    KANIKO_BUILD_CONTEXT: "images/allure"
+
 build_app_release:
   stage: build
   extends: .kaniko
