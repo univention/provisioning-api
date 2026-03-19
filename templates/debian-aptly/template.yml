@@ -12,6 +12,9 @@
 #   aptly-remove   — delete publish + repo on environment stop
 #   .build-deb     — hidden template for multi-package repos
 #   build-deb      — concrete single-package build job
+#
+# Note: Consuming projects can include univention/dev/ucs/.gitlab-ci/base.yml
+# and use $UCS_VERSION as input to inherit version from UCS repo.
 
 spec:
   inputs:
@@ -24,9 +27,9 @@ spec:
       type: string
       default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/deb-builder-5.2:latest"
     ucs-version:
-      description: "Full UCS version, e.g. 5.2-5"
+      description: "Full UCS version, e.g. 5.2-5 (use $UCS_VERSION from univention/dev/ucs base.yml)"
       type: string
-      default: "5.2-5"
+      default: "$UCS_VERSION"
     aptly-api:
       description: "Aptly API base URL"
       type: string
@@ -99,7 +102,7 @@ aptly-remove:
   variables:
     APTLY: $[[ inputs.aptly-api ]]
     APT: $[[ inputs.apt-url ]]
-    UCS_VERSION: $[[ inputs.ucs-version ]]
+    UCS_VERSION: $[[ inputs.ucs-version | expand_vars ]]
     APTLY_REPO: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
   needs:
     - prepare-aptly
