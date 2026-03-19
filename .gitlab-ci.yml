@@ -163,7 +163,7 @@ build_deb_builder52:
   extends: .build_deb_builder
   variables:
     CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/deb-builder-5.2"
-    KANIKO_ARGS: "--build-arg UCSVERSION=521"
+    KANIKO_ARGS: "--build-arg UCSVERSION=525"
 
 build_deb_builder50:
   extends: .build_deb_builder

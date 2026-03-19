@@ -1,0 +1,56 @@
+#!/bin/bash
+# SPDX-FileCopyrightText: 2025-2026 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+
+set -e -u
+
+base="${1:?Usage: $0 <package-dir>}"
+
+section_start() {
+    printf '\e[0Ksection_start:%s:%s[collapsed=true]\r\e[0K%s\n' "$(date +%s)" "$1" "$2"
+}
+
+section_end() {
+    printf '\e[0Ksection_end:%s:%s\r\e[0K\n' "$(date +%s)" "$1"
+}
+
+# --- Prepare build environment ---
+section_start prep "Preparing build environment"
+
+echo man-db man-db/auto-update boolean false | debconf-set-selections
+echo 'path-exclude /etc/univention/templates/info/*.info' > /etc/dpkg/dpkg.cfg.d/no-ucr
+
+# Add branch repo (project-namespaced)
+echo "deb [trusted=yes] $APT/$CI_PROJECT_NAME $CI_COMMIT_REF_SLUG main" \
+    >"/etc/apt/sources.list.d/${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}.list"
+
+apt-get -qq update
+
+section_end prep
+
+# --- Install build dependencies ---
+cd "$base"
+
+section_start build_dep "Installing build dependencies"
+apt-get -q --assume-yes build-dep .
+section_end build_dep
+
+# --- Version bump for MRs ---
+if [ "${ORIGINAL_SOURCE:-}" = "merge_request_event" ]; then
+    apt-get --assume-yes --no-install-recommends install devscripts
+    current_date=$(dpkg-parsechangelog -SDate)
+    dch -D unstable -v "$(dpkg-parsechangelog -SVersion)A~${UCS_VERSION//-/.}.$(date +%Y%m%d%H%M)" "pipeline version bump"
+    sed -i "0,/^ -- /s/^ -- .*$/ -- Univention GmbH <packages@univention.de>  $current_date/" debian/changelog
+fi
+
+# Reproducible builds: normalize timestamps
+find . -exec touch -m -h -c -d "@${SOURCE_DATE_EPOCH:-$(dpkg-parsechangelog -STimestamp)}" {} +
+
+# --- Build ---
+section_start build "Building binary package"
+dpkg-buildpackage -uc -us -b --jobs-try=auto
+section_end build
+
+# --- Upload ---
+cd "$CI_PROJECT_DIR"
+"${0%/*}/aptly-upload" "${base}"_*.changes
