@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2025-2026 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+#
+# GitLab CI/CD Component: debian-errata-publish
+#
+# Publishes Debian packages to the errata repository via repo_admin.py
+# and build-package-ng. Triggered on tags or manually.
+#
+# Jobs produced:
+#   errata-import  — imports package metadata to the build system
+#   errata-build   — builds and publishes the package
+#
+# Note: Include univention/dev/ucs/.gitlab-ci/base.yml to inherit $UCS_VERSION.
+
+spec:
+  inputs:
+    debian-package:
+      description: "Name of the Debian package"
+      type: string
+    debian-scope:
+      description: "Target scope (default uses $UCS_VERSION from base.yml)"
+      type: string
+      default: "errata${UCS_VERSION}"
+    ucs-version:
+      description: "Full UCS version (use $UCS_VERSION from univention/dev/ucs base.yml)"
+      type: string
+      default: "$UCS_VERSION"
+    pkg-dir:
+      description: "Path to the package directory"
+      type: string
+      default: "."
+    stage:
+      description: "Stage for publish jobs"
+      type: string
+      default: "publish"
+---
+
+errata-import:
+  stage: $[[ inputs.stage ]]
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - $[[ inputs.pkg-dir ]]/debian/changelog
+  tags:
+    - omar
+  script:
+    - |
+      repo_admin.py \
+        --git "$CI_REPOSITORY_URL" \
+        --branch "$CI_COMMIT_REF_NAME" \
+        --path "$[[ inputs.pkg-dir ]]" \
+        --release "$[[ inputs.ucs-version | expand_vars ]]" \
+        --scope "$[[ inputs.debian-scope | expand_vars ]]" \
+        --package "$[[ inputs.debian-package ]]" \
+        --verbose
+
+errata-build:
+  stage: $[[ inputs.stage ]]
+  needs:
+    - job: errata-import
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - $[[ inputs.pkg-dir ]]/debian/changelog
+  tags:
+    - ladda
+  script:
+    - |
+      build-package-ng \
+        --no-pbuilder-update \
+        --release "$[[ inputs.ucs-version | expand_vars ]]" \
+        --scope "$[[ inputs.debian-scope | expand_vars ]]" \
+        --package "$[[ inputs.debian-package ]]"
