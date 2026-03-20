@@ -70,6 +70,11 @@ prepare-aptly:
   script:
     - aptly-create || true
     - aptly-publish || true
+    - |
+      echo ""
+      echo "Add this repo to your VM:"
+      echo "  echo 'deb [trusted=yes] $APT/${CI_PROJECT_NAME} ${CI_COMMIT_REF_SLUG} main' > /etc/apt/sources.list.d/branch.list && apt-get update"
+      echo ""
   environment:
     name: branch/$CI_COMMIT_REF_SLUG
     on_stop: aptly-remove
