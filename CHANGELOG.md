@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.10](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.9...v0.70.10) (2026-03-24)
+
+
+### Bug Fixes
+
+* **udm-transformer:** id should refer to univentionObjectIdentifier, not entryUUID ([f45960e](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/f45960e11189aa667063586f9af4013cace9f0b3)), closes [univention/dev/projects/provisioning#87](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/87)
+
 ## [0.70.9](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.8...v0.70.9) (2026-03-12)
 
 
