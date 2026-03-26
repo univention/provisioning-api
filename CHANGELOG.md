@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.11](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.10...v0.70.11) (2026-03-26)
+
+
+### Bug Fixes
+
+* **deps:** Update Base Image ([3021eb7](https://git.knut.univention.de/univention/dev/projects/provisioning/commit/3021eb76e737178eeb43add150a0bcdad54f0f13)), closes [#0](https://git.knut.univention.de/univention/dev/projects/provisioning/issues/0)
+
 ## [0.70.10](https://git.knut.univention.de/univention/dev/projects/provisioning/compare/v0.70.9...v0.70.10) (2026-03-24)
 
 
