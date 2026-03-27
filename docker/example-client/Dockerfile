@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
-ARG UCS_BASE_IMAGE_TAG=5.2.5-build.20260326@sha256:163d393824d089e4d33b97378819e319627dea6e183d33200ac54ac1211614f0
+ARG UCS_BASE_IMAGE_TAG=5.2.5-build.20260326@sha256:c2f38765b4132c477e3889486adda81ea64ec94e214e15b93cd31fe4f231e716
 
 ###############################################
 # Stage 1: build dependencies and software
