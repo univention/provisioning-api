@@ -31,7 +31,7 @@ This GitLab CI/CD component automates errata publishing. When `debian/changelog`
 include:
   - project: univention/dev/ucs
     file: .gitlab-ci/base.yml
-  - component: $CI_SERVER_FQDN/univention/ci/debian-errata-publish@v1.0.0
+  - component: $CI_SERVER_FQDN/univention/ci/debian-errata-build@v1.0.0
     inputs:
       debian-package: my-package
       pkg-dir: src/my-package

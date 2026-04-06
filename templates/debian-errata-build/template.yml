@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025-2026 Univention GmbH
 # SPDX-License-Identifier: AGPL-3.0-only
 #
-# GitLab CI/CD Component: debian-errata-publish
+# GitLab CI/CD Component: debian-errata-build
 #
 # Publishes Debian packages to the errata repository via repo_admin.py
 # and build-package-ng. Triggered on tags or manually.
