@@ -10,7 +10,8 @@
 #   errata-import  — imports package metadata to the build system
 #   errata-build   — builds and publishes the package
 #
-# Note: Include univention/dev/ucs/.gitlab-ci/base.yml to inherit $UCS_VERSION.
+# Note: Runs only on protected branches.
+#       Set $UCS_VERSION in your .gitlab-ci.yml variables to match the target UCS release.
 
 spec:
   inputs:
@@ -18,11 +19,11 @@ spec:
       description: "Name of the Debian package"
       type: string
     debian-scope:
-      description: "Target scope (default uses $UCS_VERSION from base.yml)"
+      description: "Target scope (default uses $UCS_VERSION, e.g. errata5.2-5)"
       type: string
       default: "errata${UCS_VERSION}"
     ucs-version:
-      description: "Full UCS version (use $UCS_VERSION from univention/dev/ucs base.yml)"
+      description: "Full UCS version (e.g. 5.2-5), defaults to $UCS_VERSION"
       type: string
       default: "$UCS_VERSION"
     pkg-dir:
@@ -30,7 +31,7 @@ spec:
       type: string
       default: "."
     stage:
-      description: "Stage for publish jobs"
+      description: "Stage for the jobs"
       type: string
       default: "publish"
 ---
@@ -40,7 +41,7 @@ errata-import:
   variables:
     GIT_STRATEGY: none
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
       changes:
         - $[[ inputs.pkg-dir ]]/debian/changelog
   tags:
@@ -63,7 +64,7 @@ errata-build:
   variables:
     GIT_STRATEGY: none
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
       changes:
         - $[[ inputs.pkg-dir ]]/debian/changelog
   tags:
