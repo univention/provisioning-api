@@ -6,6 +6,7 @@ variables:
   rules:
     - if: $CI_MERGE_REQUEST_ID
   variables:
+    GIT_DEPTH: 0
     HOOK_IDS: "conventional-pre-commit"
   script:
     - |
