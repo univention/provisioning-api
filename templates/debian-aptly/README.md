@@ -55,7 +55,7 @@ The component uses `$UCS_VERSION` from the UCS repository by default. Include `b
 include:
   - project: univention/dev/ucs
     file: .gitlab-ci/base.yml
-  - component: $CI_SERVER_FQDN/univention/ci/deb-branch-build@1
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-aptly@<version>
 
 stages: [prepare, build, .post]
 ```
@@ -66,7 +66,7 @@ stages: [prepare, build, .post]
 include:
   - project: univention/dev/ucs
     file: .gitlab-ci/base.yml
-  - component: $CI_SERVER_FQDN/univention/ci/deb-branch-build@1
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-aptly@<version>
     inputs:
       pkg-dir: src/my-package
       auto-stop-in: "2 weeks"
@@ -78,7 +78,7 @@ To override the UCS version, pass a literal value:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/univention/ci/deb-branch-build@1
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-aptly@<version>
     inputs:
       ucs-version: "5.0-10"
 ```
@@ -91,7 +91,7 @@ Extend `.build-deb` for additional packages:
 include:
   - project: univention/dev/ucs
     file: .gitlab-ci/base.yml
-  - component: $CI_SERVER_FQDN/univention/ci/deb-branch-build@1
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-aptly@<version>
 
 stages: [prepare, build, .post]
 
