@@ -81,6 +81,7 @@ prepare-aptly:
     auto_stop_in: $[[ inputs.auto-stop-in ]]
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 aptly-remove:
   stage: $[[ inputs.stage-cleanup ]]
@@ -95,6 +96,8 @@ aptly-remove:
     action: stop
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: manual
 
 # ---------------------------------------------------------------------------
@@ -120,6 +123,7 @@ aptly-remove:
       dotenv: build.env
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 # ---------------------------------------------------------------------------
 # Default build job (single-package repos, overridable)
