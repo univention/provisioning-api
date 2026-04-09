@@ -1,5 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024-2026 Univention GmbH
+#
+# Local testing helper for the debian-aptly CI component.
+# Copy this file to your project and adjust PKG_DIR and CI_PROJECT_NAME.
+#
+# Usage:
+#   docker compose run --rm aptly-prepare
+#   docker compose run --rm aptly-build
+#   docker compose run --rm aptly-remove
 
 ---
 x-deb-common: &deb-common
@@ -16,20 +24,19 @@ x-deb-env: &deb-env
   APTLY: http://omar.knut.univention.de:11620/api
   APT: http://omar.knut.univention.de/build2/git
   BASE_APT: http://omar.knut.univention.de/build2/
-  UCS_VERSION: "5.2-5"
-  UCS_RELEASE: "5.2"
-  CI_PROJECT_NAME: keycloak
+  UCS_VERSION: "${UCS_VERSION:-5.2-5}"
+  UCS_RELEASE: "${UCS_RELEASE:-5.2}"
+  CI_PROJECT_NAME: "${CI_PROJECT_NAME:-my-project}"
   CI_PROJECT_DIR: /build
   CI_COMMIT_REF_SLUG: test-local
   CI_COMMIT_REF_NAME: test-local
-  CI_JOB_ID: local-${USER:-test}
-  APTLY_REPO: keycloak-test-local
+  CI_JOB_ID: "local-${USER:-test}"
+  APTLY_REPO: "${CI_PROJECT_NAME:-my-project}-test-local"
+  PKG_DIR: "${PKG_DIR:-.}"
 
 services:
   aptly-prepare:
     <<: *deb-common
-    # volumes:
-    #   - ./scripts:/build/scripts:ro
     environment:
       <<: *deb-env
     command: >
@@ -41,21 +48,18 @@ services:
   aptly-build:
     <<: *deb-common
     volumes:
-      # - ./scripts:/build/scripts:ro
-      - ./univention-keycloak:/build/univention-keycloak:rw
+      - .:/build:rw
       - deb-output:/build/output
     environment:
       <<: *deb-env
     command: >
       sh -c '
-        aptly-build univention-keycloak
+        aptly-build "$$PKG_DIR"
         cp -v *.deb *.changes output/ 2>/dev/null || true
       '
 
   aptly-remove:
     <<: *deb-common
-    # volumes:
-    #   - ./scripts:/build/scripts:ro
     environment:
       <<: *deb-env
     command: >
@@ -66,8 +70,7 @@ services:
   deb-shell:
     <<: *deb-common
     volumes:
-    # - ./scripts:/build/scripts:ro
-      - ./univention-keycloak:/build/univention-keycloak:rw
+      - .:/build:rw
     environment:
       <<: *deb-env
     command: bash
