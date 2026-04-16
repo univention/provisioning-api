@@ -24,6 +24,7 @@ include:
 
 variables:
   POETRY_VERSION: "1.6.1"
+  RENOVATE_USER_ID: "1393"
 
 lint-pre-commit:
   before_script:
@@ -89,9 +90,11 @@ test-end-to-end:
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
-  rules:
+  rules: &rules_dind
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: "never"
+    - if: '$GITLAB_USER_ID == $RENOVATE_USER_ID && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS !~ /Renovate run dind/'
+      when: "manual"
     - when: "on_success"
   before_script:
     # Allow that the Docker API version is negotiated between client and server
