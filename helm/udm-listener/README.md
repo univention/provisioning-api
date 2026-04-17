@@ -106,7 +106,7 @@ A Helm chart for the Univention Portal Provisioning API
 | waitForDependency.image.pullPolicy | string | `nil` |  |
 | waitForDependency.image.registry | string | `nil` |  |
 | waitForDependency.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
-| waitForDependency.image.tag | string | `"0.36.7@sha256:bcd9f939f15c2af5c48dee4e83b58c9b1e3d4684cab7bd8ac29939c9a327efe7"` |  |
+| waitForDependency.image.tag | string | `"0.36.9@sha256:6f1c6ff90e295773b5af0ba64db2223f1f9b52d08e39d611ca061315ec5ce079"` |  |
 | waitForDependency.resources.limits.cpu | string | `"500m"` |  |
 | waitForDependency.resources.limits.memory | string | `"512Mi"` |  |
 | waitForDependency.resources.requests.cpu | string | `"100m"` |  |
