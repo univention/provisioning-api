@@ -11,21 +11,15 @@
 #   errata-build   — builds and publishes the package
 #
 # Note: Runs only on protected branches.
-#       Set $UCS_VERSION in your .gitlab-ci.yml variables to match the target UCS release.
+#       Set UCS_VERSION in your .gitlab-ci.yml variables (e.g. "5.2-5").
+#       The release passed to repo_admin.py is derived as ${UCS_VERSION%%-*} (e.g. "5.2")
+#       and the scope as errata${UCS_VERSION} (e.g. "errata5.2-5").
 
 spec:
   inputs:
     debian-package:
       description: "Name of the Debian package"
       type: string
-    debian-scope:
-      description: "Target scope (default uses $UCS_VERSION, e.g. errata5.2-5)"
-      type: string
-      default: "errata${UCS_VERSION}"
-    ucs-version:
-      description: "Full UCS version (e.g. 5.2-5), defaults to $UCS_VERSION"
-      type: string
-      default: "$UCS_VERSION"
     pkg-dir:
       description: "Path to the package directory"
       type: string
@@ -52,8 +46,8 @@ errata-import:
         --git "$CI_REPOSITORY_URL" \
         --branch "$CI_COMMIT_REF_NAME" \
         --path "$[[ inputs.pkg-dir ]]" \
-        --release "$[[ inputs.ucs-version | expand_vars ]]" \
-        --scope "$[[ inputs.debian-scope | expand_vars ]]" \
+        --release "${UCS_VERSION%%-*}" \
+        --scope "errata${UCS_VERSION}" \
         --package "$[[ inputs.debian-package ]]" \
         --verbose
 
@@ -73,6 +67,6 @@ errata-build:
     - |
       build-package-ng \
         --no-pbuilder-update \
-        --release "$[[ inputs.ucs-version | expand_vars ]]" \
-        --scope "$[[ inputs.debian-scope | expand_vars ]]" \
+        --release "${UCS_VERSION%%-*}" \
+        --scope "errata${UCS_VERSION}" \
         --package "$[[ inputs.debian-package ]]"
