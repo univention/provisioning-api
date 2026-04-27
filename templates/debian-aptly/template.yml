@@ -13,8 +13,9 @@
 #   .build-deb     — hidden template for multi-package repos
 #   build-deb      — concrete single-package build job
 #
-# Note: Consuming projects can include univention/dev/ucs/.gitlab-ci/base.yml
-# and use $UCS_VERSION as input to inherit version from UCS repo.
+# Note: Consuming projects must define UCS_VERSION in their project CI/CD variables
+# (e.g. UCS_VERSION: "5.2-5"). The aptly-build script uses it for the pre-release
+# version suffix on branch builds.
 
 spec:
   inputs:
@@ -26,10 +27,6 @@ spec:
       description: "UCS base container image"
       type: string
       default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/deb-builder-5.2:latest"
-    ucs-version:
-      description: "Full UCS version, e.g. 5.2-5 (use $UCS_VERSION from univention/dev/ucs base.yml)"
-      type: string
-      default: "$UCS_VERSION"
     aptly-api:
       description: "Aptly API base URL"
       type: string
@@ -110,7 +107,6 @@ aptly-remove:
   variables:
     APTLY: $[[ inputs.aptly-api ]]
     APT: $[[ inputs.apt-url ]]
-    UCS_VERSION: $[[ inputs.ucs-version | expand_vars ]]
     APTLY_REPO: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
     ORIGINAL_SOURCE: $CI_PIPELINE_SOURCE
   needs:
