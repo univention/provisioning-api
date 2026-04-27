@@ -70,9 +70,9 @@ publish () {
 
 rc=0
 upload "$1" || rc=1
-list
-delete || rc=2
-replace || rc=3
-publish || rc=4
+list || rc=2
+delete || rc=3
+replace || rc=4
+publish || rc=5
 
 exit "$rc"

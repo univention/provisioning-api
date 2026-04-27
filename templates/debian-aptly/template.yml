@@ -112,6 +112,7 @@ aptly-remove:
     APT: $[[ inputs.apt-url ]]
     UCS_VERSION: $[[ inputs.ucs-version | expand_vars ]]
     APTLY_REPO: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
+    ORIGINAL_SOURCE: $CI_PIPELINE_SOURCE
   needs:
     - prepare-aptly
   script:
@@ -119,8 +120,6 @@ aptly-remove:
   artifacts:
     paths:
       - "*.deb"
-    reports:
-      dotenv: build.env
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
