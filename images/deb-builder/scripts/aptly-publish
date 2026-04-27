@@ -1,0 +1,17 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2025-2026 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+
+set -e -u
+
+exec "${0%/*}/ht" --ignore-stdin --check-status --pretty=all \
+    POST "$APTLY/publish/$CI_PROJECT_NAME" \
+    'SourceKind=local' \
+    "Sources:=[{\"Name\":\"$APTLY_REPO\",\"Component\":\"main\"}]" \
+    "Distribution=$CI_COMMIT_REF_SLUG" \
+    "Label=$APTLY_REPO" \
+    "Suite=$CI_COMMIT_REF_SLUG" \
+    'Origin=Univention' \
+    'ForceOverwrite:=true' \
+    'AcquireByHash:=true' \
+    'Architectures:=["amd64","source"]'

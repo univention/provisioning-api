@@ -1,0 +1,6 @@
+**/.idea
+**/.claude
+*.swp
+_build/
+target/
+*.pyc

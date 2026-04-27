@@ -1,0 +1,41 @@
+#!/bin/bash
+# SPDX-FileCopyrightText: 2025-2026 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+
+set -e -u
+
+# https://www.aptly.info/doc/api/swagger/
+
+aptly () {
+    local msg="$1" url
+    shift
+    for url in "$@"
+    do
+        case "$url" in
+        *://*) break
+        esac
+    done
+    printf '\n=== %s === %s ===\n' "$msg" "$url" >&2
+    "${0%/*}/ht" \
+        --ignore-stdin \
+        --pretty=all \
+        --timeout=60s \
+        --check-status \
+        "$@"
+}
+
+unpublish () {
+    aptly unpublish \
+        DELETE "${APTLY}/publish/${CI_PROJECT_NAME}/${CI_COMMIT_REF_SLUG}"
+}
+
+drop_repo () {
+    aptly drop \
+        DELETE "${APTLY}/repos/${APTLY_REPO}"
+}
+
+rc=0
+unpublish || rc=1
+drop_repo || rc=2
+
+exit "$rc"

@@ -1,0 +1,134 @@
+# SPDX-FileCopyrightText: 2025-2026 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+#
+# GitLab CI/CD Component: deb-branch-build
+#
+# Builds Debian packages on branches/MRs and publishes them to
+# per-branch Aptly repositories. Test VMs can install branch
+# versions by adding a single apt source line.
+#
+# Jobs produced:
+#   prepare-aptly  — create Aptly repo + publish (idempotent)
+#   aptly-remove   — delete publish + repo on environment stop
+#   .build-deb     — hidden template for multi-package repos
+#   build-deb      — concrete single-package build job
+#
+# Note: Consuming projects can include univention/dev/ucs/.gitlab-ci/base.yml
+# and use $UCS_VERSION as input to inherit version from UCS repo.
+
+spec:
+  inputs:
+    pkg-dir:
+      description: "Path to the package directory (contains debian/)"
+      type: string
+      default: "."
+    deb-image:
+      description: "UCS base container image"
+      type: string
+      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/deb-builder-5.2:latest"
+    ucs-version:
+      description: "Full UCS version, e.g. 5.2-5 (use $UCS_VERSION from univention/dev/ucs base.yml)"
+      type: string
+      default: "$UCS_VERSION"
+    aptly-api:
+      description: "Aptly API base URL"
+      type: string
+      default: "http://omar.knut.univention.de:11620/api"
+    apt-url:
+      description: "Public apt URL for the Aptly file server"
+      type: string
+      default: "http://omar.knut.univention.de/build2/git"
+    stage-prepare:
+      description: "Stage for the prepare jobs"
+      type: string
+      default: "prepare"
+    stage-build:
+      description: "Stage for the build jobs"
+      type: string
+      default: "build"
+    stage-cleanup:
+      description: "Stage for the cleanup jobs"
+      type: string
+      default: ".post"
+    auto-stop-in:
+      description: "How long before the branch environment auto-stops"
+      type: string
+      default: "6 months"
+---
+
+# ---------------------------------------------------------------------------
+# Aptly lifecycle
+# ---------------------------------------------------------------------------
+
+prepare-aptly:
+  stage: $[[ inputs.stage-prepare ]]
+  image: $[[ inputs.deb-image ]]
+  variables:
+    APTLY: $[[ inputs.aptly-api ]]
+    APT: $[[ inputs.apt-url ]]
+    APTLY_REPO: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
+  script:
+    - aptly-create || true
+    - aptly-publish || true
+    - |
+      echo ""
+      echo "Add this repo to your VM:"
+      echo "  echo 'deb [trusted=yes] $APT/${CI_PROJECT_NAME} ${CI_COMMIT_REF_SLUG} main' > /etc/apt/sources.list.d/branch.list && apt-get update"
+      echo ""
+  environment:
+    name: branch/$CI_COMMIT_REF_SLUG
+    on_stop: aptly-remove
+    auto_stop_in: $[[ inputs.auto-stop-in ]]
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+aptly-remove:
+  stage: $[[ inputs.stage-cleanup ]]
+  image: $[[ inputs.deb-image ]]
+  variables:
+    APTLY: $[[ inputs.aptly-api ]]
+    APTLY_REPO: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
+  script:
+    - aptly-remove || true
+  environment:
+    name: branch/$CI_COMMIT_REF_SLUG
+    action: stop
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+
+# ---------------------------------------------------------------------------
+# Build template (hidden, for multi-package extends)
+# ---------------------------------------------------------------------------
+
+.build-deb:
+  stage: $[[ inputs.stage-build ]]
+  image: $[[ inputs.deb-image ]]
+  variables:
+    APTLY: $[[ inputs.aptly-api ]]
+    APT: $[[ inputs.apt-url ]]
+    UCS_VERSION: $[[ inputs.ucs-version | expand_vars ]]
+    APTLY_REPO: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
+    ORIGINAL_SOURCE: $CI_PIPELINE_SOURCE
+  needs:
+    - prepare-aptly
+  script:
+    - aptly-build "$PKG_DIR"
+  artifacts:
+    paths:
+      - "*.deb"
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == "false"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ---------------------------------------------------------------------------
+# Default build job (single-package repos, overridable)
+# ---------------------------------------------------------------------------
+
+build-deb:
+  extends: .build-deb
+  variables:
+    PKG_DIR: $[[ inputs.pkg-dir ]]

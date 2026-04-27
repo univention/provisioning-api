@@ -1,0 +1,12 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2025-2026 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only
+
+set -e -u
+
+exec "${0%/*}/ht" --ignore-stdin --check-status --pretty=all \
+    POST "$APTLY/repos" \
+    "Name=$APTLY_REPO" \
+    "Comment=$CI_COMMIT_REF_NAME" \
+    'DefaultDistribution=git' \
+    'DefaultComponent=main'
