@@ -1,0 +1,72 @@
+# ============================================================================
+# Basedpyright Gate Fixtures
+# ============================================================================
+#
+# This fragment defines:
+# - fixture_good_type_hint_basedpyright: Runs bad_coverage.py with a committed baseline, expects zero new diagnostics.
+# - fixture_bad_type_hint_basedpyright: Runs without a baseline on code with errors, expects failure.
+# - validate_basedpyright_type_hint_coverage: Confirms fixture exit codes were as expected.
+#
+# Usage: Include in .gitlab-ci.yml with:
+#   - local: templates/python-type-hint-coverage-basedpyright/tests/basedpyright-gates.yml
+
+include:
+  - local: templates/python-type-hint-coverage-basedpyright/template.yml
+    inputs:
+      job_prefix: "fixture_good_"
+      python_paths: templates/python-type-hint-coverage-basedpyright/tests/examples/bad_coverage.py
+      baseline_file: templates/python-type-hint-coverage-basedpyright/tests/examples/good_baseline.json
+      allow_failure: false
+      job_rules:
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+          changes:
+            - templates/python-type-hint-coverage-basedpyright/**/*
+        - if: $CI_COMMIT_REF_PROTECTED == "true"
+          changes:
+            - templates/python-type-hint-coverage-basedpyright/**/*
+
+# Bad fixture: runs the same file with no baseline so diagnostics remain visible.
+# The job itself exits 0 only when basedpyright exits non-zero (as expected).
+fixture_bad_type_hint_basedpyright:
+  stage: build
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest
+  needs: []
+  allow_failure: false
+  script:
+    - |
+      set -eu
+      TARGET="templates/python-type-hint-coverage-basedpyright/tests/examples/bad_coverage.py"
+      CHECKER_EXIT_CODE=0
+      set +e
+      basedpyright --pythonversion 3.13 "$TARGET"
+      CHECKER_EXIT_CODE=$?
+      set -e
+      if [ "$CHECKER_EXIT_CODE" -eq 0 ]; then
+        echo "ERROR: expected basedpyright to report diagnostics on $TARGET" >&2
+        exit 1
+      fi
+      echo "Expected diagnostics observed (exit $CHECKER_EXIT_CODE). Fixture OK."
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - templates/python-type-hint-coverage-basedpyright/**/*
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
+      changes:
+        - templates/python-type-hint-coverage-basedpyright/**/*
+
+validate_basedpyright_type_hint_coverage:
+  stage: build
+  needs:
+    - fixture_good_type_hint_basedpyright
+    - fixture_bad_type_hint_basedpyright
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest
+  allow_failure: false
+  script:
+    - echo "Both fixture jobs completed with expected exit codes."
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - templates/python-type-hint-coverage-basedpyright/**/*
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
+      changes:
+        - templates/python-type-hint-coverage-basedpyright/**/*
