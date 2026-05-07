@@ -29,7 +29,7 @@ include:
 # The job itself exits 0 only when basedpyright exits non-zero (as expected).
 fixture_bad_type_hint_basedpyright:
   stage: build
-  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright
   needs: []
   allow_failure: false
   script:
@@ -59,7 +59,7 @@ validate_basedpyright_type_hint_coverage:
   needs:
     - fixture_good_type_hint_basedpyright
     - fixture_bad_type_hint_basedpyright
-  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright
   allow_failure: false
   script:
     - echo "Both fixture jobs completed with expected exit codes."

@@ -76,7 +76,7 @@ Example:
 ```sh
 docker run --rm \
   -v "$PWD":/src \
-  gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest \
+  gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright \
   sh -ceu '
     uv sync --dev && \
     basedpyright \
@@ -260,13 +260,13 @@ repos:
       - id: basedpyright-baseline
         name: basedpyright (relative to baseline)
         language: docker_image
-        entry: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest sh -c 'basedpyright --pythonversion 3.13 --baselinefile basedpyright-baseline.json --baselinemode=auto \"$@\"' --"
+        entry: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright sh -c 'basedpyright --pythonversion 3.13 --baselinefile basedpyright-baseline.json --baselinemode=auto \"$@\"' --"
         types: [python]
 
       - id: basedpyright
         name: basedpyright
         language: docker_image
-        entry: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest sh -c 'basedpyright --pythonversion 3.13 --baselinefile /tmp/nonexistent-basedpyright-baseline.json \"$@\"' --"
+        entry: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright sh -c 'basedpyright --pythonversion 3.13 --baselinefile /tmp/nonexistent-basedpyright-baseline.json \"$@\"' --"
         stages: [manual]
         types: [python]
 ```
@@ -326,7 +326,7 @@ inputs:
 | `job_prefix` | `""` | Optional prefix to avoid job name collisions. |
 | `pipeline_stage` | `build` | Stage for the basedpyright job. |
 | `job_rules` | MR + protected branch + tag | Override to narrow execution scope. |
-| `basedpyright_image` | `gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest` | Image to run basedpyright in. |
+| `basedpyright_image` | `gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright` | Image to run basedpyright in. |
 | `python_version` | `3.13` | Python version target passed to basedpyright. |
 | `python_paths` | `.` | Space-separated list of files or directories to analyze. |
 | `baseline_file` | `basedpyright-baseline.json` | Path to the committed baseline file passed to `basedpyright --baselinefile`. |

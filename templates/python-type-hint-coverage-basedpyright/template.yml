@@ -14,7 +14,7 @@ spec:
         - if: $CI_COMMIT_TAG
       description: "Rules controlling when the job runs. Override to add changes filters or different pipeline coverage."
     basedpyright_image:
-      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:latest"
+      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright"
       description: "Container image used to execute basedpyright. Default points to the image published by build_basedpyright."
     python_version:
       default: "3.13"
