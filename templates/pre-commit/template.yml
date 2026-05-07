@@ -27,17 +27,24 @@ include:
   stage: "$[[ inputs.pipeline_stage ]]"
   image: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/prek:latest"
   needs: []
+  variables:
+    PREK_HOME: "${CI_PROJECT_DIR}/.cache/prek"
+    GIT_DEPTH: 1
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
     - |
+      # CI_MERGE_REQUEST_DIFF_BASE_SHA is not included in the shallow clone; fetch it so
+      # we can read its timestamp for --shallow-since and use it as the rev-list base.
+      git fetch --no-tags --depth=1 origin "${CI_MERGE_REQUEST_DIFF_BASE_SHA}"
+      since=$(git show --no-patch --format=tformat:%cI "${CI_MERGE_REQUEST_DIFF_BASE_SHA}")
+      git fetch --no-tags --shallow-since="${since}" --filter=tree:0 origin "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
       HOOK_IDS="$[[ inputs.commit_msg_hooks ]]"
-      NUM_COMMITS=$(curl $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/commits | jq length)
-      echo "Checking $NUM_COMMITS commits."
-      COMMITS=$(git rev-list HEAD..."HEAD~$NUM_COMMITS")
+      COMMITS=$(git rev-list "${CI_MERGE_REQUEST_DIFF_BASE_SHA}..HEAD")
+      echo "Checking $(echo "$COMMITS" | wc -w) commits."
       EXIT_CODE=0
       for COMMIT in $COMMITS; do
-        echo "Checking COMMIT message for: $COMMIT"
+        echo "Checking commit message for: $COMMIT"
         git show -s --format=%B "$COMMIT" | head -n -1 > tmp.txt
         for HOOK_ID in $HOOK_IDS; do
           prek run --hook-stage commit-msg --commit-msg-filename tmp.txt "$HOOK_ID" || EXIT_CODE=1
