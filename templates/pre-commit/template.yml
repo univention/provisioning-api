@@ -15,7 +15,6 @@ spec:
 include:
   - project: univention/infrastructure/docker-services
     file: prek.yml
-    ref: 8facdd18b397cd9ee1d80342c730e1c17d3124d1
 
 "$[[ inputs.job_prefix ]]run_pre_commit":
   stage: "$[[ inputs.pipeline_stage ]]"
