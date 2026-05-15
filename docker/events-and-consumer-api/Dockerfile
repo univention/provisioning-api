@@ -9,7 +9,7 @@ ARG UCS_BASE_IMAGE_TAG=5.2.5-build.20260417@sha256:83a3b0eef92fd907fa8ec188792e6
 FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS build
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
-COPY --from=ghcr.io/astral-sh/uv:0.5.8@sha256:0bc959d4cc56e42cbd9aa9b63374d84481ee96c32803eea30bd7f16fd99d8d56 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.14@sha256:1025398289b62de8269e70c45b91ffa37c373f38118d7da036fb8bb8efc85d97 /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
   UV_COMPILE_BYTECODE=1 \
