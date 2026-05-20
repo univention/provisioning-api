@@ -13,21 +13,20 @@ spec:
         - if: $CI_COMMIT_REF_PROTECTED == "true"
         - if: $CI_COMMIT_TAG
       description: "Rules controlling when the job runs. Override to add changes filters or different pipeline coverage."
-    basedpyright_image:
-      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright"
-      description: "Container image used to execute basedpyright. Default points to the image published by build_basedpyright."
-    python_version:
-      default: "3.13"
-      description: "Python version target for basedpyright analysis. Defaults to 3.13 to avoid Python 3.14 typeshed baseline issues."
-    python_paths:
-      default: "."
-      description: "Space-separated list of files or directories to analyze. Defaults to the current repository root."
+    uv_image:
+      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/uv:latest"
+      description: "Container image providing uv/uvx."
     baseline_file:
       default: "basedpyright-baseline.json"
-      description: "Path to the basedpyright baseline file committed in the repository. Suppresses pre-existing errors so only new diagnostics fail the job. Create or refresh it with 'basedpyright --writebaseline --baselinefile basedpyright-baseline.json' in the same environment used by CI."
-    dependency_install_command:
-      default: ""
-      description: "Optional shell command executed before basedpyright to install project dependencies, preferably into workspace-local paths such as '.venv/' (for example 'uv sync --dev' or 'python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt')."
+      description: "Path to the basedpyright baseline file committed in the repository. Create or refresh it with 'uvx basedpyright --writebaseline --baselinefile basedpyright-baseline.json'."
+    python_paths:
+      default: "."
+      description: "Space-separated list of files or directories to pass to basedpyright. Defaults to the repository root."
+    before_script:
+      type: array
+      default:
+        - uv sync
+      description: "Commands run before basedpyright. Override to customise dependency installation, e.g. 'uv sync --extra test' or 'uv sync --dev'."
     allow_failure:
       type: boolean
       default: true
@@ -37,18 +36,21 @@ spec:
 
 "$[[ inputs.job_prefix ]]type_hint_basedpyright":
   stage: "$[[ inputs.pipeline_stage ]]"
-  image: "$[[ inputs.basedpyright_image ]]"
+  image: "$[[ inputs.uv_image ]]"
   needs: []
   allow_failure: $[[ inputs.allow_failure ]]
   rules: $[[ inputs.job_rules ]]
+  variables:
+    UV_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/uv"
+    UV_TOOL_DIR: "${CI_PROJECT_DIR}/.cache/uv-tools"
   cache:
     key: "$CI_JOB_NAME"
     policy: pull-push
     paths:
-      - .cache/pip/
       - .cache/uv/
-      - .cache/xdg/
+      - .cache/uv-tools/
       - .venv/
+  before_script: $[[ inputs.before_script ]]
   artifacts:
     when: always
     reports:
@@ -56,52 +58,4 @@ spec:
     paths:
       - basedpyright-code-quality.json
   script:
-    - |
-      set -eu
-      BASELINE_FILE="$[[ inputs.baseline_file ]]"
-      DEPENDENCY_INSTALL_COMMAND="$[[ inputs.dependency_install_command ]]"
-      PYTHON_VERSION="$[[ inputs.python_version ]]"
-      PATHS="$[[ inputs.python_paths ]]"
-      CACHE_ROOT="${CI_PROJECT_DIR}/.cache"
-
-      export PIP_CACHE_DIR="${CACHE_ROOT}/pip"
-      export UV_CACHE_DIR="${CACHE_ROOT}/uv"
-      export XDG_CACHE_HOME="${CACHE_ROOT}/xdg"
-
-      mkdir -p "$PIP_CACHE_DIR" "$UV_CACHE_DIR" "$XDG_CACHE_HOME"
-
-      if [ -z "$PATHS" ]; then
-        echo "python_paths input must not be empty." >&2
-        exit 1
-      fi
-
-      for path in $PATHS; do
-        if [ ! -e "$path" ]; then
-          echo "Configured python_paths entry not found: $path" >&2
-          exit 1
-        fi
-      done
-
-      if [ -n "$BASELINE_FILE" ] && [ ! -f "$BASELINE_FILE" ]; then
-        echo "Configured baseline_file not found: $BASELINE_FILE" >&2
-        echo "Create it locally with: basedpyright --writebaseline --baselinefile $BASELINE_FILE" >&2
-        exit 1
-      fi
-
-      if [ -n "$DEPENDENCY_INSTALL_COMMAND" ]; then
-        echo "Installing project dependencies using: $DEPENDENCY_INSTALL_COMMAND"
-        echo "Prefer workspace-local environments such as .venv/ so runner caches can be reused across jobs."
-        sh -ceu "$DEPENDENCY_INSTALL_COMMAND"
-      fi
-
-      echo "Running basedpyright with baseline: $BASELINE_FILE"
-      set --
-      for path in $PATHS; do
-        set -- "$@" "$path"
-      done
-      basedpyright \
-        --pythonversion "$PYTHON_VERSION" \
-        --baselinefile "$BASELINE_FILE" \
-        --baselinemode=lock \
-        --gitlabcodequality basedpyright-code-quality.json \
-        "$@"
+    - uvx basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]

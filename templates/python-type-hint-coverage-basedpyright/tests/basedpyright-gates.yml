@@ -16,6 +16,7 @@ include:
       job_prefix: "fixture_good_"
       python_paths: templates/python-type-hint-coverage-basedpyright/tests/examples/bad_coverage.py
       baseline_file: templates/python-type-hint-coverage-basedpyright/tests/examples/good_baseline.json
+      before_script: []
       allow_failure: false
       job_rules:
         - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -29,23 +30,21 @@ include:
 # The job itself exits 0 only when basedpyright exits non-zero (as expected).
 fixture_bad_type_hint_basedpyright:
   stage: build
-  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/uv:latest
   needs: []
   allow_failure: false
+  variables:
+    UV_TOOL_DIR: "${CI_PROJECT_DIR}/.cache/uv-tools"
+  cache:
+    key: "$CI_JOB_NAME"
+    policy: pull-push
+    paths:
+      - .cache/uv-tools/
   script:
     - |
-      set -eu
       TARGET="templates/python-type-hint-coverage-basedpyright/tests/examples/bad_coverage.py"
-      CHECKER_EXIT_CODE=0
-      set +e
-      basedpyright --pythonversion 3.13 "$TARGET"
-      CHECKER_EXIT_CODE=$?
-      set -e
-      if [ "$CHECKER_EXIT_CODE" -eq 0 ]; then
-        echo "ERROR: expected basedpyright to report diagnostics on $TARGET" >&2
-        exit 1
-      fi
-      echo "Expected diagnostics observed (exit $CHECKER_EXIT_CODE). Fixture OK."
+      uvx basedpyright "$TARGET" && exit 1
+      echo "Expected diagnostics observed. Fixture OK."
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -59,7 +58,7 @@ validate_basedpyright_type_hint_coverage:
   needs:
     - fixture_good_type_hint_basedpyright
     - fixture_bad_type_hint_basedpyright
-  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/basedpyright:branch-jgietzel-typehintbasedpyright
+  image: gitregistry.knut.univention.de/univention/dev/tooling/ci-components/uv:latest
   allow_failure: false
   script:
     - echo "Both fixture jobs completed with expected exit codes."
