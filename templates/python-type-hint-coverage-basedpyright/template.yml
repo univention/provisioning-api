@@ -43,7 +43,7 @@ spec:
   variables:
     UV_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/uv"
     UV_TOOL_DIR: "${CI_PROJECT_DIR}/.cache/uv-tools"
-    NODE_OPTIONS: "--max-old-space-size=2048"
+    NODE_OPTIONS: "--max-old-space-size=4096"
   cache:
     key: "$CI_JOB_NAME"
     policy: pull-push
@@ -59,4 +59,5 @@ spec:
     paths:
       - basedpyright-code-quality.json
   script:
+    - echo "NODE_OPTIONS=${NODE_OPTIONS}"
     - uvx basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]
