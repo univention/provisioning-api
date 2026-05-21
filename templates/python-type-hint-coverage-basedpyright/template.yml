@@ -43,6 +43,7 @@ spec:
   variables:
     UV_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/uv"
     UV_TOOL_DIR: "${CI_PROJECT_DIR}/.cache/uv-tools"
+    NODE_OPTIONS: "--max-old-space-size=2048"
   cache:
     key: "$CI_JOB_NAME"
     policy: pull-push
