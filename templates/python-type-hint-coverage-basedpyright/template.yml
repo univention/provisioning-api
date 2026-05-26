@@ -1,0 +1,63 @@
+spec:
+  inputs:
+    job_prefix:
+      default: ""
+      description: "Optional job name prefix, for example the app name. Prevents name collisions in composed pipelines."
+    pipeline_stage:
+      default: "build"
+      description: "The name of the stage which contains the basedpyright job."
+    job_rules:
+      type: array
+      default:
+        - if: $CI_MERGE_REQUEST_ID
+        - if: $CI_COMMIT_REF_PROTECTED == "true"
+        - if: $CI_COMMIT_TAG
+      description: "Rules controlling when the job runs. Override to add changes filters or different pipeline coverage."
+    uv_image:
+      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/uv:latest"
+      description: "Container image providing uv/uvx."
+    baseline_file:
+      default: "basedpyright-baseline.json"
+      description: "Path to the basedpyright baseline file committed in the repository. Create or refresh it with 'uvx basedpyright --writebaseline --baselinefile basedpyright-baseline.json'."
+    python_paths:
+      default: "."
+      description: "Space-separated list of files or directories to pass to basedpyright. Defaults to the repository root."
+    before_script:
+      type: array
+      default:
+        - uv sync
+      description: "Commands run before basedpyright. Override to customise dependency installation, e.g. 'uv sync --extra test' or 'uv sync --dev'."
+    allow_failure:
+      type: boolean
+      default: true
+      description: "Keep the job non-blocking by default; set to false to fail the pipeline on new basedpyright diagnostics."
+
+---
+
+"$[[ inputs.job_prefix ]]type_hint_basedpyright":
+  stage: "$[[ inputs.pipeline_stage ]]"
+  image: "$[[ inputs.uv_image ]]"
+  needs: []
+  allow_failure: $[[ inputs.allow_failure ]]
+  rules: $[[ inputs.job_rules ]]
+  variables:
+    UV_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/uv"
+    UV_TOOL_DIR: "${CI_PROJECT_DIR}/.cache/uv-tools"
+    NODE_OPTIONS: "--max-old-space-size=4000"
+  cache:
+    key: "$CI_JOB_NAME"
+    policy: pull-push
+    paths:
+      - .cache/uv/
+      - .cache/uv-tools/
+      - .venv/
+  before_script: $[[ inputs.before_script ]]
+  artifacts:
+    when: always
+    reports:
+      codequality: basedpyright-code-quality.json
+    paths:
+      - basedpyright-code-quality.json
+  script:
+    - echo "NODE_OPTIONS=${NODE_OPTIONS}"
+    - uvx basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]

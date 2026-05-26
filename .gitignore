@@ -4,3 +4,6 @@
 _build/
 target/
 *.pyc
+.venv/
+.gitlab-ci-local/
+.typing-reports/

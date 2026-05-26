@@ -14,6 +14,7 @@ include:
   - project: univention/infrastructure/docker-services
     file: pre-commit.yml
   - local: fragments/misc.yaml
+  - local: templates/python-type-hint-coverage-basedpyright/tests/basedpyright-gates.yml
 
 stages:
   - build

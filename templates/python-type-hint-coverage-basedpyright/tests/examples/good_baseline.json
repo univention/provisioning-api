@@ -1,0 +1,78 @@
+{
+  "files": {
+    "./templates/python-type-hint-coverage-basedpyright/tests/examples/bad_coverage.py": [
+      {
+        "code": "reportAny",
+        "range": {
+          "endColumn": 16,
+          "lineCount": 1,
+          "startColumn": 4
+        }
+      },
+      {
+        "code": "reportExplicitAny",
+        "range": {
+          "endColumn": 25,
+          "lineCount": 1,
+          "startColumn": 22
+        }
+      },
+      {
+        "code": "reportExplicitAny",
+        "range": {
+          "endColumn": 39,
+          "lineCount": 1,
+          "startColumn": 36
+        }
+      },
+      {
+        "code": "reportReturnType",
+        "range": {
+          "endColumn": 18,
+          "lineCount": 1,
+          "startColumn": 11
+        }
+      },
+      {
+        "code": "reportUnknownVariableType",
+        "range": {
+          "endColumn": 10,
+          "lineCount": 1,
+          "startColumn": 4
+        }
+      },
+      {
+        "code": "reportOperatorIssue",
+        "range": {
+          "endColumn": 26,
+          "lineCount": 1,
+          "startColumn": 13
+        }
+      },
+      {
+        "code": "reportUnknownVariableType",
+        "range": {
+          "endColumn": 17,
+          "lineCount": 1,
+          "startColumn": 11
+        }
+      },
+      {
+        "code": "reportAny",
+        "range": {
+          "endColumn": 8,
+          "lineCount": 1,
+          "startColumn": 4
+        }
+      },
+      {
+        "code": "reportAny",
+        "range": {
+          "endColumn": 27,
+          "lineCount": 1,
+          "startColumn": 23
+        }
+      }
+    ]
+  }
+}
