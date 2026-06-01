@@ -71,30 +71,43 @@ class UDMAdapter(UDMPort):
             response = await request.json()
             return response["_links"]["udm:object-types"]
 
-    @retry(logger=logger)
     async def list_objects(self, object_type: str, position: Optional[str] = None) -> list[str]:
         """Return the URLs of all objects for the given type."""
 
-        params = {
+        params: dict[str, Any] = {
             "scope": "sub",
             "hidden": "true",
             "properties": ["NonExistantDummyProperty"],
-            "page": "1",
-            "limit": "0",
+            "limit": "100",
             "dir": "ASC",
         }
         if position:
             params["position"] = position
 
+        all_uris: list[str] = []
+        page = 1
+        while True:
+            params["page"] = str(page)
+            uris, is_last = await self._fetch_object_page(object_type, params)
+            if not uris:
+                break
+            all_uris.extend(uris)
+            if is_last:
+                break
+            page += 1
+
+        logger.info("Found %r results for %r.", len(all_uris), object_type)
+        return all_uris
+
+    @retry(logger=logger)
+    async def _fetch_object_page(self, object_type: str, params: dict[str, Any]) -> tuple[list[str], bool]:
+        logger.info("Fetching page %r for %r.", params["page"], object_type)
         async with self._session.get(f"{self.base_url}{object_type}/", params=params) as request:
             response = await request.json()
-            n_results = response["results"]
-            logger.info("Found %r results for %r.", n_results, object_type)
-            if n_results > 0:
-                uris = [obj["uri"] for obj in response["_embedded"]["udm:object"]]
-                return uris
-            else:
-                return []
+            is_last = "last" in response.get("_links", {})
+            if response["results"] > 0:
+                return [obj["uri"] for obj in response["_embedded"]["udm:object"]], is_last
+            return [], is_last
 
     @retry(logger=logger)
     async def get_object(self, url: str) -> dict[str, Any]:
