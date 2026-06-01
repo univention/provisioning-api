@@ -39,6 +39,10 @@ class BaseQueue:
     # Nats stream subjects.
     # Nats allows the configuration of multiple subjects on one stream.
     subjects: list[str] | None = None
+    # Consumer ack_wait in seconds; None uses the NATS default (30s).
+    # Don't lower this on queues whose consumers rely on MessageAckManager
+    # (LdapQueue, IncomingQueue, PrefillQueue) — its extension cadence is 30s/5s.
+    ack_wait: int | None = None
 
     @property
     def queue_name(self) -> str:
@@ -62,11 +66,14 @@ class BaseQueue:
         )
 
     def consumer_config(self) -> ConsumerConfig:
-        return ConsumerConfig(
+        kwargs: dict[str, Any] = dict(
             durable_name=self.consumer_name,
             max_ack_pending=1,
             deliver_policy=self.deliver_policy,
         )
+        if self.ack_wait is not None:
+            kwargs["ack_wait"] = self.ack_wait
+        return ConsumerConfig(**kwargs)
 
     def __eq__(self, other) -> bool:
         return self.name == other.name and self.consumer_name == other.consumer_name
@@ -79,6 +86,9 @@ class ConsumerQueue(BaseQueue):
     """
 
     retention_policy = RetentionPolicy.LIMITS
+    # Shortens the 30s "null + hang" window when a delivery is stuck pending
+    # (delete-not-atomic-as-ack race; client disconnect mid-fetch).
+    ack_wait = 1
 
     def __init__(self, subscription_name: str):
         self.name = subscription_name
