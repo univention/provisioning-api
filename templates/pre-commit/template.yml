@@ -6,6 +6,9 @@ spec:
     pipeline_stage:
       default: "build"
       description: "The name of the stage which contains the pre-commit jobs."
+    skip_hooks:
+      default: ""
+      description: "Space or comma separated list of pre-commit hook ids to skip in the automatic run."
     commit_msg_hooks:
       default: ""
       description: "Space separated list of hooks to run on each commit message."
@@ -20,6 +23,8 @@ include:
   stage: "$[[ inputs.pipeline_stage ]]"
   image: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/prek:latest"
   needs: []
+  variables:
+    SKIP: "$[[ inputs.skip_hooks ]]"
   extends: .prek
 
 "$[[ inputs.job_prefix ]]lint_commit_messages":
