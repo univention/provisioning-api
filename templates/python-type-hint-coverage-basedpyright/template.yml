@@ -28,7 +28,7 @@ spec:
     before_script:
       type: array
       default:
-        - uv sync
+        - 'echo "Tip: Specify with before_script setup steps like uv sync"'
       description: "Commands run before basedpyright. Override to customise dependency installation, e.g. 'uv sync --extra test' or 'uv sync --dev'."
     allow_failure:
       type: boolean
