@@ -162,11 +162,17 @@ build_app_release:
     DOCKERFILE_PATH: "images/deb-builder/deb-builder.Containerfile"
     KANIKO_BUILD_CONTEXT: "images/deb-builder"
 
+build_deb_builder53:
+  extends: .build_deb_builder
+  variables:
+    CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/deb-builder-5.3"
+    KANIKO_ARGS: "--build-arg UCSVERSION=530"
+
 build_deb_builder52:
   extends: .build_deb_builder
   variables:
     CI_REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE/deb-builder-5.2"
-    KANIKO_ARGS: "--build-arg UCSVERSION=$ucs"
+    KANIKO_ARGS: "--build-arg UCSVERSION=525"
 
 build_deb_builder50:
   extends: .build_deb_builder
