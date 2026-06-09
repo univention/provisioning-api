@@ -28,8 +28,8 @@ else
     univention-appcenter-control new-version --noninteractive "$APP_UCS_VERSION/$APP_ID=$APP_STAGING_VERSION" "$APP_UCS_VERSION/$APP_ID=$APP_VERSION"
 fi
 univention-appcenter-control get --noninteractive --json "$APP_UCS_VERSION/$APP_ID" > appinfo.json
-APP_COMPONENT_ID=$(jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == $version) | .component_id' < appinfo.json)
-APP_NAME=$(jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == $version) | .name' < appinfo.json)
+APP_COMPONENT_ID=$(jq --arg version "$APP_VERSION" --arg ucs_version "$APP_UCS_VERSION" -r '.versions[] | select(.version == $version and .ucs_version == $ucs_version) | .component_id' < appinfo.json)
+APP_NAME=$(jq --arg version "$APP_VERSION" --arg ucs_version "$APP_UCS_VERSION" -r '.versions[] | select(.version == $version and .ucs_version == $ucs_version) | .name' < appinfo.json)
 {
     echo "APP_ID=$APP_ID"
     echo "APP_COMPONENT_ID=$APP_COMPONENT_ID"
@@ -38,4 +38,4 @@ APP_NAME=$(jq --arg version "$APP_VERSION" -r '.versions[] | select(.version == 
     echo "APP_VERSION=$APP_VERSION"
     echo "ENVIRONMENT_NAME"="$ENVIRONMENT_NAME"
 } > deploy.env
-jq --arg version "$APP_VERSION" '.versions[] | select(.version == $version)' < appinfo.json
+jq --arg version "$APP_VERSION" --arg ucs_version "$APP_UCS_VERSION" '.versions[] | select(.version == $version and .ucs_version == $ucs_version)' < appinfo.json
