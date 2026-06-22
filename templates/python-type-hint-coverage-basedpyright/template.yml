@@ -16,6 +16,9 @@ spec:
     uv_image:
       default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/uv:latest"
       description: "Container image providing uv/uvx."
+    python_version:
+      default: "3.13"
+      description: "Python version used by uvx when invoking basedpyright."
     baseline_file:
       default: "basedpyright-baseline.json"
       description: "Path to the basedpyright baseline file committed in the repository. Create or refresh it with 'uvx basedpyright --writebaseline --baselinefile basedpyright-baseline.json'."
@@ -25,7 +28,7 @@ spec:
     before_script:
       type: array
       default:
-        - uv sync
+        - 'echo "Tip: Specify with before_script setup steps like uv sync"'
       description: "Commands run before basedpyright. Override to customise dependency installation, e.g. 'uv sync --extra test' or 'uv sync --dev'."
     allow_failure:
       type: boolean
@@ -60,4 +63,4 @@ spec:
       - basedpyright-code-quality.json
   script:
     - echo "NODE_OPTIONS=${NODE_OPTIONS}"
-    - uvx basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]
+    - uvx --python "$[[ inputs.python_version ]]" basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]

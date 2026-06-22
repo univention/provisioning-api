@@ -6,6 +6,12 @@ spec:
     pipeline_stage:
       default: "build"
       description: "The name of the stage which contains the pre-commit jobs."
+    skip_hooks:
+      default: ""
+      description: "Space or comma separated list of pre-commit hook ids to skip in the automatic run."
+    manual_stage_hooks:
+      default: ""
+      description: "Space or comma separated list of manual-stage hook ids to run in run_pre_commit."
     commit_msg_hooks:
       default: ""
       description: "Space separated list of hooks to run on each commit message."
@@ -20,7 +26,30 @@ include:
   stage: "$[[ inputs.pipeline_stage ]]"
   image: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/prek:latest"
   needs: []
+  variables:
+    SKIP: "$[[ inputs.skip_hooks ]]"
   extends: .prek
+  script:
+    - |
+      MANUAL_HOOKS="$(echo "$[[ inputs.manual_stage_hooks ]]" | tr ',' ' ')"
+      EXIT_CODE=0
+
+      if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then
+        git fetch --no-tags --depth=1 origin "${CI_MERGE_REQUEST_DIFF_BASE_SHA}"
+        since=$(git show --no-patch --format=tformat:%cI "${CI_MERGE_REQUEST_DIFF_BASE_SHA}")
+        git fetch --no-tags --shallow-since="${since}" --filter=tree:0 origin "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+        prek run --from-ref "${CI_MERGE_REQUEST_DIFF_BASE_SHA}" --to-ref "${CI_COMMIT_SHA}" || EXIT_CODE=1
+        for HOOK_ID in $MANUAL_HOOKS; do
+          prek run --hook-stage manual --from-ref "${CI_MERGE_REQUEST_DIFF_BASE_SHA}" --to-ref "${CI_COMMIT_SHA}" "$HOOK_ID" || EXIT_CODE=1
+        done
+      else
+        prek run -a || EXIT_CODE=1
+        for HOOK_ID in $MANUAL_HOOKS; do
+          prek run --hook-stage manual -a "$HOOK_ID" || EXIT_CODE=1
+        done
+      fi
+
+      exit $EXIT_CODE
 
 "$[[ inputs.job_prefix ]]lint_commit_messages":
   stage: "$[[ inputs.pipeline_stage ]]"
