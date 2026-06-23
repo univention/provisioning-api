@@ -4,7 +4,13 @@
 import asyncio
 from unittest.mock import Mock
 
-from univention.provisioning.backends.nats_mq import ConsumerQueue, IncomingQueue, PrefillQueue
+from univention.provisioning.backends.nats_mq import (
+    ConsumerQueue,
+    IncomingQueue,
+    LdapQueue,
+    PrefillConsumerQueue,
+    PrefillQueue,
+)
 
 try:
     from unittest.mock import AsyncMock
@@ -186,3 +192,35 @@ class TestNatsMQAdapter:
 
         mock_nats_mq_adapter._js.delete_stream.assert_called_once_with(self.consumer_queue.queue_name)
         assert result is None
+
+
+class TestConsumerConfig:
+    @pytest.mark.parametrize(
+        "queue",
+        [ConsumerQueue(SUBSCRIPTION_NAME), PrefillConsumerQueue(SUBSCRIPTION_NAME)],
+    )
+    def test_api_consumer_queues_use_short_ack_wait(self, queue):
+        # Shortens the 30s null+hang window for queues read via the Provisioning API.
+        assert queue.consumer_config().ack_wait == 1
+
+    @pytest.mark.parametrize(
+        "queue",
+        [IncomingQueue(SUBSCRIPTION_NAME), LdapQueue(), PrefillQueue()],
+    )
+    def test_internal_queues_keep_default_ack_wait(self, queue):
+        # These consumers extend the ack via MessageAckManager (30s/5s cadence),
+        # so they must keep the NATS default ack_wait.
+        assert queue.consumer_config().ack_wait is None
+
+    @pytest.mark.parametrize(
+        "queue",
+        [
+            ConsumerQueue(SUBSCRIPTION_NAME),
+            PrefillConsumerQueue(SUBSCRIPTION_NAME),
+            IncomingQueue(SUBSCRIPTION_NAME),
+            LdapQueue(),
+            PrefillQueue(),
+        ],
+    )
+    def test_all_queues_limit_in_flight_messages(self, queue):
+        assert queue.consumer_config().max_ack_pending == 1
