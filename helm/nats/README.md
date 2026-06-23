@@ -253,7 +253,8 @@ null
 {
   "enabled": true,
   "fileStore": {
-    "dir": "/data"
+    "dir": "/data",
+    "sync_interval": "10ms"
   },
   "memoryStore": {
     "size": "256Mi"
@@ -262,6 +263,15 @@ null
 </pre>
 </td>
 			<td>JetStream configuration Ref: https://docs.nats.io/running-a-nats-service/configuration/resource_management</td>
+		</tr>
+		<tr>
+			<td>config.jetstream.fileStore.sync_interval</td>
+			<td>string</td>
+			<td><pre lang="json">
+"10ms"
+</pre>
+</td>
+			<td>How often JetStream flushes file-store writes to disk. Defaults to "10ms", which bounds event loss on an unclean shutdown to that window at negligible throughput cost. Set to "always" to fsync after every message (durable but much slower on a single stream), or to a longer duration or the NATS default of "2m" to favour throughput over durability. Ref: https://docs.nats.io/running-a-nats-service/configuration#jetstream</td>
 		</tr>
 		<tr>
 			<td>config.lame_duck_duration</td>
@@ -640,7 +650,7 @@ null
 			<td>nats.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"2.12.4@sha256:c9abdce88a85ed5fcc8e9fc6b284d2601f5d1c1d0d58ddd67cfdc411768bfd7f"
+"2.14.1@sha256:7f430e429d0a90444b38bd40ab7812fd3afcc49a51f6b03a931f9becd5aeb280"
 </pre>
 </td>
 			<td></td>
@@ -989,7 +999,7 @@ null
 			<td>reloader.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.22.3@sha256:ce508ee14a4be8be63f8e1ca49d4bfbc887a84317fde3718d4e2f254ed285a4b"
+"0.23.0@sha256:64cb6c858e794906d3167378e02b7e0feb83c4e14c07b371eb8d921ef8c4a60b"
 </pre>
 </td>
 			<td></td>
