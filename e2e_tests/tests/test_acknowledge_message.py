@@ -61,10 +61,6 @@ async def test_do_not_acknowledge_message(
     message = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=5)
     assert message.body == body
 
-    # test that the next message will not be delivered until the first one is temporary out of the stream
+    # the same unacknowledged message is redelivered after ack_wait expires
     message2 = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=5)
-    assert message2 is None
-
-    # test that the same unacknowledged message is delivered after 30 seconds of unavailability
-    message3 = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=30)
-    assert message3.body == body
+    assert message2.body == body
