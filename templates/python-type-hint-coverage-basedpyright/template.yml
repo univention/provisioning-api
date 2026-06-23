@@ -63,4 +63,6 @@ spec:
       - basedpyright-code-quality.json
   script:
     - echo "NODE_OPTIONS=${NODE_OPTIONS}"
-    - uvx --python "$[[ inputs.python_version ]]" basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]
+    - uv venv --allow-existing
+    - uv pip install basedpyright
+    - uv run --python "$[[ inputs.python_version ]]" basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]
