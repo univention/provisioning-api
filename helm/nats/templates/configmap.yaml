@@ -56,6 +56,7 @@ data:
         max_file_store: {{ .Values.persistence.size | required ".Values.persistence.size is required" }}
         max_memory_store: {{ .Values.config.jetstream.memoryStore.size | required ".Values.config.jetstream.memoryStore.size is required" }}
         store_dir: "/data"
+        sync_interval: {{ .Values.config.jetstream.fileStore.sync_interval | required ".Values.config.jetstream.fileStore.sync_interval is required" | quote }}
       }
       {{- end }}
       {{- if .Values.config.tls.enabled }}
