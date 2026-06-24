@@ -17,13 +17,22 @@ from .mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 
 EXPECTED_AVG_DELAY = 50
 EXPECTED_MAX_DELAY = 150
+# Number of get/ack round-trips to perform before measuring, to prime connections
+# and warm any lazily-initialized caches so the first measured request isn't an outlier.
+WARMUP_REQUESTS = 5
 
 
 def print_stats(durations: list[float]) -> None:
-    print(f"all request times were: {durations}")
+    # print(f"all request times were: {durations}")
     print(f"minimum request time: {min(durations):.2f}ms")
     print(f"maximum request time: {max(durations):.2f}ms")
     print(f"average request time: {sum(durations) / len(durations):.2f}ms")
+
+
+def print_throughput(count: int, elapsed_seconds: float) -> None:
+    print(f"processed {count} messages in {elapsed_seconds:.2f}s")
+    print(f"throughput: {count / elapsed_seconds:.1f} messages/second")
+    print(f"average per-message time (get + ack): {elapsed_seconds / count * 1000:.2f}ms")
 
 
 @pytest.fixture
@@ -73,9 +82,10 @@ async def test_simple_message_timing(
     test_settings: E2ETestSettings,
     purge_stream: Callable[[str], Coroutine[Any, Any, None]],
 ):
-    test_number = 10
+    test_number = 2_000
     get_durations = []
     status_durations = []
+    total_durations = []
     messages = []
     responses = []
     queue = ConsumerQueue(subscription)
@@ -83,31 +93,49 @@ async def test_simple_message_timing(
     await purge_stream(queue.queue_name)
 
     print("Adding simple messages to the incoming queue")
-    for _ in range(test_number):
+    # Add extra messages to be consumed during warmup so the measured run still
+    # processes the full `test_number` of messages.
+    for _ in range(test_number + WARMUP_REQUESTS):
         messages.append(create_message_via_events_api(test_settings))
 
     await asyncio.sleep(1)
 
-    print("Starting the test run")
-    for i in range(test_number):
-        tic = time.perf_counter()
+    # Warmup: consume and acknowledge the first messages. Acknowledging is required so
+    # they don't stay pending and get redelivered into the measured run below.
+    for i in range(WARMUP_REQUESTS):
         response = await provisioning_client.get_subscription_message(name=subscription)
-        get_durations.append((time.perf_counter() - tic) * 1000)
-
         assert response.body == messages[i]
-        responses.append(response)
-        print(f"request time was {get_durations[-1]:.2f}")
-
-        tic = time.perf_counter()
         await provisioning_client.set_message_status(
             subscription, response.sequence_number, status=MessageProcessingStatus.ok
         )
-        status_durations.append((time.perf_counter() - tic) * 1000)
+
+    print("Starting the test run")
+    run_start = time.perf_counter()
+    for i in range(test_number):
+        msg_tic = time.perf_counter()
+        response = await provisioning_client.get_subscription_message(name=subscription)
+        get_durations.append((time.perf_counter() - msg_tic) * 1000)
+
+        assert response.body == messages[WARMUP_REQUESTS + i]
+        responses.append(response)
+        # print(f"request time was {get_durations[-1]:.2f}")
+
+        status_tic = time.perf_counter()
+        await provisioning_client.set_message_status(
+            subscription, response.sequence_number, status=MessageProcessingStatus.ok
+        )
+        status_durations.append((time.perf_counter() - status_tic) * 1000)
+        # full per-message cycle: get + assert + ack and everything in between
+        total_durations.append((time.perf_counter() - msg_tic) * 1000)
+    run_elapsed = time.perf_counter() - run_start
 
     print("get_subscription_message statistics")
     print_stats(get_durations)
     print("set_message_status statistics")
     print_stats(status_durations)
+    print("full per-message (get + ack) statistics")
+    print_stats(total_durations)
+    print_throughput(test_number, run_elapsed)
 
     avg = sum(get_durations) / len(get_durations)
     assert avg < EXPECTED_AVG_DELAY, f"average request duration was higher than {EXPECTED_AVG_DELAY} ms: {avg} ms."
@@ -125,9 +153,10 @@ async def test_udm_message_timing(
     udm: UDM,
     purge_stream: Callable[[str], Coroutine[Any, Any, None]],
 ):
-    test_number = 10
+    test_number = 1000
     get_durations = []
     status_durations = []
+    total_durations = []
     messages = []
     responses = []
     queue = ConsumerQueue(subscription)
@@ -135,28 +164,44 @@ async def test_udm_message_timing(
     await purge_stream(queue.queue_name)
 
     print("Adding udm messages to the incoming queue")
-    for _ in range(test_number):
+    # Add extra messages to be consumed during warmup so the measured run still
+    # processes the full `test_number` of messages.
+    for _ in range(test_number + WARMUP_REQUESTS):
         messages.append(create_user_via_udm_rest_api())  # noqa: F841
 
     await asyncio.sleep(1)
 
-    print("Starting the test run")
-    for i in range(test_number):
-        tic = time.perf_counter()
+    # Warmup: consume and acknowledge the first messages. Acknowledging is required so
+    # they don't stay pending and get redelivered into the measured run below.
+    for i in range(WARMUP_REQUESTS):
         response = await provisioning_client.get_subscription_message(name=subscription)
         assert response.body.new["dn"] == messages[i].dn
-        responses.append(response)
-        get_durations.append((time.perf_counter() - tic) * 1000)
-        print(f"request time was {get_durations[-1]:.2f}")
-
-        tic = time.perf_counter()
         await provisioning_client.set_message_status(subscription, response.sequence_number, MessageProcessingStatus.ok)
-        status_durations.append((time.perf_counter() - tic) * 1000)
+
+    print("Starting the test run")
+    run_start = time.perf_counter()
+    for i in range(test_number):
+        msg_tic = time.perf_counter()
+        response = await provisioning_client.get_subscription_message(name=subscription)
+        get_durations.append((time.perf_counter() - msg_tic) * 1000)
+        assert response.body.new["dn"] == messages[WARMUP_REQUESTS + i].dn
+        responses.append(response)
+        # print(f"request time was {get_durations[-1]:.2f}")
+
+        status_tic = time.perf_counter()
+        await provisioning_client.set_message_status(subscription, response.sequence_number, MessageProcessingStatus.ok)
+        status_durations.append((time.perf_counter() - status_tic) * 1000)
+        # full per-message cycle: get + assert + ack and everything in between
+        total_durations.append((time.perf_counter() - msg_tic) * 1000)
+    run_elapsed = time.perf_counter() - run_start
 
     print("get_subscription_message statistics")
     print_stats(get_durations)
     print("set_message_status statistics")
     print_stats(status_durations)
+    print("full per-message (get + ack) statistics")
+    print_stats(total_durations)
+    print_throughput(test_number, run_elapsed)
 
     avg = sum(get_durations) / len(get_durations)
     assert avg < EXPECTED_AVG_DELAY, f"average request duration was higher than {EXPECTED_AVG_DELAY} ms: {avg} ms."
