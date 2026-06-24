@@ -85,17 +85,27 @@ async def test_unacknowledged_message_is_redelivered_quickly(
     A regression to the 30s default makes ``elapsed`` jump to ~30s (or the fetch
     returns None within the poll window), failing this test.
     """
-    body = create_message_via_events_api(test_settings)
+    # Get one delivered, unacknowledged message. The dispatcher refreshes its
+    # subscription mapping on an interval, so an event posted before the freshly
+    # created subscription is in that mapping is dropped ("No consumers"); and a
+    # fresh subscription's first request drains the (empty) prefill queue. Both are
+    # unrelated to ack_wait, so re-post and poll until a message is actually in hand.
+    first = None
+    deadline = time.monotonic() + 60
+    while first is None and time.monotonic() < deadline:
+        create_message_via_events_api(test_settings)
+        for _ in range(2):
+            first = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=5)
+            if first is not None:
+                break
+    assert first is not None, "message was never delivered (dispatcher subscription-mapping race?)"
 
-    first = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=5)
-    assert first.body == body
-
-    # Do NOT acknowledge. Measure how long until the same message comes back.
+    # Do NOT acknowledge. With max_ack_pending=1 the next fetch is blocked until
+    # ack_wait expires, then the SAME message is redelivered. Measure how long.
     start = time.monotonic()
     redelivered = await provisioning_client.get_subscription_message(name=dummy_subscription, timeout=30)
     elapsed = time.monotonic() - start
 
     assert redelivered is not None, "message was not redelivered within 30s (NATS hang regression)"
-    assert redelivered.body == body
     assert redelivered.sequence_number == first.sequence_number
     assert elapsed < 10, f"redelivery took {elapsed:.1f}s; expected ~1s (ack_wait=1), regressed to 30s default?"
