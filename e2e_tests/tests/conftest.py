@@ -384,8 +384,30 @@ def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict
     return _create_user_via_udm_rest_api
 
 
+def _wait_for_attribute_in_schema(test_settings: E2ETestSettings, cli_name: str, timeout: float) -> None:
+    """Poll the UDM REST API until ``cli_name`` appears in the users/user schema,
+    i.e. the module definitions have been reloaded.
+
+    The udm-transformer reads from a separate instance with its own module cache,
+    so the attribute must reload on all of them before it survives transformation.
+    """
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        response = requests.get(
+            f"{test_settings.udm_rest_api_base_url}/users/user/add",
+            auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
+            headers={"Accept": "application/json"},
+        )
+        if response.ok and cli_name in response.text:
+            return
+        time.sleep(1)
+    raise TimeoutError(f"Extended attribute {cli_name!r} did not appear in UDM REST API schema within {timeout:.0f}s")
+
+
 @pytest.fixture()
-def create_extended_attribute(create_udm_obj, udm, test_settings: E2ETestSettings) -> tuple[UdmObject, str]:
+def create_extended_attribute(
+    warmup_extended_attribute_pipeline, create_udm_obj, udm, test_settings: E2ETestSettings
+) -> tuple[UdmObject, str]:
     suffix = str(uuid.uuid4())[:8]
     cli_name = f"ProvisioningServiceEmail_{suffix}"
     properties = {
@@ -409,28 +431,18 @@ def create_extended_attribute(create_udm_obj, udm, test_settings: E2ETestSetting
     }
     position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
     extended_attribute = create_udm_obj("settings/extended_attribute", properties, position)
-    # Poll the UDM REST API until the new extended attribute appears in the
-    # users/user schema. This ensures the UDM REST API has reloaded its module
-    # definitions before the test creates a user with it. Without this wait, the
-    # UDM Transformer may call /directory/unmap-ldap-attributes before the reload
-    # triggered by the settings/extended_attribute LDAP event has completed,
-    # causing the extended attribute to be silently dropped from the properties.
-    deadline = time.monotonic() + 30
-    while time.monotonic() < deadline:
-        response = requests.get(
-            f"{test_settings.udm_rest_api_base_url}/users/user/add",
-            auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
-        )
-        if cli_name in response.text:
-            break
-        time.sleep(1)
-    else:
-        raise TimeoutError(f"Extended attribute {cli_name!r} did not appear in UDM REST API schema within 30s")
+    # Ensure the UDM REST API has reloaded its module definitions before the test
+    # creates a user with this attribute. Without it the UDM Transformer may call
+    # /directory/unmap-ldap-attributes before the reload triggered by the
+    # settings/extended_attribute LDAP event completes, silently dropping the
+    # attribute from the properties. The session warmup fixture has already paid
+    # the cold-start cost, so a short deadline suffices here.
+    _wait_for_attribute_in_schema(test_settings, cli_name, timeout=30)
     yield extended_attribute, cli_name
     extended_attribute.delete()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def warmup_extended_attribute_pipeline(create_udm_obj, udm, test_settings: E2ETestSettings):
     """Warm the LDAP-notifier → UDM REST API schema-reload pipeline once per
     session.
@@ -465,19 +477,6 @@ def warmup_extended_attribute_pipeline(create_udm_obj, udm, test_settings: E2ETe
     }
     position = f"cn=custom attributes,cn=univention,{udm.get_ldap_base()}"
     extended_attribute = create_udm_obj("settings/extended_attribute", properties, position)
-    timeout = 180
-    deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        response = requests.get(
-            f"{test_settings.udm_rest_api_base_url}/users/user/add",
-            auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
-        )
-        if cli_name in response.text:
-            break
-        time.sleep(1)
-    else:
-        raise TimeoutError(
-            f"Warmup extended attribute {cli_name!r} did not appear in UDM REST API schema within {timeout}s",
-        )
+    _wait_for_attribute_in_schema(test_settings, cli_name, timeout=180)
     yield
     extended_attribute.delete()
