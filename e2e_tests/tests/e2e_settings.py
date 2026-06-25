@@ -27,6 +27,18 @@ class E2ETestSettings(NamedTuple):
     udm_rest_api_username: str
     udm_rest_api_password: str
 
+    # The UDM REST API instance the udm-transformer reads from. It has its own
+    # module cache, so a new extended attribute must reload there too before it
+    # survives transformation. Empty falls back to the single instance above.
+    udm_rest_api_transformer_base_url: str = ""
+
+    @property
+    def udm_rest_api_urls(self) -> list[str]:
+        urls = [self.udm_rest_api_base_url]
+        if self.udm_rest_api_transformer_base_url and self.udm_rest_api_transformer_base_url not in urls:
+            urls.append(self.udm_rest_api_transformer_base_url)
+        return urls
+
     @property
     def subscriptions_url(self) -> str:
         return urljoin(self.provisioning_api_base_url.rstrip("/") + "/", "v1/subscriptions")

@@ -385,23 +385,26 @@ def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict
 
 
 def _wait_for_attribute_in_schema(test_settings: E2ETestSettings, cli_name: str, timeout: float) -> None:
-    """Poll the UDM REST API until ``cli_name`` appears in the users/user schema.
+    """Poll every UDM REST API instance until ``cli_name`` appears in the
+    users/user schema.
 
     The udm-transformer reads from a separate instance with its own module cache,
     so the attribute must reload on all of them before it survives transformation.
     """
-    url = f"{test_settings.udm_rest_api_base_url.rstrip('/')}/users/user/add"
     deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        response = requests.get(
-            url,
-            auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
-            headers={"Accept": "application/json"},
-        )
-        if response.ok and cli_name in response.text:
-            return
-        time.sleep(1)
-    raise TimeoutError(f"Extended attribute {cli_name!r} did not appear in UDM REST API schema within {timeout:.0f}s")
+    for base_url in test_settings.udm_rest_api_urls:
+        url = f"{base_url.rstrip('/')}/users/user/add"
+        while time.monotonic() < deadline:
+            response = requests.get(
+                url,
+                auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
+                headers={"Accept": "application/json"},
+            )
+            if response.ok and cli_name in response.text:
+                break
+            time.sleep(1)
+        else:
+            raise TimeoutError(f"Extended attribute {cli_name!r} did not appear in {url} within {timeout:.0f}s")
 
 
 @pytest.fixture()
