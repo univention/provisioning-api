@@ -385,16 +385,16 @@ def create_user_via_udm_rest_api(create_udm_obj, udm) -> Callable[[Optional[dict
 
 
 def _wait_for_attribute_in_schema(test_settings: E2ETestSettings, cli_name: str, timeout: float) -> None:
-    """Poll the UDM REST API until ``cli_name`` appears in the users/user schema,
-    i.e. the module definitions have been reloaded.
+    """Poll the UDM REST API until ``cli_name`` appears in the users/user schema.
 
     The udm-transformer reads from a separate instance with its own module cache,
     so the attribute must reload on all of them before it survives transformation.
     """
+    url = f"{test_settings.udm_rest_api_base_url.rstrip('/')}/users/user/add"
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         response = requests.get(
-            f"{test_settings.udm_rest_api_base_url}/users/user/add",
+            url,
             auth=(test_settings.udm_rest_api_username, test_settings.udm_rest_api_password),
             headers={"Accept": "application/json"},
         )
