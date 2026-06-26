@@ -37,6 +37,7 @@ codebase first.
   - [Run basedpyright via pre-commit](#run-basedpyright-via-pre-commit)
   - [Avoid docker-in-docker in CI](#avoid-docker-in-docker-in-ci)
   - [Fail the pipeline on new diagnostics (strict mode)](#fail-the-pipeline-on-new-diagnostics-strict-mode)
+  - [Version pinning](#version-pinning)
   - [Troubleshooting](#troubleshooting)
   - [Scaling notes](#scaling-notes)
   - [Input reference](#input-reference)
@@ -434,6 +435,42 @@ inputs:
   allow_failure: false
 ```
 
+## Version pinning
+
+Basedpyright releases can add new diagnostics or change existing ones, which may cause findings to
+appear or disappear relative to an existing baseline. Pinning the version keeps CI and local checks
+reproducible and avoids surprise failures after an unintended upgrade.
+
+**CI component** — set the `basedpyright_version` input (default: `1.39.8`):
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/python-type-hint-coverage-basedpyright@main
+    inputs:
+      basedpyright_version: "1.39.8"
+      ...
+```
+
+**Pre-commit hooks** — add `--from basedpyright==X.Y.Z` to every `uvx` call:
+
+```yaml
+entry: |
+  ... sh -c '...
+  uvx --python 3.11 \
+    --from basedpyright==X.Y.Z \
+    --with-requirements requirements-typecheck.txt \
+    basedpyright \
+    ...' --
+```
+
+> [!important]
+> Keep the version identical across the CI component input and all pre-commit hooks. A mismatch
+> means local checks and CI analyse with different versions of the type checker, which can cause one
+> to suppress findings that the other surfaces.
+
+When upgrading basedpyright, update both places in a single commit and regenerate the baseline
+immediately — a new version may add or remove diagnostics that shift what the baseline tracks.
+
 ## Troubleshooting
 
 - `Configured python_paths entry not found`: verify `python_paths` is correct relative to repo root.
@@ -466,5 +503,6 @@ inputs:
 | `python_version` | `3.13` | Python version target passed to basedpyright. |
 | `python_paths` | `.` | Space-separated list of files or directories to analyze. |
 | `baseline_file` | `basedpyright-baseline.json` | Path to the committed baseline file passed to `basedpyright --baselinefile`. |
+| `basedpyright_version` | `1.39.8` | Basedpyright version to install. Pin this and the pre-commit hook `--from` version together so local checks and CI always use the same analyser. |
 | `before_script` | `echo "Tip: Specify with before_script setup steps like uv sync"` | Commands run before basedpyright, for example `uv sync --python 3.11 --dev`. |
 | `allow_failure` | `true` | Set to `false` to block the pipeline on new diagnostics. |
