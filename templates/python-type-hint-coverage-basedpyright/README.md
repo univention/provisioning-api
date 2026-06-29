@@ -29,9 +29,15 @@ codebase first.
   - [Monorepo setup (one job per package)](#monorepo-setup-one-job-per-package)
   - [Avoid job name collisions in composed pipelines](#avoid-job-name-collisions-in-composed-pipelines)
   - [uv workspace monorepos](#uv-workspace-monorepos)
+  - [Non-workspace monorepos (extraPaths)](#non-workspace-monorepos-extrapaths)
+    - [`extraPaths` in `pyrightconfig.json`](#extrapaths-in-pyrightconfigjson)
+    - [Namespace package pitfall](#namespace-package-pitfall)
+    - [Workflow](#workflow)
+    - [Limitation and migration path](#limitation-and-migration-path)
   - [Run basedpyright via pre-commit](#run-basedpyright-via-pre-commit)
   - [Avoid docker-in-docker in CI](#avoid-docker-in-docker-in-ci)
   - [Fail the pipeline on new diagnostics (strict mode)](#fail-the-pipeline-on-new-diagnostics-strict-mode)
+  - [Version pinning](#version-pinning)
   - [Troubleshooting](#troubleshooting)
   - [Scaling notes](#scaling-notes)
   - [Input reference](#input-reference)
@@ -54,7 +60,7 @@ codebase first.
     > baseline with the same dependency setup. Otherwise the baseline may suppress a different set
     > of diagnostics than the pipeline produces.
     >
-    > See [Prepare the environment before analysis](#prepare-the-environment-before-analysis)
+    > See [uv workspace monorepos](#uv-workspace-monorepos)
 
 3. **Include the component** in your CI pipeline:
 
@@ -187,7 +193,7 @@ include:
         - if: $CI_COMMIT_TAG
 ```
 
-To create or refresh the shared baseline, run from repository root:
+To create or refresh the shared baseline, run from repository root (see [Run basedpyright via pre-commit](#run-basedpyright-via-pre-commit) for all hook variants):
 
 ```sh
 prek run --hook-stage manual basedpyright-container-write-baseline --all-files
@@ -198,6 +204,94 @@ If you use `pre-commit` directly instead of `prek`, run:
 ```sh
 pre-commit run --hook-stage manual basedpyright-container-write-baseline --all-files
 ```
+
+## Non-workspace monorepos (extraPaths)
+
+When a monorepo splits Python source across multiple directories but has not yet adopted uv
+workspaces or installable packages, pyright cannot resolve intra-monorepo imports out of the box.
+
+### `extraPaths` in `pyrightconfig.json`
+
+List every directory that contributes Python packages under `extraPaths`. Pyright adds these to its
+module search path without requiring `uv sync` or any package installation:
+
+```jsonc
+{
+  "venvPath": ".",
+  "pythonVersion": "3.11",
+  // Packages are not installed but their source lives in the monorepo.
+  // Point pyright to each source directory so imports resolve without stubs.
+  // Remove once uv workspaces make these properly installable.
+  "extraPaths": [
+    "pkg-a/modules",
+    "pkg-b/modules"
+  ]
+}
+```
+
+### Namespace package pitfall
+
+If the shared namespace root (e.g. `ucsschool/`) has an `__init__.py` in one contributing directory
+but not the others, pyright treats it as a *regular* package and ignores all other directories'
+contributions. Symptom: imports from subpackages in the other directories still fail with
+`reportMissingImports` even though the correct `extraPaths` entries are present.
+
+Fix: ensure the namespace root has **no `__init__.py`** in any of the contributing directories,
+making it a proper [implicit namespace package](https://peps.python.org/pep-0420/). An `__init__.py`
+that contains no logic (only a copyright header or similar) is safe to delete.
+
+### Workflow
+
+```sh
+# Check: run basedpyright against the committed baseline
+uvx prek run --hook-stage manual basedpyright-container-baseline --all-files
+
+# After config changes: refresh the baseline, then commit config + baseline together
+uvx prek run --hook-stage manual basedpyright-container-write-baseline --all-files
+```
+
+> [!tip]
+> When you change `pyrightconfig.json` (for example to add an `extraPaths` entry), always refresh
+> the baseline immediately and commit **both** the config change and the updated baseline in a
+> single commit. This keeps the baseline consistent with the analysis configuration.
+
+### Third-party stubs and `requirements-typecheck.txt`
+
+`extraPaths` makes intra-monorepo imports visible, but third-party packages that are used by the
+analysed code (e.g. `pytest`) also need to be importable for basedpyright to resolve their types.
+In a non-workspace monorepo these packages are typically not declared in `pyproject.toml`, so
+`uv sync` alone does not install them.
+
+If your project has such dependencies, pin them in a dedicated file (e.g.
+`requirements-typecheck.txt`) and install it in `before_script`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/python-type-hint-coverage-basedpyright@main
+    inputs:
+      pipeline_stage: build
+      python_paths: .
+      python_version: "3.11"
+      before_script:
+        - uv sync --python 3.11
+        - uv pip install --requirements requirements-typecheck.txt
+      baseline_file: basedpyright-baseline.json
+```
+
+Use the same file in the pre-commit hooks via `--with-requirements requirements-typecheck.txt` so
+the local environment matches CI exactly. A mismatch causes findings that are suppressed locally to
+appear as new diagnostics in the pipeline (or vice versa).
+
+> [!note]
+> Always regenerate the baseline after adding entries to `requirements-typecheck.txt`, because
+> newly resolved types may eliminate diagnostics that were previously recorded in the baseline.
+
+### Limitation and migration path
+
+`extraPaths` is a structural workaround. Without installable packages, pyright resolves intra-repo
+imports from source but cannot see transitive dependencies that are only available at runtime (e.g.
+OS-level Debian packages). Adopting uv workspaces removes this limitation — see
+[uv workspace monorepos](#uv-workspace-monorepos).
 
 ## Run basedpyright via pre-commit
 
@@ -303,11 +397,11 @@ Keep it aligned with your CI `python_version` input.
 Run manual hooks:
 
 ```sh
-# prek
-prek run --hook-stage manual basedpyright-container-write-baseline --all-files
-prek run --hook-stage manual basedpyright-container-no-baseline --all-files
+# uvx prek (recommended — works without global prek install)
+uvx prek run --hook-stage manual basedpyright-container-write-baseline --all-files
+uvx prek run --hook-stage manual basedpyright-container-no-baseline --all-files
 
-# pre-commit
+# pre-commit (alternative)
 pre-commit run --hook-stage manual basedpyright-container-write-baseline --all-files
 pre-commit run --hook-stage manual basedpyright-container-no-baseline --all-files
 ```
@@ -341,6 +435,42 @@ inputs:
   allow_failure: false
 ```
 
+## Version pinning
+
+Basedpyright releases can add new diagnostics or change existing ones, which may cause findings to
+appear or disappear relative to an existing baseline. Pinning the version keeps CI and local checks
+reproducible and avoids surprise failures after an unintended upgrade.
+
+**CI component** — set the `basedpyright_version` input (default: `1.39.8`):
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/python-type-hint-coverage-basedpyright@main
+    inputs:
+      basedpyright_version: "1.39.8"
+      ...
+```
+
+**Pre-commit hooks** — add `--from basedpyright==X.Y.Z` to every `uvx` call:
+
+```yaml
+entry: |
+  ... sh -c '...
+  uvx --python 3.11 \
+    --from basedpyright==X.Y.Z \
+    --with-requirements requirements-typecheck.txt \
+    basedpyright \
+    ...' --
+```
+
+> [!important]
+> Keep the version identical across the CI component input and all pre-commit hooks. A mismatch
+> means local checks and CI analyse with different versions of the type checker, which can cause one
+> to suppress findings that the other surfaces.
+
+When upgrading basedpyright, update both places in a single commit and regenerate the baseline
+immediately — a new version may add or remove diagnostics that shift what the baseline tracks.
+
 ## Troubleshooting
 
 - `Configured python_paths entry not found`: verify `python_paths` is correct relative to repo root.
@@ -373,5 +503,6 @@ inputs:
 | `python_version` | `3.13` | Python version target passed to basedpyright. |
 | `python_paths` | `.` | Space-separated list of files or directories to analyze. |
 | `baseline_file` | `basedpyright-baseline.json` | Path to the committed baseline file passed to `basedpyright --baselinefile`. |
+| `basedpyright_version` | `1.39.8` | Basedpyright version to install. Pin this and the pre-commit hook `--from` version together so local checks and CI always use the same analyser. |
 | `before_script` | `echo "Tip: Specify with before_script setup steps like uv sync"` | Commands run before basedpyright, for example `uv sync --python 3.11 --dev`. |
 | `allow_failure` | `true` | Set to `false` to block the pipeline on new diagnostics. |

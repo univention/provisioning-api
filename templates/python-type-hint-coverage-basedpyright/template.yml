@@ -22,6 +22,9 @@ spec:
     baseline_file:
       default: "basedpyright-baseline.json"
       description: "Path to the basedpyright baseline file committed in the repository. Create or refresh it with 'uvx basedpyright --writebaseline --baselinefile basedpyright-baseline.json'."
+    basedpyright_version:
+      default: "1.39.8"
+      description: "Basedpyright version to install. Pin this and the pre-commit hook version together so local checks and CI always use the same analyser."
     python_paths:
       default: "."
       description: "Space-separated list of files or directories to pass to basedpyright. Defaults to the repository root."
@@ -63,6 +66,6 @@ spec:
       - basedpyright-code-quality.json
   script:
     - echo "NODE_OPTIONS=${NODE_OPTIONS}"
-    - uv venv --allow-existing
-    - uv pip install basedpyright
+    - uv venv --allow-existing --python "$[[ inputs.python_version ]]"
+    - uv pip install "basedpyright==$[[ inputs.basedpyright_version ]]"
     - uv run --python "$[[ inputs.python_version ]]" basedpyright --baselinefile "$[[ inputs.baseline_file ]]" --baselinemode=lock --gitlabcodequality basedpyright-code-quality.json $[[ inputs.python_paths ]]
