@@ -72,3 +72,23 @@ If a tag is created the pipeline acts like a merge request pipeline.
 If the tag follows the regex defined by combining the inputs `release_tag_prefix` and `release_tag_constraint`,
 an app version following `release_tag_constraint` is created in the appcenter.
 After triggering the manual `do_release` job in the tag pipeline, the app is published and announced.
+
+### Errata (package update into an existing version)
+
+A tag that matches `release_tag_prefix` + `release_tag_constraint` + `errata_tag_suffix`
+(by default an `-errataN` suffix, e.g. `release-5.2v4-errata1`) triggers a package update
+into an **already published** app version instead of creating a new one.
+
+In this mode:
+
+- `APP_VERSION` resolves to the version part *before* the suffix (`5.2v4` in the example),
+  which must already exist in the appcenter — the pipeline fails fast otherwise and never
+  calls `new-version`.
+- `update_appcenter` is skipped, so the existing app version's metafiles (`ini`, `README`, …)
+  are left untouched. Only the rebuilt `.deb` packages are uploaded
+  (via `--upload-packages-although-published` in the `debian-package` component).
+- All downstream jobs (`do_release`, announcements, GitLab release, …) behave as for a normal release.
+
+The suffix carries a counter so multiple errata can be shipped into the same app version with
+unique git tags (`release-5.2v4-errata1`, `release-5.2v4-errata2`, …). Set `errata_tag_suffix`
+to an empty string to disable errata releases for an app.

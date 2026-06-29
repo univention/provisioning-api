@@ -55,12 +55,15 @@ spec:
     release_tag_constraint:
       default: '[0-9]+\.[0-9]+\.[0-9]+'
       description: "The required format of tags following the release tag prefix to trigger the release pipeline."
+    errata_tag_suffix:
+      default: '(-errata[0-9]+)?'
+      description: "Optional suffix appended to a release tag to publish a package update (errata) into an already published app version, e.g. '-errata1'. The version part before the suffix must already exist in the appcenter; no new app version is created and appcenter metafiles are left untouched. Set to an empty string to disable errata releases."
 
 ---
 "$[[ inputs.job_prefix ]]create_app_version":
   stage: "$[[ inputs.build_stage ]]"
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
       variables:
         ENVIRONMENT_NAME: "release-app/${APP_ID}_$CI_COMMIT_TAG"
 
@@ -94,7 +97,7 @@ spec:
     ENVIRONMENT_NAME: "$ENVIRONMENT_NAME"
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
       variables:
         ENVIRONMENT_NAME: "release-app/${APP_ID}_$CI_COMMIT_TAG"
       when: never
@@ -119,13 +122,18 @@ spec:
     - "$[[ inputs.job_prefix ]]create_app_version"
     - "$[[ inputs.additional_update_appcenter_needs ]]"
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
     - if: $CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
   image: "$[[ inputs.image_app_release ]]"
   variables:
     APPCENTER_FILE_DIR: "$[[ inputs.appcenter_file_dir ]]"
   script:
+    - |
+      if [ "$IS_ERRATA" == "true" ]; then
+        echo "Errata release: keeping the existing app version metafiles untouched, only packages are updated."
+        exit 0
+      fi
     - echo "Rendering all appcenter file templates."
     - render_appcenter_files
     - echo "Uploading appcenter files for $APP_UCS_VERSION/$APP_ID=$APP_VERSION."
@@ -141,7 +149,7 @@ spec:
   variables:
     GIT_STRATEGY: none
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
       when: manual
       allow_failure: false
   manual_confirmation: "LAST WARNING: App will be made public NOW!"
@@ -158,7 +166,7 @@ spec:
     - "$[[ inputs.job_prefix ]]create_app_version"
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
   script:
     - echo "Running the release job."
   release:
@@ -177,7 +185,7 @@ spec:
     - "$[[ inputs.job_prefix ]]create_app_version"
   image: "$[[ inputs.image_app_release ]]"
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
       allow_failure: false
   manual_confirmation: "Did you publish the app on omar (see: https://git.knut.univention.de/univention/components/ucsschool-kelvin-rest-api#publish-packages-from-test-appcenter-to-production-appcenter)?"
   script:
@@ -186,7 +194,7 @@ spec:
 
 "$[[ inputs.job_prefix ]]send_mail":
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
   stage: "$[[ inputs.release_stage ]]"
   needs:
     - "$[[ inputs.job_prefix ]]check_release"
@@ -207,7 +215,7 @@ spec:
 "$[[ inputs.job_prefix ]]send_chat_message":
   stage: "$[[ inputs.release_stage ]]"
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$/'
+    - if: '$CI_COMMIT_TAG =~ /^$[[ inputs.release_tag_prefix ]]$[[ inputs.release_tag_constraint ]]$[[ inputs.errata_tag_suffix ]]$/'
   needs:
     - "$[[ inputs.job_prefix ]]check_release"
     - "$[[ inputs.job_prefix ]]create_app_version"
