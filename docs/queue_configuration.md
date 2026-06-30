@@ -96,6 +96,25 @@ When the Provisioning Consumer acknowledges a message, it deletes it from the st
 This makes the Provisioning API simple and stateless, but makes
 parallelization or even hot standby of Provisioning Consumers impossible.
 
+### Long polling and client timeouts
+
+`GET /v1/subscriptions/{name}/messages/next` is a long-poll.
+The Provisioning API fetches from the consumer NATS stream
+and blocks up to the `timeout` query parameter (in seconds, default `5`)
+waiting for a message. If none arrives in that window it returns an empty response,
+and the consumer is expected to request again.
+
+A consumer's HTTP request/read timeout must therefore be configured
+**longer than** the long-poll `timeout`.
+If the client timeout is shorter, the client aborts the connection
+before the long-poll returns. The server does not detect the disconnect,
+so the message it was about to deliver stays in-flight (pending)
+and is only redelivered once the consumer-queue `ack_wait` expires.
+As a rule of thumb, set the client timeout to at least
+the long-poll `timeout` plus a few seconds.
+The bundled `ProvisioningConsumerClient` already satisfies this
+(its underlying HTTP client defaults to a 300s total timeout against the 5s long-poll).
+
 ### Cleanup of old messages
 
 We don't want to keep messages forever,

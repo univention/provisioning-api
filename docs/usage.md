@@ -26,6 +26,19 @@ curl -X POST -u "demo-consumer:super-secret-password" \
   http://nubus-provisioning-api/v1/subscriptions/demo-consumer/messages/next
 ```
 
+This endpoint **long-polls**: it waits up to `timeout` seconds (query parameter,
+default `5`) for a message before responding. An empty response means no message
+arrived within that window; the consumer should simply request again.
+
+> **Client timeout margin:** the client's HTTP request/read timeout must be set
+> **longer than** the `timeout` query parameter. If the client timeout is shorter,
+> the client aborts the connection before the long-poll returns; the server cannot
+> detect this and the in-flight message stays stuck until the consumer-queue
+> `ack_wait` expires and it is redelivered.
+
+> Rule of thumb: client timeout >= long-poll `timeout` + a few seconds.
+> The bundled `ProvisioningConsumerClient` already satisfies this (aiohttp default of 300s versus the 5s long-poll).
+
 ## Acknowledge an event
 ```sh
 curl -X POST -u "demo-consumer:super-secret-password" \
