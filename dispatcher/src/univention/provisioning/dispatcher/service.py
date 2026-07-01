@@ -93,14 +93,7 @@ class DispatcherService:
 
         validated_msg = Message.model_validate(data)
 
-        subscriptions = self._matching_subscriptions(validated_msg)
-        if not subscriptions:
-            # A subscription registered moments earlier may not be in the mapping
-            # yet: it is refreshed asynchronously from a KV watch, so a message
-            # arriving in that window would otherwise be dropped. Refresh once and
-            # re-check before concluding there are no consumers.
-            await self.update_subscriptions_mapping()
-            subscriptions = self._matching_subscriptions(validated_msg)
+        subscriptions = self._subscriptions.get(validated_msg.realm, {}).get(validated_msg.topic, [])
 
         logger.debug("Found subscriptions: %r", subscriptions)
 
@@ -115,9 +108,6 @@ class DispatcherService:
 
         if not subscriptions:
             logger.info("No consumers for message with realm: %r topic: %r.", validated_msg.realm, validated_msg.topic)
-
-    def _matching_subscriptions(self, message: Message) -> set[Subscription]:
-        return self._subscriptions.get(message.realm, {}).get(message.topic, set())
 
     async def update_subscriptions_mapping(self, *args, **kwargs) -> None:
         logger.info("Updating subscriptions mapping...")

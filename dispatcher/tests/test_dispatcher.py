@@ -68,29 +68,3 @@ class TestDispatcherService:
 
         dispatcher_service.mq_push.enqueue_message.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME), MESSAGE)
         fake_ack.acknowledge_message.assert_called_once_with()
-
-    async def test_handle_message_refreshes_mapping_on_miss(self, dispatcher_service: DispatcherService):
-        # The subscription is missing from the mapping (e.g. registered moments ago
-        # and not yet propagated via the KV watch). Refreshing finds it, so the
-        # message must be routed rather than dropped.
-        dispatcher_service._subscriptions = {}
-
-        async def populate(*args, **kwargs):
-            dispatcher_service._subscriptions = SUBSCRIPTIONS
-
-        dispatcher_service.update_subscriptions_mapping = AsyncMock(side_effect=populate)
-
-        await dispatcher_service.handle_message(MQMESSAGE)
-
-        dispatcher_service.update_subscriptions_mapping.assert_awaited_once()
-        dispatcher_service.mq_push.enqueue_message.assert_called_once_with(ConsumerQueue(SUBSCRIPTION_NAME), MESSAGE)
-
-    async def test_handle_message_no_consumers_after_refresh(self, dispatcher_service: DispatcherService):
-        # If a refresh still finds no matching subscription, the message is not routed.
-        dispatcher_service._subscriptions = {}
-        dispatcher_service.update_subscriptions_mapping = AsyncMock()
-
-        await dispatcher_service.handle_message(MQMESSAGE)
-
-        dispatcher_service.update_subscriptions_mapping.assert_awaited_once()
-        dispatcher_service.mq_push.enqueue_message.assert_not_called()
