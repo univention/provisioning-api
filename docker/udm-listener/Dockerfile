@@ -1,14 +1,65 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# SPDX-FileCopyrightText: 2024 Univention GmbH
+# SPDX-FileCopyrightText: 2024-2026 Univention GmbH
 
 # Inspired by: https://hynek.me/articles/docker-uv/
 
-ARG LISTENER_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/listener-base/listener-base
-ARG LISTENER_BASE_IMAGE_TAG=0.14.12@sha256:51990264ed2f959abcfb116e2ce183813cb005def2d0609102a3ff70cf70381e
+ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base
+ARG UCS_BASE_IMAGE_TAG=5.2.5-build.20260514@sha256:81b104694a78cf36043f84b5d9e4b3b0cbbe6777e46877239a44f08249379119
 
 ###############################################
 # Stage 1: build dependencies and software
-FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS build
+FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS ucs-sources-base
+
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+
+FROM ucs-sources-base AS deb_builder
+
+COPY docker/udm-listener/patches/*.patch /root/
+
+WORKDIR /root/src/debian/
+
+# hadolint ignore=DL3003
+RUN \
+  apt-get build-dep --assume-yes univention-directory-listener && \
+  apt-get source univention-directory-listener && \
+  cd univention-directory-listener-* && \
+  patch -p3 < /root/0001-allow-to-specify-separate-notifier-address.patch && \
+  dpkg-buildpackage -uc -us -b
+
+FROM ucs-sources-base AS listener-base
+
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+
+# hadolint ignore=DL3008
+RUN \
+  echo "postfix postfix/main_mailer_type string 'Satellite system'" \
+  | debconf-set-selections && \
+  echo "postfix postfix/mailname string univention-directory-listener" \
+  | debconf-set-selections && \
+  apt-get --assume-yes --verbose-versions --no-install-recommends install \
+  postfix
+
+COPY --from=deb_builder \
+  /root/src/debian/univention-directory-listener_*.deb /root/
+
+# hadolint ignore=DL3008
+RUN \
+  apt-get --assume-yes --verbose-versions --no-install-recommends install \
+  /root/univention-directory-listener_*.deb \
+  python3-distutils \
+  python3-univention-directory-manager && \
+  awk \
+  '/^Package: univention-directory-listener$/{ while(!/^Version: /){getline} print $2 }' \
+  /var/lib/dpkg/status > /version
+
+RUN \
+  rm /usr/lib/univention-directory-listener/system/*
+
+COPY docker/udm-listener/command.sh /
+
+CMD ["/command.sh"]
+
+FROM listener-base AS build
 
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
@@ -18,7 +69,6 @@ ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
     UV_PYTHON_DOWNLOADS=never \
     UV_PYTHON=python3.11
-    # UV_PROJECT_ENVIRONMENT=/app
 
 COPY ./backends /app/backends
 COPY ./common /app/common
@@ -34,7 +84,6 @@ RUN --mount=type=cache,target=/root/.cache \
     --no-install-project && \
   uv export -o ./requirements.txt
 
-# copy source code
 COPY ./listener/src /app/listener/src
 
 RUN --mount=type=cache,target=/root/.cache \
@@ -42,7 +91,7 @@ RUN --mount=type=cache,target=/root/.cache \
 
 ###############################################
 # Stage 2: final image
-FROM ${LISTENER_BASE_IMAGE}:${LISTENER_BASE_IMAGE_TAG} AS final
+FROM listener-base AS final
 SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
 RUN \
@@ -59,32 +108,20 @@ RUN \
     listener/debug/level="3"
 
 COPY ./docker/udm-listener/*.patch /tmp/
-# Install patch utility
 RUN apt-get update && \
     apt-get --assume-yes --verbose-versions --no-install-recommends install \
     patch && \
     patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
     patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
     apt-get purge --auto-remove --assume-yes patch && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-    rm /entrypoint.d/50-listener-base-entrypoint.envsh
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/listener/.venv/lib/python3.11/site-packages
 
 COPY ./listener/src/nubus-provisioning.py /usr/lib/univention-directory-listener/system/
 
-# TODO: Fix docker compose so that it runs without root
-# ARG USER=udm-listener
-# RUN groupadd -r ${USER} -g 1000 && \
-#     useradd -r -d /app -g ${USER} -N ${USER} -u 1000
-#
-# COPY --from=build --chown=${USER}:${USER} /app/listener /app/listener
 COPY --from=build /app/listener /app/listener
 
 USER ${USER}
-#
-# RUN \
-#   python3.11 -V && \
-#   python3.11 -m site && \
-#   python3.11 -c 'import univention.provisioning.listener'
+
