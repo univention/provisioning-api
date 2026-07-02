@@ -16,7 +16,7 @@ from nats.js.errors import NotFoundError
 from univention.admin.rest.client import UDM, HTTPError, NotFound
 from univention.admin.rest.client import Object as UdmObject
 from univention.provisioning.consumer.api import ProvisioningConsumerClient, ProvisioningConsumerClientSettings
-from univention.provisioning.models.message import Body, PublisherName
+from univention.provisioning.models.message import Body, MessageProcessingStatus, PublisherName
 from univention.provisioning.models.subscription import RealmTopic
 
 from .e2e_settings import E2ETestSettings
@@ -132,11 +132,58 @@ async def provisioning_admin_client(
         yield client
 
 
+async def _wait_until_subscription_is_dispatched(
+    provisioning_client: ProvisioningConsumerClient,
+    subscription_name: str,
+    realms_topics: list[RealmTopic],
+    test_settings: E2ETestSettings,
+    timeout: float = 30,
+) -> None:
+    """Wait until the dispatcher routes messages to a just created subscription.
+
+    The dispatcher rebuilds its realm/topic to subscription mapping
+    asynchronously from a KV watch, so a message published right after a
+    subscription is created can be dropped before the mapping includes it.
+    Publish probe events to a subscribed topic until one is delivered,
+    then drain them so the test starts with an empty queue.
+    """
+    realm_topic = realms_topics[0]
+    probe_body = {
+        "old": {},
+        "new": {str(uuid.uuid1()): str(uuid.uuid1()), "dn": "cn=foo,dc=bar", "objectType": "foo/bar"},
+    }
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        requests.post(
+            test_settings.messages_url,
+            json={
+                "publisher_name": PublisherName.consumer_client_test,
+                "ts": "2024-02-07T09:01:33.835Z",
+                "realm": realm_topic.realm,
+                "topic": realm_topic.topic,
+                "body": probe_body,
+            },
+            auth=(test_settings.provisioning_events_username, test_settings.provisioning_events_password),
+        )
+        message = await provisioning_client.get_subscription_message(name=subscription_name, timeout=1)
+        if message is None:
+            continue
+        while message is not None:
+            await provisioning_client.set_message_status(
+                subscription_name, message.sequence_number, MessageProcessingStatus.ok
+            )
+            message = await provisioning_client.get_subscription_message(name=subscription_name, timeout=1)
+        return
+    raise TimeoutError(f"Dispatcher did not start routing to subscription {subscription_name!r} within {timeout:.0f}s")
+
+
 @pytest.fixture
 async def create_subscription(
     subscriber_name,
     subscriber_password,
     provisioning_admin_client: ProvisioningConsumerClient,
+    provisioning_client: ProvisioningConsumerClient,
+    test_settings: E2ETestSettings,
 ) -> AsyncGenerator[Callable[[list[RealmTopic]], Coroutine[Any, Any, str]], None]:
     async def _create_subscription(realms_topics: list[RealmTopic]) -> str:
         await provisioning_admin_client.create_subscription(
@@ -145,6 +192,7 @@ async def create_subscription(
             realms_topics=realms_topics,
             request_prefill=False,
         )
+        await _wait_until_subscription_is_dispatched(provisioning_client, subscriber_name, realms_topics, test_settings)
         return subscriber_name
 
     yield _create_subscription
