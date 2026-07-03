@@ -6,6 +6,11 @@ This repository contains gitlab CI components that are used by some of the repos
 
 The `app-release` component is documented in [templates/app-release/README.md](templates/app-release/README.md).
 
+## ai-review
+
+The `ai-review` component adds a manual AI code review job to merge request pipelines.
+It is documented in [templates/ai-review/README.md](templates/ai-review/README.md).
+
 ## Local CI Verification
 
 Quick commands to validate pipeline before pushing.

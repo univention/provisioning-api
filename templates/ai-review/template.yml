@@ -1,0 +1,127 @@
+spec:
+  inputs:
+    job_name:
+      default: "ai-review"
+      description: "Name of the review job. Change it to avoid a naming conflict or to include the component multiple times."
+    stage:
+      default: "test"
+      description: "The name of the pipeline stage in which to run the job."
+    image:
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:latest"
+      description: "Container image with the ai-review tool."
+    llm_provider:
+      default: "OPENAI"
+      description: "Value for LLM__PROVIDER. LiteLLM's OpenAI interface also allows using non-OpenAI models."
+    llm_model:
+      default: "anthropic/claude-opus-4-8"
+      description: "Value for LLM__META__MODEL. Available models: https://litellm.knut.univention.de/ui/?page=models LiteLLM encodes the names differently to what some AIs expect. Ignore their warning."
+    llm_max_tokens:
+      default: "50000"
+      description: "Value for LLM__META__MAX_TOKENS."
+    llm_temperature:
+      default: ""
+      description: "Value for LLM__META__TEMPERATURE. Keep it empty to use the model's default. Some models reject requests that set a temperature (e.g., Opus 4.7+). When empty, the variable is unset before running ai-review, because it cannot parse an empty value."
+    llm_api_url:
+      default: "https://litellm.knut.univention.de"
+      description: "Value for LLM__HTTP_CLIENT__API_URL."
+    llm_api_token:
+      default: "$OPENAI_API_KEY"
+      description: "Value for LLM__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable OPENAI_API_KEY, which is defined as a group variable at /univention/dev."
+    vcs_provider:
+      default: "GITLAB"
+      description: "Value for VCS__PROVIDER."
+    vcs_project_id:
+      default: "$CI_PROJECT_ID"
+      description: "Value for VCS__PIPELINE__PROJECT_ID."
+    vcs_merge_request_id:
+      default: "$CI_MERGE_REQUEST_IID"
+      description: "Value for VCS__PIPELINE__MERGE_REQUEST_ID."
+    vcs_api_url:
+      default: "$CI_SERVER_URL"
+      description: "Value for VCS__HTTP_CLIENT__API_URL."
+    vcs_api_token:
+      default: "$GITLAB_TOKEN"
+      description: "Value for VCS__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable GITLAB_TOKEN, which is defined as a group variable at /univention/dev, because $CI_JOB_TOKEN lacks the permission to post comments."
+    agent_enabled:
+      default: "true"
+      description: "Value for AGENT__ENABLED."
+    agent_command_timeout:
+      default: "60"
+      description: "Value for AGENT__COMMAND_TIMEOUT."
+    company_name:
+      default: "Univention"
+      description: "Value for PROMPT__CONTEXT__COMPANY_NAME."
+    review_mode:
+      default: "ADDED_AND_REMOVED_WITH_CONTEXT"
+      description: "Value for REVIEW__MODE."
+    review_context_lines:
+      default: "20"
+      description: "Value for REVIEW__CONTEXT_LINES."
+    review_added_marker:
+      default: ""
+      description: "Value for REVIEW__REVIEW_ADDED_MARKER. ai-review adds markers to diffs. Maybe some models need that? Keep it empty when the agent complains about 'added' or 'removed' comments. The Anthropic models complain about them."
+    review_removed_marker:
+      default: ""
+      description: "Value for REVIEW__REVIEW_REMOVED_MARKER. See review_added_marker."
+    debug:
+      type: boolean
+      default: false
+      description: "Enable debug logging and store the communication with GitLab and the AI model as job artifacts. Value is a YAML boolean."
+
+---
+
+".ai-review:debug:false":
+  extends: null
+
+".ai-review:debug:true":
+  variables:
+    LOGGER__LEVEL: "DEBUG"
+    ARTIFACTS__LLM_ENABLED: "true"
+    ARTIFACTS__VCS_ENABLED: "true"
+  artifacts:
+    paths:
+      - "artifacts"  # ai-review stores the communication with GitLab and the AI model here.
+    expire_in: "1 week"
+    when: "always"
+
+"$[[ inputs.job_name ]]":
+  extends: ".ai-review:debug:$[[ inputs.debug ]]"
+  stage: "$[[ inputs.stage ]]"
+  needs: []
+  image: "$[[ inputs.image ]]"
+  rules:
+    - if: "$CI_MERGE_REQUEST_IID"
+      when: "manual"
+  allow_failure: true
+  before_script:
+    # ai-review fails on an empty LLM__META__TEMPERATURE (it must parse as a float).
+    - if [ -z "$LLM__META__TEMPERATURE" ]; then unset LLM__META__TEMPERATURE; fi
+  script:
+    - ai-review show-config
+    - ai-review run
+  variables:
+    # Configuration: https://github.com/Nikita-Filonov/ai-review/blob/main/docs/ci/gitlab.yaml
+
+    # --- LLM configuration ---
+    LLM__PROVIDER: "$[[ inputs.llm_provider ]]"
+    LLM__META__MODEL: "$[[ inputs.llm_model ]]"
+    LLM__META__MAX_TOKENS: "$[[ inputs.llm_max_tokens ]]"
+    LLM__META__TEMPERATURE: "$[[ inputs.llm_temperature ]]"  # Unset in before_script when empty.
+    LLM__HTTP_CLIENT__API_URL: "$[[ inputs.llm_api_url ]]"
+    LLM__HTTP_CLIENT__API_TOKEN: "$[[ inputs.llm_api_token ]]"
+
+    # --- GitLab integration ---
+    VCS__PROVIDER: "$[[ inputs.vcs_provider ]]"
+    VCS__PIPELINE__PROJECT_ID: "$[[ inputs.vcs_project_id ]]"
+    VCS__PIPELINE__MERGE_REQUEST_ID: "$[[ inputs.vcs_merge_request_id ]]"
+    VCS__HTTP_CLIENT__API_URL: "$[[ inputs.vcs_api_url ]]"
+    VCS__HTTP_CLIENT__API_TOKEN: "$[[ inputs.vcs_api_token ]]"
+
+    # --- Review behavior ---
+    AGENT__ENABLED: "$[[ inputs.agent_enabled ]]"
+    AGENT__COMMAND_TIMEOUT: "$[[ inputs.agent_command_timeout ]]"
+    PROMPT__CONTEXT__COMPANY_NAME: "$[[ inputs.company_name ]]"
+    REVIEW__MODE: "$[[ inputs.review_mode ]]"
+    REVIEW__CONTEXT_LINES: "$[[ inputs.review_context_lines ]]"
+    REVIEW__REVIEW_ADDED_MARKER: "$[[ inputs.review_added_marker ]]"
+    REVIEW__REVIEW_REMOVED_MARKER: "$[[ inputs.review_removed_marker ]]"
