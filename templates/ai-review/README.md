@@ -15,6 +15,14 @@ When triggered, it reviews the merge request diff with an LLM
 (by default Claude Opus via the Univention LiteLLM proxy at `litellm.knut.univention.de`)
 and posts the review as comments on the merge request.
 
+The review summary takes the **merge request's intent** into account:
+the job feeds the MR title and description,
+and the descriptions of all issues linked to the MR,
+into the summary review prompt,
+so the review can state whether the changes do what they claim —
+and not more.
+See [Merge Request and Issue Context](#merge-request-and-issue-context).
+
 The job is manual and `allow_failure: true`,
 so it never blocks a pipeline.
 
@@ -41,7 +49,11 @@ include:
       llm_model: "gemini/gemini-2.5-pro"
 ```
 
-Every variable of the job's `variables` section can be overwritten through an input.
+Every ai-review configuration variable of the job's `variables` section
+can be overwritten through an input.
+The `AI_REVIEW_*` variables holding the generated prompt texts are the exception;
+override them by redefining the job's `variables` in your own pipeline,
+or point `summary_prompt_files` / `context_prompt_files` to your own files.
 
 ## Configuration
 
@@ -68,6 +80,8 @@ Every variable of the job's `variables` section can be overwritten through an in
 | `review_context_lines`  | `20`                                                                       | `REVIEW__CONTEXT_LINES`                                             |
 | `review_added_marker`   | (empty)                                                                    | `REVIEW__REVIEW_ADDED_MARKER`                                       |
 | `review_removed_marker` | (empty)                                                                    | `REVIEW__REVIEW_REMOVED_MARKER`                                     |
+| `summary_prompt_files`  | `["/tmp/ai-review/summary-prompt.md"]`                                     | `PROMPT__SUMMARY_PROMPT_FILES`                                      |
+| `context_prompt_files`  | `["/tmp/ai-review/context-prompt.md"]`                                     | `PROMPT__CONTEXT_PROMPT_FILES`                                      |
 | `debug`                 | `false`                                                                    | `LOGGER__LEVEL`, `ARTIFACTS__LLM_ENABLED`, `ARTIFACTS__VCS_ENABLED` |
 
 See the [ai-review GitLab CI documentation](https://github.com/Nikita-Filonov/ai-review/blob/main/docs/ci/gitlab.yaml)
@@ -87,6 +101,42 @@ Notes on selected inputs:
   ai-review adds markers to diffs, which some models may need.
   Keep them empty when the agent complains about "added" or "removed" comments
   (the Anthropic models complain about them).
+
+## Merge Request and Issue Context
+
+ai-review's default prompts only contain the code diff,
+so the review cannot judge whether a change does what it is supposed to do.
+This component therefore generates its own summary and context prompt files
+(in `before_script`, under `/tmp/ai-review/`),
+which extend ai-review's default instructions with a "Merge request intent" section:
+
+- the **MR title and description**,
+  provided through ai-review's built-in `<<review_title>>` and `<<review_description>>`
+  [prompt placeholders](https://github.com/Nikita-Filonov/ai-review/blob/main/docs/prompts/README.md)
+  (ai-review fetches them from the GitLab API itself),
+- the **descriptions of all issues linked to the MR**
+  (GitLab [related_issues](https://docs.gitlab.com/api/merge_requests/#list-issues-related-to-the-merge-request) API,
+  the links shown under "Related items" in the MR UI),
+  fetched by the job and injected as the custom `<<issue_context>>` placeholder.
+
+Notes:
+
+- The intent section is only added to the **summary** and **context** review prompts,
+  not to the per-file **inline** review prompts:
+  the inline review sends one LLM request per changed file
+  (multiplied by the agent loop's iterations),
+  so embedding the descriptions there would multiply their token cost,
+  while "does the change match its intent" is a whole-MR question anyway.
+- The issue text is truncated to **127 KiB**,
+  because Linux limits a single environment variable to 128 KiB.
+- The prompts mark the descriptions as
+  **data written by their authors, not instructions to the AI**,
+  to blunt prompt-injection attempts via MR or issue descriptions.
+- A failing issue lookup never fails the job;
+  the review then simply runs without issue context.
+- The description of a **confidential** linked issue is sent to the LLM
+  like any other issue description,
+  if the `GITLAB_TOKEN` can read it.
 
 ## Required Secrets
 
