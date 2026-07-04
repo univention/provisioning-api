@@ -53,7 +53,8 @@ Every ai-review configuration variable of the job's `variables` section
 can be overwritten through an input.
 The `AI_REVIEW_*` variables holding the generated prompt texts are the exception;
 override them by redefining the job's `variables` in your own pipeline,
-or point `summary_prompt_files` / `context_prompt_files` to your own files.
+or point `summary_prompt_files` / `context_prompt_files` / `system_summary_prompt_files`
+to your own files.
 
 ## Configuration
 
@@ -61,7 +62,7 @@ or point `summary_prompt_files` / `context_prompt_files` to your own files.
 |-------------------------|----------------------------------------------------------------------------|---------------------------------------------------------------------|
 | `job_name`              | `ai-review`                                                                | – (job name)                                                        |
 | `stage`                 | `test`                                                                     | – (pipeline stage)                                                  |
-| `image`                 | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:latest` | – (job image)                                                       |
+| `image`                 | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:v0.68.0` | – (job image)                                                       |
 | `llm_provider`          | `OPENAI`                                                                   | `LLM__PROVIDER`                                                     |
 | `llm_model`             | `anthropic/claude-opus-4-8`                                                | `LLM__META__MODEL`                                                  |
 | `llm_max_tokens`        | `50000`                                                                    | `LLM__META__MAX_TOKENS`                                             |
@@ -82,6 +83,9 @@ or point `summary_prompt_files` / `context_prompt_files` to your own files.
 | `review_removed_marker` | (empty)                                                                    | `REVIEW__REVIEW_REMOVED_MARKER`                                     |
 | `summary_prompt_files`  | `["/tmp/ai-review/summary-prompt.md"]`                                     | `PROMPT__SUMMARY_PROMPT_FILES`                                      |
 | `context_prompt_files`  | `["/tmp/ai-review/context-prompt.md"]`                                     | `PROMPT__CONTEXT_PROMPT_FILES`                                      |
+| `system_summary_prompt_files` | `["/tmp/ai-review/system-summary-prompt.md"]`                        | `PROMPT__SYSTEM_SUMMARY_PROMPT_FILES`                               |
+| `include_summary_system_prompts` | `false`                                                           | `PROMPT__INCLUDE_SUMMARY_SYSTEM_PROMPTS`                            |
+| `system_agent_prompt_files` | `["/tmp/ai-review/system-agent-prompt.md"]`                            | `PROMPT__SYSTEM_AGENT_PROMPT_FILES`                                 |
 | `debug`                 | `false`                                                                    | `LOGGER__LEVEL`, `ARTIFACTS__LLM_ENABLED`, `ARTIFACTS__VCS_ENABLED` |
 
 See the [ai-review GitLab CI documentation](https://github.com/Nikita-Filonov/ai-review/blob/main/docs/ci/gitlab.yaml)
@@ -137,6 +141,59 @@ Notes:
 - The description of a **confidential** linked issue is sent to the LLM
   like any other issue description,
   if the `GITLAB_TOKEN` can read it.
+
+## Summary Comment Format
+
+ai-review posts the LLM's summary output verbatim as the comment body,
+and its default summary *system* prompt demands a plain-text paragraph
+("no JSON, no markdown, 1-4 sentences").
+This component replaces that system prompt with a generated one
+(`system_summary_prompt_files`, with `include_summary_system_prompts: false`,
+because *including* it would prepend the contradicting plain-text rule),
+so the summary comment is structured into Markdown sections:
+
+- **Summary** — what the changes do and what was done well,
+- **Findings** — a bullet list of the most important issues, most severe first,
+- **Intent** — a bullet list of unmet promises from the MR/issue intent
+  and of changes unrelated to it.
+
+Empty sections are omitted;
+"No issues found." is posted when there is nothing to report.
+
+In agent mode (`agent_enabled: true`, the default),
+the model must answer every turn with a single JSON action object,
+and ai-review posts an unparseable answer **verbatim** as the review comment —
+models occasionally narrate before the JSON action.
+The generated prompts defend against that in three ways:
+
+- **Either-or contract**: each response is either ONLY a JSON action object
+  or ONLY the final Markdown summary text, never a mix.
+  A pure-Markdown final answer is safe by construction:
+  ai-review posts an unparseable final response verbatim,
+  which in that case is exactly the summary text.
+- **Fenced actions**: the JSON action object must be wrapped
+  in a ` ```json ` fenced code block.
+  ai-review extracts a fenced block from the response before parsing,
+  so narration around a fenced action is stripped instead of breaking the parse.
+- **Note field**: commentary the model cannot suppress
+  belongs in a `"note"` field inside the JSON object,
+  which ai-review's parser ignores.
+
+The amendments live in a generated addition to the agent system prompt
+(`system_agent_prompt_files`, appended to ai-review's default, not a fork).
+
+### Maintenance: forked upstream prompts
+
+The generated summary, context, and summary-system prompts are forks of
+ai-review's defaults in
+[`ai_review/prompts/`](https://github.com/Nikita-Filonov/ai-review/tree/main/ai_review/prompts)
+(see the "forked from" comments in `template.yml` for the exact version).
+The `image` input is therefore pinned to an ai-review release
+instead of `latest`,
+so upstream prompt and behavior changes only arrive with a deliberate upgrade.
+When bumping the pinned version,
+diff `ai_review/prompts/` between the two releases
+and fold relevant upstream changes into the `AI_REVIEW_*` prompt variables.
 
 ## Required Secrets
 
