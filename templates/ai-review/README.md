@@ -74,6 +74,7 @@ to your own files.
 | `vcs_merge_request_id`  | `$CI_MERGE_REQUEST_IID`                                                    | `VCS__PIPELINE__MERGE_REQUEST_ID`                                   |
 | `vcs_api_url`           | `$CI_SERVER_URL`                                                           | `VCS__HTTP_CLIENT__API_URL`                                         |
 | `vcs_api_token`         | `$GITLAB_TOKEN`                                                            | `VCS__HTTP_CLIENT__API_TOKEN`                                       |
+| `vcs_batch_comments`    | `true`                                                                     | `VCS__BATCH_COMMENTS`                                               |
 | `agent_enabled`         | `true`                                                                     | `AGENT__ENABLED`                                                    |
 | `agent_command_timeout` | `60`                                                                       | `AGENT__COMMAND_TIMEOUT`                                            |
 | `company_name`          | `Univention`                                                               | `PROMPT__CONTEXT__COMPANY_NAME`                                     |
@@ -105,6 +106,13 @@ Notes on selected inputs:
   ai-review adds markers to diffs, which some models may need.
   Keep them empty when the agent complains about "added" or "removed" comments
   (the Anthropic models complain about them).
+- `vcs_batch_comments`: posts the review comments as GitLab draft notes
+  and publishes them in one batch,
+  so reviewers get a single email notification per review
+  instead of one per inline and summary comment.
+  Requires GitLab 15.10+
+  and an ai-review build with batch-comments support;
+  builds without it (upstream v0.68.0 and earlier) ignore the variable.
 
 ## Merge Request and Issue Context
 

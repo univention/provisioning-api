@@ -10,7 +10,9 @@ spec:
       # Pinned so that upstream prompt and behavior changes only arrive with a
       # deliberate upgrade. When bumping, diff ai_review/prompts/ between the
       # versions and update the forked AI_REVIEW_* prompt variables below.
-      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:v0.68.0"
+      # Upstream image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:v0.68.0"
+      # We're using a self-built image until PR https://github.com/Nikita-Filonov/ai-review/pull/111 has been accepted.
+      default: "gitregistry.knut.univention.de/univention/dev/tooling/ci-components/ai-review:batched-comments"
       description: "Container image with the ai-review tool."
     llm_provider:
       default: "OPENAI"
@@ -45,6 +47,9 @@ spec:
     vcs_api_token:
       default: "$GITLAB_TOKEN"
       description: "Value for VCS__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable GITLAB_TOKEN, which is defined as a group variable at /univention/dev, because $CI_JOB_TOKEN lacks the permission to post comments."
+    vcs_batch_comments:
+      default: "true"
+      description: "Value for VCS__BATCH_COMMENTS. Post the review comments as GitLab draft notes and publish them in one batch, so reviewers get a single email notification per review instead of one per comment. Requires GitLab 15.10+ and an ai-review build with batch-comments support; builds without it (upstream v0.68.0 and earlier) ignore the variable."
     agent_enabled:
       default: "true"
       description: "Value for AGENT__ENABLED."
@@ -150,6 +155,7 @@ spec:
     VCS__PIPELINE__MERGE_REQUEST_ID: "$[[ inputs.vcs_merge_request_id ]]"
     VCS__HTTP_CLIENT__API_URL: "$[[ inputs.vcs_api_url ]]"
     VCS__HTTP_CLIENT__API_TOKEN: "$[[ inputs.vcs_api_token ]]"
+    VCS__BATCH_COMMENTS: "$[[ inputs.vcs_batch_comments ]]"
 
     # --- Review behavior ---
     AGENT__ENABLED: "$[[ inputs.agent_enabled ]]"
