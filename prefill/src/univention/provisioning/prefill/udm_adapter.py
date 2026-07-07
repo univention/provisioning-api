@@ -78,7 +78,8 @@ class UDMAdapter(UDMPort):
         params = {
             "scope": "sub",
             "hidden": "true",
-            "properties": ["NonExistantDummyProperty"],
+            "opened": "0",
+            "properties": ["dn"],
             "page": "1",
             "limit": "0",
             "dir": "ASC",

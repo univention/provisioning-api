@@ -168,16 +168,6 @@ class PrefillService:
     async def _fill_udm_topic(self, object_type: str, subscription_name: str):
         """Find the DNs of all UDM objects for an object_type."""
 
-        # Note: the size of the HTTP response is limited in the UDM REST API container
-        # by the UCR variable `directory/manager/web/sizelimit`
-        # (default: 400.000 bytes).
-        #
-        # We should probably use pagination to fetch the objects, but the parameters
-        # `page` and `limit` are marked as "Broken/Experimental" in the UDM REST API.
-        #
-        # For now, first request all objects without their properties,
-        # then do one request per object-URL to fetch the whole object.
-
         urls = await self.udm.list_objects(object_type)
         for url in urls:
             logger.info("Grabbing object from: %r", url)
