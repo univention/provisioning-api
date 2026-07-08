@@ -42,6 +42,7 @@ mountSecrets: true
 # Security Context.
 # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 containerSecurityContext:
+  privileged: false
   # -- Enable container privileged escalation.
   allowPrivilegeEscalation: false
   # -- Security capabilities for container.
