@@ -22,6 +22,7 @@ include:
     file:
       - "dind.yml"
 
+
 variables:
   POETRY_VERSION: "1.6.1"
   RENOVATE_USER_ID: "1393"
