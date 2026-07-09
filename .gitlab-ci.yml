@@ -22,6 +22,10 @@ include:
     file:
       - "dind.yml"
 
+default:
+  tags:
+    - "dae-s"
+
 variables:
   POETRY_VERSION: "1.6.1"
   RENOVATE_USER_ID: "1393"
