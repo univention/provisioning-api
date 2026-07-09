@@ -91,6 +91,10 @@ include:
         # used by compose.jinja to point at the published nubus/nubus-dev image.
         - "pre-semantic-release"
 
+default:
+  tags:
+    - "dae-s"
+
 variables:
   POETRY_VERSION: "1.6.1"
   RENOVATE_USER_ID: "1393"
