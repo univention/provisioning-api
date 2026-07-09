@@ -31,7 +31,7 @@ spec:
       description: "Value for LLM__HTTP_CLIENT__API_URL."
     llm_api_token:
       default: "$OPENAI_API_KEY"
-      description: "Value for LLM__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable OPENAI_API_KEY, which is defined as a group variable at /univention/dev."
+      description: "Value for LLM__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable OPENAI_API_KEY, which is defined as a group variable at /univention."
     vcs_provider:
       default: "GITLAB"
       description: "Value for VCS__PROVIDER."
@@ -45,8 +45,8 @@ spec:
       default: "$CI_SERVER_URL"
       description: "Value for VCS__HTTP_CLIENT__API_URL."
     vcs_api_token:
-      default: "$GITLAB_TOKEN"
-      description: "Value for VCS__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable GITLAB_TOKEN, which is defined as a group variable at /univention/dev, because $CI_JOB_TOKEN lacks the permission to post comments."
+      default: "$AI_REVIEW_TOKEN"
+      description: "Value for VCS__HTTP_CLIENT__API_TOKEN. The default expands the CI/CD variable AI_REVIEW_TOKEN, which is defined as a group variable at /univention, because $CI_JOB_TOKEN lacks the permission to post comments."
     vcs_batch_comments:
       default: "true"
       description: "Value for VCS__BATCH_COMMENTS. Post the review comments as GitLab draft notes and publish them in one batch, so reviewers get a single email notification per review instead of one per comment. Requires GitLab 15.10+ and an ai-review build with batch-comments support; builds without it (upstream v0.68.0 and earlier) ignore the variable."

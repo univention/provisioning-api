@@ -36,14 +36,14 @@ so it never blocks a pipeline.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/ai-review@2.8.0
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/ai-review@2.8.1
 ```
 
 With a different model and stage:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/ai-review@2.8.0
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/ai-review@2.8.1
     inputs:
       stage: "lint"
       llm_model: "gemini/gemini-2.5-pro"
@@ -58,36 +58,36 @@ to your own files.
 
 ## Configuration
 
-| Input                   | Default                                                                    | Sets variable                                                       |
-|-------------------------|----------------------------------------------------------------------------|---------------------------------------------------------------------|
-| `job_name`              | `ai-review`                                                                | – (job name)                                                        |
-| `stage`                 | `test`                                                                     | – (pipeline stage)                                                  |
-| `image`                 | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:v0.68.0` | – (job image)                                                       |
-| `llm_provider`          | `OPENAI`                                                                   | `LLM__PROVIDER`                                                     |
-| `llm_model`             | `anthropic/claude-opus-4-8`                                                | `LLM__META__MODEL`                                                  |
-| `llm_max_tokens`        | `50000`                                                                    | `LLM__META__MAX_TOKENS`                                             |
-| `llm_temperature`       | (empty)                                                                    | `LLM__META__TEMPERATURE`                                            |
-| `llm_api_url`           | `https://litellm.knut.univention.de`                                       | `LLM__HTTP_CLIENT__API_URL`                                         |
-| `llm_api_token`         | `$OPENAI_API_KEY`                                                          | `LLM__HTTP_CLIENT__API_TOKEN`                                       |
-| `vcs_provider`          | `GITLAB`                                                                   | `VCS__PROVIDER`                                                     |
-| `vcs_project_id`        | `$CI_PROJECT_ID`                                                           | `VCS__PIPELINE__PROJECT_ID`                                         |
-| `vcs_merge_request_id`  | `$CI_MERGE_REQUEST_IID`                                                    | `VCS__PIPELINE__MERGE_REQUEST_ID`                                   |
-| `vcs_api_url`           | `$CI_SERVER_URL`                                                           | `VCS__HTTP_CLIENT__API_URL`                                         |
-| `vcs_api_token`         | `$GITLAB_TOKEN`                                                            | `VCS__HTTP_CLIENT__API_TOKEN`                                       |
-| `vcs_batch_comments`    | `true`                                                                     | `VCS__BATCH_COMMENTS`                                               |
-| `agent_enabled`         | `true`                                                                     | `AGENT__ENABLED`                                                    |
-| `agent_command_timeout` | `60`                                                                       | `AGENT__COMMAND_TIMEOUT`                                            |
-| `company_name`          | `Univention`                                                               | `PROMPT__CONTEXT__COMPANY_NAME`                                     |
-| `review_mode`           | `ADDED_AND_REMOVED_WITH_CONTEXT`                                           | `REVIEW__MODE`                                                      |
-| `review_context_lines`  | `20`                                                                       | `REVIEW__CONTEXT_LINES`                                             |
-| `review_added_marker`   | (empty)                                                                    | `REVIEW__REVIEW_ADDED_MARKER`                                       |
-| `review_removed_marker` | (empty)                                                                    | `REVIEW__REVIEW_REMOVED_MARKER`                                     |
-| `summary_prompt_files`  | `["/tmp/ai-review/summary-prompt.md"]`                                     | `PROMPT__SUMMARY_PROMPT_FILES`                                      |
-| `context_prompt_files`  | `["/tmp/ai-review/context-prompt.md"]`                                     | `PROMPT__CONTEXT_PROMPT_FILES`                                      |
-| `system_summary_prompt_files` | `["/tmp/ai-review/system-summary-prompt.md"]`                        | `PROMPT__SYSTEM_SUMMARY_PROMPT_FILES`                               |
-| `include_summary_system_prompts` | `false`                                                           | `PROMPT__INCLUDE_SUMMARY_SYSTEM_PROMPTS`                            |
-| `system_agent_prompt_files` | `["/tmp/ai-review/system-agent-prompt.md"]`                            | `PROMPT__SYSTEM_AGENT_PROMPT_FILES`                                 |
-| `debug`                 | `false`                                                                    | `LOGGER__LEVEL`, `ARTIFACTS__LLM_ENABLED`, `ARTIFACTS__VCS_ENABLED` |
+| Input                            | Default                                                                     | Sets variable                                                       |
+|----------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------|
+| `job_name`                       | `ai-review`                                                                 | – (job name)                                                        |
+| `stage`                          | `test`                                                                      | – (pipeline stage)                                                  |
+| `image`                          | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/nikitafilonov/ai-review:v0.68.0` | – (job image)                                                       |
+| `llm_provider`                   | `OPENAI`                                                                    | `LLM__PROVIDER`                                                     |
+| `llm_model`                      | `anthropic/claude-opus-4-8`                                                 | `LLM__META__MODEL`                                                  |
+| `llm_max_tokens`                 | `50000`                                                                     | `LLM__META__MAX_TOKENS`                                             |
+| `llm_temperature`                | (empty)                                                                     | `LLM__META__TEMPERATURE`                                            |
+| `llm_api_url`                    | `https://litellm.knut.univention.de`                                        | `LLM__HTTP_CLIENT__API_URL`                                         |
+| `llm_api_token`                  | `$OPENAI_API_KEY`                                                           | `LLM__HTTP_CLIENT__API_TOKEN`                                       |
+| `vcs_provider`                   | `GITLAB`                                                                    | `VCS__PROVIDER`                                                     |
+| `vcs_project_id`                 | `$CI_PROJECT_ID`                                                            | `VCS__PIPELINE__PROJECT_ID`                                         |
+| `vcs_merge_request_id`           | `$CI_MERGE_REQUEST_IID`                                                     | `VCS__PIPELINE__MERGE_REQUEST_ID`                                   |
+| `vcs_api_url`                    | `$CI_SERVER_URL`                                                            | `VCS__HTTP_CLIENT__API_URL`                                         |
+| `vcs_api_token`                  | `$AI_REVIEW_TOKEN`                                                          | `VCS__HTTP_CLIENT__API_TOKEN`                                       |
+| `vcs_batch_comments`             | `true`                                                                      | `VCS__BATCH_COMMENTS`                                               |
+| `agent_enabled`                  | `true`                                                                      | `AGENT__ENABLED`                                                    |
+| `agent_command_timeout`          | `60`                                                                        | `AGENT__COMMAND_TIMEOUT`                                            |
+| `company_name`                   | `Univention`                                                                | `PROMPT__CONTEXT__COMPANY_NAME`                                     |
+| `review_mode`                    | `ADDED_AND_REMOVED_WITH_CONTEXT`                                            | `REVIEW__MODE`                                                      |
+| `review_context_lines`           | `20`                                                                        | `REVIEW__CONTEXT_LINES`                                             |
+| `review_added_marker`            | (empty)                                                                     | `REVIEW__REVIEW_ADDED_MARKER`                                       |
+| `review_removed_marker`          | (empty)                                                                     | `REVIEW__REVIEW_REMOVED_MARKER`                                     |
+| `summary_prompt_files`           | `["/tmp/ai-review/summary-prompt.md"]`                                      | `PROMPT__SUMMARY_PROMPT_FILES`                                      |
+| `context_prompt_files`           | `["/tmp/ai-review/context-prompt.md"]`                                      | `PROMPT__CONTEXT_PROMPT_FILES`                                      |
+| `system_summary_prompt_files`    | `["/tmp/ai-review/system-summary-prompt.md"]`                               | `PROMPT__SYSTEM_SUMMARY_PROMPT_FILES`                               |
+| `include_summary_system_prompts` | `false`                                                                     | `PROMPT__INCLUDE_SUMMARY_SYSTEM_PROMPTS`                            |
+| `system_agent_prompt_files`      | `["/tmp/ai-review/system-agent-prompt.md"]`                                 | `PROMPT__SYSTEM_AGENT_PROMPT_FILES`                                 |
+| `debug`                          | `false`                                                                     | `LOGGER__LEVEL`, `ARTIFACTS__LLM_ENABLED`, `ARTIFACTS__VCS_ENABLED` |
 
 See the [ai-review GitLab CI documentation](https://github.com/Nikita-Filonov/ai-review/blob/main/docs/ci/gitlab.yaml)
 for the meaning of the variables.
@@ -148,7 +148,7 @@ Notes:
   the review then simply runs without issue context.
 - The description of a **confidential** linked issue is sent to the LLM
   like any other issue description,
-  if the `GITLAB_TOKEN` can read it.
+  if the `AI_REVIEW_TOKEN` can read it.
 
 ## Summary Comment Format
 
@@ -205,12 +205,12 @@ and fold relevant upstream changes into the `AI_REVIEW_*` prompt variables.
 
 ## Required Secrets
 
-| CI/CD variable   | Used for                                 | Notes                                                                                                         |
-|------------------|------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `OPENAI_API_KEY` | Authentication against the LiteLLM proxy | Defined as a CI/CD group variable at `/univention/dev`                                                        |
-| `GITLAB_TOKEN`   | Posting comments on the merge request    | Defined as a CI/CD group variable at `/univention/dev`; `$CI_JOB_TOKEN` lacks the permission to post comments |
+| CI/CD variable    | Used for                                 | Notes                                                                                                     |
+|-------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `OPENAI_API_KEY`  | Authentication against the LiteLLM proxy | Defined as a CI/CD group variable at `/univention`                                                        |
+| `AI_REVIEW_TOKEN` | Posting comments on the merge request    | Defined as a CI/CD group variable at `/univention`; `$CI_JOB_TOKEN` lacks the permission to post comments |
 
-Projects outside the `/univention/dev` group must define these variables themselves,
+Projects outside the `/univention` group must define these variables themselves,
 or pass different variable names via the `llm_api_token` and `vcs_api_token` inputs.
 Use tokens with the minimum required scope
 (the GitLab token only needs `api` scope to post MR comments).
@@ -224,7 +224,7 @@ as job artifacts in the `artifacts/` directory:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/ai-review@2.8.0
+  - component: $CI_SERVER_FQDN/univention/dev/tooling/ci-components/ai-review@2.8.1
     inputs:
       debug: true
 ```
