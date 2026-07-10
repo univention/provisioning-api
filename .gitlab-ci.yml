@@ -30,6 +30,9 @@ variables:
   DOCKER_HOST: "unix:///var/run/docker.sock"
   # Make the test-profile services (e2e-test) addressable by pull/run.
   COMPOSE_PROFILES: "test"
+  # Pin every provisioning image (incl. the e2e test runner) to a published
+  # release instead of :latest, so nothing is built and the versions are stable.
+  IMAGE_TAG: "0.70.19"
 
 # Runs in the built-in ".pre" stage; exports RELEASE_VERSION via deploy.env.
 pre-semantic-release:
@@ -45,9 +48,6 @@ test-end-to-end:
     # Inherited DOCKER_API_VERSION=1.39 (old dind leftover) downgrades the client
     # and the 29.x host daemon rejects it; unset so the client negotiates.
     - unset DOCKER_API_VERSION
-    # Using :latest images (no builds). IMAGE_TAG left unset so compose falls back
-    # to ${IMAGE_TAG:-latest}. RELEASE_VERSION from pre-semantic-release is still
-    # available as a CI var if needed.
     # DooD bind-mount fix, no runner-config change: the job's checkout is NOT on
     # the host daemon's filesystem, so the compose file's relative binds
     # (./nats.dev.conf, ./tests/..., ./e2e_tests/...) would resolve to empty dirs.
@@ -71,7 +71,7 @@ test-end-to-end:
   script:
     # Wait for the UDM Listener to get ready. (Not worth fixing properly atm.)
     - sleep 10
-    - docker compose run --quiet-pull --rm e2e-test
+    - docker compose run --no-build --rm e2e-test
   after_script:
     - unset DOCKER_API_VERSION
     - docker ps -a
