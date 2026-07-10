@@ -34,5 +34,34 @@ Each `dae` flavor runs the identical `.e2e-test` job (only `tags` differ), 3 run
 each for repeatability.
 
 <!-- RESULTS -->
-_Pending — populated from pipeline runs on `jlohmer/dind`._
+Job **duration** in seconds; ✓/✗ = job pass/fail. The e2e suite is flaky (a
+different flavor fails most runs, independent of size — `pull`/`up` always
+succeed), so treat pass/fail as noise and **durations** as the signal.
+
+| Pipeline | Cache state | dae-s | dae-m | dae-l | dae-xl |
+| -------- | ----------- | ----- | ----- | ----- | ------ |
+| #425831  | s warm, m/l/xl **cold** | 160 ✓ | 292 ✗ | 305 ✗ | 276 ✓ |
+| #425833  | warm                    | 195 ✗ | 152 ✓ | 237 ✗ | 175 ✗ |
+| #425835  | warm                    | 164 ✓ | 185 ✗ | 156 ✗ | 177 ✗ |
+| #425836  | **cold** (ran concurrently with #425835, so the autoscaler spun fresh instances) | 320 ✗ | 278 ✗ | 196 ✗ | 250 ✗ |
+
+### Findings
+
+- **Warm ≈ 155–195 s across every flavor** (#425833, #425835) — roughly **half**
+  the ~305 s K8s baseline. This is the real DooD win.
+- **VM size barely matters.** Warm, `dae-s` (164 s) is as fast as `dae-xl`
+  (177 s); the workload is dominated by fixed waits (`sleep 10`, service
+  readiness, pytest network waits), not CPU. Bigger flavors don't help.
+- **Cache warmth is the dominant variable.** A cold instance adds ~100–160 s:
+  job-image pull ~60 s + `compose pull` of the provisioning/nats/ldap images
+  ~30–70 s. First run per instance (#425831 m/l/xl, all of #425836) shows this.
+- **Concurrency forces cold instances.** #425836 ran alongside #425835, so the
+  autoscaler booted fresh cold VMs and lost the warm advantage entirely.
+
+### Takeaway
+
+Prefer **`dae-s`** — size buys nothing for this job. The ~2× speedup vs the K8s
+baseline comes from DooD **plus** warm caches, so the levers that matter are
+keeping instances warm (idle-count / reuse) and pre-baking the common images,
+**not** a larger flavor. The test suite's flakiness is a separate issue.
 <!-- /RESULTS -->
