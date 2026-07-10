@@ -80,9 +80,6 @@ class UDMAdapter(UDMPort):
             "hidden": "true",
             "opened": "0",
             "properties": ["dn"],
-            "page": "1",
-            "limit": "0",
-            "dir": "ASC",
         }
         if position:
             params["position"] = position
