@@ -25,6 +25,10 @@ dood-smoke:
     - "dae-s"
   image: "docker:29.6.1"
   script:
+    # An inherited CI/CD var DOCKER_API_VERSION=1.39 (leftover from the old dind
+    # service) force-pins the client API and the 29.x host daemon rejects it
+    # (needs >= 1.40). Unset it so the client negotiates. See the old e2e job.
+    - unset DOCKER_API_VERSION
     # 1. Reach the host daemon from inside the job container.
     - echo "== docker version (client in job, server on host) =="
     - docker version
@@ -62,6 +66,7 @@ dood-capabilities:
     - "dae-s"
   image: "docker:29.6.1"
   script:
+    - unset DOCKER_API_VERSION   # see dood-smoke: inherited 1.39 pin breaks the 29.x daemon
     - apk add --no-cache bash
     - bash ./dood-capabilities.sh
 
