@@ -28,6 +28,8 @@ default:
 variables:
   # DooD: talk to the host daemon via the mounted socket, not a dind service.
   DOCKER_HOST: "unix:///var/run/docker.sock"
+  # Make the test-profile services (e2e-test) addressable by pull/run.
+  COMPOSE_PROFILES: "test"
 
 # Runs in the built-in ".pre" stage; exports RELEASE_VERSION via deploy.env.
 pre-semantic-release:
@@ -55,6 +57,16 @@ test-end-to-end:
     - tar -C "$CI_PROJECT_DIR" -cf - . | docker run -i --rm -v /:/host alpine sh -c "mkdir -p /host${CI_PROJECT_DIR} && tar -C /host${CI_PROJECT_DIR} -xf -"
     - docker version
     - docker compose config e2e-test
+    # The GitLab registry is S3-backed and intermittently returns 503 on blob
+    # GETs, which aborts `up`. Pre-pull all needed images with retries so a
+    # transient blip doesn't fail the job.
+    - |
+      services="provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-rest-api udm-rest-api-1 udm-listener ldap-notifier ldap-server e2e-test"
+      n=0
+      until docker compose pull --quiet $services; do
+        n=$((n+1)); [ "$n" -ge 5 ] && echo "compose pull failed after $n attempts" && exit 1
+        echo "compose pull failed (attempt $n) — retrying in 10s"; sleep 10
+      done
     - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server
   script:
     # Wait for the UDM Listener to get ready. (Not worth fixing properly atm.)
