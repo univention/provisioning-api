@@ -30,6 +30,11 @@
 
 set -uo pipefail
 
+# A DOCKER_API_VERSION pin (e.g. an inherited CI var =1.39) force-downgrades the
+# client and a modern host daemon (>=29.x, min API 1.40) rejects every call.
+# Clear it so the client negotiates the API version with the server.
+unset DOCKER_API_VERSION
+
 # Use the same docker CLI image the pipeline job uses as the DooD stand-in, so we
 # test the *same* client/compose. Matches the VM host daemon (29.6.1).
 PROBE_IMAGE="${PROBE_IMAGE:-docker:29.6.1}"
