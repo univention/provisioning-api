@@ -1,112 +1,89 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 #
-# Barebones DooD (Docker-outside-of-Docker) smoke test.
-# Purpose: fast pipeline turnaround while validating that the dae-* runners can
-# run docker workloads against the HOST daemon (mounted /var/run/docker.sock),
-# instead of a docker:dind service sidecar.
+# Minimal e2e test setup on the dae-* runners via Docker-outside-of-Docker (DooD).
+#   pre-semantic-release  -> only to populate RELEASE_VERSION (=> IMAGE_TAG)
+#   test-end-to-end       -> run the compose stack against the HOST docker daemon
+#                            (mounted /var/run/docker.sock), no docker:dind
+#                            sidecar, no container builds.
 #
-# The real pipeline is parked in .gitlab-ci.yml-old. Restore it once DooD is proven.
-#
-# No includes, no build matrix, one job -> pushes finish in seconds.
+# The full pipeline is parked in .gitlab-ci.yml-old (recover from git history).
 
 ---
+
+include:
+  - project: "univention/dev/nubus-for-k8s/common-ci"
+    ref: "v1.61.2"
+    file:
+      # Provides .pre-semantic-release (publishes RELEASE_VERSION as a dotenv).
+      - "templates/semantic-release-env.yaml"
 
 stages:
   - "test"
 
+default:
+  tags:
+    - "dae-s"
+
 variables:
-  # Target the host daemon via the mounted socket, NOT a dind service.
+  # DooD: talk to the host daemon via the mounted socket, not a dind service.
   DOCKER_HOST: "unix:///var/run/docker.sock"
 
-dood-smoke:
+# Runs in the built-in ".pre" stage; exports RELEASE_VERSION via deploy.env.
+pre-semantic-release:
+  extends: ".pre-semantic-release"
+
+test-end-to-end:
   stage: "test"
-  tags:
-    - "dae-s"
   image: "docker:29.6.1"
-  script:
-    # An inherited CI/CD var DOCKER_API_VERSION=1.39 (leftover from the old dind
-    # service) force-pins the client API and the 29.x host daemon rejects it
-    # (needs >= 1.40). Unset it so the client negotiates. See the old e2e job.
+  needs:
+    # Pulls in the RELEASE_VERSION dotenv from the pre step.
+    - "pre-semantic-release"
+  before_script:
+    # Inherited DOCKER_API_VERSION=1.39 (old dind leftover) downgrades the client
+    # and the 29.x host daemon rejects it; unset so the client negotiates.
     - unset DOCKER_API_VERSION
-    # 1. Reach the host daemon from inside the job container.
-    - echo "== docker version (client in job, server on host) =="
+    # Using :latest images (no builds). IMAGE_TAG left unset so compose falls back
+    # to ${IMAGE_TAG:-latest}. RELEASE_VERSION from pre-semantic-release is still
+    # available as a CI var if needed.
+    # DooD bind-mount fix, no runner-config change: the job's checkout is NOT on
+    # the host daemon's filesystem, so the compose file's relative binds
+    # (./nats.dev.conf, ./tests/..., ./e2e_tests/...) would resolve to empty dirs.
+    # Materialize the checkout onto the host at the SAME absolute path via the
+    # Docker API (client-side tar -> helper with host root mounted) so the daemon
+    # finds the files. Cleaned up in after_script.
+    - tar -C "$CI_PROJECT_DIR" -cf - . | docker run -i --rm -v /:/host alpine sh -c "mkdir -p /host${CI_PROJECT_DIR} && tar -C /host${CI_PROJECT_DIR} -xf -"
     - docker version
-
-    # 2. Start a sibling container on the host from inside the job container.
-    - echo "== nested 'docker run' =="
-    - docker run --rm alpine:3.20 echo "nested-container-ok"
-
-    # 3. The DooD gotcha: relative bind-mounts are resolved by the HOST daemon.
-    #    On the docker-autoscaler runners the job's /builds dir is NOT a host path
-    #    at the same location, so this bind resolves to a non-existent host path,
-    #    the daemon auto-creates an empty DIR, and the mount shows up as a
-    #    directory ("cat: Is a directory"). This step therefore FAILS until the
-    #    runner bind-mounts the builds dir at a consistent host path (see summary).
-    #    Isolated in its own dir + filename so it can't clash with the repo's
-    #    real docker-compose.yaml.
-    - echo "== docker compose up over host socket, with a relative bind mount =="
-    - rm -rf .dood-smoke && mkdir .dood-smoke && cd .dood-smoke
-    - echo "marker-${CI_JOB_ID}" > marker
-    - |
-      cat > compose.yaml <<'YAML'
-      services:
-        hello:
-          image: alpine:3.20
-          command: ["sh", "-c", "cat /marker && echo compose-dood-ok"]
-          volumes:
-            - ./marker:/marker:ro
-      YAML
-    - docker compose -f compose.yaml up --abort-on-container-exit --exit-code-from hello
-  after_script:
-    # after_script is a fresh shell, so the script's unset doesn't carry over.
-    - unset DOCKER_API_VERSION
-    - cd .dood-smoke 2>/dev/null && docker compose -f compose.yaml down --volumes --remove-orphans || true
-
-# Runs the full probe FROM INSIDE a job container, so it reports what the runner
-# actually grants a job (socket mount, --privileged, bind-mount path consistency)
-# -- as opposed to the standalone-VM run. Diagnostic: reads OK/FAIL in the log.
-# Needs dood-capabilities.sh committed to the repo. The docker:* image is Alpine
-# with no bash (the script uses bash arrays), so install it first.
-dood-capabilities:
-  stage: "test"
-  tags:
-    - "dae-s"
-  image: "docker:29.6.1"
+    - docker compose config e2e-test
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server
   script:
-    - unset DOCKER_API_VERSION   # see dood-smoke: inherited 1.39 pin breaks the 29.x daemon
-    - apk add --no-cache bash
-    - bash ./dood-capabilities.sh
-
-# OPTION 1 (proof): make relative bind-mounts work with NO runner-config change.
-# Same test as dood-smoke, but first "materialize" the workdir onto the HOST
-# daemon's filesystem at the SAME absolute path ($CI_PROJECT_DIR). The tar is
-# read client-side (from the job fs) and streamed through the Docker API into a
-# helper that has the host root mounted, so the daemon then resolves ./marker.
-# Expected result: this job PASSES where dood-smoke FAILS.
-dood-smoke-hostcopy:
-  stage: "test"
-  tags:
-    - "dae-s"
-  image: "docker:29.6.1"
-  script:
-    - unset DOCKER_API_VERSION
-    - rm -rf .dood-smoke && mkdir .dood-smoke && echo "marker-${CI_JOB_ID}" > .dood-smoke/marker
-    - |
-      cat > .dood-smoke/compose.yaml <<'YAML'
-      services:
-        hello:
-          image: alpine:3.20
-          command: ["sh", "-c", "cat /marker && echo compose-dood-ok"]
-          volumes:
-            - ./marker:/marker:ro
-      YAML
-    # Copy the workdir onto the host at the same path the daemon will look up.
-    - tar -C "$CI_PROJECT_DIR" -cf - .dood-smoke | docker run -i --rm -v /:/host alpine sh -c "mkdir -p /host${CI_PROJECT_DIR} && tar -C /host${CI_PROJECT_DIR} -xf -"
-    - cd .dood-smoke && docker compose -f compose.yaml up --abort-on-container-exit --exit-code-from hello
+    # Wait for the UDM Listener to get ready. (Not worth fixing properly atm.)
+    - sleep 10
+    - docker compose run --quiet-pull --rm e2e-test
   after_script:
     - unset DOCKER_API_VERSION
-    - cd .dood-smoke 2>/dev/null && docker compose -f compose.yaml down --volumes --remove-orphans || true
-    - docker run --rm -v /:/host alpine sh -c "rm -rf /host${CI_PROJECT_DIR}/.dood-smoke" || true
+    - docker ps -a
+    - docker logs provisioning-api          > provisioning-api.log       2>&1 || true
+    - docker logs provisioning-dispatcher    > dispatcher.log            2>&1 || true
+    - docker logs provisioning-prefill       > prefill.log               2>&1 || true
+    - docker logs provisioning-udm-transformer > udm-transformer.log     2>&1 || true
+    - docker logs udm-listener               > udm-listener.log          2>&1 || true
+    - docker logs ldap-server                > ldap-server.log           2>&1 || true
+    - docker logs udm-rest-api               > udm-rest-api.log          2>&1 || true
+    - docker compose down --volumes --remove-orphans || true
+    # Remove the materialized copy from the (ephemeral) host.
+    - docker run --rm -v /:/host alpine sh -c "rm -rf /host${CI_PROJECT_DIR}" || true
+  artifacts:
+    paths:
+      - provisioning-api.log
+      - dispatcher.log
+      - prefill.log
+      - udm-transformer.log
+      - udm-listener.log
+      - ldap-server.log
+      - udm-rest-api.log
+    expire_in: "1 day"
+    when: "always"
+    expose_as: "docker compose server logs"
 
 ...
