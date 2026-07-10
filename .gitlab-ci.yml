@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 #
-# Minimal e2e test setup on the dae-* runners via Docker-outside-of-Docker (DooD).
+# e2e test setup on the dae-* runners via Docker-outside-of-Docker (DooD): run the
+# compose stack against the HOST docker daemon (mounted /var/run/docker.sock), no
+# docker:dind sidecar, no container builds.
 #   pre-semantic-release  -> only to populate RELEASE_VERSION (=> IMAGE_TAG)
-#   test-end-to-end       -> run the compose stack against the HOST docker daemon
-#                            (mounted /var/run/docker.sock), no docker:dind
-#                            sidecar, no container builds.
+#   .e2e-test             -> base job with all the work
+#   e2e-dae-{s,m,l,xl}    -> extend .e2e-test, one per runner tag, to compare
+#                            e2e performance across the dae flavors.
 #
 # The full pipeline is parked in .gitlab-ci.yml-old (recover from git history).
 
@@ -38,7 +40,10 @@ variables:
 pre-semantic-release:
   extends: ".pre-semantic-release"
 
-test-end-to-end:
+# Base e2e job. Concrete per-runner jobs below extend it and only override tags,
+# so we can compare e2e wall-clock across dae-s/m/l/xl. Hidden (leading dot) =>
+# never runs on its own.
+.e2e-test:
   stage: "test"
   image: "docker:29.6.1"
   needs:
@@ -99,5 +104,27 @@ test-end-to-end:
     expire_in: "1 day"
     when: "always"
     expose_as: "docker compose server logs"
+
+# Per-runner jobs: identical work, only the tag differs. Compare their durations
+# in the pipeline view to gauge e2e performance across the dae flavors.
+e2e-dae-s:
+  extends: ".e2e-test"
+  tags:
+    - "dae-s"
+
+e2e-dae-m:
+  extends: ".e2e-test"
+  tags:
+    - "dae-m"
+
+e2e-dae-l:
+  extends: ".e2e-test"
+  tags:
+    - "dae-l"
+
+e2e-dae-xl:
+  extends: ".e2e-test"
+  tags:
+    - "dae-xl"
 
 ...
