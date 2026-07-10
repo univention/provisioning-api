@@ -1,0 +1,186 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+
+include:
+  - project: "univention/dev/nubus-for-k8s/common-ci"
+    ref: "v1.61.2"
+    file:
+      - "defaults/stages.yaml"
+      - "defaults/nubus-workflow.yaml"
+      - "jobs/lint-pre-commit.yaml"
+      - "jobs/lint-commit-messages.yaml"
+      - "jobs/semantic-release-env.yaml"
+      - "jobs/container-build-external.yaml"
+      - "jobs/package-and-publish-helm-charts-external.yaml"
+      - "jobs/check-debian-updates.yaml"
+      - "templates/pip-package-and-publish.yaml"
+      - "templates/sonarqube.yaml"
+  - project: "univention/infrastructure/docker-services"
+    ref: "master"
+    file:
+      - "dind.yml"
+
+default:
+  tags:
+    - "dae-s"
+
+variables:
+  POETRY_VERSION: "1.6.1"
+  RENOVATE_USER_ID: "1393"
+
+lint-pre-commit:
+  before_script:
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+
+.build-matrix: &build-matrix
+  - IMAGE_NAME: "provisioning-dispatcher"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+  - IMAGE_NAME: "provisioning-api"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+  - IMAGE_NAME: "provisioning-prefill"
+    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+  - IMAGE_NAME: "provisioning-udm-listener"
+    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
+  - IMAGE_NAME: "provisioning-udm-transformer"
+    DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+  - IMAGE_NAME: "provisioning-example-client"
+    DOCKERFILE_PATH: "docker/example-client/Dockerfile"
+  - IMAGE_NAME: "testrunner"
+    DOCKERFILE_PATH: "docker/test/Dockerfile"
+  - IMAGE_NAME: "provisioning-e2e-tests"
+    DOCKERFILE_PATH: "docker/e2e-test/Dockerfile"
+
+.publish-matrix: &publish-matrix
+  - IMAGE_NAME:
+    - "provisioning-api"
+  - IMAGE_NAME:
+    - "provisioning-dispatcher"
+  - IMAGE_NAME:
+    - "provisioning-udm-transformer"
+  - IMAGE_NAME:
+    - "provisioning-prefill"
+  - IMAGE_NAME:
+    - "provisioning-udm-listener"
+  - IMAGE_NAME:
+    - "provisioning-example-client"
+
+container-build:
+  parallel:
+    matrix: *build-matrix
+  variables:
+    KANIKO_BUILD_CONTEXT: "${CI_PROJECT_DIR}"
+
+container-malware-scan:
+  parallel:
+    matrix: *publish-matrix
+
+test-unit-and-integration:
+  stage: "test"
+  image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
+  script:
+    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+test-end-to-end:
+  allow_failure: true
+  stage: "test"
+  extends: .dind
+  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+  rules: &rules_dind
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: "never"
+    - if: '$GITLAB_USER_ID == $RENOVATE_USER_ID && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS !~ /Renovate run dind/'
+      when: "manual"
+    - when: "on_success"
+  before_script:
+    # Allow that the Docker API version is negotiated between client and server
+    - unset DOCKER_API_VERSION
+    - export IMAGE_TAG=${RELEASE_VERSION}
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
+    - echo $IMAGE_TAG
+    - docker version
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
+    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
+    - docker compose config e2e-test
+    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
+    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server
+  script:
+    # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
+    - sleep 10
+    - docker compose run --quiet-pull --rm e2e-test
+  after_script:
+    - docker ps -a
+    - docker logs provisioning-api >& provisioning-api.log
+    - docker logs provisioning-dispatcher >& dispatcher.log
+    - docker logs provisioning-prefill >& prefill.log
+    - docker logs provisioning-udm-transformer >& udm-transformer.log
+    - docker logs udm-listener>& udm-listener.log
+    - docker logs ldap-server >& ldap-server.log
+    - docker logs udm-rest-api >& udm-rest-api.log
+    - docker compose down --volumes
+  artifacts:
+    paths:
+      - provisioning-api.log
+      - dispatcher.log
+      - prefill.log
+      - udm-transformer.log
+      - udm-listener.log
+      - ldap-server.log
+      - udm-rest-api.log
+    expire_in: "1 day"
+    when: "always"
+    expose_as: "docker compose server logs"
+
+test-chart-provisioning:
+  stage: test
+  needs: []
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.10@sha256:5cba2a8fc4c6d5fa82bcec177ad433ab74695b4e02b2a2e9ed9b53c734b34dbf"
+  script:
+    - helm dep build helm/provisioning
+    - pytest tests/chart/provisioning
+
+test-chart-udm-listener:
+  stage: test
+  needs: []
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.10@sha256:5cba2a8fc4c6d5fa82bcec177ad433ab74695b4e02b2a2e9ed9b53c734b34dbf"
+  script:
+    - helm dep build helm/udm-listener
+    - pytest tests/chart/udm-listener
+
+push-image-external:
+  parallel:
+    matrix: *publish-matrix
+
+container-sign-external:
+  parallel:
+    matrix: *publish-matrix
+
+container-release-attestation:
+  parallel:
+    matrix: *publish-matrix
+
+check-debian-updates:
+  parallel:
+    matrix: *publish-matrix
+  variables:
+    TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+
+sonarqube:
+  extends: .sonarqube
+  needs: []
+
+build-and-publish-pip:
+  extends: .build-and-publish-pip-package-with-uv
+  parallel:
+    matrix:
+      - PACKAGE_ROOT: "common"
+      - PACKAGE_ROOT: "consumer"
+...
