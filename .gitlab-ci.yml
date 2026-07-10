@@ -59,6 +59,8 @@ dood-smoke:
       YAML
     - docker compose -f compose.yaml up --abort-on-container-exit --exit-code-from hello
   after_script:
+    # after_script is a fresh shell, so the script's unset doesn't carry over.
+    - unset DOCKER_API_VERSION
     - cd .dood-smoke 2>/dev/null && docker compose -f compose.yaml down --volumes --remove-orphans || true
 
 # Runs the full probe FROM INSIDE a job container, so it reports what the runner
@@ -75,5 +77,36 @@ dood-capabilities:
     - unset DOCKER_API_VERSION   # see dood-smoke: inherited 1.39 pin breaks the 29.x daemon
     - apk add --no-cache bash
     - bash ./dood-capabilities.sh
+
+# OPTION 1 (proof): make relative bind-mounts work with NO runner-config change.
+# Same test as dood-smoke, but first "materialize" the workdir onto the HOST
+# daemon's filesystem at the SAME absolute path ($CI_PROJECT_DIR). The tar is
+# read client-side (from the job fs) and streamed through the Docker API into a
+# helper that has the host root mounted, so the daemon then resolves ./marker.
+# Expected result: this job PASSES where dood-smoke FAILS.
+dood-smoke-hostcopy:
+  stage: "test"
+  tags:
+    - "dae-s"
+  image: "docker:29.6.1"
+  script:
+    - unset DOCKER_API_VERSION
+    - rm -rf .dood-smoke && mkdir .dood-smoke && echo "marker-${CI_JOB_ID}" > .dood-smoke/marker
+    - |
+      cat > .dood-smoke/compose.yaml <<'YAML'
+      services:
+        hello:
+          image: alpine:3.20
+          command: ["sh", "-c", "cat /marker && echo compose-dood-ok"]
+          volumes:
+            - ./marker:/marker:ro
+      YAML
+    # Copy the workdir onto the host at the same path the daemon will look up.
+    - tar -C "$CI_PROJECT_DIR" -cf - .dood-smoke | docker run -i --rm -v /:/host alpine sh -c "mkdir -p /host${CI_PROJECT_DIR} && tar -C /host${CI_PROJECT_DIR} -xf -"
+    - cd .dood-smoke && docker compose -f compose.yaml up --abort-on-container-exit --exit-code-from hello
+  after_script:
+    - unset DOCKER_API_VERSION
+    - cd .dood-smoke 2>/dev/null && docker compose -f compose.yaml down --volumes --remove-orphans || true
+    - docker run --rm -v /:/host alpine sh -c "rm -rf /host${CI_PROJECT_DIR}/.dood-smoke" || true
 
 ...
