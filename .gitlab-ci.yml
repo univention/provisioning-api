@@ -37,13 +37,19 @@ dood-smoke:
     - echo "== nested 'docker run' =="
     - docker run --rm alpine:3.20 echo "nested-container-ok"
 
-    # 3. The DooD gotcha: relative bind-mounts are resolved by the HOST daemon,
-    #    so the job workdir must be a host path mounted at the same absolute path.
-    #    compose up a one-service stack with a relative bind mount to prove it.
+    # 3. The DooD gotcha: relative bind-mounts are resolved by the HOST daemon.
+    #    On the docker-autoscaler runners the job's /builds dir is NOT a host path
+    #    at the same location, so this bind resolves to a non-existent host path,
+    #    the daemon auto-creates an empty DIR, and the mount shows up as a
+    #    directory ("cat: Is a directory"). This step therefore FAILS until the
+    #    runner bind-mounts the builds dir at a consistent host path (see summary).
+    #    Isolated in its own dir + filename so it can't clash with the repo's
+    #    real docker-compose.yaml.
     - echo "== docker compose up over host socket, with a relative bind mount =="
+    - rm -rf .dood-smoke && mkdir .dood-smoke && cd .dood-smoke
     - echo "marker-${CI_JOB_ID}" > marker
     - |
-      cat > docker-compose.yml <<'YAML'
+      cat > compose.yaml <<'YAML'
       services:
         hello:
           image: alpine:3.20
@@ -51,9 +57,9 @@ dood-smoke:
           volumes:
             - ./marker:/marker:ro
       YAML
-    - docker compose up --abort-on-container-exit --exit-code-from hello
+    - docker compose -f compose.yaml up --abort-on-container-exit --exit-code-from hello
   after_script:
-    - docker compose down --volumes --remove-orphans || true
+    - cd .dood-smoke 2>/dev/null && docker compose -f compose.yaml down --volumes --remove-orphans || true
 
 # Runs the full probe FROM INSIDE a job container, so it reports what the runner
 # actually grants a job (socket mount, --privileged, bind-mount path consistency)
