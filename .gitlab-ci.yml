@@ -71,7 +71,9 @@ test-end-to-end:
   script:
     # Wait for the UDM Listener to get ready. (Not worth fixing properly atm.)
     - sleep 10
-    - docker compose run --no-build --rm e2e-test
+    # `run` has no --no-build flag; the pinned image is already pre-pulled above,
+    # so it runs the existing image without building.
+    - docker compose run --rm e2e-test
   after_script:
     - unset DOCKER_API_VERSION
     - docker ps -a
