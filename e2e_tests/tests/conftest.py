@@ -28,10 +28,34 @@ from .mock_data import (
     USERS_TOPIC,
 )
 
+# Records how long `_wait_until_subscription_is_dispatched` had to block before
+# the dispatcher started routing to a freshly created subscription. Used to
+# judge whether that probe-and-wait workaround is still necessary.
+# Each entry: (subscription_name, realm_topic, elapsed_seconds, probe_attempts, delivered)
+_DISPATCH_WAIT_TIMINGS: list[tuple[str, str, float, int, bool]] = []
+
 
 @pytest.fixture(scope="session", autouse=True)
 def anyio_backend():
     return "asyncio"
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    """Always print the dispatch-readiness wait timings, even when all tests pass."""
+    if not _DISPATCH_WAIT_TIMINGS:
+        return
+    tr = terminalreporter
+    tr.write_sep("=", "dispatcher dispatch-readiness wait (create subscription -> first probe delivered)")
+    for name, realm_topic, elapsed, attempts, delivered in _DISPATCH_WAIT_TIMINGS:
+        status = "delivered" if delivered else "TIMEOUT"
+        tr.write_line(f"  {elapsed:6.2f}s  {attempts:2d} probe(s)  {status:9s}  {realm_topic:20s}  {name}")
+    delivered_times = sorted(e for _, _, e, _, d in _DISPATCH_WAIT_TIMINGS if d)
+    if delivered_times:
+        n = len(delivered_times)
+        tr.write_line(
+            f"  -> n={n}  min={delivered_times[0]:.2f}s  "
+            f"median={delivered_times[n // 2]:.2f}s  max={delivered_times[-1]:.2f}s"
+        )
 
 
 def pytest_addoption(parser):
@@ -152,8 +176,12 @@ async def _wait_until_subscription_is_dispatched(
         "old": {},
         "new": {str(uuid.uuid1()): str(uuid.uuid1()), "dn": "cn=foo,dc=bar", "objectType": "foo/bar"},
     }
-    deadline = time.monotonic() + timeout
+    rt_label = f"{realm_topic.realm}/{realm_topic.topic}"
+    start = time.monotonic()
+    attempts = 0
+    deadline = start + timeout
     while time.monotonic() < deadline:
+        attempts += 1
         requests.post(
             test_settings.messages_url,
             json={
@@ -168,12 +196,15 @@ async def _wait_until_subscription_is_dispatched(
         message = await provisioning_client.get_subscription_message(name=subscription_name, timeout=1)
         if message is None:
             continue
+        elapsed = time.monotonic() - start
+        _DISPATCH_WAIT_TIMINGS.append((subscription_name, rt_label, elapsed, attempts, True))
         while message is not None:
             await provisioning_client.set_message_status(
                 subscription_name, message.sequence_number, MessageProcessingStatus.ok
             )
             message = await provisioning_client.get_subscription_message(name=subscription_name, timeout=1)
         return
+    _DISPATCH_WAIT_TIMINGS.append((subscription_name, rt_label, time.monotonic() - start, attempts, False))
     raise TimeoutError(f"Dispatcher did not start routing to subscription {subscription_name!r} within {timeout:.0f}s")
 
 
