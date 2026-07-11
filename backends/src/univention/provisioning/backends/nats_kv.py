@@ -6,8 +6,13 @@ import logging
 from typing import AsyncGenerator, Awaitable, Callable, List, Optional, Tuple, Union
 
 from nats.aio.client import Client as NATS
-from nats.js.errors import BucketNotFoundError, KeyNotFoundError, KeyWrongLastSequenceError, NoKeysError
-from nats.js.kv import KV_DEL, KV_PURGE
+from nats.js.errors import (
+    BucketNotFoundError,
+    KeyNotFoundError,
+    KeyWrongLastSequenceError,
+    NotFoundError,
+)
+from nats.js.kv import KV_DEL, KV_OP, KV_PURGE
 
 from univention.provisioning.models.constants import BucketName
 from univention.provisioning.models.subscription import Subscription
@@ -97,22 +102,64 @@ class NatsKeyValueDB(KeyValueDB):
             await kv_store.put(key, value.encode("utf-8"))
             return
 
-    async def get_keys(self, bucket: BucketName) -> List[str]:
-        kv_store = await self._js.key_value(bucket.value)
+    @staticmethod
+    def _stream_name(bucket: BucketName) -> str:
+        # A KV bucket `X` is backed by a JetStream stream named `KV_X`.
+        return f"KV_{bucket.value}"
+
+    @staticmethod
+    def _subject_prefix(bucket: BucketName) -> str:
+        # A KV key `k` in bucket `X` is stored on the subject `$KV.X.k`.
+        return f"$KV.{bucket.value}."
+
+    async def _iter_live_entries(self, bucket: BucketName) -> AsyncGenerator[Tuple[str, bytes], None]:
+        """
+        Enumerate the live (non-deleted) key/value pairs in `bucket` from a consistent snapshot.
+
+        ``KeyValue.keys()`` (and ``watch()``) enumerate via an ephemeral ``last_per_subject``
+        consumer whose "caught up" decision relies on the server-reported ``num_pending``. On a
+        clustered JetStream server that value is unreliable under concurrent writes, so the
+        enumeration can return an empty/partial view and silently drop keys.
+
+        Instead we read a point-in-time snapshot that never consults ``num_pending``:
+        - the key set comes from ``stream_info(subjects_filter=...)`` (committed stream state,
+          computed server-side);
+        - each value comes from ``get_last_msg`` (last message per subject), skipping tombstones
+          (keys whose latest operation is a delete/purge but which have not been purged yet).
+        """
+        stream = self._stream_name(bucket)
+        prefix = self._subject_prefix(bucket)
         try:
-            return await kv_store.keys()
-        except NoKeysError:
-            return []
+            info = await self._js.stream_info(stream, subjects_filter=f"{prefix}>")
+        except NotFoundError:
+            return
+
+        subjects = (info.state.subjects or {}) if info.state else {}
+        for subject in subjects:
+            try:
+                msg = await self._js.get_last_msg(stream, subject)
+            except NotFoundError:
+                # Key vanished between listing and reading; treat as not present.
+                continue
+
+            operation = (msg.headers or {}).get(KV_OP)
+            if operation in (KV_DEL, KV_PURGE):
+                # Tombstone: key is deleted but not yet purged from the stream.
+                continue
+
+            key = subject[len(prefix) :]
+            yield key, msg.data
+
+    async def get_keys(self, bucket: BucketName) -> List[str]:
+        return [key async for key, _ in self._iter_live_entries(bucket)]
 
     async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
-        kv_store = await self._js.key_value(BucketName.subscriptions.value)
-        for key in await self.get_keys(BucketName.subscriptions):
-            entry = await kv_store.get(key)
+        async for key, value in self._iter_live_entries(BucketName.subscriptions):
             try:
-                subscription_dict = json.loads(entry.value)
+                subscription_dict = json.loads(value)
                 subscription = Subscription.model_validate(subscription_dict)
             except ValueError as exc:
-                logger.error("Bad subscription data in KV store. key=%r entry=%r exc=%s", key, entry, exc)
+                logger.error("Bad subscription data in KV store. key=%r value=%r exc=%s", key, value, exc)
                 raise
             yield subscription
 

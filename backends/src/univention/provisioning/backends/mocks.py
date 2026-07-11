@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 import copy
+from types import SimpleNamespace
 from typing import Any, Optional
 
 try:
@@ -10,7 +11,7 @@ except ImportError:
     from mock import AsyncMock
 
 from nats.aio.msg import Msg
-from nats.js.errors import KeyNotFoundError
+from nats.js.errors import KeyNotFoundError, NotFoundError
 from nats.js.kv import KeyValue
 from test_helpers.mock_data import BASE_KV_OBJ, CONSUMER_HASHED_PASSWORD, MSG, SUBSCRIPTION_NAME
 
@@ -86,6 +87,34 @@ class FakeJs(AsyncMock):
         return FakeKvStore(bucket)
 
 
+class FakeKvJs(FakeJs):
+    """A FakeJs that also serves the consistent-snapshot KV read path.
+
+    `NatsKeyValueDB` enumerates a bucket via `stream_info(subjects_filter=...)`
+    for the key set and `get_last_msg()` per key (instead of the unreliable
+    `kv_store.keys()`). These mocks back both against `FakeKvStore`'s contents.
+    """
+
+    @classmethod
+    async def stream_info(cls, name: str, subjects_filter: Optional[str] = None):
+        # A bucket `X` lives on stream `KV_X`; keys map to subjects `$KV.X.<key>`.
+        bucket = BucketName(name.removeprefix("KV_"))
+        store = FakeKvStore(bucket)
+        prefix = f"$KV.{bucket.value}."
+        subjects = {f"{prefix}{key}": 1 for key in store._values}
+        return SimpleNamespace(state=SimpleNamespace(subjects=subjects or None))
+
+    @classmethod
+    async def get_last_msg(cls, stream_name: str, subject: str):
+        bucket = BucketName(stream_name.removeprefix("KV_"))
+        store = FakeKvStore(bucket)
+        prefix = f"$KV.{bucket.value}."
+        entry = store._values.get(subject.removeprefix(prefix))
+        if entry is None:
+            raise NotFoundError
+        return SimpleNamespace(data=entry.value, headers=None)
+
+
 class MockNatsMQAdapter(NatsMessageQueue):
     def __init__(self, server: str, user: str, password: str, max_reconnect_attempts: int = 5, **connect_kwargs):
         super().__init__(server, user, password, max_reconnect_attempts, **connect_kwargs)
@@ -98,4 +127,4 @@ class MockNatsKVAdapter(NatsKeyValueDB):
     def __init__(self, server: str, user: str, password: str):
         super().__init__(server, user, password)
         self._nats = AsyncMock()
-        self._js = FakeJs()
+        self._js = FakeKvJs()
