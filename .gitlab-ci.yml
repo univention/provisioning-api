@@ -3,13 +3,20 @@
 #
 # e2e test setup on the dae-* runners via Docker-outside-of-Docker (DooD): run the
 # compose stack against the HOST docker daemon (mounted /var/run/docker.sock), no
-# docker:dind sidecar, no container builds.
-#   pre-semantic-release  -> only to populate RELEASE_VERSION (=> IMAGE_TAG)
-#   .e2e-test             -> base job with all the work
-#   e2e-dae-{s,m,l,xl}    -> extend .e2e-test, one per runner tag, to compare
-#                            e2e performance across the dae flavors.
+# docker:dind sidecar.
 #
-# The full pipeline is parked in .gitlab-ci.yml-old (recover from git history).
+# Unlike the pure e2e-benchmark variant this replaced, this pipeline BUILDS the
+# provisioning images from the current commit (Kaniko, tagged with the
+# RELEASE_VERSION computed by semantic-release) and runs the e2e stack against
+# them. The benchmark variant pinned every image to a published release
+# (IMAGE_TAG=0.70.19), so code changes on the branch were never exercised.
+#
+#   pre-semantic-release  -> populate RELEASE_VERSION (=> image tag)
+#   container-build       -> build & push the provisioning images (Kaniko)
+#   e2e-dae-{s,m,l,xl}    -> DooD e2e against the freshly built images, one per
+#                            runner flavor (also samples the formerly-flaky suite).
+#
+# The full upstream pipeline is parked in .gitlab-ci.yml-old.
 
 ---
 
@@ -17,11 +24,12 @@ include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
     ref: "v1.61.2"
     file:
+      # Standard stage list (provides "build" and "test").
+      - "defaults/stages.yaml"
       # Provides .pre-semantic-release (publishes RELEASE_VERSION as a dotenv).
       - "templates/semantic-release-env.yaml"
-
-stages:
-  - "test"
+      # Provides the Kaniko-based `container-build` job.
+      - "jobs/container-build.yaml"
 
 default:
   tags:
@@ -32,13 +40,34 @@ variables:
   DOCKER_HOST: "unix:///var/run/docker.sock"
   # Make the test-profile services (e2e-test) addressable by pull/run.
   COMPOSE_PROFILES: "test"
-  # Pin every provisioning image (incl. the e2e test runner) to a published
-  # release instead of :latest, so nothing is built and the versions are stable.
-  IMAGE_TAG: "0.70.19"
 
 # Runs in the built-in ".pre" stage; exports RELEASE_VERSION via deploy.env.
 pre-semantic-release:
   extends: ".pre-semantic-release"
+
+# Build every provisioning image the e2e compose stack pulls, from the current
+# commit. Kaniko tags them with RELEASE_VERSION (from the pre-semantic-release
+# dotenv) and pushes to ${CI_REGISTRY_IMAGE}/<image>:<RELEASE_VERSION> -- exactly
+# what docker-compose.yaml references via ${IMAGE_TAG}.
+.build-matrix: &build-matrix
+  - IMAGE_NAME: "provisioning-api"
+    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+  - IMAGE_NAME: "provisioning-dispatcher"
+    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+  - IMAGE_NAME: "provisioning-prefill"
+    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+  - IMAGE_NAME: "provisioning-udm-listener"
+    DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
+  - IMAGE_NAME: "provisioning-udm-transformer"
+    DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+  - IMAGE_NAME: "provisioning-e2e-tests"
+    DOCKERFILE_PATH: "docker/e2e-test/Dockerfile"
+
+container-build:
+  parallel:
+    matrix: *build-matrix
+  variables:
+    KANIKO_BUILD_CONTEXT: "${CI_PROJECT_DIR}"
 
 # Base e2e job. Concrete per-runner jobs below extend it and only override tags,
 # so we can compare e2e wall-clock across dae-s/m/l/xl. Hidden (leading dot) =>
@@ -47,9 +76,14 @@ pre-semantic-release:
   stage: "test"
   image: "docker:29.6.1"
   needs:
-    # Pulls in the RELEASE_VERSION dotenv from the pre step.
+    # RELEASE_VERSION dotenv (image tag) + the freshly built images.
     - "pre-semantic-release"
+    - "container-build"
   before_script:
+    # Point the compose stack at the images we just built for this commit instead
+    # of a pinned published release.
+    - export IMAGE_TAG="${RELEASE_VERSION}"
+    - echo "Using IMAGE_TAG=${IMAGE_TAG}"
     # Inherited DOCKER_API_VERSION=1.39 (old dind leftover) downgrades the client
     # and the 29.x host daemon rejects it; unset so the client negotiates.
     - unset DOCKER_API_VERSION
@@ -76,8 +110,8 @@ pre-semantic-release:
   script:
     # Wait for the UDM Listener to get ready. (Not worth fixing properly atm.)
     - sleep 10
-    # `run` has no --no-build flag; the pinned image is already pre-pulled above,
-    # so it runs the existing image without building.
+    # `run` has no --no-build flag; the image is already pre-pulled above, so it
+    # runs the existing image without building.
     - docker compose run --rm e2e-test
   after_script:
     - unset DOCKER_API_VERSION
