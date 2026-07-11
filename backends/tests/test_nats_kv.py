@@ -3,6 +3,7 @@
 
 import json
 from contextlib import nullcontext
+from types import SimpleNamespace
 from unittest.mock import call
 
 try:
@@ -11,12 +12,27 @@ except ImportError:
     from mock import AsyncMock
 
 import pytest
-from nats.js.errors import BucketNotFoundError
+from nats.js.errors import BucketNotFoundError, NotFoundError
+from nats.js.kv import KV_DEL, KV_OP, KV_PURGE
 from test_helpers.mock_data import SUBSCRIPTION_NAME, SUBSCRIPTION_INFO_dumpable
 
 from univention.provisioning.backends.key_value_db import UpdateConflict
 from univention.provisioning.backends.mocks import FakeKvStore, MockNatsKVAdapter, kv_sub_info
 from univention.provisioning.models.constants import BucketName
+
+SUBSCRIPTIONS_STREAM = "KV_SUBSCRIPTIONS"
+SUBSCRIPTIONS_PREFIX = "$KV.SUBSCRIPTIONS."
+
+
+def _stream_info(subjects):
+    """Mimic the parts of `nats.js.api.StreamInfo` the adapter reads."""
+    return SimpleNamespace(state=SimpleNamespace(subjects=subjects))
+
+
+def _raw_msg(data, operation=None):
+    """Mimic the parts of `nats.js.api.RawStreamMsg` the adapter reads."""
+    headers = {KV_OP: operation} if operation else None
+    return SimpleNamespace(data=data, headers=headers)
 
 
 @pytest.fixture
@@ -137,3 +153,80 @@ class TestNatsKVAdapter:
         mock_kv.delete.assert_called_once_with("test_put_empty_value")
         mock_kv.put.assert_not_called()
         assert result is None
+
+    # --- Regression tests for the dropped-messages bug -----------------------
+    #
+    # The dispatcher silently dropped messages because `get_all_subscriptions()`
+    # enumerated the bucket via `kv_store.keys()`, whose "caught up" decision
+    # relies on the server-reported `num_pending`. On a clustered JetStream
+    # server that value is unreliable under concurrent writes, so the read could
+    # transiently return an empty/partial view and the routing map got wiped.
+    #
+    # The fix reads a consistent point-in-time snapshot instead: the key set from
+    # `stream_info(subjects_filter=...)` and each value from `get_last_msg()`.
+    # These tests pin that behaviour down at the read layer.
+
+    async def test_get_all_subscriptions_reads_consistent_snapshot(self, mock_nats_kv_adapter):
+        subject = f"{SUBSCRIPTIONS_PREFIX}{SUBSCRIPTION_NAME}"
+        mock_nats_kv_adapter._js.stream_info = AsyncMock(return_value=_stream_info({subject: 1}))
+        mock_nats_kv_adapter._js.get_last_msg = AsyncMock(return_value=_raw_msg(kv_sub_info.value))
+
+        subscriptions = [sub async for sub in mock_nats_kv_adapter.get_all_subscriptions()]
+
+        assert [sub.name for sub in subscriptions] == [SUBSCRIPTION_NAME]
+        # Key set is read from committed stream state, not the num_pending-based consumer.
+        mock_nats_kv_adapter._js.stream_info.assert_awaited_once_with(
+            SUBSCRIPTIONS_STREAM, subjects_filter=f"{SUBSCRIPTIONS_PREFIX}>"
+        )
+        mock_nats_kv_adapter._js.get_last_msg.assert_awaited_once_with(SUBSCRIPTIONS_STREAM, subject)
+        # The buggy `kv_store.keys()` enumeration path must no longer be used.
+        mock_nats_kv_adapter._js.key_value.assert_not_called()
+
+    @pytest.mark.parametrize("operation", [KV_DEL, KV_PURGE])
+    async def test_get_all_subscriptions_skips_tombstones(self, mock_nats_kv_adapter, operation):
+        live = f"{SUBSCRIPTIONS_PREFIX}{SUBSCRIPTION_NAME}"
+        deleted = f"{SUBSCRIPTIONS_PREFIX}deleted-but-not-yet-purged"
+        # `stream_info` still lists deleted keys until they are purged, so liveness
+        # must be confirmed per key via the last message's KV-Operation header.
+        mock_nats_kv_adapter._js.stream_info = AsyncMock(return_value=_stream_info({live: 1, deleted: 1}))
+        mock_nats_kv_adapter._js.get_last_msg = AsyncMock(
+            side_effect=lambda _stream, subject: (
+                _raw_msg(kv_sub_info.value) if subject == live else _raw_msg(b"", operation=operation)
+            )
+        )
+
+        subscriptions = [sub async for sub in mock_nats_kv_adapter.get_all_subscriptions()]
+
+        assert [sub.name for sub in subscriptions] == [SUBSCRIPTION_NAME]
+
+    async def test_get_all_subscriptions_empty_bucket_yields_nothing(self, mock_nats_kv_adapter):
+        # A genuinely empty bucket reports no subjects (JetStream returns `None`).
+        mock_nats_kv_adapter._js.stream_info = AsyncMock(return_value=_stream_info(None))
+        mock_nats_kv_adapter._js.get_last_msg = AsyncMock()
+
+        subscriptions = [sub async for sub in mock_nats_kv_adapter.get_all_subscriptions()]
+
+        assert subscriptions == []
+        mock_nats_kv_adapter._js.get_last_msg.assert_not_called()
+
+    async def test_get_all_subscriptions_missing_stream_yields_nothing(self, mock_nats_kv_adapter):
+        mock_nats_kv_adapter._js.stream_info = AsyncMock(side_effect=NotFoundError)
+
+        subscriptions = [sub async for sub in mock_nats_kv_adapter.get_all_subscriptions()]
+
+        assert subscriptions == []
+
+    async def test_get_keys_reads_consistent_snapshot(self, mock_nats_kv_adapter):
+        subject = f"{SUBSCRIPTIONS_PREFIX}{SUBSCRIPTION_NAME}"
+        deleted = f"{SUBSCRIPTIONS_PREFIX}gone"
+        mock_nats_kv_adapter._js.stream_info = AsyncMock(return_value=_stream_info({subject: 1, deleted: 1}))
+        mock_nats_kv_adapter._js.get_last_msg = AsyncMock(
+            side_effect=lambda _stream, subj: (
+                _raw_msg(kv_sub_info.value) if subj == subject else _raw_msg(b"", operation=KV_DEL)
+            )
+        )
+
+        keys = await mock_nats_kv_adapter.get_keys(BucketName.subscriptions)
+
+        assert keys == [SUBSCRIPTION_NAME]
+        mock_nats_kv_adapter._js.key_value.assert_not_called()
