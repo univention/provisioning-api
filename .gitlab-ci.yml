@@ -31,6 +31,17 @@ include:
       # Provides the Kaniko-based `container-build` job.
       - "jobs/container-build.yaml"
 
+# Deduplicate pipelines. The included jobs carry catch-all rules
+# (when: always / when: on_success) that also match `merge_request_event`, so an
+# open MR would otherwise spawn BOTH a branch pipeline and a merge-request
+# pipeline for the same commit. Suppress the MR pipeline and keep the branch
+# pipeline (which is what the dae-* debugging is watched on).
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: always
+
 default:
   tags:
     - "dae-s"
