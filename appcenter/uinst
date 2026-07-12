@@ -1,0 +1,27 @@
+#! /bin/sh
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+## joinscript api: bindpwdfile
+
+VERSION=1
+
+. /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/all.sh
+
+joinscript_init
+
+SERVICE="provisioning-service"
+
+backup2master_path=/usr/lib/univention-backup2master/post/50provisioning-service-backup2master
+if [ -f "$backup2master_path" ]; then
+    echo "Removing $backup2master_path"
+    rm -f "$backup2master_path"
+fi
+
+# remove service
+ucs_removeServiceFromLocalhost "$SERVICE" "$@"
+
+joinscript_remove_script_from_status_file $SERVICE
+
+exit 0

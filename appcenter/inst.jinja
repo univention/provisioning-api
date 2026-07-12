@@ -1,0 +1,50 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2025 Univention GmbH
+
+## joinscript api: bindpwdfile
+
+VERSION=1
+. /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/all.sh
+
+joinscript_init
+
+SERVICE="provisioning-service"
+ucs_addServiceToLocalhost "$SERVICE" "$@"
+
+wait_for_nats () {
+    local i=0
+    nats_server="localhost:8222/healthz"
+    for ((i=0; i<30; i++)); do
+        if curl -sf $nats_server > /dev/null; then
+            echo "[wait_for_nats]: NATS at $nats_server is responsive."
+            return 0
+        fi
+        echo "[wait_for_nats]: Waiting for NATS at $nats_server ..."
+        sleep 1
+    done
+    echo "[wait_for_nats]: Timeout after 30s - could not reach $nats_server."
+    return 1
+}
+
+wait_for_nats || die
+
+systemctl restart univention-directory-listener
+
+ROLE="$(ucr get server/role)"
+echo "Detected server role: ${ROLE}"
+if [[ "$ROLE" = "domaincontroller_backup" ]]; then
+  # install backup2master script
+  mkdir -p /usr/lib/univention-backup2master/post
+  backup2master_path=/usr/lib/univention-backup2master/post/50provisioning-service-backup2master
+  echo "Installing provisioning backup2master script at $backup2master_path"
+  cat <<'%EOF' >"$backup2master_path"
+{{ "apps/50provisioning-service-backup2master" | source }}
+%EOF
+  chmod +x "$backup2master_path"
+fi
+
+joinscript_save_current_version
+
+exit 0
