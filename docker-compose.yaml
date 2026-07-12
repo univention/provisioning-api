@@ -40,6 +40,7 @@ services:
   nats1:
     image: "artifacts.software-univention.de/library/nats:2.14.3@sha256:7ff2e641c33dbdb0dd13a943ba0b70d841b71275c607baa53ef9b8661f0b2d8c"
     container_name: nats1
+    restart: "on-failure"
     environment:
       jetstream: "enabled"
     ports:
@@ -53,6 +54,7 @@ services:
   nats2:
     image: "artifacts.software-univention.de/library/nats:2.14.3@sha256:7ff2e641c33dbdb0dd13a943ba0b70d841b71275c607baa53ef9b8661f0b2d8c"
     container_name: nats2
+    restart: "on-failure"
     command: --name nats2 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
     volumes:
       - ./nats.dev.conf:/etc/nats-config/nats.conf
@@ -61,6 +63,7 @@ services:
   nats3:
     image: "artifacts.software-univention.de/library/nats:2.14.3@sha256:7ff2e641c33dbdb0dd13a943ba0b70d841b71275c607baa53ef9b8661f0b2d8c"
     container_name: nats3
+    restart: "on-failure"
     command: --name nats3 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
     ports:
       - "4223:4222"
@@ -163,6 +166,7 @@ services:
       - "nats3"
     platform: linux/amd64
     container_name: "ldif-producer"
+    restart: "on-failure"
     image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest"
     # Can be uncommented to simplify local development.
     # build:
@@ -190,6 +194,7 @@ services:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
     container_name: "udm-listener"
+    restart: "on-failure"
     environment:
       NATS_HOST: "nats1"
       NATS_PORT: "4222"
@@ -204,17 +209,21 @@ services:
       DEBUG_LEVEL: "3"
       LDAP_PASSWORD_FILE: "/var/secrets/ldap_password"
     depends_on:
-      - "nats1"
-      - "ldap-server"
-      - "ldap-notifier"
+      nats1:
+        condition: service_started
+      ldap-server:
+        condition: service_healthy
+      ldap-notifier:
+        condition: service_started
 
   ldap-notifier:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-notifier:latest
     container_name: "ldap-notifier"
+    restart: "on-failure"
     depends_on:
       ldap-server:
-        condition: service_started
+        condition: service_healthy
     ports:
       - 6669:6669
     volumes:
@@ -225,6 +234,13 @@ services:
     platform: linux/amd64
     image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest
     container_name: "ldap-server"
+    restart: "on-failure"
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-H", "ldapi:///", "-Y", "EXTERNAL", "-b", "cn=config", "-LLL", "(&(objectClass=mdb))", "dn"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
     ulimits:
       nofile:
         soft: "2048"
@@ -256,6 +272,7 @@ services:
   udm-rest-api: &udm-rest-api
     image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest
     container_name: "udm-rest-api"
+    restart: "on-failure"
     platform: "linux/amd64"
     ports:
       - 9979:9979
