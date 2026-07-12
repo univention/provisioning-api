@@ -19,7 +19,11 @@ services:
       - /var/lib/univention-appcenter/apps/provisioning-service/data/nats-data/:/data
 
   provisioning-api:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:0.70.10"
+    # Published image: public "nubus" on a release, private "nubus-dev" otherwise.
+    # RELEASE_VERSION is a readable tag; the digest (from update_appcenter) pins the
+    # image and is always set in the release pipeline. The `if DIGEST else ''` guard
+    # only matters when rendering outside it. Same pattern for all images below.
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-api:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_API_DIGEST) if PROVISIONING_API_DIGEST else '' }}"
     container_name: "nubus-provisioning-api"
     restart: "unless-stopped"
     environment:
@@ -49,7 +53,7 @@ services:
       - "nats"
 
   dispatcher:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:0.70.10"
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-dispatcher:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_DISPATCHER_DIGEST) if PROVISIONING_DISPATCHER_DIGEST else '' }}"
     container_name: "nubus-provisioning-dispatcher"
     restart: "unless-stopped"
     environment:
@@ -75,7 +79,7 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:0.70.10"
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-udm-transformer:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_UDM_TRANSFORMER_DIGEST) if PROVISIONING_UDM_TRANSFORMER_DIGEST else '' }}"
     container_name: "nubus-provisioning-udm-transformer"
     restart: "unless-stopped"
     @!@if configRegistry.get('server/role').lower() == "domaincontroller_backup": print("profiles: [donotstart]\n")@!@
@@ -106,7 +110,7 @@ services:
       - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:0.70.10"
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-prefill:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_PREFILL_DIGEST) if PROVISIONING_PREFILL_DIGEST else '' }}"
     container_name: "nubus-provisioning-prefill"
     restart: "unless-stopped"
     environment:

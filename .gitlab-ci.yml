@@ -3,6 +3,23 @@
 
 ---
 
+# provisioning defines its own workflow (this REPLACES the shared
+# nubus-workflow) so releases only run from a protected "vX.Y.Z" tag. Based on
+# nubus-workflow (v1.64.0) plus the release-tag rule. Feature branches run only
+# a merge request pipeline, no separate branch pipeline.
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "trigger"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule-release"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Release pipeline: a protected "vX.Y.Z" tag.
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
     ref: "v1.66.2"
@@ -11,7 +28,9 @@ include:
       - "defaults/nubus-workflow.yaml"
       - "jobs/lint-pre-commit.yaml"
       - "jobs/lint-commit-messages.yaml"
-      - "jobs/semantic-release-env.yaml"
+      # Release only from a protected tag (see the workflow block above) instead
+      # of auto-releasing from main via semantic-release.
+      - "templates/tagged-release.yaml"
       - "jobs/container-build-external-buildkit.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
@@ -30,9 +49,63 @@ include:
       package_root: "consumer"
       job_name_suffix: "-consumer"
 
+  # App Center release: create_app_version / update_appcenter / do_release etc.
+  # On a feature branch (MR) creating the version is manual (see the
+  # create_app_version override below); on a protected vX.Y.Z tag it is the real
+  # release. The App Center Version comes from the tag (templated into ini.jinja).
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.5.2"
+    inputs:
+      app_id: "provisioning-service"
+      ucs_base_version: "5.2"
+      # TODO: point at a public changelog page once one exists.
+      changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/blob/main/CHANGELOG.md"
+      mail_recipient: "app-announcement@univention.de"
+      mail_sender: "nubus-core@univention.de"
+      author_alias: "Nubus Core Team"
+      release_tag_prefix: "v"
+      build_stage: "package"
+      release_stage: "publish"
+      cleanup_stage: ".post"
+      additional_update_appcenter_needs:
+        - job: "container-build"
+          parallel:
+            matrix:
+              - IMAGE_NAME: "provisioning-api"
+                DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
+        - job: "container-build"
+          parallel:
+            matrix:
+              - IMAGE_NAME: "provisioning-dispatcher"
+                DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
+        - job: "container-build"
+          parallel:
+            matrix:
+              - IMAGE_NAME: "provisioning-udm-transformer"
+                DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
+        - job: "container-build"
+          parallel:
+            matrix:
+              - IMAGE_NAME: "provisioning-prefill"
+                DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+        # So update_appcenter inherits RELEASE_VERSION + PUBLIC_RELEASE (dotenv),
+        # used by compose.jinja to point at the published nubus/nubus-dev image.
+        - "pre-semantic-release"
+
 variables:
   POETRY_VERSION: "1.6.1"
   RENOVATE_USER_ID: "1393"
+
+# Version stamp via common-ci's .tagged-release template. Releases come only
+# from a protected vX.Y.Z tag; every other ref is a "<base>-post-<slug>" dev
+# build published to nubus-dev only. Job name kept as "pre-semantic-release"
+# because the common-ci build/publish jobs depend on it for RELEASE_VERSION.
+# INITIAL_VERSION floors the base at the current App Center app version (2.1)
+# so the first release tag (v2.2.0) does not regress below it.
+pre-semantic-release:
+  extends: .tagged-release
+  variables:
+    INITIAL_VERSION: "2.1.0"
+    RELEASE_TAG_PATTERN: '^v[0-9]+\.[0-9]+\.[0-9]+$'
 
 lint-pre-commit:
   before_script:
@@ -182,4 +255,62 @@ check-debian-updates:
 sonarqube:
   extends: .sonarqube
   needs: []
+
+# Feature branches: creating the App Center version is MANUAL (one click on
+# create_app_version; update_appcenter follows automatically as it needs it).
+# On a vX.Y.Z tag it is automatic (the release); on main it refreshes staging.
+# Rules mirror the app-release component, with the MR case set to manual (and
+# the per-rule ENVIRONMENT_NAME kept so the environment/on_stop still resolve).
+create_app_version:
+  # Auto-expire the per-MR test version after 3 days (merges with the
+  # component's environment name/url/on_stop). GitLab then stops the
+  # environment, triggering delete_app_version to remove the temporary App
+  # Center version even if the MR is still open. The component has no input for
+  # this, so we set it here.
+  environment:
+    auto_stop_in: "3 days"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/'
+      variables:
+        ENVIRONMENT_NAME: "release-app/${APP_ID}_$CI_COMMIT_TAG"
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: "manual"
+      allow_failure: true
+      variables:
+        ENVIRONMENT_NAME: "branch-app/${APP_ID}_$CI_COMMIT_REF_SLUG"
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
+      variables:
+        ENVIRONMENT_NAME: "staging-app/${APP_ID}_999.0.0-staging"
+
+# Pin the App Center compose images to the built images' content digests. The
+# kaniko build exposes each digest as the artifact "digests/<image>"; this job
+# already pulls those artifacts via additional_update_appcenter_needs, so we
+# read them and export one variable per image for compose.jinja. The same
+# digest exists in nubus/nubus-dev (skopeo copies with --preserve-digests). If
+# an image was not built this pipeline, its digest stays empty and compose.jinja
+# falls back to the RELEASE_VERSION tag for that image.
+update_appcenter:
+  before_script:
+    - |
+      set -eu
+      digest_for() {
+        if [ -f "${CI_PROJECT_DIR}/digests/$1" ]; then
+          cat "${CI_PROJECT_DIR}/digests/$1"
+        fi
+      }
+      export PROVISIONING_API_DIGEST="$(digest_for provisioning-api)"
+      export PROVISIONING_DISPATCHER_DIGEST="$(digest_for provisioning-dispatcher)"
+      export PROVISIONING_UDM_TRANSFORMER_DIGEST="$(digest_for provisioning-udm-transformer)"
+      export PROVISIONING_PREFILL_DIGEST="$(digest_for provisioning-prefill)"
+      echo "Compose image digests:"
+      echo "  provisioning-api:             ${PROVISIONING_API_DIGEST:-<none, tag only>}"
+      echo "  provisioning-dispatcher:      ${PROVISIONING_DISPATCHER_DIGEST:-<none, tag only>}"
+      echo "  provisioning-udm-transformer: ${PROVISIONING_UDM_TRANSFORMER_DIGEST:-<none, tag only>}"
+      echo "  provisioning-prefill:         ${PROVISIONING_PREFILL_DIGEST:-<none, tag only>}"
+
+# Release announcements go out by mail (send_mail); the Rocket.Chat
+# notification is disabled, matching keycloak.
+send_chat_message:
+  rules:
+    - when: never
 ...

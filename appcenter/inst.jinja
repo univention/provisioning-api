@@ -40,7 +40,7 @@ if [[ "$ROLE" = "domaincontroller_backup" ]]; then
   backup2master_path=/usr/lib/univention-backup2master/post/50provisioning-service-backup2master
   echo "Installing provisioning backup2master script at $backup2master_path"
   cat <<'%EOF' >"$backup2master_path"
-%PROVISIONING-BACKUP2MASTER-POST%
+{{ "apps/50provisioning-service-backup2master" | source }}
 %EOF
   chmod +x "$backup2master_path"
 fi
