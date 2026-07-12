@@ -127,13 +127,14 @@ container-build:
   after_script:
     - unset DOCKER_API_VERSION
     - docker ps -a
-    - docker logs provisioning-api          > provisioning-api.log       2>&1 || true
-    - docker logs provisioning-dispatcher    > dispatcher.log            2>&1 || true
-    - docker logs provisioning-prefill       > prefill.log               2>&1 || true
+    - docker logs provisioning-api             > provisioning-api.log       2>&1 || true
+    - docker logs provisioning-dispatcher      > dispatcher.log            2>&1 || true
+    - docker logs provisioning-prefill         > prefill.log               2>&1 || true
     - docker logs provisioning-udm-transformer > udm-transformer.log     2>&1 || true
-    - docker logs udm-listener               > udm-listener.log          2>&1 || true
-    - docker logs ldap-server                > ldap-server.log           2>&1 || true
-    - docker logs udm-rest-api               > udm-rest-api.log          2>&1 || true
+    - docker logs udm-listener                 > udm-listener.log          2>&1 || true
+    - docker logs ldap-notifier                >& ldap-notifier.log
+    - docker logs ldap-server                  > ldap-server.log           2>&1 || true
+    - docker logs udm-rest-api                 > udm-rest-api.log          2>&1 || true
     - docker compose down --volumes --remove-orphans || true
     # Remove the materialized copy from the (ephemeral) host.
     - docker run --rm -v /:/host alpine sh -c "rm -rf /host${CI_PROJECT_DIR}" || true
@@ -144,6 +145,7 @@ container-build:
       - prefill.log
       - udm-transformer.log
       - udm-listener.log
+      - ldap-notifier.log
       - ldap-server.log
       - udm-rest-api.log
     expire_in: "1 day"
