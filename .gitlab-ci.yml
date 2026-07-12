@@ -126,7 +126,8 @@ test-end-to-end:
     - docker logs provisioning-dispatcher >& dispatcher.log
     - docker logs provisioning-prefill >& prefill.log
     - docker logs provisioning-udm-transformer >& udm-transformer.log
-    - docker logs udm-listener>& udm-listener.log
+    - docker logs udm-listener >& udm-listener.log
+    - docker logs ldap-notifier >& ldap-notifier.log
     - docker logs ldap-server >& ldap-server.log
     - docker logs udm-rest-api >& udm-rest-api.log
     - docker compose down --volumes
@@ -137,6 +138,7 @@ test-end-to-end:
       - prefill.log
       - udm-transformer.log
       - udm-listener.log
+      - ldap-notifier.log
       - ldap-server.log
       - udm-rest-api.log
     expire_in: "1 day"
