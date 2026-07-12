@@ -15,12 +15,20 @@ include:
       - "jobs/container-build-external-buildkit.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
-      - "templates/pip-package-and-publish.yaml"
       - "templates/sonarqube.yaml"
   - project: "univention/infrastructure/docker-services"
     ref: "master"
     file:
       - "dind.yml"
+
+  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/pip-package-and-publish-with-uv@v1.66.1"
+    inputs:
+      package_root: "common"
+      job_name_suffix: "-common"
+  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/pip-package-and-publish-with-uv@v1.66.1"
+    inputs:
+      package_root: "consumer"
+      job_name_suffix: "-consumer"
 
 variables:
   POETRY_VERSION: "1.6.1"
@@ -172,11 +180,4 @@ check-debian-updates:
 sonarqube:
   extends: .sonarqube
   needs: []
-
-build-and-publish-pip:
-  extends: .build-and-publish-pip-package-with-uv
-  parallel:
-    matrix:
-      - PACKAGE_ROOT: "common"
-      - PACKAGE_ROOT: "consumer"
 ...
