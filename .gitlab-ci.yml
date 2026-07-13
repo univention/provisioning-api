@@ -5,14 +5,14 @@
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.61.2"
+    ref: "v1.66.2"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
       - "jobs/lint-pre-commit.yaml"
       - "jobs/lint-commit-messages.yaml"
       - "jobs/semantic-release-env.yaml"
-      - "jobs/container-build-external.yaml"
+      - "jobs/container-build-external-buildkit.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/pip-package-and-publish.yaml"
@@ -67,7 +67,7 @@ container-build:
   parallel:
     matrix: *build-matrix
   variables:
-    KANIKO_BUILD_CONTEXT: "${CI_PROJECT_DIR}"
+    BUILD_CONTEXT: "${CI_PROJECT_DIR}"
 
 container-malware-scan:
   parallel:
