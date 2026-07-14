@@ -650,7 +650,7 @@ null
 			<td>nats.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"2.14.1@sha256:7f430e429d0a90444b38bd40ab7812fd3afcc49a51f6b03a931f9becd5aeb280"
+"2.14.3@sha256:7ff2e641c33dbdb0dd13a943ba0b70d841b71275c607baa53ef9b8661f0b2d8c"
 </pre>
 </td>
 			<td></td>
@@ -695,7 +695,7 @@ null
 			<td>natsBox.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"0.19.3-nonroot@sha256:c9ea3192977338d7b562ab4c21c234a09ed217a1ce4ec812cec2b20b17defb51"
+"0.19.7-nonroot@sha256:e86b9681f330ab1aa45744dd5cb367d44205b28fac2519a2f74ca0255803161a"
 </pre>
 </td>
 			<td></td>
