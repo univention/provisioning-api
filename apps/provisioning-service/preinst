@@ -26,7 +26,7 @@ NATS_CONF = """{{
   lame_duck_grace_period: 10s
   max_payload: 16MB
   jetstream {{
-    max_file_store: 1Gi
+    max_file_store: 50Gi
     max_memory_store: 256Mi
     store_dir: "/data"
     sync_interval: "10ms"
