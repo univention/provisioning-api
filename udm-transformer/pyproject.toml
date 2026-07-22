@@ -13,15 +13,15 @@ license = {text = "AGPL-3.0-only"}
 requires-python = "==3.13.*"
 
 dependencies = [
-    "aiohttp<4.0.0,>=3.13.2",
+    "aiohttp<4.0.0,>=3.14.2",
     "daemoniker<1.0.0,>=0.2.3",
-    "msgpack<2.0.0,>=1.1.0",
+    "msgpack<2.0.0,>=1.2.1",
     "nubus-provisioning-common",
     "nubus-provisioning-backends",
-    "pydantic<3.0.0,>=2.9.2",
-    "pydantic-settings<3.0.0,>=2.5.2",
-    "udm-rest-api-client>=0.0.2",
-    "dnspython<3.0,>=2.3",
+    "pydantic<3.0.0,>=2.13.4",
+    "pydantic-settings<3.0.0,>=2.14.2",
+    "udm-rest-api-client>=0.1.2",
+    "dnspython<3.0,>=2.8.0",
     "urllib3>=2.7.0",
 ]
 
