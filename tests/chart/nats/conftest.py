@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-base_dir = (Path(__file__).parent / "../").resolve()
+base_dir = (Path(__file__).parent / "../../../").resolve()
 
 
 @pytest.fixture

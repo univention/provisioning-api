@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
-from univention.testing.helm.auth_flavors.password_usage import AuthPasswordUsageViaEnv
 from univention.testing.helm.auth_flavors.nats import NatsCreateUserMixin
+from univention.testing.helm.auth_flavors.password_usage import AuthPasswordUsageViaEnv
 
 
 class TestNormalUserPassword(NatsCreateUserMixin, AuthPasswordUsageViaEnv):
