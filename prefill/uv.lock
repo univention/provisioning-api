@@ -312,12 +312,8 @@ wheels = [
 
 [[package]]
 name = "nats-py"
-version = "2.14.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c3/f8/b956c4621ba88748ed707c52e69f95b7a50c8914e750edca59a5bef84a76/nats_py-2.14.0.tar.gz", hash = "sha256:4ed02cb8e3b55c68074a063aa2687087115d805d1513297da90cb2068fb07bed", size = 120751, upload-time = "2026-02-23T22:44:58.988Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f9/39/0e87753df1072254bac190b33ed34b264f28f6aa9bea0f01b7e818071756/nats_py-2.14.0-py3-none-any.whl", hash = "sha256:4116f5d2233ce16e63c3d5538fa40a5e207f75fcf42a741773929ddf1e29d19d", size = 82259, upload-time = "2026-02-23T22:45:00.152Z" },
-]
+version = "2.15.0"
+source = { git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5#f0deaeb85e2888b7175398a0b50d3a940b2692f5" }
 
 [[package]]
 name = "nubus-provisioning-backends"
@@ -328,7 +324,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "nats-py", specifier = ">=2.9.0,<3.0.0" }]
+requires-dist = [{ name = "nats-py", git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5" }]
 
 [[package]]
 name = "nubus-provisioning-common"
@@ -353,6 +349,7 @@ dependencies = [
     { name = "aiohttp" },
     { name = "backends" },
     { name = "daemoniker" },
+    { name = "nats-py" },
     { name = "nubus-provisioning-backends" },
     { name = "nubus-provisioning-common" },
     { name = "pydantic" },
@@ -367,6 +364,7 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.13.2,<4.0.0" },
     { name = "backends", specifier = ">=1.6.6,<2.0.0" },
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
+    { name = "nats-py", git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5" },
     { name = "nubus-provisioning-backends", directory = "../backends" },
     { name = "nubus-provisioning-common", directory = "../common" },
     { name = "pydantic", specifier = ">=2.9.2,<3.0.0" },

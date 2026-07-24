@@ -4,9 +4,8 @@ requires-python = "==3.13.*"
 
 [[package]]
 name = "nats-py"
-version = "2.9.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ba/dc/9a01dd9561b736622c0aa3a19f6b40f3eeb22051eaea1475ceb81d5da48d/nats_py-2.9.0.tar.gz", hash = "sha256:01886eb9e0a87f0ec630652cf1fae65d2a8556378a609bc6cc07d2ea60c8d0dd", size = 110714, upload-time = "2024-08-26T15:14:17.337Z" }
+version = "2.15.0"
+source = { git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5#f0deaeb85e2888b7175398a0b50d3a940b2692f5" }
 
 [[package]]
 name = "nubus-provisioning-backends"
@@ -17,4 +16,4 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "nats-py", specifier = ">=2.9.0,<3.0.0" }]
+requires-dist = [{ name = "nats-py", git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5" }]

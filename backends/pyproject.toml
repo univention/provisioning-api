@@ -15,6 +15,12 @@ dependencies = [
     "nats-py<3.0.0,>=2.9.0",
 ]
 
+[tool.uv.sources]
+# TODO: Temporary pin to a patched nats-py fixing premature KV watcher initial
+# completion (univention/dev/projects/provisioning#135). Remove once
+# https://github.com/nats-io/nats.py/pull/995 is merged and released.
+nats-py = { git = "https://github.com/d3vv3/nats.py", rev = "f0deaeb85e2888b7175398a0b50d3a940b2692f5", subdirectory = "nats" }
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]
 

@@ -75,9 +75,8 @@ wheels = [
 
 [[package]]
 name = "nats-py"
-version = "2.10.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/83/2f/0f1b94844760a894659388059bc618b59fd794a3ef2f5113d710864d3fa7/nats_py-2.10.0.tar.gz", hash = "sha256:9d44265a097edb30d40e214c1dd1a7405c1451d33480ce714c041fb73bb66a10", size = 113637, upload-time = "2025-03-25T05:11:22.102Z" }
+version = "2.15.0"
+source = { git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5#f0deaeb85e2888b7175398a0b50d3a940b2692f5" }
 
 [[package]]
 name = "nubus-provisioning-listener"
@@ -102,7 +101,7 @@ dev = [
 requires-dist = [
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
     { name = "msgpack", specifier = ">=1.1.0,<2.0.0" },
-    { name = "nats-py", specifier = ">=2.9.0,<3.0.0" },
+    { name = "nats-py", git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5" },
     { name = "psutil", specifier = ">=5.9.0,<6.0.0" },
     { name = "pydantic", specifier = "<2.0.0" },
 ]

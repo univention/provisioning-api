@@ -19,6 +19,7 @@ dependencies = [
     "fastapi[standard]<1.0.0,>=0.120.0",
     "fastapi-utils<1.0.0,>=0.7.0",
     "httptools<1.0.0,>=0.6.1",
+    "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
     "passlib<2.0.0,>=1.7.4",
@@ -32,6 +33,10 @@ dependencies = [
 ]
 
 [tool.uv.sources]
+# TODO: Temporary pin to a patched nats-py fixing premature KV watcher initial
+# completion (univention/dev/projects/provisioning#135). Remove once
+# https://github.com/nats-io/nats.py/pull/995 is merged and released.
+nats-py = { git = "https://github.com/d3vv3/nats.py", rev = "f0deaeb85e2888b7175398a0b50d3a940b2692f5", subdirectory = "nats" }
 nubus-provisioning-backends = { path = "../backends" }
 nubus-provisioning-common = { path = "../common" }
 
