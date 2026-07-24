@@ -7,11 +7,13 @@ name: "nats"
 annotations:
   licenses: "AGPL-3.0-only"
 description: "A Helm Chart that deploys NATS"
-home: "https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm"
+home: "https://git.knut.univention.de/univention/dev/projects/provisioning"
+sources:
+  - "https://git.knut.univention.de/univention/dev/projects/provisioning/-/tree/main/helm/nats?ref_type=heads"
 keywords:
   - "nats"
 type: "application"
-version: "0.1.2"
+version: "0.8.1"
 dependencies:
   - name: "nubus-common"
     version: "0.28.11"

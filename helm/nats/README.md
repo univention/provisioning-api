@@ -2,10 +2,10 @@
 
 A Helm Chart that deploys NATS
 
-- **Version**: 0.1.2
+- **Version**: 0.8.1
 - **Type**: application
 - **AppVersion**:
-- **Homepage:** <https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm>
+- **Homepage:** <https://git.knut.univention.de/univention/dev/projects/provisioning>
 
 ## TL;DR
 
@@ -16,6 +16,10 @@ helm upgrade --install nats oci://gitregistry.knut.univention.de/univention/cust
 ## Introduction
 
 This chart deploys a NATS server/cluster.
+
+## Source Code
+
+* <https://git.knut.univention.de/univention/dev/projects/provisioning/-/tree/main/helm/nats?ref_type=heads>
 
 ## Installing
 
