@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2024 Univention GmbH
+
+---
+apiVersion: "v2"
+name: "nats"
+annotations:
+  licenses: "AGPL-3.0-only"
+description: "A Helm Chart that deploys NATS"
+home: "https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm"
+keywords:
+  - "nats"
+type: "application"
+version: "0.1.2"
+dependencies:
+  - name: "nubus-common"
+    version: "0.28.11"
+    repository: "oci://artifacts.software-univention.de/nubus/charts"

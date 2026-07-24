@@ -1,0 +1,71 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.description" . }}
+
+- **Version**: {{ template "chart.version" . }}
+- **Type**: {{ template "chart.type" . }}
+- **AppVersion**: {{ template "chart.appVersion" . }}
+- {{ template "chart.homepageLine" . }}
+
+## TL;DR
+
+```console
+helm upgrade --install nats oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/charts/nats
+```
+
+
+## Introduction
+
+This chart deploys a NATS server/cluster.
+
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+
+## Installing
+
+To install the chart with the release name `nats`:
+
+```console
+helm upgrade --install nats oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/charts/nats
+```
+
+
+## Uninstalling
+
+To uninstall the chart with the release name `nats`:
+
+```console
+helm uninstall nats
+```
+
+## Testing
+
+### create stream
+
+```
+nats stream add teststream --subjects='testsubject.>' --storage=file --replicas=1 --ack --retention=limits --discard=old  --max-msg-size=-1 --max-msgs=-1 --max-msgs-per-subject=-1 --max-bytes=-1 --max-age=-1  --dupe-window="2m0s" --no-allow-rollup --no-deny-delete --no-deny-purge
+```
+
+### add consumer
+```
+nats consumer add teststream testconsumer --pull --deliver=all --ack=explicit --replay=instant --filter="" --max-deliver=-1 --max-pending=0 --no-headers-only --backoff=none
+```
+
+### publish message
+```
+echo $(date) | nats publish testsubject.test1
+```
+### consume message
+
+```
+nats consumer next teststream testconsumer
+```
+
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSectionHtml" . }}
