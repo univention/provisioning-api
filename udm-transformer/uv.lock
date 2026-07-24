@@ -245,7 +245,16 @@ wheels = [
 [[package]]
 name = "nats-py"
 version = "2.15.0"
-source = { git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5#f0deaeb85e2888b7175398a0b50d3a940b2692f5" }
+source = { url = "https://github.com/d3vv3/nats.py/archive/f0deaeb85e2888b7175398a0b50d3a940b2692f5.tar.gz", subdirectory = "nats" }
+sdist = { hash = "sha256:c91e60fefc4879b604e9b91c20177c17dc1dbd84af61affe4ab1903745c6b97f" }
+
+[package.metadata]
+requires-dist = [
+    { name = "aiohttp", marker = "extra == 'aiohttp'" },
+    { name = "fast-mail-parser", marker = "extra == 'fast-parse'" },
+    { name = "nkeys", marker = "extra == 'nkeys'" },
+]
+provides-extras = ["nkeys", "aiohttp", "fast-parse"]
 
 [[package]]
 name = "nubus-provisioning-backends"
@@ -256,7 +265,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "nats-py", git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5" }]
+requires-dist = [{ name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/f0deaeb85e2888b7175398a0b50d3a940b2692f5.tar.gz", subdirectory = "nats" }]
 
 [[package]]
 name = "nubus-provisioning-common"
@@ -297,7 +306,7 @@ requires-dist = [
     { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
     { name = "dnspython", specifier = ">=2.3,<3.0" },
     { name = "msgpack", specifier = ">=1.1.0,<2.0.0" },
-    { name = "nats-py", git = "https://github.com/d3vv3/nats.py?subdirectory=nats&rev=f0deaeb85e2888b7175398a0b50d3a940b2692f5" },
+    { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/f0deaeb85e2888b7175398a0b50d3a940b2692f5.tar.gz", subdirectory = "nats" },
     { name = "nubus-provisioning-backends", directory = "../backends" },
     { name = "nubus-provisioning-common", directory = "../common" },
     { name = "pydantic", specifier = ">=2.9.2,<3.0.0" },

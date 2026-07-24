@@ -15,6 +15,7 @@ license = {text = "AGPL-3.0-only"}
 requires-python = "==3.13.*"
 
 dependencies = [
+    "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
     "nubus-provisioning-consumer",
@@ -37,6 +38,10 @@ dev = [
 ]
 
 [tool.uv.sources]
+# TODO: Temporary pin to a patched nats-py fixing premature KV watcher initial
+# completion (univention/dev/projects/provisioning#135). Remove once
+# https://github.com/nats-io/nats.py/pull/995 is merged and released.
+nats-py = { url = "https://github.com/d3vv3/nats.py/archive/f0deaeb85e2888b7175398a0b50d3a940b2692f5.tar.gz", subdirectory = "nats" }
 nubus-provisioning-backends = { path = "./backends" }
 nubus-provisioning-common = { path = "./common" }
 nubus-provisioning-consumer = { path = "./consumer" }
