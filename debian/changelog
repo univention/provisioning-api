@@ -1,3 +1,9 @@
+univention-provisioning-service (3.0.0) unstable; urgency=medium
+
+  * Bump for UCS 5.3-0
+
+ -- Marius Meschter <marius.meschter@univention.de>  Tue, 28 Jul 2026 08:49:39 +0200
+
 univention-provisioning-service (2.0.2) unstable; urgency=medium
 
   * Fix listener reconnection to NATS
