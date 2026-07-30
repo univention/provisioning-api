@@ -44,27 +44,12 @@ RUN --mount=type=cache,target=/root/.cache \
 
 ###############################################
 # Stage 3: final image
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
-SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
+FROM gcr.io/distroless/python3-debian13:nonroot AS final
+#SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
 
 ENV PYTHONUNBUFFERED=1 \
   PATH=/app/rest-api/.venv/bin:$PATH
 
-ARG USER=rest-api
-RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
-  rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-  groupadd -r ${USER} -g 1000 && \
-  useradd -r -d /app -g ${USER} -N ${USER} -u 1000
-
-COPY --from=build --chown=${USER}:${USER} /app/rest-api /app/rest-api
-
-USER ${USER}
-
-CMD ["rest-api"]
-
-RUN \
-  python3.13 -V && \
-  python3.13 -m site && \
-  python3.13 -c 'import univention.provisioning.rest'
-# TODO: importing main executes code
-# python3.13 -c 'import univention.provisioning.rest.main'
+COPY --from=build /app/rest-api /app/rest-api
+WORKDIR /app/rest-api
+ENTRYPOINT [ "/app/rest-api/.venv/bin/rest-api" ]
