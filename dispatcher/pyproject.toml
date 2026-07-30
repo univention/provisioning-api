@@ -15,7 +15,6 @@ requires-python = "==3.13.*"
 dependencies = [
     "daemoniker<1.0.0,>=0.2.3",
     "pydantic-settings<3.0.0,>=2.14.2",
-    "backends<2.0.0,>=1.9.0",
     "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
     "nubus-provisioning-common",

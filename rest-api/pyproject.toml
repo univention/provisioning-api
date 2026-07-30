@@ -27,7 +27,6 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.14.2",
     "typing-extensions<5.0.0,>=4.16.0",
     "typing-inspect<1.0.0,>=0.9.0",
-    "backends<2.0.0,>=1.9.0",
     "python-multipart>=0.0.32",
     "urllib3>=2.7.0",
 ]
