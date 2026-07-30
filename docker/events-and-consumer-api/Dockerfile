@@ -3,6 +3,9 @@
 
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
 ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20260911@sha256:51466e4d602f2ab8c4e8dcbb1d174b00bdb8e738ca9c999b0bd0627be59aaff4
+ARG UCS_DISTROLESS_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-distroless-python-530
+# TODO: repoint to the 5.3.0-build.<date> tag once ucs-base-image!109 is merged
+ARG UCS_DISTROLESS_IMAGE_TAG=0.24.0-pre-mmeschter-distroless-python@sha256:074d9c80454289f0b0f6adba72b58d0259019fe595ecd6485624331d87731376
 
 ###############################################
 # Stage 1: build dependencies and software
@@ -42,29 +45,17 @@ RUN --mount=type=cache,target=/root/.cache \
   uv sync --locked --no-dev && \
   uv pip install -e .
 
+
 ###############################################
 # Stage 3: final image
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
-SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
+#
+# Distroless: no shell, so no RUN steps here. The user, os-release and CA
+# bundle come from the base image.
+FROM ${UCS_DISTROLESS_IMAGE}:${UCS_DISTROLESS_IMAGE_TAG} AS final
 
 ENV PYTHONUNBUFFERED=1 \
   PATH=/app/rest-api/.venv/bin:$PATH
 
-ARG USER=rest-api
-RUN rm -fv /usr/lib/python*/EXTERNALLY-MANAGED && \
-  rm -fr /var/lib/apt/lists/* /var/cache/apt/archives/* && \
-  groupadd -r ${USER} -g 1000 && \
-  useradd -r -d /app -g ${USER} -N ${USER} -u 1000
-
-COPY --from=build --chown=${USER}:${USER} /app/rest-api /app/rest-api
-
-USER ${USER}
-
-CMD ["rest-api"]
-
-RUN \
-  python3.13 -V && \
-  python3.13 -m site && \
-  python3.13 -c 'import univention.provisioning.rest'
-# TODO: importing main executes code
-# python3.13 -c 'import univention.provisioning.rest.main'
+COPY --from=build /app/rest-api /app/rest-api
+WORKDIR /app/rest-api
+ENTRYPOINT [ "/app/rest-api/.venv/bin/rest-api" ]
