@@ -22,7 +22,7 @@ workflow:
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.66.2"
+    ref: "v1.66.3"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
