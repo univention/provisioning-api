@@ -10,12 +10,16 @@ A Helm Chart that deploys NATS
 ## TL;DR
 
 ```console
-helm upgrade --install nats oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/charts/nats
+helm dependency build helm/nats
+helm upgrade --install nats helm/nats
 ```
 
 ## Introduction
 
 This chart deploys a NATS server/cluster.
+
+It is not published as a standalone chart. It is a local file dependency of the
+[provisioning](../provisioning) chart and is only released as part of it.
 
 ## Source Code
 
@@ -23,10 +27,11 @@ This chart deploys a NATS server/cluster.
 
 ## Installing
 
-To install the chart with the release name `nats`:
+To install the chart from this repository with the release name `nats`:
 
 ```console
-helm upgrade --install nats oci://gitregistry.knut.univention.de/univention/customers/dataport/upx/nats-helm/charts/nats
+helm dependency build helm/nats
+helm upgrade --install nats helm/nats
 ```
 
 ## Uninstalling

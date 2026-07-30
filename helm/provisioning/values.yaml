@@ -294,7 +294,7 @@ nats:
       # -- The CA to verify the servers identity when initialising the connection.
       caFile: "/certificates/ca.crt"
   # The NATS server configuration.
-  # Ref: https://git.knut.univention.de/univention/customers/dataport/upx/nats-helm/-/blob/main/README.md
+  # Ref: https://git.knut.univention.de/univention/dev/projects/provisioning/-/blob/main/helm/nats/README.md
   affinity:
     # Disable the pod affinity rules when running on a cluster with less than 3 kubernetes nodes.
     enabled: true
