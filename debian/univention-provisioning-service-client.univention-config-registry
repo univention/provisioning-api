@@ -1,0 +1,7 @@
+Type: file
+File: etc/sudoers.d/univention-provisioning-service-client
+Variables: auth/sudo
+Variables: groups/default/domainadmins
+User: root
+Group: root
+Mode: 0440

@@ -44,6 +44,12 @@ the user DN and uses `univention-ssh` to run its fixed credential-read command
 there. The SSH stdout is captured directly; the Primary's secret file is never
 copied.
 
+On UCS, remote lookup is authorized for members of the configured
+`Domain Admins` group when `auth/sudo` is enabled. The Debian package installs
+a `sudoers` rule for only the fixed, argument-restricted credential-read
+command; it does not grant other users or delegated UMC roles general access
+to the Provisioning administrator credential.
+
 `password` and `password_file` are accepted in imported JSON for compatibility
 but ignored. `--generate-password` is the only supported source for a new
 subscriber password.

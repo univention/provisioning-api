@@ -193,6 +193,12 @@ def test_read_remote_admin_password_uses_strict_host_key_checking_and_fixed_list
     assert "env" not in runner.call_args.kwargs
 
 
+def test_remote_admin_command_is_the_scoped_noninteractive_sudo_reader():
+    assert credentials.REMOTE_ADMIN_COMMAND == (
+        "sudo -n /usr/sbin/univention-provisioning-service-client _read-admin-password"
+    )
+
+
 def test_read_remote_admin_password_accepts_one_line_without_terminal_newline():
     runner = Mock(return_value=SimpleNamespace(returncode=0, stdout=ADMIN_PASSWORD.encode()))
 

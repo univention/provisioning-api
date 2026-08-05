@@ -24,7 +24,7 @@ ADMIN_PASSWORD_KEY = "PROVISIONING_API_ADMIN_PASSWORD"
 DEFAULT_ADMIN_CREDENTIAL_FILE = "/etc/provisioning-secrets.json"
 MAX_CREDENTIAL_FILE_BYTES = 64 * 1024
 MAX_ADMIN_PASSWORD_BYTES = 4096
-REMOTE_ADMIN_COMMAND = "/usr/sbin/univention-provisioning-service-client _read-admin-password"
+REMOTE_ADMIN_COMMAND = "sudo -n /usr/sbin/univention-provisioning-service-client _read-admin-password"
 UNIVENTION_SSH = "/usr/sbin/univention-ssh"
 
 _USERNAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,255}\Z")

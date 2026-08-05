@@ -47,6 +47,7 @@ Architecture: all
 Depends:
  python3-ldap,
  python3-requests,
+ sudo,
  univention-ssh (>= 13.5.0),
  ${misc:Depends},
  ${python3:Depends},

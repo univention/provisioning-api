@@ -1,0 +1,14 @@
+@%@UCRWARNING=# @%@
+
+# Permit App Center operations authenticated as a Domain Admin to read the
+# Provisioning administrator password through one fixed, audited command.
+@!@
+import re
+group = configRegistry.get("groups/default/domainadmins", "Domain Admins")
+if group and configRegistry.is_true("auth/sudo"):
+    escaped_group = re.sub(r"([ !=:,()\\])", r"\\\1", group)
+    print(
+        "%{} ALL=(root:root) NOPASSWD: "
+        "/usr/sbin/univention-provisioning-service-client _read-admin-password".format(escaped_group)
+    )
+@!@
