@@ -48,6 +48,10 @@ include:
     inputs:
       package_root: "consumer"
       job_name_suffix: "-consumer"
+  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/pip-package-and-publish-with-uv@v1.66.3"
+    inputs:
+      package_root: "service-client"
+      job_name_suffix: "-service-client"
 
   # App Center release: create_app_version / update_appcenter / do_release etc.
   # On a feature branch (MR) creating the version is manual (see the
@@ -178,7 +182,7 @@ test-unit-and-integration:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
   script:
-    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=service-client/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:

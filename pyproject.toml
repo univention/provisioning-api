@@ -23,6 +23,7 @@ dependencies = [
     "nubus-provisioning-dispatcher",
     "nubus-provisioning-prefill",
     "nubus-provisioning-rest-api",
+    "nubus-provisioning-service-client",
     "nubus-provisioning-udm-transformer",
 ]
 
@@ -49,6 +50,7 @@ nubus-provisioning-consumer-example = { path = "./consumer_example" }
 nubus-provisioning-dispatcher = { path = "./dispatcher" }
 nubus-provisioning-prefill = { path = "./prefill" }
 nubus-provisioning-rest-api = { path = "./rest-api" }
+nubus-provisioning-service-client = { path = "./service-client" }
 nubus-provisioning-udm-transformer = { path = "./udm-transformer" }
 
 [tool.hatch.build.targets.wheel]
@@ -68,6 +70,7 @@ testpaths = [
   "listener/tests/",
   "prefill/tests/",
   "rest-api/tests/",
+  "service-client/tests/",
   "tests/integration/",
   "udm-transformer/tests/",
 ]

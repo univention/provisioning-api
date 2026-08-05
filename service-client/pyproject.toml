@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Univention GmbH
+
+[project]
+name = "nubus-provisioning-service-client"
+version = "0.1.0"
+description = "Manage Nubus Provisioning Service subscriptions"
+readme = "README.md"
+authors = [
+    {name = "Univention GmbH", email = "packages@univention.de"},
+]
+license = {text = "AGPL-3.0-only"}
+requires-python = "<4.0,>=3.11"
+dependencies = [
+    "requests<3.0.0,>=2.31.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+univention-provisioning-service-client = "univention.provisioning.service_client.cli:main"
+
+[[tool.uv.index]]
+name = "gitlab"
+publish-url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
+url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/univention"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+testpaths = ["tests"]

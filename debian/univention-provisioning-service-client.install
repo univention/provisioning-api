@@ -1,0 +1,2 @@
+service-client/src/univention usr/lib/python3/dist-packages
+service-client/bin/univention-provisioning-service-client usr/sbin

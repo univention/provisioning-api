@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+import logging
 from copy import deepcopy
 from unittest.mock import AsyncMock, call
 
@@ -241,6 +242,30 @@ class TestSubscriptionService:
         call_args = sub_service.sub_db.store_subscription.call_args
         stored_subscription = call_args[0][1]
         assert stored_subscription.prefill_queue_status == FillQueueStatus.done
+
+    async def test_prepare_and_store_subscription_info_does_not_log_password(
+        self, sub_service: SubscriptionService, caplog: pytest.LogCaptureFixture
+    ):
+        sub_service.mq.create_queue = AsyncMock()
+        sub_service.mq.create_consumer = AsyncMock()
+        sub_service.sub_db.store_subscription = AsyncMock()
+        sentinel_password = "SENTINEL-SUBSCRIPTION-PASSWORD-DO-NOT-LOG"
+        new_sub = NewSubscription(
+            name=SUBSCRIPTION_NAME,
+            realms_topics=GROUPS_REALMS_TOPICS,
+            request_prefill=True,
+            password=sentinel_password,
+        )
+
+        with caplog.at_level(logging.INFO, logger="univention.provisioning.rest.subscription_service"):
+            await sub_service.prepare_and_store_subscription_info(new_sub)
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        assert not any(sentinel_password in message for message in log_messages)
+        assert any(
+            "Preparing subscription resources" in message and repr(SUBSCRIPTION_NAME) in message
+            for message in log_messages
+        )
 
     async def test_prepare_and_store_subscription_info_queue_creation_fails(self, sub_service: SubscriptionService):
         sub_service.mq.create_queue = AsyncMock(side_effect=Exception("Queue creation failed"))

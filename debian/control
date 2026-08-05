@@ -42,6 +42,25 @@ Description: Univention config package for Nubus Provisioning
  corporate environments. For more information about UCS,
  refer to: https://www.univention.de/
 
+Package: univention-provisioning-service-client
+Architecture: all
+Depends:
+ python3-ldap,
+ python3-requests,
+ univention-ssh (>= 13.5.0),
+ ${misc:Depends},
+ ${python3:Depends},
+Description: Client for Nubus Provisioning subscriptions
+ This package provides a command-line and Python client for creating,
+ validating, recovering, and removing Provisioning Service subscriptions.
+ It can obtain the administrative credential from the Provisioning host while
+ persisting only a limited subscriber credential on the consuming system.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: https://www.univention.de/
+
 Package: python3-univention-provisioning-service-listener
 Architecture: all
 Depends:

@@ -26,6 +26,7 @@ COPY ./dispatcher /app/dispatcher
 COPY ./listener /app/listener
 COPY ./prefill /app/prefill
 COPY ./rest-api /app/rest-api
+COPY ./service-client /app/service-client
 COPY ./udm-transformer /app/udm-transformer
 COPY ./tests/test_helpers /app/tests/test_helpers
 

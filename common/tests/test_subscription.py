@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
-from univention.provisioning.models.subscription import FillQueueStatus, RealmTopic, Subscription
+from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, RealmTopic, Subscription
 
 
 def test_subscription_eq():
@@ -55,3 +55,15 @@ def test_subscription_hash():
 
     assert sub1 in subs
     assert sub2 in subs
+
+
+def test_new_subscription_repr_hides_password():
+    sentinel = "SENTINEL-SUBSCRIPTION-PASSWORD-DO-NOT-REPR"
+    subscription = NewSubscription(
+        name="example",
+        realms_topics=[RealmTopic(realm="udm", topic="users/user")],
+        request_prefill=False,
+        password=sentinel,
+    )
+
+    assert sentinel not in repr(subscription)

@@ -65,7 +65,7 @@ class FillQueueStatusReport(BaseModel):
 class NewSubscription(BaseSubscription):
     """Request to register a subscription."""
 
-    password: str = Field(description="Password for subscription registration.")
+    password: str = Field(description="Password for subscription registration.", repr=False)
 
     def __eq__(self, other: "NewSubscription") -> bool:
         if not super().__eq__(other):

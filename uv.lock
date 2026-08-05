@@ -786,6 +786,7 @@ dependencies = [
     { name = "nubus-provisioning-dispatcher" },
     { name = "nubus-provisioning-prefill" },
     { name = "nubus-provisioning-rest-api" },
+    { name = "nubus-provisioning-service-client" },
     { name = "nubus-provisioning-udm-transformer" },
 ]
 
@@ -810,6 +811,7 @@ requires-dist = [
     { name = "nubus-provisioning-dispatcher", directory = "dispatcher" },
     { name = "nubus-provisioning-prefill", directory = "prefill" },
     { name = "nubus-provisioning-rest-api", directory = "rest-api" },
+    { name = "nubus-provisioning-service-client", directory = "service-client" },
     { name = "nubus-provisioning-udm-transformer", directory = "udm-transformer" },
 ]
 
@@ -897,6 +899,21 @@ requires-dist = [
     { name = "typing-inspect", specifier = ">=0.9.0,<1.0.0" },
     { name = "urllib3", specifier = ">=2.7.0" },
 ]
+
+[[package]]
+name = "nubus-provisioning-service-client"
+version = "0.1.0"
+source = { directory = "service-client" }
+dependencies = [
+    { name = "requests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0.0" },
+    { name = "requests", specifier = ">=2.31.0,<3.0.0" },
+]
+provides-extras = ["test"]
 
 [[package]]
 name = "nubus-provisioning-udm-transformer"

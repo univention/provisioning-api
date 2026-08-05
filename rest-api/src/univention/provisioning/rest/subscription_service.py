@@ -132,7 +132,12 @@ class SubscriptionService:
         consumer_created = False
         subscription_stored = False
 
-        logger.info("Preparing to register new subscription: %r", new_sub)
+        logger.info(
+            "Preparing subscription resources (name: %r realms_topics: %r request_prefill: %r).",
+            new_sub.name,
+            new_sub.realms_topics,
+            new_sub.request_prefill,
+        )
 
         try:
             await self.mq.create_queue(queue)
