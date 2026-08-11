@@ -79,9 +79,13 @@ stops rather than silently deleting a potentially active queue.
 
 ```console
 univention-provisioning-service-client unsubscribe \
-  --provisioning-server "$(ucr get ldap/master)" \
   --subscription-file /var/lib/univention-appcenter/apps/example/runtime-secrets/provisioning-subscription.json
 ```
+
+By default, removal uses the Provisioning API endpoint saved in the protected
+subscription file. An explicitly supplied `--provisioning-server` must resolve
+to that same endpoint; a conflict is rejected before any remote request and the
+local credential is retained.
 
 Removal authenticates with the limited subscriber password. The local file is
 deleted only after the API confirms deletion or reports that the subscription

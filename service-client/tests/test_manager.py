@@ -395,6 +395,39 @@ def test_unsubscribe_uses_limited_credentials_then_removes_file(store):
     assert store.load() is None
 
 
+def test_unsubscribe_rejects_different_api_endpoint_before_remote_operation(store):
+    api = FakeAPI()
+    api.base_url = "https://backup.example.test/univention/provisioning"
+    value = definition()
+    record = save(store, value)
+    install_remote(api, value)
+    provider = Mock(return_value=ADMIN_PASSWORD)
+
+    with pytest.raises(LifecycleError, match="does not match the endpoint stored"):
+        manager(api, store, provider).unsubscribe()
+
+    assert api.calls == []
+    provider.assert_not_called()
+    assert store.load() == record
+
+
+def test_unsubscribe_accepts_equivalent_stored_endpoint_spelling(store):
+    api = FakeAPI()
+    value = definition()
+    record = SubscriptionRecord.candidate(
+        base_url="https://PRIMARY.EXAMPLE.TEST:443/univention/provisioning/",
+        definition=value,
+        password=PASSWORD,
+    ).activate()
+    store.save(record)
+    install_remote(api, value)
+
+    outcome = manager(api, store).unsubscribe()
+
+    assert outcome.action == "removed"
+    assert store.load() is None
+
+
 def test_unsubscribe_treats_missing_remote_subscription_as_success(store):
     api = FakeAPI()
     value = definition()

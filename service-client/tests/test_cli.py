@@ -13,8 +13,11 @@ import pytest
 from univention.provisioning.service_client import cli
 from univention.provisioning.service_client.credentials import AdminCredentialError
 from univention.provisioning.service_client.manager import SubscriptionOutcome
+from univention.provisioning.service_client.models import SubscriptionDefinition
+from univention.provisioning.service_client.storage import SubscriptionRecord, SubscriptionStore
 
 SERVER = "primary.example.test"
+BACKUP_SERVER = "backup.example.test"
 DEFINITION = json.dumps(
     {
         "name": "ox-connector-member",
@@ -38,6 +41,19 @@ def subscribe_args(tmp_path, *extra: str) -> list[str]:
         "--generate-password",
         *extra,
     ]
+
+
+def saved_subscription(tmp_path, *, server: str = BACKUP_SERVER):
+    path = tmp_path / "runtime-secrets" / "subscription.json"
+    definition = SubscriptionDefinition.from_json(DEFINITION)
+    record = SubscriptionRecord.candidate(
+        base_url=f"https://{server}/univention/provisioning",
+        definition=definition,
+        password="limited-subscriber-secret",
+    ).activate()
+    store = SubscriptionStore(path)
+    store.save(record)
+    return path, store, record
 
 
 def test_parser_accepts_all_appcenter_prescript_arguments(tmp_path):
@@ -173,6 +189,53 @@ def test_unsubscribe_installs_lazy_admin_provider_without_fetching_secret(monkey
     )
     provider_factory.assert_called_once()
     provider.assert_not_called()
+
+
+def test_unsubscribe_defaults_to_endpoint_stored_with_subscription(monkeypatch, tmp_path):
+    subscription_file, _store, _record = saved_subscription(tmp_path)
+    captured = {}
+
+    class FakeManager:
+        def __init__(self, api, store, admin_password_provider):
+            captured.update(api=api, store=store, provider=admin_password_provider)
+
+        def unsubscribe(self):
+            return SubscriptionOutcome(name="ox-connector-member", action="removed")
+
+    provider = Mock()
+    provider_factory = Mock(return_value=provider)
+    monkeypatch.setattr(cli, "_admin_password_provider", provider_factory)
+    monkeypatch.setattr(cli, "SubscriptionManager", FakeManager)
+
+    assert cli.main(["unsubscribe", "--subscription-file", str(subscription_file)]) == 0
+
+    assert captured["api"].base_url == f"https://{BACKUP_SERVER}/univention/provisioning"
+    assert provider_factory.call_args.args[0].provisioning_server == BACKUP_SERVER
+    provider.assert_not_called()
+
+
+def test_unsubscribe_rejects_explicit_conflicting_server_and_retains_record(monkeypatch, tmp_path, capsys):
+    subscription_file, store, record = saved_subscription(tmp_path)
+    manager = Mock()
+    provider_factory = Mock()
+    monkeypatch.setattr(cli, "SubscriptionManager", manager)
+    monkeypatch.setattr(cli, "_admin_password_provider", provider_factory)
+
+    result = cli.main(
+        [
+            "unsubscribe",
+            "--subscription-file",
+            str(subscription_file),
+            "--provisioning-server",
+            SERVER,
+        ]
+    )
+
+    assert result == 1
+    assert "does not match the endpoint stored" in capsys.readouterr().err
+    assert store.load() == record
+    manager.assert_not_called()
+    provider_factory.assert_not_called()
 
 
 def test_hidden_remote_command_prints_only_local_admin_password(monkeypatch, capsys):

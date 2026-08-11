@@ -105,6 +105,18 @@ def _normalize_base_url(base_url: str) -> str:
     return urlunsplit(("https", parsed.netloc, path, "", ""))
 
 
+def _same_api_endpoint(first: str, second: str) -> bool:
+    """Compare normalized API endpoints without treating DNS case as significant."""
+
+    def identity(value: str) -> tuple[str, int | None, str]:
+        parsed = urlsplit(_normalize_base_url(value))
+        assert parsed.hostname is not None
+        port = None if parsed.port in (None, 443) else parsed.port
+        return parsed.hostname.casefold(), port, parsed.path
+
+    return identity(first) == identity(second)
+
+
 def _normalize_timeout(timeout: RequestTimeout) -> RequestTimeout:
     def component(value: object) -> float:
         if isinstance(value, bool) or not isinstance(value, (int, float)):

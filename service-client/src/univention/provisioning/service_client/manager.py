@@ -10,7 +10,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from typing import Any, Literal
 
-from .api import APIAuthenticationError, APINotFoundError, ProvisioningAPI
+from .api import APIAuthenticationError, APINotFoundError, ProvisioningAPI, _same_api_endpoint
 from .models import DefinitionError, SubscriptionDefinition
 from .storage import SubscriptionRecord, SubscriptionStore
 
@@ -99,6 +99,11 @@ class SubscriptionManager:
         record = self.store.load()
         if record is None:
             return SubscriptionOutcome(name="", action="already-absent")
+        if not _same_api_endpoint(self.api.base_url, record.provisioning_api_base_url):
+            raise LifecycleError(
+                "The selected Provisioning API endpoint does not match the endpoint stored for this subscription; "
+                "the local credential was retained."
+            )
 
         try:
             self.api.delete_subscription(record.name, record.password)

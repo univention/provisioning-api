@@ -12,8 +12,9 @@ import stat
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
+from urllib.parse import urlsplit
 
-from .api import APIError, ProvisioningAPI
+from .api import APIError, ProvisioningAPI, _same_api_endpoint
 from .credentials import (
     DEFAULT_ADMIN_CREDENTIAL_FILE,
     AdminCredentialError,
@@ -77,8 +78,7 @@ def build_parser() -> argparse.ArgumentParser:
     unsubscribe.add_argument("--subscription-file", required=True, help="Protected subscriber credential file")
     unsubscribe.add_argument(
         "--provisioning-server",
-        default=socket.getfqdn(),
-        help="FQDN of the UCS server hosting the Provisioning Service",
+        help="FQDN of the UCS server hosting the Provisioning Service; defaults to the stored endpoint",
     )
     unsubscribe.add_argument(
         "--admin-credential-file",
@@ -158,9 +158,9 @@ def _run(args: argparse.Namespace) -> int:
         sys.stdout.write(password + "\n")
         return 0
 
-    api = _api_for(args.provisioning_server, args.ca_file)
     store = SubscriptionStore(Path(args.subscription_file))
     if args.command == "subscribe":
+        api = _api_for(args.provisioning_server, args.ca_file)
         definition = SubscriptionDefinition.from_json(args.json)
         if args.request_prefill:
             definition = definition.with_request_prefill(True)
@@ -171,6 +171,23 @@ def _run(args: argparse.Namespace) -> int:
             force=args.force,
         )
     else:
+        record = store.load()
+        if record is not None:
+            stored_api = ProvisioningAPI(record.provisioning_api_base_url, verify=args.ca_file)
+            if args.provisioning_server is None:
+                api = stored_api
+                args.provisioning_server = urlsplit(stored_api.base_url).hostname
+                assert args.provisioning_server is not None
+            else:
+                api = _api_for(args.provisioning_server, args.ca_file)
+                if not _same_api_endpoint(api.base_url, stored_api.base_url):
+                    raise LifecycleError(
+                        "The explicitly supplied Provisioning server does not match the endpoint stored for this "
+                        "subscription; the local credential was retained."
+                    )
+        else:
+            args.provisioning_server = args.provisioning_server or socket.getfqdn()
+            api = _api_for(args.provisioning_server, args.ca_file)
         # Normal removal uses only the limited password. The provider remains
         # lazy and is used solely to confirm an absent subscription if a DELETE
         # response may have been lost and the retry is rejected with HTTP 401.
