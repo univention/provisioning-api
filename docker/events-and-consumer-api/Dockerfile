@@ -2,6 +2,9 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
+ARG UCS_DISTROLESS_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-distroless-python-530
+# TODO: repoint to the 5.3.0-build.<date> tag once ucs-base-image!109 is merged
+ARG UCS_DISTROLESS_IMAGE_TAG=0.24.0-pre-mmeschter-distroless-python@sha256:074d9c80454289f0b0f6adba72b58d0259019fe595ecd6485624331d87731376
 ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20260825@sha256:f4b3ef96d03c574c5c3f57d4d41945a911ef05d63ca50718989b593c5d9cb6be
 
 ###############################################
@@ -42,10 +45,13 @@ RUN --mount=type=cache,target=/root/.cache \
   uv sync --locked --no-dev && \
   uv pip install -e .
 
+
 ###############################################
 # Stage 3: final image
-FROM gcr.io/distroless/python3-debian13:nonroot AS final
-#SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
+#
+# Distroless: no shell, so no RUN steps here. The user, os-release and CA
+# bundle come from the base image.
+FROM ${UCS_DISTROLESS_IMAGE}:${UCS_DISTROLESS_IMAGE_TAG} AS final
 
 ENV PYTHONUNBUFFERED=1 \
   PATH=/app/rest-api/.venv/bin:$PATH
