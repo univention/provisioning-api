@@ -109,18 +109,18 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | livenessProbe.api.timeoutSeconds | int | `5` | Timeout for command return. |
 | livenessProbe.dispatcher.enabled | bool | `true` | Enable liveness probe. |
-| livenessProbe.dispatcher.exec.command[0] | string | `"sh"` |  |
+| livenessProbe.dispatcher.exec.command[0] | string | `"/app/dispatcher/.venv/bin/python"` |  |
 | livenessProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
-| livenessProbe.dispatcher.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.dispatcher.exec.command[2] | string | `"pass"` |  |
 | livenessProbe.dispatcher.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.dispatcher.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
 | livenessProbe.dispatcher.periodSeconds | int | `20` | Time between probe executions. |
 | livenessProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
 | livenessProbe.prefill.enabled | bool | `true` | Enable liveness probe. |
-| livenessProbe.prefill.exec.command[0] | string | `"sh"` |  |
+| livenessProbe.prefill.exec.command[0] | string | `"/app/prefill/.venv/bin/python"` |  |
 | livenessProbe.prefill.exec.command[1] | string | `"-c"` |  |
-| livenessProbe.prefill.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.prefill.exec.command[2] | string | `"pass"` |  |
 | livenessProbe.prefill.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.prefill.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
 | livenessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
@@ -183,18 +183,18 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | readinessProbe.api.timeoutSeconds | int | `5` | Timeout for command return. |
 | readinessProbe.dispatcher.enabled | bool | `true` | Enable readiness probe. |
-| readinessProbe.dispatcher.exec.command[0] | string | `"sh"` |  |
+| readinessProbe.dispatcher.exec.command[0] | string | `"/app/dispatcher/.venv/bin/python"` |  |
 | readinessProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
-| readinessProbe.dispatcher.exec.command[2] | string | `"exit 0\n"` |  |
+| readinessProbe.dispatcher.exec.command[2] | string | `"pass"` |  |
 | readinessProbe.dispatcher.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.dispatcher.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.dispatcher.periodSeconds | int | `20` | Time between probe executions. |
 | readinessProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
 | readinessProbe.prefill.enabled | bool | `true` | Enable readiness probe. |
-| readinessProbe.prefill.exec.command[0] | string | `"sh"` |  |
+| readinessProbe.prefill.exec.command[0] | string | `"/app/prefill/.venv/bin/python"` |  |
 | readinessProbe.prefill.exec.command[1] | string | `"-c"` |  |
-| readinessProbe.prefill.exec.command[2] | string | `"exit 0\n"` |  |
+| readinessProbe.prefill.exec.command[2] | string | `"pass"` |  |
 | readinessProbe.prefill.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.prefill.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
@@ -263,18 +263,18 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.api.tcpSocket | object | `{"port":7777}` | Timeout for command return. |
 | startupProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | startupProbe.dispatcher.enabled | bool | `true` | Enable startup probe. |
-| startupProbe.dispatcher.exec.command[0] | string | `"sh"` |  |
+| startupProbe.dispatcher.exec.command[0] | string | `"/app/dispatcher/.venv/bin/python"` |  |
 | startupProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
-| startupProbe.dispatcher.exec.command[2] | string | `"exit 0\n"` |  |
+| startupProbe.dispatcher.exec.command[2] | string | `"pass"` |  |
 | startupProbe.dispatcher.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | startupProbe.dispatcher.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
 | startupProbe.dispatcher.periodSeconds | int | `20` | Time between probe executions. |
 | startupProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
 | startupProbe.prefill.enabled | bool | `true` | Enable startup probe. |
-| startupProbe.prefill.exec.command[0] | string | `"sh"` |  |
+| startupProbe.prefill.exec.command[0] | string | `"/app/prefill/.venv/bin/python"` |  |
 | startupProbe.prefill.exec.command[1] | string | `"-c"` |  |
-| startupProbe.prefill.exec.command[2] | string | `"exit 0\n"` |  |
+| startupProbe.prefill.exec.command[2] | string | `"pass"` |  |
 | startupProbe.prefill.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | startupProbe.prefill.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
 | startupProbe.prefill.periodSeconds | int | `20` | Time between probe executions. |
