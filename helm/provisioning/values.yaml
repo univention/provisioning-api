@@ -501,12 +501,13 @@ livenessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/dispatcher/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   udmTransformer:
     # -- Enable liveness probe.
     enabled: true
@@ -539,12 +540,13 @@ livenessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/prefill/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   api:
     # -- Enable liveness probe.
     enabled: true
@@ -609,12 +611,13 @@ readinessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/dispatcher/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   udmTransformer:
     # -- Enable readiness probe.
     enabled: true
@@ -647,12 +650,13 @@ readinessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/prefill/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   api:
     # -- Enable readiness probe.
     enabled: true
@@ -783,12 +787,13 @@ startupProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/dispatcher/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   udmTransformer:
     # -- Enable startup probe.
     enabled: true
@@ -821,12 +826,13 @@ startupProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/prefill/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   api:
     # -- Enable startup probe.
     enabled: true
