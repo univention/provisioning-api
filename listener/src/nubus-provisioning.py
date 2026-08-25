@@ -61,7 +61,8 @@ class LdapListener(ListenerModuleHandler):
 
     async def _async_ensure_queue_exists(self, retry=True) -> None:
         exception = None
-        for attempt in range(self.settings.nats_max_retry_count if retry else 0):
+        attempts = self.settings.nats_max_retry_count if retry else 1
+        for attempt in range(max(attempts, 1)):
             if attempt != 0:
                 time.sleep(self.settings.nats_retry_delay)
             try:

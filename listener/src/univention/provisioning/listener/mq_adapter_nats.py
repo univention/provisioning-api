@@ -23,6 +23,7 @@ from .mq_port import MessageQueuePort
 
 logger = logging.getLogger(__name__)
 
+# Must match 'LdapQueue.message_subject' in backends/.../nats_mq.py (provisioning#138).
 LDAP_SUBJECT = "ldap-producer-subject"
 LDAP_PRODUCER_QUEUE_NAME = "ldap-producer"
 
