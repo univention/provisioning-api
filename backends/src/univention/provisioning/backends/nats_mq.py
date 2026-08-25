@@ -121,6 +121,12 @@ class LdapQueue(BaseQueue):
 
     name = "ldap-producer"
 
+    @property
+    def message_subject(self) -> str:
+        # Not the BaseQueue default: the listener publishes here and both sides
+        # call update_stream(), so they have to agree (provisioning#138).
+        return "ldap-producer-subject"
+
 
 class IncomingQueue(BaseQueue):
     """
