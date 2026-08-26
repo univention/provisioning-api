@@ -4,11 +4,10 @@ Date: Thu, 2 May 2024 12:46:21 +0200
 Subject: [PATCH] allow to specify separate notifier address
 
 ---
- .../univention-directory-listener/src/main.c  | 22 +++++++++++++++----
+ .../univention-directory-listener/src/main.c        | 22 ++++++++++++++++++----
  1 file changed, 18 insertions(+), 4 deletions(-)
 
 diff --git a/management/univention-directory-listener/src/main.c b/management/univention-directory-listener/src/main.c
-index cf4c90ca02b..abfc6236496 100644
 --- a/management/univention-directory-listener/src/main.c
 +++ b/management/univention-directory-listener/src/main.c
 @@ -191,6 +191,9 @@ static void usage(void) {
@@ -81,13 +80,12 @@ index cf4c90ca02b..abfc6236496 100644
  			if (initialize_only) {
  				univention_debug(UV_DEBUG_LISTENER, UV_DEBUG_ERROR, "can not connect any server, exit");
  				exit(1);
-@@ -599,6 +612,7 @@ int main(int argc, char *argv[]) {
+@@ -597,5 +610,6 @@ int main(int argc, char *argv[]) {
+ 	if (rv != 0)
+ 		univention_debug(UV_DEBUG_LISTENER, UV_DEBUG_ERROR, "listener: %d", rv);
 
- 	univention_ldap_close(lp);
- 	univention_ldap_close(lp_local);
 +	free(notifier_host);
-
- 	exit_handler(0);
+ 	exit_handler_cleanup(get_exit_signal(), lp, lp_local);
  }
 --
 2.44.0
