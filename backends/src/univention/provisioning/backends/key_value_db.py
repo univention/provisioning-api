@@ -41,7 +41,6 @@ class KeyValueDB(ABC):
         Retrieve value at `key` in `bucket`.
         Returns the value or None if key does not exist.
         """
-        pass
 
     @abstractmethod
     async def get_value_with_revision(self, key: str, bucket: BucketName) -> Optional[Tuple[str, int]]:
@@ -49,7 +48,6 @@ class KeyValueDB(ABC):
         Retrieve value and latest version (revision) at `key` in `bucket`.
         Returns a tuple (value, revision) or None if key does not exist.
         """
-        pass
 
     @abstractmethod
     async def put_value(
@@ -60,14 +58,13 @@ class KeyValueDB(ABC):
         If `revision` is None overwrite value in DB without a further check.
         If `revision` is not None and the revision in the DB is different, raise UpdateConflict.
         """
-        pass
 
     @abstractmethod
     async def get_keys(self, bucket: BucketName) -> List[str]:
         pass
 
     @abstractmethod
-    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
+    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription]:
         pass
 
     @abstractmethod
@@ -78,4 +75,3 @@ class KeyValueDB(ABC):
         :param callback: Async function that accepts two arguments: the key of the changed entry (str)
             and its value (bytes). When the value is None, the key has been deleted.
         """
-        pass

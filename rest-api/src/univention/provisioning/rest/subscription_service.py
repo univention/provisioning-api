@@ -49,18 +49,14 @@ class SubscriptionService:
         self.mq = mq
 
     async def get_subscription(self, name: str) -> Subscription:
-        """
-        Get information about a registered subscription.
-        """
+        """Get information about a registered subscription."""
         try:
             return await self.sub_db.load_subscription(name)
         except NoSubscription as exc:
             raise ValueError(str(exc))
 
     async def get_subscriptions(self) -> list[Subscription]:
-        """
-        Return a list of all known subscriptions.
-        """
+        """Return a list of all known subscriptions."""
         names = await self.sub_db.load_subscription_names()
         return [await self.get_subscription(name) for name in names]
 
@@ -81,10 +77,7 @@ class SubscriptionService:
 
         hashed_password = await self.sub_db.load_hashed_password(new_sub.name)
         valid = password_context.verify(new_sub.password, hashed_password)
-        if not valid:
-            return False
-
-        return True
+        return valid
 
     async def register_subscription(self, new_sub: NewSubscription) -> bool:
         """
@@ -93,7 +86,6 @@ class SubscriptionService:
         :returns: True is a new subscription was created or False if a matching one already exists.
         :raises HTTPException(409): If a subscription already exists, but its configuration does not match `new_sub`.
         """
-
         try:
             existing_sub = await self.sub_db.load_subscription(new_sub.name)
             if not await self.is_subscriptions_matching(new_sub, existing_sub):
@@ -155,19 +147,19 @@ class SubscriptionService:
                 try:
                     await self.mq.delete_consumer(queue)
                 except Exception as cleanup_error:
-                    logger.error(f"Rollback: Failed to delete consumer: {cleanup_error}")
+                    logger.error("Rollback: Failed to delete consumer: %s", cleanup_error)
 
             if queue_created:
                 try:
                     await self.mq.delete_queue(queue)
                 except Exception as cleanup_error:
-                    logger.error(f"Rollback: Failed to delete queue: {cleanup_error}")
+                    logger.error("Rollback: Failed to delete queue: %s", cleanup_error)
 
             if subscription_stored:
                 try:
                     await self.sub_db.delete_subscription(new_sub.name)
                 except Exception as cleanup_error:
-                    logger.error(f"Rollback: Failed to delete subscription: {cleanup_error}")
+                    logger.error("Rollback: Failed to delete subscription: %s", cleanup_error)
 
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -186,9 +178,7 @@ class SubscriptionService:
         await self.sub_db.store_subscription(name, subscription)
 
     async def delete_subscription(self, name: str) -> None:
-        """
-        Delete a subscription and all of its data.
-        """
+        """Delete a subscription and all of its data."""
         _ = await self.get_subscription(name)
         await self.sub_db.delete_subscription(name)
         await self.mq.delete_queue(ConsumerQueue(name))

@@ -71,9 +71,7 @@ class NatsSubscriptionsDB(SubscriptionsDBPort):
         return await self.get_str_value(name, BucketName.credentials)
 
     async def load_subscription(self, name: str) -> Optional[Subscription]:
-        """
-        :raises NoSubscription: if subscription was not found.
-        """
+        """:raises NoSubscription: if subscription was not found."""
         if result := await self.get_dict_value(name, BucketName.subscriptions):
             return Subscription.model_validate(result)
         else:

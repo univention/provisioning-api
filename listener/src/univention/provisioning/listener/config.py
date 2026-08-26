@@ -33,7 +33,7 @@ def ucr_ldap_producer_settings(settings: BaseSettings) -> Dict[str, Any]:
     nats_password_file = ucr.get("nats/passwordfile", "/etc/nats/provisioning-listener.secret")
 
     if os.path.exists(nats_password_file):
-        with open(nats_password_file, "r") as f:
+        with open(nats_password_file) as f:
             conf["nats_password"] = f.read().strip()
 
     return conf

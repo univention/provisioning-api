@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 @router.get("", status_code=fastapi.status.HTTP_200_OK, dependencies=[Depends(authenticate_admin)])
 async def get_subscriptions(kv: KVDependency, mq: MQDependency) -> list[Subscription]:
     """Return a list of all known subscriptions."""
-
     service = SubscriptionService(subscriptions_db=kv, mq=mq)
     return await service.get_subscriptions()
 
@@ -38,7 +37,6 @@ async def get_subscriptions(kv: KVDependency, mq: MQDependency) -> list[Subscrip
 @router.get("/{name}", status_code=fastapi.status.HTTP_200_OK)
 async def get_subscription(name: str, credentials: HttpBasicDep, kv: KVDependency, mq: MQDependency) -> Subscription:
     """Return information about a subscription."""
-
     service = SubscriptionService(subscriptions_db=kv, mq=mq)
     await service.authenticate_user(credentials, name)
 
@@ -54,7 +52,6 @@ async def delete_subscription(
     name: str, kv: KVDependency, mq: MQDependency, credentials: HttpBasicDep, settings: AppSettingsDep
 ):
     """Delete a subscription."""
-
     service = SubscriptionService(subscriptions_db=kv, mq=mq)
 
     try:
@@ -72,7 +69,6 @@ async def delete_subscription(
 @router.post("", status_code=fastapi.status.HTTP_201_CREATED, dependencies=[Depends(authenticate_admin)])
 async def create_subscription(subscription: NewSubscription, kv: KVDependency, mq: MQDependency, response: Response):
     """Register a new subscription."""
-
     sub_service = SubscriptionService(subscriptions_db=kv, mq=mq)
 
     if not await sub_service.register_subscription(subscription):
@@ -93,7 +89,6 @@ async def update_subscription_prefill_status(
     authentication: Annotated[None, Depends(authenticate_prefill)],
 ):
     """Update a subscription's prefill queue status"""
-
     service = SubscriptionService(subscriptions_db=kv, mq=mq)
     try:
         await service.set_subscription_queue_status(name, report.status)
@@ -107,7 +102,6 @@ async def get_next_message(
     name: str, kv: KVDependency, mq: MQDependency, credentials: HttpBasicDep, timeout: float = 5, pop: bool = False
 ) -> Optional[ProvisioningMessage]:
     """Return the next pending message for the given subscription."""
-
     t0 = time.perf_counter()
     sub_service = SubscriptionService(subscriptions_db=kv, mq=mq)
     await sub_service.authenticate_user(credentials, name)
@@ -144,7 +138,6 @@ async def update_message_status(
     credentials: HttpBasicDep,
 ):
     """Report on the processing of the given message."""
-
     sub_service = SubscriptionService(subscriptions_db=kv, mq=mq)
     await sub_service.authenticate_user(credentials, name)
 

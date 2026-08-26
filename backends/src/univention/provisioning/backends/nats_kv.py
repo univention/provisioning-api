@@ -104,7 +104,7 @@ class NatsKeyValueDB(KeyValueDB):
         except NoKeysError:
             return []
 
-    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription, None]:
+    async def get_all_subscriptions(self) -> AsyncGenerator[Subscription]:
         kv_store = await self._js.key_value(BucketName.subscriptions.value)
         for key in await self.get_keys(BucketName.subscriptions):
             entry = await kv_store.get(key)

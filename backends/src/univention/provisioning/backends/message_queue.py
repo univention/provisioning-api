@@ -69,7 +69,6 @@ class MessageQueue(ABC):
 
         By default, it fails after a maximum of 10 seconds because of a 2 second connect timout * 5 reconnect attempts.
         """
-        pass
 
     @abstractmethod
     async def close(self):
@@ -83,11 +82,11 @@ class MessageQueue(ABC):
         binary_encoder: Callable[[Any], bytes] = json_encoder,
     ):
         """Publish a message to a NATS subject."""
-        pass
 
     @abstractmethod
     async def initialize_subscription(self, queue, migrate_stream: bool = False) -> QueueStatus:
-        """Initialize a subscription to a queue.
+        """
+        Initialize a subscription to a queue.
 
         Args:
             queue: The queue configuration
@@ -96,12 +95,10 @@ class MessageQueue(ABC):
         Returns:
             QueueStatus
         """
-        pass
 
     @abstractmethod
     async def get_message(self, queue, timeout: float, pop: bool):
         """Retrieve multiple messages from a NATS subject."""
-        pass
 
     @abstractmethod
     async def get_one_message(
@@ -162,10 +159,7 @@ class MessageAckManager:
         message_handler: Coroutine[Any, Any, None],
         acknowledge_message_in_progress: Callable[[], Coroutine[Any, Any, None]],
     ) -> None:
-        """
-        Combines message processing and automatic AckWait extension.
-        """
-
+        """Combines message processing and automatic AckWait extension."""
         async with asyncio.TaskGroup() as task_group:
             ack_extender = task_group.create_task(self.extend_ack_wait(acknowledge_message_in_progress))
             message_handler_task = task_group.create_task(message_handler)

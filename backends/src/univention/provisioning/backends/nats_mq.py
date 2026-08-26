@@ -6,7 +6,6 @@
 # for UCS compatibility (pydantic v1).
 # If changes are made here, consider whether they need to be ported to the listener version.
 
-import asyncio
 import json
 import logging
 from typing import Any, Callable, Optional, Tuple
@@ -66,11 +65,11 @@ class BaseQueue:
         )
 
     def consumer_config(self) -> ConsumerConfig:
-        kwargs: dict[str, Any] = dict(
-            durable_name=self.consumer_name,
-            max_ack_pending=1,
-            deliver_policy=self.deliver_policy,
-        )
+        kwargs: dict[str, Any] = {
+            "durable_name": self.consumer_name,
+            "max_ack_pending": 1,
+            "deliver_policy": self.deliver_policy,
+        }
         if self.ack_wait is not None:
             kwargs["ack_wait"] = self.ack_wait
         return ConsumerConfig(**kwargs)
@@ -228,7 +227,6 @@ class NatsMessageQueue(MessageQueue):
         binary_encoder: Callable[[Any], bytes] = json_encoder,
     ):
         """Publish a message to a NATS subject."""
-
         await self._js.publish(
             subject=queue.message_subject,
             payload=binary_encoder(message.model_dump()),
@@ -241,7 +239,8 @@ class NatsMessageQueue(MessageQueue):
         )
 
     async def initialize_subscription(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus:
-        """Initializes a stream for a pull consumer.
+        """
+        Initializes a stream for a pull consumer.
 
         Args:
             queue: The queue configuration
@@ -263,7 +262,6 @@ class NatsMessageQueue(MessageQueue):
 
     async def get_message(self, queue: BaseQueue, timeout: float, pop: bool) -> Optional[ProvisioningMessage]:
         """Retrieve messages from a NATS subject."""
-
         try:
             await self._js.stream_info(queue.queue_name)
         except NotFoundError:
@@ -282,7 +280,7 @@ class NatsMessageQueue(MessageQueue):
         )
         try:
             msgs = await sub.fetch(1, timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return None
 
         if pop:
@@ -303,7 +301,7 @@ class NatsMessageQueue(MessageQueue):
 
         try:
             messages = await self.pull_subscription.fetch(1, timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise Empty()
 
         acknowledgements = self.build_acknowledgements(messages[0])
@@ -358,13 +356,13 @@ class NatsMessageQueue(MessageQueue):
         try:
             await self._js.delete_stream(queue.queue_name)
         except NotFoundError:
-            return None
+            return
 
     async def delete_consumer(self, queue: BaseQueue):
         try:
             await self._js.delete_consumer(queue.queue_name, queue.consumer_name)
         except NotFoundError:
-            return None
+            return
 
     async def stream_exists(self, queue: BaseQueue) -> bool:
         try:
@@ -374,7 +372,8 @@ class NatsMessageQueue(MessageQueue):
         return True
 
     async def ensure_stream(self, queue: BaseQueue, migrate_stream: bool = False) -> QueueStatus:
-        """Ensure stream exists with correct configuration.
+        """
+        Ensure stream exists with correct configuration.
 
         Args:
             queue: The queue configuration
@@ -400,7 +399,7 @@ class NatsMessageQueue(MessageQueue):
         except ServerError as e:
             if not migrate_stream:
                 logger.error(
-                    "Stream %r update failed but migration not enabled. " "See docs/queue-migration.md. Error: %s",
+                    "Stream %r update failed but migration not enabled. See docs/queue-migration.md. Error: %s",
                     queue.queue_name,
                     str(e),
                 )
@@ -414,7 +413,8 @@ class NatsMessageQueue(MessageQueue):
             return await self.migrate_stream(queue, existing_stream)
 
     async def migrate_stream(self, queue: BaseQueue, existing_stream) -> QueueStatus:
-        """Seal stream and migrate if empty.
+        """
+        Seal stream and migrate if empty.
 
         Args:
             queue: The queue configuration with desired settings

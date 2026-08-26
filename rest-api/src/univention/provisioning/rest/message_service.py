@@ -29,7 +29,8 @@ class MessageService:
         timeout: float,
         pop: bool,
     ) -> Optional[ProvisioningMessage]:
-        """Retrieve the first message from the subscription's stream.
+        """
+        Retrieve the first message from the subscription's stream.
 
         :param str subscription_name: Name of the subscription.
         :param bool pop: If the message should be deleted after request.
