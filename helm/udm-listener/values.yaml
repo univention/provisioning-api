@@ -122,7 +122,7 @@ waitForDependency:
     registry: null
     pullPolicy: null
     repository: "nubus/images/wait-for-dependency"
-    tag: "0.36.12@sha256:7150d72c8f342a05b945ce1b21464864aa91590d00f65ebe4b628571cce34efc"
+    tag: "0.36.13@sha256:bc0d56b125da3ec44b52a71ed89624790b12fc84279a9bec8f9fda87804ec6fa"
 
 # -- In seconds, time the given to the pod needs to terminate gracefully.
 # Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
