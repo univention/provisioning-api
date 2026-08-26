@@ -165,7 +165,7 @@ class SubscriptionService:
 
             if subscription_stored:
                 try:
-                    await self.sub_db.delete_subscription(queue)
+                    await self.sub_db.delete_subscription(new_sub.name)
                 except Exception as cleanup_error:
                     logger.error(f"Rollback: Failed to delete subscription: {cleanup_error}")
 
