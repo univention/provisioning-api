@@ -1,3 +1,10 @@
+univention-provisioning-service (2.0.3) unstable; urgency=medium
+
+  * Fix ensure_queue_exists retry off-by-one error.
+    Should be exactly 1 attempt, not 0 attempts.
+
+ -- Johannes Lohmer <lohmer@univention.de>  Wed, 26 Aug 2026 11:58:50 +0200
+
 univention-provisioning-service (2.0.2) unstable; urgency=medium
 
   * Fix listener reconnection to NATS
