@@ -3,6 +3,7 @@
 
 import asyncio
 import logging
+import secrets
 from typing import Optional
 
 import bcrypt
@@ -201,7 +202,9 @@ class SubscriptionService:
         )
 
     async def authenticate_user(self, credentials: HTTPBasicCredentials, subscription_name: Optional[str] = None):
-        if subscription_name and subscription_name != credentials.username:
+        if subscription_name and not secrets.compare_digest(
+            subscription_name.encode("UTF-8"), credentials.username.encode("UTF-8")
+        ):
             self.handle_authentication_error("You do not have access to this data")
 
         hashed_password = await self.sub_db.load_hashed_password(credentials.username)
