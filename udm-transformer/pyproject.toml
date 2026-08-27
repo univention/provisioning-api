@@ -30,8 +30,8 @@ dependencies = [
 # completion (univention/dev/projects/provisioning#135). Remove once
 # https://github.com/nats-io/nats.py/pull/995 is merged and released.
 nats-py = { url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" }
-nubus-provisioning-backends = { path = "../backends" }
-nubus-provisioning-common = { path = "../common" }
+nubus-provisioning-backends = { workspace = true }
+nubus-provisioning-common = { workspace = true }
 
 [project.scripts]
 udm-transformer = "univention.provisioning.udm_transformer.main:run"

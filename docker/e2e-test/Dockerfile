@@ -20,10 +20,20 @@ ENV UV_LINK_MODE=copy \
     PYTHONUNBUFFERED=1 \
     PATH=/app/e2e_tests/.venv/bin:$PATH
 
-
 COPY ./backends /app/backends
 COPY ./common /app/common
 COPY ./consumer /app/consumer
+
+# e2e_tests is not a workspace member and keeps its own lock, but it path-depends
+# on members whose manifests say `workspace = true`. Those only resolve if the
+# workspace root and every member manifest are discoverable from here.
+COPY ./pyproject.toml /app/
+COPY ./consumer_example/pyproject.toml /app/consumer_example/
+COPY ./dispatcher/pyproject.toml /app/dispatcher/
+COPY ./prefill/pyproject.toml /app/prefill/
+COPY ./rest-api/pyproject.toml /app/rest-api/
+COPY ./udm-transformer/pyproject.toml /app/udm-transformer/
+
 COPY ./e2e_tests/uv.lock \
      ./e2e_tests/pyproject.toml \
      /app/e2e_tests/

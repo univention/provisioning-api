@@ -38,19 +38,39 @@ dev = [
     "pytest-httpserver>=1.1.5",
 ]
 
+# One lock for every image, so a package can never resolve to two different
+# versions across the release. listener (Python 3.11 only) and e2e_tests keep
+# their own locks. See docs/simplify/README.md (W11).
+[tool.uv.workspace]
+members = [
+    "backends",
+    "common",
+    "consumer",
+    "consumer_example",
+    "dispatcher",
+    "prefill",
+    "rest-api",
+    "udm-transformer",
+]
+exclude = [
+    "e2e_tests",
+    "listener",
+    "test_queue",
+]
+
 [tool.uv.sources]
 # TODO: Temporary pin to a patched nats-py fixing premature KV watcher initial
 # completion (univention/dev/projects/provisioning#135). Remove once
 # https://github.com/nats-io/nats.py/pull/995 is merged and released.
 nats-py = { url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" }
-nubus-provisioning-backends = { path = "./backends" }
-nubus-provisioning-common = { path = "./common" }
-nubus-provisioning-consumer = { path = "./consumer" }
-nubus-provisioning-consumer-example = { path = "./consumer_example" }
-nubus-provisioning-dispatcher = { path = "./dispatcher" }
-nubus-provisioning-prefill = { path = "./prefill" }
-nubus-provisioning-rest-api = { path = "./rest-api" }
-nubus-provisioning-udm-transformer = { path = "./udm-transformer" }
+nubus-provisioning-backends = { workspace = true }
+nubus-provisioning-common = { workspace = true }
+nubus-provisioning-consumer = { workspace = true }
+nubus-provisioning-consumer-example = { workspace = true }
+nubus-provisioning-dispatcher = { workspace = true }
+nubus-provisioning-prefill = { workspace = true }
+nubus-provisioning-rest-api = { workspace = true }
+nubus-provisioning-udm-transformer = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["tests/test_helpers"]
