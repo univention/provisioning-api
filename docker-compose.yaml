@@ -295,7 +295,7 @@ services:
     restart: "on-failure"
 
   e2e-test:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/e2e-tests:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-e2e-tests:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/e2e-test/Dockerfile
