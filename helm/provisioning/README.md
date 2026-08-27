@@ -33,6 +33,7 @@ A Helm Chart that deploys the provisioning services
 | api.auth.prefill.existingSecret.keyMapping.password | string | `nil` |  |
 | api.auth.prefill.existingSecret.name | string | `nil` |  |
 | api.auth.prefill.password | string | `nil` |  |
+| api.command[0] | string | `"/app/.venv/bin/rest-api"` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
@@ -40,7 +41,7 @@ A Helm Chart that deploys the provisioning services
 | api.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | api.image.pullPolicy | string | `nil` |  |
 | api.image.registry | string | `""` |  |
-| api.image.repository | string | `"nubus-dev/images/provisioning-api"` |  |
+| api.image.repository | string | `"nubus-dev/images/provisioning-server"` |  |
 | api.image.tag | string | `"latest"` |  |
 | api.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | api.nats.auth.existingSecret.name | string | `nil` |  |
@@ -58,12 +59,13 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
 | dispatcher.additionalAnnotations | object | `{}` |  |
 | dispatcher.additionalLabels | object | `{}` |  |
+| dispatcher.command[0] | string | `"/app/.venv/bin/dispatcher"` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
 | dispatcher.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | dispatcher.image.pullPolicy | string | `nil` |  |
 | dispatcher.image.registry | string | `""` |  |
-| dispatcher.image.repository | string | `"nubus-dev/images/provisioning-dispatcher"` |  |
+| dispatcher.image.repository | string | `"nubus-dev/images/provisioning-server"` |  |
 | dispatcher.image.tag | string | `"latest"` |  |
 | dispatcher.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | dispatcher.nats.auth.existingSecret.name | string | `nil` |  |
@@ -109,7 +111,7 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | livenessProbe.api.timeoutSeconds | int | `5` | Timeout for command return. |
 | livenessProbe.dispatcher.enabled | bool | `true` | Enable liveness probe. |
-| livenessProbe.dispatcher.exec.command[0] | string | `"/app/dispatcher/.venv/bin/python"` |  |
+| livenessProbe.dispatcher.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | livenessProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.dispatcher.exec.command[2] | string | `"pass"` |  |
 | livenessProbe.dispatcher.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -118,7 +120,7 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
 | livenessProbe.prefill.enabled | bool | `true` | Enable liveness probe. |
-| livenessProbe.prefill.exec.command[0] | string | `"/app/prefill/.venv/bin/python"` |  |
+| livenessProbe.prefill.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | livenessProbe.prefill.exec.command[1] | string | `"-c"` |  |
 | livenessProbe.prefill.exec.command[2] | string | `"pass"` |  |
 | livenessProbe.prefill.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -127,9 +129,9 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | livenessProbe.udmTransformer.enabled | bool | `true` | Enable liveness probe. |
-| livenessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| livenessProbe.udmTransformer.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | livenessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
-| livenessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.udmTransformer.exec.command[2] | string | `"pass"` |  |
 | livenessProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
 | livenessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
@@ -154,6 +156,7 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
 | prefill.additionalAnnotations | object | `{}` |  |
 | prefill.additionalLabels | object | `{}` |  |
+| prefill.command[0] | string | `"/app/.venv/bin/prefill"` |  |
 | prefill.config.LOG_LEVEL | string | `"INFO"` | Python log level |
 | prefill.config.UDM_HOST | string | `""` | UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api |
 | prefill.config.UDM_PORT | int | `9979` | UDM REST API: port |
@@ -165,7 +168,7 @@ A Helm Chart that deploys the provisioning services
 | prefill.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | prefill.image.pullPolicy | string | `nil` |  |
 | prefill.image.registry | string | `""` |  |
-| prefill.image.repository | string | `"nubus-dev/images/provisioning-prefill"` |  |
+| prefill.image.repository | string | `"nubus-dev/images/provisioning-server"` |  |
 | prefill.image.tag | string | `"latest"` |  |
 | prefill.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | prefill.nats.auth.existingSecret.name | string | `nil` |  |
@@ -183,7 +186,7 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | readinessProbe.api.timeoutSeconds | int | `5` | Timeout for command return. |
 | readinessProbe.dispatcher.enabled | bool | `true` | Enable readiness probe. |
-| readinessProbe.dispatcher.exec.command[0] | string | `"/app/dispatcher/.venv/bin/python"` |  |
+| readinessProbe.dispatcher.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | readinessProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.dispatcher.exec.command[2] | string | `"pass"` |  |
 | readinessProbe.dispatcher.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -192,7 +195,7 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
 | readinessProbe.prefill.enabled | bool | `true` | Enable readiness probe. |
-| readinessProbe.prefill.exec.command[0] | string | `"/app/prefill/.venv/bin/python"` |  |
+| readinessProbe.prefill.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | readinessProbe.prefill.exec.command[1] | string | `"-c"` |  |
 | readinessProbe.prefill.exec.command[2] | string | `"pass"` |  |
 | readinessProbe.prefill.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -201,9 +204,9 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | readinessProbe.udmTransformer.enabled | bool | `true` | Enable readiness probe. |
-| readinessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| readinessProbe.udmTransformer.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | readinessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
-| readinessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| readinessProbe.udmTransformer.exec.command[2] | string | `"pass"` |  |
 | readinessProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
@@ -263,7 +266,7 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.api.tcpSocket | object | `{"port":7777}` | Timeout for command return. |
 | startupProbe.api.tcpSocket.port | int | `7777` | The port to connect to the container. |
 | startupProbe.dispatcher.enabled | bool | `true` | Enable startup probe. |
-| startupProbe.dispatcher.exec.command[0] | string | `"/app/dispatcher/.venv/bin/python"` |  |
+| startupProbe.dispatcher.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | startupProbe.dispatcher.exec.command[1] | string | `"-c"` |  |
 | startupProbe.dispatcher.exec.command[2] | string | `"pass"` |  |
 | startupProbe.dispatcher.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -272,7 +275,7 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.dispatcher.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.dispatcher.timeoutSeconds | int | `5` | Timeout for command return. |
 | startupProbe.prefill.enabled | bool | `true` | Enable startup probe. |
-| startupProbe.prefill.exec.command[0] | string | `"/app/prefill/.venv/bin/python"` |  |
+| startupProbe.prefill.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | startupProbe.prefill.exec.command[1] | string | `"-c"` |  |
 | startupProbe.prefill.exec.command[2] | string | `"pass"` |  |
 | startupProbe.prefill.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
@@ -281,9 +284,9 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | startupProbe.udmTransformer.enabled | bool | `true` | Enable startup probe. |
-| startupProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| startupProbe.udmTransformer.exec.command[0] | string | `"/app/.venv/bin/python"` |  |
 | startupProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
-| startupProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| startupProbe.udmTransformer.exec.command[2] | string | `"pass"` |  |
 | startupProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | startupProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
 | startupProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
@@ -294,12 +297,13 @@ A Helm Chart that deploys the provisioning services
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
 | udmTransformer.additionalAnnotations | object | `{}` |  |
 | udmTransformer.additionalLabels | object | `{}` |  |
+| udmTransformer.command[0] | string | `"/app/.venv/bin/udm-transformer"` |  |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
 | udmTransformer.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | udmTransformer.image.pullPolicy | string | `nil` |  |
 | udmTransformer.image.registry | string | `""` |  |
-| udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-udm-transformer"` |  |
+| udmTransformer.image.repository | string | `"nubus-dev/images/provisioning-server"` |  |
 | udmTransformer.image.tag | string | `"latest"` |  |
 | udmTransformer.ldap.baseDn | string | `""` |  |
 | udmTransformer.nats.auth.existingSecret.keyMapping.password | string | `nil` |  |
