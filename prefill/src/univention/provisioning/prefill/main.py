@@ -4,8 +4,6 @@
 import asyncio
 import logging
 
-from daemoniker import Daemonizer
-
 from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.utils.log import setup_logging
 
@@ -19,22 +17,21 @@ logger = logging.getLogger(__name__)
 
 
 async def main(settings: PrefillSettings):
-    with Daemonizer():
-        async with (
-            NatsMessageQueue(settings) as mq,
-            UDMAdapter(settings) as udm,
-            SubscriptionsRestApiAdapter(
-                settings.provisioning_api_url, settings.prefill_username, settings.prefill_password
-            ) as update_sub_q_status,
-        ):
-            service = PrefillService(
-                ack_manager=MessageAckManager(),
-                mq=mq,
-                udm=udm,
-                update_sub_q_status=update_sub_q_status,
-                settings=settings,
-            )
-            await service.handle_requests_to_prefill()
+    async with (
+        NatsMessageQueue(settings) as mq,
+        UDMAdapter(settings) as udm,
+        SubscriptionsRestApiAdapter(
+            settings.provisioning_api_url, settings.prefill_username, settings.prefill_password
+        ) as update_sub_q_status,
+    ):
+        service = PrefillService(
+            ack_manager=MessageAckManager(),
+            mq=mq,
+            udm=udm,
+            update_sub_q_status=update_sub_q_status,
+            settings=settings,
+        )
+        await service.handle_requests_to_prefill()
 
 
 def run():
