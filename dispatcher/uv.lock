@@ -37,15 +37,6 @@ wheels = [
 ]
 
 [[package]]
-name = "daemoniker"
-version = "0.2.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9e/95/ff9366d346e679e93ed70a90e3bbca92110eaa8c94732b9892891a3f7b9a/daemoniker-0.2.3.tar.gz", hash = "sha256:d9b62c8d75227b3da88c0ca22b82e19d88d32dade4ffa838427235e0cdd5e578", size = 29405, upload-time = "2017-01-10T01:54:53.097Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/34/b8/a88b8d94e4aa048057e394140514158390fd485c9cc5686072688d4b5385/daemoniker-0.2.3-py3-none-any.whl", hash = "sha256:72df5fb977b7951a1a48039dad349a06d9326e700f032f2e0114ad9643b93e98", size = 33145, upload-time = "2017-01-10T01:54:51Z" },
-]
-
-[[package]]
 name = "idna"
 version = "3.18"
 source = { registry = "https://pypi.org/simple" }
@@ -99,7 +90,6 @@ name = "nubus-provisioning-dispatcher"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "daemoniker" },
     { name = "nats-py" },
     { name = "nubus-provisioning-backends" },
     { name = "nubus-provisioning-common" },
@@ -108,7 +98,6 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "daemoniker", specifier = ">=0.2.3,<1.0.0" },
     { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" },
     { name = "nubus-provisioning-backends", directory = "../backends" },
     { name = "nubus-provisioning-common", directory = "../common" },
