@@ -74,23 +74,8 @@ include:
         - job: "container-build"
           parallel:
             matrix:
-              - IMAGE_NAME: "provisioning-api"
-                DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
-        - job: "container-build"
-          parallel:
-            matrix:
-              - IMAGE_NAME: "provisioning-dispatcher"
-                DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
-        - job: "container-build"
-          parallel:
-            matrix:
-              - IMAGE_NAME: "provisioning-udm-transformer"
-                DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
-        - job: "container-build"
-          parallel:
-            matrix:
-              - IMAGE_NAME: "provisioning-prefill"
-                DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+              - IMAGE_NAME: "provisioning-server"
+                DOCKERFILE_PATH: "docker/provisioning-server/Dockerfile"
         # So provisioning-service-update_appcenter inherits RELEASE_VERSION + PUBLIC_RELEASE (dotenv),
         # used by compose.jinja to point at the published nubus/nubus-dev image.
         - "pre-semantic-release"
@@ -173,16 +158,12 @@ lint-pre-commit:
   when: never
 
 .build-matrix: &build-matrix
-  - IMAGE_NAME: "provisioning-dispatcher"
-    DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
-  - IMAGE_NAME: "provisioning-api"
-    DOCKERFILE_PATH: "docker/events-and-consumer-api/Dockerfile"
-  - IMAGE_NAME: "provisioning-prefill"
-    DOCKERFILE_PATH: "docker/prefill/Dockerfile"
+  # One image for api, dispatcher, prefill and udm-transformer; the process is
+  # selected by the container command. See docs/simplify/README.md (W2).
+  - IMAGE_NAME: "provisioning-server"
+    DOCKERFILE_PATH: "docker/provisioning-server/Dockerfile"
   - IMAGE_NAME: "provisioning-udm-listener"
     DOCKERFILE_PATH: "docker/udm-listener/Dockerfile"
-  - IMAGE_NAME: "provisioning-udm-transformer"
-    DOCKERFILE_PATH: "docker/udm-transformer/Dockerfile"
   - IMAGE_NAME: "provisioning-example-client"
     DOCKERFILE_PATH: "docker/example-client/Dockerfile"
   - IMAGE_NAME: "testrunner"
@@ -192,13 +173,7 @@ lint-pre-commit:
 
 .publish-matrix: &publish-matrix
   - IMAGE_NAME:
-    - "provisioning-api"
-  - IMAGE_NAME:
-    - "provisioning-dispatcher"
-  - IMAGE_NAME:
-    - "provisioning-udm-transformer"
-  - IMAGE_NAME:
-    - "provisioning-prefill"
+    - "provisioning-server"
   - IMAGE_NAME:
     - "provisioning-udm-listener"
   - IMAGE_NAME:
