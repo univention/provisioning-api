@@ -23,7 +23,7 @@ update all lock files:
   ```
 * If you have a problem with `docker compose` caching, you can build the images manually like this:
   ```
-  docker build -f docker/dispatcher/Dockerfile .
+  docker build -f docker/provisioning-server/Dockerfile .
   ```
 ### Testing on a UCS
 
