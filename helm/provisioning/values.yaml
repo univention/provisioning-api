@@ -39,8 +39,11 @@ api:
   image:
     registry: ""
     pullPolicy: null
-    repository: "nubus-dev/images/provisioning-api"
+    repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
+  # One image serves all four processes; pick this one.
+  command:
+    - "/app/.venv/bin/rest-api"
   # If specified environment variables will be set on the container
   # Could be deduplicated.
   nats:
@@ -95,8 +98,11 @@ dispatcher:
     # TODO: unset when global.imageRegistry is supported by update-helm-values
     registry: ""
     pullPolicy: null
-    repository: "nubus-dev/images/provisioning-dispatcher"
+    repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
+  # One image serves all four processes; pick this one.
+  command:
+    - "/app/.venv/bin/dispatcher"
   # If specified environment variables will be set on the container
   nats:
     auth:
@@ -124,8 +130,11 @@ udmTransformer:
   image:
     registry: ""
     pullPolicy: null
-    repository: "nubus-dev/images/provisioning-udm-transformer"
+    repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
+  # One image serves all four processes; pick this one.
+  command:
+    - "/app/.venv/bin/udm-transformer"
 
   nats:
     auth:
@@ -168,8 +177,11 @@ prefill:
   image:
     registry: ""
     pullPolicy: null
-    repository: "nubus-dev/images/provisioning-prefill"
+    repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
+  # One image serves all four processes; pick this one.
+  command:
+    - "/app/.venv/bin/prefill"
 
   # If specified environment variables will be set on the container
   nats:
@@ -505,7 +517,7 @@ livenessProbe:
     # application health.
     exec:
       command:
-        - /app/dispatcher/.venv/bin/python
+        - /app/.venv/bin/python
         - -c
         - "pass"
   udmTransformer:
@@ -521,12 +533,13 @@ livenessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   prefill:
     # -- Enable liveness probe.
     enabled: true
@@ -544,7 +557,7 @@ livenessProbe:
     # application health.
     exec:
       command:
-        - /app/prefill/.venv/bin/python
+        - /app/.venv/bin/python
         - -c
         - "pass"
   api:
@@ -615,7 +628,7 @@ readinessProbe:
     # application health.
     exec:
       command:
-        - /app/dispatcher/.venv/bin/python
+        - /app/.venv/bin/python
         - -c
         - "pass"
   udmTransformer:
@@ -631,12 +644,13 @@ readinessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   prefill:
     # -- Enable readiness probe.
     enabled: true
@@ -654,7 +668,7 @@ readinessProbe:
     # application health.
     exec:
       command:
-        - /app/prefill/.venv/bin/python
+        - /app/.venv/bin/python
         - -c
         - "pass"
   api:
@@ -791,7 +805,7 @@ startupProbe:
     # application health.
     exec:
       command:
-        - /app/dispatcher/.venv/bin/python
+        - /app/.venv/bin/python
         - -c
         - "pass"
   udmTransformer:
@@ -807,12 +821,13 @@ startupProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   prefill:
     # -- Enable startup probe.
     enabled: true
@@ -830,7 +845,7 @@ startupProbe:
     # application health.
     exec:
       command:
-        - /app/prefill/.venv/bin/python
+        - /app/.venv/bin/python
         - -c
         - "pass"
   api:
