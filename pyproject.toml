@@ -28,6 +28,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "mock>=5.2.0",
     "polyfactory==2.17.0",
     "pytest<9.0.0,>=8.4.2",
