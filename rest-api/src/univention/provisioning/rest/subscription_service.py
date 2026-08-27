@@ -10,7 +10,6 @@ import bcrypt
 import cachetools.func
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBasicCredentials
-from passlib.context import CryptContext
 
 from univention.provisioning.models.subscription import FillQueueStatus, NewSubscription, Subscription
 
@@ -19,28 +18,28 @@ from .mq_port import MessageQueuePort
 from .subscriptions_db_port import NoSubscription, SubscriptionsDBPort
 
 logger = logging.getLogger(__name__)
-password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 PASSWORD_CACHE_TTL = 30.0
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
 
 
-# Workaround for passlib bug https://github.com/pyca/bcrypt/issues/684
-# https://foss.heptapod.net/python-libs/passlib/-/issues/190
-if not hasattr(bcrypt, "__about__"):
-    bcrypt.__about__ = type("about", (object,), {"__version__": bcrypt.__version__})
+def hash_password(cleartext_pw: str) -> str:
+    """Hash a password with bcrypt.
+
+    gensalt() defaults to cost 12 and the $2b$ ident, matching what passlib's
+    CryptContext(schemes=["bcrypt"]) produced, so older hashes stay verifiable.
+    """
+    return bcrypt.hashpw(cleartext_pw.encode("UTF-8"), bcrypt.gensalt()).decode("ASCII")
 
 
 @cachetools.func.ttl_cache(maxsize=32, ttl=PASSWORD_CACHE_TTL)
-def verify_and_update_password(
-    cleartext_pw: str, hashed_pw: str, subscription_name: Optional[str] = None
-) -> tuple[bool, str | None]:
+def verify_password(cleartext_pw: str, hashed_pw: str, subscription_name: Optional[str] = None) -> bool:
     """
-    Caching wrapper around CryptContext.verify_and_update()
+    Caching wrapper around bcrypt.checkpw()
 
     Caches all hits and exceptions!
     But the caller (SubscriptionService.authenticate_user()) will delete negative hits, so we cache only positive hits.
     """
-    return password_context.verify_and_update(cleartext_pw, hashed_pw)  # takes ~200ms
+    return bcrypt.checkpw(cleartext_pw.encode("UTF-8"), hashed_pw.encode("ASCII"))  # takes ~200ms
 
 
 class SubscriptionService:
@@ -62,7 +61,7 @@ class SubscriptionService:
 
     @staticmethod
     def hash_password(password: str) -> str:
-        return password_context.hash(password)
+        return hash_password(password)
 
     async def is_subscriptions_matching(self, new_sub: NewSubscription, existing_sub: Subscription) -> bool:
         """
@@ -76,8 +75,7 @@ class SubscriptionService:
             return False
 
         hashed_password = await self.sub_db.load_hashed_password(new_sub.name)
-        valid = password_context.verify(new_sub.password, hashed_password)
-        return valid
+        return bcrypt.checkpw(new_sub.password.encode("UTF-8"), hashed_password.encode("ASCII"))
 
     async def register_subscription(self, new_sub: NewSubscription) -> bool:
         """
@@ -199,15 +197,10 @@ class SubscriptionService:
 
         hashed_password = await self.sub_db.load_hashed_password(credentials.username)
         cached_func_args = (credentials.password, hashed_password, subscription_name)
-        valid, new_hash = verify_and_update_password(*cached_func_args)
-        if valid:
-            if new_hash:
-                logger.info("Storing new password hash for user %r.", credentials.username)
-                await self.sub_db.store_hashed_password(credentials.username, new_hash)
-        else:
+        if not verify_password(*cached_func_args):
             # cache only positive authentication attempts -> remove cache entry for invalid password
-            cache_key = verify_and_update_password.cache_key(*cached_func_args)
-            verify_and_update_password.cache.pop(cache_key, None)
+            cache_key = verify_password.cache_key(*cached_func_args)
+            verify_password.cache.pop(cache_key, None)
             self.handle_authentication_error("Incorrect username or password")
 
     async def check_subscription_queue_status(self, subscription_name: str, timeout: float) -> FillQueueStatus:
