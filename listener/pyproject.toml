@@ -15,7 +15,6 @@ license = { text = "AGPL-3.0-only" }
 requires-python = "==3.11.*"
 
 dependencies = [
-    "daemoniker<1.0.0,>=0.2.3",
     "msgpack<2.0.0,>=1.2.1",
     "nats-py<3.0.0,>=2.15.0",
     "nats-py<3.0.0,>=2.15.0",
