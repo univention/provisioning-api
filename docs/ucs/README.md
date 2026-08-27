@@ -27,7 +27,8 @@ provisioning service on UCS.
 The provisioning service supports backup to primary failover.
 
 The backup-to-primary scenario is automatically handled via
-`apps/50provisioning-service-backup2master`, which is executed during `univention-backup2master`.
+`appcenter/provisioning-service/50provisioning-service-backup2master`,
+which is executed during `univention-backup2master`.
 It installs the `provisioning-service-backend` app on the new Primary Directory Node and
 reinitializes the `provisioning-service` app.
 
