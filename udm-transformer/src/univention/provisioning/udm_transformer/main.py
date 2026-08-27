@@ -4,8 +4,6 @@
 import asyncio
 import logging
 
-from daemoniker import Daemonizer
-
 from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.utils.log import setup_logging
 
@@ -22,22 +20,21 @@ logger = logging.getLogger(__name__)
 
 
 async def main(settings: UDMTransformerSettings):
-    with Daemonizer():
-        async with (
-            CacheNats(settings) as cache,
-            MessagesRestApiEventSender(
-                settings.provisioning_api_url, settings.events_username_udm, settings.events_password_udm
-            ) as event_sender,
-            NatsSubscriptions(settings) as subscriptions,
-        ):
-            await TransformerService(
-                ack_manager=MessageAckManager(),
-                cache=cache,
-                event_sender=event_sender,
-                ldap2udm=Ldap2UdmAdapter(settings),
-                subscriptions=subscriptions,
-                settings=settings,
-            ).listen_for_ldap_events()
+    async with (
+        CacheNats(settings) as cache,
+        MessagesRestApiEventSender(
+            settings.provisioning_api_url, settings.events_username_udm, settings.events_password_udm
+        ) as event_sender,
+        NatsSubscriptions(settings) as subscriptions,
+    ):
+        await TransformerService(
+            ack_manager=MessageAckManager(),
+            cache=cache,
+            event_sender=event_sender,
+            ldap2udm=Ldap2UdmAdapter(settings),
+            subscriptions=subscriptions,
+            settings=settings,
+        ).listen_for_ldap_events()
 
 
 def run():
