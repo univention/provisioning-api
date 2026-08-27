@@ -24,7 +24,6 @@ dependencies = [
     "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
-    "passlib<2.0.0,>=1.7.4",
     "pydantic<3.0.0,>=2.13.4",
     "pydantic-settings<3.0.0,>=2.14.2",
     "typing-extensions<5.0.0,>=4.16.0",
