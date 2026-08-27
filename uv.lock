@@ -2,6 +2,19 @@ version = 1
 revision = 3
 requires-python = "==3.13.*"
 
+[manifest]
+members = [
+    "nubus-provisioning-backends",
+    "nubus-provisioning-common",
+    "nubus-provisioning-consumer",
+    "nubus-provisioning-consumer-example",
+    "nubus-provisioning-dispatcher",
+    "nubus-provisioning-metapackage",
+    "nubus-provisioning-prefill",
+    "nubus-provisioning-rest-api",
+    "nubus-provisioning-udm-transformer",
+]
+
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.7.1"
@@ -556,7 +569,7 @@ provides-extras = ["nkeys", "aiohttp", "fast-parse"]
 [[package]]
 name = "nubus-provisioning-backends"
 version = "0.1.0"
-source = { directory = "backends" }
+source = { editable = "backends" }
 dependencies = [
     { name = "nats-py" },
 ]
@@ -567,7 +580,7 @@ requires-dist = [{ name = "nats-py", url = "https://github.com/d3vv3/nats.py/arc
 [[package]]
 name = "nubus-provisioning-common"
 version = "0.1.0"
-source = { directory = "common" }
+source = { editable = "common" }
 dependencies = [
     { name = "pydantic" },
 ]
@@ -578,7 +591,7 @@ requires-dist = [{ name = "pydantic", specifier = ">=2.13.4" }]
 [[package]]
 name = "nubus-provisioning-consumer"
 version = "0.1.0"
-source = { directory = "consumer" }
+source = { editable = "consumer" }
 dependencies = [
     { name = "aiohttp" },
     { name = "jsondiff" },
@@ -591,7 +604,7 @@ dependencies = [
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.14.2,<4.0.0" },
     { name = "jsondiff", specifier = ">=2.2.1,<3.0.0" },
-    { name = "nubus-provisioning-common", directory = "common" },
+    { name = "nubus-provisioning-common", editable = "common" },
     { name = "pydantic", specifier = ">=2.13.4,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2,<3.0.0" },
 ]
@@ -599,7 +612,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-consumer-example"
 version = "0.1.0"
-source = { directory = "consumer_example" }
+source = { editable = "consumer_example" }
 dependencies = [
     { name = "aiohttp" },
     { name = "jsondiff" },
@@ -612,7 +625,7 @@ dependencies = [
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.14.2,<4.0.0" },
     { name = "jsondiff", specifier = ">=2.2.1,<3.0.0" },
-    { name = "nubus-provisioning-consumer", directory = "consumer" },
+    { name = "nubus-provisioning-consumer", editable = "consumer" },
     { name = "pydantic", specifier = ">=2.13.4,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2,<3.0.0" },
 ]
@@ -620,7 +633,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-dispatcher"
 version = "0.1.0"
-source = { directory = "dispatcher" }
+source = { editable = "dispatcher" }
 dependencies = [
     { name = "nats-py" },
     { name = "nubus-provisioning-backends" },
@@ -631,8 +644,8 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
-    { name = "nubus-provisioning-common", directory = "common" },
+    { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-common", editable = "common" },
     { name = "pydantic-settings", specifier = ">=2.14.2,<3.0.0" },
 ]
 
@@ -667,14 +680,14 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
-    { name = "nubus-provisioning-common", directory = "common" },
-    { name = "nubus-provisioning-consumer", directory = "consumer" },
-    { name = "nubus-provisioning-consumer-example", directory = "consumer_example" },
-    { name = "nubus-provisioning-dispatcher", directory = "dispatcher" },
-    { name = "nubus-provisioning-prefill", directory = "prefill" },
-    { name = "nubus-provisioning-rest-api", directory = "rest-api" },
-    { name = "nubus-provisioning-udm-transformer", directory = "udm-transformer" },
+    { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-common", editable = "common" },
+    { name = "nubus-provisioning-consumer", editable = "consumer" },
+    { name = "nubus-provisioning-consumer-example", editable = "consumer_example" },
+    { name = "nubus-provisioning-dispatcher", editable = "dispatcher" },
+    { name = "nubus-provisioning-prefill", editable = "prefill" },
+    { name = "nubus-provisioning-rest-api", editable = "rest-api" },
+    { name = "nubus-provisioning-udm-transformer", editable = "udm-transformer" },
 ]
 
 [package.metadata.requires-dev]
@@ -692,7 +705,7 @@ dev = [
 [[package]]
 name = "nubus-provisioning-prefill"
 version = "0.1.0"
-source = { directory = "prefill" }
+source = { editable = "prefill" }
 dependencies = [
     { name = "aiohttp" },
     { name = "nats-py" },
@@ -709,8 +722,8 @@ dependencies = [
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.14.2,<4.0.0" },
     { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
-    { name = "nubus-provisioning-common", directory = "common" },
+    { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-common", editable = "common" },
     { name = "pydantic", specifier = ">=2.13.4,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2,<3.0.0" },
     { name = "tenacity", specifier = ">=9.1.4" },
@@ -721,7 +734,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-rest-api"
 version = "0.1.0"
-source = { directory = "rest-api" }
+source = { editable = "rest-api" }
 dependencies = [
     { name = "asgi-correlation-id" },
     { name = "bcrypt" },
@@ -749,8 +762,8 @@ requires-dist = [
     { name = "fastapi-utils", specifier = ">=0.8.0,<1.0.0" },
     { name = "httptools", specifier = ">=0.8.0,<1.0.0" },
     { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
-    { name = "nubus-provisioning-common", directory = "common" },
+    { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-common", editable = "common" },
     { name = "pydantic", specifier = ">=2.13.4,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2,<3.0.0" },
     { name = "typing-extensions", specifier = ">=4.16.0,<5.0.0" },
@@ -762,7 +775,7 @@ requires-dist = [
 [[package]]
 name = "nubus-provisioning-udm-transformer"
 version = "0.1.0"
-source = { directory = "udm-transformer" }
+source = { editable = "udm-transformer" }
 dependencies = [
     { name = "aiohttp" },
     { name = "dnspython" },
@@ -782,8 +795,8 @@ requires-dist = [
     { name = "dnspython", specifier = ">=2.8.0,<3.0" },
     { name = "msgpack", specifier = ">=1.2.1,<2.0.0" },
     { name = "nats-py", url = "https://github.com/d3vv3/nats.py/archive/04c80ade9d015e5e11b926d36e5b57b401f6fedf.tar.gz", subdirectory = "nats" },
-    { name = "nubus-provisioning-backends", directory = "backends" },
-    { name = "nubus-provisioning-common", directory = "common" },
+    { name = "nubus-provisioning-backends", editable = "backends" },
+    { name = "nubus-provisioning-common", editable = "common" },
     { name = "pydantic", specifier = ">=2.13.4,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2,<3.0.0" },
     { name = "udm-rest-api-client", specifier = ">=0.1.2" },
