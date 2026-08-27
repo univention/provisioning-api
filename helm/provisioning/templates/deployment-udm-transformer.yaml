@@ -122,6 +122,9 @@ spec:
           {{- end }}
           image: "{{ coalesce .Values.udmTransformer.image.registry .Values.global.imageRegistry }}/{{ .Values.udmTransformer.image.repository }}:{{ .Values.udmTransformer.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.udmTransformer.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          {{- with .Values.udmTransformer.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
