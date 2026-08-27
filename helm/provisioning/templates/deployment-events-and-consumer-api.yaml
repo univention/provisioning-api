@@ -104,6 +104,9 @@ spec:
           {{- end }}
           image: "{{ coalesce .Values.api.image.registry .Values.global.imageRegistry }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.api.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          {{- with .Values.api.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
