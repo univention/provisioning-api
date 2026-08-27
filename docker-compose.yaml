@@ -235,8 +235,8 @@ services:
       PYTHON_LOG_LEVEL: "DEBUG"
       UPDATE_INDEX_ON_STARTUP: "true"
     ports:
-      - 389:389
-      - 636:636
+      - 3890:389
+      - 6360:636
     volumes:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
       - ldap-shared-run:/var/run/slapd/:rw
