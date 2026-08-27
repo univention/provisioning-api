@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
 
-import httpx
+import httpx2
 import pytest
 from test_helpers.mock_data import FLAT_MESSAGE
 
@@ -15,7 +15,7 @@ class TestInternalApi:
     def setup_class(cls):
         cls.settings = app_settings()
 
-    async def test_add_event(self, client: httpx.AsyncClient):
+    async def test_add_event(self, client: httpx2.AsyncClient):
         response = await client.post(
             "/v1/messages",
             json=FLAT_MESSAGE,
