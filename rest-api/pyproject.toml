@@ -16,19 +16,20 @@ dependencies = [
     "asgi-correlation-id<5.0.0,>=4.3.4",
     "bcrypt==4.2.0",
     "cachetools<6.0.0,>=5.5.2",
-    "fastapi[standard]<1.0.0,>=0.139.2",
+    "fastapi<1.0.0,>=0.139.2",
     "fastapi-utils<1.0.0,>=0.8.0",
+    # Switches uvicorn off the pure-Python h11 parser. Added in 8b2e4e4 to fix
+    # h11._util.LocalProtocolError -- do not drop.
     "httptools<1.0.0,>=0.8.0",
     "nats-py<3.0.0,>=2.9.0",
     "nubus-provisioning-backends",
     "nubus-provisioning-common",
-    "passlib<2.0.0,>=1.7.4",
     "pydantic<3.0.0,>=2.13.4",
     "pydantic-settings<3.0.0,>=2.14.2",
     "typing-extensions<5.0.0,>=4.16.0",
     "typing-inspect<1.0.0,>=0.9.0",
-    "python-multipart>=0.0.32",
-    "urllib3>=2.7.0",
+    "uvicorn<1.0.0,>=0.34.0",
+    "uvloop>=0.22.1",
 ]
 
 [tool.uv.sources]
