@@ -10,7 +10,7 @@
     "nats_url": "nats://localhost:4222",
     "nats_user": "admin",
     "nats_password": "univention",
-    "ldap_server_uri": "ldap://localhost:389",
+    "ldap_server_uri": "ldap://localhost:3890",
     "ldap_base": "dc=univention-organization,dc=intranet",
     "ldap_bind_dn": "cn=admin,dc=univention-organization,dc=intranet",
     "ldap_bind_password": "univention",
