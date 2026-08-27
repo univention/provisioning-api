@@ -14,27 +14,38 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.32@sha256:df4cae8f3a96d175e2e5f992e5975500
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
     UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.13
+    UV_PYTHON=python3.13 \
+    UV_PROJECT_ENVIRONMENT=/app/consumer_example/.venv
 
-COPY ./common /app/common
-COPY ./consumer /app/consumer
-COPY ./consumer_example/uv.lock \
-     ./consumer_example/pyproject.toml \
-     /app/consumer_example/
+# uv needs every workspace member's manifest to load the workspace, including
+# members this image does not install.
+COPY ./pyproject.toml ./uv.lock /app/
+COPY ./backends/pyproject.toml /app/backends/
+COPY ./common/pyproject.toml /app/common/
+COPY ./consumer/pyproject.toml /app/consumer/
+COPY ./consumer_example/pyproject.toml /app/consumer_example/
+COPY ./dispatcher/pyproject.toml /app/dispatcher/
+COPY ./prefill/pyproject.toml /app/prefill/
+COPY ./rest-api/pyproject.toml /app/rest-api/
+COPY ./udm-transformer/pyproject.toml /app/udm-transformer/
 
-WORKDIR /app/consumer_example
+WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache \
   uv sync \
     --locked \
     --no-dev \
-    --no-install-project && \
-  uv export -o ./requirements.txt
+    --package nubus-provisioning-consumer-example \
+    --no-install-workspace && \
+  uv export --no-dev --frozen --no-emit-workspace --no-hashes \
+    --package nubus-provisioning-consumer-example -o /app/consumer_example/requirements.txt
 
 # copy source code
+COPY ./common/src /app/common/src
+COPY ./consumer/src /app/consumer/src
 COPY ./consumer_example/src /app/consumer_example/src
 
 RUN --mount=type=cache,target=/root/.cache \
-  uv sync --locked --no-dev --no-editable
+  uv sync --locked --no-dev --package nubus-provisioning-consumer-example --no-editable
 
 ###############################################
 # Stage 2: final image
