@@ -17,6 +17,8 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     # Release pipeline: a protected "vX.Y.Z" tag.
     - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
+    # Backend release pipeline: a protected "provisioning-service-backend-vX.Y.Z" tag.
+    - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
@@ -49,19 +51,21 @@ include:
       package_root: "consumer"
       job_name_suffix: "-consumer"
 
-  # App Center release: create_app_version / update_appcenter / do_release etc.
-  # On a feature branch (MR) creating the version is manual (see the
-  # create_app_version override below); on a protected vX.Y.Z tag it is the real
+  # App Center release: provisioning-service-create_app_version / provisioning-service-update_appcenter /
+  # provisioning-service-do_release etc. On a feature branch (MR) creating the version is manual (see the
+  # provisioning-service-create_app_version override below); on a protected vX.Y.Z tag it is the real
   # release. The App Center Version comes from the tag (templated into ini.jinja).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.5.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.16.2"
     inputs:
       app_id: "provisioning-service"
+      job_prefix: "provisioning-service-"
       ucs_base_version: "5.2"
       # TODO: point at a public changelog page once one exists.
       changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/blob/main/CHANGELOG.md"
       mail_recipient: "app-announcement@univention.de"
       mail_sender: "nubus-core@univention.de"
       author_alias: "Nubus Core Team"
+      appcenter_file_dir: "appcenter/provisioning-service/"
       release_tag_prefix: "v"
       build_stage: "package"
       release_stage: "publish"
@@ -87,9 +91,40 @@ include:
             matrix:
               - IMAGE_NAME: "provisioning-prefill"
                 DOCKERFILE_PATH: "docker/prefill/Dockerfile"
-        # So update_appcenter inherits RELEASE_VERSION + PUBLIC_RELEASE (dotenv),
+        # So provisioning-service-update_appcenter inherits RELEASE_VERSION + PUBLIC_RELEASE (dotenv),
         # used by compose.jinja to point at the published nubus/nubus-dev image.
         - "pre-semantic-release"
+
+  # Backend (package-based) App Center app "provisioning-service-backend",
+  # released independently via a protected "provisioning-service-backend-vX.Y.Z" tag.
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.16.2"
+    inputs:
+      app_id: "provisioning-service-backend"
+      job_prefix: "provisioning-service-backend-"
+      ucs_base_version: "5.2"
+      # TODO: point at a public changelog page once one exists.
+      changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/blob/main/CHANGELOG.md"
+      mail_recipient: "app-announcement@univention.de"
+      mail_sender: "nubus-core@univention.de"
+      author_alias: "Nubus Core Team"
+      appcenter_file_dir: "appcenter/provisioning-service-backend/"
+      release_tag_prefix: "provisioning-service-backend-v"
+      build_stage: "package"
+      release_stage: "publish"
+      cleanup_stage: ".post"
+
+  # Builds the univention-provisioning-service Debian package and uploads it
+  # into the backend app version (not the UCS errata repository).
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-package@2.16.2"
+    inputs:
+      build_stage: "package"
+      ucs_base_version: "5.2"
+      scope: "provisioning-service"
+      additional_upload_needs:
+        - "provisioning-service-backend-create_app_version"
+      git_build_rules:
+        - if: '$CI_MERGE_REQUEST_ID'
+        - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
 
 variables:
   POETRY_VERSION: "1.6.1"
@@ -132,6 +167,11 @@ lint-pre-commit:
     # nats chart is vendored into helm/provisioning/charts.
     - helm dep build helm/nats
 
+# Skip on a backend-only "provisioning-service-backend-vX.Y.Z" release tag.
+.rules-skip-backend-release-tag: &rules-skip-backend-release-tag
+  if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/'
+  when: never
+
 .build-matrix: &build-matrix
   - IMAGE_NAME: "provisioning-dispatcher"
     DOCKERFILE_PATH: "docker/dispatcher/Dockerfile"
@@ -169,6 +209,9 @@ container-build:
     matrix: *build-matrix
   variables:
     BUILD_CONTEXT: "${CI_PROJECT_DIR}"
+  rules:
+    - *rules-skip-backend-release-tag
+    - !reference [".buildkit", "rules"]
 
 container-malware-scan:
   parallel:
@@ -177,6 +220,11 @@ container-malware-scan:
 test-unit-and-integration:
   stage: "test"
   image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
+  rules:
+    # Must stay in lockstep with container-build: no testrunner image is
+    # built for a backend-only release tag.
+    - *rules-skip-backend-release-tag
+    - when: "on_success"
   script:
     - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -192,6 +240,7 @@ test-end-to-end:
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
   rules: &rules_dind
+    - *rules-skip-backend-release-tag
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: "never"
     - if: '$GITLAB_USER_ID == $RENOVATE_USER_ID && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS !~ /Renovate run dind/'
@@ -242,6 +291,9 @@ test-chart-provisioning:
   stage: test
   needs: []
   image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.10@sha256:5cba2a8fc4c6d5fa82bcec177ad433ab74695b4e02b2a2e9ed9b53c734b34dbf"
+  rules:
+    - *rules-skip-backend-release-tag
+    - when: "on_success"
   script:
     # The bundled nats chart is a local file dependency; its own dependencies
     # have to be built first so they end up inside the packaged subchart.
@@ -253,6 +305,9 @@ test-chart-udm-listener:
   stage: test
   needs: []
   image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.10@sha256:5cba2a8fc4c6d5fa82bcec177ad433ab74695b4e02b2a2e9ed9b53c734b34dbf"
+  rules:
+    - *rules-skip-backend-release-tag
+    - when: "on_success"
   script:
     - helm dep build helm/udm-listener
     - pytest tests/chart/udm-listener
@@ -261,6 +316,9 @@ test-chart-nats:
   stage: test
   needs: []
   image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.10@sha256:5cba2a8fc4c6d5fa82bcec177ad433ab74695b4e02b2a2e9ed9b53c734b34dbf"
+  rules:
+    - *rules-skip-backend-release-tag
+    - when: "on_success"
   script:
     - helm dep build helm/nats
     - pytest tests/chart/nats
@@ -270,6 +328,9 @@ test-chart-nats:
 # up inside the packaged subchart, and drop the separately packaged nats chart
 # afterwards: it is only published as part of the provisioning chart.
 package-helm-charts:
+  rules:
+    - *rules-skip-backend-release-tag
+    - !reference [".package-helm-charts", "rules"]
   before_script:
     - helm dep build helm/nats
   after_script:
@@ -293,6 +354,9 @@ extract-nats-image-info:
   image:
     name: "${RUNNER_REGISTRY_IMAGE}:${RUNNER_IMAGE_TAG}"
     entrypoint: [""]
+  rules:
+    - *rules-skip-backend-release-tag
+    - when: "on_success"
   script:
     - |
       # Extract image info from Helm chart for release attestation
@@ -314,6 +378,7 @@ nats-container-release-attestation:
   stage: "publish"
   image: "${RUNNER_REGISTRY_IMAGE}:${RUNNER_IMAGE_TAG}"
   rules:
+    - *rules-skip-backend-release-tag
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: "never"
     - when: "on_success"
@@ -370,14 +435,23 @@ nats-container-release-attestation:
 push-image-external:
   parallel:
     matrix: *publish-matrix
+  rules:
+    - *rules-skip-backend-release-tag
+    - !reference [".push-image-external", "rules"]
 
 container-sign-external:
   parallel:
     matrix: *publish-matrix
+  rules:
+    - *rules-skip-backend-release-tag
+    - !reference [".container-sign-external", "rules"]
 
 container-release-attestation:
   parallel:
     matrix: *publish-matrix
+  rules:
+    - *rules-skip-backend-release-tag
+    - !reference [".container-release-attestation", "rules"]
 
 check-debian-updates:
   parallel:
@@ -390,15 +464,15 @@ sonarqube:
   needs: []
 
 # Feature branches: creating the App Center version is MANUAL (one click on
-# create_app_version; update_appcenter follows automatically as it needs it).
+# provisioning-service-create_app_version; provisioning-service-update_appcenter follows automatically as it needs it).
 # On a vX.Y.Z tag it is automatic (the release); on main it refreshes staging.
 # Rules mirror the app-release component, with the MR case set to manual (and
 # the per-rule ENVIRONMENT_NAME kept so the environment/on_stop still resolve).
-create_app_version:
+provisioning-service-create_app_version:
   # Auto-expire the per-MR test version after 3 days (merges with the
   # component's environment name/url/on_stop). GitLab then stops the
-  # environment, triggering delete_app_version to remove the temporary App
-  # Center version even if the MR is still open. The component has no input for
+  # environment, triggering provisioning-service-delete_app_version to remove the temporary App Center
+  # version even if the MR is still open. The component has no input for
   # this, so we set it here.
   environment:
     auto_stop_in: "3 days"
@@ -422,7 +496,7 @@ create_app_version:
 # digest exists in nubus/nubus-dev (skopeo copies with --preserve-digests). If
 # an image was not built this pipeline, its digest stays empty and compose.jinja
 # falls back to the RELEASE_VERSION tag for that image.
-update_appcenter:
+provisioning-service-update_appcenter:
   before_script:
     - |
       set -eu
@@ -441,9 +515,51 @@ update_appcenter:
       echo "  provisioning-udm-transformer: ${PROVISIONING_UDM_TRANSFORMER_DIGEST:-<none, tag only>}"
       echo "  provisioning-prefill:         ${PROVISIONING_PREFILL_DIGEST:-<none, tag only>}"
 
-# Release announcements go out by mail (send_mail); the Rocket.Chat
+# Release announcements go out by mail (provisioning-service-send_mail); the Rocket.Chat
 # notification is disabled, matching keycloak.
-send_chat_message:
+provisioning-service-send_chat_message:
+  rules:
+    - when: never
+
+provisioning-service-backend-create_app_version:
+  environment:
+    auto_stop_in: "3 days"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/'
+      variables:
+        ENVIRONMENT_NAME: "release-app/${APP_ID}_$CI_COMMIT_TAG"
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: "manual"
+      allow_failure: true
+      variables:
+        ENVIRONMENT_NAME: "branch-app/${APP_ID}_$CI_COMMIT_REF_SLUG"
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
+      variables:
+        ENVIRONMENT_NAME: "staging-app/${APP_ID}_999.0.0-staging"
+
+provisioning-service-backend-send_chat_message:
+  rules:
+    - when: never
+
+# debian/rules builds from sibling dirs (listener/, common/, backends/), so
+# build in place at the repo root instead of the component's default
+# isolated-subdir build.
+deb_build_git:
+  script:
+    - mkdir -p artifacts
+    - apt-get --quiet --assume-yes build-dep .
+    - dpkg-buildpackage --unsigned-source --unsigned-changes
+    - mv ../*.deb artifacts/
+
+# Disabled: these would otherwise publish into the UCS build system on every
+# protected ref. The package ships via upload_from_git only.
+deb_repo_import:
+  rules:
+    - when: never
+deb_repo_build:
+  rules:
+    - when: never
+upload_from_build_system:
   rules:
     - when: never
 ...
