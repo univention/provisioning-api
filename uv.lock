@@ -569,15 +569,11 @@ name = "nubus-provisioning-common"
 version = "0.1.0"
 source = { directory = "common" }
 dependencies = [
-    { name = "asgi-correlation-id" },
     { name = "pydantic" },
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "asgi-correlation-id", specifier = ">=4.3.4,<5.0.0" },
-    { name = "pydantic", specifier = ">=2.13.4" },
-]
+requires-dist = [{ name = "pydantic", specifier = ">=2.13.4" }]
 
 [[package]]
 name = "nubus-provisioning-consumer"

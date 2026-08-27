@@ -4,7 +4,7 @@
 import logging
 
 import uvicorn
-from asgi_correlation_id import CorrelationIdMiddleware
+from asgi_correlation_id import CorrelationIdFilter, CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.exception_handlers import http_exception_handler
@@ -90,7 +90,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 def run():
     settings = app_settings()
     assert settings
-    setup_logging(settings.log_level)
+    setup_logging(settings.log_level, CorrelationIdFilter(uuid_length=10))
     uvicorn.run(
         app,
         host="0.0.0.0",
