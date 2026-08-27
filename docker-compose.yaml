@@ -3,13 +3,14 @@
 
 services:
   provisioning-api:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-server:${IMAGE_TAG:-latest}
     build:
       context: .
-      dockerfile: docker/events-and-consumer-api/Dockerfile
+      dockerfile: docker/provisioning-server/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-api"
+    command: ["/app/.venv/bin/rest-api"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -70,13 +71,14 @@ services:
         target: /var/run
 
   dispatcher:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
+    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-server:${IMAGE_TAG:-latest}
     build:
       context: .
-      dockerfile: docker/dispatcher/Dockerfile
+      dockerfile: docker/provisioning-server/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-dispatcher"
+    command: ["/app/.venv/bin/dispatcher"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -93,13 +95,14 @@ services:
       - "provisioning-api"
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-server:${IMAGE_TAG:-latest}"
     build:
       context: .
-      dockerfile: docker/udm-transformer/Dockerfile
+      dockerfile: docker/provisioning-server/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-udm-transformer"
+    command: ["/app/.venv/bin/udm-transformer"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -125,13 +128,14 @@ services:
       - "udm-rest-api-1"
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
+    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-server:${IMAGE_TAG:-latest}"
     build:
       context: .
-      dockerfile: docker/prefill/Dockerfile
+      dockerfile: docker/provisioning-server/Dockerfile
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-prefill"
+    command: ["/app/.venv/bin/prefill"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
