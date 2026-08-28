@@ -27,9 +27,6 @@ name = "gitlab"
 publish-url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
 url = "https://git.knut.univention.de/api/v4/projects/882/packages/pypi"
 
-[project.scripts]
-prefill = "univention.provisioning.prefill.main:run"
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/univention"]
 

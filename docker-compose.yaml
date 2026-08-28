@@ -10,7 +10,7 @@ services:
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-api"
-    command: ["/app/.venv/bin/rest-api"]
+    command: ["rest-api"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -78,7 +78,7 @@ services:
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-dispatcher"
-    command: ["/app/.venv/bin/dispatcher"]
+    command: ["dispatcher"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -102,7 +102,7 @@ services:
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-udm-transformer"
-    command: ["/app/.venv/bin/udm-transformer"]
+    command: ["udm-transformer"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
@@ -135,7 +135,7 @@ services:
       # args:
       #   - UCS_BASE_IMAGE_TAG=latest
     container_name: "provisioning-prefill"
-    command: ["/app/.venv/bin/prefill"]
+    command: ["prefill"]
     restart: "on-failure"
     environment:
       LOG_LEVEL: "DEBUG"
