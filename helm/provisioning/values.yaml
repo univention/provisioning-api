@@ -521,12 +521,13 @@ livenessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/udm-transformer/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   prefill:
     # -- Enable liveness probe.
     enabled: true
@@ -631,12 +632,13 @@ readinessProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/udm-transformer/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   prefill:
     # -- Enable readiness probe.
     enabled: true
@@ -807,12 +809,13 @@ startupProbe:
     successThreshold: 1
     # -- Timeout for command return.
     timeoutSeconds: 5
+    # Interpreter check only: the image has no shell. Does not check
+    # application health.
     exec:
       command:
-        - sh
+        - /app/udm-transformer/.venv/bin/python
         - -c
-        - |
-          exit 0
+        - "pass"
   prefill:
     # -- Enable startup probe.
     enabled: true

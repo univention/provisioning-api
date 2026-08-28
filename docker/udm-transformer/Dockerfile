@@ -4,6 +4,9 @@
 # Inspired by: https://hynek.me/articles/docker-uv/
 
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
+ARG UCS_DISTROLESS_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-distroless-python-530
+# TODO: repoint to the 5.3.0-build.<date> tag once ucs-base-image!109 is merged
+ARG UCS_DISTROLESS_IMAGE_TAG=0.24.0-pre-mmeschter-distroless-python@sha256:074d9c80454289f0b0f6adba72b58d0259019fe595ecd6485624331d87731376
 ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20260825@sha256:f4b3ef96d03c574c5c3f57d4d41945a911ef05d63ca50718989b593c5d9cb6be
 
 ###############################################
@@ -27,7 +30,6 @@ COPY ./udm-transformer/uv.lock \
 
 WORKDIR /app/udm-transformer
 RUN --mount=type=cache,target=/root/.cache \
-  uv venv --system-site-packages && \
   uv sync \
     --locked \
     --no-dev \
@@ -37,28 +39,25 @@ RUN --mount=type=cache,target=/root/.cache \
 # copy source code
 COPY ./udm-transformer/src /app/udm-transformer/src
 
-RUN uv sync --locked --no-dev --no-editable
+RUN --mount=type=cache,target=/root/.cache \
+  uv sync --locked --no-dev --no-editable
+
+# The venv is self-contained: `univention.admin.rest.client` comes from the
+# PyPI udm-rest-api-client, not from a UCS system Python module. Fail the build
+# here rather than in the shell-less final image if that ever stops holding.
+RUN .venv/bin/python -c 'import univention.provisioning.udm_transformer.main'
+
 
 ###############################################
 # Stage 3: final image
-FROM ${UCS_BASE_IMAGE}:${UCS_BASE_IMAGE_TAG} AS final
-SHELL ["/bin/bash", "-uxo", "pipefail", "-c"]
+#
+# Distroless: no shell, so no RUN steps here. The user, os-release and CA
+# bundle come from the base image.
+FROM ${UCS_DISTROLESS_IMAGE}:${UCS_DISTROLESS_IMAGE_TAG} AS final
 
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/app/udm-transformer/.venv/bin:$PATH
+  PATH=/app/udm-transformer/.venv/bin:$PATH
 
-ARG USER=udm-transformer
-RUN groupadd -r ${USER} -g 1000 && \
-    useradd -r -d /app -g ${USER} -N ${USER} -u 1000
-
-COPY --from=build --chown=${USER}:${USER} /app/udm-transformer/.venv /app/udm-transformer/.venv
-COPY --from=build --chown=${USER}:${USER} /app/udm-transformer/requirements.txt /app/udm-transformer/requirements.txt
-
-USER ${USER}
-
-CMD ["udm-transformer"]
-
- RUN \
-   python3.13 -V && \
-   python3.13 -m site && \
-   python3.13 -c 'import univention.provisioning.udm_transformer.main'
+COPY --from=build /app/udm-transformer /app/udm-transformer
+WORKDIR /app/udm-transformer
+ENTRYPOINT [ "/app/udm-transformer/.venv/bin/udm-transformer" ]

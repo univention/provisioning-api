@@ -127,9 +127,9 @@ A Helm Chart that deploys the provisioning services
 | livenessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | livenessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | livenessProbe.udmTransformer.enabled | bool | `true` | Enable liveness probe. |
-| livenessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| livenessProbe.udmTransformer.exec.command[0] | string | `"/app/udm-transformer/.venv/bin/python"` |  |
 | livenessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
-| livenessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| livenessProbe.udmTransformer.exec.command[2] | string | `"pass"` |  |
 | livenessProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | livenessProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until LivenessProbe is executed. |
 | livenessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
@@ -201,9 +201,9 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | readinessProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | readinessProbe.udmTransformer.enabled | bool | `true` | Enable readiness probe. |
-| readinessProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| readinessProbe.udmTransformer.exec.command[0] | string | `"/app/udm-transformer/.venv/bin/python"` |  |
 | readinessProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
-| readinessProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| readinessProbe.udmTransformer.exec.command[2] | string | `"pass"` |  |
 | readinessProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | readinessProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until ReadinessProbe is executed. |
 | readinessProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
@@ -281,9 +281,9 @@ A Helm Chart that deploys the provisioning services
 | startupProbe.prefill.successThreshold | int | `1` | Number of successful executions after failed ones until container is marked healthy. |
 | startupProbe.prefill.timeoutSeconds | int | `5` | Timeout for command return. |
 | startupProbe.udmTransformer.enabled | bool | `true` | Enable startup probe. |
-| startupProbe.udmTransformer.exec.command[0] | string | `"sh"` |  |
+| startupProbe.udmTransformer.exec.command[0] | string | `"/app/udm-transformer/.venv/bin/python"` |  |
 | startupProbe.udmTransformer.exec.command[1] | string | `"-c"` |  |
-| startupProbe.udmTransformer.exec.command[2] | string | `"exit 0\n"` |  |
+| startupProbe.udmTransformer.exec.command[2] | string | `"pass"` |  |
 | startupProbe.udmTransformer.failureThreshold | int | `10` | Number of failed executions until container is terminated. |
 | startupProbe.udmTransformer.initialDelaySeconds | int | `15` | Delay after container start until StartupProbe is executed. |
 | startupProbe.udmTransformer.periodSeconds | int | `20` | Time between probe executions. |
