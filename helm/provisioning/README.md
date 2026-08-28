@@ -33,7 +33,7 @@ A Helm Chart that deploys the provisioning services
 | api.auth.prefill.existingSecret.keyMapping.password | string | `nil` |  |
 | api.auth.prefill.existingSecret.name | string | `nil` |  |
 | api.auth.prefill.password | string | `nil` |  |
-| api.command[0] | string | `"/app/.venv/bin/rest-api"` |  |
+| api.command[0] | string | `"rest-api"` |  |
 | api.config.CORS_ALL | string | `"false"` |  |
 | api.config.DEBUG | string | `"false"` |  |
 | api.config.LOG_LEVEL | string | `"INFO"` |  |
@@ -59,7 +59,7 @@ A Helm Chart that deploys the provisioning services
 | containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` | Disallow custom Seccomp profile by setting it to RuntimeDefault. |
 | dispatcher.additionalAnnotations | object | `{}` |  |
 | dispatcher.additionalLabels | object | `{}` |  |
-| dispatcher.command[0] | string | `"/app/.venv/bin/dispatcher"` |  |
+| dispatcher.command[0] | string | `"dispatcher"` |  |
 | dispatcher.config.LOG_LEVEL | string | `"INFO"` |  |
 | dispatcher.config.natsMaxReconnectAttempts | int | `5` |  |
 | dispatcher.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
@@ -156,7 +156,7 @@ A Helm Chart that deploys the provisioning services
 | podSecurityContext.sysctls | list | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"1"}]` | Allow binding to ports below 1024 without root access. |
 | prefill.additionalAnnotations | object | `{}` |  |
 | prefill.additionalLabels | object | `{}` |  |
-| prefill.command[0] | string | `"/app/.venv/bin/prefill"` |  |
+| prefill.command[0] | string | `"prefill"` |  |
 | prefill.config.LOG_LEVEL | string | `"INFO"` | Python log level |
 | prefill.config.UDM_HOST | string | `""` | UDM REST API: host defaults to %RELEASE-NAME%-udm-rest-api |
 | prefill.config.UDM_PORT | int | `9979` | UDM REST API: port |
@@ -297,7 +297,7 @@ A Helm Chart that deploys the provisioning services
 | topologySpreadConstraints | list | `[]` | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/  topologySpreadConstraints:   - maxSkew: 1     topologyKey: failure-domain.beta.kubernetes.io/zone     whenUnsatisfiable: DoNotSchedule |
 | udmTransformer.additionalAnnotations | object | `{}` |  |
 | udmTransformer.additionalLabels | object | `{}` |  |
-| udmTransformer.command[0] | string | `"/app/.venv/bin/udm-transformer"` |  |
+| udmTransformer.command[0] | string | `"udm-transformer"` |  |
 | udmTransformer.config.LOG_LEVEL | string | `"INFO"` |  |
 | udmTransformer.config.ldapPublisherName | string | `"udm-listener"` |  |
 | udmTransformer.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |

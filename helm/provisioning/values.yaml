@@ -41,9 +41,10 @@ api:
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
-  # One image serves all four processes; pick this one.
+  # One image serves all four processes; pick this one. Resolved via PATH,
+  # which the image points at the venv.
   command:
-    - "/app/.venv/bin/rest-api"
+    - "rest-api"
   # If specified environment variables will be set on the container
   # Could be deduplicated.
   nats:
@@ -100,9 +101,10 @@ dispatcher:
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
-  # One image serves all four processes; pick this one.
+  # One image serves all four processes; pick this one. Resolved via PATH,
+  # which the image points at the venv.
   command:
-    - "/app/.venv/bin/dispatcher"
+    - "dispatcher"
   # If specified environment variables will be set on the container
   nats:
     auth:
@@ -132,9 +134,10 @@ udmTransformer:
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
-  # One image serves all four processes; pick this one.
+  # One image serves all four processes; pick this one. Resolved via PATH,
+  # which the image points at the venv.
   command:
-    - "/app/.venv/bin/udm-transformer"
+    - "udm-transformer"
 
   nats:
     auth:
@@ -179,9 +182,10 @@ prefill:
     pullPolicy: null
     repository: "nubus-dev/images/provisioning-server"
     tag: "latest"
-  # One image serves all four processes; pick this one.
+  # One image serves all four processes; pick this one. Resolved via PATH,
+  # which the image points at the venv.
   command:
-    - "/app/.venv/bin/prefill"
+    - "prefill"
 
   # If specified environment variables will be set on the container
   nats:
