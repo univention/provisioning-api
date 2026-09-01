@@ -3,7 +3,7 @@
 
 from typing import Callable
 
-import httpx
+import httpx2
 import pytest
 from test_helpers.mock_data import NATS_SERVER
 
@@ -26,8 +26,8 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def client():
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    transport = httpx2.ASGITransport(app=app)
+    async with httpx2.AsyncClient(transport=transport, base_url="http://testserver") as client:
         yield client
 
 

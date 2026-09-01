@@ -16,7 +16,7 @@ dependencies = [
     "asgi-correlation-id<5.0.0,>=4.3.4",
     "bcrypt==4.2.0",
     "cachetools<6.0.0,>=5.5.2",
-    "fastapi[standard]<1.0.0,>=0.139.2",
+    "fastapi<1.0.0,>=0.139.2",
     "fastapi-utils<1.0.0,>=0.8.0",
     "httptools<1.0.0,>=0.8.0",
     "nats-py<3.0.0,>=2.9.0",
@@ -29,6 +29,7 @@ dependencies = [
     "typing-inspect<1.0.0,>=0.9.0",
     "python-multipart>=0.0.32",
     "urllib3>=2.7.0",
+    "uvicorn[standard]<1.0.0,>=0.52.0",
 ]
 
 [tool.uv.sources]
