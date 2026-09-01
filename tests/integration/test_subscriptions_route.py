@@ -4,7 +4,7 @@
 
 import uuid
 
-import httpx
+import httpx2
 import pytest
 from test_helpers.mock_data import (
     CONSUMER_PASSWORD,
@@ -33,7 +33,7 @@ class TestSubscriptionsRoute:
     def setup_class(cls):
         cls.settings = app_settings()
 
-    async def test_create_subscription(self, client: httpx.AsyncClient):
+    async def test_create_subscription(self, client: httpx2.AsyncClient):
         name = str(uuid.uuid4())
         response = await client.post(
             self.subscriptions_url,
@@ -47,7 +47,7 @@ class TestSubscriptionsRoute:
         )
         assert response.status_code == 201
 
-    async def test_create_subscription_existing_subscription(self, client: httpx.AsyncClient):
+    async def test_create_subscription_existing_subscription(self, client: httpx2.AsyncClient):
         response = await client.post(
             self.subscriptions_url,
             json={
@@ -60,7 +60,7 @@ class TestSubscriptionsRoute:
         )
         assert response.status_code == 200
 
-    async def test_create_subscription_existing_subscription_different_parameters(self, client: httpx.AsyncClient):
+    async def test_create_subscription_existing_subscription_different_parameters(self, client: httpx2.AsyncClient):
         response = await client.post(
             self.subscriptions_url,
             json={
@@ -73,7 +73,7 @@ class TestSubscriptionsRoute:
         )
         assert response.status_code == 409
 
-    async def test_get_subscriptions(self, client: httpx.AsyncClient):
+    async def test_get_subscriptions(self, client: httpx2.AsyncClient):
         response = await client.get(
             self.subscriptions_url, auth=(self.settings.admin_username, self.settings.admin_password)
         )
@@ -85,7 +85,7 @@ class TestSubscriptionsRoute:
         assert len(data[0]["realms_topics"]) == len(GROUPS_REALMS_TOPICS)
         assert all(realm_topic in data[0]["realms_topics"] for realm_topic in GROUPS_REALMS_TOPICS_as_dicts)
 
-    async def test_get_subscription(self, client: httpx.AsyncClient):
+    async def test_get_subscription(self, client: httpx2.AsyncClient):
         response = await client.get(
             f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}", auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD)
         )
@@ -97,21 +97,21 @@ class TestSubscriptionsRoute:
         assert len(data["realms_topics"]) == len(GROUPS_REALMS_TOPICS)
         assert all(realm_topic in data["realms_topics"] for realm_topic in GROUPS_REALMS_TOPICS_as_dicts)
 
-    async def test_delete_subscription(self, client: httpx.AsyncClient):
+    async def test_delete_subscription(self, client: httpx2.AsyncClient):
         response = await client.delete(
             f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}",
             auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD),
         )
         assert response.status_code == 200
 
-    async def test_delete_subscription_as_admin(self, client: httpx.AsyncClient):
+    async def test_delete_subscription_as_admin(self, client: httpx2.AsyncClient):
         response = await client.delete(
             f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}",
             auth=(self.settings.admin_username, self.settings.admin_password),
         )
         assert response.status_code == 200
 
-    async def test_get_message(self, client: httpx.AsyncClient):
+    async def test_get_message(self, client: httpx2.AsyncClient):
         response = await client.get(
             f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}/messages/next", auth=(SUBSCRIPTION_NAME, CONSUMER_PASSWORD)
         )
@@ -123,7 +123,7 @@ class TestSubscriptionsRoute:
         assert data["publisher_name"] == PUBLISHER_NAME
         assert data["sequence_number"] == 1
 
-    async def test_update_messages_status(self, client: httpx.AsyncClient):
+    async def test_update_messages_status(self, client: httpx2.AsyncClient):
         response = await client.patch(
             f"{self.subscriptions_url}/{SUBSCRIPTION_NAME}/messages/{MESSAGE_PROCESSING_SEQ_ID}/status",
             json={"status": MESSAGE_PROCESSING_STATUS.value},
