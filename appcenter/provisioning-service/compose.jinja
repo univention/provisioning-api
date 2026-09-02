@@ -22,9 +22,11 @@ services:
     # Published image: public "nubus" on a release, private "nubus-dev" otherwise.
     # RELEASE_VERSION is a readable tag; the digest (from update_appcenter) pins the
     # image and is always set in the release pipeline. The `if DIGEST else ''` guard
-    # only matters when rendering outside it. Same pattern for all images below.
-    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-api:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_API_DIGEST) if PROVISIONING_API_DIGEST else '' }}"
+    # only matters when rendering outside it. Same pattern for all services below —
+    # they all run the merged provisioning-server image, distinguished by `command`.
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-server:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_SERVER_DIGEST) if PROVISIONING_SERVER_DIGEST else '' }}"
     container_name: "nubus-provisioning-api"
+    command: ["/app/.venv/bin/rest-api"]
     restart: "unless-stopped"
     environment:
       - PLATFORM_UCS=true
@@ -53,8 +55,9 @@ services:
       - "nats"
 
   dispatcher:
-    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-dispatcher:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_DISPATCHER_DIGEST) if PROVISIONING_DISPATCHER_DIGEST else '' }}"
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-server:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_SERVER_DIGEST) if PROVISIONING_SERVER_DIGEST else '' }}"
     container_name: "nubus-provisioning-dispatcher"
+    command: ["/app/.venv/bin/dispatcher"]
     restart: "unless-stopped"
     environment:
       - PLATFORM_UCS=true
@@ -79,8 +82,9 @@ services:
     #entrypoint: ["sleep", "10000"]
 
   udm-transformer:
-    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-udm-transformer:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_UDM_TRANSFORMER_DIGEST) if PROVISIONING_UDM_TRANSFORMER_DIGEST else '' }}"
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-server:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_SERVER_DIGEST) if PROVISIONING_SERVER_DIGEST else '' }}"
     container_name: "nubus-provisioning-udm-transformer"
+    command: ["/app/.venv/bin/udm-transformer"]
     restart: "unless-stopped"
     @!@if configRegistry.get('server/role').lower() == "domaincontroller_backup": print("profiles: [donotstart]\n")@!@
     extra_hosts:
@@ -110,8 +114,9 @@ services:
       - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
 
   prefill:
-    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-prefill:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_PREFILL_DIGEST) if PROVISIONING_PREFILL_DIGEST else '' }}"
+    image: "{{ EXTERNAL_PUBLIC_IMAGE_REGISTRY if PUBLIC_RELEASE else EXTERNAL_PRIVATE_IMAGE_REGISTRY }}/provisioning-server:{{ RELEASE_VERSION }}{{ ('@' ~ PROVISIONING_SERVER_DIGEST) if PROVISIONING_SERVER_DIGEST else '' }}"
     container_name: "nubus-provisioning-prefill"
+    command: ["/app/.venv/bin/prefill"]
     restart: "unless-stopped"
     environment:
      - PLATFORM_UCS=true
