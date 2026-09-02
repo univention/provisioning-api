@@ -464,13 +464,14 @@ provisioning-service-create_app_version:
       variables:
         ENVIRONMENT_NAME: "staging-app/${APP_ID}_999.0.0-staging"
 
-# Pin the App Center compose images to the built images' content digests. The
-# kaniko build exposes each digest as the artifact "digests/<image>"; this job
-# already pulls those artifacts via additional_update_appcenter_needs, so we
-# read them and export one variable per image for compose.jinja. The same
-# digest exists in nubus/nubus-dev (skopeo copies with --preserve-digests). If
-# an image was not built this pipeline, its digest stays empty and compose.jinja
-# falls back to the RELEASE_VERSION tag for that image.
+# Pin the App Center compose image to the built image's content digest. The
+# kaniko build exposes the digest as the artifact "digests/provisioning-server";
+# this job already pulls that artifact via additional_update_appcenter_needs, so
+# we read it and export it for compose.jinja, which uses the merged
+# provisioning-server image (distinguished per service by `command`) for all
+# four service blocks. The same digest exists in nubus/nubus-dev (skopeo copies
+# with --preserve-digests). If the image was not built this pipeline, the
+# digest stays empty and compose.jinja falls back to the RELEASE_VERSION tag.
 provisioning-service-update_appcenter:
   before_script:
     - |
@@ -480,15 +481,9 @@ provisioning-service-update_appcenter:
           cat "${CI_PROJECT_DIR}/digests/$1"
         fi
       }
-      export PROVISIONING_API_DIGEST="$(digest_for provisioning-api)"
-      export PROVISIONING_DISPATCHER_DIGEST="$(digest_for provisioning-dispatcher)"
-      export PROVISIONING_UDM_TRANSFORMER_DIGEST="$(digest_for provisioning-udm-transformer)"
-      export PROVISIONING_PREFILL_DIGEST="$(digest_for provisioning-prefill)"
-      echo "Compose image digests:"
-      echo "  provisioning-api:             ${PROVISIONING_API_DIGEST:-<none, tag only>}"
-      echo "  provisioning-dispatcher:      ${PROVISIONING_DISPATCHER_DIGEST:-<none, tag only>}"
-      echo "  provisioning-udm-transformer: ${PROVISIONING_UDM_TRANSFORMER_DIGEST:-<none, tag only>}"
-      echo "  provisioning-prefill:         ${PROVISIONING_PREFILL_DIGEST:-<none, tag only>}"
+      export PROVISIONING_SERVER_DIGEST="$(digest_for provisioning-server)"
+      echo "Compose image digest:"
+      echo "  provisioning-server: ${PROVISIONING_SERVER_DIGEST:-<none, tag only>}"
 
 # Release announcements go out by mail (provisioning-service-send_mail); the Rocket.Chat
 # notification is disabled, matching keycloak.
