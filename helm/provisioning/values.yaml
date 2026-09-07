@@ -234,6 +234,13 @@ registerConsumers:
   #       name: null
   #       keyMapping:
   #         registration: null
+  #     # Optional. When set, the consumer's password is read from this Secret -
+  #     # which may be a different one - and merged into the registration document
+  #     # at registration time, so the document does not have to contain it and the
+  #     # credential can live in exactly one place.
+  #     passwordSecret:
+  #       name: null
+  #       key: null
   #
   # The entries can only be provided as existing secrets and the content of the
   # key "registration" has to follow the correct JSON structure.
