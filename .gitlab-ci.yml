@@ -24,16 +24,20 @@ workflow:
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.67.3"
+    # TEST RUN: pinned to a feature branch to validate the "build pushes
+    # straight to harbor, no push-image-external hop" change end to end
+    # before it lands in common-ci proper. Revert to a tagged common-ci
+    # release once validated.
+    ref: "isakov/skip-push-to-gitregistry"
     file:
       - "defaults/stages.yaml"
-      - "defaults/nubus-workflow.yaml"
+#      - "defaults/nubus-workflow.yaml"
       - "jobs/lint-pre-commit.yaml"
       - "jobs/lint-commit-messages.yaml"
       # Release only from a protected tag (see the workflow block above) instead
       # of auto-releasing from main via semantic-release.
       - "templates/tagged-release.yaml"
-      - "jobs/container-build-external-buildkit.yaml"
+      - "jobs/container-build-direct-buildkit.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/sonarqube.yaml"
@@ -216,17 +220,35 @@ container-build:
 container-malware-scan:
   parallel:
     matrix: *publish-matrix
+  variables:
+    SCAN_REGISTRY_IMAGE: "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}"
 
 test-unit-and-integration:
   stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
+  # The testrunner image now lives in harbor (private project), not
+  # gitregistry, so it can't be pulled via the native "image:" keyword
+  # (that pull happens before any in-job login could take effect, and there
+  # is no DOCKER_AUTH_CONFIG configured for harbor). Pull it explicitly
+  # instead, via .dind, reusing the same robot-account login pattern already
+  # used by promote-image-public/container-sign-external.
+  extends: .dind
+  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
   rules:
     # Must stay in lockstep with container-build: no testrunner image is
     # built for a backend-only release tag.
     - *rules-skip-backend-release-tag
     - when: "on_success"
+  before_script:
+    - unset DOCKER_API_VERSION
+    - echo "${EXTERNAL_REGISTRY_ROBOT_TOKEN}" | docker login "${EXTERNAL_REGISTRY_HOST}" --username "${EXTERNAL_REGISTRY_ROBOT_ACCOUNT}" --password-stdin
+    - docker pull "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/testrunner:${RELEASE_VERSION}"
   script:
-    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+    - >
+      docker run --rm
+      -v "${CI_PROJECT_DIR}:${CI_PROJECT_DIR}"
+      -w "${CI_PROJECT_DIR}"
+      "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/testrunner:${RELEASE_VERSION}"
+      python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
@@ -432,12 +454,12 @@ nats-container-release-attestation:
 
       done < "${ATTESTATION_IMAGE_LIST_FILE}"
 
-push-image-external:
+promote-image-public:
   parallel:
     matrix: *publish-matrix
   rules:
     - *rules-skip-backend-release-tag
-    - !reference [".push-image-external", "rules"]
+    - !reference [".promote-image-external-public", "rules"]
 
 container-sign-external:
   parallel:
@@ -457,7 +479,7 @@ check-debian-updates:
   parallel:
     matrix: *publish-matrix
   variables:
-    TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+    TARGET_IMAGE: "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/${IMAGE_NAME}:latest"
 
 sonarqube:
   extends: .sonarqube
