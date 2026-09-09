@@ -62,6 +62,13 @@ spec:
                   items:
                     - key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $data.existingSecret "key" "registration" "context" .) }}
                       path: {{ printf "%s.json" ( lower $consumer ) }}
+              {{- with $data.passwordSecret }}
+              - secret:
+                  name: {{ tpl .name $ | quote }}
+                  items:
+                    - key: {{ .key | quote }}
+                      path: {{ printf "%s.password" ( lower $consumer ) }}
+              {{- end }}
               {{- end }}
         {{- end }}
         - name: "scripts-volume"
@@ -135,11 +142,24 @@ spec:
             - "-c"
           args:
             - |
-              for file in /secrets/*; do
+              register() {
+                set +x
+                curl -s -o response.txt -w "%{http_code}" -u "${ADMIN_USERNAME}":"${ADMIN_PASSWORD}" \
+                  -H 'Content-Type: application/json' \
+                  -d @"${1}" "${PROVISIONING_API_BASE_URL}"
+              }
+
+              for file in /secrets/*.json; do
                 filename=$(basename "${file}" .json)
-                response=$(set +x; curl -s -o response.txt -w "%{http_code}" -u "${ADMIN_USERNAME}":"${ADMIN_PASSWORD}" \
-                -H 'Content-Type: application/json' \
-                -d @"${file}" "${PROVISIONING_API_BASE_URL}")
+                if [ -f "/secrets/${filename}.password" ]; then
+                  # The consumer's password is supplied as its own Secret key, so it is not part of
+                  # the registration document. Merge it in here rather than on disk, and pipe the
+                  # result straight to curl so it never appears in the process list.
+                  response=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); d["password"]=open(sys.argv[2]).read(); sys.stdout.write(json.dumps(d))' \
+                    "${file}" "/secrets/${filename}.password" | register -)
+                else
+                  response=$(register "${file}")
+                fi
 
                 if [ "${response}" -eq 201 ]; then
                   echo "Successful registration of the consumer: "${filename}""
