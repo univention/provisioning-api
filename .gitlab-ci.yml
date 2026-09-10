@@ -272,6 +272,10 @@ test-end-to-end:
     # Allow that the Docker API version is negotiated between client and server
     - unset DOCKER_API_VERSION
     - export IMAGE_TAG=${RELEASE_VERSION}
+    # docker-compose.yaml now pulls our own images from harbor (private
+    # project), not gitregistry, so they need an explicit login too - same
+    # robot-account pattern as test-unit-and-integration.
+    - echo "${EXTERNAL_REGISTRY_ROBOT_TOKEN}" | docker login "${EXTERNAL_REGISTRY_HOST}" --username "${EXTERNAL_REGISTRY_ROBOT_ACCOUNT}" --password-stdin
     - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
     - echo $IMAGE_TAG
     - docker version
