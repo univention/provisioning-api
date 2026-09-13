@@ -3,7 +3,7 @@
 
 services:
   provisioning-api:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-api:${IMAGE_TAG:-latest}
+    image: artifacts.software-univention.de/nubus-dev/images/provisioning-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/events-and-consumer-api/Dockerfile
@@ -70,7 +70,7 @@ services:
         target: /var/run
 
   dispatcher:
-    image: gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-dispatcher:${IMAGE_TAG:-latest}
+    image: artifacts.software-univention.de/nubus-dev/images/provisioning-dispatcher:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/dispatcher/Dockerfile
@@ -93,7 +93,7 @@ services:
       - "provisioning-api"
 
   udm-transformer:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-udm-transformer:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-transformer/Dockerfile
@@ -125,7 +125,7 @@ services:
       - "udm-rest-api-1"
 
   prefill:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-prefill:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-prefill:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/prefill/Dockerfile
@@ -185,7 +185,7 @@ services:
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   udm-listener:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-udm-listener:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-udm-listener:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/udm-listener/Dockerfile
@@ -279,7 +279,7 @@ services:
       - 9980:9979
 
   example-client:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-example-client:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-example-client:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/example-client/Dockerfile
@@ -295,7 +295,7 @@ services:
     restart: "on-failure"
 
   e2e-test:
-    image: "gitregistry.knut.univention.de/univention/dev/projects/provisioning/provisioning-e2e-tests:${IMAGE_TAG:-latest}"
+    image: "artifacts.software-univention.de/nubus-dev/images/provisioning-e2e-tests:${IMAGE_TAG:-latest}"
     build:
       context: .
       dockerfile: docker/e2e-test/Dockerfile
