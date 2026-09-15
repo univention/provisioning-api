@@ -38,6 +38,8 @@ include:
       # of auto-releasing from main via semantic-release.
       - "templates/tagged-release.yaml"
       - "jobs/container-build-direct-buildkit.yaml"
+      - "jobs/container-publish-direct.yaml"
+      - "jobs/container-malware-scan.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/sonarqube.yaml"
