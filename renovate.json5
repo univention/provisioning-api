@@ -2,5 +2,78 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>univention/dev/nubus-for-k8s/common-renovate#v1.8.5"
+  ],
+
+  // Look the mirrored images up on Docker Hub, because the mirror only ever
+  // holds versions this repository has already asked for. Renovate replaces
+  // just the version and the digest, so the mirror path stays in the file.
+  "registryAliases": {
+    "artifacts.software-univention.de/library": "docker.io/library"
+  },
+
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The NATS server pin in the App Center template",
+      // The UCR blocks make this file invalid YAML, so no built-in manager
+      // reads it.
+      "managerFilePatterns": [
+        "/^appcenter/provisioning-service/compose\\.jinja$/"
+      ],
+      "matchStrings": [
+        "library/nats:(?<currentValue>[^\"@\\s]+)@(?<currentDigest>sha256:[0-9a-f]{64})"
+      ],
+      "depNameTemplate": "docker.io/library/nats",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "The NATS config reloader pin",
+      // helm-values builds the image name from image.registry, which is null
+      // here, so it looks these two up under docker.io/library, where neither
+      // exists. Both live under natsio.
+      "managerFilePatterns": [
+        "/^helm/nats/values\\.yaml$/"
+      ],
+      "matchStrings": [
+        "repository: \"library/nats-server-config-reloader\"\\s+tag: \"(?<currentValue>[^\"@]+)@(?<currentDigest>sha256:[0-9a-f]{64})\""
+      ],
+      "depNameTemplate": "docker.io/natsio/nats-server-config-reloader",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "The nats-box pin",
+      "managerFilePatterns": [
+        "/^helm/nats/values\\.yaml$/"
+      ],
+      "matchStrings": [
+        "repository: \"library/nats-box\"\\s+tag: \"(?<currentValue>[^\"@]+)@(?<currentDigest>sha256:[0-9a-f]{64})\""
+      ],
+      "depNameTemplate": "docker.io/natsio/nats-box",
+      "datasourceTemplate": "docker"
+    }
+  ],
+
+  "packageRules": [
+    {
+      "description": "One merge request moves every NATS image",
+      "matchPackageNames": [
+        "docker.io/library/nats",
+        "library/nats",
+        "docker.io/natsio/nats-server-config-reloader",
+        "docker.io/natsio/nats-box"
+      ],
+      "groupName": "NATS",
+      "semanticCommitScope": "nats",
+      // Renovate only fires postUpgradeTasks that are part of the branch-level
+      // config, so the task belongs on the group rule.
+      "postUpgradeTasks": {
+        "commands": [
+          "helm-docs"
+        ],
+        "executionMode": "branch"
+      }
+    }
   ]
 }
