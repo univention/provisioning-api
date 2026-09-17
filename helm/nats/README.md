@@ -659,7 +659,7 @@ null
 			<td>nats.image.tag</td>
 			<td>string</td>
 			<td><pre lang="json">
-"2.14.6@sha256:d4a8980c1ee558257f196f86693ec919c7a8b8095dd678e2cb5ff1adcfe03ecb"
+"2.14.7@sha256:578f9e80385d6294ce200ff6019061f26b717301ff35ce0c1118a0249fc3c608"
 </pre>
 </td>
 			<td></td>
