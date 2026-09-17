@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2024 Univention GmbH
 
+{{- if .Values.registerConsumers.createUsers }}
 {{ $fullname := include "common.names.fullname" . }}
 {{ $fullnameWithRevision := include "provisioning.names.fullnameWithRevision" (dict "localName" "register-consumers" "context" .) }}
 ---
@@ -51,7 +52,6 @@ spec:
       {{- end }}
       restartPolicy: Never
       volumes:
-        {{- if .Values.registerConsumers.createUsers }}
         - name: consumer-secrets
           projected:
             sources:
@@ -63,7 +63,6 @@ spec:
                     - key: {{ include "nubus-common.secrets.key" (dict "existingSecret" $data.existingSecret "key" "registration" "context" .) }}
                       path: {{ printf "%s.json" ( lower $consumer ) }}
               {{- end }}
-        {{- end }}
         - name: "scripts-volume"
           configMap:
             name: {{ printf "%s-wait-for-api" $fullname }}
@@ -156,3 +155,4 @@ spec:
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
+{{- end }}
