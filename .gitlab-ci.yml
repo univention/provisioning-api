@@ -122,8 +122,8 @@ include:
     inputs:
       job_name_suffix: "-nats"
       source: "docker.io/library/nats"
-      tag: "2.14.7"
-      digest: "sha256:578f9e80385d6294ce200ff6019061f26b717301ff35ce0c1118a0249fc3c608"
+      tag: "2.15.0"
+      digest: "sha256:cd3fcd4ecdda44e3a66728a5334af0a959bc3979b32810e033d1c547241cd0f4"
       destination: "artifacts.software-univention.de/library/nats"
       # The default cosign:latest carries no skopeo yet,
       # common-ci's jlohmer/skopeo branch adds it.
