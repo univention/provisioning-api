@@ -114,6 +114,9 @@ RUN apt-get update && \
     patch -p1 -i /tmp/listener.py.patch /usr/lib/python3/dist-packages/listener.py && \
     patch -p1 -i /tmp/handler_logging.py.patch /usr/lib/python3/dist-packages/univention/listener/handler_logging.py && \
     apt-get purge --auto-remove --assume-yes patch && \
+    # bind9 arrives as a hard dependency of python3-univention-lib, which only
+    # calls dig for AD member mode. Keep this the last dpkg operation.
+    dpkg --purge --force-depends bind9-dnsutils bind9-host bind9-libs && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 ENV PYTHONUNBUFFERED=1 \
