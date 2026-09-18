@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>univention/dev/nubus-for-k8s/common-renovate#v1.8.5"
+    "local>univention/dev/nubus-for-k8s/common-renovate",
   ],
 
   // Look the mirrored images up on Docker Hub, because the mirror only ever
@@ -52,6 +52,19 @@
       ],
       "depNameTemplate": "docker.io/natsio/nats-box",
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "The upstream NATS images the mirror-image CI component copies",
+      // The component takes the reference as three inputs, so one matchString
+      // spans all three lines. They have to stay adjacent and in this order.
+      "managerFilePatterns": [
+        "/^\\.gitlab-ci\\.yml$/"
+      ],
+      "matchStrings": [
+        "source: \"(?<depName>[^\"]+)\"\\s+tag: \"(?<currentValue>[^\"]+)\"\\s+digest: \"(?<currentDigest>sha256:[0-9a-f]{64})\""
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
 
@@ -66,6 +79,9 @@
       ],
       "groupName": "NATS",
       "semanticCommitScope": "nats",
+      "prBodyNotes": [
+        "cc @jlohmer"
+      ],
       // Renovate only fires postUpgradeTasks that are part of the branch-level
       // config, so the task belongs on the group rule.
       "postUpgradeTasks": {
