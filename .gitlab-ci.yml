@@ -113,6 +113,42 @@ include:
       release_stage: "publish"
       cleanup_stage: ".post"
 
+  # Copy the pinned upstream NATS images into the registry that helm/nats,
+  # docker-compose.yaml and the App Center compose template pull from.
+  # These pins are the only upstream references in the repository;
+  # Renovate bumps them with the mirrored ones (NATS group in renovate.json5).
+  # TODO: pin to a released ci-components tag once the component branch is merged.
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@jlohmer-mirror-image-component"
+    inputs:
+      job_name_suffix: "-nats"
+      source: "docker.io/library/nats"
+      tag: "2.14.7"
+      digest: "sha256:578f9e80385d6294ce200ff6019061f26b717301ff35ce0c1118a0249fc3c608"
+      destination: "artifacts.software-univention.de/library/nats"
+      skip_rules: &mirror-skip-rules
+        - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "manual"'
+          when: "never"
+        - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/'
+          when: "never"
+
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@jlohmer-mirror-image-component"
+    inputs:
+      job_name_suffix: "-nats-box"
+      source: "docker.io/natsio/nats-box"
+      tag: "0.19.7-nonroot"
+      digest: "sha256:e86b9681f330ab1aa45744dd5cb367d44205b28fac2519a2f74ca0255803161a"
+      destination: "artifacts.software-univention.de/library/nats-box"
+      skip_rules: *mirror-skip-rules
+
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@jlohmer-mirror-image-component"
+    inputs:
+      job_name_suffix: "-nats-config-reloader"
+      source: "docker.io/natsio/nats-server-config-reloader"
+      tag: "0.24.0"
+      digest: "sha256:d758a82a9c20337e46c2f7356a413faa52cf4d6b02497c3ad81f72f1ba106464"
+      destination: "artifacts.software-univention.de/library/nats-server-config-reloader"
+      skip_rules: *mirror-skip-rules
+
   # Builds the univention-provisioning-service Debian package and uploads it
   # into the backend app version (not the UCS errata repository).
   - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-package@2.16.2"
@@ -338,103 +374,6 @@ package-helm-charts:
     - |
       echo "Packages left after removing the nats chart:"
       ls -l packages/dev packages/public
-
-# ===================================================================================================
-# Since the nats chart uses external images we create a release attestation for
-# those images while we're packaging the helm chart.
-# (Migrated from the nats-helm repository.)
-# ===================================================================================================
-extract-nats-image-info:
-  variables:
-    RUNNER_REGISTRY_IMAGE: "gitregistry.knut.univention.de/univention/infrastructure/ci-images/helm/helm"
-    RUNNER_IMAGE_TAG: "1.25.4@sha256:377c25e5acd3cc76d177d80a7b8be1b0df0dc35a712fafa352855b79aaf585c1"
-    ATTESTATION_IMAGE_LIST_FILE: "chart-image-list.txt"
-  stage: publish
-  needs: []
-  image:
-    name: "${RUNNER_REGISTRY_IMAGE}:${RUNNER_IMAGE_TAG}"
-    entrypoint: [""]
-  rules:
-    - *rules-skip-backend-release-tag
-    - when: "on_success"
-  script:
-    - |
-      # Extract image info from Helm chart for release attestation
-      helm dependency build helm/nats --skip-refresh
-      helm template n helm/nats --values helm/nats/linter_values.yaml --set reloader.enabled=true --set natsBox.enabled=true \
-        | grep image: | grep nats | awk '{print $2}' | sort -u | tr -d '"' \
-        | tee "${ATTESTATION_IMAGE_LIST_FILE}"
-  artifacts:
-    paths:
-      - "${ATTESTATION_IMAGE_LIST_FILE}"
-    expire_in: 1 hour
-
-nats-container-release-attestation:
-  variables:
-    RUNNER_REGISTRY_IMAGE: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-ci/cosign"
-    RUNNER_IMAGE_TAG: "latest"
-    ATTESTATION_IMAGE_LIST_FILE: "chart-image-list.txt"
-    COSIGN_PASSWORD: ""
-  stage: "publish"
-  image: "${RUNNER_REGISTRY_IMAGE}:${RUNNER_IMAGE_TAG}"
-  rules:
-    - *rules-skip-backend-release-tag
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: "never"
-    - when: "on_success"
-  needs:
-    - extract-nats-image-info
-  # Scope COSIGN_PRIVATE_KEY to this environment
-  environment:
-    name: "secured"
-    action: "prepare"
-  script:
-    - !reference [".bash-header-script", "script"]
-    - !reference [".check-required-variables-bash-script", "script"]
-    - !reference [".release-json-bash-script", "script"]
-    - |
-      required_variables=(
-        COSIGN_PRIVATE_KEY
-        COSIGN_PUBLIC_KEY
-        EXTERNAL_REGISTRY_ROBOT_TOKEN
-        EXTERNAL_REGISTRY_ROBOT_ACCOUNT
-        EXTERNAL_PRIVATE_IMAGE_REGISTRY
-        EXTERNAL_PUBLIC_IMAGE_REGISTRY
-      )
-      check_required_variables 1 "${required_variables[@]}"
-      echo ${COSIGN_PRIVATE_KEY} | base64 -d > ${CI_PROJECT_DIR}/cosign.key
-      echo ${COSIGN_PUBLIC_KEY} | base64 -d > ${CI_PROJECT_DIR}/cosign.pub
-    - |
-      # Perform attestation for all images listed in the extracted image list file
-      while IFS= read -r image; do
-        # extract image components
-        image_name=${image//:*/}
-        image_digest=${image//*@}
-        image_version=${image/$image_name:/}
-        image_version=${image_version/@$image_digest/}
-
-        echo "Verifying existing attestation for image: ${image_name}@${image_digest}"
-        cosign verify-attestation --key ${CI_PROJECT_DIR}/cosign.pub \
-          --type https://in-toto.io/attestation/release/v0.1 \
-          ${image_name}@${image_digest} >& /dev/null \
-          && echo "Release attestation exists." && continue
-
-        echo "Attesting image: ${image_name}@${image_digest}, version: ${image_version}"
-        dump-release-json \
-          IMAGE_REGISTRY_URL="${image_name%/*}" \
-          IMAGE_NAME="${image_name/*\//}" \
-          IMAGE_DIGEST="${image//*@}" \
-          RELEASE_VERSION="${image_version}" \
-          | tee ${CI_PROJECT_DIR}/release-attestation.json
-
-        cosign attest --yes --replace --key ${CI_PROJECT_DIR}/cosign.key \
-          --registry-username "$EXTERNAL_REGISTRY_ROBOT_ACCOUNT" \
-          --registry-password "$EXTERNAL_REGISTRY_ROBOT_TOKEN" \
-          --type https://in-toto.io/attestation/release/v0.1 \
-          --predicate "${CI_PROJECT_DIR}/release-attestation.json" \
-          ${image_name}@${image_digest}
-
-      done < "${ATTESTATION_IMAGE_LIST_FILE}"
 
 push-image-external:
   parallel:
