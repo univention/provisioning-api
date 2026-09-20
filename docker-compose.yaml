@@ -181,7 +181,8 @@ services:
       LDAP_BASE_DN: "dc=univention-organization,dc=intranet"
       IGNORE_TEMPORARY_OBJECTS: "true"
     volumes:
-      - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
+      # Mounted as base.conf, not base-defaults.conf, so the image's own defaults layer still applies.
+      - ./tests/base-defaults.conf:/etc/univention/base.conf:ro
       - ldap-socket:/var/lib/univention-ldap/slapd-sock/:rw
 
   udm-listener:
@@ -241,7 +242,8 @@ services:
       - ldap-shared-data:/var/lib/univention-ldap/:rw
       - ldap-shared-run:/var/run/slapd/:rw
       - ${LDAP_SOCKET_LOCATION:-ldap-socket}:/var/lib/univention-ldap/slapd-sock/:rw
-      - ./tests/base-defaults.conf:/etc/univention/base-defaults.conf:ro
+      # Mounted as base.conf, not base-defaults.conf, so the image's own defaults layer still applies.
+      - ./tests/base-defaults.conf:/etc/univention/base.conf:ro
 
   ldap-admin:
     image: osixia/phpldapadmin:0.9.0
