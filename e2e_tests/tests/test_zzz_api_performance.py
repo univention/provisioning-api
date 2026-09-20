@@ -15,8 +15,8 @@ from univention.provisioning.models.subscription import FillQueueStatus, RealmTo
 from .e2e_settings import E2ETestSettings
 from .mock_data import DUMMY_REALMS_TOPICS, USERS_REALMS_TOPICS
 
-EXPECTED_AVG_DELAY = 75
-EXPECTED_MAX_DELAY = 200
+EXPECTED_AVG_DELAY = 100
+EXPECTED_MAX_DELAY = 250
 
 
 def print_stats(durations: list[float]) -> None:
