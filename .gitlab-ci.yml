@@ -61,7 +61,7 @@ include:
       job_prefix: "provisioning-service-"
       ucs_base_version: "5.2"
       # TODO: point at a public changelog page once one exists.
-      changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/blob/main/CHANGELOG.md"
+      changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/releases"
       mail_recipient: "app-announcement@univention.de"
       mail_sender: "nubus-core@univention.de"
       author_alias: "Nubus Core Team"
@@ -103,7 +103,7 @@ include:
       job_prefix: "provisioning-service-backend-"
       ucs_base_version: "5.2"
       # TODO: point at a public changelog page once one exists.
-      changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/blob/main/CHANGELOG.md"
+      changelog_link: "https://git.knut.univention.de/univention/dev/projects/provisioning/-/releases"
       mail_recipient: "app-announcement@univention.de"
       mail_sender: "nubus-core@univention.de"
       author_alias: "Nubus Core Team"
