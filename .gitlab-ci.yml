@@ -24,16 +24,22 @@ workflow:
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.68.0"
+    # TEST RUN: pinned to a feature branch to validate the "build pushes
+    # straight to harbor, no push-image-external job" change end to end
+    # before it lands in common-ci proper. Revert to a tagged common-ci
+    # release once validated.
+    ref: "isakov/skip-push-to-gitregistry"
     file:
       - "defaults/stages.yaml"
-      - "defaults/nubus-workflow.yaml"
+#      - "defaults/nubus-workflow.yaml"
       - "jobs/lint-pre-commit.yaml"
       - "jobs/lint-commit-messages.yaml"
       # Release only from a protected tag (see the workflow block above) instead
       # of auto-releasing from main via semantic-release.
       - "templates/tagged-release.yaml"
-      - "jobs/container-build-external-buildkit.yaml"
+      - "jobs/container-build-direct-buildkit.yaml"
+      - "jobs/container-publish-direct.yaml"
+      - "jobs/container-malware-scan.yaml"
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/sonarqube.yaml"
@@ -251,10 +257,15 @@ container-build:
 container-malware-scan:
   parallel:
     matrix: *publish-matrix
+  variables:
+    SCAN_REGISTRY_IMAGE: "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}"
 
 test-unit-and-integration:
   stage: "test"
-  image: "${CI_REGISTRY_IMAGE}/testrunner:${RELEASE_VERSION}"
+  # The testrunner image lives in harbor (private project) now, not
+  # gitregistry, harbor serves that project's images without
+  # authentication.
+  image: "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/testrunner:${RELEASE_VERSION}"
   rules:
     # Must stay in lockstep with container-build: no testrunner image is
     # built for a backend-only release tag.
@@ -374,12 +385,12 @@ package-helm-charts:
       echo "Packages left after removing the nats chart:"
       ls -l packages/dev packages/public
 
-push-image-external:
+promote-image-public:
   parallel:
     matrix: *publish-matrix
   rules:
     - *rules-skip-backend-release-tag
-    - !reference [".push-image-external", "rules"]
+    - !reference [".promote-image-external-public", "rules"]
 
 container-sign-external:
   parallel:
@@ -399,7 +410,7 @@ check-debian-updates:
   parallel:
     matrix: *publish-matrix
   variables:
-    TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+    TARGET_IMAGE: "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/${IMAGE_NAME}:latest"
 
 sonarqube:
   extends: .sonarqube
