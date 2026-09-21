@@ -227,30 +227,18 @@ container-malware-scan:
 
 test-unit-and-integration:
   stage: "test"
-  # The testrunner image now lives in harbor (private project), not
-  # gitregistry, so it can't be pulled via the native "image:" keyword
-  # (that pull happens before any in-job login could take effect, and there
-  # is no DOCKER_AUTH_CONFIG configured for harbor). Pull it explicitly
-  # instead, via .dind, reusing the same robot-account login pattern already
-  # used by promote-image-public/container-sign-external.
-  extends: .dind
-  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+  # The testrunner image lives in harbor (private project) now, not
+  # gitregistry - but harbor serves that project's images without
+  # authentication, so the native "image:" pull (which happens before any
+  # in-job login could take effect) works exactly as it did with gitregistry.
+  image: "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/testrunner:${RELEASE_VERSION}"
   rules:
     # Must stay in lockstep with container-build: no testrunner image is
     # built for a backend-only release tag.
     - *rules-skip-backend-release-tag
     - when: "on_success"
-  before_script:
-    - unset DOCKER_API_VERSION
-    - echo "${EXTERNAL_REGISTRY_ROBOT_TOKEN}" | docker login "${EXTERNAL_REGISTRY_HOST}" --username "${EXTERNAL_REGISTRY_ROBOT_ACCOUNT}" --password-stdin
-    - docker pull "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/testrunner:${RELEASE_VERSION}"
   script:
-    - >
-      docker run --rm
-      -v "${CI_PROJECT_DIR}:${CI_PROJECT_DIR}"
-      -w "${CI_PROJECT_DIR}"
-      "${EXTERNAL_PRIVATE_IMAGE_REGISTRY}/testrunner:${RELEASE_VERSION}"
-      python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
+    - python3 -m pytest -lvv --cov=backends/src/ --cov=common/src/ --cov=consumer/src/ --cov dispatcher/src/ --cov=prefill/src/ --cov=rest-api/src/ --cov=udm-transformer/src/ --cov-report=term --cov-report=xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
@@ -274,10 +262,9 @@ test-end-to-end:
     # Allow that the Docker API version is negotiated between client and server
     - unset DOCKER_API_VERSION
     - export IMAGE_TAG=${RELEASE_VERSION}
-    # docker-compose.yaml now pulls our own images from harbor (private
-    # project), not gitregistry, so they need an explicit login too - same
-    # robot-account pattern as test-unit-and-integration.
-    - echo "${EXTERNAL_REGISTRY_ROBOT_TOKEN}" | docker login "${EXTERNAL_REGISTRY_HOST}" --username "${EXTERNAL_REGISTRY_ROBOT_ACCOUNT}" --password-stdin
+    # docker-compose.yaml pulls our own images from harbor (private project)
+    # now, not gitregistry - no login needed, harbor serves that project's
+    # images without authentication, same as gitregistry did.
     - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
     - echo $IMAGE_TAG
     - docker version
