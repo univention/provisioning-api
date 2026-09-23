@@ -474,4 +474,9 @@ deb_repo_build:
 upload_from_build_system:
   rules:
     - when: never
+
+pip-package-and-publish-with-uv-common:
+  allow_failure: true
+pip-package-and-publish-with-uv-consumer:
+  allow_failure: true
 ...
