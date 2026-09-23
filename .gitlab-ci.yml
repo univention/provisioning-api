@@ -42,11 +42,11 @@ include:
     file:
       - "dind.yml"
 
-  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/pip-package-and-publish-with-uv@v1.66.3"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.18.0"
     inputs:
       package_root: "common"
       job_name_suffix: "-common"
-  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/pip-package-and-publish-with-uv@v1.66.3"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.18.0"
     inputs:
       package_root: "consumer"
       job_name_suffix: "-consumer"
@@ -474,9 +474,4 @@ deb_repo_build:
 upload_from_build_system:
   rules:
     - when: never
-
-pip-package-and-publish-with-uv-common:
-  allow_failure: true
-pip-package-and-publish-with-uv-consumer:
-  allow_failure: true
 ...
