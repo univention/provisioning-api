@@ -119,8 +119,8 @@ include:
     inputs:
       job_name_suffix: "-nats-box"
       source: "docker.io/natsio/nats-box"
-      tag: "0.19.7-nonroot"
-      digest: "sha256:e86b9681f330ab1aa45744dd5cb367d44205b28fac2519a2f74ca0255803161a"
+      tag: "0.20.0-nonroot"
+      digest: "sha256:be25666441c3aee65193aba33d60ff2f06ede7ee9eba58864324b33d7eb94fea"
       destination: "artifacts.software-univention.de/library/nats-box"
       skip_rules: *mirror-skip-rules
 
