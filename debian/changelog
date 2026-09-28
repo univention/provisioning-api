@@ -1,3 +1,9 @@
+univention-provisioning-service (2.0.4) unstable; urgency=medium
+
+  * Support pydantic v2 in the listener module for UCS 5.3.
+
+ -- Jürn Brodersen <brodersen@univention.de>  Mon, 28 Sep 2026 18:00:11 +0200
+
 univention-provisioning-service (2.0.3) unstable; urgency=medium
 
   * Fix ensure_queue_exists retry off-by-one error.
