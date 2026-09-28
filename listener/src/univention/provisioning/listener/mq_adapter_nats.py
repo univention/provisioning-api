@@ -15,8 +15,13 @@ import msgpack
 from nats.aio.client import Client as NATS
 from nats.js.api import RetentionPolicy, StreamConfig
 from nats.js.errors import NotFoundError
-from pydantic import BaseModel, Field, root_validator
-from pydantic.json import pydantic_encoder
+
+try:
+    from pydantic.v1 import BaseModel, Field, root_validator
+    from pydantic.v1.json import pydantic_encoder
+except ImportError:
+    from pydantic import BaseModel, Field, root_validator
+    from pydantic.json import pydantic_encoder
 
 from .config import LdapProducerSettings, ldap_producer_settings
 from .mq_port import MessageQueuePort

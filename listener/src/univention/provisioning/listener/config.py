@@ -4,7 +4,10 @@ import os
 from functools import lru_cache
 from typing import Any, Callable, Dict, Tuple
 
-from pydantic import BaseSettings, conint
+try:
+    from pydantic.v1 import BaseSettings, conint
+except ImportError:
+    from pydantic import BaseSettings, conint
 
 SettingsSourceCallable = Callable[["BaseSettings"], Dict[str, Any]]
 
