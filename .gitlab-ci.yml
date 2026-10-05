@@ -21,10 +21,12 @@ workflow:
     - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
+    # Trial only: pipelines created through the API. Remove before merging.
+    - if: '$CI_PIPELINE_SOURCE == "api"'
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.68.2"
+    ref: "mmeschter/sbom-upload"  # Trial only: common-ci MR 259 records pushed/<IMAGE_NAME>. Pin a release before merging.
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -41,6 +43,32 @@ include:
     ref: "master"
     file:
       - "dind.yml"
+
+  # Build-time SBOM: attested to the image and uploaded to the Dependency-Track
+  # v5 instance as a release-versioned project. Included from vul-man directly
+  # while the component and its common-ci wrapper are unreleased;
+  # switch to common-ci's "jobs/sbom-upload.yaml" once both are tagged.
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/vulnerability-management/sbom-upload@mmeschter/sbom-upload"
+    inputs:
+      # vul-man's DEP_TRACK_API_KEY belongs to the v4 instance; the v5 one has its own key.
+      dep_track_api_key: "$DEP_TRACK_V5_API_KEY"
+      # The hubble ingress serves its certificate without the intermediate.
+      # Known cluster issue; drop this once it is fixed.
+      dep_track_ca_bundle: "$DEP_TRACK_V5_CA_BUNDLE"
+      # Trial only: the vul-man image exists under its branch version until the
+      # vul-man MR is merged and released. Remove before merging.
+      vul_man_image: "gitregistry.knut.univention.de/univention/dev/tooling/vulnerability-management/vul-man:1.0.0-pre-mmeschter-sbom-upload@sha256:35d47c1bd6204b0c15f250ecd3b39b9d974ec18cb86115386adf8d77a8b19818"
+      # Trial only: this branch is never a release. Remove before merging.
+      release_only: false
+      # Trial only: lets a pipeline started from the "Run pipeline" form or the
+      # API on this branch run the job. Remove before merging; the defaults are
+      # main and release tags.
+      job_rules:
+        - if: '$CI_PIPELINE_SOURCE == "schedule"'
+          when: "never"
+        - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api"'
+        - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
+        - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
   - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.18.0"
     inputs:
@@ -249,13 +277,10 @@ test-end-to-end:
   stage: "test"
   extends: .dind
   image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
-  rules: &rules_dind
-    - *rules-skip-backend-release-tag
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: "never"
-    - if: '$GITLAB_USER_ID == $RENOVATE_USER_ID && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS !~ /Renovate run dind/'
-      when: "manual"
-    - when: "on_success"
+  # Trial only: the docker-in-docker e2e test is skipped on this branch to keep
+  # the SBOM upload trial pipelines short. Remove before merging.
+  rules:
+    - when: "never"
   before_script:
     # Allow that the Docker API version is negotiated between client and server
     - unset DOCKER_API_VERSION
@@ -357,6 +382,10 @@ push-image-external:
     - !reference [".push-image-external", "rules"]
 
 container-sign-external:
+  parallel:
+    matrix: *publish-matrix
+
+sbom-upload:
   parallel:
     matrix: *publish-matrix
   rules:
