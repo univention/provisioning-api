@@ -1,0 +1,16 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Univention GmbH
+#
+# Server password change hook of the univention-provisioning-service-config package.
+#
+
+. /usr/lib/univention-server/lib/server_password_change/debug.sh
+. /usr/share/univention-lib/base.sh
+
+[ "$1" = "postchange" ] || exit 0
+
+[ "$(ucr get appcenter/apps/provisioning-service/status)" = "installed" ] || exit 0
+
+echowithtimestamp "reinitializing provisioning-service after server password change"
+univention-app reinitialize provisioning-service
