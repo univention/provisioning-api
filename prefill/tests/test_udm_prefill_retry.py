@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
+import aiohttp
 import pytest
 from polyfactory.factories.pydantic_factory import ModelFactory
 from polyfactory.pytest_plugin import register_fixture
@@ -179,9 +180,40 @@ class TestUDMPreFillRetry:
             ]
         )
 
-        with pytest.raises(ExceptionGroup):
-            await udm_prefill.handle_requests_to_prefill()
+        try:
+            with pytest.raises(ExceptionGroup):
+                await udm_prefill.handle_requests_to_prefill()
+        finally:
+            httpserver.start()
 
         end = time.time()
         # if 3 tries fail we wait for 7s (1 + 2 + 4)
         assert (end - start) >= 7
+
+    @patch("univention.provisioning.prefill.prefill_service.datetime")
+    async def test_no_retry_and_error_log_on_udm_unauthorized(
+        self, mock_datetime, udm_prefill: PrefillService, httpserver, caplog
+    ):
+        mock_datetime.now.return_value = datetime(2023, 11, 9, 11, 15, 52, 616061)
+        udm_prefill.mq.get_one_message = AsyncMock(
+            side_effect=[
+                (MQMESSAGE_PREFILL, AsyncMock()),
+                EscapeLoopException("Stop waiting for the new event"),
+            ]
+        )
+
+        attempts = 0
+
+        def unauthorized(request) -> Response:
+            nonlocal attempts
+            attempts += 1
+            return Response(status=401)
+
+        httpserver.expect_request(f"/udm/{GROUPS_TOPIC}/3").respond_with_handler(unauthorized)
+
+        with pytest.raises(ExceptionGroup) as exc_info:
+            await udm_prefill.handle_requests_to_prefill()
+
+        assert exc_info.group_contains(aiohttp.ClientResponseError, match="^401")
+        assert attempts == 1
+        assert any(record.levelno == logging.ERROR and "HTTP 401" in record.getMessage() for record in caplog.records)
