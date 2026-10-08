@@ -3,6 +3,7 @@
 
 import logging
 import ssl
+from http import HTTPStatus
 from typing import Any, Optional
 
 import aiohttp
@@ -54,8 +55,18 @@ class UDMAdapter(UDMPort):
 
             connector = aiohttp.TCPConnector(ssl=ssl_context)
             self._session = aiohttp.ClientSession(
-                auth=self.auth, connector=connector, headers=self.headers, raise_for_status=True
+                auth=self.auth, connector=connector, headers=self.headers, raise_for_status=self._raise_for_status
             )
+
+    async def _raise_for_status(self, response: aiohttp.ClientResponse) -> None:
+        if response.status == HTTPStatus.UNAUTHORIZED:
+            logger.error(
+                "The UDM REST API at %r rejected the credentials of user %r (HTTP 401). "
+                "Check the configured UDM username and password.",
+                self.base_url,
+                self.settings.udm_username,
+            )
+        response.raise_for_status()
 
     async def close(self) -> None:
         if self._session:
