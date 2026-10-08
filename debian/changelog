@@ -1,3 +1,10 @@
+univention-provisioning-service (2.0.4) unstable; urgency=medium
+
+  * Add a server password change hook that reinitializes the
+    provisioning-service app, so prefill uses the new machine password.
+
+ -- Enock kipsang <enock.kipsang@univention.de>  Wed, 14 Oct 2026 18:07:26 +0300
+
 univention-provisioning-service (2.0.3) unstable; urgency=medium
 
   * Fix ensure_queue_exists retry off-by-one error.
