@@ -1,0 +1,15 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Univention GmbH
+#
+# Server password change hook, installed to
+# /usr/lib/univention-server/server_password_change.d/ by the provisioning-service app.
+#
+# The prefill container authenticates against the UDM REST API with the machine
+# account. Its password is passed as environment variable at container creation,
+# so the containers have to be recreated after /etc/machine.secret changed.
+
+[ "$1" = "postchange" ] || exit 0
+
+echo "($(date '+%F %T.%N')) reinitializing provisioning-service after server password change" | logger -t "server-password-change"
+univention-app reinitialize provisioning-service

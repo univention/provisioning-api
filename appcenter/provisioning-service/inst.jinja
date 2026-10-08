@@ -4,7 +4,7 @@
 
 ## joinscript api: bindpwdfile
 
-VERSION=1
+VERSION=2
 . /usr/share/univention-join/joinscripthelper.lib
 . /usr/share/univention-lib/all.sh
 
@@ -31,6 +31,13 @@ wait_for_nats () {
 wait_for_nats || die
 
 systemctl restart univention-directory-listener
+
+password_change_hook_path=/usr/lib/univention-server/server_password_change.d/50provisioning-service
+echo "Installing provisioning server password change hook at $password_change_hook_path"
+cat <<'%EOF' >"$password_change_hook_path"
+{{ "appcenter/provisioning-service/scripts/50provisioning-service" | source }}
+%EOF
+chmod +x "$password_change_hook_path"
 
 ROLE="$(ucr get server/role)"
 echo "Detected server role: ${ROLE}"

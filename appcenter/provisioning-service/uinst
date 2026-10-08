@@ -19,6 +19,12 @@ if [ -f "$backup2master_path" ]; then
     rm -f "$backup2master_path"
 fi
 
+password_change_hook_path=/usr/lib/univention-server/server_password_change.d/50provisioning-service
+if [ -f "$password_change_hook_path" ]; then
+    echo "Removing $password_change_hook_path"
+    rm -f "$password_change_hook_path"
+fi
+
 # remove service
 ucs_removeServiceFromLocalhost "$SERVICE" "$@"
 
