@@ -351,7 +351,7 @@ nats:
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "library/nats"
-    tag: "2.15.0@sha256:cd3fcd4ecdda44e3a66728a5334af0a959bc3979b32810e033d1c547241cd0f4"
+    tag: "2.15.1@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490"
   # -- Array with extra environment variables to add to containers.
   #
   # extraEnvVars:
@@ -384,7 +384,7 @@ natsBox:
     # -- Container registry address. This setting has higher precedence than global.registry.
     registry: null
     repository: "library/nats-box"
-    tag: "0.19.7-nonroot@sha256:e86b9681f330ab1aa45744dd5cb367d44205b28fac2519a2f74ca0255803161a"
+    tag: "0.20.0-nonroot@sha256:be25666441c3aee65193aba33d60ff2f06ede7ee9eba58864324b33d7eb94fea"
   resources:
     limits:
       memory: "256Mi"
