@@ -134,6 +134,7 @@ spec:
             - "-c"
           args:
             - |
+              rc=0
               for file in /secrets/*; do
                 filename=$(basename "${file}" .json)
                 response=$(set +x; curl -s -o response.txt -w "%{http_code}" -u "${ADMIN_USERNAME}":"${ADMIN_PASSWORD}" \
@@ -148,10 +149,11 @@ spec:
                   echo "Failed to register the consumer: "${filename}"
               Response code: "${response}"
               Response body: $(cat response.txt)"
-                  exit 1
+                  rc=1
                 fi
                 echo ------------------------------------
               done
+              exit "$rc"
           {{- if .Values.resources.registerConsumers }}
           resources: {{- include "common.tplvalues.render" (dict "value" .Values.resources.registerConsumers "context" .) | nindent 12 }}
           {{- end }}
