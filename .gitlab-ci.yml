@@ -248,7 +248,7 @@ test-end-to-end:
   allow_failure: true
   stage: "test"
   extends: .dind
-  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7"
+  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.7@sha256:52459560108c9833c5ae0ffb998fc2677616ffb7f759177cd8b8b4cf2cb8f157"
   rules: &rules_dind
     - *rules-skip-backend-release-tag
     - if: '$CI_PIPELINE_SOURCE == "schedule"'

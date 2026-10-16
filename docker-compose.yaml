@@ -167,7 +167,7 @@ services:
       - "nats3"
     platform: linux/amd64
     container_name: "ldif-producer"
-    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest@sha256:36bad6af100c6d95cc556b0db4b074189db450c571959a0244af6497e32c40f3"
     # Can be uncommented to simplify local development.
     # build:
     #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
@@ -215,7 +215,7 @@ services:
 
   ldap-notifier:
     platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-notifier:latest
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-notifier:latest@sha256:28a94c9427d125981434d10ec01c8b0fe4550fb112259b71e956b333ab9b41e8
     container_name: "ldap-notifier"
     depends_on:
       ldap-server:
@@ -228,7 +228,7 @@ services:
 
   ldap-server:
     platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest@sha256:2337d5bb8b3edf347029bb8e493423be966cd10bce726a3c39fd8f1e4439d436
     container_name: "ldap-server"
     ulimits:
       nofile:
@@ -250,7 +250,7 @@ services:
       - ./tests/base-defaults.conf:/etc/univention/base.conf:ro
 
   ldap-admin:
-    image: osixia/phpldapadmin:0.9.0
+    image: osixia/phpldapadmin:0.9.0@sha256:d112b82be1336f91e028b0348755133fda333992355b533419355a65c32ff9ad
     environment:
       PHPLDAPADMIN_LDAP_HOSTS: "#PYTHON2BASH:[{'ldap-server':{'login':{'bind_id':'cn=admin,dc=univention-organization,dc=intranet'}}}]"
       PHPLDAPADMIN_HTTPS: "false"
@@ -260,7 +260,7 @@ services:
       - 8001:80
 
   udm-rest-api: &udm-rest-api
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest@sha256:16974654f671d82ce9246067b7af31878cc404645e26a0aa35d2b259834686a0
     container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
@@ -337,7 +337,7 @@ services:
   pre-commit:
     profiles:
       - test
-    image: gitregistry.knut.univention.de/univention/dev/tooling/pre-commit/upx-pre-commit:latest
+    image: gitregistry.knut.univention.de/univention/dev/tooling/pre-commit/upx-pre-commit:latest@sha256:463c8492054d807da3d1ca41dc46ee155ea5f421a941cacf211ab169fce880c9
     volumes:
       - type: bind
         source: .
@@ -350,7 +350,7 @@ services:
 
   # Environment to build the documentation
   docs:
-    image: docker-registry.knut.univention.de/sphinx:latest
+    image: docker-registry.knut.univention.de/sphinx:latest@sha256:bd2b67f65aec9681e583379363a9ffb34037e636e79dcf62f5353c4769f228ed
     working_dir: /src/docs
     volumes:
       - ".:/src"
