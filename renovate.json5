@@ -76,7 +76,7 @@
       "groupName": "NATS",
       "semanticCommitScope": "nats",
       "prBodyNotes": [
-        "cc @jlohmer"
+        "cc @jlohmer @fbest @ccastens @fbotner @jconde @ekipsang"
       ],
       // Renovate only fires postUpgradeTasks that are part of the branch-level
       // config, so the task belongs on the group rule.
