@@ -49,16 +49,11 @@ COPY ./consumer_example/src /app/consumer_example/src
 RUN --mount=type=cache,target=/root/.cache \
   uv sync --locked --no-dev --package nubus-provisioning-consumer-example --no-editable
 
-# Verify the entrypoint imports while a shell is still available; the final
-# stage has none.
-RUN \
-  /app/consumer_example/.venv/bin/python -c 'import univention.provisioning.consumer_example.main'
-
 ###############################################
 # Stage 2: final image
 #
-# Distroless: no shell, so no RUN steps here. The user, os-release and CA
-# bundle come from the base image.
+# Distroless: no shell, so every instruction here is exec form. The user,
+# os-release and CA bundle come from the base image.
 FROM ${UCS_DISTROLESS_IMAGE}:${UCS_DISTROLESS_IMAGE_TAG} AS final
 
 ENV PYTHONUNBUFFERED=1 \
@@ -67,6 +62,9 @@ ENV PYTHONUNBUFFERED=1 \
 COPY --from=build /app/consumer_example /app/consumer_example
 
 WORKDIR /app
+
+# Verify the entrypoint imports in the image that ships.
+RUN ["python3.13", "-c", "import univention.provisioning.consumer_example.main"]
 
 # The base image sets an ENTRYPOINT of its own; reset it so that CMD is the
 # whole command line.

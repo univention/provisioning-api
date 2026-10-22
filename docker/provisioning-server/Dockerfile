@@ -7,9 +7,10 @@
 # process with the container command; see docs/simplify/README.md (W2).
 
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
+ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20261008@sha256:c50651cd92b620100d4a897f84e1a8976ad50915cd3ff2410c55288dab3b7246
+
 ARG UCS_DISTROLESS_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-distroless-python
 ARG UCS_DISTROLESS_IMAGE_TAG=5.3.0-build.20260917@sha256:a965bfba1bb1af8cf0c47d6e436c8a37aaa26ed15b29c9b55636839b2b8436e3
-ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20261008@sha256:c50651cd92b620100d4a897f84e1a8976ad50915cd3ff2410c55288dab3b7246
 
 ###############################################
 # Stage 1: build dependencies and software
@@ -71,23 +72,11 @@ RUN --mount=type=cache,target=/root/.cache \
     --package nubus-provisioning-udm-transformer \
     --no-editable
 
-# Verify every entrypoint imports while a shell is still available; the final
-# stage has none. rest-api reads its settings at import time, hence the env.
-RUN \
-  /app/.venv/bin/python -c 'import univention.provisioning.dispatcher.main' && \
-  /app/.venv/bin/python -c 'import univention.provisioning.prefill.main' && \
-  /app/.venv/bin/python -c 'import univention.provisioning.udm_transformer.main' && \
-  LOG_LEVEL=DEBUG DEBUG=false ROOT_PATH=/ CORS_ALL=false \
-  ADMIN_USERNAME=x ADMIN_PASSWORD=x NATS_USER=x NATS_PASSWORD=x NATS_HOST=x NATS_PORT=1 \
-  ADMIN_NATS_USER=x ADMIN_NATS_PASSWORD=x PREFILL_USERNAME=x PREFILL_PASSWORD=x \
-  EVENTS_USERNAME_UDM=x EVENTS_PASSWORD_UDM=x \
-  /app/.venv/bin/python -c 'import univention.provisioning.rest.main'
-
 ###############################################
 # Stage 2: final image
 #
-# Distroless: no shell, so no RUN steps here. The user, os-release and CA
-# bundle come from the base image.
+# Distroless: no shell, so no shell-form RUN steps here. The user, os-release
+# and CA bundle come from the base image.
 FROM ${UCS_DISTROLESS_IMAGE}:${UCS_DISTROLESS_IMAGE_TAG} AS final
 
 EXPOSE 7777
@@ -100,6 +89,25 @@ COPY --from=build /app/requirements.txt /app/requirements.txt
 
 WORKDIR /app
 
-# No default process: the base image's ENTRYPOINT is reset and no CMD is set, so
-# every caller has to name the service it wants (see helm values / compose).
+# Verify every entrypoint imports in the image that ships.
+# There is no /bin/sh, so SHELL is the interpreter.
+# hadolint shellchecks the heredoc as sh regardless of SHELL.
+SHELL ["python3.13", "-c"]
+# hadolint ignore=SC2239
+RUN <<EOF
+import pydantic
+import univention.provisioning.dispatcher.main
+import univention.provisioning.prefill.main
+import univention.provisioning.udm_transformer.main
+try:
+    import univention.provisioning.rest.main
+except pydantic.ValidationError:
+    pass  # main.py reads its settings at import time, after all of its imports ran
+EOF
+
+# hadolint only parses the heredoc as closed when a blank line follows EOF.
+SHELL ["/bin/sh", "-c"]
+
+# No default process: the base image's ENTRYPOINT is reset and no CMD is set,
+# so every caller has to name the service it wants (see helm values / compose).
 ENTRYPOINT []
