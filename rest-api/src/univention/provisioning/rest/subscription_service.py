@@ -20,6 +20,13 @@ from .subscriptions_db_port import NoSubscription, SubscriptionsDBPort
 logger = logging.getLogger(__name__)
 PASSWORD_CACHE_TTL = 30.0
 REALM_TOPIC_TEMPLATE = "{realm}:{topic}"
+BCRYPT_MAX_PASSWORD_BYTES = 72
+
+
+def _encode_password(cleartext_pw: str) -> bytes:
+    # bcrypt ignores everything past 72 bytes. bcrypt>=5 raises instead of truncating,
+    # so truncate here to keep the behaviour of passlib and of hashes it wrote.
+    return cleartext_pw.encode("UTF-8")[:BCRYPT_MAX_PASSWORD_BYTES]
 
 
 def hash_password(cleartext_pw: str) -> str:
@@ -28,7 +35,7 @@ def hash_password(cleartext_pw: str) -> str:
     gensalt() defaults to cost 12 and the $2b$ ident, matching what passlib's
     CryptContext(schemes=["bcrypt"]) produced, so older hashes stay verifiable.
     """
-    return bcrypt.hashpw(cleartext_pw.encode("UTF-8"), bcrypt.gensalt()).decode("ASCII")
+    return bcrypt.hashpw(_encode_password(cleartext_pw), bcrypt.gensalt()).decode("ASCII")
 
 
 @cachetools.func.ttl_cache(maxsize=32, ttl=PASSWORD_CACHE_TTL)
@@ -39,7 +46,7 @@ def verify_password(cleartext_pw: str, hashed_pw: str, subscription_name: Option
     Caches all hits and exceptions!
     But the caller (SubscriptionService.authenticate_user()) will delete negative hits, so we cache only positive hits.
     """
-    return bcrypt.checkpw(cleartext_pw.encode("UTF-8"), hashed_pw.encode("ASCII"))  # takes ~200ms
+    return bcrypt.checkpw(_encode_password(cleartext_pw), hashed_pw.encode("ASCII"))  # takes ~200ms
 
 
 class SubscriptionService:
@@ -75,7 +82,7 @@ class SubscriptionService:
             return False
 
         hashed_password = await self.sub_db.load_hashed_password(new_sub.name)
-        return bcrypt.checkpw(new_sub.password.encode("UTF-8"), hashed_password.encode("ASCII"))
+        return bcrypt.checkpw(_encode_password(new_sub.password), hashed_password.encode("ASCII"))
 
     async def register_subscription(self, new_sub: NewSubscription) -> bool:
         """
