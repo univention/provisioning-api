@@ -107,7 +107,7 @@ include:
       job_name_suffix: "-nats"
       source: "docker.io/library/nats"
       tag: "2.15.1"
-      digest: "sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490"
+      digest: "sha256:023a08c46caa5aff878fb86841187bebfdad9a6e3c552ba5c1a1e18938bbf88a"
       destination: "artifacts.software-univention.de/library/nats"
       skip_rules: &mirror-skip-rules
         - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "manual"'
@@ -119,8 +119,8 @@ include:
     inputs:
       job_name_suffix: "-nats-box"
       source: "docker.io/natsio/nats-box"
-      tag: "0.20.0-nonroot"
-      digest: "sha256:be25666441c3aee65193aba33d60ff2f06ede7ee9eba58864324b33d7eb94fea"
+      tag: "0.20.1-nonroot"
+      digest: "sha256:9eec37227e52bf4d207ffc246284034c18dd09d51bae0bfd2af9dbbd77ba4d44"
       destination: "artifacts.software-univention.de/library/nats-box"
       skip_rules: *mirror-skip-rules
 
@@ -128,8 +128,8 @@ include:
     inputs:
       job_name_suffix: "-nats-config-reloader"
       source: "docker.io/natsio/nats-server-config-reloader"
-      tag: "0.24.0"
-      digest: "sha256:d758a82a9c20337e46c2f7356a413faa52cf4d6b02497c3ad81f72f1ba106464"
+      tag: "0.25.0"
+      digest: "sha256:24bacde6b844f8875f93424ed153d33b3d9e9367fcccc14b683eb71fab3a4d8c"
       destination: "artifacts.software-univention.de/library/nats-server-config-reloader"
       skip_rules: *mirror-skip-rules
 

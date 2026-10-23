@@ -39,7 +39,7 @@ services:
       - "7777:7777"
 
   nats1:
-    image: "artifacts.software-univention.de/library/nats:2.15.1@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490"
+    image: "artifacts.software-univention.de/library/nats:2.15.1@sha256:023a08c46caa5aff878fb86841187bebfdad9a6e3c552ba5c1a1e18938bbf88a"
     container_name: nats1
     environment:
       jetstream: "enabled"
@@ -52,7 +52,7 @@ services:
         target: /var/run
     command: --name nats1 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
   nats2:
-    image: "artifacts.software-univention.de/library/nats:2.15.1@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490"
+    image: "artifacts.software-univention.de/library/nats:2.15.1@sha256:023a08c46caa5aff878fb86841187bebfdad9a6e3c552ba5c1a1e18938bbf88a"
     container_name: nats2
     command: --name nats2 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
     volumes:
@@ -60,7 +60,7 @@ services:
       - type: tmpfs
         target: /var/run
   nats3:
-    image: "artifacts.software-univention.de/library/nats:2.15.1@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490"
+    image: "artifacts.software-univention.de/library/nats:2.15.1@sha256:023a08c46caa5aff878fb86841187bebfdad9a6e3c552ba5c1a1e18938bbf88a"
     container_name: nats3
     command: --name nats3 --cluster_name JetStreamCluster --jetstream -m 8222 -p 4222 -config /etc/nats-config/nats.conf --cluster nats://0.0.0.0:4245 --routes nats://nats1:4245,nats://nats2:4245,nats://nats3:4245
     ports:
