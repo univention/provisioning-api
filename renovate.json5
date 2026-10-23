@@ -86,6 +86,17 @@
         ],
         "executionMode": "branch"
       }
+    },
+    {
+      "description": "The listener stays on pydantic 1",
+      // The listener runs on UCS 5.2, whose Debian 12 base ships no pydantic 2.
+      "matchFileNames": [
+        "listener/pyproject.toml"
+      ],
+      "matchPackageNames": [
+        "pydantic"
+      ],
+      "allowedVersions": "<2"
     }
   ]
 }
