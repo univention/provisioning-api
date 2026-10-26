@@ -7,10 +7,10 @@
 # process with the container command; see docs/simplify/README.md (W2).
 
 ARG UCS_BASE_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-base-python
-ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20261022@sha256:ea444eeecf1681d2ca6e599a08779b3e078a29311f74678b2a3245474c564f61
+ARG UCS_BASE_IMAGE_TAG=5.3.0-build.20261026@sha256:6eae72e522f58da1b0dce75f38eddc7ed725ec5fc235929abca8079256475eb5
 
 ARG UCS_DISTROLESS_IMAGE=gitregistry.knut.univention.de/univention/dev/projects/ucs-base-image/ucs-distroless-python
-ARG UCS_DISTROLESS_IMAGE_TAG=5.3.0-build.20261022@sha256:f65cefc852c76dfd42ad0c1ad0f6885357e62899f51aa421b6f89eef550b97cf
+ARG UCS_DISTROLESS_IMAGE_TAG=5.3.0-build.20261026@sha256:f65cefc852c76dfd42ad0c1ad0f6885357e62899f51aa421b6f89eef550b97cf
 
 ###############################################
 # Stage 1: build dependencies and software
