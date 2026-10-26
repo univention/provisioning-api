@@ -28,7 +28,7 @@ spec:
       http:
         paths:
           {{- range .Values.ingress.paths }}
-          - pathType: {{ .pathType }}
+          - pathType: {{ include "nubus-common.compatibility.ingressPathType" (dict "pathType" .pathType "context" $) }}
             path: {{ .path }}
             backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
           {{- end }}
