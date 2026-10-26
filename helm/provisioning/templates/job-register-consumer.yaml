@@ -45,7 +45,7 @@ spec:
         {{- end }}
       {{- end }}
       {{- if .Values.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.podSecurityContext "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "common.names.fullname" . }}
@@ -69,7 +69,7 @@ spec:
             defaultMode: 0555
       initContainers:
         - name: wait-for-provisioning-api
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.containerSecurityContext "context" $) | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           command: ["/bin/bash", "-c", "/scripts/wait-for-api.sh ${PROVISIONING_API_BASE_URL}"]
@@ -86,7 +86,7 @@ spec:
             - name: scripts-volume
               mountPath: /scripts
         - name: wait-for-data-loader
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.containerSecurityContext "context" $) | nindent 12 }}
           command: ["wait-for-udm.sh"]
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
@@ -110,7 +110,7 @@ spec:
           {{- end }}
       containers:
         - name: main
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.containerSecurityContext "context" $) | nindent 12 }}
           image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           volumeMounts:

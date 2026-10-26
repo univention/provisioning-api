@@ -67,7 +67,7 @@ spec:
       nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" .) | nindent 8 }}
       {{- end }}
       {{- if .Values.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.podSecurityContext "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ coalesce .Values.serviceAccount.name (include "common.names.fullname" .) }}
@@ -78,7 +78,7 @@ spec:
       containers:
         - name: "main"
           {{- if .Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.containerSecurityContext "context" $) | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.nats.image.registry .Values.global.imageRegistry }}/{{ .Values.nats.image.repository }}:{{ .Values.nats.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.nats.image.pullPolicy .Values.global.imagePullPolicy | quote }}
@@ -169,7 +169,7 @@ spec:
         {{- if .Values.reloader.enabled }}
         - name: "reloader"
           {{- if .Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.containerSecurityContext "context" $) | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.reloader.image.registry .Values.global.imageRegistry }}/{{ .Values.reloader.image.repository }}:{{ .Values.reloader.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.reloader.image.pullPolicy .Values.global.imagePullPolicy | quote }}
@@ -201,7 +201,7 @@ spec:
         {{- if .Values.natsBox.enabled }}
         - name: "nats-box"
           {{- if .Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "nubus-common.compatibility.renderSecurityContext" (dict "secContext" $.Values.containerSecurityContext "context" $) | nindent 12 }}
           {{- end }}
           image: "{{ coalesce .Values.natsBox.image.registry .Values.global.imageRegistry }}/{{ .Values.natsBox.image.repository }}:{{ .Values.natsBox.image.tag }}"
           imagePullPolicy: {{ coalesce .Values.natsBox.image.pullPolicy .Values.global.imagePullPolicy | quote }}
