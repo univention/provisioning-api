@@ -301,7 +301,7 @@ test-end-to-end:
 test-chart-provisioning:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.22@sha256:a9254c92372e9847e792be0793d0e731678506b073ca9828e33693b7f7dad77a"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.24@sha256:1f34d54d23452475db4e92a43b669b8cb1817c4837b0003b2d897d47ed2f9d35"
   rules:
     - *rules-skip-backend-release-tag
     - when: "on_success"
@@ -315,7 +315,7 @@ test-chart-provisioning:
 test-chart-udm-listener:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.22@sha256:a9254c92372e9847e792be0793d0e731678506b073ca9828e33693b7f7dad77a"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.24@sha256:1f34d54d23452475db4e92a43b669b8cb1817c4837b0003b2d897d47ed2f9d35"
   rules:
     - *rules-skip-backend-release-tag
     - when: "on_success"
@@ -326,7 +326,7 @@ test-chart-udm-listener:
 test-chart-nats:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.22@sha256:a9254c92372e9847e792be0793d0e731678506b073ca9828e33693b7f7dad77a"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.24@sha256:1f34d54d23452475db4e92a43b669b8cb1817c4837b0003b2d897d47ed2f9d35"
   rules:
     - *rules-skip-backend-release-tag
     - when: "on_success"
