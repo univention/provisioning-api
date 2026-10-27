@@ -10,7 +10,7 @@ A Helm chart for the example client of the UDM provisioning API
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://artifacts.software-univention.de/nubus/charts | nubus-common | ^0.8.x |
+| oci://artifacts.software-univention.de/nubus-dev/charts | nubus-common | 0.30.0-pre-steuwer-openshift-poc |
 
 ## Values
 

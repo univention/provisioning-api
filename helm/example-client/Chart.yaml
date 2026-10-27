@@ -15,7 +15,7 @@ version: "0.1.0"
 
 dependencies:
   - name: "nubus-common"
-    version: "^0.8.x"
-    repository: "oci://artifacts.software-univention.de/nubus/charts"
+    version: "0.30.0-pre-steuwer-openshift-poc"
+    repository: "oci://artifacts.software-univention.de/nubus-dev/charts"
 
 ...
