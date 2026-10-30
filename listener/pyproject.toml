@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest==9.1.1", "pytest-asyncio==1.4.0", "pytest-cov==7.1.0"]
+dev = ["pytest==9.2.0", "pytest-asyncio==1.4.1", "pytest-cov==7.1.0"]
 
 [tool.uv.sources]
 # TODO: Temporary pin to a patched nats-py fixing premature KV watcher initial
