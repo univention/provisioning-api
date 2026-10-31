@@ -12,7 +12,7 @@ description = "Nubus - Provisioning Listener (depricated in favor of LDIF Produc
 authors = [{ name = "Univention GmbH", email = "packages@univention.de" }]
 license = { text = "AGPL-3.0-only" }
 
-requires-python = "==3.11.*"
+requires-python = "==3.15.*"
 
 dependencies = [
     "msgpack<2.0.0,>=1.2.1",

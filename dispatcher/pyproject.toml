@@ -10,7 +10,7 @@ authors = [
 ]
 license = {text = "AGPL-3.0-only"}
 
-requires-python = "==3.13.*"
+requires-python = "==3.15.*"
 
 dependencies = [
     "pydantic-settings<3.0.0,>=2.14.2",
