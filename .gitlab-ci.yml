@@ -42,11 +42,11 @@ include:
     file:
       - "dind.yml"
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.18.0"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.25.1"
     inputs:
       package_root: "common"
       job_name_suffix: "-common"
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.18.0"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.25.1"
     inputs:
       package_root: "consumer"
       job_name_suffix: "-consumer"
@@ -55,7 +55,7 @@ include:
   # provisioning-service-do_release etc. On a feature branch (MR) creating the version is manual (see the
   # provisioning-service-create_app_version override below); on a protected vX.Y.Z tag it is the real
   # release. The App Center Version comes from the tag (templated into ini.jinja).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.16.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.25.1"
     inputs:
       app_id: "provisioning-service"
       job_prefix: "provisioning-service-"
@@ -82,7 +82,7 @@ include:
 
   # Backend (package-based) App Center app "provisioning-service-backend",
   # released independently via a protected "provisioning-service-backend-vX.Y.Z" tag.
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.16.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.25.1"
     inputs:
       app_id: "provisioning-service-backend"
       job_prefix: "provisioning-service-backend-"
@@ -102,7 +102,7 @@ include:
   # docker-compose.yaml and the App Center compose template pull from.
   # These pins are the only upstream references in the repository;
   # Renovate bumps them with the mirrored ones (NATS group in renovate.json5).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.17.0"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.25.1"
     inputs:
       job_name_suffix: "-nats"
       source: "docker.io/library/nats"
@@ -115,7 +115,7 @@ include:
         - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/'
           when: "never"
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.17.0"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.25.1"
     inputs:
       job_name_suffix: "-nats-box"
       source: "docker.io/natsio/nats-box"
@@ -124,7 +124,7 @@ include:
       destination: "artifacts.software-univention.de/library/nats-box"
       skip_rules: *mirror-skip-rules
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.17.0"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.25.1"
     inputs:
       job_name_suffix: "-nats-config-reloader"
       source: "docker.io/natsio/nats-server-config-reloader"
@@ -135,7 +135,7 @@ include:
 
   # Builds the univention-provisioning-service Debian package and uploads it
   # into the backend app version (not the UCS errata repository).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-package@2.16.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-package@2.25.1"
     inputs:
       build_stage: "package"
       ucs_base_version: "5.2"
