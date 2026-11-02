@@ -3,6 +3,8 @@
 
 import asyncio
 import logging
+import signal
+import sys
 
 from univention.provisioning.backends.message_queue import MessageAckManager
 from univention.provisioning.utils.log import setup_logging
@@ -37,6 +39,8 @@ async def main(settings: PrefillSettings):
 def run():
     settings = prefill_settings()
     setup_logging(settings.log_level)
+    # As PID 1 the process has no default SIGTERM handler, so Kubernetes would wait for SIGKILL.
+    signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(0))
     asyncio.run(main(settings))
 
 
