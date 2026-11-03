@@ -66,7 +66,16 @@ dispatcher:
     auth:
       password: "stub-value"
 
+# The passwords below are needed by the tests that render the chart with global.secrets.generatePasswords: false.
+# That mode ignores the masterPassword, so every password must be set.
 api:
+  auth:
+    admin:
+      password: "linter-api-admin-password"
+    prefill:
+      password: "linter-api-prefill-password"
+    eventsUdm:
+      password: "linter-api-events-password"
   nats:
     auth:
       password: "stub-value"
@@ -83,8 +92,14 @@ registerConsumers:
     auth:
       password: "linter-register-consumers-udm-password"
 
-# Required when nats.bundled: false is set
 nats:
+  config:
+    createUsers:
+      adminUser:
+        auth:
+          # Admin password of the bundled nats, needed without a masterPassword.
+          password: "linter-nats-admin-password"
+  # Required when nats.bundled: false is set
   connection:
     host: "linter-nats-host"
     port: "linter-nats-port"
