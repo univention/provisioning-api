@@ -88,6 +88,19 @@
       }
     },
     {
+      "description": "No digest-only updates for the official NATS image",
+      // Docker republishes library/nats tags under new digests, and mirror-image
+      // refuses to overwrite a tag Harbor already holds under another digest.
+      "matchPackageNames": [
+        "docker.io/library/nats",
+        "library/nats"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "enabled": false
+    },
+    {
       "description": "The listener stays on pydantic 1",
       // The listener runs on UCS 5.2, whose Debian 12 base ships no pydantic 2.
       "matchFileNames": [
