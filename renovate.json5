@@ -88,6 +88,18 @@
       }
     },
     {
+      "description": "The custom managers own the nats-box and config reloader pins",
+      // helm-values looks both up under docker.io/library, where neither exists.
+      "matchManagers": [
+        "helm-values"
+      ],
+      "matchPackageNames": [
+        "library/nats-box",
+        "library/nats-server-config-reloader"
+      ],
+      "enabled": false
+    },
+    {
       "description": "No digest-only updates for the official NATS image",
       // Docker republishes library/nats tags under new digests, and mirror-image
       // refuses to overwrite a tag Harbor already holds under another digest.
