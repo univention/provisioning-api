@@ -102,7 +102,7 @@ include:
   # docker-compose.yaml and the App Center compose template pull from.
   # These pins are the only upstream references in the repository;
   # Renovate bumps them with the mirrored ones (NATS group in renovate.json5).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.25.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.26.1"
     inputs:
       job_name_suffix: "-nats"
       source: "docker.io/library/nats"
@@ -115,7 +115,7 @@ include:
         - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/'
           when: "never"
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.25.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.26.1"
     inputs:
       job_name_suffix: "-nats-box"
       source: "docker.io/natsio/nats-box"
@@ -124,7 +124,7 @@ include:
       destination: "artifacts.software-univention.de/library/nats-box"
       skip_rules: *mirror-skip-rules
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.25.2"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.26.1"
     inputs:
       job_name_suffix: "-nats-config-reloader"
       source: "docker.io/natsio/nats-server-config-reloader"
