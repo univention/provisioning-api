@@ -248,10 +248,11 @@ test-unit-and-integration:
 test-end-to-end:
   allow_failure: true
   stage: "test"
-  extends: .dind
+  # The dood runner mounts the VM's Docker socket; no dind service.
   tags:
     - "dood"
-  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:24.0.9@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e"
+  # The VM runs Docker 29, which needs API 1.44; the Docker 24 client stops at 1.43.
+  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:29.6.1@sha256:66d292e5c26bd33a6f6f61cacb880de2186339a524ecba1ce098dbbaceed6515"
   rules: &rules_dind
     - *rules-skip-backend-release-tag
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -276,6 +277,7 @@ test-end-to-end:
     - sleep 10
     - docker compose run --quiet-pull --rm e2e-test
   after_script:
+    - unset DOCKER_API_VERSION
     - docker ps -a
     - docker logs provisioning-api >& provisioning-api.log
     - docker logs provisioning-dispatcher >& dispatcher.log
