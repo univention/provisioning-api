@@ -13,8 +13,8 @@
 #
 #   pre-semantic-release  -> populate RELEASE_VERSION (=> image tag)
 #   container-build       -> build & push the provisioning images (buildkit)
-#   e2e-dae-{s,m,l,xl}    -> DooD e2e against the freshly built images, one per
-#                            runner flavor (also samples the formerly-flaky suite).
+#   test-end-to-end       -> DooD e2e against the freshly built images on the
+#                            `dood` runner (one job per VM, host /builds mounted).
 #
 # The full upstream pipeline is parked in .gitlab-ci.yml-old.
 
@@ -81,11 +81,10 @@ container-build:
   variables:
     BUILD_CONTEXT: "${CI_PROJECT_DIR}"
 
-# Base e2e job. Concrete per-runner jobs below extend it and only override tags,
-# so we can compare e2e wall-clock across dae-s/m/l/xl. Hidden (leading dot) =>
-# never runs on its own.
-.e2e-test:
+test-end-to-end:
   stage: "test"
+  tags:
+    - "dood"
   image: "docker:29.6.1"
   needs:
     # RELEASE_VERSION dotenv (image tag) + the freshly built images.
@@ -99,13 +98,6 @@ container-build:
     # Inherited DOCKER_API_VERSION=1.39 (old dind leftover) downgrades the client
     # and the 29.x host daemon rejects it; unset so the client negotiates.
     - unset DOCKER_API_VERSION
-    # DooD bind-mount fix, no runner-config change: the job's checkout is NOT on
-    # the host daemon's filesystem, so the compose file's relative binds
-    # (./nats.dev.conf, ./tests/..., ./e2e_tests/...) would resolve to empty dirs.
-    # Materialize the checkout onto the host at the SAME absolute path via the
-    # Docker API (client-side tar -> helper with host root mounted) so the daemon
-    # finds the files. Cleaned up in after_script.
-    - tar -C "$CI_PROJECT_DIR" -cf - . | docker run -i --rm -v /:/host alpine sh -c "mkdir -p /host${CI_PROJECT_DIR} && tar -C /host${CI_PROJECT_DIR} -xf -"
     - docker version
     - docker compose config e2e-test
     # The GitLab registry is S3-backed and intermittently returns 503 on blob
@@ -137,8 +129,6 @@ container-build:
     - docker logs ldap-server                  > ldap-server.log           2>&1 || true
     - docker logs udm-rest-api                 > udm-rest-api.log          2>&1 || true
     - docker compose down --volumes --remove-orphans || true
-    # Remove the materialized copy from the (ephemeral) host.
-    - docker run --rm -v /:/host alpine sh -c "rm -rf /host${CI_PROJECT_DIR}" || true
   artifacts:
     paths:
       - provisioning-api.log
@@ -152,27 +142,5 @@ container-build:
     expire_in: "1 day"
     when: "always"
     expose_as: "docker compose server logs"
-
-# Per-runner jobs: identical work, only the tag differs. Compare their durations
-# in the pipeline view to gauge e2e performance across the dae flavors.
-e2e-dae-s:
-  extends: ".e2e-test"
-  tags:
-    - "dae-s"
-
-e2e-dae-m:
-  extends: ".e2e-test"
-  tags:
-    - "dae-m"
-
-e2e-dae-l:
-  extends: ".e2e-test"
-  tags:
-    - "dae-l"
-
-e2e-dae-xl:
-  extends: ".e2e-test"
-  tags:
-    - "dae-xl"
 
 ...
