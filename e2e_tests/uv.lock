@@ -1176,16 +1176,16 @@ wheels = [
 
 [[package]]
 name = "udm-rest-api-client"
-version = "0.1.2"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cachecontrol" },
     { name = "typing-extensions" },
     { name = "uritemplate" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0f/fe/5fb70d3f0bcb1f4a06541765474305580761c86c7430ff3e6c96885666eb/udm_rest_api_client-0.1.2.tar.gz", hash = "sha256:a3f6326e86b56397cd2310aee8dd657d5b301b0184f499751d7454b64134cdff", size = 62732, upload-time = "2025-06-12T09:44:20.608Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/ff/dc219bdf2556215dc30e022fcafd05187da23a100e6ffb0d38d8a62282ab/udm_rest_api_client-0.2.0.tar.gz", hash = "sha256:59674f170ea31677c54bb66c1aa1723850cd8833ea894e8d8234dc715aaf6b52", size = 53610, upload-time = "2026-11-06T10:41:21.156Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/98/0745b4e4343aea5f04cc2120d1ab1373bb71fb2addccd19f8d333e3de270/udm_rest_api_client-0.1.2-py3-none-any.whl", hash = "sha256:6137a94b7a13175fe9e071ba71567772d9bf633742a333a7206fd222117b87b0", size = 37636, upload-time = "2025-06-12T09:44:18.825Z" },
+    { url = "https://files.pythonhosted.org/packages/23/6a/328405a950ed04d6e3c8518cc11c4bac382ad416d74250199ad2100cc601/udm_rest_api_client-0.2.0-py3-none-any.whl", hash = "sha256:106a35a78f7740e516b0c6e4ca9c9c9e5015cededd713e4c9da178f90f380dd1", size = 39664, upload-time = "2026-11-06T10:41:19.867Z" },
 ]
 
 [[package]]
