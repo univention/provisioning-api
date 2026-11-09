@@ -24,7 +24,7 @@ workflow:
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.71.0"
+    ref: "v1.72.0"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -37,10 +37,7 @@ include:
       - "jobs/package-and-publish-helm-charts-external.yaml"
       - "jobs/check-debian-updates.yaml"
       - "templates/sonarqube.yaml"
-  - project: "univention/infrastructure/docker-services"
-    ref: "master"
-    file:
-      - "dind.yml"
+      - "templates/compose-test.yaml"
 
   - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.27.0"
     inputs:
@@ -145,7 +142,7 @@ include:
       git_build_rules:
         - if: '$CI_MERGE_REQUEST_ID'
         - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
-  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/vul-man@v1.71.0"
+  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/vul-man@v1.72.0"
 
 variables:
   POETRY_VERSION: "1.6.1"
@@ -246,61 +243,18 @@ test-unit-and-integration:
         path: coverage.xml
 
 test-end-to-end:
+  extends: ".compose-test"
   allow_failure: true
   stage: "test"
-  # The dood runner mounts the VM's Docker socket; no dind service.
-  tags:
-    - "dood"
-  # The VM runs Docker 29, which needs API 1.44; the Docker 24 client stops at 1.43.
-  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:29.6.1@sha256:66d292e5c26bd33a6f6f61cacb880de2186339a524ecba1ce098dbbaceed6515"
-  rules: &rules_dind
+  rules:
     - *rules-skip-backend-release-tag
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: "never"
-    - if: '$GITLAB_USER_ID == $RENOVATE_USER_ID && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS !~ /Renovate run dind/'
-      when: "manual"
-    - when: "on_success"
-  before_script:
-    # Allow that the Docker API version is negotiated between client and server
-    - unset DOCKER_API_VERSION
-    - export IMAGE_TAG=${RELEASE_VERSION}
-    - echo -e "\e[0Ksection_start:`date +%s`:docker_debug[collapsed=true]\r\e[0KDocker version details"
-    - echo $IMAGE_TAG
-    - docker version
-    - echo -e "\e[0Ksection_end:`date +%s`:docker_debug\r\e[0K"
-    - echo -e "\e[0Ksection_start:`date +%s`:docker_compose_config[collapsed=true]\r\e[0KDocker Compose configuration"
-    - docker compose config e2e-test
-    - echo -e "\e[0Ksection_end:`date +%s`:docker_compose_config\r\e[0K"
-    - docker compose up --no-build --quiet-pull --wait --wait-timeout 60 provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server
+    - !reference [".compose-test", "rules"]
+  variables:
+    COMPOSE_TEST_SERVICES: "provisioning-api nats1 nats2 nats3 dispatcher prefill udm-transformer udm-listener ldap-notifier udm-rest-api ldap-server"
   script:
     # Wait for UDM Listener to get ready. (It's not worth it to fix this properly atm)
     - sleep 10
     - docker compose run --quiet-pull --rm e2e-test
-  after_script:
-    - unset DOCKER_API_VERSION
-    - docker ps -a
-    - docker logs provisioning-api >& provisioning-api.log
-    - docker logs provisioning-dispatcher >& dispatcher.log
-    - docker logs provisioning-prefill >& prefill.log
-    - docker logs provisioning-udm-transformer >& udm-transformer.log
-    - docker logs udm-listener>& udm-listener.log
-    - docker logs ldap-notifier >& ldap-notifier.log
-    - docker logs ldap-server >& ldap-server.log
-    - docker logs udm-rest-api >& udm-rest-api.log
-    - docker compose down --volumes
-  artifacts:
-    paths:
-      - provisioning-api.log
-      - dispatcher.log
-      - prefill.log
-      - udm-transformer.log
-      - udm-listener.log
-      - ldap-notifier.log
-      - ldap-server.log
-      - udm-rest-api.log
-    expire_in: "1 day"
-    when: "always"
-    expose_as: "docker compose server logs"
 
 test-chart-provisioning:
   stage: test
