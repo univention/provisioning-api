@@ -10,6 +10,7 @@ from typing import Any, Callable, Coroutine, Optional
 
 import aiohttp
 from jsondiff import diff
+from pydantic import TypeAdapter
 
 from univention.provisioning.models.message import (
     Event,
@@ -28,6 +29,8 @@ from .config import (
 )
 
 logger = logging.getLogger(__name__)
+
+_subscriptions_adapter = TypeAdapter(list[Subscription])
 
 
 # TODO: the subscription part will be delegated to an admin using an admin API
@@ -103,8 +106,7 @@ class ProvisioningConsumerClient:
     async def get_subscriptions(self) -> list[Subscription]:
         response = await self.session.get(self.settings.subscriptions_url)
         data = await response.json()
-        # TODO: parse a list of subscriptions instead
-        return [Subscription.model_validate(data)]
+        return _subscriptions_adapter.validate_python(data)
 
     # FIXME: What is the purpose of this method? It looks like it wants to publish_event via Event API
     async def submit_message(self, realm: str, topic: str, body: dict[str, Any], name: str):
