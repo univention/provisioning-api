@@ -315,3 +315,4 @@ A Helm Chart that deploys the provisioning services
 | udmTransformer.udm.auth.existingSecret.name | string | `nil` |  |
 | udmTransformer.udm.auth.password | string | `nil` |  |
 | updateStrategy.type | string | `"Recreate"` | Set to Recreate if you use persistent volume that cannot be mounted by more than one pods to make sure the pods are destroyed first. FIXME: Change to `RollingUpdate` after this bug is fixed https://git.knut.univention.de/univention/customers/dataport/upx/provisioning/-/issues/70 |
+| waitForDependency | object | `{"image":{"pullPolicy":null,"registry":"","repository":"nubus/images/wait-for-dependency","tag":"0.36.21@sha256:07c5b42d2071053d525bd49a91ee34ad532ef2af1957a1c32e48f1ac0e988054"}}` | The image of the init containers that wait for the Provisioning API and the UDM REST API. |

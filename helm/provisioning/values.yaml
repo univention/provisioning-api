@@ -234,6 +234,14 @@ prefill:
   #     value: "bar"
   extraEnvVars: []
 
+# -- The image of the init containers that wait for the Provisioning API and the UDM REST API.
+waitForDependency:
+  image:
+    registry: ""
+    pullPolicy: null
+    repository: "nubus/images/wait-for-dependency"
+    tag: "0.36.21@sha256:07c5b42d2071053d525bd49a91ee34ad532ef2af1957a1c32e48f1ac0e988054"
+
 registerConsumers:
   image:
     registry: ""

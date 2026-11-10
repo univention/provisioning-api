@@ -73,8 +73,8 @@ spec:
         - name: wait-for-udm
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           command: ["wait-for-udm.sh"]
-          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          image: "{{ coalesce .Values.waitForDependency.image.registry .Values.global.imageRegistry }}/{{ .Values.waitForDependency.image.repository }}:{{ .Values.waitForDependency.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.waitForDependency.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           env:
             - name: UDM_API_URL
               value: {{ printf "http://%s:%s/univention/udm/" (include "provisioning.udmRestApi.host" .) (include "provisioning.udmRestApi.port" .) }}
@@ -93,8 +93,8 @@ spec:
           {{- end }}
         - name: wait-for-api-to-start
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          image: "{{ coalesce .Values.registerConsumers.image.registry .Values.global.imageRegistry }}/{{ .Values.registerConsumers.image.repository }}:{{ .Values.registerConsumers.image.tag }}"
-          imagePullPolicy: {{ coalesce .Values.registerConsumers.image.pullPolicy .Values.global.imagePullPolicy | quote }}
+          image: "{{ coalesce .Values.waitForDependency.image.registry .Values.global.imageRegistry }}/{{ .Values.waitForDependency.image.repository }}:{{ .Values.waitForDependency.image.tag }}"
+          imagePullPolicy: {{ coalesce .Values.waitForDependency.image.pullPolicy .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: {{ printf "%s-common" (include "common.names.fullname" .) }}
