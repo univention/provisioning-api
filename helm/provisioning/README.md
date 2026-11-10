@@ -214,15 +214,20 @@ A Helm Chart that deploys the provisioning services
 | readinessProbe.udmTransformer.timeoutSeconds | int | `5` | Timeout for command return. |
 | registerConsumers.additionalAnnotations | object | `{}` |  |
 | registerConsumers.additionalLabels | object | `{}` |  |
-| registerConsumers.createUsers | object | `{}` | Allows to create users in the Provisioning API.  The entries have to be in the following structure:    consumerName:     existingSecret:       name: null       keyMapping:         registration: null  The entries can only be provided as existing secrets and the content of the key "registration" has to follow the correct JSON structure.  This parameter shall be used as an integration point between the consumer's chart and this chart. The consumer's chart owns the Secret and has to store the correct JSON data within the Secret. This chart only receives a reference this Secret so that it can register the consumer. |
+| registerConsumers.command[0] | string | `"register-consumers"` |  |
+| registerConsumers.createUsers | object | `{}` | Allows to create users in the Provisioning API.  The entries have to be in the following structure:    consumerName:     existingSecret:       name: null       keyMapping:         registration: null  The entries can only be provided as existing secrets and the content of the key "registration" has to follow the correct JSON structure.  The "password" in that JSON is either the password itself, or a reference to the Secret key that holds it, read by the Job through the Kubernetes API:    "password": {"kubernetes_secret": {"name": "<Secret>", "key": "<key>"}}  This parameter shall be used as an integration point between the consumer's chart and this chart. The consumer's chart owns the Secret and has to store the correct JSON data within the Secret. This chart only receives a reference this Secret so that it can register the consumer. |
 | registerConsumers.extraEnvVars | list | `[]` | Array with extra environment variables to add to containers.  extraEnvVars:   - name: FOO     value: "bar" |
 | registerConsumers.image.pullPolicy | string | `nil` |  |
 | registerConsumers.image.registry | string | `""` |  |
-| registerConsumers.image.repository | string | `"nubus/images/wait-for-dependency"` |  |
-| registerConsumers.image.tag | string | `"0.36.21@sha256:07c5b42d2071053d525bd49a91ee34ad532ef2af1957a1c32e48f1ac0e988054"` |  |
+| registerConsumers.image.repository | string | `"nubus-dev/images/provisioning-server"` |  |
+| registerConsumers.image.tag | string | `"latest"` |  |
 | registerConsumers.jsonSecretName | string | `""` |  |
 | registerConsumers.podAnnotations | object | `{}` |  |
 | registerConsumers.provisioningApiBaseUrl | string | `""` |  |
+| registerConsumers.rbac.create | bool | `true` | Create a Role that allows `get` on the Secrets of the namespace, and bind it to the Job's ServiceAccount. |
+| registerConsumers.serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount. |
+| registerConsumers.serviceAccount.create | bool | `true` | Create a ServiceAccount for the Job. |
+| registerConsumers.serviceAccount.name | string | `""` | The ServiceAccount to use when `create` is false. |
 | registerConsumers.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | registerConsumers.udm.auth.existingSecret.name | string | `nil` |  |
 | registerConsumers.udm.auth.password | string | `nil` |  |
