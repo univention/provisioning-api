@@ -44,3 +44,11 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- required ".Values.registerConsumers.provisioningApiBaseUrl must be defined." .Values.registerConsumers.provisioningApiBaseUrl -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "provisioning.registerConsumers.serviceAccountName" -}}
+{{- if .Values.registerConsumers.serviceAccount.create -}}
+{{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
+{{- else -}}
+{{ default "default" .Values.registerConsumers.serviceAccount.name }}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Univention GmbH
+{{- if .Values.registerConsumers.createUsers }}
+{{- $name := printf "%s-register-consumers" (include "common.names.fullname" .) }}
+{{- if .Values.registerConsumers.serviceAccount.create }}
+---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.registerConsumers.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.registerConsumers.serviceAccount.annotations .Values.registerConsumers.additionalAnnotations }}
+  annotations:
+    {{- with .Values.registerConsumers.serviceAccount.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" . "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- with .Values.registerConsumers.additionalAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" . "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+# The Job's pod turns the token on; nothing else uses this ServiceAccount.
+automountServiceAccountToken: false
+{{- end }}
+{{- if .Values.registerConsumers.rbac.create }}
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.registerConsumers.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+rules:
+  # Namespace-wide: the Job learns the referenced Secret names from the specs at runtime.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.registerConsumers.additionalLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalLabels "context" . ) | nindent 4 }}
+    {{- end }}
+subjects:
+  - kind: "ServiceAccount"
+    name: {{ include "provisioning.registerConsumers.serviceAccountName" . }}
+    namespace: {{ include "common.names.namespace" . | quote }}
+roleRef:
+  apiGroup: "rbac.authorization.k8s.io"
+  kind: "Role"
+  name: {{ $name }}
+{{- end }}
+{{- end }}
