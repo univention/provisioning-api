@@ -7,7 +7,7 @@ from pytest_httpserver import HTTPServer
 
 from univention.provisioning.consumer.api import ProvisioningConsumerClient
 from univention.provisioning.consumer.config import ProvisioningConsumerClientSettings
-from univention.provisioning.models.subscription import RealmTopic
+from univention.provisioning.models.subscription import RealmTopic, Subscription
 
 
 def client_settings(httpserver: HTTPServer) -> ProvisioningConsumerClientSettings:
@@ -17,6 +17,34 @@ def client_settings(httpserver: HTTPServer) -> ProvisioningConsumerClientSetting
         provisioning_api_password="admin-password",
         log_level="DEBUG",
     )
+
+
+def subscription(name: str) -> dict:
+    return {
+        "name": name,
+        "realms_topics": [{"realm": "udm", "topic": "users/user"}],
+        "request_prefill": True,
+        "prefill_queue_status": "done",
+    }
+
+
+async def test_get_subscriptions_returns_every_subscription(httpserver: HTTPServer):
+    httpserver.expect_request("/v1/subscriptions", method="GET").respond_with_json(
+        [subscription("portal-consumer"), subscription("selfservice-consumer")]
+    )
+
+    async with ProvisioningConsumerClient(client_settings(httpserver)) as client:
+        result = await client.get_subscriptions()
+
+    assert [s.name for s in result] == ["portal-consumer", "selfservice-consumer"]
+    assert all(isinstance(s, Subscription) for s in result)
+
+
+async def test_get_subscriptions_without_subscriptions(httpserver: HTTPServer):
+    httpserver.expect_request("/v1/subscriptions", method="GET").respond_with_json([])
+
+    async with ProvisioningConsumerClient(client_settings(httpserver)) as client:
+        assert await client.get_subscriptions() == []
 
 
 async def test_create_subscription_does_not_log_the_password(httpserver: HTTPServer, caplog):
