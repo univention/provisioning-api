@@ -70,7 +70,7 @@ class ProvisioningConsumerClient:
             password=password,
         )
 
-        logger.debug(subscription.model_dump())
+        logger.debug(subscription.model_dump(exclude={"password"}))
         return await self.session.post(self.settings.subscriptions_url, json=subscription.model_dump())
 
     async def cancel_subscription(self, name: str):
