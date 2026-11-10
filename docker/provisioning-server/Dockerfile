@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Univention GmbH
 
 # One image for the four Python services (api, dispatcher, prefill,
-# udm-transformer). They share almost all of their dependencies, so four
+# udm-transformer) and the register-consumers Job. They share almost all of their dependencies, so four
 # separate images multiplied the same packages across four SBOMs. Select the
 # process with the container command; see docs/simplify/README.md (W2).
 
@@ -46,17 +46,20 @@ RUN --mount=type=cache,target=/root/.cache \
     --package nubus-provisioning-dispatcher \
     --package nubus-provisioning-prefill \
     --package nubus-provisioning-udm-transformer \
+    --package nubus-provisioning-consumer \
     --no-install-workspace && \
   uv export --no-dev --frozen --no-emit-workspace --no-hashes \
     --package nubus-provisioning-rest-api \
     --package nubus-provisioning-dispatcher \
     --package nubus-provisioning-prefill \
     --package nubus-provisioning-udm-transformer \
+    --package nubus-provisioning-consumer \
     -o /app/requirements.txt
 
 # copy source code
 COPY ./backends/src /app/backends/src
 COPY ./common/src /app/common/src
+COPY ./consumer/src /app/consumer/src
 COPY ./dispatcher/src /app/dispatcher/src
 COPY ./prefill/src /app/prefill/src
 COPY ./rest-api/src /app/rest-api/src
@@ -70,6 +73,7 @@ RUN --mount=type=cache,target=/root/.cache \
     --package nubus-provisioning-dispatcher \
     --package nubus-provisioning-prefill \
     --package nubus-provisioning-udm-transformer \
+    --package nubus-provisioning-consumer \
     --no-editable
 
 ###############################################
@@ -96,6 +100,7 @@ SHELL ["python3.13", "-c"]
 # hadolint ignore=SC2239
 RUN <<EOF
 import pydantic
+import univention.provisioning.consumer.register
 import univention.provisioning.dispatcher.main
 import univention.provisioning.prefill.main
 import univention.provisioning.udm_transformer.main
