@@ -18,6 +18,9 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.14.2",
 ]
 
+[project.scripts]
+register-consumers = "univention.provisioning.consumer.register:run"
+
 [tool.uv.sources]
 nubus-provisioning-backends = { workspace = true }
 nubus-provisioning-common = { workspace = true }
