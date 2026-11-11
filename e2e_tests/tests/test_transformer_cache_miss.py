@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2025 Univention GmbH
 
+import time
 import uuid
 
 import pytest
@@ -90,3 +91,17 @@ async def test_cache_miss_during_modification(
     finally:
         group.delete()
         print(f"Deleted group {group.dn!r}.")
+        # Without this the subscription can be cancelled while the delete event is in flight,
+        # and the dispatcher redelivers the event to the subscription of the next test.
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            message = await provisioning_client.get_subscription_message(name=groups_subscription, timeout=1)
+            if message is None:
+                continue
+            await provisioning_client.set_message_status(
+                groups_subscription, message.sequence_number, MessageProcessingStatus.ok
+            )
+            if not message.body.new and message.body.old.get("dn") == group_dn:
+                break
+        else:
+            pytest.fail(f"The delete event for {group_dn!r} did not arrive.")
