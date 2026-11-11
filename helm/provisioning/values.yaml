@@ -269,7 +269,7 @@ registerConsumers:
   # The "password" in that JSON is either the password itself, or a reference
   # to the Secret key that holds it, read by the Job through the Kubernetes API:
   #
-  #   "password": {"kubernetes_secret": {"name": "<Secret>", "key": "<key>"}}
+  #   "password": {"kubernetesSecret": {"name": "<Secret>", "key": "<key>"}}
   #
   # This parameter shall be used as an integration point between the consumer's
   # chart and this chart. The consumer's chart owns the Secret and has to store

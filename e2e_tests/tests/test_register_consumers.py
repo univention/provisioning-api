@@ -4,7 +4,7 @@
 """
 The register-consumers entry point against a real Provisioning API.
 
-A small aiohttp app stands in for the Kubernetes API, so the `kubernetes_secret`
+A small aiohttp app stands in for the Kubernetes API, so the `kubernetesSecret`
 reference is resolved over HTTP the way the Job does it in a cluster.
 """
 
@@ -126,7 +126,7 @@ async def test_register_consumers_with_inline_and_referenced_passwords(
         specs_dir,
         "referenced",
         consumer_names["referenced"],
-        {"kubernetes_secret": {"name": "referenced-consumer", "key": "password"}},
+        {"kubernetesSecret": {"name": "referenced-consumer", "key": "password"}},
     )
 
     assert await register_all(settings, kubernetes_api.reader) == 0
