@@ -6,7 +6,7 @@ Register every subscription spec in a directory at the Provisioning API.
 
 This is the main process of the register-consumers Job.
 Every `*.json` file is one subscription spec, whose `password` is a string
-or a `kubernetes_secret` reference.
+or a `kubernetesSecret` reference.
 Every spec is tried; the exit code is 1 if one of them failed.
 """
 
@@ -140,7 +140,7 @@ async def resolve_password(spec: dict, secrets: LazyReader, settings: RegisterCo
     if isinstance(value, str):
         return value, None
     if not is_reference(value):
-        raise SpecError("password must be a string or a {'kubernetes_secret': {'name', 'key'}} reference")
+        raise SpecError("password must be a string or a {'kubernetesSecret': {'name', 'key'}} reference")
     try:
         reference = parse_reference(value)
     except InvalidReference as error:

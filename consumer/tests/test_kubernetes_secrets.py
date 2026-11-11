@@ -34,19 +34,19 @@ async def reader(httpserver: HTTPServer):
 
 class TestParseReference:
     def test_valid(self):
-        reference = parse_reference({"kubernetes_secret": {"name": "portal-consumer", "key": "password"}})
+        reference = parse_reference({"kubernetesSecret": {"name": "portal-consumer", "key": "password"}})
         assert reference == SecretReference(name="portal-consumer", key="password")
 
     @pytest.mark.parametrize(
         "value",
         [
-            {"kubernetes_secret": {"name": "s"}},
-            {"kubernetes_secret": {"key": "k"}},
-            {"kubernetes_secret": {"name": "s", "key": "k", "namespace": "other"}},
-            {"kubernetes_secret": {"name": "", "key": "k"}},
-            {"kubernetes_secret": {"name": "s", "key": 1}},
-            {"kubernetes_secret": "s"},
-            {"kubernetes_secret": {"name": "s", "key": "k"}, "default": "x"},
+            {"kubernetesSecret": {"name": "s"}},
+            {"kubernetesSecret": {"key": "k"}},
+            {"kubernetesSecret": {"name": "s", "key": "k", "namespace": "other"}},
+            {"kubernetesSecret": {"name": "", "key": "k"}},
+            {"kubernetesSecret": {"name": "s", "key": 1}},
+            {"kubernetesSecret": "s"},
+            {"kubernetesSecret": {"name": "s", "key": "k"}, "default": "x"},
         ],
     )
     def test_invalid(self, value):
@@ -54,7 +54,7 @@ class TestParseReference:
         with pytest.raises(InvalidReference):
             parse_reference(value)
 
-    @pytest.mark.parametrize("value", ["password", None, {"name": "s", "key": "k"}, ["kubernetes_secret"]])
+    @pytest.mark.parametrize("value", ["password", None, {"name": "s", "key": "k"}, ["kubernetesSecret"]])
     def test_not_a_reference(self, value):
         assert not is_reference(value)
 
