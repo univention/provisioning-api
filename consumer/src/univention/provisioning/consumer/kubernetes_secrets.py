@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText: 2026 Univention GmbH
 
 """
-`kubernetes_secret` references and a reader for the Secrets they name.
+`kubernetesSecret` references and a reader for the Secrets they name.
 
-A reference replaces a value: `{"kubernetes_secret": {"name": "<Secret>", "key": "<key>"}}`.
+A reference replaces a value: `{"kubernetesSecret": {"name": "<Secret>", "key": "<key>"}}`.
 The rules match the data-loader's in stack-data.
 """
 
@@ -17,7 +17,7 @@ from typing import Any, Mapping
 
 import aiohttp
 
-REFERENCE_KEY = "kubernetes_secret"
+REFERENCE_KEY = "kubernetesSecret"
 REFERENCE_FIELDS = {"name", "key"}
 SERVICE_ACCOUNT_DIR = Path("/var/run/secrets/kubernetes.io/serviceaccount")
 

@@ -29,7 +29,7 @@ def spec(name: str, password="consumer-secret-pw", **overrides) -> dict:
 
 
 def reference(name: str, key: str = "password") -> dict:
-    return {"kubernetes_secret": {"name": name, "key": key}}
+    return {"kubernetesSecret": {"name": name, "key": key}}
 
 
 @pytest.fixture
