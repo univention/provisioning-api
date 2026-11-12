@@ -12,7 +12,7 @@ metadata:
   namespace: {{ include "common.names.namespace" . | quote }}
   labels:
       {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
-      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" $fullname) }}
+      {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" $fullname | trunc 63 | trimSuffix "-") }}
       {{- $mergedLabels := merge $uiLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
     {{- if .Values.registerConsumers.additionalLabels }}
@@ -31,7 +31,7 @@ spec:
         {{- end }}
       labels:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
-        {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" $fullname) }}
+        {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" $fullname | trunc 63 | trimSuffix "-") }}
         {{- $mergedLabels := merge $uiLabels $commonLabels}}
         {{- toYaml $mergedLabels | nindent 8 }}
     spec:
