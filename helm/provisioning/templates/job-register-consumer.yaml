@@ -14,7 +14,7 @@ metadata:
       {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
       {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" $fullname | trunc 63 | trimSuffix "-") }}
       {{- $additionalLabels := include "common.tplvalues.render" ( dict "value" ( .Values.registerConsumers.additionalLabels | default dict ) "context" . ) | fromYaml }}
-      {{- $mergedLabels := merge $additionalLabels $uiLabels $commonLabels}}
+      {{- $mergedLabels := merge $uiLabels $additionalLabels $commonLabels}}
       {{- toYaml $mergedLabels | nindent 4 }}
   {{- if .Values.registerConsumers.additionalAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalAnnotations "context" . ) | nindent 4 }}
@@ -31,7 +31,7 @@ spec:
         {{- $commonLabels := include "common.labels.standard" . | fromYaml }}
         {{- $uiLabels := dict "app.kubernetes.io/name" (printf "%s-register-consumers" $fullname | trunc 63 | trimSuffix "-") }}
         {{- $additionalLabels := include "common.tplvalues.render" ( dict "value" ( .Values.registerConsumers.additionalLabels | default dict ) "context" . ) | fromYaml }}
-        {{- $mergedLabels := merge $additionalLabels $uiLabels $commonLabels}}
+        {{- $mergedLabels := merge $uiLabels $additionalLabels $commonLabels}}
         {{- toYaml $mergedLabels | nindent 8 }}
     spec:
       {{- if or .Values.imagePullSecrets .Values.global.imagePullSecrets  }}
