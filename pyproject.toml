@@ -32,7 +32,7 @@ dev = [
     "mock>=5.2.0",
     "polyfactory==3.5.0",
     "pytest<9.2.1,>=9.2.0",
-    "pytest-asyncio<1.5,>=1.4",
+    "pytest-asyncio<1.6,>=1.5",
     "pytest-cov<6.0,>=5.0.0",
     "pytest-env<2.0.0,>=1.2.0",
     "pytest-httpserver>=1.1.5",
