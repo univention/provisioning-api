@@ -284,7 +284,7 @@ registerConsumers:
     create: true
     # -- Annotations to add to the ServiceAccount.
     annotations: {}
-    # -- The ServiceAccount to use when `create` is false.
+    # -- The ServiceAccount to use when `create` is false. Required then.
     name: ""
   rbac:
     # -- Create a Role that allows `get` on the Secrets of the namespace, and bind it to the Job's ServiceAccount.

@@ -49,6 +49,6 @@ If compatible Helm charts set .Values.global.nubusDeployment to true, the templa
 {{- if .Values.registerConsumers.serviceAccount.create -}}
 {{ printf "%s-register-consumers" (include "common.names.fullname" .) }}
 {{- else -}}
-{{ default "default" .Values.registerConsumers.serviceAccount.name }}
+{{ required "registerConsumers.serviceAccount.name must be set if registerConsumers.serviceAccount.create is false, so the Role is not bound to the default ServiceAccount" .Values.registerConsumers.serviceAccount.name }}
 {{- end -}}
 {{- end -}}

@@ -48,9 +48,27 @@ spec:
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "provisioning.registerConsumers.serviceAccountName" . }}
-      automountServiceAccountToken: true
+      # Only the main container gets the token, through the "service-account-token" volume.
+      automountServiceAccountToken: false
       restartPolicy: Never
       volumes:
+        # What the kubelet mounts with automountServiceAccountToken, for the main container only:
+        # register-consumers reads referenced Secrets through the Kubernetes API, the init containers don't.
+        - name: "service-account-token"
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: "token"
+              - configMap:
+                  name: "kube-root-ca.crt"
+                  items:
+                    - key: "ca.crt"
+                      path: "ca.crt"
+              - downwardAPI:
+                  items:
+                    - path: "namespace"
+                      fieldRef:
+                        fieldPath: "metadata.namespace"
         - name: consumer-secrets
           projected:
             sources:
@@ -115,6 +133,9 @@ spec:
           volumeMounts:
             - name: consumer-secrets
               mountPath: "/secrets"
+            - name: "service-account-token"
+              mountPath: "/var/run/secrets/kubernetes.io/serviceaccount"
+              readOnly: true
           env:
             - name: PROVISIONING_API_BASE_URL
               value: {{ include "provisioning-register-consumers.provisioningApiBaseUrl" . | quote }}

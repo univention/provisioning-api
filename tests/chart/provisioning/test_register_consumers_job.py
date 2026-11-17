@@ -1,12 +1,15 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-FileCopyrightText: 2026 Univention GmbH
 
+import subprocess
+
 import pytest
 
 JOB_NAME = "release-name-provisioning-register-consumers-1"
 JOB_IDENTITY = "release-name-provisioning-register-consumers"
 JOB_TEMPLATE = "templates/job-register-consumer.yaml"
 RBAC_TEMPLATE = "templates/rbac-register-consumers.yaml"
+SERVICE_ACCOUNT_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
 
 
 def pod_spec(result):
@@ -80,11 +83,26 @@ def test_init_containers_use_the_wait_for_dependency_image(helm, chart_path, tem
     assert init["image"] == "reg/repo/wait:9.9.9"
 
 
-def test_job_runs_with_its_own_service_account_and_token(helm, chart_path):
+def test_job_runs_with_its_own_service_account(helm, chart_path):
     spec = pod_spec(helm.helm_template(chart_path, {}, JOB_TEMPLATE))
 
     assert spec["serviceAccountName"] == JOB_IDENTITY
-    assert spec["automountServiceAccountToken"] is True
+
+
+def test_only_the_main_container_gets_the_service_account_token(helm, chart_path):
+    spec = pod_spec(helm.helm_template(chart_path, {}, JOB_TEMPLATE))
+
+    assert spec["automountServiceAccountToken"] is False
+    [volume] = [v for v in spec["volumes"] if v["name"] == "service-account-token"]
+    assert [next(iter(source)) for source in volume["projected"]["sources"]] == [
+        "serviceAccountToken",
+        "configMap",
+        "downwardAPI",
+    ]
+    mount = {"name": "service-account-token", "mountPath": SERVICE_ACCOUNT_DIR, "readOnly": True}
+    assert mount in container(spec, "main")["volumeMounts"]
+    for init in spec["initContainers"]:
+        assert "service-account-token" not in [m["name"] for m in init.get("volumeMounts", [])]
 
 
 def test_service_account_keeps_the_token_off_by_default(helm, chart_path):
@@ -128,6 +146,15 @@ def test_existing_service_account(helm, chart_path):
         rbac.get_resource(kind="ServiceAccount", name=JOB_IDENTITY)
     binding = rbac.get_resource(kind="RoleBinding", name=JOB_IDENTITY)
     assert binding["subjects"][0]["name"] == "custom-account"
+
+
+def test_existing_service_account_needs_a_name(helm, chart_path):
+    values = {"registerConsumers": {"serviceAccount": {"create": False}}}
+
+    with pytest.raises(subprocess.CalledProcessError) as error:
+        helm.helm_template(chart_path, values, RBAC_TEMPLATE)
+
+    assert "registerConsumers.serviceAccount.name" in error.value.stderr
 
 
 def test_rbac_can_be_disabled(helm, chart_path):
