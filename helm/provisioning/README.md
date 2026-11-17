@@ -224,7 +224,7 @@ A Helm Chart that deploys the provisioning services
 | registerConsumers.rbac.create | bool | `true` | Create a Role that allows `get` on the Secrets of the namespace, and bind it to the Job's ServiceAccount. |
 | registerConsumers.serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount. |
 | registerConsumers.serviceAccount.create | bool | `true` | Create a ServiceAccount for the Job. |
-| registerConsumers.serviceAccount.name | string | `""` | The ServiceAccount to use when `create` is false. |
+| registerConsumers.serviceAccount.name | string | `""` | The ServiceAccount to use when `create` is false. Required then. |
 | registerConsumers.udm.auth.existingSecret.keyMapping.password | string | `nil` |  |
 | registerConsumers.udm.auth.existingSecret.name | string | `nil` |  |
 | registerConsumers.udm.auth.password | string | `nil` |  |
