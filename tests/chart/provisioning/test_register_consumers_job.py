@@ -25,8 +25,8 @@ def env(container_spec):
     return {item["name"]: item for item in container_spec.get("env", [])}
 
 
-def test_main_container_runs_register_consumers_from_the_provisioning_server_image(helm, chart_path):
-    values = {"registerConsumers": {"image": {"registry": "reg", "repository": "repo/server", "tag": "1.2.3"}}}
+def test_main_container_runs_register_consumers_from_the_api_image(helm, chart_path):
+    values = {"api": {"image": {"registry": "reg", "repository": "repo/server", "tag": "1.2.3"}}}
 
     main = container(pod_spec(helm.helm_template(chart_path, values, JOB_TEMPLATE)), "main")
 
@@ -35,18 +35,13 @@ def test_main_container_runs_register_consumers_from_the_provisioning_server_ima
     assert "args" not in main
 
 
-def test_default_image_is_provisioning_server(helm, chart_path):
-    main = container(pod_spec(helm.helm_template(chart_path, {}, JOB_TEMPLATE)), "main")
+def test_the_removed_image_key_fails_the_render(helm, chart_path):
+    values = {"registerConsumers": {"image": {"repository": "nubus/images/wait-for-dependency"}}}
 
-    assert "/nubus-dev/images/provisioning-server:" in main["image"]
+    with pytest.raises(subprocess.CalledProcessError) as error:
+        helm.helm_template(chart_path, values, JOB_TEMPLATE)
 
-
-def test_command_is_configurable(helm, chart_path):
-    values = {"registerConsumers": {"command": ["python", "-m", "univention.provisioning.consumer.register"]}}
-
-    main = container(pod_spec(helm.helm_template(chart_path, values, JOB_TEMPLATE)), "main")
-
-    assert main["command"] == ["python", "-m", "univention.provisioning.consumer.register"]
+    assert "waitForDependency.image" in error.value.stderr
 
 
 def test_main_container_gets_the_base_url_without_the_subscriptions_path(helm, chart_path):
@@ -73,7 +68,7 @@ def test_main_container_gets_the_base_url_without_the_subscriptions_path(helm, c
 def test_init_containers_use_the_wait_for_dependency_image(helm, chart_path, template, init_container):
     values = {
         "waitForDependency": {"image": {"registry": "reg", "repository": "repo/wait", "tag": "9.9.9"}},
-        "registerConsumers": {"image": {"registry": "reg", "repository": "repo/server", "tag": "1.2.3"}},
+        "api": {"image": {"registry": "reg", "repository": "repo/server", "tag": "1.2.3"}},
     }
 
     result = helm.helm_template(chart_path, values, template)
