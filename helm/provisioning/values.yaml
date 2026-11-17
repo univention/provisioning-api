@@ -227,16 +227,6 @@ waitForDependency:
     tag: "0.36.23@sha256:ca155b32dc35dbd4e6e2a954f01703e98c847b66b895c3fa04b57326f2a21f61"
 
 registerConsumers:
-  image:
-    registry: ""
-    pullPolicy: null
-    repository: "nubus-dev/images/provisioning-server"
-    tag: "latest"
-  # One image serves all four processes and this Job; pick this one. Resolved via PATH,
-  # which the image points at the venv.
-  command:
-    - "register-consumers"
-
   # -- Allows to create users in the Provisioning API.
   #
   # The entries have to be in the following structure:

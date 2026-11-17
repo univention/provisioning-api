@@ -12,7 +12,6 @@ class TestImageConfiguration(ImageConfiguration):
             "dispatcher.image": "image",
             "udmTransformer.image": "image",
             "prefill.image": "image",
-            "registerConsumers.image": "image",
             "waitForDependency.image": "image",
         }
         apply_mapping(values, mapping, copy=True)
