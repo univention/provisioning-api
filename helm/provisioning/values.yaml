@@ -263,6 +263,8 @@ registerConsumers:
   rbac:
     # -- Create a Role that allows `get` on the Secrets of the namespace, and bind it to the Job's ServiceAccount.
     create: true
+    # -- Limit the Role to these Secret names, templated. Empty allows every Secret in the namespace.
+    secretNames: []
 
   udm:
     auth:
