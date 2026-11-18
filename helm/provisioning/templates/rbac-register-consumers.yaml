@@ -39,10 +39,17 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.registerConsumers.additionalLabels "context" . ) | nindent 4 }}
     {{- end }}
 rules:
-  # Namespace-wide: the Job learns the referenced Secret names from the specs at runtime.
+  # Namespace-wide by default: the Job learns the referenced Secret names from the specs at runtime.
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get"]
+    {{- with .Values.registerConsumers.rbac.secretNames }}
+    # An empty list in resourceNames would allow every name, so the field only appears with names.
+    resourceNames:
+      {{- range . }}
+      - {{ tpl . $ | quote }}
+      {{- end }}
+    {{- end }}
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "RoleBinding"

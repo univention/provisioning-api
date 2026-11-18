@@ -120,6 +120,27 @@ def test_role_allows_reading_secrets_and_is_bound_to_the_job_account(helm, chart
     assert [(s["kind"], s["name"]) for s in binding["subjects"]] == [("ServiceAccount", JOB_IDENTITY)]
 
 
+def test_role_can_be_limited_to_named_secrets(helm, chart_path):
+    values = {
+        "registerConsumers": {
+            "rbac": {
+                "secretNames": ["{{ .Release.Name }}-portal-consumer-provisioning-api-password", "operator-secret"]
+            },
+        },
+    }
+
+    role = helm.helm_template(chart_path, values, RBAC_TEMPLATE).get_resource(kind="Role", name=JOB_IDENTITY)
+
+    assert role["rules"] == [
+        {
+            "apiGroups": [""],
+            "resources": ["secrets"],
+            "verbs": ["get"],
+            "resourceNames": ["release-name-portal-consumer-provisioning-api-password", "operator-secret"],
+        },
+    ]
+
+
 def test_shared_service_account_gets_no_role(helm, chart_path):
     result = helm.helm_template(chart_path, {})
 
