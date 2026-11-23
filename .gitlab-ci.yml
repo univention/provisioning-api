@@ -24,7 +24,7 @@ workflow:
 
 include:
   - project: "univention/dev/nubus-for-k8s/common-ci"
-    ref: "v1.72.1"
+    ref: "v1.72.2"
     file:
       - "defaults/stages.yaml"
       - "defaults/nubus-workflow.yaml"
@@ -39,11 +39,11 @@ include:
       - "templates/sonarqube.yaml"
       - "templates/compose-test.yaml"
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.28.0"
     inputs:
       package_root: "common"
       job_name_suffix: "-common"
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/pip-package-and-publish-with-uv@2.28.0"
     inputs:
       package_root: "consumer"
       job_name_suffix: "-consumer"
@@ -52,7 +52,7 @@ include:
   # provisioning-service-do_release etc. On a feature branch (MR) creating the version is manual (see the
   # provisioning-service-create_app_version override below); on a protected vX.Y.Z tag it is the real
   # release. The App Center Version comes from the tag (templated into ini.jinja).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.28.0"
     inputs:
       app_id: "provisioning-service"
       job_prefix: "provisioning-service-"
@@ -79,7 +79,7 @@ include:
 
   # Backend (package-based) App Center app "provisioning-service-backend",
   # released independently via a protected "provisioning-service-backend-vX.Y.Z" tag.
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/app-release@2.28.0"
     inputs:
       app_id: "provisioning-service-backend"
       job_prefix: "provisioning-service-backend-"
@@ -99,7 +99,7 @@ include:
   # docker-compose.yaml and the App Center compose template pull from.
   # These pins are the only upstream references in the repository;
   # Renovate bumps them with the mirrored ones (NATS group in renovate.json5).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.28.0"
     inputs:
       job_name_suffix: "-nats"
       source: "docker.io/library/nats"
@@ -112,7 +112,7 @@ include:
         - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/'
           when: "never"
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.28.0"
     inputs:
       job_name_suffix: "-nats-box"
       source: "docker.io/natsio/nats-box"
@@ -121,7 +121,7 @@ include:
       destination: "artifacts.software-univention.de/library/nats-box"
       skip_rules: *mirror-skip-rules
 
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/mirror-image@2.28.0"
     inputs:
       job_name_suffix: "-nats-config-reloader"
       source: "docker.io/natsio/nats-server-config-reloader"
@@ -132,7 +132,7 @@ include:
 
   # Builds the univention-provisioning-service Debian package and uploads it
   # into the backend app version (not the UCS errata repository).
-  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-package@2.27.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/tooling/ci-components/debian-package@2.28.0"
     inputs:
       build_stage: "package"
       ucs_base_version: "5.2"
@@ -142,7 +142,7 @@ include:
       git_build_rules:
         - if: '$CI_MERGE_REQUEST_ID'
         - if: '$CI_COMMIT_TAG =~ /^provisioning-service-backend-v[0-9]+\.[0-9]+\.[0-9]+$/ && $CI_COMMIT_REF_PROTECTED == "true"'
-  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/vul-man@v1.72.1"
+  - component: "$CI_SERVER_FQDN/univention/dev/nubus-for-k8s/common-ci/vul-man@v1.72.2"
 
 variables:
   POETRY_VERSION: "1.6.1"
@@ -258,7 +258,7 @@ test-end-to-end:
 test-chart-provisioning:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.25@sha256:ad501511d7b3ede40c1f42fc57f48838f57ba104a432934fc4925fe0d4c53088"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.30.1@sha256:c11f2d5210be69da131df071a442bfef55ff5892734b33718523579a74193602"
   rules:
     - *rules-skip-backend-release-tag
     - when: "on_success"
@@ -272,7 +272,7 @@ test-chart-provisioning:
 test-chart-udm-listener:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.25@sha256:ad501511d7b3ede40c1f42fc57f48838f57ba104a432934fc4925fe0d4c53088"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.30.1@sha256:c11f2d5210be69da131df071a442bfef55ff5892734b33718523579a74193602"
   rules:
     - *rules-skip-backend-release-tag
     - when: "on_success"
@@ -283,7 +283,7 @@ test-chart-udm-listener:
 test-chart-nats:
   stage: test
   needs: []
-  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.25@sha256:ad501511d7b3ede40c1f42fc57f48838f57ba104a432934fc4925fe0d4c53088"
+  image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.30.1@sha256:c11f2d5210be69da131df071a442bfef55ff5892734b33718523579a74193602"
   rules:
     - *rules-skip-backend-release-tag
     - when: "on_success"

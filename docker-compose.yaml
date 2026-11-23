@@ -167,7 +167,7 @@ services:
       - "nats3"
     platform: linux/amd64
     container_name: "ldif-producer"
-    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest@sha256:834d5914a5fb6acacf284e472950a04766e8b5dee39f81d3dd90165b04b8df1c"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldif-producer:latest@sha256:6ae06fadd55cd48f16e5306fabe5ebbbbda7b16b44e7d2ff63e3314d2b50708f"
     # Can be uncommented to simplify local development.
     # build:
     #   dockerfile: ../container-ldap/docker/ldif-producer/Dockerfile
@@ -215,7 +215,7 @@ services:
 
   ldap-notifier:
     platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-notifier:latest@sha256:d1dbcf76dc5a5d0f3ba6f3e82029e0a03973ad3c39e0c32d0c8fb1547764df5d
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-notifier:latest@sha256:685989217bd86b0e156a2d50547307a73d69d236b1cbee3c4090dcc51fc6ff02
     container_name: "ldap-notifier"
     depends_on:
       ldap-server:
@@ -228,7 +228,7 @@ services:
 
   ldap-server:
     platform: linux/amd64
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest@sha256:b28037454a01769d9b02f3c42a26ba9da6e4aceda186989e5245f73605e25da1
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/ldap/ldap-server:latest@sha256:342361eb76798da81ee85c7b4a7012189c30980a9686d59940d10ab853266084
     container_name: "ldap-server"
     ulimits:
       nofile:
@@ -260,7 +260,7 @@ services:
       - 8001:80
 
   udm-rest-api: &udm-rest-api
-    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest@sha256:b4868f9c89d0c274d60503d70e5ede454bf8766c69f938baf9dabeeb10feac98
+    image: gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/udm-rest-api/udm-rest-api:latest@sha256:2b27e1995d34c90941eeadea3da65fbf41fc31dc566a53881539b3b6b05f8f69
     container_name: "udm-rest-api"
     platform: "linux/amd64"
     ports:
@@ -314,7 +314,7 @@ services:
       - "./e2e_tests/e2e_settings.json.example:/app/e2e_tests/e2e_settings.json:ro"
 
   test-chart-provisioning:
-    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.25@sha256:ad501511d7b3ede40c1f42fc57f48838f57ba104a432934fc4925fe0d4c53088"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.30.1@sha256:c11f2d5210be69da131df071a442bfef55ff5892734b33718523579a74193602"
     pull_policy: "if_not_present"
     command: "pytest tests/helm/chart"
     profiles:
@@ -324,7 +324,7 @@ services:
       - "./tests/chart/provisioning/:/app/tests/helm/chart"
 
   test-chart-udm-listener:
-    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.29.25@sha256:ad501511d7b3ede40c1f42fc57f48838f57ba104a432934fc4925fe0d4c53088"
+    image: "gitregistry.knut.univention.de/univention/dev/nubus-for-k8s/common-helm/testrunner:0.30.1@sha256:c11f2d5210be69da131df071a442bfef55ff5892734b33718523579a74193602"
     pull_policy: "if_not_present"
     command: "pytest tests/helm/chart"
     profiles:
